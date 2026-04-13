@@ -8,14 +8,11 @@ with fenix utility classes. Theme-aware, safe, reversible.
 Usage: python scripts/fenix_migrate_inline.py [--dry-run] [--verbose] [--path templates/invoicing/]
 """
 
-import os
 import re
 import sys
 import argparse
 from pathlib import Path
 from collections import defaultdict
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 # ═══════════════════════════════════════════════════════════════
 # COLOR MAPPINGS: hardcoded hex → CSS variable class
@@ -228,7 +225,7 @@ def find_class_for_prop(prop, val):
             if val.startswith('#'):
                 norm = normalize_color(val)
                 return BG_COLOR_MAP.get(norm) or BG_COLOR_MAP.get(val.lower())
-    
+
     # Font-size
     if prop == 'font-size':
         return FONT_SIZE_MAP.get(val.lower())
@@ -274,7 +271,7 @@ def process_style_attr(style_value):
     props = extract_style_props(style_value)
     classes = []
     remaining = []
-    
+
     for prop, val in props:
         cls = find_class_for_prop(prop, val)
         if cls:
@@ -282,14 +279,14 @@ def process_style_attr(style_value):
                 classes.append(cls)
         else:
             remaining.append(f"{prop}:{val}")
-    
+
     return classes, remaining
 
 
 def process_tag(match):
     """Process a single HTML tag match."""
     full_tag = match.group(0)
-    
+
     # Skip Django template tags, script tags, SVG
     if full_tag.startswith('{{') or full_tag.startswith('{%'):
         return full_tag
@@ -301,19 +298,19 @@ def process_tag(match):
     style_match = re.search(r'\bstyle\s*=\s*"([^"]*)"', full_tag)
     if not style_match:
         return full_tag
-    
+
     style_value = style_match.group(1)
     new_classes, remaining = process_style_attr(style_value)
-    
+
     if not new_classes:
         return full_tag  # Nothing to replace
-    
+
     result = full_tag
-    
+
     # Update or add class attribute
     class_match = re.search(r'\bclass\s*=\s*"([^"]*)"', result)
     new_class_str = ' '.join(new_classes)
-    
+
     if class_match:
         existing = class_match.group(1).strip()
         # Don't add duplicate classes
@@ -329,14 +326,14 @@ def process_tag(match):
         # Insert class before style
         style_start = result.find('style=')
         result = result[:style_start] + f'class="{new_class_str}" ' + result[style_start:]
-    
+
     # Update or remove style attribute (re-find since positions may have shifted)
     if remaining:
         new_style = ';'.join(remaining)
         result = re.sub(r'\bstyle\s*=\s*"[^"]*"', f'style="{new_style}"', result)
     else:
         result = re.sub(r'\s*\bstyle\s*=\s*"[^"]*"', '', result)
-    
+
     return result
 
 
@@ -344,34 +341,34 @@ def process_file(filepath, dry_run=False, verbose=False):
     """Process a single HTML file. Returns (changes_count, details)."""
     with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
         original = f.read()
-    
+
     # Process all HTML tags with style attributes
     # Match opening tags: <tag ... style="..." ...>
     pattern = re.compile(r'<[a-zA-Z][^>]*\bstyle\s*=\s*"[^"]*"[^>]*>', re.DOTALL)
     result = pattern.sub(process_tag, original)
-    
+
     if result == original:
         return 0, []
-    
+
     # Count changes
     orig_styles = len(re.findall(r'\bstyle\s*=\s*"', original))
     new_styles = len(re.findall(r'\bstyle\s*=\s*"', result))
     removed = orig_styles - new_styles
-    
+
     # Count added classes
     orig_fx = len(re.findall(r'fx-\w+', original))
     new_fx = len(re.findall(r'fx-\w+', result))
     added = new_fx - orig_fx
-    
+
     if not dry_run:
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(result)
-    
+
     details = []
     if verbose:
         details.append(f"  Styles fully removed: {removed}")
         details.append(f"  Utility classes added: {added}")
-    
+
     return removed + added, details
 
 
@@ -381,24 +378,24 @@ def main():
     parser.add_argument('--verbose', '-v', action='store_true', help='Show per-file details')
     parser.add_argument('--path', default='templates/', help='Path to scan (default: templates/)')
     args = parser.parse_args()
-    
+
     base_dir = Path('/var/www/fina-connect')
     scan_path = base_dir / args.path
-    
+
     if not scan_path.exists():
         print(f"Error: {scan_path} does not exist")
         sys.exit(1)
-    
+
     # Collect HTML files
     html_files = sorted(scan_path.rglob('*.html'))
-    
+
     total_changes = 0
     files_changed = 0
     stats = defaultdict(int)
-    
+
     print(f"{'[DRY RUN] ' if args.dry_run else ''}Scanning {len(html_files)} HTML files in {scan_path}...")
     print("=" * 60)
-    
+
     for filepath in html_files:
         changes, details = process_file(filepath, dry_run=args.dry_run, verbose=args.verbose)
         if changes > 0:
@@ -411,13 +408,13 @@ def main():
                     print(d)
             elif changes > 5:
                 print(f"  {rel}: {changes} changes")
-    
+
     print("\n" + "=" * 60)
     print(f"{'[DRY RUN] ' if args.dry_run else ''}COMPLETE")
     print(f"  Files scanned:  {len(html_files)}")
     print(f"  Files changed:  {files_changed}")
     print(f"  Total changes:  {total_changes}")
-    
+
     if args.dry_run:
         print("\nRun without --dry-run to apply changes.")
 

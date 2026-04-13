@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 """
 core/business_lookup.py
 ═══════════════════════════════════════════════════════════════════════
@@ -33,7 +32,7 @@ from typing import Optional
 from xml.etree import ElementTree as ET
 
 import requests
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

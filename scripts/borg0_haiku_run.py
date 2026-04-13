@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """BORG-0 Haiku batch: classify remaining 'other' items."""
-import django, os, json, time, sys
+import django, os, json, time
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
@@ -10,8 +10,6 @@ load_dotenv('/var/www/fina-connect/.env')
 import anthropic
 from inventory.models import InventoryItem
 from collections import Counter
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
 
@@ -106,4 +104,4 @@ for cat, c in stats.most_common():
 with open('BORG0_HAIKU_REPORT.json', 'w') as f:
     json.dump({'classified': classified, 'errors': errors,
                'stats': dict(stats), 'results': all_results}, f, indent=2, ensure_ascii=False)
-print(f'Report saved: BORG0_HAIKU_REPORT.json', flush=True)
+print('Report saved: BORG0_HAIKU_REPORT.json', flush=True)

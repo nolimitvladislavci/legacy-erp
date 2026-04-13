@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 """
 FENIX SessionGuard — "Zaključaj kancelariju prije izlaska"
 
@@ -18,7 +17,7 @@ API:
     # [{'type': 'pos_open', 'msg': 'Smjena #3 je otvorena...', 'action_url': '/pos/...'}]
 """
 from django.utils.translation import gettext as _
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 class SessionGuard:

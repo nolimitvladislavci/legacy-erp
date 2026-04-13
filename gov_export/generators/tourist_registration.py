@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import hashlib
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 class TouristRegistrationGenerator:
@@ -50,7 +50,7 @@ class TouristRegistrationGenerator:
                 ET.SubElement(g, 'Status').text = b.status
                 if b.actual_check_in:
                     ET.SubElement(g, 'ActualCheckIn').text = b.actual_check_in.isoformat()
-                
+
                 # Lokalni ZKI — hash kao dokaz prijave
                 zki_data = f'{company.oib}|{b.guest_name}|{b.check_in}|{b.pk}'
                 zki = hashlib.sha256(zki_data.encode()).hexdigest()[:32]

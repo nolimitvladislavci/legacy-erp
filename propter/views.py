@@ -11,10 +11,9 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 
 from django.db import models as db_models
-from django.core.exceptions import ObjectDoesNotExist
-from .models import BillingPeriod, Otpremnica, OtpremnicaItem, PropterConfig, EkoStats
+from .models import BillingPeriod, Otpremnica, PropterConfig, EkoStats
 from .services.aggregate import close_period, aggregate_to_eracun
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 def _company(request):
@@ -336,7 +335,6 @@ def eko_public(request, slug):
     Company puts badge/link on their own website.
     URL: /propter/eko/public/<slug>/
     """
-    from django.views.decorators.cache import cache_page
     from companies.models import Company
 
     # Sanitize slug

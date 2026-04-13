@@ -7,7 +7,6 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -201,8 +200,7 @@ def check_overdue_invoices():
 @shared_task
 def run_dunning_cycle():
     """Celery beat task -- radnim danima u 08:00. Full dunning cycle."""
-    from invoicing.models import Invoice, DunningHistory
-    from .models import DunningRule
+    from invoicing.models import Invoice
     from accounts.models import UserProfile
     from companies.models import Company
     today = timezone.now().date()

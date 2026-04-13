@@ -1,4 +1,3 @@
-import logging
 """
 experiences/models.py — Agro-Turizam 360
 
@@ -19,11 +18,10 @@ Modeli:
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -351,7 +349,7 @@ class ExperienceBooking(models.Model):
                 date_issued=timezone.now(),
                 client_name=self.guest_name,
                 client_email=self.guest_email or '',
-                
+
                 note=(
                     f'Naknada za nedolazak (no-show) — "{experience.name}" '
                     f'({self.schedule.date}).{storno_ref} '
@@ -425,7 +423,7 @@ class ExperienceBooking(models.Model):
                 date_issued=timezone.now(),
                 client_name=self.guest_name,
                 client_email=self.guest_email or '',
-                
+
                 note=(
                     f'Avansni račun — depozit za "{experience.name}" '
                     f'({self.schedule.date} {self.schedule.time_from}). '
@@ -814,8 +812,7 @@ class RecallEvent(models.Model):
         Vrača dict s listama pogođenih entiteta.
         """
         from marketplace.models import MarketplaceProduct, MarketplaceOrderItem
-        from gastro_menu.models import MenuItemIngredient, TableOrder
-        from rental.models import Guest
+        from gastro_menu.models import MenuItemIngredient
 
         affected = {
             'marketplace_products': [],

@@ -8,10 +8,7 @@ Korištenje u BILO KOJEM templateu:
     {% complaints_qr %}                  → QR kod za potrošačev mobitel
 """
 from django import template
-from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
-from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 register = template.Library()
 
@@ -76,7 +73,7 @@ def complaints_stats(context):
     try:
         from core.company_utils import get_user_company
         from pos.models import KnjigaPrigovora
-        from django.db.models import Avg, Count, Q
+        from django.db.models import Avg
         company = get_user_company(request)
         if not company:
             return {}

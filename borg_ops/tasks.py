@@ -110,7 +110,6 @@ import logging
 from celery import shared_task
 from django.apps import apps
 from django.db import connection
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('borg.sentinel')
 
@@ -153,15 +152,15 @@ def schema_drift_check(self):
 
     for model in apps.get_models():
         table = model._meta.db_table
-        
+
         try:
             db_cols = _get_db_columns(table)
         except Exception:
             continue
-        
+
         if not db_cols:
             continue
-        
+
         model_cols = _get_model_columns(model)
         checked += 1
 
@@ -220,10 +219,9 @@ def orphan_data_check(self):
     Orphaned Data Radar — pronađi zapise koji pokazuju na
     nepostojeće FK objekte (company, partner, user).
     """
-    from django.contrib.contenttypes.models import ContentType
 
     orphans = []
-    
+
     # Kritične FK relacije za provjeru
     checks = [
         ('invoicing.Invoice', 'company_id', 'companies.Company'),
@@ -238,19 +236,19 @@ def orphan_data_check(self):
         try:
             app_label, model_name = model_path.split('.')
             Model = apps.get_model(app_label, model_name)
-            
+
             target_app, target_model = target_path.split('.')
             TargetModel = apps.get_model(target_app, target_model)
-            
+
             # Nađi zapise s FK koji ne postoji u target tablici
             valid_ids = set(TargetModel.objects.values_list('pk', flat=True))
-            
+
             orphan_qs = Model.objects.exclude(
                 **{f'{fk_field}__isnull': True}
             ).exclude(
                 **{f'{fk_field}__in': valid_ids}
             ) if valid_ids else Model.objects.none()
-            
+
             # Efikasniji pristup: raw SQL
             from django.db import connection
             table = Model._meta.db_table
@@ -262,7 +260,7 @@ def orphan_data_check(self):
                     f"AND t.{fk_field} NOT IN (SELECT id FROM {target_table})"
                 )
                 count = cur.fetchone()[0]
-            
+
             if count > 0:
                 orphans.append({
                     'model': model_path,
@@ -282,7 +280,7 @@ def orphan_data_check(self):
         try:
             from core.whatsapp import send_text
             msg = (
-                f'BORG SENTINEL: Orphaned Data!\n'
+                'BORG SENTINEL: Orphaned Data!\n'
                 + '\n'.join(f'{o["model"]}.{o["fk_field"]}: {o["count"]} siročadi' for o in orphans)
             )
             send_text(phone='385976091655', message=msg, company_id='system')
@@ -376,7 +374,6 @@ def aggregate_signals():
     emitira apstraktne signale, detektira trendove.
     """
     from borg_ops.models import BorgSignal, BorgCollabConfig, BorgInsightAlert
-    from borg_ops.audit_helpers import log_borg_audit
     from django.db.models import F
 
     configs = BorgCollabConfig.objects.filter(enabled=True).select_related('company')

@@ -230,7 +230,7 @@ def retrieve_knowledge(module_context='', query='', limit=5):
     if detected_module:
         # Prioritet: modul-specifični + general
         qs = qs.filter(Q(module=detected_module) | Q(module='general') | Q(module='compliance'))
-    
+
     # Keyword search iz query-ja
     if query:
         words = query.lower().split()[:5]  # Max 5 riječi
@@ -242,12 +242,12 @@ def retrieve_knowledge(module_context='', query='', limit=5):
             qs = qs.filter(q_filter)
 
     articles = qs.order_by('priority')[:limit]
-    
+
     if not articles:
         return ''
 
     kb_text = "\n\n## Baza znanja (RAG) — koristi ove podatke za točan odgovor:\n"
     for art in articles:
         kb_text += f"\n### {art.title}\n{art.content}\n"
-    
+
     return kb_text

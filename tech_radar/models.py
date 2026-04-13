@@ -5,9 +5,8 @@ TechSignal: zapis o metrikama sustava (DB, disk, memory, sessions, queue).
 CapacityThreshold: pragovi za alarme (npr. disk > 85% → warning).
 """
 import uuid
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class TechSignal(models.Model):

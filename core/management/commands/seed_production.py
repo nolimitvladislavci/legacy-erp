@@ -14,7 +14,7 @@ za funkcionalan sustav:
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 User = get_user_model()
 

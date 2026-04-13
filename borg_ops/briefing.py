@@ -8,9 +8,8 @@ Rankira po: urgency x financial_impact.
 """
 import logging
 from datetime import timedelta
-from decimal import Decimal
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('borg.briefing')
 

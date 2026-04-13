@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.db import DatabaseError, IntegrityError
+from django.db import DatabaseError
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company

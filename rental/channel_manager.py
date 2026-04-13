@@ -15,7 +15,6 @@ Za produkciju trebas:
 """
 import logging
 from datetime import date, timedelta
-from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 

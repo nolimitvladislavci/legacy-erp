@@ -15,7 +15,7 @@ class InventoryLedgerGenerator:
 
     def generate(self, export):
         from inventory.models import InventoryItem, StockMovement, StockBatch
-        
+
         company = export.company
         root = ET.Element('InventoryLedger', xmlns=self.NS)
         root.set('version', '1.0')

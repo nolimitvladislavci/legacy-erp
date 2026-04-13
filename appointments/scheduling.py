@@ -5,9 +5,8 @@ v2 - Koristi Appointment.actor_resource FK (mig 0009) za precizno pracenje aktor
 """
 from datetime import timedelta
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
-from appointments.models import Appointment, BookingResource, BookingService, WorkingHours
+from appointments.models import Appointment, BookingResource, WorkingHours
 
 
 class SchedulingError(Exception):

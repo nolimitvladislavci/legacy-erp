@@ -66,7 +66,6 @@ def build_sections(invoice):
     Fallback: jedna grupa bez naslova ako section polje ne postoji u DB.
     """
     from django.db import connection
-    from itertools import groupby as _groupby
 
     # Provjeri postoji li section kolona u bazi (ne u ORM cache!)
     has_section_col = False

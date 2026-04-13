@@ -132,7 +132,7 @@ def _send_pdv_whatsapp_summary(year, month, results, obveznik_count, total_obvez
             msg += f"Greske: {err_count}\n"
 
         if top5_lines:
-            msg += f"\nTop 5 po PDV obvezi:\n" + "\n".join(top5_lines) + "\n"
+            msg += "\nTop 5 po PDV obvezi:\n" + "\n".join(top5_lines) + "\n"
 
         msg += (
             f"\nXML-ovi spremni za preuzimanje:\n"

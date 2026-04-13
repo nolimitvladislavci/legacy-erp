@@ -13,9 +13,8 @@ from django.http import StreamingHttpResponse, JsonResponse
 from django.utils import timezone as tz
 
 from accounts.models import UserProfile
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('accounts')
 

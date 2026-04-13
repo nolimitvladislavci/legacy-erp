@@ -9,11 +9,8 @@ ZUGFeRD 2.x embeds CII XML inside a PDF/A-3.
 """
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from decimal import Decimal
 from datetime import date
 import logging
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

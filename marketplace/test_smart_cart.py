@@ -19,8 +19,7 @@ import datetime
 import io
 import zipfile
 from decimal import Decimal
-from unittest import skip
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, override_settings
@@ -144,7 +143,7 @@ class SmartCartTests(TestCase):
         ConsolidatedDelivery i DispatchOffer su kreirani za taj order.
         """
         print("\n--- [TEST 1.1] Logistička Shizofrenija: TAXI + cold chain ---")
-        from delivery.models import ConsolidatedDelivery, DispatchOffer
+        from delivery.models import DispatchOffer
 
         self._set_cart([(self.flour, 2), (self.steak, 1)])
 
@@ -250,7 +249,7 @@ class SmartCartTests(TestCase):
         self.assertEqual(calculate_delivery_date(after),  datetime.date(2026, 3, 9))
         self.assertEqual(calculate_delivery_date(before), datetime.date(2026, 3, 8))
 
-        print(f"✅ 22:00:05 → 2026-03-09  |  21:59:59 → 2026-03-08")
+        print("✅ 22:00:05 → 2026-03-09  |  21:59:59 → 2026-03-08")
 
     # ──────────────────────────────────────────────────────────────────────
     # TEST 1.3b — Cut-Off warning u GET view
@@ -294,7 +293,6 @@ class SmartCartTests(TestCase):
         OČEKIVANJE: MarketplaceOrder.invoice != None, invoice.status = 'DRAFT'.
         """
         print("\n--- [TEST 1.4] Draft Invoice na Checkout ---")
-        from invoicing.models import Invoice
 
         self._set_cart([(self.flour, 3)])
 
@@ -379,7 +377,7 @@ class SmartCartTests(TestCase):
             "GREŠKA: Anonimni korisnik — created_by mora biti None.")
 
         print(f"✅ OrderComplaint #{complaint.pk}: reason=damaged, item={order_item.product.name}")
-        print(f"   Anonimni QR pristup radi, created_by=None ✓")
+        print("   Anonimni QR pristup radi, created_by=None ✓")
 
     # ──────────────────────────────────────────────────────────────────────
     # TEST 1.6 — I-4 Legal Vault ZIP
@@ -424,7 +422,7 @@ class SmartCartTests(TestCase):
         self.assertEqual(response.status_code, 200,
             f"GREŠKA: Legal Vault vrati {response.status_code}.")
         self.assertEqual(response.get('Content-Type'), 'application/zip',
-            f"GREŠKA: Content-Type mora biti application/zip.")
+            "GREŠKA: Content-Type mora biti application/zip.")
 
         # Provjeri ZIP sadržaj
         buf = io.BytesIO(b''.join(response.streaming_content))

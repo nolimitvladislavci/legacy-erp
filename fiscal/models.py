@@ -1,6 +1,4 @@
-from django.db import models, DatabaseError, IntegrityError
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from core.managers import CompanyManager
 
 

@@ -19,7 +19,7 @@ def parse_camt053(xml_content, bank_account, company):
     Dedup: skips entries where external_id already exists.
     Returns: list of created BankTransaction objects.
     """
-    from konto.services.bank_import import parse_camt053 as _parse, import_bank_statement_from_parsed
+    from konto.services.bank_import import parse_camt053 as _parse
     from konto.models import BankTransaction, BankAccount, KontoAccount
 
     data = _parse(xml_content)
@@ -282,7 +282,7 @@ def parse_mt940(content, bank_account, company):
                 defaults={'name': 'Žiro račun u banci', 'account_type': 'asset'})
             bank_account = BankAccount.objects.create(
                 company=company,
-                name=f'Račun MT940',
+                name='Račun MT940',
                 iban=data.get('iban', ''),
                 bank_name='',
                 konto_account=konto,

@@ -9,9 +9,8 @@ Endpointi (bez autentifikacije, javni):
 import json
 import logging
 from django.contrib.auth.decorators import login_required
-from memio_pet.security import rate_limit, add_security_headers, require_memio_key, audit_log
+from memio_pet.security import rate_limit, require_memio_key
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger(__name__)

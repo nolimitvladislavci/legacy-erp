@@ -5,7 +5,6 @@ Bulk import from Synesis archive -- scans directory for client folders.
 import csv, io, os, subprocess, time, re
 from collections import defaultdict
 from django.core.management.base import BaseCommand, CommandError
-from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
 
 

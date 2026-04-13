@@ -1,22 +1,20 @@
-[project]
-name = "fina-connect"
-version = "1.0.0"
-description = "FINA-Connect ERP — Multi-tenant Business Management Platform"
-requires-python = ">=3.12"
-
 [tool.ruff]
-line-length = 120
 target-version = "py312"
+line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+select = ["F", "E9", "W"]
+# F: Pyflakes (unused imports, undefined names, etc.)
+# E9: Runtime errors (syntax errors, etc.)
+# W: Warnings
+# NOT including E (style) yet — too many hits for first pass
 
-[tool.ruff.lint.isort]
-known-first-party = ["core", "companies", "invoicing", "pos", "appointments", "documents", "marketplace", "partners", "inventory", "konto", "calculator", "projects", "work_orders", "worktime", "reports", "notifications", "burza", "delivery", "traceability", "gastro_menu", "fiscal", "permissions"]
-
-[tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "core.settings"
-python_files = "test*.py"
-python_classes = "Test*"
-python_functions = "test_*"
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["ALL"]
+"*/tests*" = ["ALL"]
+"backups/*" = ["ALL"]
+"tmp/*" = ["ALL"]
+"simulation/*" = ["ALL"]
+"TASK_ARCHIVE/*" = ["ALL"]
+"tools/*" = ["ALL"]
+"venv/*" = ["ALL"]

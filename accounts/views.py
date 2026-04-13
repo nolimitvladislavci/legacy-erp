@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 from core.models import BookingSignature
 from django.contrib import messages
 from django.utils.translation import gettext as _
@@ -117,7 +116,7 @@ def translation_manager(request, lang_code='de'):
     po_path = os.path.join(settings.BASE_DIR, 'locale', lang_code, 'LC_MESSAGES', 'django.po')
 
     if not os.path.exists(po_path):
-        messages.warning(request, f'Pojmovi su u bazi već na Hrvatskom. Preusmjereno na Njemački rječnik.')
+        messages.warning(request, 'Pojmovi su u bazi već na Hrvatskom. Preusmjereno na Njemački rječnik.')
         return redirect('accounts:translation_manager', lang_code='de')
 
     if request.method == 'POST':

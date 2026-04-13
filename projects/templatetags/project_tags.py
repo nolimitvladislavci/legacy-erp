@@ -1,6 +1,5 @@
 from django import template
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 register = template.Library()
 

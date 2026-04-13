@@ -4,8 +4,7 @@ Ljubeta unosi podatke ovdje. Inline pomoc na svakom koraku.
 """
 from django.contrib import admin
 from django.utils.html import format_html, mark_safe
-from django.db import IntegrityError, DatabaseError
-from django.http import HttpResponseRedirect
+from django.db import IntegrityError
 from django.contrib import messages
 from memio_pet.models import (
     BreederProfile, AnimalProfile, PetHealthRecord,
@@ -415,7 +414,6 @@ class RawFoodOrderAdmin(admin.ModelAdmin):
 
 
 from memio_pet.models import DogTrainingSession, PetBoardingReservation
-from django.core.exceptions import ObjectDoesNotExist
 
 @admin.register(DogTrainingSession)
 class DogTrainingSessionAdmin(admin.ModelAdmin):

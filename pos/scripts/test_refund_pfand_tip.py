@@ -159,8 +159,6 @@ print("TEST 4: NAPOJNICA IZVJEŠTAJ — po konobaru")
 print("=" * 60)
 
 from pos.views import tip_report
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 req3 = factory.get("/pos/tips/?format=json")
 req3.user = su
 with patch("pos.views.get_user_company", return_value=konjik):

@@ -6,7 +6,7 @@ mirror it to worktime.Project so it appears on timesheet forms.
 import uuid
 import logging
 
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from projects.models import Project

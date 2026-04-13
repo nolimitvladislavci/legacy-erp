@@ -1,4 +1,3 @@
-import logging
 """
 memio_pet/views.py -- Public-facing views za memio.pet domenu
 
@@ -12,14 +11,13 @@ Endpointi:
 """
 import io
 import qrcode
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
-from django.views.decorators.cache import cache_page, never_cache
+from django.views.decorators.cache import cache_page
 from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord, PetOwnership, BreederReview
 from django.db import IntegrityError, DatabaseError
 
@@ -477,7 +475,7 @@ def resend_consent(request):
     bp.consent_sent_at = timezone.now()
     bp.save(using=db, update_fields=['consent_token', 'consent_sent_at'])
     _send_parental_consent_email(bp, bp.parent_email)
-    messages.success(request, f'Email ponovo poslan roditelju. Provjeri s njim/njom.')
+    messages.success(request, 'Email ponovo poslan roditelju. Provjeri s njim/njom.')
     return redirect('memio_pet:breeder_profile', breeder_id=bp.pk)
 
 
@@ -774,7 +772,7 @@ def add_milestone(request):
             m.photo = request.FILES['photo']
         m.save(using=db)
         identifier = animal.chip_number or animal.ear_tag
-        messages.success(request, f'Prekretnica dodana!')
+        messages.success(request, 'Prekretnica dodana!')
         return redirect('memio_pet:pet_profile', chip_or_tag=identifier)
 
     from memio_pet.models import LifeMilestone as LM
@@ -915,7 +913,6 @@ def knjiga_sjecanja_pdf(request, chip_or_tag):
         memorial = None
 
     # Agregacija životnog traka
-    from datetime import date as _date
     timeline = []
 
     if animal.date_of_birth:
@@ -1113,7 +1110,7 @@ def social_import_wizard(request):
                 url = 'https://' + url
             title = request.POST.get('title', '').strip()
             if not title:
-                title = f'Objava s društvene mreže'
+                title = 'Objava s društvene mreže'
             from memio_pet.models import LifeMilestone
             from django.utils import timezone
             LifeMilestone.objects.using(db).create(
@@ -1139,7 +1136,6 @@ def sitemap_xml(request):
     """Dinamički sitemap.xml za memio.pet."""
     db = 'memio_pets'
     from django.http import HttpResponse
-    from django.utils import timezone
 
     animals = AnimalProfile.objects.using(db).filter(
         status__in=['aktivno', 'u_azilu', 'udomljen', 'uginulo']

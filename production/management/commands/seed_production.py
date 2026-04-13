@@ -136,5 +136,5 @@ class Command(BaseCommand):
                       'workstation': ws1})
 
         self.stdout.write(self.style.SUCCESS(
-            f'Seeded: 3 workstations, 4 BOMs (1 multi-level), 8 sirovina, 4 gotova proizvoda, 2 radna naloga'
+            'Seeded: 3 workstations, 4 BOMs (1 multi-level), 8 sirovina, 4 gotova proizvoda, 2 radna naloga'
         ))

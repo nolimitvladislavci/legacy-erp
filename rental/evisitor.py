@@ -5,8 +5,6 @@ Generira XML prema HTZ formatu. Iznajmljivač ga uploadira na eVisitor.hr.
 Buduće: direktni API poziv kad dobijemo ključ.
 """
 import xml.etree.ElementTree as ET
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def build_evisitor_xml(booking, guests=None) -> str:

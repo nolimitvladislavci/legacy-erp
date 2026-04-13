@@ -35,7 +35,6 @@ def export_dsfinvk(company, date_from: date, date_to: date) -> bytes:
         bytes: ZIP file content
     """
     from pos.models import POSReceipt, POSSession
-    from fiscal.models import FiscalLog
 
     buf = io.BytesIO()
 

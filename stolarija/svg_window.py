@@ -1,5 +1,3 @@
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 """
 SVG Window Visualizer — generira vizualni prikaz prozora/vrata za PDF ponude.
 
@@ -213,42 +211,42 @@ def generate_door_svg(width_mm, height_mm, wing_config='single_left',
     w = width_mm * scale
     wall_d = 30  # debljina zida u SVG
     pad = 40
-    
+
     svg_w = w + pad * 2
     svg_h = w + pad * 2 + 50  # kvadratni prostor za luk + dimenzije
-    
+
     parts = []
     parts.append(f'<svg xmlns="http://www.w3.org/2000/svg" '
                  f'viewBox="0 0 {svg_w:.0f} {svg_h:.0f}" '
                  f'width="{svg_w:.0f}" height="{svg_h:.0f}">')
-    
+
     # Defs
     parts.append('<defs>'
                  '<marker id="darrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">'
                  '<path d="M0,0 L6,3 L0,6" fill="#999"/></marker></defs>')
-    
+
     ox = pad
     oy = pad
-    
+
     is_left = 'left' in wing_config or wing_config == 'single'
     is_inward = swing_direction != 'outward'
-    
+
     # Zid (dva segmenta oko otvora)
     parts.append(f'<rect x="{ox-10:.0f}" y="{oy:.0f}" width="10" height="{wall_d}" fill="#64748b" rx="1"/>')  # lijevi zid
     parts.append(f'<rect x="{ox+w:.0f}" y="{oy:.0f}" width="10" height="{wall_d}" fill="#64748b" rx="1"/>')  # desni zid
-    
+
     # Stok
     parts.append(f'<rect x="{ox:.0f}" y="{oy:.0f}" width="{w:.0f}" height="{wall_d}" '
                  f'fill="{profile_color}" rx="2"/>')
-    
+
     # Krilo vrata (linija)
     door_w = w - 10  # krilo je uze od otvora
-    
+
     if is_left:
         # Sarke lijevo
         hinge_x = ox + 5
         handle_x = ox + door_w
-        
+
         if is_inward:
             # Otvaranje u prostoriju (dolje)
             parts.append(f'<line x1="{hinge_x:.0f}" y1="{oy+wall_d:.0f}" '
@@ -276,7 +274,7 @@ def generate_door_svg(width_mm, height_mm, wing_config='single_left',
     else:
         # Sarke desno
         hinge_x = ox + w - 5
-        
+
         if is_inward:
             parts.append(f'<line x1="{hinge_x:.0f}" y1="{oy+wall_d:.0f}" '
                         f'x2="{hinge_x - door_w:.0f}" y2="{oy+wall_d:.0f}" '
@@ -297,20 +295,20 @@ def generate_door_svg(width_mm, height_mm, wing_config='single_left',
                         f'fill="none" stroke="{door_color}" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>')
             parts.append(f'<text x="{hinge_x - door_w/2:.0f}" y="{oy - door_w/3:.0f}" '
                         f'text-anchor="middle" font-size="16" font-weight="bold" fill="{door_color}" opacity="0.5">D</text>')
-    
+
     # Sarke oznaka (crni krug)
     if is_left:
         parts.append(f'<circle cx="{ox+5:.0f}" cy="{oy+wall_d/2:.0f}" r="3" fill="#1a1a2e"/>')
     else:
         parts.append(f'<circle cx="{ox+w-5:.0f}" cy="{oy+wall_d/2:.0f}" r="3" fill="#1a1a2e"/>')
-    
+
     # Dimenzije
     ty = max(oy + wall_d + w + 15, oy + wall_d + 60)
     parts.append(f'<text x="{ox+w/2:.0f}" y="{ty:.0f}" text-anchor="middle" '
                  f'font-family="Arial" font-size="11" fill="#666">'
                  f'{width_mm} mm | {"L" if is_left else "D"} | '
                  f'{"u prostoriju" if is_inward else "van prostorije"}</text>')
-    
+
     # Smjer strelica
     arrow_y = oy + wall_d / 2
     if is_inward:
@@ -319,7 +317,7 @@ def generate_door_svg(width_mm, height_mm, wing_config='single_left',
     else:
         parts.append(f'<text x="{ox+w/2:.0f}" y="{oy-8:.0f}" text-anchor="middle" '
                      f'font-size="10" fill="#94a3b8">&#8593; van prostorije</text>')
-    
+
     parts.append('</svg>')
     return chr(10).join(parts)
 
@@ -332,21 +330,21 @@ def generate_mosquito_svg(width_mm, height_mm, mounting_type='fixed_frame',
     h = height_mm * scale
     fw = 15
     pad = 10
-    
+
     svg_w = w + pad * 2
     svg_h = h + pad * 2 + 25
-    
+
     parts = []
     parts.append(f'<svg xmlns="http://www.w3.org/2000/svg" '
                  f'viewBox="0 0 {svg_w:.0f} {svg_h:.0f}" '
                  f'width="{svg_w:.0f}" height="{svg_h:.0f}">')
-    
+
     ox, oy = pad, pad
-    
+
     # Okvir
     parts.append(f'<rect x="{ox:.0f}" y="{oy:.0f}" width="{w:.0f}" height="{h:.0f}" '
                  f'fill="{frame_color}" rx="2"/>')
-    
+
     # Mreza (cross-hatch pattern)
     gx, gy = ox + fw, oy + fw
     gw, gh = w - fw*2, h - fw*2
@@ -364,7 +362,7 @@ def generate_mosquito_svg(width_mm, height_mm, mounting_type='fixed_frame',
             lx = gx + i * step
             parts.append(f'<line x1="{lx:.0f}" y1="{gy:.0f}" x2="{lx:.0f}" y2="{gy+gh:.0f}" '
                         f'stroke="{mesh_color}" stroke-width="0.3" opacity="0.4"/>')
-    
+
     # Montaza tip oznaka
     mounting_labels = {
         'fixed_frame': 'fiksni okvir',
@@ -374,11 +372,11 @@ def generate_mosquito_svg(width_mm, height_mm, mounting_type='fixed_frame',
         'velcro': 'velcro',
     }
     label = mounting_labels.get(mounting_type, mounting_type)
-    
+
     ty = oy + h + 18
     parts.append(f'<text x="{ox+w/2:.0f}" y="{ty:.0f}" text-anchor="middle" '
                  f'font-family="Arial" font-size="11" fill="#666">'
                  f'{width_mm}x{height_mm}mm | {label}</text>')
-    
+
     parts.append('</svg>')
     return chr(10).join(parts)

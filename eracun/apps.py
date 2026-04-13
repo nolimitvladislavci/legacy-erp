@@ -8,5 +8,3 @@ class EracunConfig(AppConfig):
 
     def ready(self):
         import eracun.signals  # noqa: F401
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist

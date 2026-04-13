@@ -1,12 +1,11 @@
 import uuid
 
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.db.models import Sum
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from companies.models import Company
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

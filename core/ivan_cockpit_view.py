@@ -1,4 +1,4 @@
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 # Dodaj na kraj core/views.py
 
 @login_required

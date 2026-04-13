@@ -14,7 +14,6 @@ import hmac
 import logging
 import time
 from functools import wraps
-from django.contrib.auth.decorators import login_required  # BUG-1 fix
 from django.http import JsonResponse
 from django.core.cache import cache
 
@@ -90,7 +89,6 @@ def verify_memio_api_key(request, company) -> bool:
     Verificira API ključ iz X-Memio-Key headera.
     Kompanija mora imati validan ključ u BreederProfile.
     """
-    from django.conf import settings
     provided_key = request.META.get('HTTP_X_MEMIO_KEY', '')
 
     if not provided_key:

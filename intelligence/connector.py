@@ -7,7 +7,6 @@ Runs as Celery task: intelligence_unified_scan
 import logging
 from celery import shared_task
 from django.utils import timezone
-from django.db.models import Q
 
 logger = logging.getLogger('borg.intelligence')
 

@@ -1,8 +1,7 @@
 """Asset Depreciation Engine."""
 from datetime import date
 from decimal import Decimal
-from django.db import transaction, DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from .models import Asset, DepreciationLog
 
 

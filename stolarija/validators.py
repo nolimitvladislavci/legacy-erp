@@ -9,7 +9,6 @@ Tri sloja:
 Svaki sloj vraća warnings s razinom: error, warn, info.
 """
 import logging
-from decimal import Decimal
 from statistics import mean, stdev
 
 logger = logging.getLogger(__name__)
@@ -121,7 +120,7 @@ def validate_measurement(measurement, session=None):
         warnings.append({
             'level': 'info',
             'code': 'single_wide',
-            'message': f'Jednokrilni prozor širi od 1200mm — razmislite o dvokrilnom.',
+            'message': 'Jednokrilni prozor širi od 1200mm — razmislite o dvokrilnom.',
         })
     if wing == 'fixed' and etype == 'door':
         warnings.append({
@@ -181,7 +180,6 @@ def validate_measurement_ai(measurement, session):
     Uspoređuje s historijskim podacima firme.
     Vraća dodatne warnings ili prazan list.
     """
-    import os
     warnings = []
 
     # Provjeri ima li dovoljno historije

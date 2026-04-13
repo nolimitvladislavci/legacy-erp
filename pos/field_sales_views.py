@@ -2,23 +2,20 @@
 pos/field_sales_views.py — Terenska prodaja za pekaru
 Utovar → Ruta → Prodaja (POS) → Povratnica → Z-report
 """
-import json
 import logging
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from inventory.models import InventoryItem, StockMovement
 from pos.models import POSTerminal, POSSession
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('pos.field_sales')
 

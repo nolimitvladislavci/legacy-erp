@@ -4,9 +4,6 @@ Ako firma nije potpisala uvjete korištenja → redirect na /legal/tc-accept/
 Exempt: superadmin, API, ajax, login, static, media, legal pages
 """
 from django.shortcuts import redirect
-from django.urls import reverse
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 EXEMPT_PREFIXES = (
     '/admin/', '/api/', '/hr/login', '/hr/logout', '/legal/',

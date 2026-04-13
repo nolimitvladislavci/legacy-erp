@@ -241,7 +241,6 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 # ══════════════════════════════════════════════════════════════════════════════
 
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 
 def api_cart_add(request):
@@ -299,11 +298,11 @@ def public_shop(request, company_slug):
     from companies.models import Company
     from django.db.models import Q
     company = get_object_or_404(Company, booking_slug=company_slug)
-    
+
     cat   = request.GET.get('cat', '')
     q     = request.GET.get('q', '')
     sort  = request.GET.get('sort', 'name')
-    
+
     qs = Product.objects.filter(company=company, is_active=True)
     if cat:
         qs = qs.filter(category=cat)
@@ -315,16 +314,16 @@ def public_shop(request, company_slug):
         qs = qs.order_by('-price')
     else:
         qs = qs.order_by('name')
-    
+
     paginator = Paginator(qs, 24)
     page = paginator.get_page(request.GET.get('page', 1))
-    
+
     cats = Product.objects.filter(
         company=company, is_active=True
     ).values_list('category', flat=True).distinct()
-    
+
     cat_labels = dict(Product.CATEGORY_CHOICES)
-    
+
     return render(request, 'webshop/public/shop.html', {
         'company':    company,
         'page':       page,
@@ -341,11 +340,11 @@ def public_product(request, company_slug, pk):
     from companies.models import Company
     company = get_object_or_404(Company, booking_slug=company_slug)
     product = get_object_or_404(Product, pk=pk, company=company, is_active=True)
-    
+
     related = Product.objects.filter(
         company=company, category=product.category, is_active=True
     ).exclude(pk=pk)[:4]
-    
+
     return render(request, 'webshop/public/product.html', {
         'company': company,
         'product': product,
@@ -358,7 +357,7 @@ def public_product(request, company_slug, pk):
 def public_cart(request, company_slug):
     from companies.models import Company
     company = get_object_or_404(Company, booking_slug=company_slug)
-    
+
     cart = request.session.get('cart_' + company_slug, {})
     items = []
     total = 0
@@ -370,7 +369,7 @@ def public_cart(request, company_slug):
             items.append({'product': p, 'qty': qty, 'subtotal': subtotal})
         except Product.DoesNotExist:
             pass
-    
+
     return render(request, 'webshop/public/cart.html', {
         'company': company,
         'items':   items,
@@ -383,7 +382,7 @@ def public_cart_add(request, company_slug):
     from companies.models import Company
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
-    
+
     company = get_object_or_404(Company, booking_slug=company_slug)
     try:
         import json as _json
@@ -392,15 +391,15 @@ def public_cart_add(request, company_slug):
         qty  = max(1, int(data.get('qty', 1)))
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid'}, status=400)
-    
+
     product = get_object_or_404(Product, pk=pid, company=company, is_active=True)
-    
+
     key  = 'cart_' + company_slug
     cart = request.session.get(key, {})
     cart[pid] = cart.get(pid, 0) + qty
     request.session[key] = cart
     request.session.modified = True
-    
+
     total_qty = sum(cart.values())
     return JsonResponse({'ok': True, 'cart_count': total_qty, 'name': product.name})
 
@@ -415,7 +414,7 @@ def public_cart_remove(request, company_slug):
         pid = str(int(data.get('product_id', 0)))
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid'}, status=400)
-    
+
     key  = 'cart_' + company_slug
     cart = request.session.get(key, {})
     cart.pop(pid, None)
@@ -427,12 +426,12 @@ def public_cart_remove(request, company_slug):
 def public_checkout(request, company_slug):
     from companies.models import Company
     company = get_object_or_404(Company, booking_slug=company_slug)
-    
+
     cart = request.session.get('cart_' + company_slug, {})
     if not cart:
         from django.shortcuts import redirect
         return redirect('webshop:public_shop', company_slug=company_slug)
-    
+
     items = []
     total = 0
     for pid, qty in cart.items():
@@ -443,7 +442,7 @@ def public_checkout(request, company_slug):
             items.append({'product': p, 'qty': qty, 'subtotal': subtotal})
         except Product.DoesNotExist:
             pass
-    
+
     DELIVERY_METHODS = [
         ('pickup',  'Osobno preuzimanje u poslovnici', '0.00'),
         ('hp',      'HP Express dostava',              '4.99'),
@@ -456,7 +455,7 @@ def public_checkout(request, company_slug):
         ('paypal',  'PayPal'),
         ('crypto',  'Kriptovalute'),
     ]
-    
+
     return render(request, 'webshop/public/checkout.html', {
         'company':          company,
         'items':            items,
@@ -470,15 +469,15 @@ def public_checkout_submit(request, company_slug):
     from django.http import JsonResponse
     from companies.models import Company
     import json as _json
-    
+
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
-    
+
     company = get_object_or_404(Company, booking_slug=company_slug)
     cart    = request.session.get('cart_' + company_slug, {})
     if not cart:
         return JsonResponse({'error': 'Košarica je prazna.'}, status=400)
-    
+
     try:
         data            = _json.loads(request.body)
         name            = data.get('name', '').strip()
@@ -490,14 +489,14 @@ def public_checkout_submit(request, company_slug):
         note            = data.get('note', '').strip()
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    
+
     if not name or not email:
         return JsonResponse({'error': 'Ime i email su obavezni.'}, status=400)
-    
+
     # Kreiraj narudžbu
     delivery_prices = {'pickup': 0, 'hp': 4.99, 'konjik': 3.50}
     delivery_cost   = delivery_prices.get(delivery_method, 0)
-    
+
     items_total = 0
     order_items = []
     for pid, qty in cart.items():
@@ -509,9 +508,9 @@ def public_checkout_submit(request, company_slug):
                                  'price': float(p.price), 'subtotal': subtotal})
         except Product.DoesNotExist:
             pass
-    
+
     grand_total = items_total + delivery_cost
-    
+
     # Nadi ili kreiraj Partner (kupac)
     import uuid as _uuid
     from partners.models import Partner
@@ -525,7 +524,7 @@ def public_checkout_submit(request, company_slug):
             partner_type='KUPAC',
             oib='WEB' + _uuid.uuid4().hex[:8].upper(),
         )
-    
+
     order_num = 'WEB-' + str(company.pk)[:4].upper() + '-' + str(int(_uuid.uuid4().int % 100000)).zfill(5)
     order = Order.objects.create(
         order_number     = order_num,
@@ -536,7 +535,7 @@ def public_checkout_submit(request, company_slug):
         shipping_address = address,
         notes            = ('Placanje: ' + payment_method + ('\nNapomena: ' + note if note else '')),
     )
-    
+
     # Spremi stavke
     for pid, qty in cart.items():
         try:
@@ -548,11 +547,11 @@ def public_checkout_submit(request, company_slug):
             )
         except ObjectDoesNotExist:
             pass
-    
+
     # Očisti košaricu
     request.session['cart_' + company_slug] = {}
     request.session.modified = True
-    
+
     # Email potvrda
     try:
         from core.email_tasks import send_email_task
@@ -566,7 +565,7 @@ def public_checkout_submit(request, company_slug):
         send_email_task.delay(subject, body, 'noreply@limit-connect.com', [email])
     except ImportError:
         pass
-    
+
     return JsonResponse({
         'ok': True,
         'order_id': order.pk,

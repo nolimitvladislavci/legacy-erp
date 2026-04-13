@@ -822,7 +822,7 @@ def fenix_intercept_incoming(self, eracun_id):
                 notification_type='system',
                 title=title,
                 message=message[:300],
-                url=f'/eracun/inbox/',
+                url='/eracun/inbox/',
                 company=company,
             )
     except ImportError as e:
@@ -918,11 +918,11 @@ def growth_patrol(self):
     from datetime import timedelta
     from pos.models import ImprovementSuggestion
     from companies.models import Company
-    
+
     now = timezone.now()
     yesterday = now - timedelta(hours=24)
     findings = []
-    
+
     # 1. Error scan — zadnja 24h
     try:
         log_path = '/var/www/fina-connect/logs/django.log'
@@ -939,7 +939,7 @@ def growth_patrol(self):
                 })
     except (FileNotFoundError, PermissionError, IOError):
         pass
-    
+
     # 2. Compliance gaps
     try:
         from worktime.models import EmployeeProfile
@@ -955,7 +955,7 @@ def growth_patrol(self):
             })
     except DatabaseError:
         pass
-    
+
     # 3. Nefiskalizirani računi
     try:
         from pos.models import POSReceipt
@@ -972,10 +972,9 @@ def growth_patrol(self):
             })
     except DatabaseError:
         pass
-    
+
     # 4. Certifikati koji istječu
     try:
-        from django.db.models import F
         from registration.models import CompanySubscription
         expiring = CompanySubscription.objects.filter(
             is_active=True,
@@ -991,12 +990,12 @@ def growth_patrol(self):
             })
     except DatabaseError:
         pass
-    
+
     # Kreiraj sugestije za svaki finding
     platform = Company.objects.filter(is_platform_owner=True).first()
     if not platform:
         platform = Company.objects.first()
-    
+
     created = 0
     for f in findings:
         # Provjeri duplikat (isti naslov u zadnja 24h)
@@ -1006,7 +1005,7 @@ def growth_patrol(self):
         ).exists()
         if exists:
             continue
-        
+
         s = ImprovementSuggestion.objects.create(
             company=platform,
             source='system',
@@ -1016,15 +1015,15 @@ def growth_patrol(self):
             priority=f['priority'],
             trojstvo_status='pending',
         )
-        
+
         # Pokreni Trojstvo analizu
         try:
             from pos.trojstvo_task import trojstvo_rijesi
             trojstvo_rijesi.delay(s.pk)
         except ImportError:
             pass
-        
+
         created += 1
-    
+
     logger.info('Growth patrol: %d findings, %d new suggestions', len(findings), created)
     return {'findings': len(findings), 'created': created}

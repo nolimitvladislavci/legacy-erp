@@ -11,8 +11,6 @@ Maksimalni ukupni rabat: 50% (safety cap).
 """
 from decimal import Decimal
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 TIER_DISCOUNTS = {

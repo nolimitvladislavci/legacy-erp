@@ -8,12 +8,10 @@ Uses invoice history to forecast:
 3. Monthly revenue trends and seasonality
 """
 import logging
-from collections import defaultdict
 from datetime import timedelta
-from decimal import Decimal
 
 from celery import shared_task
-from django.db.models import Sum, Count, Avg, F, Q, Case, When, Value, CharField
+from django.db.models import Sum, Count, Avg, F, Q
 from django.db.models.functions import TruncMonth, ExtractMonth
 from django.utils import timezone
 
@@ -29,7 +27,6 @@ def predict_cash_flow(company_id=None, days_ahead=90):
     - Seasonal trends
     """
     from invoicing.models import Invoice
-    from companies.models import Company
 
     filters = Q(status__in=['PAID', 'UNPAID', 'OVERDUE', 'SENT', 'sent'])
     if company_id:

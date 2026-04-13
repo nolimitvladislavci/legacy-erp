@@ -1,8 +1,7 @@
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from decimal import Decimal
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 from borg_ops.mixins import FSMMixin
 
@@ -333,7 +332,7 @@ class ScaleReading(models.Model):
     station = models.ForeignKey(
         WasteStation, on_delete=models.CASCADE,
         related_name='scale_readings')
-    
+
     # Sirovi podaci s vage
     raw_data = models.CharField(max_length=200, verbose_name=_('Sirovi podaci s vage'),
         help_text=_('Nekodiran string s vage, npr. "ST,GS,   152.5 kg"'))
@@ -343,14 +342,14 @@ class ScaleReading(models.Model):
     is_stable = models.BooleanField(default=True,
         verbose_name=_('Stabilno očitanje'),
         help_text=_('True = vaga se stabilizirala (ST flag)'))
-    
+
     # Anti-tamper
     integrity_hash = models.CharField(max_length=64,
         verbose_name=_('SHA-256 hash'),
         help_text=_('hash(raw_data + timestamp + station_id + secret)'))
     is_tampered = models.BooleanField(default=False,
         verbose_name=_('Sumnja na manipulaciju'))
-    
+
     # Izvor
     source = models.CharField(max_length=20,
         choices=[
@@ -360,21 +359,21 @@ class ScaleReading(models.Model):
             ('web_serial', _('Web Serial API')),
         ],
         default='web_serial')
-    
+
     read_at = models.DateTimeField(default=timezone.now)
     operator = models.ForeignKey(
         'auth.User', on_delete=models.SET_NULL,
         null=True, blank=True)
     objects = CompanyManager()
-    
+
     class Meta:
         verbose_name = _('Očitanje vage')
         verbose_name_plural = _('Očitanja vage')
         ordering = ['-read_at']
-    
+
     def __str__(self):
         return f'{self.weight_kg} kg @ {self.station.name} ({self.read_at:%H:%M})'
-    
+
     def verify_integrity(self):
         """Provjeri je li hash još valjan."""
         import hashlib
@@ -383,7 +382,7 @@ class ScaleReading(models.Model):
         payload = f'{self.raw_data}|{self.read_at.isoformat()}|{self.station_id}|{secret}'
         expected = hashlib.sha256(payload.encode()).hexdigest()
         return self.integrity_hash == expected
-    
+
     @staticmethod
     def compute_hash(raw_data, timestamp, station_id):
         """Izračunaj integrity hash za novo očitanje."""
@@ -412,61 +411,61 @@ class OntoExportBatch(models.Model):
         ('error', _('Greška')),
         ('retry', _('Čeka ponovni pokušaj')),
     ]
-    
+
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
     station = models.ForeignKey(
         WasteStation, on_delete=models.CASCADE,
         related_name='onto_batches')
-    
+
     # Period
     date_from = models.DateField(verbose_name=_('Od datuma'))
     date_to = models.DateField(verbose_name=_('Do datuma'))
-    
+
     # Sadržaj
     delivery_count = models.PositiveIntegerField(default=0,
         verbose_name=_('Broj zapisa'))
     total_weight_kg = models.DecimalField(
         max_digits=12, decimal_places=2, default=0,
         verbose_name=_('Ukupna težina (kg)'))
-    
+
     # XML payload
     xml_payload = models.TextField(blank=True,
         verbose_name=_('XML za e-ONTO'),
         help_text=_('Generirani XML prema e-ONTO shemi'))
     xml_hash = models.CharField(max_length=64, blank=True,
         verbose_name=_('SHA-256 XML-a'))
-    
+
     # Status i retry
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
     retry_count = models.PositiveSmallIntegerField(default=0)
     max_retries = models.PositiveSmallIntegerField(default=3)
     last_error = models.TextField(blank=True, verbose_name=_('Zadnja greška'))
-    
+
     # Odgovor Ministarstva
     response_code = models.CharField(max_length=20, blank=True)
     response_body = models.TextField(blank=True)
     accepted_count = models.PositiveIntegerField(default=0)
     rejected_count = models.PositiveIntegerField(default=0)
     rejection_details = models.JSONField(default=list, blank=True)
-    
+
     # Meta
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     objects = CompanyManager()
-    
+
     class Meta:
         verbose_name = _('e-ONTO batch')
         verbose_name_plural = _('e-ONTO batchevi')
         ordering = ['-created_at']
         unique_together = [('company', 'station', 'date_from', 'date_to')]
-    
+
     def __str__(self):
         return f'e-ONTO {self.station.name} {self.date_from}–{self.date_to} [{self.get_status_display()}]'
-    
+
     def can_retry(self):
         return self.status in ('error', 'retry') and self.retry_count < self.max_retries
-    
+
     def generate_xml(self):
         """
         Generira XML prema e-ONTO shemi iz WasteDelivery zapisa.
@@ -474,26 +473,26 @@ class OntoExportBatch(models.Model):
         """
         import hashlib
         from xml.etree.ElementTree import Element, SubElement, tostring
-        
+
         deliveries = WasteDelivery.objects.filter(
             onto_batch=self,
             status='confirmed'
         ).select_related('citizen__partner', 'category', 'station')
-        
+
         root = Element('eONTO')
         root.set('version', '1.0')
         root.set('xmlns', 'http://onto.mzoe.hr/schema/v1')
-        
+
         header = SubElement(root, 'Zaglavlje')
         SubElement(header, 'OIB').text = self.company.oib
         SubElement(header, 'NazivObveznika').text = self.company.name
         SubElement(header, 'DatumOd').text = self.date_from.isoformat()
         SubElement(header, 'DatumDo').text = self.date_to.isoformat()
         SubElement(header, 'BrojZapisa').text = str(deliveries.count())
-        
+
         zapisi = SubElement(root, 'Zapisi')
         total_kg = Decimal('0')
-        
+
         for d in deliveries:
             zapis = SubElement(zapisi, 'Zapis')
             SubElement(zapis, 'RedniBroj').text = str(d.pk)
@@ -506,7 +505,7 @@ class OntoExportBatch(models.Model):
             SubElement(zapis, 'IzvorTezine').text = d.weight_source
             SubElement(zapis, 'Lokacija').text = d.station.name
             total_kg += d.quantity
-        
+
         xml_str = tostring(root, encoding='unicode', xml_declaration=True)
         self.xml_payload = xml_str
         self.xml_hash = hashlib.sha256(xml_str.encode()).hexdigest()
@@ -535,7 +534,7 @@ class WasteQuickButton(models.Model):
         ('#00BCD4', _('Tirkizna (tekstil)')),
         ('#607D8B', _('Tamno siva (glomazni)')),
     ]
-    
+
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
     station = models.ForeignKey(
         WasteStation, on_delete=models.CASCADE,
@@ -546,7 +545,7 @@ class WasteQuickButton(models.Model):
         WasteCategory, on_delete=models.CASCADE,
         related_name='quick_buttons',
         verbose_name=_('Kategorija otpada'))
-    
+
     label = models.CharField(max_length=30, verbose_name=_('Tekst na gumbu'),
         help_text=_('Kratko: "PAPIR", "PLASTIKA", "ŠUTA"'))
     icon = models.CharField(max_length=50, blank=True,
@@ -557,12 +556,12 @@ class WasteQuickButton(models.Model):
     sort_order = models.PositiveSmallIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     objects = CompanyManager()
-    
+
     class Meta:
         verbose_name = _('Brzi gumb')
         verbose_name_plural = _('Brzi gumbi')
         ordering = ['sort_order']
-    
+
     def __str__(self):
         return f'{self.label} → {self.category.key_number}'
 

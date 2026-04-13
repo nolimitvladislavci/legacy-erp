@@ -1,8 +1,6 @@
-from django.core.exceptions import ObjectDoesNotExist
 from core.fields import FernetEncryptedCharField
 """e-Račun models — multi-tenant e-invoice gateway."""
-from django.db import models, DatabaseError, IntegrityError
-from django.utils import timezone
+from django.db import models
 from core.managers import CompanyManager
 import uuid
 
@@ -269,18 +267,18 @@ class SukladnostTestRun(models.Model):
     )
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    
+
     # Rezultati po scenariju
     ts01_cert = models.BooleanField(null=True, verbose_name='TS-01: Certifikat')
     ts02_ubl = models.BooleanField(null=True, verbose_name='TS-02: UBL generacija')
     ts03_validate = models.BooleanField(null=True, verbose_name='TS-03: XSD validacija')
     ts04_fiscal = models.BooleanField(null=True, verbose_name='TS-04: Fiskalizacija')
     ts05_inbox = models.BooleanField(null=True, verbose_name='TS-05: Inbox primanje')
-    
+
     total_pass = models.PositiveIntegerField(default=0)
     total_fail = models.PositiveIntegerField(default=0)
     details = models.JSONField(default=dict, blank=True)
-    
+
     class Meta:
         verbose_name = 'Test sukladnosti'
         verbose_name_plural = 'Testovi sukladnosti'
@@ -293,6 +291,6 @@ class SukladnostTestRun(models.Model):
     def score_pct(self):
         return int(self.total_pass / 5 * 100) if self.total_pass else 0
 
-    @property 
+    @property
     def all_pass(self):
         return self.total_pass == 5

@@ -6,8 +6,6 @@ import base64
 import logging
 from celery import shared_task
 from django.core.mail import send_mail, EmailMessage
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

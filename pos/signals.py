@@ -4,7 +4,7 @@ POS Signals — auto-generiranje dnevnog izvještaja i auto-knjiženje na zatvar
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from pos.models import POSSession, POSDailyReport
+from pos.models import POSSession
 from django.core.exceptions import ObjectDoesNotExist
 
 

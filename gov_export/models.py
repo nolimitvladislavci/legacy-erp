@@ -5,10 +5,8 @@ Filozofija: svaki export je "dokument" koji prolazi kroz iste faze
 kao fiskalizirani račun — generate → validate → sign → send → confirm.
 """
 import uuid
-from django.db import models, DatabaseError, IntegrityError
-from django.utils import timezone
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 
@@ -96,7 +94,7 @@ class GovExport(models.Model):
 
     # Status pipeline
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='draft')
-    
+
     # XML dokument
     xml_content = models.TextField(blank=True, verbose_name=_('XML sadržaj'))
     xml_hash = models.CharField(max_length=64, blank=True, verbose_name=_('SHA-256'))

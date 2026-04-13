@@ -22,9 +22,9 @@ pozivaju iste funkcije.
 """
 import logging
 import re
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.db.models.signals import pre_save
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('validation_engine')

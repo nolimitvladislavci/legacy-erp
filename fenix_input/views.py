@@ -17,7 +17,6 @@ from django.contrib.auth.decorators import login_required
 from fenix_input.models import InputMessage, SMSDevice
 from fenix_input.interpreter import interpret_message, parse_sms_by_pattern
 from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('fenix_input')
 

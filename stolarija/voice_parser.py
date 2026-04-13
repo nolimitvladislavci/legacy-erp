@@ -1,7 +1,4 @@
 import re
-import json
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 WORD_TO_NUM = {

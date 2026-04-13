@@ -8,12 +8,10 @@ Koristi PostgreSQL trigram similarity za fuzzy matching.
 import logging
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.db.models import Q, Value, CharField
-from django.db.models.functions import Concat
-from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 
 from core.company_utils import get_user_company
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 # Enable pg_trgm similarity search
 try:

@@ -11,8 +11,6 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.services_intelligence import get_intelligence_stats, search_partner_global
 

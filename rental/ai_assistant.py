@@ -79,7 +79,7 @@ def generate_landlord_daily_brief(company) -> str:
             lines.append(f'Aktivni gosti: {active}')
         lines.append(f'YTD prihod: {ytd:.0f}€ ({pct}% praga)')
         if pct >= 80:
-            lines.append(f'UPOZORENJE: Blizu 40.000€ praga!')
+            lines.append('UPOZORENJE: Blizu 40.000€ praga!')
         return '\n'.join(lines)
 
 

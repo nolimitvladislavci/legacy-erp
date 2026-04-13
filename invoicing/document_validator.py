@@ -13,7 +13,7 @@ Korisnik NIKAD ne mora znati pravila napamet.
 7. Udruga rules (članarina PDV)
 8. Synesis filter (ne validirati historijske)
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List
 from enum import Enum
 
@@ -74,7 +74,6 @@ class DocumentValidator:
     def _check_dates(self, inv) -> List[ValidationIssue]:
         issues = []
         from django.utils import timezone
-        from datetime import timedelta
         today = timezone.now().date()
 
         issued = getattr(inv, 'date_issued', None)
@@ -192,7 +191,6 @@ class DocumentValidator:
         if getattr(inv, 'doctype', '') != 'A':
             return issues
         from django.utils import timezone
-        from datetime import timedelta
         issued = getattr(inv, 'date_issued', None)
         if issued:
             if hasattr(issued, 'date'):

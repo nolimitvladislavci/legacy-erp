@@ -9,9 +9,9 @@ Usage:
     )
 """
 import io
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count
 from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
@@ -27,7 +27,7 @@ def generate_volunteer_timesheet(company, user, month, year, project_code='', sk
     2. Mjesečni fond — max radni dani × 8h
     3. Potpisi — approved_by + approved_at obavezni
     """
-    from worktime.models import TimeEntry, EmployeeProfile
+    from worktime.models import TimeEntry
 
     profile = getattr(user, 'employeeprofile', None)
     hourly_value = profile.volunteer_hourly_value if profile else Decimal('5.00')
@@ -305,7 +305,6 @@ def generate_annual_volunteer_report(company, year):
     Sadrzaj: broj volontera, sati, dobne skupine, aktivnosti.
     """
     from worktime.models import TimeEntry, EmployeeProfile
-    from django.contrib.auth.models import User
 
     # Svi volonteri ove firme koji su radili ove godine
     volunteer_profiles = EmployeeProfile.objects.filter(

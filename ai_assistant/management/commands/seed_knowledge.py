@@ -159,7 +159,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'  + {obj}')
             else:
                 self.stdout.write(f'  ~ {obj} (updated)')
-        
+
         self.stdout.write(self.style.SUCCESS(
             f'\nDone: {created} created, {len(ARTICLES) - created} updated'
         ))

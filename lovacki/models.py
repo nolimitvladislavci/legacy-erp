@@ -3,9 +3,8 @@ lovacki/models.py — Lovački modul za evidenciju divljači.
 Zakon o lovstvu (NN 99/2018): obvezna evidencija odstrjela.
 CITES: međunarodni certifikat za zaštićene vrste.
 """
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -147,7 +146,6 @@ class HuntRecord(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         # Auto-update quota
-        from django.db.models import Count
         quota = HuntingQuota.objects.filter(
             ground=self.ground, species=self.species, year=self.datum.year
         ).first()

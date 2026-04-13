@@ -12,7 +12,6 @@ Then assigns existing users to groups based on their profile.role.
 """
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
 
 
 # Permission mappings per group

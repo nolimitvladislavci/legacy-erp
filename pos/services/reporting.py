@@ -11,7 +11,7 @@ Pravila:
 import logging
 from decimal import Decimal
 
-from django.db.models import Case, CharField, Count, DecimalField, F, Q, Sum, Value, When
+from django.db.models import Case, Count, DecimalField, F, Q, Sum, Value, When
 from django.db.models.functions import Coalesce
 
 logger = logging.getLogger('pos_reporting')
@@ -148,7 +148,7 @@ class ReportingService:
     @staticmethod
     def _calc_cashier_breakdown(session):
         """2 SQL upita: receipts grouped by cashier + tip sums."""
-        from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem
+        from pos.models import POSReceipt
 
         # Upit 1: receipts po blagajniku s payment breakdownom
         receipts = (

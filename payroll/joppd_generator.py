@@ -6,9 +6,7 @@ Format: JOPPD v4.0 (2024+)
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime, date
-from decimal import Decimal
 import calendar
-from django.db import DatabaseError, IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
 

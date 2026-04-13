@@ -1,6 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 
 class RolePermissionMiddleware(MiddlewareMixin):
@@ -20,7 +19,6 @@ class RolePermissionMiddleware(MiddlewareMixin):
             request.user_role = None
             return None
 
-        from .engine import get_engine
         from .models import Permission, UserRole
 
         user = request.user

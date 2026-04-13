@@ -4,8 +4,6 @@ from django.core.management.base import BaseCommand
 from companies.models import Company
 from synesis.models import SynesisConfig
 from partners.models import Partner
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):

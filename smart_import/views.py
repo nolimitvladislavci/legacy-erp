@@ -12,8 +12,6 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from inventory.models import GoodsReceipt, GoodsReceiptItem, InventoryItem
@@ -424,11 +422,8 @@ def confirm_view(request, pk):
 @login_required
 def manual_entry_view(request, pk):
     """Manual data entry for failed Smart Import batch -- fallback when AI fails."""
-    from django.contrib import messages
     from django.utils.translation import gettext as _
     from documents.models import ArhivaEntry
-    from django.utils import timezone
-    import hashlib
 
     company = get_user_company(request)
     batch = get_object_or_404(ImportBatch, pk=pk, company=company)
@@ -691,7 +686,7 @@ def review_dashboard(request):
     if not company:
         return redirect('smart_import:staging_upload')
 
-    from .models import StagingFileHeader, StagingFile
+    from .models import StagingFileHeader
     import json
 
     # Svi headeri za ovu tvrtku, sortirani: needs_review=True prvi
@@ -765,7 +760,7 @@ def review_approve(request):
     - Zamka 2: matematička validacija (osnovica + PDV = ukupno ±0.02)
     - Zamka 3: atomska provjera stanja (select_for_update + conflict guard)
     """
-    from .models import StagingFileHeader, StagingFile
+    from .models import StagingFileHeader
     from decimal import Decimal, InvalidOperation
     from django.db import transaction
 

@@ -28,7 +28,7 @@ class Command(BaseCommand):
         # Generiraj ključ
         if options['generate_key']:
             key = Fernet.generate_key().decode()
-            self.stdout.write(self.style.SUCCESS(f'\nNovi VAULT_KEY (dodaj u .env):'))
+            self.stdout.write(self.style.SUCCESS('\nNovi VAULT_KEY (dodaj u .env):'))
             self.stdout.write(f'VAULT_KEY={key}\n')
             self.stdout.write(self.style.WARNING(
                 'ČUVAJ OVAJ KLJUČ! Bez njega su svi unosi u trezoru nepovratno izgubljeni.\n'

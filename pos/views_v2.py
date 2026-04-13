@@ -14,17 +14,14 @@ POS Views V2 — novi endpointi za:
 import hashlib
 import json
 import logging
-from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, DatabaseError
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone as tz
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -1356,7 +1353,6 @@ def offline_catalog(request):
     Kad internet padne, POS crta grid iz IndexedDB.
     """
     from inventory.models import InventoryItem
-    from companies.models import TaxRate
     from django.utils import timezone as tz
 
     terminal_id = request.GET.get('terminal_id')

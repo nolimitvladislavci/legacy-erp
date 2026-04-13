@@ -1,6 +1,6 @@
 import logging
 
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction, DatabaseError
 
 logger = logging.getLogger(__name__)
 import json
@@ -18,7 +18,6 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from rest_framework import permissions, viewsets
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from partners.models import Partner
@@ -396,8 +395,8 @@ def api_submit_public_booking(request):
             if service.price:
                 body += f"  Cijena:  {service.price} EUR\n"
             body += (
-                f"\nAko trebate otkazati ili promijeniti termin, kontaktirajte nas.\n\n"
-                f"Hvala na povjerenju!\n"
+                "\nAko trebate otkazati ili promijeniti termin, kontaktirajte nas.\n\n"
+                "Hvala na povjerenju!\n"
             )
             send_email_task.delay(
                 subject, body,
@@ -963,7 +962,7 @@ def api_slots_week(request):
     service = get_object_or_404(BookingService, id=service_id, is_active=True)
     step = service.slot_duration_minutes
     dur  = service.duration_minutes
-    from datetime import date, timedelta
+    from datetime import timedelta
     today = datetime.now().date()
     now_time = datetime.now().time()
     if week_start_str:
@@ -1502,7 +1501,6 @@ def api_double_lock_slots(request):
         return JsonResponse({"slots": [], "service_name": service.name, "message": "Nema radnog vremena za taj dan."})
 
     # Find earliest start, latest end across all resources
-    from datetime import time as time_class
     earliest = min(wh.start_time for wh in wh_entries)
     latest = max(wh.end_time for wh in wh_entries)
 
@@ -1558,7 +1556,7 @@ def booking_calendar_view(request):
 @require_POST
 def api_booking_guest_register(request):
     """Korak 1: Gost unese ime+email+telefon → šalje email verify link + WA PIN."""
-    import secrets, hashlib
+    import secrets
     from django.core.cache import cache
     from django.core.validators import validate_email
     from django.core.exceptions import ValidationError

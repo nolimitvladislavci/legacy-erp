@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from accounts.models import UserProfile
 from companies.models import Company
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 class Command(BaseCommand):
@@ -104,5 +104,5 @@ class Command(BaseCommand):
         self.stdout.write(f"  Firma:    {company.name}")
         self.stdout.write(f"  OIB:      {company.oib}")
         self.stdout.write(f"  Login:    {user.username} / {password}")
-        self.stdout.write(f"  URL:      https://limit-connect.com/hr/login/")
-        self.stdout.write(f"  POS tema: body.theme-azil (automatski za udruge)")
+        self.stdout.write("  URL:      https://limit-connect.com/hr/login/")
+        self.stdout.write("  POS tema: body.theme-azil (automatski za udruge)")

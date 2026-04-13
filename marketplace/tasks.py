@@ -25,8 +25,7 @@ def send_expiry_reminders(self):
     Svakih 6h — šalje "Još dostupno? Da/Ne" push notif za listinge koji uskoro ističu.
     Prodavač može 1 tapom refreshati listing.
     """
-    from marketplace.services.marketplace_bridge import get_expiring_soon, EXPIRY_RULES
-    from datetime import timedelta
+    from marketplace.services.marketplace_bridge import get_expiring_soon
 
     expiring = get_expiring_soon(hours=6)
     notified = 0
@@ -125,7 +124,7 @@ def finalize_ended_auctions(self):
       3. Posalji WhatsApp kupcu + prodavacu
       4. Update golub status = "Prodano - Ceka transport"
     """
-    from marketplace.models import MarketplaceProduct, AuctionBid
+    from marketplace.models import MarketplaceProduct
     from django.utils import timezone
 
     now = timezone.now()

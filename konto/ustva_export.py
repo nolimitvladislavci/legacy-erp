@@ -19,7 +19,6 @@ Kennzahlen (KZ) Mapping:
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import datetime
 
 
 def _q(val):
@@ -226,7 +225,7 @@ def format_ustva_text(kz_data):
     elif kz83 < 0:
         lines.append(f"  KZ 83  UEBERSCHUSS:            {abs(kz83):>12.2f} EUR (Erstattung)")
     else:
-        lines.append(f"  KZ 83  NULLMELDUNG")
+        lines.append("  KZ 83  NULLMELDUNG")
 
     lines.append(f"\n  Abgabefrist: {kz_data['filing_deadline']}")
 
@@ -266,7 +265,6 @@ def generate_zm(company, year, quarter):
     """
     import datetime
     from invoicing.models import Invoice
-    from django.db.models import Sum
 
     q_start_month = (quarter - 1) * 3 + 1
     q_end_month = q_start_month + 2

@@ -120,7 +120,6 @@ class SEPACamtParser:
             'unresolved_ibans': list[str],  # IBAN-ovi kojih nema u BankAccount
           }
         """
-        from konto.models import BankAccount, BankTransaction
 
         if not import_batch:
             import_batch = str(uuid.uuid4())[:8]
@@ -574,8 +573,7 @@ def get_partial_payment_discrepancies(company):
         'days_overdue': int,
       }
     """
-    from django.db.models import Sum, F, ExpressionWrapper, DecimalField
-    from django.db.models.functions import Coalesce
+    from django.db.models import Sum
     from django.utils import timezone
     from konto.models import BankTransaction
     from invoicing.models import Invoice

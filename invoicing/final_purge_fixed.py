@@ -10,8 +10,6 @@ django.setup()
 from django.db.models import Q
 
 from invoicing.models import Invoice
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def purge():

@@ -11,7 +11,6 @@ django.setup()
 
 from companies.models import Company
 from invoicing.models import Invoice
-from collections import defaultdict
 
 MDB_CHARSET = 'cp1250'
 ARCHIVE_DIRS = [
@@ -25,7 +24,7 @@ def mdb_count(mdb_path, table):
     env = os.environ.copy()
     env['MDB_JET3_CHARSET'] = MDB_CHARSET
     try:
-        r = subprocess.run(['mdb-export', mdb_path, table], 
+        r = subprocess.run(['mdb-export', mdb_path, table],
                           capture_output=True, text=True, timeout=30, env=env)
         if r.returncode != 0:
             return -1
@@ -71,37 +70,37 @@ issues = 0
 for m in mdbs:
     client = m['client']
     mdb = m['mdb']
-    
+
     # MDB counts
     inv_count = mdb_count(mdb, 'INVOICES')
     ura_count = mdb_count(mdb, 'URAEU')
     tinv_count = mdb_count(mdb, 'TINVOICES')
-    
+
     # Find matching LC company
     from django.db.models import Q
     companies = Company.objects.filter(
         Q(name__icontains=client[:20]) | Q(name__icontains=client.split()[0] if client.split() else client)
     )
-    
+
     lc_ira = 0
     lc_ura = 0
     lc_items = 0
     status = ''
-    
+
     if companies.exists():
         for co in companies:
             lc_ira += Invoice.objects.filter(company=co, number__startswith='SYN-IRA-').count()
             lc_ura += Invoice.objects.filter(company=co, number__startswith='SYN-URA-').count()
     else:
         status = 'NO_MATCH'
-    
+
     if inv_count > 0 and lc_ira == 0:
         missing_ira.append(client)
         status += ' MISS_IRA'
     if ura_count > 0 and lc_ura == 0:
         missing_ura.append(client)
         status += ' MISS_URA'
-    
+
     if inv_count > 0:
         total_mdb_ira += inv_count
     if lc_ira > 0:
@@ -110,7 +109,7 @@ for m in mdbs:
         total_mdb_ura += ura_count
     if lc_ura > 0:
         total_lc_ura += lc_ura
-    
+
     if not status:
         ira_ok = inv_count <= 0 or abs(inv_count - lc_ira) / max(inv_count, 1) < 0.1
         ura_ok = ura_count <= 0 or abs(ura_count - lc_ura) / max(ura_count, 1) < 0.1
@@ -122,11 +121,11 @@ for m in mdbs:
             issues += 1
     else:
         issues += 1
-    
+
     inv_s = str(inv_count) if inv_count >= 0 else '-'
     ura_s = str(ura_count) if ura_count >= 0 else '-'
     tinv_s = str(tinv_count) if tinv_count >= 0 else '-'
-    
+
     print(f"{client:<35} {inv_s:>8} {lc_ira:>7} {ura_s:>8} {lc_ura:>7} {tinv_s:>9} {'':>8} {status}")
 
 print("=" * 120)

@@ -5,10 +5,9 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
 from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Conversation, Message, AIUsageLog
-from .claude_client import chat_with_claude, SYSTEM_PROMPT, estimate_cost, _build_contextual_system_prompt
+from .claude_client import chat_with_claude, estimate_cost, _build_contextual_system_prompt
 from .tools import TOOLS
 from .tool_handlers import handle_tool_call
 

@@ -7,10 +7,9 @@ sys.path.append('/var/www/fina-connect')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction
 
 from invoicing.models import Invoice
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def apply_integrity():

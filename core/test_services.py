@@ -1,8 +1,6 @@
 """Tests for core.services — dashboard stats unit tests."""
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.services import (
     get_company_dashboard_stats,

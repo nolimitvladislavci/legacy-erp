@@ -5,12 +5,10 @@ Može se pozivati: manage.py run_system_test --notify=+4915771998747
 Ili automatski iz Celery beat.
 """
 import subprocess
-import traceback
 from datetime import datetime
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 IVAN_DE_PHONE = '+4915771998747'
@@ -237,7 +235,7 @@ class Command(BaseCommand):
         lines = [
             f'{emoji} FENIX TEST REPORT',
             f'📅 {start.strftime("%d.%m.%Y %H:%M")} ({elapsed}s)',
-            f'',
+            '',
             f'✅ OK: {ok_n}/{total}',
             f'🔴 Kritično: {crit_n}',
             f'🟠 Upozorenja: {warn_n}',

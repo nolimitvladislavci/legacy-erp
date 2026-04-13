@@ -9,7 +9,6 @@ Flow:
   4. Server validates, broadcasts to all watchers
   5. Timer hits 0 → auction_end: auto-invoice + golub status "Prodano"
 """
-import json
 import logging
 from decimal import Decimal, InvalidOperation
 from datetime import timedelta

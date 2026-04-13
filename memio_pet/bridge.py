@@ -8,7 +8,6 @@ Koristiti:
     from memio_pet.bridge import push_animal_profile, push_breeder_profile
 """
 import logging
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ def push_animal_profile(livestock_obj) -> 'AnimalProfile':
       - pri promjeni statusa (npr. prodano, udomljeno)
       - pri dodavanju zdravstvenih zapisa
     """
-    from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord
+    from memio_pet.models import AnimalProfile, BreederProfile
 
     company = livestock_obj.company
 

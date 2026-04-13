@@ -1,4 +1,3 @@
-import logging
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
@@ -9,7 +8,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import viewsets
 
 from partners.models import Partner
-from django.db import DatabaseError, IntegrityError
 
 from .models import InventoryItem, StockMovement
 from .serializers import InventoryItemSerializer, StockMovementSerializer
@@ -168,7 +166,6 @@ from core.company_utils import get_user_company
 from core.tenant import get_current_company
 
 from .models import GoodsReceipt, GoodsReceiptItem
-from django.views.decorators.csrf import csrf_exempt
 
 # ── PRIMKA VIEWS ───────────────────────────────────────────────────────────────
 
@@ -402,7 +399,6 @@ def api_ai_predict_item(request):
     """AI predviđanje kategorije, poreza i barkoda na osnovu imena artikla.
     GET ?name=Burek sa sirom → {"category":"food","tax_rate":13,"tax_rate_id":2,"barcode":"2000001234567"}
     """
-    import re
     name = request.GET.get('name', '').strip()
     if not name:
         return JsonResponse({'category': 'other', 'tax_rate': 25})
@@ -583,7 +579,6 @@ def kalo_view(request):
     """View and write off natural shrinkage (kalo) for inventory items."""
     from core.company_utils import get_user_company
     from django.utils.timezone import now
-    import calendar
 
     company = get_user_company(request)
     if not company:
@@ -595,7 +590,6 @@ def kalo_view(request):
     ).order_by('name')
 
     # Annotate kalo values
-    from decimal import Decimal
     kalo_data = []
     for item in items_with_kalo:
         kalo_qty   = round(item.quantity * item.kalo_percent / 100, 3)
@@ -851,7 +845,6 @@ def predictive_dashboard(request):
     """Enhanced predictive analytics dashboard with weekly demand + auto-PO."""
     from core.company_utils import get_user_company
     from inventory.reorder import reorder_report, predict_weekly_demand
-    from inventory.models import InventoryItem
 
     company = get_user_company(request)
     report = reorder_report(company, top_n=30)
@@ -1558,7 +1551,6 @@ def inventura_difference_pdf(request, pk):
     shortages = items.filter(difference_qty__lt=0)
     surpluses = items.filter(difference_qty__gt=0)
 
-    from decimal import Decimal
     total_shortage = sum(abs(i.difference_value) for i in shortages)
     total_surplus = sum(abs(i.difference_value) for i in surpluses)
 

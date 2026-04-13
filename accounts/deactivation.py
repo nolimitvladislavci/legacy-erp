@@ -25,10 +25,9 @@ from django.conf import settings
 from django.shortcuts import redirect, render
 from django.utils import timezone as tz
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('accounts')
 

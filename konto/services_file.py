@@ -2,10 +2,9 @@
 Konto business logic - double-entry bookkeeping, bank reconciliation, reports.
 """
 from decimal import Decimal
-from django.db import transaction, DatabaseError
-from django.db.models import Sum, Q, F
+from django.db import transaction
+from django.db.models import Sum
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def _get_or_fail(company, code):
@@ -1272,7 +1271,7 @@ def book_pos_session(session, user=None):
     Returns JournalEntry or None if already booked / no sales.
     """
     from .models import KontoAccount, JournalEntry, LedgerLine
-    from pos.models import POSReceipt, POSPaymentLine
+    from pos.models import POSReceipt
 
     company = session.terminal.company
 

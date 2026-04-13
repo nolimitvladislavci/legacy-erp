@@ -7,9 +7,6 @@ Usage from anywhere in ERP:
     push_item_to_synesis(inventory_item, user=request.user)
     push_partner_to_synesis(partner, user=request.user)
 """
-from decimal import Decimal
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def push_item_to_synesis(item, user=None, price_only=False):

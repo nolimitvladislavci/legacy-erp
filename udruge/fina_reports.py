@@ -10,7 +10,7 @@ import io
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 

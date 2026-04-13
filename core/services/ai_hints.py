@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.utils import timezone
 from datetime import timedelta
 import logging
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,6 @@ def _check_unpaid_invoices(company, hints, today):
 
 
 def _check_eracun_status(company, hints):
-    from eracun.models import ERacunConfig, ERacun
 
     try:
         config = company.eracun_config
@@ -136,7 +135,7 @@ def _check_eracun_status(company, hints):
 
 
 def _check_konto_health(company, hints, today):
-    from konto.models import JournalEntry, KontoAccount
+    from konto.models import JournalEntry
     from django.db.models import Sum
 
     je_count = JournalEntry.objects.filter(company=company).count()

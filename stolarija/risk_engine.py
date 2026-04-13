@@ -12,8 +12,7 @@ Calculates risk score 0-100 for each warranty based on:
 Phase 2 will add ML model trained on actual service outcomes.
 """
 import logging
-from datetime import date, timedelta
-from decimal import Decimal
+from datetime import date
 
 logger = logging.getLogger('stolarija')
 

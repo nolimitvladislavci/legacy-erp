@@ -25,8 +25,6 @@ from django.utils import timezone
 from appointments.models import Appointment, BookingResource, BookingService, WorkingHours
 from appointments.scheduling import SchedulingError, book_slot, check_availability
 from companies.models import Company
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

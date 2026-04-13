@@ -6,25 +6,22 @@ import wizard, QR scan, statistika.
 """
 import json
 import re
-from datetime import date, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.db.models import Count, Q, Sum, F
+from django.db.models import Count, Q, F
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
     Author, Category, Book, BookCopy, MembershipType,
-    LibraryMember, Loan, Reservation, ImportBatch,
+    LibraryMember, Loan, Reservation,
 )
 
 

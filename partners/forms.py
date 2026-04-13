@@ -1,8 +1,7 @@
 """Partner forms — validation for partner CRUD."""
 from django import forms
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.db import DatabaseError, IntegrityError
 
 from .models import Partner
 

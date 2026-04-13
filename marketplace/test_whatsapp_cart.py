@@ -6,17 +6,16 @@ Scenario 2.3: Meta API timeout (fallback, no crash)
 """
 from datetime import timedelta
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from companies.models import Company
 from marketplace.models import (
-    CartSnapshot, MarketplaceOrder, MarketplaceProduct, MarketplaceCategory,
+    CartSnapshot, MarketplaceProduct, MarketplaceCategory,
 )
 
 
@@ -175,7 +174,7 @@ class CartSnapshotSecurityTests(TestCase):
         resp2 = self.client.get(url)
         self.assertEqual(resp2.status_code, 200)
         self.assertContains(resp2, 'vec iskoristen')
-        print(f' -> Second access: shows "already used" page')
+        print(' -> Second access: shows "already used" page')
         print(' PASS: Double-submit is idempotent')
 
     def test_scenario_2_3_whatsapp_api_failure_fallback(self):
@@ -196,10 +195,10 @@ class CartSnapshotSecurityTests(TestCase):
 
             result = send_cart_link(snapshot, '+385911234567')
 
-            print(f' -> WA exception: WA API timeout after 10s')
+            print(' -> WA exception: WA API timeout after 10s')
             print(f' -> Result sent: {result["sent"]}')
             print(f' -> Fallback used: {snapshot.wa_fallback_used}')
-            print(f' -> Crashed: No')
+            print(' -> Crashed: No')
 
             snapshot.refresh_from_db()
             self.assertFalse(result['sent'])

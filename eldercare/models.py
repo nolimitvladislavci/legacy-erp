@@ -15,12 +15,11 @@ Light moduli:
   StaffShift -- Raspored smjena osoblja
   Activity -- Dnevne aktivnosti (NE medicinske)
 """
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 

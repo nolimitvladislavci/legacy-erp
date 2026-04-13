@@ -6,16 +6,14 @@ Nema redirect na Django admin — vlastiti login screen.
 """
 import hashlib
 import functools
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from memio_pet.models import (
-    BreederProfile, AnimalProfile, PetHealthRecord, PetOwnership,
-    BreederReview, WaitlistEntry, AddAnimalToken,
+    BreederProfile, AnimalProfile, PetHealthRecord, WaitlistEntry,
 )
 
 # Admin email whitelist (SHA-256 hashevi)

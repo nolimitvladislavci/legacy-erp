@@ -163,8 +163,7 @@ def generate_monthly_billings():
     Pokrece se 1. u mjesecu za prethodni mjesec.
     Automatski kreira Invoice u invoicing modulu.
     """
-    from kindergarten.models import Child, MonthlyBilling, Attendance
-    from django.db.models import Count, Q
+    from kindergarten.models import Child, MonthlyBilling
 
     now = timezone.now()
     # Previous month

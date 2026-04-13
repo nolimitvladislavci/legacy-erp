@@ -14,14 +14,8 @@ Zahtjevi:
 """
 import io
 import logging
-from datetime import datetime
 
 from pypdf import PdfReader, PdfWriter
-from pypdf.generic import (
-    ArrayObject, DecodedStreamObject, DictionaryObject,
-    NameObject, NumberObject, TextStringObject,
-    create_string_object,
-)
 
 logger = logging.getLogger('eracun.zugferd')
 

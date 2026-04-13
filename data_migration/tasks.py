@@ -11,7 +11,6 @@ import traceback
 from celery import shared_task
 from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ def run_migration(project_pk, audit_ctx=None):
     Po zavrsetku kreira PermanentMigrationAudit zapis.
     """
     from .adapters.base import get_adapter
-    from .models import MigrationProject, PermanentMigrationAudit
+    from .models import MigrationProject
 
     audit_ctx = audit_ctx or {}
 
@@ -282,7 +281,6 @@ def generate_full_export(self, manifest_id):
     """
     import json
     import os
-    import tempfile
     from django.utils import timezone as tz
 
     logger = logging.getLogger('borg.export')

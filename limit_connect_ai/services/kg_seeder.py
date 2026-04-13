@@ -7,7 +7,6 @@ Usage:
     result = seed_knowledge_graph()
 """
 import logging
-from django.utils import timezone
 
 logger = logging.getLogger('borg.kg_seeder')
 

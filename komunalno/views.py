@@ -1,4 +1,3 @@
-import logging
 import hashlib
 import json
 from datetime import date, timedelta
@@ -9,10 +8,8 @@ from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     WasteStation, WasteCategory, CitizenCard, AnnualQuota,
@@ -533,7 +530,7 @@ def _create_overage_receipt(request, delivery):
     Automatski — operater ne mora ništa raditi.
     """
     try:
-        from pos.models import POSReceipt, POSPaymentLine, POSSession
+        from pos.models import POSReceipt, POSSession
 
         # Pronađi aktivnu POS sesiju za ovu lokaciju
         session = POSSession.objects.filter(

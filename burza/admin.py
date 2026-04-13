@@ -1,7 +1,5 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import LeadActivity, ProjectLead
 

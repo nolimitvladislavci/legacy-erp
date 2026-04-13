@@ -1,8 +1,6 @@
 from django import template
 
 from permissions.engine import get_engine
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 

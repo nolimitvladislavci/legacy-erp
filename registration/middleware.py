@@ -1,6 +1,4 @@
-from django.shortcuts import redirect
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 from .constants import MODULE_URL_MAP
 

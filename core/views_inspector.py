@@ -13,16 +13,12 @@ Flow:
 """
 import logging
 from datetime import date, timedelta
-from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import InspectionToken
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -247,7 +243,7 @@ def _gather_radna(company, date_from, date_to):
 
     try:
         from worktime.models import TimeEntry, EmployeeProfile
-        from django.db.models import Sum, Count, F
+        from django.db.models import Sum
 
         # Zaposlenici
         profiles = EmployeeProfile.objects.filter(company=company)
@@ -275,7 +271,6 @@ def _gather_radna(company, date_from, date_to):
         data['total_night'] = float(agg['night'] or 0)
 
         # Prekovremeni po zaposleniku (ZOR limit: 180h/god, 10h/tj)
-        from django.db.models import F as Ff
         overtime_by_user = entries.values(
             'user__first_name', 'user__last_name'
         ).annotate(
@@ -331,7 +326,6 @@ def _gather_livestock(company, scope):
     data = {}
     try:
         from livestock.models import Animal, HealthRecord, Field
-        from django.db.models import Count
 
         animals = Animal.objects.filter(company=company)
         data['animals_count'] = animals.count()

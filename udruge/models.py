@@ -3,9 +3,8 @@ Udruge modul - evidencija clanova braniteljskih, sportskih i OPG udruga.
 Cross-sell: clan udruge -> potencijalni OPG/obrt korisnik LC-a.
 """
 from django.conf import settings
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

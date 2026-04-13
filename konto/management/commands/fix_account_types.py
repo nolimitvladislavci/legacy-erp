@@ -16,8 +16,6 @@ DE SKR03:
 """
 from django.core.management.base import BaseCommand
 from konto.models import KontoAccount
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 # ── HR RRF ──

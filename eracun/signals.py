@@ -1,4 +1,3 @@
-import logging
 """
 Signal: ERacun status → 'accepted' → auto-create JournalEntry in konto.
 
@@ -11,7 +10,7 @@ from decimal import Decimal
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 @receiver(pre_save, sender='eracun.ERacun')

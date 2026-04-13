@@ -1,9 +1,8 @@
-import logging
 import json
 import time
 from datetime import datetime, timedelta
 
-from django.db import IntegrityError, transaction, DatabaseError
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone

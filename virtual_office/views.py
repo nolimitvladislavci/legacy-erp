@@ -5,11 +5,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.http import HttpResponse
 from django.utils import timezone
-from django.db.models import Count, Q
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 
 from core.company_utils import get_user_company
 

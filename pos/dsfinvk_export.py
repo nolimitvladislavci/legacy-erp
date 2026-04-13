@@ -21,10 +21,8 @@ Usage:
 import csv
 import io
 import zipfile
-from datetime import date, datetime
-from decimal import Decimal
+from datetime import datetime
 
-from django.utils import timezone
 
 # DSFinV-K Zahlungsart Mapping
 ZAHLUNGSART = {
@@ -69,7 +67,7 @@ def generate_dsfinvk_export(company, date_from, date_to):
     Returns:
         bytes: ZIP-Datei Inhalt
     """
-    from pos.models import POSReceipt, POSTerminal, POSSession
+    from pos.models import POSReceipt, POSTerminal
 
     receipts = POSReceipt.objects.filter(
         session__terminal__company=company,

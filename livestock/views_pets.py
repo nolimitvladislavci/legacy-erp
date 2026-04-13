@@ -14,7 +14,6 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import Livestock, HealthRecord
 from django.db import IntegrityError, DatabaseError
@@ -265,7 +264,6 @@ def pet_qr_code(request, pk):
     """
     import io
     import qrcode
-    from qrcode.image.pure import PyPNGImage
 
     company = get_user_company(request)
     pet = get_object_or_404(Livestock, pk=pk, company=company, vrsta__in=PET_VRSTE)

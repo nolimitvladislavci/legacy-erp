@@ -25,14 +25,11 @@ DVA ZAKONA KOJA POŠTUJEMO:
 BORG VETO: Svako polje u ovom fajlu dolazi iz cat models.py — nula pretpostavki.
 """
 import logging
-from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
-from django.db.models import Sum, Q, F
-from django.db.models.functions import ExtractQuarter, ExtractYear
-from django.db import IntegrityError, DatabaseError
+from django.db.models import Q
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +225,7 @@ class PrefillEngine:
         Caka #2: paid_at je datum primitka (POS = trenutna naplata)
         Caka #3: is_training=True bonovi se ISKLJUČUJU
         """
-        from pos.models import POSReceipt, POSReceiptItem
+        from pos.models import POSReceipt
 
         # Dohvati sve PLAĆENE, ne-training bonove za ovu firmu i godinu
         receipts = POSReceipt.objects.filter(

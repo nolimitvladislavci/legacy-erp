@@ -15,7 +15,7 @@ Pokretanje:
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 
 

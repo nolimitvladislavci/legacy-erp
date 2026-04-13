@@ -23,11 +23,10 @@ Pokretanje:
 import re
 from contextlib import nullcontext
 from django.core.management.base import BaseCommand
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction
 from django.utils import timezone
 
 from partners.models import Partner
-from django.core.exceptions import ObjectDoesNotExist
 
 
 # ═══════════════════════════════════════════════════════
@@ -418,17 +417,17 @@ class Command(BaseCommand):
             f'\n{"─" * 60}\n  REZULTATI\n{"─" * 60}'
         ))
 
-        self.stdout.write(f'\n  DISTRIBUCIJA BUYER TYPE:')
+        self.stdout.write('\n  DISTRIBUCIJA BUYER TYPE:')
         for bt, cnt in sorted(stats.items(), key=lambda x: -x[1]):
             pct = (cnt / total * 100) if total else 0
             bar = '█' * int(pct / 2)
             self.stdout.write(f'    {bt:15s} {cnt:>6d}  ({pct:5.1f}%)  {bar}')
 
-        self.stdout.write(f'\n  POUZDANOST:')
+        self.stdout.write('\n  POUZDANOST:')
         for level, cnt in sorted(confidence_stats.items(), key=lambda x: -x[1]):
             self.stdout.write(f'    {level:10s} {cnt:>6d}')
 
-        self.stdout.write(f'\n  SAŽETAK:')
+        self.stdout.write('\n  SAŽETAK:')
         self.stdout.write(f'    Ukupno analizirano:      {total:>6d}')
         self.stdout.write(f'    Promijenjeno:            {changed:>6d}')
         self.stdout.write(f'    Preskočeno (tehničko):   {skipped:>6d}')
@@ -436,11 +435,11 @@ class Command(BaseCommand):
 
         if dry_run:
             self.stdout.write(self.style.WARNING(
-                f'\n  DRY RUN — ništa nije spremljeno u bazu!\n'
-                f'  Pokreni bez --dry-run za produkcijski run.\n'
+                '\n  DRY RUN — ništa nije spremljeno u bazu!\n'
+                '  Pokreni bez --dry-run za produkcijski run.\n'
             ))
 
-            self.stdout.write(f'\n  UZORAK PROMJENA (max 5 po tipu):')
+            self.stdout.write('\n  UZORAK PROMJENA (max 5 po tipu):')
             shown_types = {}
             for ch in changes_log:
                 bt = ch['new']

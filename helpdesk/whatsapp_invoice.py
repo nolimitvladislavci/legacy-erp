@@ -8,10 +8,8 @@ Tok:
   4. Celery task parsira (Gemini + Claude fallback)
   5. Odgovor natrag na WhatsApp: "✅ Račun od Konzuma, 450€, PDV 25%"
 """
-import base64
 import logging
 import os
-import tempfile
 
 import requests
 from django.conf import settings

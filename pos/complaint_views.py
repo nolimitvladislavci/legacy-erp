@@ -14,8 +14,6 @@ Views:
 import json
 import hashlib
 import logging
-import re
-from collections import Counter
 from datetime import timedelta
 from io import BytesIO
 
@@ -27,12 +25,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Avg, Count, Q, F
-from django.db.models.functions import TruncMonth, TruncWeek
+from django.db.models import Avg, Count, Q
+from django.db.models.functions import TruncMonth
 from django.template.loader import render_to_string
 
 from companies.models import Company
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
 
@@ -737,7 +734,6 @@ def complaint_widget_js(request, company_id):
 
 def generate_prigovor_pdf_bytes(prigovor):
     """Generira PDF bytes za jedan prigovor/utisak."""
-    from pos.models import KnjigaPrigovora
 
     # ADR info
     adr_info = _get_adr_info(prigovor)

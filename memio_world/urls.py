@@ -1,7 +1,5 @@
 from django.urls import path
 from memio_world import views
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 app_name = 'memio_world'
 

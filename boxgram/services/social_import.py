@@ -74,21 +74,21 @@ def fetch_oembed(url: str) -> ImportPreview:
         ImportPreview sa rezultatima
     """
     platform = detect_platform(url)
-    
+
     if not platform:
         return ImportPreview(
             success=False,
             source_url=url,
             error='Nepodržana platforma. Podržane: Facebook, Instagram, TikTok, YouTube'
         )
-    
+
     # Pronađi odgovarajući oEmbed endpoint
     oembed_url = None
     for domain, endpoint in OEMBED_PROVIDERS.items():
         if domain in url:
             oembed_url = endpoint
             break
-    
+
     if not oembed_url:
         return ImportPreview(
             success=False,
@@ -96,11 +96,11 @@ def fetch_oembed(url: str) -> ImportPreview:
             source_url=url,
             error=f'Nema oEmbed endpoint-a za {platform}'
         )
-    
+
     try:
         # Pripremi parametre ovisno o platformi
         params = {'url': url}
-        
+
         if platform == 'instagram':
             # Instagram zahtijeva poseban token
             instagram_token = getattr(settings, 'INSTAGRAM_OEMBED_TOKEN', '')
@@ -112,7 +112,7 @@ def fetch_oembed(url: str) -> ImportPreview:
                     error='Instagram token nije konfiguriran. Kontaktiraj administratora.'
                 )
             params['access_token'] = instagram_token
-        
+
         # Kreni HTTP zahtjev sa timeout-om
         response = requests.get(
             oembed_url,
@@ -121,25 +121,25 @@ def fetch_oembed(url: str) -> ImportPreview:
             headers={'User-Agent': 'Boxgram/1.0'}
         )
         response.raise_for_status()
-        
+
         data = response.json()
-        
+
         # Normaliziraj podatke
         thumbnail_url = data.get('thumbnail_url') or data.get('thumbnail')
-        
+
         # Za TikTok - cache thumbnail lokalno
         if platform == 'tiktok':
             thumbnail_url = data.get('thumbnail_url')
-        
+
         # Za YouTube - koristi standard thumbnail URL
         if platform == 'youtube':
             # Ekstrakuj video ID
             video_id = _extract_youtube_id(url)
             if video_id:
                 thumbnail_url = f'https://img.youtube.com/vi/{video_id}/maxresdefault.jpg'
-        
+
         caption = data.get('title') or data.get('description', '')
-        
+
         return ImportPreview(
             success=True,
             platform=platform,
@@ -150,7 +150,7 @@ def fetch_oembed(url: str) -> ImportPreview:
             embed_html=data.get('html'),
             raw_data=data
         )
-        
+
     except requests.Timeout:
         return ImportPreview(
             success=False,
@@ -165,7 +165,7 @@ def fetch_oembed(url: str) -> ImportPreview:
             error_msg = 'Objava nije dostupna ili je privatna.'
         else:
             error_msg = f'HTTP greška {response.status_code}'
-        
+
         return ImportPreview(
             success=False,
             platform=platform,
@@ -219,7 +219,7 @@ def create_social_import(pet: PetProfile, url: str, requested_by) -> tuple[Socia
         pet=pet,
         source_url=url
     ).first()
-    
+
     if existing:
         # Dohvati već stare podatke
         preview = ImportPreview(
@@ -230,11 +230,11 @@ def create_social_import(pet: PetProfile, url: str, requested_by) -> tuple[Socia
             error='Ovaj URL je već importan.'
         )
         return existing, preview
-    
+
     platform = detect_platform(url)
     if not platform:
         platform = 'manual'
-    
+
     # Kreiraj SocialImport zapis
     social_import = SocialImport.objects.create(
         pet=pet,
@@ -242,10 +242,10 @@ def create_social_import(pet: PetProfile, url: str, requested_by) -> tuple[Socia
         source_url=url,
         status='pending'
     )
-    
+
     # Povuči preview
     preview = fetch_oembed(url)
-    
+
     # Spremi raw_data ako je uspješno
     if preview.success:
         social_import.raw_data = preview.raw_data
@@ -257,5 +257,5 @@ def create_social_import(pet: PetProfile, url: str, requested_by) -> tuple[Socia
             args=(str(social_import.id),),
             countdown=60  # Pokušaj za 1 minutu
         )
-    
+
     return social_import, preview

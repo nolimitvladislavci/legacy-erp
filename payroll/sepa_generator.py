@@ -9,8 +9,6 @@ import uuid
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
 from decimal import Decimal
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 NAMESPACE = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"
 

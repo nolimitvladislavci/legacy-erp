@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
-from django.db import models, DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from core.managers import CompanyManager
 
 
@@ -113,7 +112,6 @@ class VendorItemMapping(models.Model):
         return f'"{self.vendor_item_name}" -> {self.inventory_item.name}'
 
 
-from decimal import Decimal
 from django.utils import timezone as _tz
 
 

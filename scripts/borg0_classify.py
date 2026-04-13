@@ -14,8 +14,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from inventory.models import InventoryItem
-from django.db import transaction, DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 # ─── RULES ────────────────────────────────────────────────────────────
 # (keywords, item_class, fiscal_treatment, new_category)
@@ -366,14 +364,14 @@ def run(dry_run=True):
 
     print(f'\nKlasificirano: {classified} ({classified*100/total:.1f}%)')
     print(f'Neprepoznato:  {unmatched} ({unmatched*100/total:.1f}%)')
-    print(f'\nPo kategoriji:')
+    print('\nPo kategoriji:')
     for cat, count in stats.most_common():
         print(f'  {cat}: {count}')
 
     if dry_run:
-        print(f'\n--- DRY RUN — baza NIJE promijenjena ---')
+        print('\n--- DRY RUN — baza NIJE promijenjena ---')
         # Pokazi uzorak neprepoznatih
-        print(f'\nUzorak neprepoznatih (prvih 50):')
+        print('\nUzorak neprepoznatih (prvih 50):')
         for n in unmatched_names[:50]:
             print(f'  {n}')
 

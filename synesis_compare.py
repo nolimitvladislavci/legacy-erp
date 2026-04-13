@@ -19,7 +19,6 @@ django.setup()
 from companies.models import Company
 from invoicing.models import Invoice
 from konto.models import JournalEntry
-from django.db.models import Sum
 
 # ─── CONFIG ───────────────────────────────────────────
 TOLERANCE = Decimal('0.02')

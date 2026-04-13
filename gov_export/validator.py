@@ -5,9 +5,8 @@ BEZ AUTENTIFIKACIJE — javno dostupno.
 """
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
 import hashlib
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 @csrf_exempt
@@ -61,7 +60,7 @@ def public_validator(request):
                     result['signature_valid'] = True
                 except ImportError as e:
                     result['signature_error'] = str(e)[:200]
-            
+
             # Provjeri u bazi postoji li ovaj export
             try:
                 from gov_export.models import GovExport

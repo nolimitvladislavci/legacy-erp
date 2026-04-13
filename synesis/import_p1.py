@@ -5,7 +5,7 @@ Za svih 87 firmi iz Synesis MDB baza.
 Pokreni: venv/bin/python synesis/import_p1.py
 """
 import os, sys, glob, csv, io, subprocess, time, django
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from collections import defaultdict
 import logging
 logger = logging.getLogger("synesis.import_p1")
@@ -15,7 +15,6 @@ sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
 from companies.models import Company
-from django.db import connection
 
 MDB_CHARSET = 'cp1250'
 
@@ -100,7 +99,7 @@ def import_invoices_ira(company, mdb_path):
 
     headers = _mdb(mdb_path, 'INVOICES')
     lines = _mdb(mdb_path, 'TINVOICES')
-    
+
     # Group lines by DIN
     by_din = defaultdict(list)
     for ln in lines:
@@ -114,9 +113,9 @@ def import_invoices_ira(company, mdb_path):
         inv_date = _date(hdr.get('INVOICE_DATE',''))
         cust_oib = _clean(hdr.get('CUSTOMER_VATNUMBER',''), 20)
         cust_code = _clean(hdr.get('CUSTOMER_CODE',''))
-        
+
         if not inv_num: continue
-        
+
         number = f'SYN-IRA-{inv_num}'
         if Invoice.objects.filter(company=company, number=number).exists():
             continue
@@ -128,7 +127,7 @@ def import_invoices_ira(company, mdb_path):
         inv_lines = by_din.get(din, [])
         subtotal = Decimal('0')
         tax_total = Decimal('0')
-        
+
         inv = Invoice.objects.create(
             company=company,
             number=number,
@@ -181,12 +180,12 @@ def import_invoices_ira(company, mdb_path):
 
 def import_invoices_ura(company, mdb_path):
     """Import URAEU + TURAEU → invoicing.Invoice (ulazni računi)"""
-    from invoicing.models import Invoice, InvoiceItem
+    from invoicing.models import Invoice
     from django.utils import timezone
 
     headers = _mdb(mdb_path, 'URAEU')
     lines = _mdb(mdb_path, 'TURAEU')
-    
+
     by_din = defaultdict(list)
     for ln in lines:
         din = _clean(ln.get('DIN',''))
@@ -294,7 +293,7 @@ if __name__ == '__main__':
     print(f"{'='*75}\n")
 
     total_items = total_ira = total_ura = 0
-    
+
     for i, job in enumerate(jobs):
         company = find_company(job['name'])
         if not company:
@@ -306,18 +305,18 @@ if __name__ == '__main__':
             items = import_items(company, job['mdb'])
             ira = import_invoices_ira(company, job['mdb'])
             ura = import_invoices_ura(company, job['mdb'])
-            
+
             total_items += items
             total_ira += ira
             total_ura += ura
-            
+
             elapsed = time.time() - t0
             print(f"[{i+1:2d}/{len(jobs)}] OK    {company.name:40s} Items={items:>5d} IRA={ira:>5d} URA={ura:>5d} ({elapsed:.1f}s)")
         except (ValueError, TypeError) as e:
             print(f"[{i+1:2d}/{len(jobs)}] ERROR {job['name']:40s} — {str(e)[:60]}")
 
     print(f"\n{'='*75}")
-    print(f"P1 REZULTAT")
+    print("P1 REZULTAT")
     print(f"{'='*75}")
     print(f"Artikli:  {total_items:>8,d}")
     print(f"IRA:      {total_ira:>8,d}")

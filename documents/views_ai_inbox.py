@@ -9,11 +9,9 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 
@@ -87,7 +85,6 @@ def _create_journal_entry_from_proposal(entry, user=None):
     """Create JournalEntry + LedgerLines from ArhivaEntry.ai_proposal.
     Returns the JournalEntry or None on failure."""
     from konto.models import JournalEntry, LedgerLine, KontoAccount
-    from django.utils import timezone
 
     proposal = entry.ai_proposal
     if not _proposal_has_debit_credit(proposal):

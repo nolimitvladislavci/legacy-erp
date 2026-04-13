@@ -3,8 +3,6 @@ from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
 from django.db import IntegrityError, DatabaseError
-import json
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('udruge')
 
@@ -49,7 +47,7 @@ def evaluate_subscriptions(self):
     + auto-renew za aktivne planove
     + dunning email za grace period
     """
-    from .models import MemberSubscription, MembershipPlan, Clanarina
+    from .models import MemberSubscription, Clanarina
 
     today = timezone.now().date()
     processed = {'active': 0, 'grace': 0, 'suspended': 0, 'renewed': 0, 'reminded': 0}

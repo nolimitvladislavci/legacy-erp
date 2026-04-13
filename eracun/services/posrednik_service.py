@@ -13,8 +13,6 @@ Usage:
 """
 import logging
 import requests
-from django.conf import settings
-from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('eracun.posrednik')

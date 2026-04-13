@@ -108,7 +108,7 @@ def order_predictor(company, partner):
     Gleda zadnjih 6 mjeseci faktura i POS računa.
     Returns: lista artikala s predicted_quantity i confidence.
     """
-    from invoicing.models import InvoiceItem, Invoice
+    from invoicing.models import InvoiceItem
     from django.db.models import Avg, Count
 
     six_months_ago = timezone.now() - timedelta(days=180)
@@ -221,7 +221,7 @@ def resolve_price(company, partner, item, quantity=1):
     Resolve najbolju cijenu za kupca/artikl kombinaciju.
     Hijerarhija: Partner cjenik > Grupa cjenik > Standardna cijena
     """
-    from sales.models import CustomerPriceList, PriceListLine
+    from sales.models import CustomerPriceList
 
     today = timezone.now().date()
     base_price = item.unit_price

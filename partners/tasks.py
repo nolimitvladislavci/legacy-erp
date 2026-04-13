@@ -3,7 +3,7 @@ import logging
 from decimal import Decimal
 from celery import shared_task
 from django.utils import timezone as tz
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('agents')
 
@@ -139,8 +139,7 @@ def retroactive_nkd_lookup(company_ids=None, dry_run=False):
       3. Knowledge Graph — industry inference iz ClientOpportunityMatch patterns
     Vraća broj ažuriranih firmi.
     """
-    from companies.models import Company, NKDCode
-    from django.db.models import Q
+    from companies.models import Company
 
     qs = Company.objects.filter(nkd_code__isnull=True)
     if company_ids:
@@ -182,7 +181,7 @@ def _infer_nkd_from_context(company) -> 'NKDCode | None':
 
     # Strategija 1: Knowledge Graph match patterns
     try:
-        from limit_connect_ai.models_knowledge_graph import ClientOpportunityMatch, LegalOpportunity
+        from limit_connect_ai.models_knowledge_graph import ClientOpportunityMatch
         matches = ClientOpportunityMatch.objects.filter(
             company=company
         ).select_related('opportunity__impact_domain')
@@ -223,7 +222,7 @@ def _infer_nkd_from_context(company) -> 'NKDCode | None':
 
     # Strategija 3: POS kategorije
     try:
-        from pos.models import POSTerminal, Category
+        from pos.models import POSTerminal
         terminals = POSTerminal.objects.filter(company=company)
         if terminals.exists():
             # Firma ima POS — najvjerojatnija djelatnost je maloprodaja
@@ -304,7 +303,6 @@ def classify_buyer_types_batch(company_id=None):
     """
     from partners.management.commands.classify_buyer_types import classify_partner
     from partners.models import Partner
-    from django.utils import timezone
     import logging
 
     logger = logging.getLogger('partners.tasks')

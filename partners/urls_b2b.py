@@ -1,6 +1,4 @@
 from django.urls import path
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .b2b_views import b2b_dashboard, b2b_invoices, b2b_invoice_detail, b2b_invoice_action, b2b_invoice_pdf
 
 urlpatterns = [

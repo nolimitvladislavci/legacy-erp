@@ -82,7 +82,7 @@ class TemplateURLTest(TestCase):
                             broken.append(f'{rel}: {url_name}')
                     except (ValueError, TypeError):
                         pass
-        self.assertEqual(broken, [], f"Broken critical template URLs:\n" + "\n".join(broken))
+        self.assertEqual(broken, [], "Broken critical template URLs:\n" + "\n".join(broken))
 
 
 class ModelIntegrityTest(TestCase):
@@ -118,7 +118,7 @@ class DashboardSmokeTest(TestCase):
 
 class AMLModuleTest(TestCase):
     def test_models_importable(self):
-        from aml.models import AMLRiskCategory, AMLClientProfile, AMLTransaction
+        from aml.models import AMLRiskCategory
         self.assertTrue(AMLRiskCategory._meta.db_table)
 
     def test_risk_category_crud(self):
@@ -129,7 +129,7 @@ class AMLModuleTest(TestCase):
 
 class BorgOpsModuleTest(TestCase):
     def test_models_importable(self):
-        from borg_ops.models import CardActivity, StatusTimestamp
+        from borg_ops.models import CardActivity
         self.assertTrue(CardActivity._meta.db_table)
 
     def test_hub_url_resolves(self):
@@ -139,19 +139,19 @@ class BorgOpsModuleTest(TestCase):
 
 class EdikModuleTest(TestCase):
     def test_models_importable(self):
-        from edik.models import TaxFormType, TaxSubmission, TaxCalendar
+        from edik.models import TaxFormType
         self.assertTrue(TaxFormType._meta.db_table)
 
 
 class EinvoiceModuleTest(TestCase):
     def test_models_importable(self):
-        from einvoice.models import AS4Message, PeppolParticipant, InboundInvoice
+        from einvoice.models import AS4Message
         self.assertTrue(AS4Message._meta.db_table)
 
 
 class EldercareModuleTest(TestCase):
     def test_models_importable(self):
-        from eldercare.models import Room, Resident, Activity
+        from eldercare.models import Resident
         self.assertTrue(Resident._meta.db_table)
 
     def test_room_needs_company(self):
@@ -164,13 +164,13 @@ class EldercareModuleTest(TestCase):
 
 class EracunModuleTest(TestCase):
     def test_models_importable(self):
-        from eracun.models import ERacunConfig, ERacun, ERacunLog
+        from eracun.models import ERacunConfig
         self.assertTrue(ERacunConfig._meta.db_table)
 
 
 class GovExportModuleTest(TestCase):
     def test_models_importable(self):
-        from gov_export.models import GovInstitution, GovExport
+        from gov_export.models import GovExport
         self.assertTrue(GovExport._meta.db_table)
 
     def test_institution_fields(self):
@@ -182,13 +182,13 @@ class GovExportModuleTest(TestCase):
 
 class KindergartenModuleTest(TestCase):
     def test_models_importable(self):
-        from kindergarten.models import Child, KindergartenGroup
+        from kindergarten.models import Child
         self.assertTrue(Child._meta.db_table)
 
 
 class KnjiznicaModuleTest(TestCase):
     def test_models_importable(self):
-        from knjiznica.models import BookMeta, LibraryMember, BookLoan
+        from knjiznica.models import BookMeta
         self.assertTrue(BookMeta._meta.db_table)
 
     def test_book_meta_fields(self):
@@ -199,7 +199,7 @@ class KnjiznicaModuleTest(TestCase):
 
 class LibraryModuleTest(TestCase):
     def test_models_importable(self):
-        from library.models import Book, Loan, LibraryMember
+        from library.models import Book, Loan
         self.assertTrue(Book._meta.db_table)
         self.assertTrue(Loan._meta.db_table)
 
@@ -231,25 +231,25 @@ class PdvSModuleTest(TestCase):
 
 class PermissionsModuleTest(TestCase):
     def test_models_importable(self):
-        from permissions.models import Permission, Role, UserRole
+        from permissions.models import Permission
         self.assertTrue(Permission._meta.db_table)
 
 
 class PropterModuleTest(TestCase):
     def test_models_importable(self):
-        from propter.models import PropterConfig, EkoStats
+        from propter.models import PropterConfig
         self.assertTrue(PropterConfig._meta.db_table)
 
 
 class SeasonalModuleTest(TestCase):
     def test_models_importable(self):
-        from seasonal.models import SeasonalWorker, SeasonalContract
+        from seasonal.models import SeasonalWorker
         self.assertTrue(SeasonalWorker._meta.db_table)
 
 
 class VirtualOfficeModuleTest(TestCase):
     def test_models_importable(self):
-        from virtual_office.models import VirtualMailbox, IncomingMail
+        from virtual_office.models import VirtualMailbox
         self.assertTrue(VirtualMailbox._meta.db_table)
 
 
@@ -261,5 +261,5 @@ class InsuranceModuleTest(TestCase):
 
 class DataMigrationModuleTest(TestCase):
     def test_models_importable(self):
-        from data_migration.models import MigrationProject, MigrationFile, MigrationLog
+        from data_migration.models import MigrationProject
         self.assertTrue(MigrationProject._meta.db_table)

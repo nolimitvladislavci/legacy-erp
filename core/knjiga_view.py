@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
 from django.utils import timezone
 from django.conf import settings
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 @user_passes_test(lambda u: u.is_superuser)

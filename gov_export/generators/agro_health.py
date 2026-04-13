@@ -4,7 +4,6 @@ Svaki FlockHealthRecord + karenca → potpisan XML za veterinarsku inspekciju.
 """
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from datetime import datetime
 from django.utils import timezone
 
 
@@ -15,7 +14,7 @@ class AgroHealthGenerator:
 
     def generate(self, export):
         from udruge.models import Flock, FlockHealthRecord, EggRecord, FlockMortality
-        
+
         company = export.company
         root = ET.Element('AgroHealthReport', xmlns=self.NS)
         root.set('version', '1.0')

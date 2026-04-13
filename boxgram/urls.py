@@ -1,7 +1,5 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .views import (
     PetProfileViewSet, LifeEventViewSet, CompetitionViewSet, SocialImportViewSet,
     public_profile, public_feed, competition_detail, competition_vote_web,

@@ -63,7 +63,6 @@ class FiscalConfig(models.Model):
             with open(cert_path, 'rb') as f:
                 p12_data = f.read()
             key, cert, chain = load_key_and_certificates(p12_data, password)
-            from django.utils import timezone
             self.cert_expires_at = cert.not_valid_after_utc
             self.cert_subject = cert.subject.rfc4514_string()[:200]
             self.save(update_fields=['cert_expires_at', 'cert_subject'])

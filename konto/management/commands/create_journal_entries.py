@@ -16,7 +16,6 @@ from invoicing.models import Invoice
 from konto.models import JournalEntry, LedgerLine, KontoAccount
 from konto.services_file import _next_entry_number
 from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 # Default konto plan mapping

@@ -1,7 +1,7 @@
 import json
 import os
 import logging
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('ai_assistant.patrol')
 

@@ -7,10 +7,9 @@ Alert: POS Pulse critical event + log.
 """
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from django.utils import timezone as tz
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('eracun.cert_monitor')
 

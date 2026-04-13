@@ -6,8 +6,6 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from core.oib_validator import (
     validate_oib_hr, validate_hr_iban, validate_iban, validate_mbs,
     validate_jibg, validate_jzb, validate_ueln, validate_chip_iso, validate_nkd,

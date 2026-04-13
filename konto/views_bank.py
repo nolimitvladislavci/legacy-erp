@@ -5,12 +5,10 @@ Supported formats: camt.053 XML (SEPA), CSV (FINA/HR banke), MT940 (SWIFT).
 """
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 @login_required

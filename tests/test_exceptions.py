@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import RequestFactory, TestCase
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.exceptions import (
     BookingConflictError,

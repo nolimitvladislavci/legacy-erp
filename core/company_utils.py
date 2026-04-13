@@ -1,4 +1,3 @@
-from django.db import DatabaseError, IntegrityError
 from core.tenant import get_current_company
 from django.core.exceptions import ObjectDoesNotExist
 import logging

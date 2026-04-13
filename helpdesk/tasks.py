@@ -1,10 +1,7 @@
 from celery import shared_task
-from django.utils import timezone
 from helpdesk.models import Ticket
 from superadmin_ai.models import PendingAIAction, AIModulePermission
-from companies.models import Company
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import DatabaseError, IntegrityError
 
 @shared_task
 def analyze_ticket_and_propose_action(ticket_id):

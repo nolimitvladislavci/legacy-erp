@@ -5,8 +5,7 @@ Analyses payment behavior from URA invoices to populate SupplierRiskAlert.
 from celery import shared_task
 from decimal import Decimal
 from django.utils import timezone
-from django.db.models import Sum, Avg, Count, Q, F
-import json
+from django.db.models import Sum
 import logging
 
 logger = logging.getLogger('borg_fenix')

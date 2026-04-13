@@ -21,7 +21,7 @@ from core.company_utils import get_user_company
 from core.tenant import get_current_company
 from inventory.models import InventoryItem
 
-from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal, Voucher
+from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
 from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
@@ -3024,7 +3024,6 @@ def refund_receipt(request, receipt_id):
         return JsonResponse({'error': 'Storno bona se ne može ponovo stornirati'}, status=400)
 
     # Izračunaj već refundirane količine (double-refund guard)
-    from django.db.models import Sum
     already_refunded = {}
     for ref_receipt in original.refund_receipts.exclude(status='cancelled'):
         for ri in ref_receipt.items.all():
@@ -3254,7 +3253,6 @@ def pfand_return(request):
 def tip_report(request):
     """Izvještaj napojnica po konobaru/blagajniku."""
     company = get_user_company(request)
-    from django.db.models import Sum, Count
     from datetime import date, timedelta
 
     date_from = request.GET.get('from', '')
@@ -3619,7 +3617,6 @@ def kitchen_tablet(request, token):
     URL: /pos/gastro/kds/<company_token>/
     Always-on tablet screen showing orders."""
     from companies.models import Company
-    from .models import Table
     company = Company.objects.filter(id=token).first()
     if not company:
         return render(request, 'pos/waiter/kds.html', {'error': 'Nepoznat token'})
@@ -3890,7 +3887,7 @@ def webshop_public(request, slug):
     ).order_by('category', 'name')
 
     # Roba od jučer
-    from datetime import date, timedelta
+    from datetime import date
     today = date.today()
     from django.db import connection as _conn
     cursor = _conn.cursor()
@@ -4091,8 +4088,6 @@ def cashier_report_html(request, session_id):
 
     def fmt(dt):
         if not dt: return '-'
-        import pytz
-        from django.utils import timezone as tz
         if hasattr(dt, 'astimezone'):
             dt = dt.astimezone()
         return dt.strftime('%H:%M')
@@ -4422,7 +4417,7 @@ def _zlatno_dugme_notify_user(suggestion):
         )
         if suggestion.admin_note:
             msg += f"Komentar: {suggestion.admin_note}\n"
-        msg += f"\nHvala što pomažete poboljšati sustav!"
+        msg += "\nHvala što pomažete poboljšati sustav!"
         send_text(phone, msg)
     except AttributeError as e:
         import logging
@@ -4449,7 +4444,6 @@ def improvement_list(request):
             )
             # Screenshot upload
             if request.FILES.get('screenshot'):
-                import os
                 from django.core.files.storage import default_storage
                 f = request.FILES['screenshot']
                 path = f'feedback/screenshots/{s.pk}_{f.name}'
@@ -5343,7 +5337,7 @@ def dsfinvk_export(request):
 def kassenbuch_download(request):
     """Blagajnicki dnevnik / Kassenbuch XLSX download."""
     from django.http import HttpResponse
-    from datetime import date, timedelta
+    from datetime import date
     company = get_user_company(request)
     if not company:
         return JsonResponse({'error': 'Nema firme'}, status=400)

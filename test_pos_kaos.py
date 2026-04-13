@@ -5,8 +5,6 @@ Pokreni: cd /var/www/fina-connect && source venv/bin/activate && python test_pos
 from playwright.sync_api import sync_playwright
 import time
 import json
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 # --- KONFIGURACIJA ---
 BASE_URL = "https://limit-connect.com"
@@ -204,7 +202,7 @@ def run_chaos_test():
 
         # Screenshot
         page.screenshot(path="/tmp/kaos_final.png")
-        print(f"\n[DONE] Screenshot: /tmp/kaos_final.png")
+        print("\n[DONE] Screenshot: /tmp/kaos_final.png")
 
         browser.close()
         return result

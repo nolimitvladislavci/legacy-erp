@@ -16,10 +16,8 @@ import base64
 import json
 import logging
 import re
-from datetime import timedelta
 
 from django.conf import settings
-from django.utils import timezone
 
 logger = logging.getLogger('stolarija')
 

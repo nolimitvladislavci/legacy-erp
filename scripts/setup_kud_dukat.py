@@ -14,13 +14,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
-from decimal import Decimal
 from datetime import date, time, timedelta
-from django.utils import timezone
 from companies.models import Company
 from udruge.models import Clan, GlazbenaSkola, GlazbeniUcenik, SatGlazbene
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 print('=' * 60)
 print('  SETUP KUD DUKAT VLADISLAVCI — Glazbena škola')
@@ -138,5 +134,5 @@ print(f'  Sati: {SatGlazbene.objects.filter(company=kud).count()}')
 print(f'  Nefakturirano: {SatGlazbene.objects.filter(company=kud, fakturiran=False).count()} sati')
 print(f'  Vrijednost: {SatGlazbene.objects.filter(company=kud, fakturiran=False).count() * 15}€')
 print()
-print(f'  Dashboard: /hr/udruge/glazbena-skola/')
-print(f'  Web: /korpas/kud-dukat/')
+print('  Dashboard: /hr/udruge/glazbena-skola/')
+print('  Web: /korpas/kud-dukat/')

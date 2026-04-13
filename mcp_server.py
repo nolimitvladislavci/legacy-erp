@@ -4,7 +4,7 @@ Pokrece se kao: venv/bin/python core/mcp_server.py
 
 v3: SQL guard, ORM sandbox, rate limit, extended blocked commands
 """
-import os, sys, subprocess, json, signal, asyncio
+import os, sys, subprocess, json, signal
 sys.path.insert(0, '/var/www/fina-connect')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')

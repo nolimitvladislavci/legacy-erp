@@ -5,7 +5,7 @@ Auto-creates BorgTasks from overdue invoices, anomalies, signals, adaptations.
 import logging
 from celery import shared_task
 from django.utils import timezone
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.ops')

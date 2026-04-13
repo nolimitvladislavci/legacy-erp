@@ -1,6 +1,6 @@
 from django.utils.translation import get_language
 from django.conf import settings
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 def booking_globals(request):

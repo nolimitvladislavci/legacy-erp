@@ -17,7 +17,7 @@ Inovacija #3: XML export za ePorezna (uz PDF za arhivu)
 """
 import logging
 from datetime import date
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from io import BytesIO
 import xml.etree.ElementTree as ET
 
@@ -46,7 +46,7 @@ def generate_tz2_data(company, year=None):
       - Ukupne primitke iz EP evidencije (Točka 17)
       - Popust 20% za potpomognuta područja
     """
-    from rental.models import Property, AccommodationUnit, LandlordProfile, TrafficRecord
+    from rental.models import Property, LandlordProfile, TrafficRecord
 
     if year is None:
         year = timezone.now().year

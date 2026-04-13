@@ -5,8 +5,6 @@ All tasks are idempotent with graceful retry on gateway errors.
 import logging
 from celery import shared_task
 from django.conf import settings
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('whatsapp')
 
@@ -46,7 +44,7 @@ def send_appointment_confirmation_whatsapp(self, appointment_id):
     )
     if appt.total_price:
         msg += f"Cijena: {appt.total_price} EUR\n"
-    msg += f"\nHvala na povjerenju!"
+    msg += "\nHvala na povjerenju!"
 
     result = send_text(appt.whatsapp_number, msg)
     if not result['success'] and result['error'] in ('Gateway unreachable', 'Gateway timeout'):
@@ -81,7 +79,7 @@ def send_appointment_reminder_whatsapp(self, appointment_id):
     )
     if appt.location:
         msg += f"Lokacija: {appt.location}\n"
-    msg += f"\nVidimo se!"
+    msg += "\nVidimo se!"
 
     result = send_text(appt.whatsapp_number, msg)
     if result['success']:

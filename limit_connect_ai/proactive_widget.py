@@ -14,7 +14,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.db.models import Sum
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

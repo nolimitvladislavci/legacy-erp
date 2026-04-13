@@ -15,14 +15,10 @@ GDPR: hash ≠ osobni podatak. SHA256 je jednosmjerna funkcija.
 Opcija: dnevni anchor hash → OpenTimestamps (Bitcoin) za neoboriv dokaz.
 """
 import hashlib
-import json
 import logging
-from datetime import datetime
-from decimal import Decimal
 
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils import timezone as tz
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('pos_hashchain')
 from core.managers import CompanyManager

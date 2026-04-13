@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from companies.models import Company
-        from synesis.models import SynesisConfig, SynesisLog
+        from synesis.models import SynesisConfig
 
         company_q = options['company']
         try:

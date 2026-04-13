@@ -8,7 +8,7 @@ Nema hardkodiranih datuma — računa pomične praznike matematički zauvijek.
 from datetime import date, datetime, time, timedelta
 from django.utils import timezone
 import logging
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('borg.sla')
 

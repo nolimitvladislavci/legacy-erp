@@ -8,8 +8,6 @@ Usage u templateima:
 """
 from django import template
 from django.utils.translation import get_language
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 

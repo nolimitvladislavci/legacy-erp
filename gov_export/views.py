@@ -1,13 +1,10 @@
 """GovExport Views — dashboard + run pipeline."""
-import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import GovExport, GovDocumentType, GovInstitution
 
@@ -17,7 +14,7 @@ def dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
-    
+
     exports = GovExport.objects.filter(company=company)[:20]
     institutions = GovInstitution.objects.filter(is_active=True)
     doc_types = GovDocumentType.objects.filter(is_active=True).select_related('institution')
@@ -40,10 +37,10 @@ def dashboard(request):
 def run_export(request, export_id):
     company = get_user_company(request)
     export = get_object_or_404(GovExport, pk=export_id, company=company)
-    
+
     from .pipeline import run_pipeline
     results = run_pipeline(export, user=request.user)
-    
+
     passed = sum(1 for v in results.values() if 'ok' in str(v))
     total = len(results)
     messages.success(request, f'Pipeline: {passed}/{total} koraka uspješno. Status: {export.status}')
@@ -54,11 +51,11 @@ def run_export(request, export_id):
 def download_xml(request, export_id):
     company = get_user_company(request)
     export = get_object_or_404(GovExport, pk=export_id, company=company)
-    
+
     if not export.xml_content:
         messages.error(request, _('XML još nije generiran.'))
         return redirect('gov_export:dashboard')
-    
+
     response = HttpResponse(export.xml_content, content_type='application/xml')
     response['Content-Disposition'] = f'attachment; filename="{export.reference_number}.xml"'
     return response
@@ -69,7 +66,7 @@ def export_log(request, export_id):
     company = get_user_company(request)
     export = get_object_or_404(GovExport, pk=export_id, company=company)
     logs = export.logs.all()
-    
+
     return JsonResponse({
         'reference': export.reference_number,
         'status': export.status,

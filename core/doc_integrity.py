@@ -1,5 +1,3 @@
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 """
 Document Integrity Service — SHA-256 hash za sve dokumente.
 
@@ -11,7 +9,6 @@ Usage:
     # ctx sadrzi: doc_hash, timestamp, generated_by, verified_text
 """
 import hashlib
-from datetime import datetime
 from django.utils import timezone
 
 

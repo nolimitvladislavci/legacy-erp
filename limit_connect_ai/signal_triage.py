@@ -190,11 +190,11 @@ def dedup_signals(hours=24):
             message=group['message'],
             page_url=group['page_url'],
         ).order_by('-created_at')
-        
+
         # Keep the first (newest), mark the rest
         keep_ids = [matching.first().id] if matching.exists() else []
         older = matching.exclude(id__in=keep_ids)
-        
+
         count = older.filter(status='new').update(status='resolved')
         total_deduped += count
 

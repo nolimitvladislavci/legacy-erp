@@ -216,7 +216,7 @@ def nightly_owner_zreport(self):
     """
     from companies.models import Company
     from pos.models import POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
-    from django.db.models import Sum, Count, Q
+    from django.db.models import Sum
     from django.utils import timezone
     from core.whatsapp import send_text
     import logging

@@ -7,8 +7,7 @@ Fiscal Health template tag v2 — 3 drona neutralizirana:
 from django import template
 from django.core.cache import cache
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 register = template.Library()
 
@@ -70,7 +69,6 @@ def fiscal_health_status(context):
                 result['cert_subject'] = config.cert_subject or ''
 
         # ── DRON #2: Neposlani računi (ZKI bez JIR) ──
-        from datetime import timedelta
         try:
             from pos.models import POSReceipt
             pending_pos = POSReceipt.objects.filter(
@@ -80,9 +78,9 @@ def fiscal_health_status(context):
             ) | POSReceipt.objects.filter(
                 zki__isnull=False,
             ).exclude(zki='').filter(jir='')
-            
+
             pending_count = pending_pos.count()
-            
+
             # Najstariji neposlani
             oldest = pending_pos.order_by('fiscal_datetime').first()
             if oldest and oldest.fiscal_datetime:

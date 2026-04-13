@@ -1,9 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from decimal import Decimal
 import datetime
-from unittest.mock import patch
 from companies.models import Company
 from accounts.models import UserProfile
 from registration.models import CompanySubscription
@@ -234,8 +232,6 @@ class ShortShiftAndBreakComplianceTests(TestCase):
 
 
 from django.test import override_settings
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class PayrollViewTests(TestCase):

@@ -15,17 +15,13 @@ import re
 import urllib.request
 import urllib.error
 import urllib.parse
-from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
-from .models import Book, Author, BookCopy, Category
+from .models import Book, Author, BookCopy
 
 
 SOURCES = {

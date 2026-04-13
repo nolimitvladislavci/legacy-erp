@@ -15,8 +15,6 @@ from companies.models import Company
 from accounts.models import UserProfile
 from registration.models import CompanySubscription
 from worktime.models import EmployeeProfile
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class PayrollViewTestsFixed(TestCase):
@@ -67,7 +65,7 @@ class PayrollViewTestsFixed(TestCase):
         if response.status_code == 302:
             response = self.client.get('/worktime/payroll/', follow=True, secure=True)
             self.assertEqual(response.status_code, 200,
-                f"Nakon followanja redirecta mora biti 200.")
+                "Nakon followanja redirecta mora biti 200.")
 
     def test_inspector_print_unauthenticated_redirects(self):
         """Neautenticirani korisnik dobiva redirect na login."""

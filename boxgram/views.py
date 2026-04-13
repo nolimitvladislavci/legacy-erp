@@ -6,19 +6,15 @@ from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     PetProfile, LifeEvent, EventMedia, SocialImport,
-    Competition, CompetitionEntry, CompetitionVote, PetFollower, EventHeart
+    Competition, CompetitionEntry, CompetitionVote
 )
 from .serializers import (
-    PetProfileSerializer, LifeEventSerializer, EventMediaSerializer,
-    SocialImportSerializer, CompetitionSerializer, CompetitionEntrySerializer
+    PetProfileSerializer, LifeEventSerializer, SocialImportSerializer, CompetitionSerializer
 )
 from .throttles import VoteRateThrottle, ImportRateThrottle
-from .tasks import generate_pet_qr, fetch_social_import, close_competition
-from django.utils import timezone
+from .tasks import generate_pet_qr, fetch_social_import
 import logging
 import json
 
@@ -279,7 +275,6 @@ def competition_vote_web(request, competition_id):
 @require_POST
 def add_event_web(request, slug):
     """Web endpoint za dodavanje LifeEventa s media uploadom (FenixCamera)."""
-    from django.contrib.auth.decorators import login_required
     import datetime
 
     if not request.user.is_authenticated:

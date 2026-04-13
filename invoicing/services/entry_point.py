@@ -10,7 +10,6 @@ from typing import Optional
 import logging
 
 from django.db import transaction
-from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)

@@ -74,7 +74,7 @@ def check_gunicorn():
 
     # SLUČAJ 1: sve OK
     if systemd_status == 'active' and port_open and http_ok:
-        return True, f'OK (systemd=active, port=open, HTTP=200)'
+        return True, 'OK (systemd=active, port=open, HTTP=200)'
 
     # SLUČAJ 2: PORT ZAUZET — zombie proces (Ivan-incident)
     # systemd kaže "active" (restart loop), ali novi gunicorn ne može vezati port

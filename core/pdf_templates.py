@@ -1,5 +1,3 @@
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 """
 PDF Template Resolver — dohvaća pravi base template ovisno o company.pdf_template.
 

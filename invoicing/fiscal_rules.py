@@ -20,13 +20,13 @@ def get_hr_pdv_rate(invoice_date, category: str = 'standard') -> float:
     if isinstance(invoice_date, str):
         from datetime import datetime
         invoice_date = datetime.strptime(invoice_date[:10], '%Y-%m-%d').date()
-    
+
     y = invoice_date.year
     m = invoice_date.month
     d_val = invoice_date.day
-    
+
     cat = category.lower()
-    
+
     # RESTORANI / UGOSTITELJSTVO
     if cat in ('restaurant', 'ugostiteljstvo', 'catering'):
         if invoice_date < date(2020, 1, 1):
@@ -37,7 +37,7 @@ def get_hr_pdv_rate(invoice_date, category: str = 'standard') -> float:
             return 5.0    # NN 39/22 COVID rasterecenje
         else:
             return 13.0   # NN 114/23 povratak
-    
+
     # HRANA (osnovna: kruh, mlijeko, meso, voce, povrce, riba...)
     if cat in ('food', 'hrana', 'food_basic', 'food_processed', 'meso', 'voce', 'povrce'):
         if invoice_date < date(2022, 4, 1):
@@ -45,7 +45,7 @@ def get_hr_pdv_rate(invoice_date, category: str = 'standard') -> float:
             return 5.0
         else:
             return 5.0    # NN 39/22 prosireno na meso, voce, povrce...
-    
+
     # PLIN / GRIJANJE
     if cat in ('gas', 'plin', 'grijanje', 'heating'):
         if invoice_date < date(2022, 4, 1):
@@ -56,24 +56,24 @@ def get_hr_pdv_rate(invoice_date, category: str = 'standard') -> float:
             return 13.0   # Produljeno NN 113/22 -> NN 35/24
         else:
             return 25.0   # Isteklo
-    
+
     # SOLARNE PLOCE
     if cat in ('solar', 'solarne ploce', 'pv'):
         if invoice_date >= date(2022, 10, 1):
             return 0.0    # NN 113/22
         return 25.0
-    
+
     # KULTURA / SPORT / KONCERTI
     if cat in ('culture', 'sport', 'concert', 'kultura', 'kazaliste'):
         if invoice_date < date(2022, 4, 1):
             return 13.0
         else:
             return 5.0    # NN 39/22
-    
+
     # KNJIGE / NOVINE / CASOPISI
     if cat in ('books', 'knjige', 'novine', 'press'):
         return 5.0   # Uvijek 5% od 2013
-    
+
     # STANDARDNA STOPA (default)
     return 25.0
 
@@ -87,7 +87,7 @@ def get_fiscal_version(invoice_date) -> Tuple[Optional[str], str]:
     if isinstance(invoice_date, str):
         from datetime import datetime
         invoice_date = datetime.strptime(invoice_date[:10], '%Y-%m-%d').date()
-    
+
     if invoice_date < date(2013, 1, 1):
         return None, 'Pre-fiskalizacija — nije bilo obaveze'
     elif invoice_date < date(2013, 7, 1):
@@ -137,16 +137,16 @@ def should_fiscalize(invoice) -> Tuple[bool, str]:
     """
     company = invoice.company
     country = getattr(invoice, 'country', 'HR') or 'HR'
-    
+
     if country == 'DE':
         return False, 'DE racun — DSFinV-K, ne HR fiskalizacija'
-    
+
     if getattr(company, 'fiscal_exempt', False):
         return False, 'Firma nije obveznik fiskalizacije'
-    
+
     if invoice.doctype in NON_FISCAL_DOCTYPES:
         return False, f'Vrsta dokumenta {invoice.doctype} ne fiskalizira se'
-    
+
     if company.business_type in ('udruga', 'ustanova'):
         try:
             items = invoice.items.all()
@@ -159,14 +159,14 @@ def should_fiscalize(invoice) -> Tuple[bool, str]:
                     return False, 'Svi artikli su nonprofit aktivnost udruge'
         except DatabaseError:
             pass
-    
+
     total = getattr(invoice, 'total', 0) or 0
     if total == 0:
         return False, 'Nulti iznos — fiskalizacija nije potrebna'
-    
+
     if invoice.doctype in FISCAL_DOCTYPES_HR:
         return True, 'HR fiskalizacija obavezna'
-    
+
     return False, 'Nije prepoznat slucaj za fiskalizaciju'
 
 
@@ -182,11 +182,11 @@ def get_de_mwst_rate(invoice_date, category: str = 'standard') -> Tuple[float, O
     if isinstance(invoice_date, str):
         from datetime import datetime
         invoice_date = datetime.strptime(invoice_date[:10], '%Y-%m-%d').date()
-    
+
     covid_period = date(2020, 7, 1) <= invoice_date <= date(2020, 12, 31)
-    
+
     cat = category.lower()
-    
+
     # GASTRONOMIJA
     if cat in ('restaurant', 'gastronomie', 'speisen'):
         if invoice_date < date(2020, 7, 1):
@@ -197,25 +197,25 @@ def get_de_mwst_rate(invoice_date, category: str = 'standard') -> Tuple[float, O
             return 7.0, 'COVID rasterecenje produljeno do 31.12.2023.'
         else:
             return 19.0, 'Od 01.01.2024. gastronomija opet 19%'
-    
+
     # OPCA STOPA
     if cat == 'standard':
         if covid_period:
             return 16.0, 'COVID period 07-12.2020. — 16% je LEGALNO'
         return 19.0, None
-    
+
     # SNIZENA STOPA
     if cat in ('reduced', 'ermassigt', 'food', 'hrana', 'books', 'knjige'):
         if covid_period:
             return 5.0, 'COVID period — 5% snizena'
         return 7.0, None
-    
+
     # SOLARNE PLOCE
     if cat in ('solar', 'pv'):
         if invoice_date >= date(2023, 1, 1):
             return 0.0, 'Nullsteuersatz od 01.01.2023. za PV sustave'
         return 19.0, None
-    
+
     # Defaultno
     if covid_period:
         return 16.0, 'COVID period — provjeri tocnu kategoriju'
@@ -234,27 +234,27 @@ def validate_item_pdv_rate(item, company, invoice_date) -> Tuple[float, Optional
     country = getattr(company, 'country', 'HR') or 'HR'
     nkd = getattr(company, 'nkd_code', None)
     nkd_code = getattr(nkd, 'code', '') if nkd else ''
-    
+
     current_rate = getattr(item, 'tax_rate', None) or getattr(item, 'tax_percent', 25)
-    
+
     if country == 'DE':
         expected, note = get_de_mwst_rate(invoice_date)
         return expected, note
-    
+
     # HR — provjeri NKD
     food_nkds = ('10.', '47.2', '56.', '01.')
     restaurant_nkds = ('56.',)
-    
+
     if any(nkd_code.startswith(x) for x in restaurant_nkds):
         expected = get_hr_pdv_rate(invoice_date, 'restaurant')
         if abs(float(current_rate) - expected) > 0.01:
             return expected, f'NKD {nkd_code} (ugostiteljstvo): ocekivana PDV {expected}%, postavljeno {current_rate}%'
-    
+
     elif any(nkd_code.startswith(x) for x in food_nkds):
         expected = get_hr_pdv_rate(invoice_date, 'food')
         if abs(float(current_rate) - expected) > 0.01:
             return expected, f'NKD {nkd_code} (prehrambeni): ocekivana PDV {expected}%, postavljeno {current_rate}%'
-    
+
     return float(current_rate), None
 
 

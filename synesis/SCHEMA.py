@@ -1,5 +1,3 @@
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 """
 ═══════════════════════════════════════════════════════════════════════════
 synesis/SCHEMA.py — KANONSKA ŠEMA MAPIRANJA SYNESIS MDB → LIMIT CONNECT

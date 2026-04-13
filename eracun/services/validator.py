@@ -11,8 +11,6 @@ import logging
 import os
 from decimal import Decimal
 from lxml import etree
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('eracun.validator')
 

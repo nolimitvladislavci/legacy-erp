@@ -5,8 +5,6 @@ Scenario 2.3: Meta API timeout — fallback chain.
 import logging
 import requests
 from django.conf import settings
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

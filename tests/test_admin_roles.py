@@ -8,11 +8,10 @@ Logički i integracijski testovi za razine admina:
 
 73+ testova u 12 kategorija.
 """
-from decimal import Decimal
 from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.utils import timezone
-from companies.models import Company, CompanyBranch
+from companies.models import Company
 from accounts.models import UserProfile, CompanyMembership
 from registration.models import CompanySubscription
 

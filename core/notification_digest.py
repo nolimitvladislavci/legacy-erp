@@ -22,8 +22,7 @@ from collections import defaultdict
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
-from django.template.loader import render_to_string
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +320,7 @@ def render_digest_html(company, alerts):
 """
         html += "    </table>\n"
 
-    html += f"""
+    html += """
 </div>
 
 <!-- Footer -->
@@ -343,7 +342,7 @@ def render_digest_plaintext(company, alerts):
     """Plaintext fallback za email klijente koji ne podržavaju HTML."""
     today = timezone.now()
     lines = [
-        f'LIMIT Connect — Tjedni Digest',
+        'LIMIT Connect — Tjedni Digest',
         f'{company.name} — {today:%d.%m.%Y %H:%M}',
         '=' * 50,
         '',
@@ -374,7 +373,7 @@ def render_whatsapp_digest(company, alerts):
         for item in items if item.get('urgency') == 'danger'
     )
 
-    msg = f'📋 *LIMIT Connect — Tjedni Digest*\n'
+    msg = '📋 *LIMIT Connect — Tjedni Digest*\n'
     msg += f'*{company.name}*\n\n'
     msg += f'Ukupno: *{total}* upozorenja'
     if danger:

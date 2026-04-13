@@ -8,11 +8,8 @@ Princip: "inform aggressively, execute conservatively"
 - Tiho preskače ako nema PetProfile za tu company
 """
 from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.utils import timezone
 import logging
 from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

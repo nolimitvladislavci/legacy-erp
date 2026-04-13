@@ -352,7 +352,7 @@ def _log_gemini_usage(response, caller):
 
 def _encode_image(file_path):
     try:
-        from PIL import Image as PILImage, ImageEnhance, ImageFilter
+        from PIL import Image as PILImage, ImageEnhance
         img = PILImage.open(file_path)
 
         # Auto-rotate based on EXIF (mobile camera photos)

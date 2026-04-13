@@ -19,7 +19,7 @@ DLQ_MAX_RETRIES = 5
 @shared_task(bind=True, max_retries=5, default_retry_delay=60, acks_late=True)
 def send_invoice_task(self, message_id):
     """Send a single invoice through transport pipeline."""
-    from einvoice.models import AS4Message, MessageStatus
+    from einvoice.models import AS4Message
     from einvoice.services.transport_router import TransportRouter
     from einvoice.services.metrics import record_sent, record_retry
 

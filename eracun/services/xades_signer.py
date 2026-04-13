@@ -13,7 +13,6 @@ FINA zahtijeva XAdES-BES profil (Basic Electronic Signature):
 Zamjenjuje stari sign_xml() koji je radio goli XML-DSIG.
 """
 import logging
-from datetime import datetime, timezone
 from lxml import etree
 
 logger = logging.getLogger("eracun.xades_signer")

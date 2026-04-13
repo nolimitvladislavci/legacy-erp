@@ -1,6 +1,6 @@
 from core.models import BookingSignature
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 """Arhiva Views — Centralizirana arhiva svih dokumenata."""
 import csv
 import io
@@ -19,7 +19,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count, Prefetch, Q, Sum
+from django.db.models import Q
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -1333,7 +1333,6 @@ def arhiva_proknjizi(request, pk):
         return JsonResponse({'error': 'Već proknjiženo'}, status=409)
 
     # dry_run mode — return proposal without committing
-    import json
     dry_run = request.POST.get('dry_run', '0') == '1'
 
     from konto.ai_bookkeeper import process_archive_entry
@@ -1610,16 +1609,16 @@ def arhiva_send_komitent(request, pk):
 
     subject = f'Dokument {entry.doc_number} — {entry.company.name}'
     body_lines = [
-        f'Poštovani,',
-        f'',
-        f'U prilogu je dokument iz vaše arhive:',
+        'Poštovani,',
+        '',
+        'U prilogu je dokument iz vaše arhive:',
         f'• Broj: {entry.doc_number}',
         f'• Vrsta: {entry.get_source_type_display()}',
         f'• Partner: {entry.partner_name or "—"}',
         f'• Iznos: {entry.amount} {entry.currency}',
         f'• Datum: {entry.doc_date.strftime("%d.%m.%Y") if entry.doc_date else "—"}',
-        f'',
-        f'Pozdrav,',
+        '',
+        'Pozdrav,',
         f'{request.user.get_full_name() or request.user.username}',
         f'{entry.company.name}',
     ]

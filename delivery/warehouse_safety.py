@@ -1,5 +1,3 @@
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 """
 delivery/warehouse_safety.py
 ════════════════════════════════════════════════════════
@@ -16,7 +14,6 @@ Sigurnosni slojevi:
 Import u warehouse_views.py:
   from .warehouse_safety import _check_fefo, _check_weight_tolerance, _check_anti_crush
 """
-import datetime
 from decimal import Decimal
 
 # ── Konstante ─────────────────────────────────────────────────────────────────

@@ -1,8 +1,6 @@
 """Gemini Agent Celery Tasks — autonomno izvršavanje zadataka."""
 import logging
 from celery import shared_task
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('gemini_agent')

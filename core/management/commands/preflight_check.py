@@ -30,8 +30,8 @@ class Command(BaseCommand):
         except SystemExit as e:
             if e.code:
                 self.stdout.write(self.style.ERROR(
-                    f'  FAIL — unregistered model changes detected!\n'
-                    f'  Run: python manage.py makemigrations'
+                    '  FAIL — unregistered model changes detected!\n'
+                    '  Run: python manage.py makemigrations'
                 ))
                 errors += 1
             else:
@@ -46,8 +46,8 @@ class Command(BaseCommand):
         except SystemExit as e:
             if e.code:
                 self.stdout.write(self.style.ERROR(
-                    f'  FAIL — unapplied migrations exist!\n'
-                    f'  Run: python manage.py migrate'
+                    '  FAIL — unapplied migrations exist!\n'
+                    '  Run: python manage.py migrate'
                 ))
                 errors += 1
             else:
@@ -64,10 +64,10 @@ class Command(BaseCommand):
             try:
                 db_cols = _get_db_columns(table)
                 model_cols = _get_model_columns(model)
-                
+
                 orphans = set(db_cols.keys()) - set(model_cols.keys()) - {'id'}
                 missing = set(model_cols.keys()) - set(db_cols.keys())
-                
+
                 if orphans:
                     self.stdout.write(self.style.WARNING(
                         f'  DRIFT: {table} has {len(orphans)} orphan DB column(s): {", ".join(orphans)}'

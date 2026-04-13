@@ -27,9 +27,7 @@ import json
 import re
 import os
 import logging
-import base64
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 logger = logging.getLogger("borg.scan")

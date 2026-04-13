@@ -1,7 +1,6 @@
-from django.core.exceptions import ObjectDoesNotExist
 from core.fields import FernetEncryptedCharField
 from django.contrib.auth.models import User
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.managers import CompanyManager
 
@@ -313,4 +312,3 @@ class DeviceToken(models.Model):
 # ════════════════════════════════════════════════════════════════
 # TriKey — 3 ključa za 1 bravu
 # ════════════════════════════════════════════════════════════════
-from accounts.trikey import TriKeyProfile  # noqa: E402

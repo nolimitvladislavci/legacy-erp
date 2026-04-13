@@ -75,31 +75,31 @@ class Command(BaseCommand):
             f'{"═" * 60}'
         ))
 
-        self.stdout.write(f'\n  FIRME:')
+        self.stdout.write('\n  FIRME:')
         self.stdout.write(f'    Ukupno:          {total_companies}')
         self.stdout.write(f'    Aktivne:         {active_companies}')
         self.stdout.write(f'    S NKD kodom:     {with_nkd} ({with_nkd*100//max(active_companies,1)}%)')
         self.stdout.write(f'    Bez NKD:         {without_nkd} ({without_nkd*100//max(active_companies,1)}%)')
 
-        self.stdout.write(f'\n  OPPORTUNITIES:')
+        self.stdout.write('\n  OPPORTUNITIES:')
         self.stdout.write(f'    Aktivne:         {active_opps}')
         self.stdout.write(f'    Ukupno:          {total_opps}')
 
-        self.stdout.write(f'\n  MATCHES:')
+        self.stdout.write('\n  MATCHES:')
         self.stdout.write(f'    Ukupno:          {total_matches}')
         self.stdout.write(f'    Ukupna ušteda:   {total_savings:,.2f} EUR')
         for status, cnt in sorted(status_counts.items(), key=lambda x: -x[1]):
             self.stdout.write(f'      {status:20s} {cnt}')
         self.stdout.write(f'    Firme bez matcha: {unmatched}')
 
-        self.stdout.write(f'\n  SUPPLIER RISK ALERTS:')
+        self.stdout.write('\n  SUPPLIER RISK ALERTS:')
         self.stdout.write(f'    Ukupno:          {risk_total}')
         for level, cnt in sorted(risk_by_level.items(), key=lambda x: -x[1]):
             self.stdout.write(f'      {level:15s} {cnt}')
         self.stdout.write(f'    Nepotvrđeni:     {unack}')
 
         if top_opps:
-            self.stdout.write(f'\n  TOP 5 OPPORTUNITIES:')
+            self.stdout.write('\n  TOP 5 OPPORTUNITIES:')
             for i, opp in enumerate(top_opps, 1):
                 savings = opp.total_match_savings or 0
                 self.stdout.write(

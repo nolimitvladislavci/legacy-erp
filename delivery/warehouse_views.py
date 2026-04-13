@@ -8,17 +8,14 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction, DatabaseError, IntegrityError
-from django.db.models import Sum, F
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
-    PickWave, PickTask, Rollwagen, ConsolidatedDelivery,
-    PackagingExchange, DeliveryStop,
+    PickWave, PickTask, Rollwagen, PackagingExchange,
 )
 
 logger = logging.getLogger(__name__)
@@ -144,7 +141,7 @@ def pack_station(request, order_pk):
     Dynamic pricing: actual_quantity updates draft invoice.
     Safety: weight tolerance (6.2), anti-crush (6.3).
     """
-    from marketplace.models import MarketplaceOrder, MarketplaceOrderItem
+    from marketplace.models import MarketplaceOrder
 
     order = get_object_or_404(MarketplaceOrder, pk=order_pk)
     items = order.items.all().select_related('product')

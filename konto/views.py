@@ -14,7 +14,7 @@ from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Q
 from django.utils.translation import gettext_lazy as _
 from django.db import IntegrityError, transaction, DatabaseError
 from django.utils import timezone
@@ -24,7 +24,6 @@ from .models import (
     JournalEntry, LedgerLine, AccountType,
 )
 from . import services
-from core.audit_access import audit_sensitive_access, audit_bulk_access
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -1007,7 +1006,7 @@ def skr03_seed(request):
     POST /konto/skr03-seed/
     Seeds SKR 03 accounts for the current company.
     """
-    from django.http import JsonResponse, HttpResponse
+    from django.http import JsonResponse
     from core.company_utils import get_user_company
     from konto.german_accounting import seed_skr03
 
@@ -1334,7 +1333,6 @@ def report_opz_stat(request):
 
     import datetime
     from invoicing.models import Invoice
-    from django.db.models import Count, Sum
 
     year = int(request.GET.get('year', datetime.date.today().year))
     export_csv = request.GET.get('format') == 'csv'

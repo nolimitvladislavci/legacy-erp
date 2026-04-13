@@ -7,7 +7,6 @@ import logging
 import tempfile
 import os
 
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +175,6 @@ def _naive_to_aware(dt):
     if dt is None:
         return None
     import datetime
-    from django.utils import timezone as tz
     if dt.tzinfo is None:
         return dt.replace(tzinfo=datetime.timezone.utc)
     return dt

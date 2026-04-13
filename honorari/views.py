@@ -1,21 +1,19 @@
 """
 Honorari Views — ugovori o djelu, autorski honorari, obračuni.
 """
-import datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Q
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction
 from django.utils import timezone
-from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
 
 from .models import (
     HonorarContract, HonorarCalculation,
-    HonorarJOPPD, HonorarPayment,
+    HonorarJOPPD,
 )
 from partners.models import Partner
 from django.core.exceptions import ObjectDoesNotExist
@@ -412,7 +410,6 @@ def joppd_preview(request):
     month = int(request.GET.get('month', today.month))
 
     # Dohvati JOPPD stavke za odabrani mjesec
-    from django.db.models.functions import ExtractYear, ExtractMonth
     items = HonorarJOPPD.objects.filter(
         calculation__contract__company=company,
         joppd_date__year=year,

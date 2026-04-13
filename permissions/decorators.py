@@ -7,8 +7,6 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .engine import get_engine
 

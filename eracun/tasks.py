@@ -176,9 +176,8 @@ def send_eracun_to_fina_async(self, eracun_id):
     5. Ako FINA reject (poslovni razlog) -> nema retryja, rejected
     """
     from eracun.models import ERacun, ERacunLog
-    from eracun.services.engine import process_eracun, build_fina_xml, get_cert_pem
+    from eracun.services.engine import process_eracun
     from eracun.services.validator import validate_xml_against_xsd, XSDValidationError
-    from lxml import etree
     import requests
 
     try:

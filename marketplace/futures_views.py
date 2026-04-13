@@ -7,8 +7,6 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .discounts import get_discount_for_item

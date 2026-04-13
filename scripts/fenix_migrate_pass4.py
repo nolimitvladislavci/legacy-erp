@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """FENIX Pass 4 — High-frequency remaining patterns"""
 import re, glob, sys
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 PROP_MAP = {
     # Padding

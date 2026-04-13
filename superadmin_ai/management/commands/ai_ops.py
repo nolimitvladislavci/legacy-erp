@@ -12,17 +12,13 @@ Korištenje:
     python manage.py ai_ops exec <module> <action> [--desc "opis"]  # Izvrši akciju kroz gate
     python manage.py ai_ops sites           # Provjeri sve domene/sajtove
 """
-import os
-import json
 import subprocess
 import socket
-from datetime import timedelta
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.db import connection
-from django.apps import apps
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 class Command(BaseCommand):

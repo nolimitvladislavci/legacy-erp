@@ -5,10 +5,8 @@ Faza A: BillingPeriod, Otpremnica, OtpremnicaItem
 Faza B: PropterTenant, PropterOperator
 """
 import uuid
-from decimal import Decimal
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

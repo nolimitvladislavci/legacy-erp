@@ -1,5 +1,4 @@
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 from core.models import BookingSignature
 """
 accounts/trikey_views.py — TriKey autentifikacija views
@@ -15,7 +14,7 @@ import logging
 
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -364,7 +363,6 @@ def quick_login(request):
                 users.append({'id': u.pk, 'name': name, 'email': u.email})
 
     if request.method == 'POST':
-        import json
         user_id = request.POST.get('user_id', '')
         pin = request.POST.get('pin', '').strip()
 

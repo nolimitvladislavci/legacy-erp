@@ -9,8 +9,6 @@ Generates XML per:
 """
 from lxml import etree
 from decimal import Decimal
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 # Namespaces
 NS = {

@@ -1,14 +1,12 @@
 """PDV-S views."""
 import io
 import zipfile
-from django.db import models, DatabaseError, IntegrityError
-from django.shortcuts import render, redirect, get_object_or_404
+from django.db import models
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 

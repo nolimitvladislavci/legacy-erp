@@ -1,7 +1,6 @@
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 from borg_ops.mixins import FSMMixin
 from django.contrib.contenttypes.fields import GenericRelation

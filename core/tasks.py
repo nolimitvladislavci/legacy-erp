@@ -170,7 +170,6 @@ def database_backup(self):
     import os
     import glob
     from datetime import datetime
-    from django.conf import settings
 
     log = logging.getLogger('core.backup')
 

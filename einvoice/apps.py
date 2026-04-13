@@ -8,5 +8,3 @@ class EinvoiceConfig(AppConfig):
 
     def ready(self):
         import einvoice.signals  # noqa: F401
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist

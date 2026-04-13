@@ -170,7 +170,7 @@ def import_knjizenja(company, mdb_path, wipe_existing=False):
 
     # Read lines
     lines = _mdb_export(mdb_path, 'TACCOUNTING')
-    
+
     # Group by DIN
     by_din = defaultdict(list)
     for line in lines:
@@ -301,16 +301,16 @@ def import_knjizenja(company, mdb_path, wipe_existing=False):
 def full_import(company, mdb_path, wipe=False):
     """Full import: kontni plan + partneri + knjiženja."""
     results = {}
-    
+
     logger.info("=== FULL IMPORT: %s from %s ===", company.name, mdb_path)
-    
+
     results['kontni_plan'] = import_kontni_plan(company, mdb_path)
     logger.info("Kontni plan: %d created", results['kontni_plan'])
-    
+
     results['partneri'] = import_partneri(company, mdb_path)
     logger.info("Partneri: %d created", results['partneri'])
-    
+
     results['knjizenja'] = import_knjizenja(company, mdb_path, wipe_existing=wipe)
     logger.info("Knjiženja: %s", results['knjizenja'])
-    
+
     return results

@@ -15,9 +15,9 @@ Za ostale pausalce, Invoice je primarni izvor.
 """
 import logging
 from datetime import date
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from django.utils import timezone
 
 logger = logging.getLogger("tax_wizard.auto_fill")

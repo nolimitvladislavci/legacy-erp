@@ -4,11 +4,10 @@ and returns a dict/list that will be JSON-serialized as tool_result.
 """
 import logging
 from datetime import date, timedelta
-from decimal import Decimal
 from django.db.models import Sum, Count
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -586,7 +585,6 @@ def _run_test_suite(params, user, company):
 
 def _audit_data_integrity(params, user, company):
     """Provjera integriteta podataka."""
-    from django.db.models import Q
     issues = []
 
     # 1. POS: Receipts bez sesije
@@ -797,9 +795,8 @@ def _explain_business_flow(params, user, company):
 
 def _build_timeentry_queryset(params, company):
     """Helper: gradi TimeEntry queryset iz parametara."""
-    from worktime.models import TimeEntry, Project, WorkGroup
-    from datetime import date, timedelta
-    from django.contrib.auth.models import User
+    from worktime.models import TimeEntry, WorkGroup
+    from datetime import date
 
     qs = TimeEntry.objects.filter(company=company)
 
@@ -853,8 +850,7 @@ def _build_timeentry_queryset(params, company):
 
 def _get_worktime_report(params, user, company):
     """Izvjestaj radnih sati s agregacijom."""
-    from django.db.models import Sum, Count, F
-    from decimal import Decimal
+    from django.db.models import Sum, Count
 
     qs = _build_timeentry_queryset(params, company)
 
@@ -923,7 +919,7 @@ def _get_worktime_report(params, user, company):
 
 def _preview_invoice_from_hours(params, user, company):
     """Suhi pregled racuna iz neobracunatih sati (dry run)."""
-    from worktime.models import TimeEntry, Project
+    from worktime.models import Project
     from django.db.models import Sum
     from decimal import Decimal
 
@@ -1011,7 +1007,7 @@ def _preview_invoice_from_hours(params, user, company):
 
 def _create_invoice_from_hours(params, user, company):
     """Kreira racun iz neobracunatih sati i oznacava ih kao obracunate."""
-    from worktime.models import TimeEntry, Project
+    from worktime.models import Project
     from invoicing.models import Invoice, InvoiceItem
     from django.db import transaction
     from django.db.models import Sum

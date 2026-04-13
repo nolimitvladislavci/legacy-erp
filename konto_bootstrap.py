@@ -3,15 +3,14 @@
 Konto bootstrap — popunjava kontni plan + retroaktivno knjizi fakture.
 Run: cd /var/www/fina-connect && source venv/bin/activate && python3 konto_bootstrap.py
 """
-import os, sys
+import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 import django; django.setup()
 
 from decimal import Decimal
 from django.db import transaction
-from django.utils import timezone
 from companies.models import Company
-from konto.models import KontoAccount, JournalEntry, LedgerLine, AccountingPeriod
+from konto.models import KontoAccount, JournalEntry, LedgerLine
 from invoicing.models import Invoice
 
 def print_status(msg):

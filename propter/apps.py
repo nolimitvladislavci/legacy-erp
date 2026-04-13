@@ -8,5 +8,3 @@ class PropterConfig(AppConfig):
 
     def ready(self):
         import propter.signals  # noqa
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist

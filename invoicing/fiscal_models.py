@@ -205,7 +205,7 @@ class InvoiceProfile(models.Model):
         # Doctype-aware prefix mapping
         dtype_prefix = {
             'R': 'RE',    # Rechnung / Račun
-            'PO': 'AN',   # Angebot / Ponuda  
+            'PO': 'AN',   # Angebot / Ponuda
             'P': 'KV',    # Kostenvoranschlag / Predračun
             'A': 'AR',    # Abschlagsrechnung / Avansni
             'S': 'ST',    # Storno

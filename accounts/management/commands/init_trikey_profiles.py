@@ -6,8 +6,6 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
 from accounts.trikey import TriKeyProfile
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 

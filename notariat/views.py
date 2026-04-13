@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from datetime import date, timedelta
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 from .models import PravniPredmet, DimnjacarskaInspekcija
 
 

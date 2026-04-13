@@ -8,8 +8,7 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 from .models import (
     MeasurementSession, Measurement,
@@ -62,7 +61,7 @@ def session_new(request):
             latitude=float(lat) if lat else None,
             longitude=float(lng) if lng else None,
         )
-        messages.success(request, f'Sesija kreirana — možeš početi mjeriti.')
+        messages.success(request, 'Sesija kreirana — možeš početi mjeriti.')
 
         # AJAX request — redirect as JSON
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -533,7 +532,6 @@ def installation_detail(request, install_id):
 def handover(request, install_id):
     """Kupac potpisuje primopredaju → garancija se generira."""
     from stolarija.models import InstallationOrder, HandoverProtocol, WindowWarranty
-    import secrets
 
     company = _company(request)
     install = get_object_or_404(InstallationOrder, pk=install_id, company=company)

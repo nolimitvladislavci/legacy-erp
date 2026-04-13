@@ -61,8 +61,6 @@ class ProblemReportAdmin(admin.ModelAdmin):
 
 
 from smart_import.models import FenixInboxItem
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 @admin.register(FenixInboxItem)
 class FenixInboxItemAdmin(admin.ModelAdmin):

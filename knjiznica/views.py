@@ -9,8 +9,6 @@ from django.http import HttpResponse
 from datetime import timedelta
 from decimal import Decimal
 import csv
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import BookMeta, BookLoan, LibraryMember, BookReservation

@@ -1,8 +1,6 @@
 import os
 
 from django.conf import settings
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def get_cert_path():

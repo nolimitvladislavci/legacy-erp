@@ -2,12 +2,10 @@
 konto/views_ai_review.py
 Human review UI for AI bookkeeper proposals.
 """
-import json
 import logging
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext as _

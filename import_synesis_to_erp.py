@@ -9,8 +9,6 @@ from companies.models import Company
 from partners.models import Partner
 from inventory.models import InventoryItem
 from decimal import Decimal, InvalidOperation
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 # Load JSON
 print("Loading synesis_export.json...")
@@ -164,7 +162,7 @@ for company_name, years_data in data.items():
 # Summary
 # ══════════════════════════════════════════════════
 print(f"\n{'='*60}")
-print(f"IMPORT COMPLETE")
+print("IMPORT COMPLETE")
 print(f"Total partners created: {total_partners}")
 print(f"Total items created: {total_items}")
 print(f"{'='*60}")

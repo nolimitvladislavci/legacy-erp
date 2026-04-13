@@ -12,18 +12,16 @@ Pokretanje:
 Rezultati: test_posrednik_results.json + ispis u konzolu
 """
 
-import os, sys, json, time, uuid, threading, random, hashlib
+import os, sys, json, time, uuid, threading, random
 from datetime import date, timedelta
 from decimal import Decimal
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
 django.setup()
 
-from django.contrib.auth.models import User
 from companies.models import Company
 from eracun.models import ERacun, ERacunConfig, ERacunItem, ERacunTaxSummary, ERacunLog
 from eracun.services.engine import validate_eracun
@@ -413,7 +411,7 @@ def agent_a(company, config):
         config.save(update_fields=['api_rate_limit'])
         config.refresh_from_db()
         assert config.api_rate_limit == 1500, "Rate limit nije sačuvan"
-        return f"api_rate_limit=1500 (razina 1500 korisnika)"
+        return "api_rate_limit=1500 (razina 1500 korisnika)"
     run_test('A-20', 'API rate limit konfiguracija (1500 users tier)', 'A', 'config', test_a20)
 
 
@@ -777,8 +775,8 @@ def agent_b(company, config):
 
 def main():
     print(f"\n{C}{'═'*60}")
-    print(f"  Digitalni Posrednik — Dual-Agent Test Runner")
-    print(f"  Target: 1500 korisnika razina")
+    print("  Digitalni Posrednik — Dual-Agent Test Runner")
+    print("  Target: 1500 korisnika razina")
     print(f"{'═'*60}{RST}\n")
 
     company = get_test_company()

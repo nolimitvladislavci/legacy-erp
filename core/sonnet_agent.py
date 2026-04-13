@@ -19,7 +19,7 @@ import logging
 import os
 import re
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.conf import settings
 
 logger = logging.getLogger('sonnet_agent')

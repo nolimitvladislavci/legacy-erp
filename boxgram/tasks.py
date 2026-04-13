@@ -1,10 +1,8 @@
 from celery import shared_task
-from django.utils import timezone
 import qrcode
 import io
 from django.core.files.base import ContentFile
-from django.db import DatabaseError, IntegrityError
-from .models import Competition, SocialImport, PetProfile, CompetitionEntry
+from .models import Competition, SocialImport, PetProfile
 import logging
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -16,20 +14,20 @@ def close_competition(competition_id):
     try:
         competition = Competition.objects.get(id=competition_id)
         competition.status = 'closed'
-        
+
         if competition.entries.exists():
             top_entry = competition.entries.order_by('-votes').first()
             if top_entry:
                 competition.winner = top_entry.pet
                 top_entry.rank = 1
                 top_entry.save()
-                
+
                 rank = 2
                 for entry in competition.entries.exclude(id=top_entry.id).order_by('-votes'):
                     entry.rank = rank
                     entry.save()
                     rank += 1
-        
+
         competition.save()
         logger.info(f"Competition {competition_id} closed successfully")
     except Competition.DoesNotExist:
@@ -62,12 +60,12 @@ def generate_pet_qr(pet_id):
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(f"https://memio.pet/{pet.slug}/")
         qr.make(fit=True)
-        
+
         img = qr.make_image(fill_color="black", back_color="white")
         img_io = io.BytesIO()
         img.save(img_io, 'PNG')
         img_io.seek(0)
-        
+
         pet.qr_code.save(f'qr_{pet.id}.png', ContentFile(img_io.getvalue()))
         pet.save()
         logger.info(f"QR code generated for pet {pet_id}")
@@ -82,10 +80,10 @@ def bulk_sync_company_to_boxgram(company_id):
     try:
         from companies.models import Company
         from .models import PetProfile
-        
+
         company = Company.objects.get(id=company_id)
         pets = PetProfile.objects.filter(company=company)
-        
+
         if pets.exists():
             logger.info(f"Bulk sync for company {company_id}: {pets.count()} pets")
         else:
@@ -99,10 +97,10 @@ def retry_fetch_social_import(self, import_id):
     """Retry task za dohvaćanje social importa nakon timeout-a"""
     try:
         from .services.social_import import fetch_oembed
-        
+
         social_import = SocialImport.objects.get(id=import_id)
         preview = fetch_oembed(social_import.source_url)
-        
+
         if preview.success:
             social_import.raw_data = preview.raw_data
             social_import.save()

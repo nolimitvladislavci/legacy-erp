@@ -2,9 +2,7 @@
 Permission Manager - Core permission checking logic
 """
 from django.core.cache import cache
-from django.db import models, DatabaseError, IntegrityError
-from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, DatabaseError
 
 from .models import Permission, PermissionOverride, Role, UserRole
 

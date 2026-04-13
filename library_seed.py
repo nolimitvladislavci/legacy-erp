@@ -8,8 +8,6 @@ django.setup()
 
 from companies.models import Company
 from library.models import Book, Author, BookCopy, Category, MembershipType
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 # Uzmi prvu firmu za demo (ili kreiraj)
 company = Company.objects.first()

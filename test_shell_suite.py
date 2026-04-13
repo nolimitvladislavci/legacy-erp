@@ -16,14 +16,9 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-import re
-import time
-import unittest
-from django.test import TestCase, Client, RequestFactory
+from django.test import Client
 from django.contrib.auth.models import User
-from django.template.loader import get_template, render_to_string
-from django.template import Template, Context
-from django.urls import reverse, NoReverseMatch
+from django.template.loader import get_template
 
 # ─────────────────────────────────────────────────────────────────────────
 # BOJE ZA OUTPUT
@@ -221,13 +216,13 @@ for m in MODUL_CHECKS:
           f"include '{m['include']}' referenciran",
           f"include '{m['include']}' NEDOSTAJE")
 
-    check(f"block shell_mode" in src,
+    check("block shell_mode" in src,
           "block shell_mode prisutan",
           "block shell_mode NEDOSTAJE", warning=True)
 
     check('FenixShell.openRight()' in src,
-          f"auto-open panel na DOMContentLoaded",
-          f"auto-open NEDOSTAJE — panel se neće otvoriti", warning=True)
+          "auto-open panel na DOMContentLoaded",
+          "auto-open NEDOSTAJE — panel se neće otvoriti", warning=True)
 
     # Provjeri da nema duplikata blokova (otvori-tag s imenom)
     title_count = src.count('{% block shell_right_title %}') + src.count("{% block shell_right_title%}")
@@ -348,7 +343,7 @@ try:
         try:
             resp = client.get(url, follow=True)
             check(resp.status_code == 200,
-                  f"HTTP 200",
+                  "HTTP 200",
                   f"HTTP {resp.status_code} — stranica ne radi!")
 
             content = resp.content.decode('utf-8', errors='replace')
@@ -478,8 +473,6 @@ except FileNotFoundError:
 head("9. GIT STANJE")
 
 import subprocess
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True)
 uncommited = [l for l in result.stdout.strip().split('\n') if l.strip()]
 uncommited_shell = [l for l in uncommited if any(x in l for x in ['base.html','shell','panel','konto','doktor','pos'])]
@@ -489,7 +482,7 @@ check(len(uncommited_shell) == 0,
       f"SHELL FAJLOVI NISU COMMITED: {uncommited_shell}")
 
 result2 = subprocess.run(['git', 'log', '--oneline', '-5'], capture_output=True, text=True)
-info(f"Zadnjih 5 commitova:\n    " + result2.stdout.replace('\n', '\n    '))
+info("Zadnjih 5 commitova:\n    " + result2.stdout.replace('\n', '\n    '))
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -507,7 +500,7 @@ errors   = [l for l in output.split('\n') if 'ERROR' in l]
 warnings = [l for l in output.split('\n') if 'WARNING' in l]
 
 check(len(errors) == 0,
-      f"Django check: 0 ERROR-a",
+      "Django check: 0 ERROR-a",
       f"Django check: {len(errors)} ERROR-a — {errors}")
 
 check(len(warnings) <= 5,

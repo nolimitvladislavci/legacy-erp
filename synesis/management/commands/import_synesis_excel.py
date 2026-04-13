@@ -12,7 +12,7 @@ Usage:
 """
 import os, time
 from collections import defaultdict
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.db import IntegrityError, DatabaseError

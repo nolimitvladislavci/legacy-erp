@@ -2,11 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.http import JsonResponse
-from django.db.models import Q, Sum, Count, Avg
+from django.db.models import Q, Sum, Count
 from django.utils import timezone
 from decimal import Decimal
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import PurchaseOrder, PurchaseOrderItem, SupplierPriceList
 from django.db import IntegrityError, DatabaseError

@@ -3,7 +3,6 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.db import DatabaseError, IntegrityError
 
 from .models import GalleryImage
 from django.core.exceptions import ObjectDoesNotExist

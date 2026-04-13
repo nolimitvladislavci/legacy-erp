@@ -40,7 +40,7 @@ def match_opportunities_for_company(company):
         dict: {company_id, company_name, total_savings, count, matches[], scanned_at}
     """
     from limit_connect_ai.models_knowledge_graph import (
-        LegalOpportunity, ImpactDomain, ClientOpportunityMatch,
+        LegalOpportunity, ClientOpportunityMatch,
     )
 
     now = timezone.now().date()
@@ -172,11 +172,11 @@ def generate_onboarding_report(company):
         )
 
     lines = [
-        f"*LIMIT Connect — Analiza prilika*",
+        "*LIMIT Connect — Analiza prilika*",
         f"_{company.name}_",
-        f"",
+        "",
         f"Pronasli smo *{result['count']} prilika* za ustedu od *{result['total_savings']:,.2f} EUR*!",
-        f"",
+        "",
     ]
 
     for i, m in enumerate(result['matches'][:5], 1):

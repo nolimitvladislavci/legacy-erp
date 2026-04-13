@@ -1,11 +1,8 @@
-import logging
 import json
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.http import JsonResponse
-from django.apps import apps
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from django.db import models, DatabaseError, IntegrityError
 from django.utils import timezone
 
@@ -687,7 +684,7 @@ def live_metrics(request):
 @user_passes_test(is_superadmin)
 def subscription_cockpit(request):
     """ARR/MRR cockpit — monetizacijski pregled za superadmina."""
-    from registration.models import CompanySubscription, PricingPlan
+    from registration.models import CompanySubscription
     from companies.models import Company
     from decimal import Decimal
     from datetime import timedelta

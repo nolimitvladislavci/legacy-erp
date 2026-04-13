@@ -67,7 +67,7 @@ class Command(BaseCommand):
             return
 
         # Step 2: Count what needs to be deleted
-        from konto.models import JournalEntry, LedgerLine, KontoAccount
+        from konto.models import JournalEntry, LedgerLine
         from partners.models import Partner
         from inventory.models import InventoryItem
         from invoicing.models import Invoice

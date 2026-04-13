@@ -3,7 +3,6 @@ Propter operator dashboard & tenant management views.
 Security hardened: input validation, audit logging, enum checks, bounds.
 """
 import logging
-from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -14,9 +13,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
-from .models import PropterTenant, CompanySubscription
+from .models import PropterTenant
 from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('propter.security')

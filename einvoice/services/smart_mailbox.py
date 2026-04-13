@@ -2,10 +2,7 @@
 import logging
 from datetime import date
 from lxml import etree
-from django.utils import timezone
-from einvoice.models import AS4Message, InboundInvoice, MessageStatus
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from einvoice.models import InboundInvoice, MessageStatus
 
 logger = logging.getLogger("propter.einvoice.mailbox")
 

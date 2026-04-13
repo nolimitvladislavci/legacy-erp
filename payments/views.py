@@ -1,11 +1,10 @@
 import json
 import logging
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
 from core.company_utils import get_user_company
 from .models import Payment, PaymentConfig
 from . import services

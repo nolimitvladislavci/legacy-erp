@@ -11,8 +11,6 @@ from django.views.decorators.http import require_POST
 from django.core.cache import cache
 
 from limit_connect_ai.models_signal import FenixSignal
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("borg.signal")
 

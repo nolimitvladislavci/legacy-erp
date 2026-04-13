@@ -153,7 +153,6 @@ def cleanup_old_readings():
     Zadržava samo reading_ids referenciran u HACCPIncident.
     """
     from delivery.models import SensorReading, HACCPIncident
-    from django.db.models import Q
 
     cutoff = tz.now() - timedelta(days=90)
 

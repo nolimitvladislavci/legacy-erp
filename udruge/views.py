@@ -9,8 +9,6 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
 
@@ -558,7 +556,6 @@ def download_gpriznpf(request):
 @login_required
 def download_donatorska_potvrda(request, pk):
     from django.http import HttpResponse
-    from django.template.loader import render_to_string
     company = get_user_company(request)
 
     from .models import Donacija
@@ -826,7 +823,7 @@ def dogadjaj_create(request):
 @login_required
 def dogadjaj_detail(request, pk):
     company = get_user_company(request)
-    from .models import Dogadjaj, EventPrijava, Clan
+    from .models import Dogadjaj, Clan
 
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
     prijave = dogadjaj.prijave.select_related("clan").all()
@@ -1374,7 +1371,7 @@ def dvd_dashboard(request):
     if not company:
         return redirect('/')
     from .models import VatrogasnaOprema, VatrogasnoVozilo, Intervencija, Vjezba, VatrogasnoZvanje
-    from django.db.models import Count, Sum, Avg
+    from django.db.models import Sum
     from datetime import timedelta
 
     today = timezone.now().date()
@@ -1671,8 +1668,8 @@ def kud_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Repertoar, ProbaLog, Kostim, NastupPlan, Dogadjaj
-    from django.db.models import Count, Sum
+    from .models import Repertoar, ProbaLog, Kostim, NastupPlan
+    from django.db.models import Sum
 
     today = timezone.now().date()
     repertoar = Repertoar.objects.filter(company=company)
@@ -1905,7 +1902,7 @@ def ribari_dashboard(request):
     if not company:
         return redirect('/')
     from .models import Revir, RibolovnaDozvola, UlovEvidencija, Poribljavanje, CuvarskaStraza
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
 
     today = timezone.now().date()
     reviri = Revir.objects.filter(company=company)
@@ -2171,7 +2168,7 @@ def pcelari_dashboard(request):
     if not company:
         return redirect('/')
     from .models import Pcelinjak, Kosnica, TretmanKosnice, MedProizvodnja, SelidbaLog
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
 
     today = timezone.now().date()
     pcelinjaci = Pcelinjak.objects.filter(company=company)
@@ -2438,7 +2435,7 @@ def rakija_dashboard(request):
     if not company:
         return redirect('/')
     from .models import DestilacijaKotao, DestilacijaLog, RakijaProizvodnja, TrosarinaPrijava
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
 
     today = timezone.now().date()
     kotlovi = DestilacijaKotao.objects.filter(company=company)
@@ -3590,7 +3587,7 @@ def par_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import ParGolubova, Golub, Golubinjak
+    from .models import ParGolubova, Golub
     if request.method == 'POST':
         par = ParGolubova.objects.create(
             company=company,
@@ -4170,7 +4167,7 @@ def golubar_ai_prsten(request):
     Body JSON: { "images": ["<b64>", "<b64>", ...] }  # 1-3 slike prstena
     Returns:   { "prsten_broj": "HR-2026-12345", "godina": "2026", "confidence": 0.92 }
     """
-    import json, os, re, base64, logging
+    import json, os, re, logging
     logger = logging.getLogger("borg.golubar")
 
     if not request.user.is_authenticated:
@@ -4371,7 +4368,7 @@ def glazbena_skola_fakturiraj(request):
 def glazbena_dodaj_ucenika(request):
     """HTMX POST: inline forma za dodavanje učenika."""
     company = get_user_company(request)
-    from .models import GlazbeniUcenik, GlazbenaSkola
+    from .models import GlazbeniUcenik
 
     ime = request.POST.get('ime', '').strip()
     prezime = request.POST.get('prezime', '').strip()
@@ -4484,7 +4481,7 @@ def azil_dashboard(request):
 
 @login_required
 def azil_zivotinja_nova(request):
-    from .models import Zivotinja, KartonZdravlja
+    from .models import Zivotinja
     company = get_user_company(request)
     if not company:
         return redirect('company_setup')
@@ -4520,7 +4517,7 @@ def azil_zivotinja_nova(request):
 
 @login_required
 def azil_zivotinja_detalj(request, pk):
-    from .models import Zivotinja, KartonZdravlja, Udomljavanje, VeterinarskaEutanazija
+    from .models import Zivotinja, KartonZdravlja
     company = get_user_company(request)
     z = get_object_or_404(Zivotinja, pk=pk, company=company)
 
@@ -4626,7 +4623,7 @@ def azil_udomljavanje_nova(request, pk):
 
 @login_required
 def azil_izvjestaj(request):
-    from .models import MjesecniIzvjestajAzil, Zivotinja
+    from .models import MjesecniIzvjestajAzil
     company = get_user_company(request)
     if not company:
         return redirect('company_setup')

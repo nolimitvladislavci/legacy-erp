@@ -8,8 +8,6 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from companies.models import Company
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .fisk import ping_fina
 from .models import FiscalConfig
@@ -78,7 +76,7 @@ def config_view(request):
             config.last_test_at = timezone.now()
             config.save(update_fields=['last_test_ok', 'last_test_at'])
             if ok:
-                messages.success(request, f'✓ Veza s FINA CIS uspješna!')
+                messages.success(request, '✓ Veza s FINA CIS uspješna!')
             else:
                 messages.error(request, _('✗ Veza s FINA CIS nije uspjela.'))
 

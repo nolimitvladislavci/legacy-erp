@@ -13,9 +13,6 @@ Uporaba iz bilo kojeg modula:
     else:
         # blokirano
 """
-from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .models import AIModulePermission, PendingAIAction, AIActionLog
 
 
@@ -76,7 +73,7 @@ class AIGate:
                 self._log(company, module, action_type, level, 'allowed', user, ip_address)
                 return AIGateResult(
                     allowed=True, level=level,
-                    message=f'AI čitanje dopušteno (assisted mode).'
+                    message='AI čitanje dopušteno (assisted mode).'
                 )
             pending = PendingAIAction.objects.create(
                 company=company,

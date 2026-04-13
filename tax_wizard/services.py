@@ -417,7 +417,7 @@ def process_posd_step(session: TaxWizardSession, step: int, data: dict,
         for q in ['q1_primitak', 'q2_primitak', 'q3_primitak', 'q4_primitak']:
             val = Decimal(str(data.get(q, 0)))
             if val < 0:
-                errors.append(f'Primitak za kvartal ne može biti negativan.')
+                errors.append('Primitak za kvartal ne može biti negativan.')
                 break
             total += val
 

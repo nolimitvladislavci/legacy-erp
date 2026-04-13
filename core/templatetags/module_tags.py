@@ -95,7 +95,7 @@ def module_sidebar(context):
         cat_key = group['category_key']
 
         # Category group wrapper
-        html_parts.append(f'<div class="sidebar-group">')
+        html_parts.append('<div class="sidebar-group">')
         html_parts.append(
             f'<button class="sidebar-group-toggle" onclick="toggleGroup(this)">'
             f'<span><i class="fas {cat_icon}" style="margin-right:6px;font-size:0.65rem"></i>'

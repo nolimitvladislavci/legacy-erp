@@ -4,14 +4,12 @@ GDPR cl.8: pristanak roditelja OBAVEZAN za djecu < 16.
 """
 import re
 from django import forms
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
 
 from .models import (
-    Child, Guardian, ChildGuardian, Attendance, MonthlyBilling,
-    DailyReport, Announcement, KindergartenGroup,
+    Child, Guardian, ChildGuardian, Attendance, DailyReport, Announcement, KindergartenGroup,
 )
 
 

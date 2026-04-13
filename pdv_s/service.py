@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 PDV_NS = 'http://e-porezna.porezna-uprava.hr/sheme/zahtjevi/PDV-S/v2-0'

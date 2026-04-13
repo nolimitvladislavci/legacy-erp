@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models, DatabaseError
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 
@@ -267,7 +266,6 @@ class InventoryItem(models.Model):
         """Vrati ispravnu cijenu ovisno o tipu kupca.
         Returns: dict(price, vat_included, price_type)
         """
-        from decimal import Decimal
         if buyer_type in ('b2b', 'wholesale') and self.wholesale_price > 0 and qty >= float(self.wholesale_min_qty or 1):
             if quantity >= float(self.min_order_qty):
                 return {

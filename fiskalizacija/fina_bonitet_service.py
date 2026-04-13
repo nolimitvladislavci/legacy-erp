@@ -6,12 +6,10 @@ Redis Shield: cache.get(f"fina_risk_{oib}") — 24h TTL.
 Koristi postojeći core.oib_validator za validaciju.
 """
 import logging
-from decimal import Decimal
 
 from django.core.cache import cache
 from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('fiskalizacija.bonitet')
 
@@ -47,7 +45,7 @@ def get_supplier_risk(oib, company_id=None):
         return cached
 
     # ── OIB validacija ───────────────────────────────────────────────
-    from core.oib_validator import validate_oib_hr, validate_vat_id
+    from core.oib_validator import validate_oib_hr
 
     details = {
         'oib_valid': False,
@@ -145,7 +143,6 @@ def _save_alert(oib, company_id, result):
     """Spremi SupplierRiskAlert u bazu ako rizik > LOW."""
     try:
         from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
-        from companies.models import Company
 
         if not company_id:
             logger.warning('[BONITET ALERT] OIB=%s rizik=%s — nema company_id, preskačem bazu', oib, result['risk_level'])

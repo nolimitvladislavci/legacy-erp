@@ -1,6 +1,4 @@
 from django.urls import path
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from . import views
 from . import views_bank
 from . import views_ai_review

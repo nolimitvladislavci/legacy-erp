@@ -70,10 +70,10 @@ class Command(BaseCommand):
         subject = f'[LIMIT Connect] AUDIT ALERT - Hash chain broken ({len(failures)} companies)'
 
         body_lines = [
-            f'Audit Hash Chain Verification Report',
+            'Audit Hash Chain Verification Report',
             f'Date: {now.strftime("%d.%m.%Y %H:%M")} UTC',
-            f'',
-            f'FAILURES DETECTED:',
+            '',
+            'FAILURES DETECTED:',
         ]
         for r in results:
             if not r['valid']:

@@ -1241,7 +1241,6 @@ def api_name_search(request):
     from django.http import JsonResponse
     from companies.models import Company
     from partners.models import Partner
-    from django.db.models import Q
 
     q = request.GET.get('q', '').strip()
     if len(q) < 3:
@@ -1732,7 +1731,6 @@ def register_trikey(request):
         return redirect("registration:register_step1")
 
     if request.method == "POST":
-        import uuid
         from datetime import timedelta
         from django.contrib.auth import login as auth_login
         from django.db import transaction as db_transaction

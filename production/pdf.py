@@ -4,7 +4,6 @@ WeasyPrint ako je dostupan, fallback na HTML-to-response.
 """
 
 import logging
-from io import BytesIO
 
 from django.http import HttpResponse
 from django.template.loader import render_to_string

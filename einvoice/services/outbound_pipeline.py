@@ -4,12 +4,10 @@ Flow: Generate UBL → Validate → Route → Submit
 Each step creates an audit event on the AS4Message.
 """
 import logging
-from einvoice.models import AS4Message, MessageStatus, MessageDirection, TransportType
+from einvoice.models import AS4Message, MessageStatus, MessageDirection
 from einvoice.services.ubl_generator import generate_ubl_for_invoice, generate_ubl_for_eracun
 from einvoice.services.ubl_validator import validate_ubl
 from einvoice.services.transport_router import TransportRouter
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("propter.einvoice.pipeline")
 

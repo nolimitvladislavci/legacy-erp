@@ -3,16 +3,11 @@ logger = logging.getLogger(__name__)
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from core.models import BookingSignature
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
-from django.views.decorators.http import require_POST
 
-from django.views.decorators.csrf import csrf_exempt
 from permissions.decorators import require_role
-from .services import get_company_dashboard_stats, get_superadmin_stats
 
 
 def _get_admin_companies(request):
@@ -474,9 +469,8 @@ def umbrella_dashboard(request):
     from companies.models import Company
     from core.company_utils import get_user_company
     from django.contrib.auth import get_user_model
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
     from django.utils import timezone
-    from datetime import timedelta
     User = get_user_model()
 
     company = get_user_company(request)
@@ -871,7 +865,6 @@ def superadmin_users(request):
     users_page = paginator.get_page(page)
 
     # Companies for filter dropdown
-    from companies.models import Company
     companies = _get_admin_companies(request).order_by('name')
 
     # Handle POST actions (toggle active, toggle staff)
@@ -910,7 +903,6 @@ def superadmin_users(request):
 
 @login_required
 def company_dashboard(request):
-    import datetime
 
     from django.db.models import Sum
     from django.utils import timezone
@@ -1322,7 +1314,6 @@ def company_dashboard(request):
     # ── Wizard Funnel — draftovi koje ova firma vodi kao accounting_firm ─────
     try:
         from partners.models import WizardDraft
-        from django.db.models import Count, Q
         wd_qs = WizardDraft.objects.filter(accounting_firm=company)
         context['wizard_funnel'] = {
             'total':      wd_qs.count(),
@@ -2059,7 +2050,6 @@ def datenschutz(request):
 def control_tower_view(request):
     """Renders the Control Tower dashboard page with full context."""
     from django.utils import timezone
-    import datetime
 
     user = request.user
     now = timezone.now()
@@ -2217,7 +2207,6 @@ def control_tower_api(request):
     from django.db.models import Count, Sum, Q
     from django.utils import timezone
     from django.http import JsonResponse
-    import datetime
 
     now = timezone.now()
     today = now.date()
@@ -2405,7 +2394,7 @@ def control_tower_api(request):
 
     # ── Financial Radar (V3) ─────────────────────────────────────────────
     try:
-        from konto.models import BankAccount, BankTransaction
+        from konto.models import BankAccount
         from invoicing.models import Invoice
         from finance.bank_parsers import get_partial_payment_discrepancies
         import datetime as _dt
@@ -2477,7 +2466,6 @@ def control_tower_api(request):
     # ── HelpDesk ─────────────────────────────────────────────────────────
     try:
         from helpdesk.models import Ticket
-        from django.utils import timezone as tz
         hd_qs = Ticket.objects.all()
         open_statuses = ['open ', 'in_progress', 'waiting_client', 'waiting_internal']
         closed_statuses = ['resolved', 'closed']
@@ -2640,7 +2628,6 @@ def promo_opg(request):
 @login_required
 def tc_consent(request):
     """T&C Consent — firma mora potpisati prije korištenja AI sustava."""
-    from companies.models import Company
     from django.utils import timezone as tz
 
     company = None
@@ -2707,8 +2694,7 @@ def cross_company_dashboard(request):
 
     from invoicing.models import Invoice
     from partners.models import Partner
-    from django.db.models import Sum, Count, Q, F, Value, CharField
-    from django.db.models.functions import Coalesce
+    from django.db.models import Sum, Count, F
 
     # Unpaid invoices across ALL companies
     unpaid = Invoice.objects.filter(
@@ -2768,7 +2754,6 @@ def cross_company_dashboard(request):
 
     # Aging buckets
     from django.utils import timezone
-    import datetime
     now = timezone.now().date()
     for d in debtors:
         d['aging_0_30'] = 0
@@ -2985,7 +2970,7 @@ def panel_detail(request):
     try:
         Model = apps.get_model(app_label, model_cls_name)
     except LookupError:
-        return render(request, 'includes/_panel_htmx_detail.html', {'error': f'Model not found'})
+        return render(request, 'includes/_panel_htmx_detail.html', {'error': 'Model not found'})
 
     # Validate ID is numeric (prevent ValueError on XSS/injection payloads)
     try:

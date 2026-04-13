@@ -1,7 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 @login_required

@@ -6,14 +6,12 @@ Final comprehensive PO fix:
 """
 import re
 import subprocess
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 LOCALES = ["hr", "en", "de", "tr", "el"]
 HEADERS = {
     "hr": "hr",
     "en": "en",
-    "de": "de", 
+    "de": "de",
     "tr": "tr",
     "el": "el",
 }
@@ -55,14 +53,14 @@ def fix_missing_msgstr(content):
     blocks = content.split('\n\n')
     fixed = 0
     new_blocks = []
-    
+
     for block in blocks:
         if 'msgid "' in block and 'msgstr' not in block and 'msgid_plural' not in block:
             # Missing msgstr - add it
             block = block.rstrip() + '\nmsgstr ""'
             fixed += 1
         new_blocks.append(block)
-    
+
     return '\n\n'.join(new_blocks), fixed
 
 
@@ -73,26 +71,26 @@ def fix_format_strings(path):
         capture_output=True, text=True
     )
     errors = result.stderr
-    
+
     # Find line numbers with format string errors
     bad_lines = set()
     for line in errors.split('\n'):
         m = re.match(rf'{re.escape(path)}:(\d+):.*not a valid Python format string', line)
         if m:
             bad_lines.add(int(m.group(1)))
-    
+
     if not bad_lines:
         return 0
-    
+
     with open(path) as f:
         lines = f.readlines()
-    
+
     fixed = 0
     for bad_line_num in sorted(bad_lines):
         idx = bad_line_num - 1  # 0-based
         if idx >= len(lines):
             continue
-        
+
         # Find the msgid for this msgstr
         msgid_parts = []
         i = idx - 1
@@ -112,37 +110,37 @@ def fix_format_strings(path):
             else:
                 break
             i -= 1
-        
+
         msgid_val = ''.join(msgid_parts)
         if msgid_val:
             # Replace the msgstr with the msgid value
             lines[idx] = f'msgstr "{msgid_val}"\n'
             fixed += 1
-    
+
     with open(path, 'w') as f:
         f.writelines(lines)
-    
+
     return fixed
 
 
 for locale in LOCALES:
     path = f"/var/www/fina-connect/locale/{locale}/LC_MESSAGES/django.po"
-    
+
     with open(path) as f:
         content = f.read()
-    
+
     # Fix 1: header
     content = fix_header(content, HEADERS[locale])
-    
+
     # Fix 2: missing msgstr
     content, missing_fixed = fix_missing_msgstr(content)
-    
+
     with open(path, 'w') as f:
         f.write(content)
-    
+
     # Fix 3: format strings
     fmt_fixed = fix_format_strings(path)
-    
+
     # Check remaining errors
     result = subprocess.run(
         ['msgfmt', '--check', path, '-o', '/dev/null'],
@@ -150,7 +148,7 @@ for locale in LOCALES:
     )
     errors = [l for l in result.stderr.split('\n') if 'fatal' in l or 'error' in l.lower()]
     remaining = len([l for l in result.stderr.split('\n') if ': ' in l and 'warning' not in l and l.strip()])
-    
+
     print(f"{locale}: header={'fixed' if 'Project-Id' in content[:500] else 'OK'}, "
           f"missing_msgstr={missing_fixed}, format_fixed={fmt_fixed}, "
           f"remaining_issues={remaining}")

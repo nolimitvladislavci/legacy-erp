@@ -11,11 +11,10 @@ import logging
 import os
 import re
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +158,7 @@ class DocumentProcessor:
     @classmethod
     def process_chunk(cls, batch_id, offset=0):
         """Obradi BATCH_SIZE slika. Nema sleep. Vraca (ok, err, more)."""
-        from documents.models import ScanBatch, ScanBatchImage
+        from documents.models import ScanBatch
         try:
             batch = ScanBatch.objects.get(pk=batch_id)
         except ScanBatch.DoesNotExist:

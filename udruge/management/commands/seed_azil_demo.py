@@ -15,7 +15,6 @@ Pokretanje:
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from datetime import date, timedelta
-from django.utils import timezone
 
 
 class Command(BaseCommand):
@@ -184,10 +183,10 @@ class Command(BaseCommand):
                         'ugovor_potpisan': True,
                     }
                 )
-            self.stdout.write(f'  ✓ Udomljavanja i povrati: 3 unosa')
+            self.stdout.write('  ✓ Udomljavanja i povrati: 3 unosa')
 
         self.stdout.write(self.style.SUCCESS(
-            f'\n  Azil demo završen → /udruge/azil/'))
+            '\n  Azil demo završen → /udruge/azil/'))
 
     # ═══════════════════════════════════════════════════════════════
     # B) LJUBETA NOVAK — uzgajivačnica rasnih pasa
@@ -335,7 +334,7 @@ class Command(BaseCommand):
             self.stdout.write(f'  ✓ Zdravstveni kartoni (Ljubeta): {zdravlje_count} novih')
 
         self.stdout.write(self.style.SUCCESS(
-            f'\n  Ljubeta Novak seed završen → /udruge/azil/'))
+            '\n  Ljubeta Novak seed završen → /udruge/azil/'))
         self.stdout.write('  Dalmatineri: Argo, Bella, Cezar, Diana, Grof, Hera')
         self.stdout.write('  Njem. ovčari: Emir, Fiora')
         self.stdout.write('  Leglo 2025/A: Grof + Hera (Cezar × Diana)')

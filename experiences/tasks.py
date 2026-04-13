@@ -5,8 +5,6 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('experiences')
 
@@ -17,7 +15,7 @@ def send_experience_reminders(self):
     Svakih 6h — WhatsApp podsjetnik gostima za sutrašnje aktivnosti.
     18h prije + 2h prije.
     """
-    from .models import ExperienceBooking, ExperienceSchedule
+    from .models import ExperienceSchedule
     from datetime import datetime
 
     now = timezone.now()
@@ -69,7 +67,7 @@ def mark_no_shows(self):
     Dnevno u 22:00 — označi no-show za nepojavljene goste.
     Depozit se automatski zadržava.
     """
-    from .models import ExperienceBooking, ExperienceSchedule
+    from .models import ExperienceSchedule
 
     today = timezone.now().date()
     past_schedules = ExperienceSchedule.objects.filter(
@@ -139,8 +137,7 @@ def inventory_depletion_check(self):
     Svakih 6h — provjeri hoće li zalihe izdržati za sutrašnje aktivnosti.
     Upozorava: "Ako prodaš još 5 paketa, nećeš imati dovoljno jagoda za doručak."
     """
-    from .models import Experience, ExperienceSchedule, ExperienceInclusion
-    from inventory.models import InventoryItem
+    from .models import ExperienceSchedule, ExperienceInclusion
 
     today = timezone.now().date()
     tomorrow = today + timedelta(days=1)

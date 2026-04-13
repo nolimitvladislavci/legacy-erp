@@ -100,7 +100,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 @login_required
 def bank_import_csv(request):
     import csv, io, uuid, datetime as _dt
-    from decimal import Decimal, InvalidOperation
+    from decimal import Decimal
     from django.contrib import messages
     from django.shortcuts import get_object_or_404
     from konto.models import BankAccount, BankTransaction
@@ -258,7 +258,6 @@ def report_pnl_pdf(request):
 
 @login_required
 def report_vat_pdf(request, pk):
-    import datetime as _dt
     from django.http import HttpResponse
     from django.utils import timezone
     from konto.models import TaxPeriod

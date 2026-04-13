@@ -16,10 +16,9 @@ from django.db import models
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_POST, require_GET
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import CardActivity, StatusTimestamp
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('borg.ops')
 
@@ -205,14 +204,14 @@ def operations_dashboard(request):
                     content_type=ct, status=status,
                     exited_at__isnull=True, entered_at__lt=cutoff,
                 ).values('object_id', 'entered_at')[:10]
-                
+
                 if not overdue_ts:
                     continue
-                
+
                 # BULK: dohvati sve objekte odjednom
                 obj_ids = [t['object_id'] for t in overdue_ts]
                 objects = {o.pk: o for o in Model.objects.filter(pk__in=obj_ids)}
-                
+
                 for ts in overdue_ts:
                     obj = objects.get(ts['object_id'])
                     if not obj:
@@ -497,7 +496,7 @@ def borg_hub(request):
     from core.company_utils import get_user_company
     from django.core.cache import cache
     from datetime import timedelta
-    from django.db.models import Sum, Count, Q
+    from django.db.models import Sum
 
     company = get_user_company(request)
     now = timezone.now()

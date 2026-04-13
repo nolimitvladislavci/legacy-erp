@@ -6,8 +6,6 @@ import hashlib
 import logging
 import time
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('gov_export.pipeline')
 
@@ -34,7 +32,7 @@ def run_pipeline(export, user=None, dry_run=False):
                 xml.encode('utf-8') if isinstance(xml, str) else xml
             ).hexdigest()
             export.save(update_fields=['xml_content', 'xml_size', 'xml_hash'])
-        
+
         results['generate'] = 'ok'
         GovExportLog.objects.create(
             export=export, step='generate', status='ok',
@@ -59,7 +57,7 @@ def run_pipeline(export, user=None, dry_run=False):
             from eracun.services.validator import validate_xsd
             xml_bytes = export.xml_content.encode('utf-8') if isinstance(export.xml_content, str) else export.xml_content
             validate_xsd(xml_bytes)
-        
+
         export.is_valid = True
         export.validated_at = timezone.now()
         export.status = 'validated'
@@ -89,10 +87,9 @@ def run_pipeline(export, user=None, dry_run=False):
             from fiskalizacija.models import FiscalConfig
             config = FiscalConfig.objects.filter(company=export.company, is_active=True).first()
             if config and config.cert_path:
-                import os
                 from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
                 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
-                
+
                 pw = config.get_password()
                 if isinstance(pw, str): pw = pw.encode()
                 with open(config.cert_path, 'rb') as f:
@@ -194,7 +191,7 @@ def _get_generator(export):
     class_path = export.document_type.generator_class
     if not class_path:
         raise ValueError(f'Nema generator_class za {export.document_type.code}')
-    
+
     module_path, class_name = class_path.rsplit('.', 1)
     import importlib
     module = importlib.import_module(module_path)

@@ -18,7 +18,7 @@ Trigger: Signal na MarketplaceOrder.save() ili poziv iz checkout viewa.
 import logging
 from django.db import transaction
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('delivery')
 

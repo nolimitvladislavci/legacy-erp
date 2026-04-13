@@ -24,8 +24,6 @@ Parametri:
 """
 from django import template
 from django.utils.html import format_html
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 

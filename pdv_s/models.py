@@ -1,7 +1,6 @@
 """PDV-S (Prijava PDV-a) — modeli."""
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 

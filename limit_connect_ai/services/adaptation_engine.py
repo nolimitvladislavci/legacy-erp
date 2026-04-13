@@ -14,9 +14,8 @@ Samo InventoryItem.tax_rate FK se ažurira na novu stopu.
 import logging
 from decimal import Decimal
 
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

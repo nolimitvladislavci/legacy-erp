@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 from django.contrib.auth.decorators import login_required
-from django.db.models import Subquery, OuterRef, Q
+from django.db.models import OuterRef, Q
 from django.views.decorators.http import require_POST
 
 def _post_or_json(request, key, default=''):
@@ -21,8 +21,6 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -169,7 +167,7 @@ def consolidated_create(request):
             cd.marketplace_orders.set(order_ids)
 
         # Auto-create TrackedItem
-        from tracking.models import TrackedItem, TrackingStatus
+        from tracking.models import TrackedItem
         from django.contrib.contenttypes.models import ContentType
         ct = ContentType.objects.get_for_model(ConsolidatedDelivery)
         tracked = TrackedItem.objects.create(
@@ -493,7 +491,6 @@ def driver_handoff(request, stop_pk):
     stop = get_object_or_404(DeliveryStop, pk=stop_pk)
 
     # HACCP Block Check — ako je SmartBox blokiran, ne dopusti primopredaju
-    from .models import HACCPIncident
     blocked_boxes = stop.smart_boxes.filter(haccp_status='blocked')
     if blocked_boxes.exists():
         box = blocked_boxes.first()
@@ -787,7 +784,7 @@ def transport_order_detail(request, pk):
 @login_required
 def fleet_dashboard(request):
     from core.company_utils import get_user_company
-    from .models import TransportOrder, Vehicle, VehicleDocument, DriverDocument
+    from .models import TransportOrder, Vehicle, VehicleDocument
     from django.utils import timezone
     from datetime import timedelta
     company = get_user_company(request)
@@ -795,13 +792,13 @@ def fleet_dashboard(request):
         return redirect('dashboard')
     today = timezone.now().date()
     warn_date = today + timedelta(days=30)
-    
+
     vehicles = Vehicle.objects.filter(company=company, is_active=True) if hasattr(Vehicle, 'objects') else []
     active_orders = TransportOrder.objects.filter(company=company, status__in=['planned', 'in_transit', 'loading', 'border_crossing']).order_by('-planned_departure')[:20]
-    
+
     expiring_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lte=warn_date, valid_until__gte=today).order_by('valid_until')[:20]
     expired_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lt=today).order_by('valid_until')[:10]
-    
+
     return render(request, 'delivery/fleet_dashboard.html', {
         'vehicles': vehicles,
         'active_orders': active_orders,

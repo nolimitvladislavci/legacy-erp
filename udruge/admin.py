@@ -90,8 +90,6 @@ class RezultatUtrkeAdmin(admin.ModelAdmin):
 
 # ── Perad (Flock) modul ──
 from udruge.models import Flock, EggRecord, FlockHealthRecord, FlockMortality
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class EggRecordInline(admin.TabularInline):

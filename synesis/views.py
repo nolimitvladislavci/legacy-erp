@@ -1,4 +1,3 @@
-import logging
 import json
 import time
 from django.shortcuts import render, redirect
@@ -9,7 +8,6 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
 from core.company_utils import get_user_company
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -619,7 +617,6 @@ def synesis_import_api(request):
     elif sync_type == "schema_probe":
         result = _import_schema_probe(company, data)
     elif sync_type == "invoices":
-        from django.http import HttpRequest
         created, updated, errors = _import_invoices(request, company, data if isinstance(data, list) else data.get("invoices", []))
         result = {"created": created, "updated": updated, "errors": errors}
     else:
@@ -973,7 +970,7 @@ def _import_schema_probe(company, data):
     Receive schema from Windows probe script.
     Saves to /tmp/synesis_schema_{company_id}.json for developer inspection.
     """
-    import json as _json, os
+    import json as _json
     out_path = f'/tmp/synesis_schema_{company.pk}.json'
     payload = data[0] if data else {}
     with open(out_path, 'w', encoding='utf-8') as f:
@@ -1033,7 +1030,6 @@ def download_pkv_probe(request):
 def _import_invoices(request, company, data_list):
     """Import faktura iz Synesis MDB (Storage.mdb INVOICES/INVOICEPO tablice)."""
     import hashlib
-    from datetime import timedelta
     from decimal import Decimal, InvalidOperation
     from django.utils import timezone
     from invoicing.models import Invoice, InvoiceItem

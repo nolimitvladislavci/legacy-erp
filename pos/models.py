@@ -6,9 +6,8 @@ import uuid
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.contrib.auth.models import User
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.managers import CompanyManager
 
@@ -1197,7 +1196,7 @@ class POSDailyReport(models.Model):
     def generate_from_session(cls, session):
         """Generiraj dnevni izvještaj iz zatvorene sesije."""
         from decimal import Decimal
-        from django.db.models import Sum, Count, Q
+        from django.db.models import Sum
 
         receipts = session.receipts.filter(status='paid')
         cancelled = session.receipts.filter(status='cancelled').count()

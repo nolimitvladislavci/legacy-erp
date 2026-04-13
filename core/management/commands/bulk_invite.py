@@ -15,7 +15,6 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 from django.conf import settings
-from django.utils import timezone
 
 
 class Command(BaseCommand):

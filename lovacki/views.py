@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from django.db import IntegrityError, DatabaseError
@@ -12,7 +11,7 @@ from django.db import IntegrityError, DatabaseError
 @login_required
 def hunting_dashboard(request):
     """Lovački dashboard — kvote, odstrjeli, statistike."""
-    from .models import HuntingGround, HuntRecord, HuntingQuota, GameSpecies
+    from .models import HuntingGround, HuntRecord, HuntingQuota
 
     company = get_user_company(request)
     if not company:

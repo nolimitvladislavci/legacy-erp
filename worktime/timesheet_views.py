@@ -12,7 +12,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
 
 from core.tenant import get_current_company
 
@@ -415,7 +414,7 @@ def time_entry_add(request):
 
             # ═══ VALIDATION: Very old date ═══
             if entry_date < date.today() - timedelta(days=60):
-                messages.error(request, f'❌ Ne možete unijeti sate starije od 60 dana!')
+                messages.error(request, '❌ Ne možete unijeti sate starije od 60 dana!')
                 return redirect('worktime:ts_worker')
 
             try: rate = request.user.employeeprofile.hourly_rate
@@ -1275,10 +1274,6 @@ def bill_entries(request):
 @login_required
 def timesheet_analytics(request):
     """Worktime analytics — daily hours chart, project distribution, task breakdown, top workers."""
-    import json
-    import calendar
-    from django.db.models import Avg, F, Q
-    from django.db.models.functions import TruncDate, TruncWeek
 
     company = _user_company(request.user)
     today = date.today()
@@ -1783,7 +1778,7 @@ def dispute_revision(request, revision_id):
             notify(
                 manager,
                 f'Prigovor na izmjenu sata: {request.user.get_full_name()} ne slaže se s izmjenom {rev.field_name}',
-                url=f'/hr/worktime/ts/manager/',
+                url='/hr/worktime/ts/manager/',
             )
     except ImportError:
         pass

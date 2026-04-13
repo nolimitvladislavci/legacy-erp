@@ -385,7 +385,6 @@ def migrate_existing_files():
     """
     import os
     from datetime import datetime
-    from django.utils import timezone as tz
 
     # Lazy imports to avoid circular
     from documents.models import ArhivaEntry

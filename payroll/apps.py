@@ -7,5 +7,3 @@ class PayrollConfig(AppConfig):
 
     def ready(self):
         import payroll.signals  # noqa: F401
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist

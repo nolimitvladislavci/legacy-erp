@@ -7,5 +7,3 @@ class WebshopConfig(AppConfig):
 
     def ready(self):
         import webshop.signals  # noqa: F401
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist

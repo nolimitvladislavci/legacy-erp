@@ -5,8 +5,7 @@ Koristi ImpactDomain.matches_company() za brzu provjeru,
 a za kompleksnije slucajeve LLM analizu.
 """
 import logging
-from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('borg.nn_classifier')
 

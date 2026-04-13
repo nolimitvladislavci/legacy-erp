@@ -14,7 +14,7 @@ NAPOMENA: Pomoćni kreveti se NE oporezuju paušalnim porezom na dohodak!
 """
 import logging
 from datetime import date
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from io import BytesIO
 import xml.etree.ElementTree as ET
 

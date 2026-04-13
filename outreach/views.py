@@ -10,7 +10,6 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Campaign, CampaignContact, Contact
 from django.db import IntegrityError, DatabaseError
@@ -353,7 +352,7 @@ def campaign_bulk_send(request, pk):
         cc.personalized_body    = result['body']
 
         if channel == 'whatsapp':
-            from core.whatsapp import send_text, normalize_phone, is_gateway_healthy
+            from core.whatsapp import send_text, normalize_phone
             phone = cc.contact.phone or ''
             if not phone or not normalize_phone(phone):
                 failed += 1
@@ -409,7 +408,7 @@ def import_from_partners(request):
             city=getattr(p, 'city', '') or '',
             contact_type='firma',
             source='manual',
-            notes=f'Importiran iz Partners modul',
+            notes='Importiran iz Partners modul',
             company=request.user.profile.company if hasattr(request.user, 'profile') else None,
         )
         created += 1
@@ -426,7 +425,7 @@ def contact_whatsapp(request, pk):
         msg = request.POST.get('message', '').strip()
         phone = c.phone or ''
         if not phone or not normalize_phone(phone):
-            messages.error(request, f'Kontakt nema validan WhatsApp broj.')
+            messages.error(request, 'Kontakt nema validan WhatsApp broj.')
         elif not is_gateway_healthy():
             messages.error(request, _('WhatsApp gateway nije dostupan.'))
         elif not msg:

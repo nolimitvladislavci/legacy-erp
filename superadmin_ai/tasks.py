@@ -7,19 +7,17 @@ Tasks:
 """
 import os
 import socket
-import subprocess
 import logging
 from datetime import timedelta
 from decimal import Decimal
 
 from celery import shared_task
 from django.utils import timezone
-from django.db.models import Sum, Count
+from django.db.models import Sum
 from django.contrib.auth.models import User
 
 from superadmin_ai.models import PendingAIAction
-from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 logger = logging.getLogger('superadmin_ai')
 

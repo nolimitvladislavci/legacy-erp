@@ -2,7 +2,7 @@
 Deploy Synesis Invoice Integration — Faze 1-6
 Pokreni na serveru: venv/bin/python3 synesis_invoices_deploy.py
 """
-import os, sys
+import os
 
 # ══════════════════════════════════════════════════════════════════════
 # FAZA 1: Model proširenje — Invoice + SynesisYearConfig

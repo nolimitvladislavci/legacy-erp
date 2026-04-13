@@ -200,7 +200,7 @@ def copy_invoice(source, new_doctype, new_number, extra_fields=None):
     Deep-copy an invoice with new doctype and number.
     Returns the new Invoice instance (unsaved items are copied too).
     """
-    from invoicing.models import Invoice, InvoiceItem
+    from invoicing.models import Invoice
     new_inv = Invoice()
     skip = {'id', 'pk', 'uuid', 'number', 'doctype', 'is_fiscalized', 'zki', 'jir',
             'fiscal_datetime', 'status', 'qr_code_base64', 'created_at', 'updated_at'}

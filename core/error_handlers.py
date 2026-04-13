@@ -42,7 +42,7 @@ def custom_500_handler(request):
         capture_error_for_borg(request)
     except Exception:
         logger.exception("Unexpected error in: capture_error_for_borg(request)")
-    
+
     # Redirect na početnu s error porukom
     from django.shortcuts import redirect
     from django.contrib import messages
@@ -64,7 +64,6 @@ def custom_500_handler(request):
 
 import traceback
 import logging
-import json
 from django.utils import timezone
 
 logger = logging.getLogger('borg.remediation')
@@ -87,17 +86,17 @@ def capture_error_for_borg(request, exc_info=None):
     try:
         import sys
         exc_info = exc_info or sys.exc_info()
-        
+
         # Stack trace
         tb_lines = traceback.format_exception(*exc_info) if exc_info[0] else []
         stack_trace = ''.join(tb_lines)[-3000:]  # max 3K chars
-        
+
         # Request context
         url = getattr(request, 'path', '?')
         method = getattr(request, 'method', '?')
         user_id = getattr(request.user, 'id', None) if hasattr(request, 'user') else None
         user_name = str(getattr(request.user, 'username', '?')) if hasattr(request, 'user') else '?'
-        
+
         # Company context
         company_id = None
         company_name = None
@@ -110,7 +109,7 @@ def capture_error_for_borg(request, exc_info=None):
                 company_name = company.name
         except (ValueError, TypeError):
             logger.exception("HTTP request failed")
-        
+
         # Sanitize POST data (remove passwords, tokens)
         post_data = {}
         if hasattr(request, 'POST') and request.POST:
@@ -119,7 +118,7 @@ def capture_error_for_borg(request, exc_info=None):
                 k: '***' if any(s in k.lower() for s in sensitive_keys) else str(v)[:200]
                 for k, v in request.POST.items()
             }
-        
+
         # Error log tail (zadnjih 20 linija)
         error_log_tail = ''
         try:
@@ -131,11 +130,11 @@ def capture_error_for_borg(request, exc_info=None):
             error_log_tail = result.stdout[-2000:] if result.stdout else ''
         except Exception:
             logger.exception("Failed to import subprocess")
-        
+
         # Error type extraction
         error_type = exc_info[0].__name__ if exc_info[0] else 'Unknown'
         error_msg = str(exc_info[1])[:500] if exc_info[1] else ''
-        
+
         # Extract file + line from traceback
         source_file = ''
         source_line = 0
@@ -146,18 +145,18 @@ def capture_error_for_borg(request, exc_info=None):
                 tb = tb.tb_next
             source_file = os.path.basename(tb.tb_frame.f_code.co_filename)
             source_line = tb.tb_lineno
-        
+
         # Kreira PendingAIAction
         from superadmin_ai.models import PendingAIAction
         from companies.models import Company
-        
+
         company_obj = None
         if company_id:
             try:
                 company_obj = Company.objects.get(pk=company_id)
             except Company.DoesNotExist:
                 pass
-        
+
         action = PendingAIAction.objects.create(
             company=company_obj,
             module='error_remediation',
@@ -188,14 +187,14 @@ def capture_error_for_borg(request, exc_info=None):
             },
             status='pending',
         )
-        
+
         logger.info(
             'BORG ingestion: Error #%s — %s in %s:%d (user=%s, company=%s)',
             action.pk, error_type, source_file, source_line, user_name, company_name,
         )
-        
+
         return action
-        
+
     except ObjectDoesNotExist as e:
         # NIKADA ne crashaj error handler
         logger.error('BORG ingestion failed: %s', e)

@@ -1,11 +1,10 @@
 import uuid
 
 from django.conf import settings
-from django.db import models, DatabaseError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from companies.models import Company
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 from partners.models import Partner
 

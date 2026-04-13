@@ -21,7 +21,7 @@ def test_detect_platform():
         ('https://www.instagram.com/p/ABC123/', 'instagram'),
         ('https://www.example.com', None),
     ]
-    
+
     passed = 0
     for url, expected in tests:
         result = detect_platform(url)
@@ -30,7 +30,7 @@ def test_detect_platform():
             passed += 1
         else:
             print(f"✗ detect_platform({url[:40]}...) expected {expected}, got {result}")
-    
+
     return passed, len(tests)
 
 def test_youtube_id_extraction():
@@ -40,7 +40,7 @@ def test_youtube_id_extraction():
         ('https://youtu.be/dQw4w9WgXcQ', 'dQw4w9WgXcQ'),
         ('https://youtube.com/watch?v=abc123&t=10', 'abc123'),
     ]
-    
+
     passed = 0
     for url, expected in tests:
         result = _extract_youtube_id(url)
@@ -49,7 +49,7 @@ def test_youtube_id_extraction():
             passed += 1
         else:
             print(f"✗ _extract_youtube_id({url[:40]}...) expected {expected}, got {result}")
-    
+
     return passed, len(tests)
 
 def test_fetch_oembed():
@@ -58,7 +58,7 @@ def test_fetch_oembed():
         ('https://invalid.domain.xyz/video', False),  # Invalid domain
         ('https://www.example.com/video', False),     # No oEmbed endpoint
     ]
-    
+
     passed = 0
     for url, should_succeed in tests:
         preview = fetch_oembed(url)
@@ -67,7 +67,7 @@ def test_fetch_oembed():
             passed += 1
         else:
             print(f"✗ fetch_oembed({url[:40]}...) expected success={should_succeed}, got {preview.success}")
-    
+
     return passed, len(tests)
 
 def test_social_import_model():
@@ -76,7 +76,7 @@ def test_social_import_model():
     from companies.models import Company
     from boxgram.models import PetProfile, SocialImport
     import uuid
-    
+
     # Setup
     company = Company.objects.create(
         name=f'TestCo{uuid.uuid4().hex[:8]}',
@@ -94,10 +94,10 @@ def test_social_import_model():
         species='pas',
         slug=f'pet{uuid.uuid4().hex[:8]}'
     )
-    
+
     passed = 0
     total = 4
-    
+
     # Test 1: Create
     url = f'https://youtube.com/watch?v={uuid.uuid4().hex[:8]}'
     import1 = SocialImport.objects.create(
@@ -107,28 +107,28 @@ def test_social_import_model():
         status='pending'
     )
     if import1.id is not None:
-        print(f"✓ Create SocialImport")
+        print("✓ Create SocialImport")
         passed += 1
     else:
-        print(f"✗ Create SocialImport failed")
-    
+        print("✗ Create SocialImport failed")
+
     # Test 2: Duplicate check
     existing = SocialImport.objects.filter(pet=pet, source_url=url).first()
     if existing is not None:
-        print(f"✓ Duplicate detection works")
+        print("✓ Duplicate detection works")
         passed += 1
     else:
-        print(f"✗ Duplicate detection failed")
-    
+        print("✗ Duplicate detection failed")
+
     # Test 3: Status transition
     import1.status = 'rejected'
     import1.save()
     if import1.status == 'rejected':
-        print(f"✓ Status transition works")
+        print("✓ Status transition works")
         passed += 1
     else:
-        print(f"✗ Status transition failed")
-    
+        print("✗ Status transition failed")
+
     # Test 4: Raw data storage
     test_data = {'title': 'Test', 'author': 'Author'}
     import2 = SocialImport.objects.create(
@@ -139,43 +139,43 @@ def test_social_import_model():
         raw_data=test_data
     )
     if import2.raw_data.get('title') == 'Test':
-        print(f"✓ Raw data storage works")
+        print("✓ Raw data storage works")
         passed += 1
     else:
-        print(f"✗ Raw data storage failed")
-    
+        print("✗ Raw data storage failed")
+
     return passed, total
 
 if __name__ == '__main__':
     print("=" * 60)
     print("SOCIAL IMPORT SERVICE TESTS")
     print("=" * 60)
-    
+
     all_passed = 0
     all_total = 0
-    
+
     print("\n[1/3] Testing platform detection...")
     p, t = test_detect_platform()
     all_passed += p
     all_total += t
-    
-    print(f"\n[2/3] Testing YouTube ID extraction...")
+
+    print("\n[2/3] Testing YouTube ID extraction...")
     p, t = test_youtube_id_extraction()
     all_passed += p
     all_total += t
-    
-    print(f"\n[3/3] Testing fetch_oembed...")
+
+    print("\n[3/3] Testing fetch_oembed...")
     p, t = test_fetch_oembed()
     all_passed += p
     all_total += t
-    
-    print(f"\n[4/4] Testing SocialImport model...")
+
+    print("\n[4/4] Testing SocialImport model...")
     p, t = test_social_import_model()
     all_passed += p
     all_total += t
-    
+
     print("\n" + "=" * 60)
     print(f"RESULTS: {all_passed}/{all_total} tests passed")
     print("=" * 60)
-    
+
     sys.exit(0 if all_passed == all_total else 1)

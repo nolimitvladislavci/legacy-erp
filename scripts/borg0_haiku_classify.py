@@ -13,12 +13,11 @@ django.setup()
 
 import anthropic
 from inventory.models import InventoryItem
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import DatabaseError
 from collections import Counter
 
 # Učitaj API key iz .env
 from dotenv import load_dotenv
-from django.core.exceptions import ObjectDoesNotExist
 load_dotenv('/var/www/fina-connect/.env')
 
 client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
@@ -139,18 +138,18 @@ def run(dry_run=True, batch_size=50):
 
     print(f'\nKlasificirano: {classified}')
     print(f'Greške: {errors}')
-    print(f'\nPo kategoriji:')
+    print('\nPo kategoriji:')
     for cat, count in stats.most_common():
         print(f'  {cat}: {count}')
 
     if dry_run:
-        print(f'\n--- DRY RUN — baza NIJE promijenjena ---')
+        print('\n--- DRY RUN — baza NIJE promijenjena ---')
 
     # Spremi report
     with open('BORG0_HAIKU_REPORT.json', 'w') as f:
         json.dump({'classified': classified, 'errors': errors,
                    'stats': dict(stats), 'results': all_results}, f, indent=2)
-    print(f'Report: BORG0_HAIKU_REPORT.json')
+    print('Report: BORG0_HAIKU_REPORT.json')
 
     return classified, errors
 

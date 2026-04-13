@@ -11,15 +11,13 @@ LIMIT Connect ERP — 2026-03-25
 import io
 import os
 import logging
-from decimal import Decimal
 
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import JsonResponse
-from django.utils.deprecation import MiddlewareMixin
 
 from PIL import Image, ExifTags
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

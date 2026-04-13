@@ -13,7 +13,7 @@ import math
 import logging
 from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Q, Count
+from django.db.models import Q
 
 logger = logging.getLogger('borg.dispatch')
 

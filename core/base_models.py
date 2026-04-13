@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 """
 Fenix Abstract Base Models
 ==========================
@@ -20,7 +19,7 @@ Hierarchy:
     MoneyModel                → + currency, amount helpers
 """
 from django.conf import settings
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils import timezone
 
 

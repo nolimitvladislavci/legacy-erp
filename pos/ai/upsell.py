@@ -6,7 +6,6 @@ Cache per (items_hash, company_id) — 24h.
 import json
 import hashlib
 import logging
-from decimal import Decimal
 
 from django.conf import settings
 from django.core.cache import cache

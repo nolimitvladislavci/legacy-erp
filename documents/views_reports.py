@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Sum
+from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string

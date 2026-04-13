@@ -13,8 +13,7 @@ from konto.models import LedgerLine, JournalEntry
 from django.db.models import Sum
 
 # Disable triggers for speed
-from django.db import connection, DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
 with connection.cursor() as c:
     c.execute("ALTER TABLE konto_ledgerline DISABLE TRIGGER trg_check_journal_balance")
     c.execute("ALTER TABLE konto_journalentry DISABLE TRIGGER trg_period_lock_journal")
@@ -61,11 +60,11 @@ for d in sorted(glob.glob(f'{base}/*/Storage.mdb')):
     name = os.path.basename(folder)
     for suffix in [' 2025', ' 2025 R1', ' 2025-KIOSK', ' 2026', '(Popravljeno 1)']:
         name = name.replace(suffix, '').strip()
-    
+
     # Skip duplicate Konjik (use Popravljeno 1)
     if 'KONJIK D.O.O. 2025/' in d and 'Popravljeno' not in d:
         continue
-    
+
     jobs.append({'name': name, 'mdb': d})
 
 for d in sorted(glob.glob(f'{korpa}/*/Storage.mdb')):
@@ -95,32 +94,32 @@ for i, job in enumerate(jobs):
 
     # Check if already has SYN- entries (skip Konjik which we already did)
     existing = JournalEntry.objects.filter(company=company, entry_number__startswith='SYN-').count()
-    
+
     t0 = time.time()
-    
+
     # Wipe only if re-importing (Konjik already done correctly)
     wipe = existing > 0
-    
+
     try:
         r = full_import(company, job['mdb'], wipe=wipe)
         je = r['knjizenja']['journal_entries']
         ll = r['knjizenja']['ledger_lines']
         err = r['knjizenja']['errors']
-        
+
         total_je += je
         total_ll += ll
         total_err += err
-        
+
         elapsed = time.time() - t0
-        
+
         # Quick balance check
         d = LedgerLine.objects.filter(journal_entry__company=company, side='debit').aggregate(t=Sum('amount'))['t'] or 0
         p = LedgerLine.objects.filter(journal_entry__company=company, side='credit').aggregate(t=Sum('amount'))['t'] or 0
         bal = 'BAL' if abs(float(d)-float(p)) < 1 else f'R={float(d-p):+.2f}'
-        
+
         print(f"[{i+1:2d}/{len(jobs)}] OK    {company.name:40s} JE={je:>5d} LL={ll:>6d} E={err:>3d} {bal:>12s} ({elapsed:.1f}s)")
         results.append({'company': company.name, 'je': je, 'll': ll, 'err': err, 'bal': bal})
-        
+
     except (ValueError, TypeError) as e:
         print(f"[{i+1:2d}/{len(jobs)}] ERROR {company.name:40s} — {str(e)[:60]}")
         results.append({'company': company.name, 'je': 0, 'll': 0, 'err': -1, 'bal': 'ERR'})
@@ -131,7 +130,7 @@ with connection.cursor() as c:
     c.execute("ALTER TABLE konto_journalentry ENABLE TRIGGER trg_period_lock_journal")
 
 print(f"\n{'='*70}")
-print(f"REZULTAT")
+print("REZULTAT")
 print(f"{'='*70}")
 print(f"Ukupno MDB:        {len(jobs)}")
 print(f"Importirano:       {len(results)}")
@@ -143,7 +142,7 @@ print(f"Greške:            {total_err:,}")
 # Global balance
 d = float(LedgerLine.objects.filter(side='debit').aggregate(t=Sum('amount'))['t'] or 0)
 p = float(LedgerLine.objects.filter(side='credit').aggregate(t=Sum('amount'))['t'] or 0)
-print(f"\nGLOBALNA BILANCA:")
+print("\nGLOBALNA BILANCA:")
 print(f"  Duguje:    {d:>15,.2f} EUR")
 print(f"  Potrazuje: {p:>15,.2f} EUR")
 print(f"  Razlika:   {d-p:>15,.2f} EUR")

@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 """
 LIMIT CONNECT — Globalni Streaming ZIP Servis
 
@@ -30,7 +29,7 @@ Korištenje iz bilo kojeg modula:
 import os
 import zipstream
 from django.http import StreamingHttpResponse
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 
 class StreamingZipResponse:
@@ -106,7 +105,6 @@ def build_audit_package(company, date_from=None, date_to=None):
     Returns: StreamingZipResponse
     """
     from datetime import date, timedelta
-    from django.utils import timezone
 
     if not date_from:
         date_from = date.today() - timedelta(days=365)
@@ -170,7 +168,7 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 4. Inventure CSV
     try:
-        from inventory.models import Inventura, InventuraItem
+        from inventory.models import Inventura
         import csv, io
         for inv in Inventura.objects.filter(company=company):
             buf = io.StringIO()

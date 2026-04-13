@@ -3,11 +3,11 @@ Reports views — Revenue, Worktime summaries with CSV/Excel export.
 """
 import csv
 import io
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, F, Q
+from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.shortcuts import render
 

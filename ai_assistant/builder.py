@@ -8,18 +8,15 @@ import json
 import os
 import logging
 import traceback
-import subprocess
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from django.conf import settings
 from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
-from .models import Conversation, Message, AIUsageLog
-from .claude_client import get_claude_client, estimate_cost
+from .models import Conversation, Message
+from .claude_client import get_claude_client
 from superadmin_ai.models import AIModulePermission, PendingAIAction, AIActionLog
 
 logger = logging.getLogger(__name__)

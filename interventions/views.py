@@ -13,7 +13,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from accounts.models import UserProfile
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import HitnaIntervencija
 

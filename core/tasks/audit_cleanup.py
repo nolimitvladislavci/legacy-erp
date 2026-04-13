@@ -13,8 +13,6 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('core.audit_cleanup')
@@ -40,7 +38,6 @@ def cleanup_old_audit_logs():
     Čisti stare audit logove uz poštivanje zakonskih rokova.
     """
     from core.models import SystemAuditLog
-    from django.db.models import Count
 
     now = timezone.now()
     cutoff_90 = now - timedelta(days=90)

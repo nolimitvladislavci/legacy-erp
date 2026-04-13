@@ -4,8 +4,6 @@ from django.utils import timezone
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from datetime import timedelta
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import SeasonalWorker, SeasonalContract, SeasonalPayment
 

@@ -3,10 +3,7 @@ Client/Partner Portal — Token-based, no login required.
 """
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import gettext as _
-from django.http import HttpResponse
-from django.db.models import Sum, Count
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Sum
 from .models import Partner
 
 
@@ -171,7 +168,7 @@ def send_portal_whatsapp(request, partner_id):
     partner = get_object_or_404(Partner, pk=partner_id)
     phone = getattr(partner, "phone", "") or getattr(partner, "contact_phone", "") or ""
     if not phone or not normalize_phone(phone):
-        messages.error(request, f"Partner nema validan WhatsApp broj.")
+        messages.error(request, "Partner nema validan WhatsApp broj.")
         return redirect(request.META.get("HTTP_REFERER", "/partners/"))
     if not is_gateway_healthy():
         messages.error(request, _("WhatsApp gateway nije dostupan."))
@@ -256,7 +253,7 @@ def portal_pdv_approve(request, token, pk):
             invoice.save(update_fields=['tax_status', 'status', 'internal_note'])
         elif action == 'reject':
             invoice.tax_status = 'rejected'
-            invoice.internal_note = (invoice.internal_note or '') + f'\nPDV odbijen via portal'
+            invoice.internal_note = (invoice.internal_note or '') + '\nPDV odbijen via portal'
             invoice.save(update_fields=['tax_status', 'internal_note'])
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

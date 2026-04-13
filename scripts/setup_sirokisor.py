@@ -13,7 +13,6 @@ Koristi se: cd /var/www/fina-connect && python manage.py shell < scripts/setup_s
 6. Kreira 20 Table + 20 TableQR (Lokal 1-8, Šank 1-4, Terasa 1-8)
 """
 import os
-import sys
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
@@ -25,8 +24,6 @@ from companies.models import Company, CompanyBranch
 from gastro_menu.models import DigitalMenu, MenuCategory, MenuItem, MenuItemIngredient, TableQR
 from inventory.models import InventoryItem
 from pos.models import Table
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 # ═══════════════════════════════════════════════════════════════════
 # CONFIG
@@ -315,7 +312,7 @@ def run():
     print(f'QR Codes:    {TableQR.objects.filter(company=company, menu=menu).count()}')
     print()
     print(f'Digital menu URL: /gastro/menu/{menu.slug}/')
-    print(f'Admin panel:      /gastro/admin/')
+    print('Admin panel:      /gastro/admin/')
 
 
 run()

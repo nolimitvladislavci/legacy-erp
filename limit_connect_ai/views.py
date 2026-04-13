@@ -7,13 +7,12 @@ from django.utils import timezone
 from django.db.models import Sum, Count, F
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 from core.company_utils import get_user_company
 from .models import (
     AIAgentMission, AIReportLog, FundApplicationDraft,
-    ComplianceWatchItem, CampaignPlan,
+    ComplianceWatchItem,
 )
 
 

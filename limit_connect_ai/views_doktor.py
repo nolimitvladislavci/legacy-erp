@@ -5,8 +5,6 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_GET
 from companies.models import Company
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .models_doktor import DiagnosisReport
 from .tasks_doktor import run_clinic_diagnostics_single
 

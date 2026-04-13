@@ -6,9 +6,9 @@ Celery task šalje Mariji WhatsApp jednom mjesečno.
 """
 import logging
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date, timedelta
+from datetime import date
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('inventory.depreciation')
 
@@ -110,7 +110,6 @@ def check_depreciation_reminders():
     """
     try:
         from inventory.models import InventoryItem
-        from django.apps import apps
         from datetime import date, timedelta
 
         threshold = date.today() - timedelta(days=365)
@@ -138,7 +137,7 @@ def check_depreciation_reminders():
             poruka = (
                 f'📊 Amortizacija — {count} nacrta čeka pregled\n\n'
                 + '\n'.join(f'• {d["item_name"]}: {d["book_value"]:.2f} EUR knjig. vrijed.' for d in drafts[:5])
-                + f'\n\nhttps://limit-connect.com/hr/inventory/'
+                + '\n\nhttps://limit-connect.com/hr/inventory/'
             )
             send_text(phone='+385981234567', message=poruka)  # Marija HR broj
             logger.info(f'Depreciation reminder poslan Mariji: {count} asseta')

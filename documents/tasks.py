@@ -62,7 +62,6 @@ def arhiva_ai_monitor(self):
             })
 
     # ── 3. Cross-firma dual-access pattern ──
-    from companies.models import CompanyPartnership
     dual_companies = Company.objects.filter(
         managing_partners__isnull=False,
         memberships__isnull=False,
@@ -176,7 +175,7 @@ def arhiva_morning_brief(self):
     Claude Haiku generira personalizirani summary.
     """
     from documents.models import ArhivaEntry
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
     from django.utils import timezone
     from datetime import timedelta
     import os
@@ -241,7 +240,6 @@ def generate_revizija_zip(self, company_id, date_from, date_to, user_email):
     """Async ZIP generacija za velike revizorske pakete. Salje email kad zavrsi."""
     import zipfile, csv, io, os
     from documents.models import ArhivaEntry
-    from invoicing.models import Invoice
     from companies.models import Company
     from django.conf import settings as _s
     from django.db.models import Sum
@@ -506,11 +504,10 @@ def send_ai_inbox_summary_email(self, company_id=None):
     Ako je company_id=None — salje svim kompanijama koje imaju pending dokumente.
     Moze se trigirati rucno ili automatski (svaki radni dan u 08:00).
     """
-    import os
     from documents.models import ArhivaEntry
     from companies.models import Company
     from django.core.mail import EmailMultiAlternatives
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
     from django.utils import timezone
     from accounts.models import CompanyMembership
 
@@ -639,7 +636,7 @@ def process_scan_batch(self, batch_id):
     import logging
     logger = logging.getLogger('documents.tasks')
 
-    from documents.models import ScanBatch, ScanBatchImage
+    from documents.models import ScanBatch
 
     try:
         batch = ScanBatch.objects.get(pk=batch_id)
@@ -847,15 +844,15 @@ def gmail_ura_import(self):
     Batch: 10 emailova = 1 zbirna WhatsApp poruka
     """
     import os
-    
+
     client_id = os.environ.get('GMAIL_CLIENT_ID', '')
     client_secret = os.environ.get('GMAIL_CLIENT_SECRET', '')
     refresh_token = os.environ.get('GMAIL_REFRESH_TOKEN', '')
-    
+
     if not all([client_id, client_secret, refresh_token]):
         logger.info('Gmail credentials nisu konfigurirani — preskačem. Ivan treba postaviti OAuth2.')
         return {'status': 'skipped', 'reason': 'missing_credentials'}
-    
+
     # TODO: Implementirati kad Ivan postavi OAuth
     # 1. OAuth2 refresh token flow
     # 2. Fetch unread emails s attachment-ima (PDF/XML)

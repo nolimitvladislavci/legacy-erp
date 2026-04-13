@@ -3,7 +3,6 @@ from boxgram.models import PetProfile
 from companies.models import Company
 import logging
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +21,11 @@ class Command(BaseCommand):
         try:
             company = Company.objects.get(id=company_id)
             pet = PetProfile.objects.get(slug=pet_slug)
-            
+
             pet.company = company
             pet.limit_connect_ref = company.oib or company.id
             pet.save()
-            
+
             self.stdout.write(
                 self.style.SUCCESS(
                     f'Successfully linked company {company.name} to pet {pet.name}'

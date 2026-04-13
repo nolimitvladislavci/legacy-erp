@@ -7,11 +7,10 @@ Baza: memio_pets (PostgreSQL, odvojena od fina_erp)
 """
 import hashlib
 import uuid
-import secrets as _sec
 from django.db import models
 from memio_pet.encrypted_fields import MemioEncryptedField
 from memio_pet.validators import (
-    validate_no_scripts, validate_no_sql, validate_oib_format,
+    validate_oib_format,
     validate_chip_number, validate_name_field, validate_free_text,
 )
 

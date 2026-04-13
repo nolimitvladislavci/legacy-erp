@@ -6,8 +6,6 @@ Rezultat: XML koji organizator šalje na prijavadj@zamp.hr
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom import minidom
 from datetime import date
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def generiraj_zamp_obrazac(company, dogadjaj, set_lista: list) -> bytes:

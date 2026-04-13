@@ -8,7 +8,7 @@ import logging
 from datetime import timedelta
 
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

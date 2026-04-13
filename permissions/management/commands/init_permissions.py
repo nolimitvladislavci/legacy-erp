@@ -2,10 +2,9 @@
 Initialize default permissions and roles
 """
 from django.core.management.base import BaseCommand
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction
 
 from permissions.models import Permission, Role
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class Command(BaseCommand):

@@ -12,7 +12,6 @@ from typing import Optional
 
 from django.db import transaction
 from django.utils.timezone import now
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.exceptions import PaymentError, SessionError
 from django.db import IntegrityError, DatabaseError

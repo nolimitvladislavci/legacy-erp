@@ -88,8 +88,8 @@ def predictive_reorder_check(self):
                 # Build item descriptions
                 item_names = [ip[0].name for ip in items_preds[:5]]
                 notes = (
-                    f'[AUTO-REORDER] Automatski generirano na temelju prediktivne analize.\n'
-                    f'Artikli s kritičnom/upozorenom zalihom: PLACEHOLDER'
+                    '[AUTO-REORDER] Automatski generirano na temelju prediktivne analize.\n'
+                    'Artikli s kritičnom/upozorenom zalihom: PLACEHOLDER'
                 )
 
                 po = PurchaseOrder.objects.create(

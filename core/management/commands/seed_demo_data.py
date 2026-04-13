@@ -111,7 +111,7 @@ class Command(BaseCommand):
     # ── reset ──────────────────────────────────────────────────────────────────
 
     def _reset(self, company):
-        from invoicing.models import Invoice, InvoiceItem
+        from invoicing.models import Invoice
         from partners.models import Partner
 
         deleted_inv = Invoice.objects.filter(

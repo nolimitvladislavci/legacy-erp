@@ -2,8 +2,6 @@
 import inspect
 
 from django.contrib import admin
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from . import models as _m
 from .models import *

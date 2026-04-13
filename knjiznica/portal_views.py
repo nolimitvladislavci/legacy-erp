@@ -6,18 +6,12 @@ S PIN-om: roditeljski dashboard, djeca, bedževi
 """
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db.models import Exists, F, OuterRef, Q, Count
+from django.db.models import Exists, F, OuterRef, Q
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404
-from django.utils import timezone
-from datetime import timedelta
 
 from companies.models import Company
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .models import (
-    BookMeta, BookLoan, LibraryMember, BookReservation,
-    ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,
+    BookLoan, LibraryMember, ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,
     MediaContent, FamilyChallenge,
 )
 

@@ -11,9 +11,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
-from .models import LeadActivity, ProjectLead
+from .models import ProjectLead
 
 
 def get_company(request):
@@ -102,7 +101,7 @@ def lead_move(request, pk):
         return JsonResponse({'ok': False, 'error': 'Neispravan zahtjev.'}, status=400)
     valid = [s[0] for s in ProjectLead.Status.choices]
     if new_status not in valid:
-        return JsonResponse({'ok': False, 'error': f'Nepoznati status.'}, status=400)
+        return JsonResponse({'ok': False, 'error': 'Nepoznati status.'}, status=400)
 
     # FSM validated transition
     try:
@@ -132,7 +131,7 @@ def lead_preuzmi(request, pk):
             if lead.status != 'NA_BURZI':
                 return JsonResponse({'ok': False, 'error': 'Posao više nije dostupan na burzi.'}, status=409)
             if lead.taken_by is not None:
-                return JsonResponse({'ok': False, 'error': f'Posao je već preuzet.'}, status=409)
+                return JsonResponse({'ok': False, 'error': 'Posao je već preuzet.'}, status=409)
             if lead.company == company:
                 return JsonResponse({'ok': False, 'error': 'Ne možete preuzeti vlastiti posao.'}, status=400)
 

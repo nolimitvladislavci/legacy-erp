@@ -13,8 +13,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.services_oib_finalizer import (
     OIBFinalizerError,
@@ -28,7 +26,6 @@ logger = logging.getLogger(__name__)
 @login_required
 def draft_companies_view(request):
     """Lista DRAFT tvrtki čekaju pravi OIB."""
-    from companies.models import Company
     from core.company_utils import get_user_company
 
     company = get_user_company(request)

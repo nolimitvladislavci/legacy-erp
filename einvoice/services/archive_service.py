@@ -1,8 +1,7 @@
 """S3/MinIO Archive Service with SHA-256 integrity verification."""
 import logging
 from django.conf import settings
-from django.utils import timezone
-from einvoice.models import AS4Message, DocumentArchive
+from einvoice.models import DocumentArchive
 
 logger = logging.getLogger("propter.einvoice.archive")
 

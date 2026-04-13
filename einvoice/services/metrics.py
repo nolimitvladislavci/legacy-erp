@@ -7,9 +7,6 @@ Counters and histograms for:
 - Transport backend usage
 """
 import logging
-import time
-from functools import wraps
-from django.conf import settings
 
 logger = logging.getLogger("propter.einvoice.metrics")
 

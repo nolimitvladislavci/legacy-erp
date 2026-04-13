@@ -210,7 +210,6 @@ class SAFTGenerator:
 
     def _build_general_ledger_entries(self, root):
         from konto.models import JournalEntry
-        from django.db.models import Sum
 
         entries = JournalEntry.objects.filter(
             company=self.company,

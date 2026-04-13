@@ -12,7 +12,6 @@ django.setup()
 from django.conf import settings
 from django.apps import apps
 from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 print("="*70)
 print(" FINA-CONNECT CHAOS MONKEY - DIAGNOSTIČKI TEST POUZDANOSTI (FAZA 1)")

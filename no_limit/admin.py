@@ -1,7 +1,5 @@
 from django.contrib import admin
 from no_limit.models import AzilPrijava
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 @admin.register(AzilPrijava)

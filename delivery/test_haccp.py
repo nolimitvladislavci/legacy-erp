@@ -5,8 +5,6 @@ from decimal import Decimal
 from datetime import timedelta
 from companies.models import Company
 from delivery.models import SmartBox, SensorReading, HACCPIncident, analyze_readings
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 
@@ -57,7 +55,7 @@ class HACCPAnalysisTests(TestCase):
         incidents = analyze_readings(self.box)
         self.box.refresh_from_db()
 
-        print(f" -> Ocitanja: 4->6->10->7->4 C (2 min iznad praga)")
+        print(" -> Ocitanja: 4->6->10->7->4 C (2 min iznad praga)")
         print(f" -> Incidenti: {len(incidents)}")
         print(f" -> Box status: {self.box.haccp_status}")
 
@@ -85,7 +83,7 @@ class HACCPAnalysisTests(TestCase):
         incidents = analyze_readings(self.box)
         self.box.refresh_from_db()
 
-        print(f" -> Ocitanja: 4->7->9->10->11->11.5->5 C")
+        print(" -> Ocitanja: 4->7->9->10->11->11.5->5 C")
         print(f" -> Incidenti: {len(incidents)}")
         if incidents:
             inc = incidents[0]
@@ -163,7 +161,7 @@ class HACCPAnalysisTests(TestCase):
         incidents = analyze_readings(self.box)
         self.box.refresh_from_db()
 
-        print(f" -> Ocitanja: 4->8->16.5 C")
+        print(" -> Ocitanja: 4->8->16.5 C")
         print(f" -> Incidenti: {len(incidents)}")
         if incidents:
             print(f" -> Tip: {incidents[0].incident_type}")

@@ -333,7 +333,6 @@ def employee_create(request):
         try:
             from worktime.models import EmployeeProfile
             from decimal import Decimal
-            import datetime
             ep, ep_created = EmployeeProfile.objects.get_or_create(
                 user=user,
                 defaults={
@@ -814,7 +813,7 @@ def workspace_home(request):
     HOME SCREEN radnika — lista klijenata iz njegovog workspace-a.
     Klik na klijenta → switch_company → rad u kontekstu.
     """
-    from companies.models import Workspace, Company
+    from companies.models import Workspace
     from documents.models import ArhivaEntry
     from django.db.models import Count, Q
 
@@ -1082,7 +1081,6 @@ def employee_onboard(request, pk=None):
     """
     from worktime.models import EmployeeProfile
     from core.company_utils import get_user_company
-    from django.utils import timezone
 
     company = get_user_company(request)
     if not company:
@@ -1397,7 +1395,7 @@ def compliance_monitor(request):
                 ).exists()
             except DatabaseError:
                 is_cashier = False
-            
+
             level = 'critical' if is_cashier else 'warning'
             msg = _('Nema OIB! Radi na kasi — kazna do 66.000€') if is_cashier else _('Nema OIB — preporučeno za evidenciju')
             alerts.append({

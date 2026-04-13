@@ -21,7 +21,7 @@ logger = logging.getLogger("propter.aggregate")
 
 def create_from_pos_receipt(receipt):
     """Kreira Otpremnicu iz PAID POS bona. Idempotentno."""
-    from propter.models import Otpremnica, OtpremnicaItem, BillingPeriod
+    from propter.models import Otpremnica, OtpremnicaItem
 
     # Idempotentno -- provjeri postoji li vec
     existing = Otpremnica.objects.filter(pos_receipt_id=str(receipt.pk)).first()

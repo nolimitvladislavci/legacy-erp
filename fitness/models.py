@@ -1,8 +1,7 @@
 from django.utils import timezone
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from decimal import Decimal
 from datetime import date, timedelta
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -185,7 +184,7 @@ class MemberSubscription(models.Model):
                 new_status = 'grace' # Ako je unutar grace perioda
             else:
                 new_status = 'expired' # Ako je prošao i grace period
-        
+
         # Ako je trenutni status 'draft' i valid_from je danas ili ranije, pretplata postaje aktivna
         if self.status == 'draft' and self.valid_from <= today and new_status != 'expired':
             new_status = 'active'

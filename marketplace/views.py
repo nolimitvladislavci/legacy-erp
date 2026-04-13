@@ -13,11 +13,10 @@ from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 
-from .discounts import get_discount_for_item, get_cart_with_discounts
+from .discounts import get_discount_for_item
 from .models import (
     MarketplaceCategory,
     MarketplaceOrder,
@@ -822,7 +821,7 @@ def cart_shared_checkout(request, token):
     Public checkout page from shared link.
     Security: token expiry (Scenario 2.1), cart_hash validation (Scenario 2.2).
     """
-    from .models import CartSnapshot, OrderComplaint
+    from .models import CartSnapshot
 
     snapshot = get_object_or_404(CartSnapshot, token=token)
 

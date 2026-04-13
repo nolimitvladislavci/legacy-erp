@@ -10,7 +10,6 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.db.models import Count, Q, Sum
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import ERacun, ERacunConfig, ERacunLog, ERacunItem, ERacunTaxSummary
 from django.db import IntegrityError, DatabaseError
@@ -472,7 +471,6 @@ def sukladnost_run(request):
     """Pokreni svih 5 testnih scenarija."""
     from .models import SukladnostTestRun, ERacunConfig
     from django.utils import timezone
-    import json
 
     company = get_user_company(request)
     if not company:

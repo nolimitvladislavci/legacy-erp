@@ -5,9 +5,7 @@ Server-side: uses mdbtools (apt install mdbtools) since no ODBC driver on Linux.
 import subprocess
 import csv
 import io
-import os
 import json
-import tempfile
 from decimal import Decimal
 
 

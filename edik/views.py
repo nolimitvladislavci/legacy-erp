@@ -4,8 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from datetime import date, timedelta
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 

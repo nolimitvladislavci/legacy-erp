@@ -6,8 +6,6 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

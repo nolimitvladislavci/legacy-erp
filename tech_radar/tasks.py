@@ -14,7 +14,7 @@ from datetime import timedelta
 
 from celery import shared_task
 from django.utils import timezone as tz
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('tech_radar')
 

@@ -15,14 +15,12 @@ from boxgram.services.social_import import (
     detect_platform, fetch_oembed, create_social_import
 )
 import uuid
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 def main():
     print("=" * 70)
     print("END-TO-END TEST: Boxgram Social Import")
     print("=" * 70)
-    
+
     # Setup
     print("\n[Setup] Creating test data...")
     company = Company.objects.create(
@@ -43,13 +41,13 @@ def main():
     )
     print(f"  ✓ User: {user.username}")
     print(f"  ✓ Pet: {pet.name} (slug: {pet.slug})")
-    
+
     # Test 1: YouTube URL detection & preview
     print("\n[Test 1] YouTube URL Detection & Preview")
     yt_url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     platform = detect_platform(yt_url)
     print(f"  ✓ Detected platform: {platform}")
-    
+
     preview = fetch_oembed(yt_url)
     print(f"  ✓ Preview fetched: success={preview.success}")
     if preview.success:
@@ -58,7 +56,7 @@ def main():
     else:
         # Expected untuk test jer je real URL
         print(f"    - Expected error (real API): {preview.error[:50]}...")
-    
+
     # Test 2: Create Social Import
     print("\n[Test 2] Create Social Import Record")
     test_url = f'https://www.youtube.com/watch?v={uuid.uuid4().hex[:8]}'
@@ -66,13 +64,13 @@ def main():
     print(f"  ✓ SocialImport created: {social_import.id}")
     print(f"    - Status: {social_import.status}")
     print(f"    - Platform: {social_import.platform}")
-    
+
     # Test 3: Simulate confirm import (create LifeEvent)
     print("\n[Test 3] Confirm Import → Create LifeEvent")
     if not preview.success:
         # Za test, koristi mock data
         preview.caption = "Test Video Caption"
-    
+
     life_event = LifeEvent.objects.create(
         pet=pet,
         event_type='social_import',
@@ -87,13 +85,13 @@ def main():
     print(f"    - Title: {life_event.title}")
     print(f"    - Pet: {life_event.pet.name}")
     print(f"    - Source: {life_event.source}")
-    
+
     # Map SocialImport to LifeEvent
     social_import.status = 'approved'
     social_import.mapped_to = life_event
     social_import.save()
-    print(f"  ✓ Mapped SocialImport to LifeEvent")
-    
+    print("  ✓ Mapped SocialImport to LifeEvent")
+
     # Test 4: Query pending imports
     print("\n[Test 4] Query Pending Imports")
     pending = SocialImport.objects.filter(
@@ -101,7 +99,7 @@ def main():
         status='pending'
     )
     print(f"  ✓ Found {pending.count()} pending imports")
-    
+
     # Test 5: Reject import
     print("\n[Test 5] Reject Import")
     test_url2 = f'https://www.tiktok.com/video/{uuid.uuid4().hex[:8]}'
@@ -115,14 +113,14 @@ def main():
     import2.save()
     print(f"  ✓ Rejected import: {import2.id}")
     print(f"    - Status: {import2.status}")
-    
+
     # Test 6: Timeline
     print("\n[Test 6] Pet Timeline")
     timeline = pet.life_events.all()
     print(f"  ✓ Pet has {timeline.count()} events on timeline")
     for event in timeline:
         print(f"    - {event.title} ({event.event_type})")
-    
+
     # Summary
     print("\n" + "=" * 70)
     print("END-TO-END TEST PASSED ✓")

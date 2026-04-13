@@ -4,7 +4,7 @@ Token-based auth (no login required).
 """
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count
 from django.utils import timezone
 
 from partners.models import Partner
@@ -278,7 +278,6 @@ def client_ticket_detail(request, token, ticket_id):
 
 
 # ── Document Upload (Drag & Drop) ─────────────────────────────────
-import json
 
 def client_upload(request, token):
     """AJAX: Klijent uploada fakturu (slika/PDF) → draft URA via Gemini OCR."""
@@ -370,7 +369,7 @@ def client_eracun_timeline(request, token):
                 for s in steps:
                     if not s['done']:
                         s['error'] = True
-                        s['label'] += f' (Greška)'
+                        s['label'] += ' (Greška)'
                         break
 
             data.append({

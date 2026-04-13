@@ -8,5 +8,3 @@ class TrackingConfig(AppConfig):
 
     def ready(self):
         import tracking.signals  # noqa
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist

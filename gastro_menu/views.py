@@ -13,9 +13,9 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 
 from core.company_utils import get_user_company
-from .models import DigitalMenu, MenuCategory, MenuItem, MenuItemIngredient, TableQR, TableOrder
+from .models import DigitalMenu, MenuCategory, MenuItem, TableQR, TableOrder
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('gastro_menu')
 

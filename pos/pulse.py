@@ -15,7 +15,7 @@ Svaki event se sprema + opcija WhatsApp alert vlasniku.
 import logging
 from decimal import Decimal
 from django.utils import timezone as tz
-from django.db.models import Count, Sum, Q, Avg
+from django.db.models import Sum
 
 logger = logging.getLogger('pos_pulse')
 
@@ -181,7 +181,7 @@ def get_dashboard_data(company):
     """Pulse dashboard podaci za frontend."""
     now = tz.now()
     today = now.date()
-    from pos.models import POSReceipt, POSPulseEvent, POSSession, POSTerminal
+    from pos.models import POSReceipt, POSPulseEvent, POSSession
     from datetime import timedelta
 
     # Active terminals (smjena otvorena)

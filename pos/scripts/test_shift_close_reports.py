@@ -5,15 +5,13 @@ Simulacija: 3 konobara + 1 recepcija rade smjenu, zatvaraju, generiraju izvješt
 from decimal import Decimal
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.test import RequestFactory
-from unittest.mock import patch
 from datetime import timedelta
 import json
 
 from companies.models import Company
 from pos.models import *
-from inventory.models import InventoryItem, StockMovement
-from pos.worktime_bridge import cashier_clock_in, cashier_clock_out, session_close_all_cashiers
+from inventory.models import InventoryItem
+from pos.worktime_bridge import cashier_clock_in, cashier_clock_out
 
 konjik = Company.objects.get(name__icontains="Konjik")
 su = User.objects.get(username="superadmin")
@@ -188,7 +186,6 @@ print("\n--- FAZA 4: Zatvaranje smjene ---")
 
 def t_close():
     # Simuliraj da su blagajnici radili od ranije
-    import datetime
     start = now() - timedelta(hours=8)
     for c in [c_ana, c_marko, c_ivan]:
         c.clock_in_at = start
@@ -256,7 +253,7 @@ test("5.1 POSDailyReport — kompletni dnevni izvještaj", t_daily_report)
 
 # ── Per-cashier breakdown ──
 def t_cashier_breakdown():
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
     for cashier in [c_ana, c_marko, c_ivan]:
         receipts = session.receipts.filter(cashier=cashier, status="paid")
         total = receipts.aggregate(s=Sum("total"))["s"] or Decimal("0")

@@ -30,8 +30,6 @@ NUDGE_SCENARIOS = [
 def user_nudge_patrol(self):
     """Globalni nudge patrol — svakih 4h."""
     from companies.models import Company
-    from accounts.models import CompanyMembership
-    from django.contrib.auth.models import User
     from django.core.cache import cache
 
     results = {'checked': 0, 'nudged': 0, 'skipped': 0}

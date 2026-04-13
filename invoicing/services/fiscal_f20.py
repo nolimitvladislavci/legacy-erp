@@ -3,7 +3,6 @@ invoicing/services/fiscal_f20.py
 Fiskalizacija 2.0 handler — delegira na informacijskog posrednika.
 """
 import logging
-from django.core.exceptions import ObjectDoesNotExist
 from .entry_point import BaseFiscalHandler, FiscalResult
 from django.db import IntegrityError, DatabaseError
 
@@ -43,7 +42,7 @@ class ERacunFiskalizacija20Handler(BaseFiscalHandler):
         2. Posalji posredniku putem API-ja (njihov kod)
         3. Zapisi rezultat
         """
-        from eracun.models import ERacun, ERacunItem, ERacunLog
+        from eracun.models import ERacunLog
         from eracun.services.ubl_generator import generate_ubl_xml
 
         try:

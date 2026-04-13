@@ -9,12 +9,10 @@ import io
 import json
 import logging
 import os
-import uuid
 from datetime import datetime
 from decimal import Decimal
 from xml.etree.ElementTree import Element, SubElement, tostring
 
-from django.conf import settings
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -524,7 +522,7 @@ def convert_image_to_xml(file_bytes, filename, company, user=None):
     Returns: ConversionRecord instance
     """
     from documents.models import ConversionRecord, ArhivaEntry
-    from documents.storage_backends import store_document, get_file_hash
+    from documents.storage_backends import store_document
 
     original_hash = hashlib.sha256(file_bytes).hexdigest()
     original_size = len(file_bytes)

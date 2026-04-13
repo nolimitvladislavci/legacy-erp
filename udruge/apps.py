@@ -22,5 +22,3 @@ class UdrugeConfig(AppConfig):
                          dispatch_uid='udruge_auto_nonprofit_setup')
 
         import udruge.signals  # noqa: F401 — KnjigaPrimitaka + Donacija archival
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist

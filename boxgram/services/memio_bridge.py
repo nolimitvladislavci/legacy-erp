@@ -191,14 +191,14 @@ def _get_tenant_id(animal):
     """Dohvati company (tenant) za animal. PetProfile.tenant je FK na Company."""
     from django.apps import apps
     Company = apps.get_model('companies', 'Company')
-    
+
     # Ako breeder ima linkanu LIMIT Connect firmu
     if animal.breeder and animal.breeder.limit_company_id:
         try:
             return int(animal.breeder.limit_company_id)
         except (ValueError, TypeError):
             pass
-    
+
     # Fallback: prva firma
     first = Company.objects.first()
     return first.pk if first else None

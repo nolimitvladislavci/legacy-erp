@@ -10,7 +10,6 @@ Rules:
 Uses KontoAccount FK lookup, not hardcoded account codes.
 """
 import logging
-from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 from django.db import IntegrityError, DatabaseError
@@ -32,7 +31,7 @@ def book_bank_transaction(bank_txn):
     Returns the JournalEntry or None if booking was skipped.
     Raises nothing — logs errors instead.
     """
-    from konto.models import KontoAccount, JournalEntry, LedgerLine
+    from konto.models import JournalEntry, LedgerLine
 
     # Guard: already booked
     if bank_txn.is_booked:
@@ -184,7 +183,6 @@ def auto_knjizi_clanarina(clanarina):
     D: 112 (blagajna/gotovina) ili 111 (žiro) / C: 3211 (Članarine)
     """
     import logging
-    from decimal import Decimal
     from konto.models import JournalEntry, LedgerLine
     logger = logging.getLogger('konto.booking')
 
@@ -258,7 +256,6 @@ def auto_knjizi_donacija(donacija):
     D: 111 (žiro) ili 029 (oprema za materijalnu) / C: 353 (pravna) ili 3633 (fizička) ili 351 (proračun)
     """
     import logging
-    from decimal import Decimal
     from konto.models import JournalEntry, LedgerLine
     logger = logging.getLogger('konto.booking')
 

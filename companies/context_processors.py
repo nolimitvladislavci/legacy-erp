@@ -1,5 +1,4 @@
-from django.db import IntegrityError, DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 """
 companies/context_processors.py
 Injects sidebar_modules into every template context.
@@ -20,8 +19,7 @@ def sidebar_modules(request):
 
         from companies.models import CompanyModuleConfig
         from companies.module_registry import (
-            MODULES, CATEGORIES, get_modules_by_category,
-            get_quick_actions, get_module,
+            MODULES, CATEGORIES, get_quick_actions,
         )
 
         config = CompanyModuleConfig.objects.filter(company=company).first()

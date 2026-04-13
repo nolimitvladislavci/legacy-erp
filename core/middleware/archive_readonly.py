@@ -10,8 +10,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 # URLs that are always allowed even in readonly mode
 EXEMPT_PATHS = (

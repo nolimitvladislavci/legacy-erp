@@ -4,7 +4,7 @@ Autonomni nocni patrol -- pokrece se svako jutro u 03:30.
 """
 import logging
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('intelligence')
 

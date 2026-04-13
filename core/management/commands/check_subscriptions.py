@@ -4,10 +4,8 @@ core/management/commands/check_subscriptions.py
 Provjera pretplata i računa — šalje WhatsApp podsjetnike.
 Pokreće se jednom dnevno preko Celery beat-a.
 """
-from datetime import date, timedelta
+from datetime import date
 from django.core.management.base import BaseCommand
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from core.notify import notify
 
 

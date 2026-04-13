@@ -6,9 +6,8 @@ Core functions: slot availability, booking creation, reminders.
 import logging
 from datetime import date, datetime, timedelta
 
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.exceptions import BookingConflictError
 from core.exceptions import ValidationError as BizValidationError

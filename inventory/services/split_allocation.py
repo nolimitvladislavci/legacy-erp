@@ -7,7 +7,6 @@ da bi porezna inspekcija mogla pratiti tok robe.
 """
 import logging
 from decimal import Decimal
-from django.utils import timezone
 
 logger = logging.getLogger('inventory.split_allocation')
 
@@ -39,7 +38,7 @@ def allocate_to_inhouse(item, qty, reason='', user=None):
         movement_type='internal_use',
         quantity=qty,
         unit_price=item.unit_price or Decimal('0'),
-        reason=reason or f'SplitAllocation: prebačeno u internu upotrebu (repromaterijal)',
+        reason=reason or 'SplitAllocation: prebačeno u internu upotrebu (repromaterijal)',
         performed_by=user,
     )
 
@@ -76,7 +75,7 @@ def release_from_inhouse(item, qty, reason='', user=None):
         movement_type='in',
         quantity=qty,
         unit_price=item.unit_price or Decimal('0'),
-        reason=reason or f'SplitAllocation: povrat iz interne upotrebe u slobodnu zalihu',
+        reason=reason or 'SplitAllocation: povrat iz interne upotrebe u slobodnu zalihu',
         performed_by=user,
     )
 

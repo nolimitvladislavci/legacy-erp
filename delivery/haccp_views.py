@@ -3,17 +3,14 @@ delivery/haccp_views.py — HACCP Forensic Report + Dispatcher Incident Manageme
 """
 import hashlib
 import json
-from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
-from .models import HACCPIncident, SmartBox, SensorReading
+from .models import HACCPIncident, SensorReading
 
 
 @login_required

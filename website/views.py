@@ -1,12 +1,10 @@
-import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 from .forms import HitnaIntervencijaForm
 from .models import Brand, GalleryImage, HitnaIntervencija, VideoGallery
@@ -570,7 +568,6 @@ def digitalni_posrednik(request):
 import json as _json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 
 KRULJAC_WA = "+385913912621"
 

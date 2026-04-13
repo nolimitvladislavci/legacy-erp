@@ -10,7 +10,7 @@ Poziva se PRIJE generiranja EU timesheeta i pri save() TimeEntry.
 import logging
 from decimal import Decimal
 
-from django.db.models import Sum, Q
+from django.db.models import Sum
 
 logger = logging.getLogger('eu_audit')
 

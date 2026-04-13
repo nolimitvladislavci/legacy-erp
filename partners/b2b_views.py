@@ -4,11 +4,10 @@ Partner pristupa putem portal_token (UUID), bez login-a.
 """
 import json
 
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum
 
 from partners.models import Partner
 from invoicing.models import Invoice

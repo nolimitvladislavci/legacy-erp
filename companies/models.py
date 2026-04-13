@@ -1,10 +1,9 @@
 import uuid
 
 from django.conf import settings
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models, DatabaseError
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 from core.managers import CompanyManager
 
 
@@ -697,7 +696,7 @@ class CompanyModuleConfig(models.Model):
         return module_id in self.enabled_modules
 
     def get_sidebar_modules(self):
-        from companies.module_registry import MODULES, get_module
+        from companies.module_registry import get_module
         result = []
         order = self.sidebar_order or self.enabled_modules
         for mid in order:

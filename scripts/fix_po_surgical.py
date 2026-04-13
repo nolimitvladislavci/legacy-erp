@@ -3,8 +3,6 @@ Surgical fix for known problematic PO entries.
 Uses line-by-line approach to find and fix broken entries.
 """
 import re
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 LOCALES = ["hr", "en", "de", "tr", "el"]
 
@@ -18,18 +16,18 @@ PROBLEM_MSGIDS = [
 def fix_file(path):
     with open(path, "r", encoding="utf-8") as f:
         content = f.read()
-    
+
     # Strategy: find broken msgstr entries and replace them
     # A broken entry has msgstr "..." followed by content NOT starting with # or msgid or "
-    
+
     lines = content.split('\n')
     new_lines = []
     i = 0
     fixes = 0
-    
+
     while i < len(lines):
         line = lines[i]
-        
+
         # Detect a msgstr that's broken (content after closing quote)
         if line.startswith('msgstr "'):
             # Find the corresponding msgid
@@ -52,7 +50,7 @@ def fix_file(path):
                             break
                     msgid = ''.join(parts)
                     break
-            
+
             # Check if this msgstr line is properly formatted
             m = re.match(r'^msgstr "(.*)"$', line)
             if m:
@@ -60,7 +58,7 @@ def fix_file(path):
                 new_lines.append(line)
                 i += 1
                 continue
-            
+
             # Broken msgstr - collect all garbage until next proper entry
             i += 1
             garbage_lines = []
@@ -75,7 +73,7 @@ def fix_file(path):
                     continue
                 garbage_lines.append(next_line)
                 i += 1
-            
+
             # For these broken entries, just set msgstr = msgid
             if msgid:
                 new_lines.append(f'msgstr "{msgid}"')
@@ -83,13 +81,13 @@ def fix_file(path):
                 new_lines.append('msgstr ""')
             fixes += 1
             continue
-        
+
         new_lines.append(line)
         i += 1
-    
+
     with open(path, "w", encoding="utf-8") as f:
         f.write('\n'.join(new_lines))
-    
+
     return fixes
 
 

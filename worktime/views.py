@@ -1,10 +1,8 @@
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
-from django.db import DatabaseError, IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import *
@@ -132,7 +130,6 @@ def api_quick_create_project(request):
 # HYBRID TIME TRACKING API — Clock In/Out, Geofence, Auditor
 # ══════════════════════════════════════════════════════════════════════════════
 import math
-from decimal import Decimal
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -413,7 +410,6 @@ def offline_sync(request):
     """Sync offline worktime entries from IndexedDB."""
     import json
     from django.http import JsonResponse
-    from django.utils import timezone as tz
     from .models import TimeLog
     from core.company_utils import get_user_company
 
@@ -463,7 +459,6 @@ def my_hours(request):
     """Radnik vidi SVOJE sate — ne može vidjeti tuđe."""
     from django.utils import timezone
     from django.db.models import Sum
-    from decimal import Decimal
 
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
     today = timezone.now().date()
@@ -552,7 +547,7 @@ def my_hours(request):
 @login_required
 def my_pay(request):
     """Radnik vidi svoje isplatne liste."""
-    from payroll.models import PayrollRun, Payslip
+    from payroll.models import Payslip
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
 
     payslips = Payslip.objects.filter(
@@ -569,7 +564,6 @@ def my_pay(request):
 @login_required
 def my_requests(request):
     """Radnik šalje zahtjeve — godišnji, bolovanje, PIN promjena."""
-    from django.utils import timezone
 
     if request.method == 'POST':
         req_type = request.POST.get('type', '')

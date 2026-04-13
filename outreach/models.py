@@ -1,6 +1,5 @@
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class Contact(models.Model):

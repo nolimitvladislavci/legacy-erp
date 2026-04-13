@@ -894,7 +894,6 @@ def device_token_auto_login(request):
     Koristi se kad POS radi na istom mobitelu.
     URL: /auth/device-login/?token=uuid
     """
-    import json
     from accounts.models import DeviceToken
     from django.utils import timezone
 

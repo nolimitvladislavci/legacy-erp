@@ -49,15 +49,14 @@ def run(name, fn):
         failed(name, str(e)[:100], (time.time()-t0)*1000)
 
 print(f'\n{BOLD}{C}╔══════════════════════════════════════════╗')
-print(f'║  LIMIT-CONNECT POS TEST SUITE v2        ║')
+print('║  LIMIT-CONNECT POS TEST SUITE v2        ║')
 print(f'║  {datetime.now().strftime("%d.%m.%Y %H:%M")}                       ║')
 print(f'╚══════════════════════════════════════════╝{RESET}')
 
 from pos.models import (POSTerminal, POSSession, POSReceipt, POSReceiptItem,
-    POSPaymentLine, POSCashier, POSSettings, POSDailyReport,
+    POSPaymentLine, POSCashier, POSDailyReport,
     Table, GastroOrder, GastroOrderItem, WaiterShift,
-    Voucher, CashDeposit, ExpiryBatch, LoyaltyProgram,
-    ImprovementSuggestion)
+    Voucher, CashDeposit, ExpiryBatch, ImprovementSuggestion)
 from companies.models import Company
 from inventory.models import InventoryItem
 

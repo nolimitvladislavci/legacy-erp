@@ -50,18 +50,18 @@ def get_timestamp_token(data_bytes, tsa_server=None):
         import asn1crypto.tsp as tsp
         import asn1crypto.algos as algos
         import asn1crypto.core as core
-        
+
         msg_imprint = tsp.MessageImprint({
             'hash_algorithm': algos.DigestAlgorithm({'algorithm': 'sha256'}),
             'hashed_message': digest,
         })
-        
+
         ts_req = tsp.TimeStampReq({
             'version': 'v1',
             'message_imprint': msg_imprint,
             'cert_req': True,
         })
-        
+
         req_der = ts_req.dump()
     except ImportError:
         # Fallback: ručni minimalni ASN.1 DER za SHA-256 TSReq
@@ -82,7 +82,7 @@ def get_timestamp_token(data_bytes, tsa_server=None):
             headers={'Content-Type': 'application/timestamp-query'},
             timeout=(3, 10),
         )
-        
+
         if resp.status_code == 200:
             logger.info('TSA timestamp dobiven od %s (%d bytes)', server, len(resp.content))
             return resp.content
@@ -101,10 +101,10 @@ def embed_timestamp_in_xades(xml_content, timestamp_token):
     """
     if not timestamp_token:
         return xml_content
-    
+
     import base64
     ts_b64 = base64.b64encode(timestamp_token).decode('ascii')
-    
+
     # Inject SignatureTimeStamp u XAdES UnsignedProperties
     ts_xml = (
         '<xades:UnsignedProperties>'
@@ -115,10 +115,10 @@ def embed_timestamp_in_xades(xml_content, timestamp_token):
         '</xades:UnsignedSignatureProperties>'
         '</xades:UnsignedProperties>'
     )
-    
+
     if isinstance(xml_content, bytes):
         xml_content = xml_content.decode('utf-8')
-    
+
     # Inject prije zatvaranja QualifyingProperties
     if '</xades:QualifyingProperties>' in xml_content:
         xml_content = xml_content.replace(
@@ -131,5 +131,5 @@ def embed_timestamp_in_xades(xml_content, timestamp_token):
             '</ds:Signature>',
             f'<ds:Object Id="TSA-Token">{ts_b64}</ds:Object></ds:Signature>'
         )
-    
+
     return xml_content

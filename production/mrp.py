@@ -15,7 +15,6 @@ Rezultat: Lista MRPPlannedOrder-a za pregled/potvrdu.
 """
 
 import logging
-import uuid
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -35,7 +34,7 @@ def mrp_run(company, horizon_days=30, user=None):
     Returns: dict with results summary + list of planned orders
     """
     from production.models import (
-        BillOfMaterials, ProductionOrder, MRPPlannedOrder, StockMovement,
+        BillOfMaterials, ProductionOrder, MRPPlannedOrder,
     )
     from inventory.models import InventoryItem
 
@@ -204,7 +203,7 @@ def calculate_workstation_load(company, days_ahead=14):
     """
     Kapacitet planiranje — koliko je svaka radna stanica opterećena.
     """
-    from production.models import Workstation, ProductionOrder, ProductionStep
+    from production.models import Workstation, ProductionStep
 
     horizon = date.today() + timedelta(days=days_ahead)
     workstations = Workstation.objects.filter(company=company, status='active')

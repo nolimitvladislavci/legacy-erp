@@ -99,7 +99,7 @@ class Command(BaseCommand):
             )
         )
         if not created:
-            self.stdout.write(f"  Firma već postoji — koristi se postojeća")
+            self.stdout.write("  Firma već postoji — koristi se postojeća")
 
         user, ucreated = User.objects.get_or_create(
             username=username,
@@ -139,7 +139,7 @@ class Command(BaseCommand):
         from partners.models import Partner
         from inventory.models import InventoryItem
         from work_orders.models import WorkOrder, WorkOrderItem
-        from invoicing.models import Invoice, InvoiceItem
+        from invoicing.models import Invoice
         from calculator.models import BOM, BOMItem
 
         # Partneri — klijenti servisa
@@ -359,7 +359,7 @@ class Command(BaseCommand):
 
     def _seed_salon(self, company, user):
         from partners.models import Partner
-        from appointments.models import Appointment, BookingResource, BookingService, WorkingHours
+        from appointments.models import Appointment, BookingResource, BookingService
         from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem
         from inventory.models import InventoryItem
 

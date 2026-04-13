@@ -70,7 +70,6 @@ def opportunity_digest():
     Returns structured data for dashboard widget.
     """
     from limit_connect_ai.models import ClientOpportunityMatch
-    from companies.models import Company
 
     stats = (
         ClientOpportunityMatch.objects

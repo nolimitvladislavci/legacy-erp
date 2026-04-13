@@ -1,7 +1,5 @@
 """B2C Portal Service — email + web viewer for non-Peppol recipients."""
 import logging
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("propter.einvoice.b2c")
 

@@ -8,14 +8,14 @@ import re
 import datetime
 
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('intelligence')
 
 
 def run_intelligence_job(job):
     """Pokreni jedan job -- provjeri sve izvore i generiraj rezultate."""
-    from intelligence.models import IntelligenceResult, IntelligenceSource, FundOpportunity
+    from intelligence.models import IntelligenceResult, FundOpportunity
     from core.gemini_agent import GeminiAgent
 
     results_count = 0

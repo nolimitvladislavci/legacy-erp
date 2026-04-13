@@ -11,9 +11,6 @@ Usage u PDF templateima:
     {% doc_integrity_badge lang="de" %}
 """
 from django import template
-from django.utils.safestring import mark_safe
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 

@@ -12,11 +12,10 @@ Tok:
 """
 import logging
 import json
-import os
 from datetime import datetime
 
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 logger = logging.getLogger('trojstvo')
 

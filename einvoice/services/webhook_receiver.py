@@ -5,7 +5,6 @@ Security: HMAC signature verification on every payload.
 """
 import hmac
 import hashlib
-import json
 import logging
 from django.conf import settings
 from einvoice.models import AS4Message, MessageStatus

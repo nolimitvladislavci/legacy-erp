@@ -15,7 +15,6 @@ Usage:
     python manage.py test_fina_sandbox --live   # When real sandbox available
 """
 import os
-import sys
 import time
 import hashlib
 import tempfile
@@ -24,7 +23,6 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 
 logger = logging.getLogger("propter.einvoice.sandbox")
 
@@ -306,7 +304,7 @@ class Command(BaseCommand):
                 cert=(cert_pem, key_pem),
                 timeout=httpx.Timeout(connect=5.0, read=10.0, write=10.0, pool=5.0),
             )
-            self._ok(f"httpx client created with mTLS cert")
+            self._ok("httpx client created with mTLS cert")
             self._ok(f"  cert: {cert_pem}")
             self._ok(f"  key:  {key_pem}")
 
@@ -337,15 +335,15 @@ class Command(BaseCommand):
         import uuid
         fake_message_id = f"ECHO-{uuid.uuid4().hex[:12].upper()}"
 
-        self._ok(f"Simulated submit:")
-        self._ok(f"  Endpoint: https://api.einvoice.hr/v1/invoices (NOT called)")
-        self._ok(f"  Method: POST")
-        self._ok(f"  Content-Type: application/xml")
+        self._ok("Simulated submit:")
+        self._ok("  Endpoint: https://api.einvoice.hr/v1/invoices (NOT called)")
+        self._ok("  Method: POST")
+        self._ok("  Content-Type: application/xml")
         self._ok(f"  Payload: {results['ubl']['size']} bytes")
         self._ok(f"  SHA-256: {sha[:32]}...")
         self._ok(f"  mTLS: cert loaded ({'YES' if results['mtls']['ok'] else 'NO'})")
         self._ok(f"  Echo MessageID: {fake_message_id}")
-        self._ok(f"  Simulated Status: ACCEPTED")
+        self._ok("  Simulated Status: ACCEPTED")
 
         return {"ok": True, "message_id": fake_message_id, "mode": "echo"}
 

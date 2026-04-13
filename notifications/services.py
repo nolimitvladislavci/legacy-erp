@@ -1,7 +1,5 @@
 """Notification helpers — create DB notification + Web Push."""
 import logging
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from .models import Notification
 
 logger = logging.getLogger(__name__)

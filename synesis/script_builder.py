@@ -1,5 +1,3 @@
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 """
 synesis/script_builder.py
 
@@ -66,11 +64,11 @@ def build_sync_script(cfg, company):
     a('# Connect radni folderi (automatski se kreiraju)')
     a(f'CONNECT_BASE     = r"{connect_base}"')
     a(f'FIRMA_SLUG       = "{slug}"')
-    a(f'CONNECT_DIR      = os.path.join(CONNECT_BASE, FIRMA_SLUG)')
-    a(f'BACKUP_DIR       = os.path.join(CONNECT_DIR, "backup")')
-    a(f'WORK_DIR         = os.path.join(CONNECT_DIR, "work")')
-    a(f'EXPORT_DIR       = os.path.join(CONNECT_DIR, "export")')
-    a(f'LOG_FILE         = os.path.join(CONNECT_DIR, "connect_log.txt")')
+    a('CONNECT_DIR      = os.path.join(CONNECT_BASE, FIRMA_SLUG)')
+    a('BACKUP_DIR       = os.path.join(CONNECT_DIR, "backup")')
+    a('WORK_DIR         = os.path.join(CONNECT_DIR, "work")')
+    a('EXPORT_DIR       = os.path.join(CONNECT_DIR, "export")')
+    a('LOG_FILE         = os.path.join(CONNECT_DIR, "connect_log.txt")')
     a()
     a('# Radne kopije (WORK — ovdje se čita i piše)')
     a('STORAGE_WORK     = os.path.join(WORK_DIR, "Storage_work.mdb")')

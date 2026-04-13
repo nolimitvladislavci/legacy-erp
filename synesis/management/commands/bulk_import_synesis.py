@@ -37,7 +37,7 @@ from decimal import Decimal, InvalidOperation
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError
 
 ARCHIVE_PATH = "/var/www/fina-connect/synesis/KONJIK_ARHIVA/Synesis/"
 

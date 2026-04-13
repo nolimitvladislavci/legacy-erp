@@ -1,7 +1,5 @@
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.middleware.csrf import get_token
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def csrf_failure_view(request, reason=''):

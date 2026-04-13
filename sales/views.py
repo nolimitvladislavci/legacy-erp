@@ -2,7 +2,6 @@
 sales/views.py — Cjenici, Narudžbe kupaca, Saldakonti (25+ views).
 """
 
-import json
 import logging
 from decimal import Decimal
 from datetime import timedelta
@@ -10,12 +9,11 @@ from datetime import timedelta
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Sum, Count, F, Case, When, DecimalField
+from django.db.models import Q, Sum, F
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -23,7 +21,7 @@ from .models import (
     SalesOrder, SalesOrderLine, OpenItem, IOSReport,
 )
 from .ai_services import smart_pricing_suggest, order_predictor, payment_predictor, resolve_price
-from django.db import DatabaseError, IntegrityError
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

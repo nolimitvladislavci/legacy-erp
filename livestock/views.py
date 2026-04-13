@@ -2,7 +2,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.core.exceptions import ObjectDoesNotExist
 from core.company_utils import get_user_company
 from .models import Livestock, Field, CropPlan
 from django.db import IntegrityError, DatabaseError
@@ -206,7 +205,6 @@ def vet_dashboard(request):
     })
 
 
-from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 
@@ -303,7 +301,6 @@ def robot_identify(request):
 
 def institutional_api(request, scope):
     """API za institucije — token auth, rate limited, audited."""
-    import json
     from django.http import JsonResponse
     from .models import InstitutionalAccessToken, InstitutionalAccessLog, Livestock, HealthRecord
 
@@ -491,7 +488,7 @@ def inspector_live_view(request, scope, token):
 def inspector_panic_button(request):
     """Panic button — farmer generira QR + PDF za inspekciju."""
     from core.company_utils import get_user_company
-    from .models import InstitutionalAccessToken, Livestock, HealthRecord
+    from .models import InstitutionalAccessToken, HealthRecord
     from django.utils import timezone
 
     company = get_user_company(request)
@@ -539,7 +536,6 @@ def generate_inspection_pdf(request):
     from .models import Livestock, HealthRecord
     from core.doc_integrity import get_integrity_badge_context
     from django.utils import timezone
-    import io
 
     company = get_user_company(request)
     if not company:

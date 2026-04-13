@@ -1,7 +1,5 @@
 from django.urls import path
 from no_limit import views
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 app_name = "no_limit"
 

@@ -14,7 +14,6 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from companies.models import Company
 from accounts.models import UserProfile
-from registration.models import CompanySubscription
 
 # ─── PODACI IZ SYNESIS ARHIVE ─────────────────────────────────────────────────
 # Marija Brtan je odgovorna osoba / računovotkinja za sve ove firme
@@ -119,7 +118,7 @@ with transaction.atomic():
             for ch in changed:
                 print(f"     + {ch}")
         else:
-            print(f"     (sva polja već popunjena)")
+            print("     (sva polja već popunjena)")
 
         # ── 2. User: kreiraj ili ažuriraj ─────────────────────────────────
         existing_user = User.objects.filter(username=f['username']).first()

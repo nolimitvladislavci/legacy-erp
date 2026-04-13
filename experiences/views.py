@@ -1,7 +1,6 @@
 """
 experiences/views.py — Agro-Turizam 360 views
 """
-import json
 from decimal import Decimal
 
 from django.contrib import messages
@@ -11,15 +10,14 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db import models, DatabaseError, IntegrityError
+from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
     Experience, ExperienceSchedule, ExperienceBooking,
-    ExperienceInclusion, ExperienceReview,
-    AgroPackage, PackageComponent,
-    RecallEvent, RecallNotification,
+    ExperienceReview,
+    AgroPackage, RecallEvent, RecallNotification,
 )
 
 
@@ -295,7 +293,7 @@ def booking_complete(request, pk):
     booking = get_object_or_404(ExperienceBooking, pk=pk)
 
     if booking.status != 'checked_in':
-        messages.error(request, f'Gost mora biti checked-in prije završetka.')
+        messages.error(request, 'Gost mora biti checked-in prije završetka.')
         return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
 
     if request.method == 'POST':
@@ -523,7 +521,7 @@ def normativ_preview(request, pk):
     GET /experiences/<pk>/normativ/?pax=10
     Vraća JSON s normativom za zadani broj gostiju + stock status.
     """
-    from .models import Experience, ExperienceInclusion
+    from .models import Experience
     from django.http import JsonResponse
 
     exp = get_object_or_404(Experience, pk=pk)

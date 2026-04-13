@@ -14,11 +14,10 @@ next_order_number()      — generiraj sljedeći broj narudžbe
 import logging
 from decimal import Decimal
 
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import transaction
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
-from .models import SalesOrder, SalesOrderLine
+from .models import SalesOrder
 from .ai_services import resolve_price
 
 logger = logging.getLogger(__name__)

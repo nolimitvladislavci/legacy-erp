@@ -8,8 +8,7 @@ django.setup()
 from pos.models import *
 from django.db.models import Sum, Count, Avg
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 
 SEP = "=" * 55
 
@@ -68,7 +67,7 @@ top_items = POSReceiptItem.objects.values('description').annotate(
     cnt=Count('id'), total=Sum('subtotal')
 ).order_by('-cnt')[:10]
 print(f"  Ukupno stavki: {items_count}")
-print(f"  Top 10 artikala:")
+print("  Top 10 artikala:")
 for i in top_items:
     print(f"    - {i['description'][:40]} | {i['cnt']}x | {i['total']:.2f} EUR")
 
@@ -130,7 +129,7 @@ except DatabaseError as e:
 print("\n[ BLAGAJNICKI POLOG ]")
 try:
     cd = CashDeposit.objects.all().order_by('-created_at')[:5]
-    print(f"  Zadnjih 5 pologa:")
+    print("  Zadnjih 5 pologa:")
     for d in cd:
         print(f"  {d.created_at.strftime('%d.%m')} | {d.amount} EUR | {d.deposit_type}")
 except DatabaseError as e:

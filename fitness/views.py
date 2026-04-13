@@ -7,7 +7,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from rest_framework import permissions, viewsets
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Member, MemberCheckIn
 from .serializers import MemberCheckInSerializer, MemberSerializer

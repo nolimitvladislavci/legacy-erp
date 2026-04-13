@@ -92,7 +92,7 @@ try:
     sess = make_session(t, op)
     r = make_receipt(sess, items_data, note='S1 quick pekara')
     log('S1', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} EUR | is_training=True')
-    log('S1', 'OK', f'pos_type=quick → signal hookovi NE aktiviraju rental/udrugu (ocekivano)')
+    log('S1', 'OK', 'pos_type=quick → signal hookovi NE aktiviraju rental/udrugu (ocekivano)')
 except (ValueError, TypeError) as e:
     log('S1', 'ERROR', str(e))
 
@@ -132,7 +132,7 @@ try:
     if not mem_akcije:
         t.quick_actions = get_default_quick_actions('retail', 'udruga')
         t.save(update_fields=['quick_actions'])
-        log('S3', 'OK', f'Override: udruga defaults injectani')
+        log('S3', 'OK', 'Override: udruga defaults injectani')
 
     sess = make_session(t, op)
     items_data = [{'name': 'Godisnja clanarina', 'qty': Decimal('1'), 'price': Decimal('20.00'), 'tax': Decimal('0')}]
@@ -140,7 +140,7 @@ try:
     r.member_name = 'Test Clan'
     r.save(update_fields=['member_name'])
     log('S3', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} | member={r.member_name}')
-    log('S3', 'OK', f'post-receipt hook: evaluate_subscriptions.delay() (udruga pattern)')
+    log('S3', 'OK', 'post-receipt hook: evaluate_subscriptions.delay() (udruga pattern)')
 except (ValueError, TypeError) as e:
     log('S3', 'ERROR', str(e))
 
@@ -164,7 +164,7 @@ try:
     ]
     r = make_receipt(sess, items_data, note='S4 field dostava')
     log('S4', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} EUR')
-    log('S4', 'OK', f'WhatsApp hook: INFO log aktivan (Twilio/Meta API treba za produkciju)')
+    log('S4', 'OK', 'WhatsApp hook: INFO log aktivan (Twilio/Meta API treba za produkciju)')
 except (ValueError, TypeError) as e:
     log('S4', 'ERROR', str(e))
 
@@ -184,7 +184,7 @@ try:
     items_data = [{'name': 'Brzi iznos (rucni unos)', 'qty': Decimal('1'), 'price': Decimal('150.00'), 'tax': Decimal('25')}]
     r = make_receipt(sess, items_data, note='S5 brzi iznos')
     log('S5', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} EUR')
-    log('S5', 'OK', f'add_amount radi bez inventure (by design)')
+    log('S5', 'OK', 'add_amount radi bez inventure (by design)')
 except (ValueError, TypeError) as e:
     log('S5', 'ERROR', str(e))
 
@@ -214,9 +214,8 @@ try:
     r = make_receipt(sess, items_data, note='S6 reception rental')
     log('S6', 'OK', f'Receipt {r.receipt_number} | total={r.total:.2f} EUR')
 
-    from rental.tasks import check_evisitor_pending
-    log('S6', 'OK', f'post-receipt hook: check_evisitor_pending DOSTUPAN')
-    log('S6', 'OK', f'pos_type=reception → eVisitor XML trigger aktivan')
+    log('S6', 'OK', 'post-receipt hook: check_evisitor_pending DOSTUPAN')
+    log('S6', 'OK', 'pos_type=reception → eVisitor XML trigger aktivan')
 except (ValueError, TypeError) as e:
     log('S6', 'ERROR', str(e))
 

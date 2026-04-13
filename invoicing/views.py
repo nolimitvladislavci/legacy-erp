@@ -1,22 +1,18 @@
 from django.core.exceptions import ObjectDoesNotExist
 from core.models import BookingSignature
 import logging
-import os
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from notifications.services import notify
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_POST
 
 from permissions.decorators import require_permission
 
 logger = logging.getLogger(__name__)
 from django.db import transaction, DatabaseError, IntegrityError
-from django.template.loader import render_to_string
 from rest_framework import permissions, viewsets
 
 from core.company_utils import get_user_company
@@ -1483,11 +1479,10 @@ def api_update_invoice(request, pk):
         'date_due', 'date_delivery',
     ]
 
-    import datetime
     for field in allowed_fields:
         if field in data:
             val = data[field]
-     
+
 
 @login_required
 def api_oib_lookup(request):
@@ -1520,7 +1515,7 @@ def api_partner_hint(request):
         return JsonResponse({'hint': None})
 
     company = get_user_company(request)
-    from django.db.models import Avg, Count, Sum
+    from django.db.models import Avg, Count
 
     qs = Invoice.objects.filter(company=company, client_oib=oib)
 
@@ -1978,7 +1973,7 @@ def api_invoice_morph(request, pk):
         invoice=invoice,
         event_type='morphed',
         title=f'Dokument mutirao: {old_doctype} -> {new_name}',
-        detail=f'Automatska tranzicija dokumenta.',
+        detail='Automatska tranzicija dokumenta.',
         actor=request.user,
         metadata={'from': current, 'to': target},
     )
@@ -2194,7 +2189,7 @@ def api_invoice_items(request, pk):
 @login_required
 def dunning_dashboard(request):
     from django.utils import timezone
-    from django.db.models import Sum, Count
+    from django.db.models import Sum
     from .models import Invoice, DunningHistory, DunningRule
     from .tasks import run_dunning_cycle
 
@@ -2258,7 +2253,7 @@ def dunning_dashboard(request):
 @login_required
 def ira_ura_dashboard(request):
     """GAP7: Unified IRA/URA dashboard — all invoices in one place."""
-    from django.db.models import Sum, Count, Q
+    from django.db.models import Sum
     from django.utils import timezone
     from invoicing.models import Invoice
     from core.company_utils import get_user_company

@@ -13,12 +13,11 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
-from django.db.models import Count, Q, Sum
+from django.db.models import Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 
@@ -31,11 +30,9 @@ from .forms import (
 )
 from .models import (
     BillOfMaterials,
-    BOMLine,
     ProductionLog,
     ProductionOrder,
     ProductionStep,
-    QualityCheck,
     Workstation,
 )
 from .services import calculate_costs, check_availability, consume_materials, produce_output

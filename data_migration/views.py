@@ -18,14 +18,12 @@ import os
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 
 from .adapters.base import detect_adapter, get_adapter, get_all_adapters
-from .models import MigrationFile, MigrationLog, MigrationProject
+from .models import MigrationFile, MigrationProject
 from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)

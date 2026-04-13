@@ -484,7 +484,7 @@ def process_staging_batch(self, staging_batch_id):
     import time as _time
     from django.utils import timezone
 
-    from .models import StagingBatch, StagingFile, ImportBatch, ImportBatchItem
+    from .models import StagingBatch, ImportBatch, ImportBatchItem
     from .services import parse_image, parse_image_enhanced, match_items
 
     RATE_LIMIT_DELAY = 7.5  # 8 req/min

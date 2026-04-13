@@ -5,31 +5,29 @@ Robust PO file fixer:
 3. For technical/API strings, copy msgid as msgstr
 """
 import re
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 LOCALES = ["hr", "en", "de", "tr", "el"]
 
 def fix_po_file(path, locale):
     with open(path, "r", encoding="utf-8") as f:
         raw = f.read()
-    
+
     # Split into blocks separated by blank lines
     blocks = raw.split('\n\n')
     fixed_blocks = []
     fix_count = 0
-    
+
     for block in blocks:
         lines = block.split('\n')
-        
+
         # Check if this block has a broken msgstr
         has_msgid = any(l.startswith('msgid ') for l in lines)
         has_msgstr = any(l.startswith('msgstr ') for l in lines)
-        
+
         if not has_msgid or not has_msgstr:
             fixed_blocks.append(block)
             continue
-        
+
         # Extract msgid
         msgid_parts = []
         msgstr_parts = []
@@ -37,7 +35,7 @@ def fix_po_file(path, locale):
         in_msgid = False
         in_msgstr = False
         is_broken = False
-        
+
         for line in lines:
             if line.startswith('msgid "'):
                 in_msgid = True
@@ -79,23 +77,23 @@ def fix_po_file(path, locale):
                     in_msgid = False
                     in_msgstr = False
                     other_lines.append(line)
-        
+
         if is_broken:
             # Reconstruct the entry properly
             msgid_val = ''.join(msgid_parts).strip('"').replace('\n', '\\n')
             msgstr_val = ''.join(msgstr_parts).strip('"').replace('\n', '\\n')
-            
+
             # Clean up any double-escaping
             while '\\\\n' in msgstr_val:
                 msgstr_val = msgstr_val.replace('\\\\n', '\\n')
-            
+
             # Remove any trailing garbage
             msgstr_val = msgstr_val.strip().rstrip('"').strip()
-            
+
             # Rebuild block
             comment_lines = [l for l in other_lines if l.startswith('#')]
             new_block_lines = comment_lines[:]
-            
+
             # Write msgid
             if '\\n' in msgid_val or len(msgid_val) > 75:
                 new_block_lines.append('msgid ""')
@@ -106,27 +104,27 @@ def fix_po_file(path, locale):
                         new_block_lines.append('"\\n"')
             else:
                 new_block_lines.append(f'msgid "{msgid_val}"')
-            
+
             # For msgstr, if it looks like a technical string, use msgid
             if not msgstr_val or 'OpenApi3' in msgid_val or 'schema' in msgid_val:
                 msgstr_val = msgid_val
-            
+
             new_block_lines.append(f'msgstr "{msgstr_val}"')
-            
+
             # Add any msgid_plural / msgstr[N] lines
             for l in other_lines:
                 if l.startswith('msgid_plural') or l.startswith('msgstr['):
                     new_block_lines.append(l)
-            
+
             fixed_blocks.append('\n'.join(new_block_lines))
             fix_count += 1
         else:
             fixed_blocks.append(block)
-    
+
     result = '\n\n'.join(fixed_blocks)
     with open(path, "w", encoding="utf-8") as f:
         f.write(result)
-    
+
     return fix_count
 
 
