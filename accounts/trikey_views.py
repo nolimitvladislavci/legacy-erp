@@ -307,7 +307,12 @@ def pin_recovery(request):
 
     # Generate new PIN and send via email
     new_pin = generate_pin()
-    trikey.set_pin(new_pin)
+    try:
+        trikey.set_pin(new_pin)
+    except ValueError:
+        # generate_pin() je siguran, ali kao sigurnosna mreža
+        new_pin = generate_pin()
+        trikey.set_pin(new_pin)
 
     from django.core.mail import send_mail
     send_mail(

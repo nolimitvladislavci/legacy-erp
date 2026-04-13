@@ -27,15 +27,16 @@ CONFLICT_LOG = '/var/log/trojstvo/conflict.log'
 @shared_task(bind=True, soft_time_limit=180, max_retries=1)
 def trojstvo_rijesi(self, suggestion_id):
     from pos.models import ImprovementSuggestion
+    from django.db import transaction
 
     try:
-        s = ImprovementSuggestion.objects.get(pk=suggestion_id)
+        with transaction.atomic():
+            s = ImprovementSuggestion.objects.select_for_update().get(pk=suggestion_id)
+            s.trojstvo_status = 'pending'
+            s.save(update_fields=['trojstvo_status'])
     except ImprovementSuggestion.DoesNotExist:
         logger.error('Trojstvo: suggestion %s ne postoji', suggestion_id)
         return
-
-    s.trojstvo_status = 'pending'
-    s.save(update_fields=['trojstvo_status'])
 
     # ── Zlatni Paket: obogaceni kontekst za AI ──
     problem = (
@@ -87,21 +88,29 @@ def trojstvo_rijesi(self, suggestion_id):
         except Exception:
             pass
 
+    def _safe_save(fields):
+        from pos.models import ImprovementSuggestion
+        rows = ImprovementSuggestion.objects.filter(pk=suggestion_id).update(
+            **{f: getattr(s, f) for f in fields}
+        )
+        if not rows:
+            raise ImprovementSuggestion.DoesNotExist(f'suggestion {suggestion_id} deleted mid-task')
+
     try:
         haiku_result  = _haiku_analiza(problem)
         s.haiku_proposal = haiku_result
-        s.save(update_fields=['haiku_proposal'])
+        _safe_save(['haiku_proposal'])
 
         gemini_result = _gemini_analiza(problem)
         s.gemini_proposal = gemini_result
-        s.save(update_fields=['gemini_proposal'])
+        _safe_save(['gemini_proposal'])
 
         agreed, postotak, resolution = _konsenzus(problem, haiku_result, gemini_result)
 
         s.ai_resolution   = resolution
         s.trojstvo_status = 'agreed' if agreed else 'conflict'
         s.status          = 'reviewed'
-        s.save(update_fields=['ai_resolution', 'trojstvo_status', 'status'])
+        _safe_save(['ai_resolution', 'trojstvo_status', 'status'])
 
         if agreed:
             _log_agreed(s, postotak, resolution)
@@ -112,9 +121,11 @@ def trojstvo_rijesi(self, suggestion_id):
             logger.info('Trojstvo CONFLICT %s%%: %s → WhatsApp poslan', postotak, s.title)
 
     except Exception as exc:
-        s.trojstvo_status = 'error'
-        s.ai_resolution   = f'Greška: {exc}'
-        s.save(update_fields=['trojstvo_status', 'ai_resolution'])
+        from pos.models import ImprovementSuggestion
+        ImprovementSuggestion.objects.filter(pk=suggestion_id).update(
+            trojstvo_status='error',
+            ai_resolution=f'Greška: {exc}'[:500],
+        )
         logger.error('Trojstvo greška za %s: %s', suggestion_id, exc)
         raise self.retry(exc=exc)
 

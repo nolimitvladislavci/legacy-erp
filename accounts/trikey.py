@@ -346,14 +346,12 @@ def oib_lookup(oib):
 
 
 def generate_pin():
-    """Generiraj siguran 6-digit PIN (ne počinje s 0, ne sekvencijalan)."""
+    """Generiraj siguran 6-digit PIN — koristi BANNED_PINS iz TriKeyProfile."""
+    banned = getattr(TriKeyProfile, 'BANNED_PINS', set())
     while True:
         pin = str(secrets.randbelow(900000) + 100000)
-        # Odbaci trivijalne (123456, 111111, etc.)
         if len(set(pin)) < 3:
             continue
-        if pin in ('123456', '654321', '000000', '111111', '222222',
-                   '333333', '444444', '555555', '666666', '777777',
-                   '888888', '999999', '112233', '998877'):
+        if pin in banned:
             continue
         return pin

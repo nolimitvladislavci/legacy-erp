@@ -35,6 +35,7 @@ ROUTE_REGISTRY: dict = {
     'login_fallback':              AccessLevel.PUBLIC,
     'logout':                      AccessLevel.PUBLIC,
     'health_check':                AccessLevel.PUBLIC,
+    'api_validate':                AccessLevel.PUBLIC,
     'brochure_croxmlverify':       AccessLevel.PUBLIC,
     'no_limit_web':                AccessLevel.PUBLIC,
     'brosura_posrednik':           AccessLevel.PUBLIC,

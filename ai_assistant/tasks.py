@@ -4,85 +4,93 @@ from celery import shared_task
 logger = logging.getLogger('ai_assistant.patrol')
 
 
-@shared_task(bind=True, max_retries=2, retry_backoff=True)
-def ai_midnight_patrol(self):
-    """Run AI patrol for all active companies. Scheduled nightly at 02:00."""
+@shared_task(bind=True, soft_time_limit=120, max_retries=2, retry_backoff=True)
+def ai_midnight_patrol_company(self, company_id):
+    """Patrol za jednu firmu — poziva se kao subtask iz ai_midnight_patrol."""
     from companies.models import Company
     from ai_assistant.patrol import run_patrol
     from ai_assistant.models import PatrolReport
-    from notifications.services import notify
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
 
-    companies = Company.objects.all()
-    results = []
+    try:
+        company = Company.objects.get(pk=company_id)
+    except Company.DoesNotExist:
+        logger.warning("Patrol: company %s ne postoji", company_id)
+        return
 
-    for company in companies:
+    try:
+        report = run_patrol(company)
+
+        PatrolReport.objects.create(
+            company=company,
+            summary=report['summary'],
+            raw_data=report['raw_data'],
+            has_issues=report['has_issues'],
+        )
+
+        # Notify admins
         try:
-            report = run_patrol(company)
-
-            # Save report to DB
-            patrol = PatrolReport.objects.create(
+            from accounts.models import UserProfile
+            from notifications.services import notify
+            admin_profiles = list(UserProfile.objects.filter(
                 company=company,
-                summary=report['summary'],
-                raw_data=report['raw_data'],
-                has_issues=report['has_issues'],
-            )
+                role__in=['company_admin', 'superadmin']
+            ).select_related('user')[:3])
 
-            # Notify company admins via profile role
-            admin_profiles = []
-            try:
-                from accounts.models import UserProfile
+            if not admin_profiles:
                 admin_profiles = list(UserProfile.objects.filter(
                     company=company,
-                    role__in=['company_admin', 'superadmin']
+                    user__is_staff=True
                 ).select_related('user')[:3])
 
-                if not admin_profiles:
-                    admin_profiles = list(UserProfile.objects.filter(
-                        company=company,
-                        user__is_staff=True
-                    ).select_related('user')[:3])
+            for profile in admin_profiles:
+                notify(
+                    recipient=profile.user,
+                    notification_type='system',
+                    title='Jutarnji AI Patrol',
+                    message=report['summary'][:200],
+                    url='/ai/patrol/',
+                    company=company,
+                )
 
-                for profile in admin_profiles:
-                    notify(
-                        recipient=profile.user,
-                        notification_type='system',
-                        title='Jutarnji AI Patrol',
-                        message=report['summary'][:200],
-                        url='/ai/patrol/',
-                        company=company,
-                    )
-            except Exception as ne:
-                logger.warning("Notification failed for {}: {}".format(company.name, ne))
-
-            # WhatsApp notification if issues found
             if report['has_issues'] and admin_profiles:
-                try:
-                    from core.whatsapp import send_text, is_gateway_healthy
-                    if is_gateway_healthy():
-                        first_admin = admin_profiles[0]
-                        phone = getattr(first_admin, 'phone', '') or ''
-                        if phone:
-                            msg = "LIMIT Connect Patrol:\n{}".format(report['summary'][:500])
-                            send_text(phone, msg)
-                except Exception as e:
-                    logger.warning("WhatsApp patrol notify failed: {}".format(e))
+                from core.whatsapp import send_text, is_gateway_healthy
+                if is_gateway_healthy():
+                    phone = getattr(admin_profiles[0], 'phone', '') or ''
+                    if phone:
+                        send_text(phone, "LIMIT Connect Patrol:\n{}".format(report['summary'][:500]))
+        except Exception as ne:
+            logger.warning("Patrol notify failed for %s: %s", company.name, ne)
 
-            results.append({
-                'company': company.name,
-                'status': 'ok',
-                'has_issues': report['has_issues']
-            })
-            logger.info("Patrol completed for {}: {}".format(
-                company.name, 'ISSUES' if report['has_issues'] else 'OK'))
+        logger.info("Patrol OK: %s — %s", company.name, 'ISSUES' if report['has_issues'] else 'OK')
+        return {'company': company.name, 'status': 'ok', 'has_issues': report['has_issues']}
 
-        except Exception as e:
-            logger.error("Patrol failed for {}: {}".format(company.name, e))
-            results.append({
-                'company': company.name,
-                'status': 'error',
-                'error': str(e)
-            })
+    except Exception as exc:
+        logger.error("Patrol failed for %s: %s", company.name, exc)
+        return {'company': company.name, 'status': 'error', 'error': str(exc)}
 
-    return results
+
+@shared_task(bind=True, soft_time_limit=60, max_retries=1)
+def ai_midnight_patrol(self):
+    """
+    Orkestrator — raspoređuje po-firminu patrol kao zasebne subtaskove.
+    Soft limit 60s — samo dispatcha, ne čeka rezultate.
+    """
+    from companies.models import Company
+
+    # Samo aktivne firme (ne DRAFT OIB)
+    company_ids = list(
+        Company.objects.exclude(oib__startswith='DRAFT')
+                       .values_list('id', flat=True)
+    )
+
+    dispatched = 0
+    # Rasporedi s razmakom od 10s između firma — ne preopterećuje AI API
+    for i, cid in enumerate(company_ids):
+        ai_midnight_patrol_company.apply_async(
+            args=[cid],
+            countdown=i * 10,  # firma 0 odmah, firma 1 za 10s, firma 2 za 20s...
+        )
+        dispatched += 1
+
+    logger.info("ai_midnight_patrol: dispatched %d company patrols", dispatched)
+    return {'dispatched': dispatched}
