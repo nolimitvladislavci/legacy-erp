@@ -3,8 +3,8 @@ Seed permissions, roles, and auto-assign UserRoles from UserProfile.role.
 Usage: python manage.py seed_permissions
 """
 from django.core.management.base import BaseCommand
-from permissions.models import Permission, Role, UserRole
 
+from permissions.models import Permission, Role, UserRole
 
 MODULES = [
     'users', 'companies', 'partners', 'invoices', 'documents',

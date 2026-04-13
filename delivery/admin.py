@@ -14,7 +14,7 @@ for name, obj in inspect.getmembers(_m):
             pass
 
 
-from .models import Rollwagen, PackagingExchange
+from .models import PackagingExchange, Rollwagen
 
 try:
     admin.site.unregister(Rollwagen)
@@ -37,7 +37,7 @@ class PackagingExchangeAdmin(admin.ModelAdmin):
     list_display = ('delivery_stop', 'packaging_type', 'delivered_qty', 'returned_qty', 'balance', 'created_at')
     list_filter = ('packaging_type',)
 
-from .models import SmartBox, DeliveryCostRule, TransportHandoff, DispatchOffer
+from .models import DeliveryCostRule, DispatchOffer, SmartBox, TransportHandoff
 
 for _M in [SmartBox, DeliveryCostRule, TransportHandoff, DispatchOffer]:
     try:

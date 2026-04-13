@@ -1,5 +1,7 @@
 import secrets
+
 from django.db import models
+
 from core.managers import CompanyManager
 
 

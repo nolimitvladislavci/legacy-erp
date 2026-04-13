@@ -7,10 +7,10 @@ sales/ai_services.py — AI-powered inovacije za prodajni modul
 """
 
 import logging
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
-from django.db.models import Avg, Sum, Count, F, Q
+from django.db.models import Avg, Count, F, Q, Sum
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -108,8 +108,9 @@ def order_predictor(company, partner):
     Gleda zadnjih 6 mjeseci faktura i POS računa.
     Returns: lista artikala s predicted_quantity i confidence.
     """
-    from invoicing.models import InvoiceItem
     from django.db.models import Avg, Count
+
+    from invoicing.models import InvoiceItem
 
     six_months_ago = timezone.now() - timedelta(days=180)
 

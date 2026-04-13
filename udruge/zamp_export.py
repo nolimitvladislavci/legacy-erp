@@ -3,9 +3,9 @@ ZAMP obrazac za prijavu izvođenih glazbenih djela.
 Ne koristi ZAMP API (ne postoji). Generira strukturirani XML.
 Rezultat: XML koji organizator šalje na prijavadj@zamp.hr
 """
-from xml.etree.ElementTree import Element, SubElement, tostring
-from xml.dom import minidom
 from datetime import date
+from xml.dom import minidom
+from xml.etree.ElementTree import Element, SubElement, tostring
 
 
 def generiraj_zamp_obrazac(company, dogadjaj, set_lista: list) -> bytes:

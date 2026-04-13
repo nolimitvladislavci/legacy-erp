@@ -16,8 +16,9 @@ PAUSAL_LIMIT = Decimal('40000')
 
 def generate_landlord_daily_brief(company) -> str:
     """Haiku generira dnevni sažetak. Celery beat poziva svako jutro 08:00."""
-    from rental.models import Booking
     from datetime import timedelta
+
+    from rental.models import Booking
 
     today = timezone.now().date()
 

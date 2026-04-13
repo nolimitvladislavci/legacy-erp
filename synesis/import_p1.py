@@ -4,10 +4,19 @@ Za svih 87 firmi iz Synesis MDB baza.
 
 Pokreni: venv/bin/python synesis/import_p1.py
 """
-import os, sys, glob, csv, io, subprocess, time, django
-from decimal import Decimal
-from collections import defaultdict
+import csv
+import glob
+import io
 import logging
+import os
+import subprocess
+import sys
+import time
+from collections import defaultdict
+from decimal import Decimal
+
+import django
+
 logger = logging.getLogger("synesis.import_p1")
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
@@ -24,27 +33,27 @@ def _mdb(mdb_path, table):
         r = subprocess.run(['mdb-export', mdb_path, table], capture_output=True, text=True, timeout=60, env=env)
         if r.returncode != 0: return []
         return list(csv.DictReader(io.StringIO(r.stdout)))
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         return []
 
 def _dec(val):
     if not val: return Decimal('0')
     try: return Decimal(str(val).strip().replace(',','.').replace('"','')).quantize(Decimal('0.01'))
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         return Decimal('0')
 
 def _date(val):
     if not val: return None
     val = val.strip().strip('"')
-    from datetime import datetime, timedelta, date
+    from datetime import date, datetime, timedelta
     for fmt in ('%m/%d/%y %H:%M:%S','%m/%d/%Y %H:%M:%S','%m/%d/%y','%Y-%m-%d'):
         try: return datetime.strptime(val, fmt).date()
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             continue
     try:
         s = float(val)
         if 30000 < s < 60000: return date(1899,12,30) + timedelta(days=int(s))
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         pass
     return None
 
@@ -94,8 +103,9 @@ def import_items(company, mdb_path):
 
 def import_invoices_ira(company, mdb_path):
     """Import INVOICES + TINVOICES → invoicing.Invoice (izdani računi)"""
-    from invoicing.models import Invoice, InvoiceItem
     from django.utils import timezone
+
+    from invoicing.models import Invoice, InvoiceItem
 
     headers = _mdb(mdb_path, 'INVOICES')
     lines = _mdb(mdb_path, 'TINVOICES')
@@ -180,8 +190,9 @@ def import_invoices_ira(company, mdb_path):
 
 def import_invoices_ura(company, mdb_path):
     """Import URAEU + TURAEU → invoicing.Invoice (ulazni računi)"""
-    from invoicing.models import Invoice
     from django.utils import timezone
+
+    from invoicing.models import Invoice
 
     headers = _mdb(mdb_path, 'URAEU')
     lines = _mdb(mdb_path, 'TURAEU')

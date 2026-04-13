@@ -1,18 +1,19 @@
 import logging
-from django.db import IntegrityError, DatabaseError
+
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 """Grossmarkt Online - marketplace views with discount system."""
 from decimal import Decimal
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
 
@@ -246,8 +247,9 @@ def checkout(request):
         return redirect('marketplace:catalog')
 
     if request.method == 'POST':
-        from django.db import transaction
         from datetime import timedelta
+
+        from django.db import transaction
 
         delivery_method = request.POST.get('delivery_method', 'standard')
         is_recurring = bool(request.POST.get('is_recurring'))
@@ -327,8 +329,9 @@ def checkout(request):
 
             # Draft Invoice (deferred fiscalization)
             try:
-                from invoicing.models import Invoice
                 from django.utils import timezone as _tz
+
+                from invoicing.models import Invoice
                 draft_invoice = Invoice.objects.create(
                     company=company,
                     status='DRAFT',
@@ -637,6 +640,7 @@ def legal_vault(request, pk):
     """Download ZIP archive with all documents for an order."""
     import io
     import zipfile
+
     from django.http import FileResponse
 
     order = get_object_or_404(MarketplaceOrder, pk=pk)
@@ -695,10 +699,10 @@ Datum: {inv.created_at.strftime('%d.%m.%Y') if hasattr(inv, 'created_at') else '
         # 4. HACCP incidents (if cold chain)
         if order.requires_cold_chain:
             try:
-                from delivery.models import HACCPIncident, ConsolidatedDelivery
+                from delivery.models import ConsolidatedDelivery, HACCPIncident
                 cds = ConsolidatedDelivery.objects.filter(marketplace_orders=order)
                 for cd in cds:
-                    incidents = HACCPIncident.objects.filter(consolidated_delivery=cd)
+                    incidents = HACCPIncident.objects.filter(consolidated_delivery=cd).select_related("smart_box", "resolved_by")
                     for inc in incidents:
                         inc_text = f"""HACCP INCIDENT #{inc.pk}
 Tip: {inc.get_incident_type_display()}
@@ -748,8 +752,9 @@ Datum: {comp.created_at.strftime('%d.%m.%Y %H:%M')}
 @login_required
 def cart_share_create(request):
     """Dispatcher creates a cart snapshot and gets a shareable link."""
-    from .models import CartSnapshot
     from datetime import timedelta
+
+    from .models import CartSnapshot
 
     company = get_user_company(request)
     if not company:
@@ -931,10 +936,12 @@ def cart_shared_checkout(request, token):
 
 def traceability_view(request, pk):
     """Farm-to-Fork QR traceability page — public."""
-    from .models import MarketplaceProduct
-    from django.shortcuts import get_object_or_404
     import base64
     from io import BytesIO
+
+    from django.shortcuts import get_object_or_404
+
+    from .models import MarketplaceProduct
 
     product = get_object_or_404(MarketplaceProduct, pk=pk)
 
@@ -982,9 +989,11 @@ def gastro_bridge(request, pk):
     Gastro bridge: 1-click prebacivanje marketplace listinga u POS gastro meni.
     Marketplace oglas se gasi, POS dobiva novi artikl s -30% popustom.
     """
-    from .models import MarketplaceProduct
-    from django.shortcuts import get_object_or_404
     from decimal import Decimal
+
+    from django.shortcuts import get_object_or_404
+
+    from .models import MarketplaceProduct
 
     product = get_object_or_404(MarketplaceProduct, pk=pk, seller_company=get_user_company(request))
 
@@ -1024,7 +1033,7 @@ def gastro_bridge(request, pk):
                 '"%s" prebaceno u gastro meni! Cijena: %.2f EUR (-30%%). '
                 'Vidljivo na digitalnom meniju.' % (gastro_name, gastro_price)
             )
-        except Exception as e:
+        except Exception:
             messages.error(request, _('Prebacivanje nije uspjelo. Pokušajte ponovo.'))
 
         return redirect('marketplace:seller_dashboard')
@@ -1040,17 +1049,19 @@ def gastro_bridge(request, pk):
 
 def auction_live(request, pk):
     """Live auction page with WebSocket connection."""
-    from .models import MarketplaceProduct
     from django.shortcuts import get_object_or_404
+
+    from .models import MarketplaceProduct
     product = get_object_or_404(MarketplaceProduct, pk=pk, is_auction=True)
     return render(request, 'marketplace/auction_live.html', {'product': product})
 
 
 def auction_state_api(request, pk):
     """HTTP fallback for auction state (when WebSocket unavailable)."""
-    from .models import MarketplaceProduct
     from django.http import JsonResponse
     from django.utils import timezone
+
+    from .models import MarketplaceProduct
 
     try:
         product = MarketplaceProduct.objects.get(pk=pk, is_auction=True)

@@ -1,6 +1,6 @@
-from django.utils.translation import get_language
 from django.conf import settings
 from django.db import DatabaseError
+from django.utils.translation import get_language
 
 
 def booking_globals(request):
@@ -110,9 +110,9 @@ def module_context(request):
             return {}
 
         from core.module_registry import (
+            MODULE_REGISTRY,
             get_active_modules,
             get_sidebar_items,
-            MODULE_REGISTRY,
         )
 
         active_keys = get_active_modules(company)
@@ -136,8 +136,8 @@ def failed_imports_badge(request):
     if not hasattr(request, 'user') or not request.user.is_authenticated:
         return {}
     try:
-        from smart_import.models import FailedImport
         from core.company_utils import get_user_company
+        from smart_import.models import FailedImport
         company = get_user_company(request)
         if not company:
             return {}

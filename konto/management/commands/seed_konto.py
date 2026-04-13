@@ -1,7 +1,7 @@
 """Management command: python manage.py seed_konto [--company_id=X] [--country=HR|DE]"""
 from django.core.management.base import BaseCommand
-from konto.models import KontoAccount
 
+from konto.models import KontoAccount
 
 HR_CHART = [
     # (code, name, account_type)

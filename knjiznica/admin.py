@@ -1,8 +1,16 @@
 from django.contrib import admin
+
 from .models import (
-    BookMeta, LibraryMember, BookLoan, BookReservation,
-    ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,
-    MediaContent, FamilyChallenge,
+    BadgeDefinition,
+    BookLoan,
+    BookMeta,
+    BookReservation,
+    ChildReader,
+    EarnedBadge,
+    FamilyChallenge,
+    LibraryMember,
+    MediaContent,
+    ReadingLog,
 )
 
 

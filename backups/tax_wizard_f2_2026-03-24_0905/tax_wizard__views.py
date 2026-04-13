@@ -16,25 +16,25 @@ import json
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse, Http404
-from django.shortcuts import render, get_object_or_404, redirect
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
 from tax_wizard.models import (
+    PausalTier,
+    TaxDeadline,
     TaxFormTemplate,
     TaxWizardSession,
-    TaxDeadline,
-    PausalTier,
 )
 from tax_wizard.prefill_engine import PrefillEngine
 from tax_wizard.services import (
-    create_posd_session,
-    process_posd_step,
-    finalize_posd_session,
     AIAdvisor,
     POSDCalculator,
+    create_posd_session,
+    finalize_posd_session,
+    process_posd_step,
 )
 
 logger = logging.getLogger(__name__)

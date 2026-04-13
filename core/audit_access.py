@@ -15,8 +15,8 @@ Usage:
 import functools
 import logging
 
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -101,8 +101,8 @@ def audit_bulk_access(model_name, description=''):
                 return response
 
             try:
-                from core.tenant import get_current_company
                 from core.models import SystemAuditLog
+                from core.tenant import get_current_company
                 company = get_current_company()
                 ip = (
                     request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()

@@ -1,4 +1,5 @@
 import logging
+
 """
 core/ai_service.py — Gemini AI adapter s troškovnom kontrolom.
 
@@ -8,7 +9,9 @@ Sigurnosni slojevi:
   3. CircuitBreaker — greška = fallback dict, ne crash
   4. Input trim     — max 8000 znakova
 """
-import os, json, hashlib
+import hashlib
+import json
+import os
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)
@@ -26,10 +29,12 @@ class AICallBudget:
 
     def check(self, caller=""):
         try:
-            from smart_import.gemini_log import GeminiUsageLog
-            from django.utils import timezone
-            from django.db.models import Sum, Count
             from datetime import timedelta
+
+            from django.db.models import Count, Sum
+            from django.utils import timezone
+
+            from smart_import.gemini_log import GeminiUsageLog
             now      = timezone.now()
             hour_ago = now - timedelta(hours=1)
             daily    = GeminiUsageLog.objects.filter(called_at__date=now.date()).aggregate(

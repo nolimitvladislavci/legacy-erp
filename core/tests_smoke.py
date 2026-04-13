@@ -5,16 +5,17 @@ GET-only tests that verify responses and cover view code paths.
 import datetime
 import uuid
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 
 def _setup_company_user(oib, username, modules=None):
     """Create company + user with subscription."""
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'Smoke {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -224,8 +225,8 @@ class KontoServicesTest(TestCase):
         self.assertIsInstance(result, list)
 
     def test_get_open_receivables_with_invoice(self):
-        from konto.services import get_open_receivables
         from invoicing.models import Invoice
+        from konto.services import get_open_receivables
         Invoice.objects.create(
             company=self.company,
             number='R-KONTO-001',
@@ -267,8 +268,9 @@ class KontoServicesTest(TestCase):
         self.assertIsNotNone(result)
 
     def test_get_profit_loss_empty(self):
-        from konto.services import get_profit_loss
         import datetime
+
+        from konto.services import get_profit_loss
         result = get_profit_loss(
             self.company,
             datetime.date(2026, 1, 1),
@@ -279,8 +281,9 @@ class KontoServicesTest(TestCase):
         # key is profit_loss
 
     def test_get_balance_sheet_empty(self):
-        from konto.services import get_balance_sheet
         import datetime
+
+        from konto.services import get_balance_sheet
         try:
             result = get_balance_sheet(self.company, datetime.date(2026, 12, 31))
             self.assertIsInstance(result, dict)

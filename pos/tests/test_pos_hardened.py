@@ -9,11 +9,11 @@ import json
 import threading
 from decimal import Decimal
 
-from django.test import TestCase, Client, TransactionTestCase, override_settings
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase, TransactionTestCase, override_settings
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -31,10 +31,10 @@ class POSTestMixin:
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        from companies.models import Company, TaxRate
-        from pos.models import POSTerminal, POSCashier
-        from inventory.models import InventoryItem
         from accounts.models import UserProfile
+        from companies.models import Company, TaxRate
+        from inventory.models import InventoryItem
+        from pos.models import POSCashier, POSTerminal
 
         cls.company = Company.objects.create(
             name='HTest Firma', oib='99988877766',
@@ -611,13 +611,13 @@ class TestRaceCondition(POSTestMixin, TransactionTestCase):
 
     def test_concurrent_checkout_stock(self):
         """2 threada naplaćuju isti artikl — provjeri inventar konzistentnost."""
-        from pos.services.checkout import CheckoutService
-        from inventory.models import InventoryItem
-        from pos.models import POSSession
+        from accounts.models import UserProfile
 
         # Kreiraj artikl s quantity=2
         from companies.models import Company, TaxRate
-        from accounts.models import UserProfile
+        from inventory.models import InventoryItem
+        from pos.models import POSSession
+        from pos.services.checkout import CheckoutService
         company = Company.objects.create(name='Race Firma', oib='77766655544')
         user = User.objects.create_user(username='racer', password='test123')
         UserProfile.objects.create(user=user, company=company)

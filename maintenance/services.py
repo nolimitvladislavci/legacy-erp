@@ -1,7 +1,9 @@
 """Asset Depreciation Engine."""
 from datetime import date
 from decimal import Decimal
+
 from django.db import transaction
+
 from .models import Asset, DepreciationLog
 
 
@@ -20,7 +22,7 @@ def calculate_monthly_depreciation(asset):
 
 @transaction.atomic
 def run_monthly_depreciation(company, year, month):
-    from konto.models import JournalEntry, LedgerLine, KontoAccount
+    from konto.models import JournalEntry, KontoAccount, LedgerLine
     from konto.services import _next_entry_number
     assets = Asset.objects.filter(company=company, status="active")
     entries = []

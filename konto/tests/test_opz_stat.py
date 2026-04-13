@@ -1,10 +1,12 @@
 """Tests for OPZ-STAT-1 report — scenarios #7-12."""
 import datetime
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from companies.models import Company
+from django.test import Client, TestCase
+
 from accounts.models import UserProfile
+from companies.models import Company
 from invoicing.models import Invoice
 
 

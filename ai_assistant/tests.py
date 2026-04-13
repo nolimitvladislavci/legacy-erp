@@ -12,7 +12,7 @@ Run:
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client, override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 User = get_user_model()
@@ -56,8 +56,9 @@ def make_user(company, username="ai_user"):
 
 
 def make_subscription(company):
-    from registration.models import CompanySubscription
     from django.utils import timezone
+
+    from registration.models import CompanySubscription
     return CompanySubscription.objects.create(
         company=company,
         plan="enterprise",
@@ -133,8 +134,8 @@ class ConversationModelTest(TestCase):
 
     def test_usage_log_cost_estimate(self):
         """AIUsageLog stores non-zero cost_estimate after a real call."""
-        from ai_assistant.models import Conversation, AIUsageLog
         from ai_assistant.claude_client import estimate_cost
+        from ai_assistant.models import AIUsageLog, Conversation
         conv = Conversation.objects.create(user=self.user, title="Cost test")
         cost = estimate_cost(1000, 300)
         log = AIUsageLog.objects.create(

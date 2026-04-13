@@ -1,7 +1,10 @@
 from django.contrib import admin
+
 from .models import (
-    HonorarContract, HonorarCalculation,
-    HonorarJOPPD, HonorarPayment,
+    HonorarCalculation,
+    HonorarContract,
+    HonorarJOPPD,
+    HonorarPayment,
 )
 
 

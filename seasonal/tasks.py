@@ -1,5 +1,7 @@
-from celery import shared_task
 import logging
+
+from celery import shared_task
+
 log = logging.getLogger('seasonal')
 
 
@@ -10,8 +12,10 @@ def daily_hzmo_check():
     Šalje WhatsApp samo kad treba (5/2/1/0 dana).
     """
     from django.utils import timezone
-    from .models import SeasonalContract
+
     from core.whatsapp import send_text
+
+    from .models import SeasonalContract
 
     today  = timezone.localdate()
     alerts = []

@@ -14,8 +14,8 @@ from datetime import date
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 
 # ═══════════════════════════════════════════════════════════════
 #  A. MODEL TESTS (15)
@@ -60,8 +60,9 @@ class TaxFormTemplateTest(TestCase):
         self.assertIn('q1', names)
 
     def test_unique_together(self):
-        from tax_wizard.models import TaxFormTemplate
         from django.db import IntegrityError
+
+        from tax_wizard.models import TaxFormTemplate
         with self.assertRaises(IntegrityError):
             TaxFormTemplate.objects.create(
                 form_type='PO-SD',
@@ -80,8 +81,8 @@ class TaxWizardSessionTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from tax_wizard.models import TaxFormTemplate, TaxWizardSession
         from companies.models import Company
+        from tax_wizard.models import TaxFormTemplate, TaxWizardSession
 
         cls.user = User.objects.create_user('testuser', password='testpass123!')
         cls.company = Company.objects.create(name='Test Obrt', oib='12345678901')
@@ -441,8 +442,8 @@ class POSDXmlGeneratorTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from tax_wizard.models import TaxFormTemplate, TaxWizardSession
         from companies.models import Company
+        from tax_wizard.models import TaxFormTemplate, TaxWizardSession
 
         cls.user = User.objects.create_user('xmluser', password='testpass123!')
         cls.company = Company.objects.create(name='XML Obrt', oib='98765432101')
@@ -543,8 +544,8 @@ class WizardViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from tax_wizard.models import TaxFormTemplate, TaxWizardSession, PausalTier
         from companies.models import Company
+        from tax_wizard.models import PausalTier, TaxFormTemplate, TaxWizardSession
 
         cls.user = User.objects.create_user('viewuser', password='testpass123!')
         cls.other_user = User.objects.create_user('otheruser', password='testpass123!')
@@ -696,8 +697,8 @@ class SecurityTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from tax_wizard.models import TaxFormTemplate, TaxWizardSession
         from companies.models import Company
+        from tax_wizard.models import TaxFormTemplate, TaxWizardSession
 
         cls.user1 = User.objects.create_user('secure1', password='testpass123!')
         cls.user2 = User.objects.create_user('secure2', password='testpass123!')

@@ -115,9 +115,11 @@ def get_audit_summary(company, item=None, days=30):
             'total_out': Decimal,
         }
     """
-    from inventory.models import StockMovement
-    from django.db.models import Sum, Q
     from datetime import timedelta
+
+    from django.db.models import Q, Sum
+
+    from inventory.models import StockMovement
 
     since = timezone.now() - timedelta(days=days)
 

@@ -17,17 +17,17 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
+from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from django.conf import settings
+from django.db import DatabaseError
 from django.shortcuts import redirect, render
 from django.utils import timezone as tz
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
-from django.db import DatabaseError
 
 logger = logging.getLogger('accounts')
 
@@ -246,9 +246,10 @@ def process_vaulting():
     - Opći porezni zakon (OPZ): porezna dokumentacija 11 godina
     - Zakon o fiskalizaciji (NN 133/12): fiskalni zapisi
     """
-    from companies.models import Company
-    from accounts.models import CompanyMembership
     from django.contrib.auth.models import User
+
+    from accounts.models import CompanyMembership
+    from companies.models import Company
 
     cutoff = tz.now() - timedelta(days=GRACE_PERIOD_DAYS)
     pending = Company.objects.filter(

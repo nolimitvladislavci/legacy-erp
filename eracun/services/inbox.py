@@ -190,7 +190,7 @@ def receive_eracun(company, xml_string, received_via='upload', user=None):
     Returns:
         dict: {success: bool, eracun: ERacun, message: str}
     """
-    from eracun.models import ERacun, ERacunItem, ERacunTaxSummary, ERacunLog
+    from eracun.models import ERacun, ERacunItem, ERacunLog, ERacunTaxSummary
 
     try:
         data = parse_ubl_xml(xml_string)

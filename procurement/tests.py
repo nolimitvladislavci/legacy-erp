@@ -1,6 +1,8 @@
 """Tests for Procurement module."""
 from decimal import Decimal
+
 from django.test import TestCase
+
 from companies.models import Company
 from procurement.models import PurchaseOrder, PurchaseOrderItem
 

@@ -5,15 +5,20 @@ Ažurira podatke Korpa klijenata iz Synesis arhive:
 - Kreira korisnike za firme koje nemaju nijednog
 - Dodaje email Marijinoj adresi (konjik_admin nadzire ove firme)
 """
-import os, sys, django
+import os
+import sys
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
 from django.contrib.auth.models import User
 from django.db import transaction
-from companies.models import Company
+
 from accounts.models import UserProfile
+from companies.models import Company
 
 # ─── PODACI IZ SYNESIS ARHIVE ─────────────────────────────────────────────────
 # Marija Brtan je odgovorna osoba / računovotkinja za sve ove firme

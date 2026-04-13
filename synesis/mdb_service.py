@@ -2,10 +2,10 @@
 Synesis MDB Reader — reads Storage.mdb via pyodbc or subprocess mdb-export.
 Server-side: uses mdbtools (apt install mdbtools) since no ODBC driver on Linux.
 """
-import subprocess
 import csv
 import io
 import json
+import subprocess
 from decimal import Decimal
 
 
@@ -277,7 +277,7 @@ def json_items_preview(json_path):
 
 def import_json_to_erp(json_path, company):
     """Import all data from JSON file into ERP using existing import functions."""
-    from synesis.views import _import_partners, _import_items, _import_pos
+    from synesis.views import _import_items, _import_partners, _import_pos
 
     data = read_json_file(json_path)
     results = {}

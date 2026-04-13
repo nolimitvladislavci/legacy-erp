@@ -1,9 +1,10 @@
 import uuid
 
 from django.conf import settings
-from django.db import models, DatabaseError
+from django.db import DatabaseError, models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+
 from core.managers import CompanyManager
 
 
@@ -942,8 +943,9 @@ class LicenseToken(models.Model):
         return max(0, delta.days)
 
     def enter_grace(self):
-        from django.utils import timezone
         import datetime
+
+        from django.utils import timezone
         self.status = 'grace'
         self.grace_until = timezone.now() + datetime.timedelta(days=7)
         self.save(update_fields=['status', 'grace_until', 'updated_at'])
@@ -953,8 +955,9 @@ class LicenseToken(models.Model):
         self.save(update_fields=['status', 'updated_at'])
 
     def renew(self, months=1):
-        from django.utils import timezone
         import datetime
+
+        from django.utils import timezone
         base = max(self.valid_until, timezone.now())
         self.valid_until = base + datetime.timedelta(days=30 * months)
         self.status = 'active'

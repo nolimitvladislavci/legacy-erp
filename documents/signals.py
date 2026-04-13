@@ -5,9 +5,10 @@ Koristi get+save umjesto update_or_create da prolazi kroz ArhivaEntry.save()
 (integritet hash, barcode, archive_number, deletion protection).
 """
 import logging
+
+from django.db import DatabaseError, IntegrityError
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('documents.signals')
 
@@ -66,6 +67,7 @@ def _archive_invoice_inner(instance):
             pdf_bytes = pdf_result[0] if isinstance(pdf_result, tuple) else pdf_result
             if pdf_bytes:
                 import os
+
                 from django.conf import settings as _s
                 rel_path = f'arhiva/{entry.company_id}/{entry.archive_number}.pdf'
                 full_path = os.path.join(_s.MEDIA_ROOT, rel_path)

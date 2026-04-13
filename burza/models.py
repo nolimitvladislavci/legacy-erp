@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from borg_ops.mixins import FSMMixin
-from django.contrib.contenttypes.fields import GenericRelation
 
 
 class ProjectLead(FSMMixin, models.Model):

@@ -6,14 +6,19 @@ Pokriva: session lifecycle, checkout, inventory, offline, voice, UI, compliance.
 import json
 import os
 import uuid
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 
 from companies.models import Company
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSCashier, Table, GastroOrder,
+    GastroOrder,
+    POSCashier,
+    POSReceipt,
+    POSSession,
+    POSTerminal,
+    Table,
 )
 
 # Default VAT rate used by add_receipt_item
@@ -67,7 +72,7 @@ class POSTestBase(TestCase):
         return receipt, result
 
     def _create_receipt(self, items=None):
-        from pos.services import create_receipt, add_receipt_item
+        from pos.services import add_receipt_item, create_receipt
         receipt = create_receipt(self.session)
         if items:
             for name, qty, price in items:
@@ -111,7 +116,7 @@ class SessionLifecycleTest(POSTestBase):
 
     def test_close_with_open_receipts_raises(self):
         """Cannot close session with open receipts — must cancel first."""
-        from pos.services import create_receipt, close_session, SessionError
+        from pos.services import SessionError, close_session, create_receipt
         create_receipt(self.session)
         with self.assertRaises(SessionError):
             close_session(self.session)
@@ -130,7 +135,7 @@ class ReceiptCRUDTest(POSTestBase):
         self.assertEqual(r.session, self.session)
 
     def test_add_item_with_inventory(self):
-        from pos.services import create_receipt, add_receipt_item
+        from pos.services import add_receipt_item, create_receipt
         item = self._create_item('Burek', 3.00)
         r = create_receipt(self.session)
         ri = add_receipt_item(r, item.pk, 'Burek', Decimal('2'), Decimal('3.00'))
@@ -139,14 +144,14 @@ class ReceiptCRUDTest(POSTestBase):
         self.assertEqual(ri.total_price, _with_vat(Decimal('6.00')))
 
     def test_add_custom_item_no_inventory(self):
-        from pos.services import create_receipt, add_receipt_item
+        from pos.services import add_receipt_item, create_receipt
         r = create_receipt(self.session)
         ri = add_receipt_item(r, None, 'Custom Service', Decimal('1'), Decimal('25.00'))
         self.assertEqual(ri.description, 'Custom Service')
         self.assertIsNone(ri.inventory_item_id)
 
     def test_remove_item(self):
-        from pos.services import create_receipt, add_receipt_item, remove_receipt_item
+        from pos.services import add_receipt_item, create_receipt, remove_receipt_item
         item = self._create_item()
         r = create_receipt(self.session)
         ri = add_receipt_item(r, item.pk, 'Test', Decimal('1'), Decimal('10'))
@@ -170,7 +175,7 @@ class ReceiptCRUDTest(POSTestBase):
         self.assertEqual(r.total, expected)
 
     def test_discount_applied(self):
-        from pos.services import create_receipt, add_receipt_item
+        from pos.services import add_receipt_item, create_receipt
         item = self._create_item('Disc Item', 100.00)
         r = create_receipt(self.session)
         ri = add_receipt_item(r, item.pk, 'Disc', Decimal('1'), Decimal('100'), discount_percent=Decimal('10'))
@@ -186,7 +191,7 @@ class ReceiptCRUDTest(POSTestBase):
 class PaymentTest(POSTestBase):
 
     def test_cash_payment(self):
-        from pos.services import create_receipt, add_receipt_item, process_payment
+        from pos.services import add_receipt_item, create_receipt, process_payment
         item = self._create_item('Cash Item', 15.00)
         r = create_receipt(self.session)
         add_receipt_item(r, item.pk, 'Cash Item', Decimal('1'), Decimal('15'))
@@ -197,7 +202,7 @@ class PaymentTest(POSTestBase):
         self.assertEqual(r.status, POSReceipt.Status.PAID)
 
     def test_cash_change_calculated(self):
-        from pos.services import create_receipt, add_receipt_item, process_payment
+        from pos.services import add_receipt_item, create_receipt, process_payment
         item = self._create_item('Change Item', 8.00)
         r = create_receipt(self.session)
         add_receipt_item(r, item.pk, 'Change', Decimal('1'), Decimal('8.00'))
@@ -206,7 +211,7 @@ class PaymentTest(POSTestBase):
         self.assertEqual(result['change'], Decimal('20.00') - r.total)
 
     def test_card_payment(self):
-        from pos.services import create_receipt, add_receipt_item, process_payment
+        from pos.services import add_receipt_item, create_receipt, process_payment
         item = self._create_item('Card Item', 25.00)
         r = create_receipt(self.session)
         add_receipt_item(r, item.pk, 'Card', Decimal('1'), Decimal('25'))
@@ -216,7 +221,7 @@ class PaymentTest(POSTestBase):
         self.assertEqual(r.status, POSReceipt.Status.PAID)
 
     def test_empty_cart_payment_blocked(self):
-        from pos.services import create_receipt, process_payment, PaymentError
+        from pos.services import PaymentError, create_receipt, process_payment
         r = create_receipt(self.session)
         with self.assertRaises(PaymentError):
             process_payment(r, 'CASH', Decimal('10'), user=self.user)
@@ -591,7 +596,7 @@ class FullSimulationTest(POSTestBase):
 
     def test_cancel_and_resale(self):
         """Cancel receipt then sell same items again."""
-        from pos.services import create_receipt, add_receipt_item, process_payment
+        from pos.services import add_receipt_item, create_receipt, process_payment
         item = self._create_item('Cancel Test', 15, 10)
 
         r1 = create_receipt(self.session)

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Room, Resident, Relative, MonthlyCharge, StaffShift, Activity
+
+from .models import Activity, MonthlyCharge, Relative, Resident, Room, StaffShift
 
 
 @admin.register(Room)

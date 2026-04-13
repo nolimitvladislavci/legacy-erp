@@ -2,6 +2,7 @@
 companies/tasks.py — Celery tasks za data quality.
 """
 import logging
+
 from celery import shared_task
 
 logger = logging.getLogger('companies.tasks')
@@ -10,9 +11,10 @@ logger = logging.getLogger('companies.tasks')
 @shared_task(name='companies.async_fill_company_address', bind=True, max_retries=1, soft_time_limit=30)
 def async_fill_company_address(self, company_pk):
     """Auto-fill prazne adrese iz partnera ili VIES-a."""
+    from django.db.models import Q
+
     from companies.models import Company
     from partners.models import Partner
-    from django.db.models import Q
 
     try:
         company = Company.objects.get(pk=company_pk)
@@ -74,8 +76,9 @@ def async_fill_company_address(self, company_pk):
 @shared_task(name='companies.nightly_data_quality', bind=True, max_retries=0, soft_time_limit=120)
 def nightly_data_quality(self):
     """Noćna provjera kvalitete podataka — popuni rupe + alertiraj."""
-    from django.core.management import call_command
     from io import StringIO
+
+    from django.core.management import call_command
 
     # 1. Pokušaj popuniti iz partnera
     out = StringIO()
@@ -111,8 +114,10 @@ def check_license_tokens(self):
     - Istekao grace_until → prebaci u suspended
     - Suspended → označi WhiteLabel kao neaktivan
     """
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
     from companies.models import LicenseToken
 
     now = timezone.now()

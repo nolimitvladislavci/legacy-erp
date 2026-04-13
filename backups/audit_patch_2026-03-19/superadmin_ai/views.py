@@ -1,12 +1,14 @@
 import json
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
 
-from .models import AIModulePermission, PendingAIAction, AIActionLog
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from .models import AIActionLog, AIModulePermission, PendingAIAction
+
 
 def is_superadmin(user):
     return user.is_superuser or user.is_staff
@@ -215,6 +217,7 @@ def bulk_all(request):
 # ══════════════════════════════════════════════════════════
 
 import os
+
 AI_AGENT_TOKEN = os.environ.get('DEV_API_TOKEN', '')
 
 def _check_agent_auth(request):
@@ -356,7 +359,9 @@ def _execute_agent_action(action, module, payload, company, ip):
             qs = Model.objects.filter(**filters)[:limit]
             data = list(qs.values())
             # Serialize special types
-            import decimal, datetime, uuid
+            import datetime
+            import decimal
+            import uuid
             for row in data:
                 for k, v in row.items():
                     if isinstance(v, (decimal.Decimal,)): row[k] = float(v)

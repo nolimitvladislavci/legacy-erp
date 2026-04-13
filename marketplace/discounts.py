@@ -10,8 +10,8 @@ Primjena: uzima se NAJVECI od (partner_tier, category_discount), pa se DODAJE vo
 Maksimalni ukupni rabat: 50% (safety cap).
 """
 from decimal import Decimal
-from django.utils import timezone
 
+from django.utils import timezone
 
 TIER_DISCOUNTS = {
     'standard': Decimal('0'),
@@ -41,7 +41,7 @@ def get_discount_for_item(product, buyer_company, quantity=Decimal('1')):
             'savings_per_unit': Decimal,
         }
     """
-    from .models import PartnerDiscount, CategoryDiscount, VolumeDiscount
+    from .models import CategoryDiscount, PartnerDiscount, VolumeDiscount
 
     today = timezone.now().date()
     seller = product.seller_company

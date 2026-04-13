@@ -1,4 +1,5 @@
 from django.db import DatabaseError
+
 # Dodaj na kraj core/views.py
 
 @login_required
@@ -6,11 +7,13 @@ def ivan_cockpit(request):
     if not request.user.is_superuser:
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden()
-    from django.db.models import Sum, Count
-    from django.utils import timezone
-    from datetime import timedelta
     import subprocess
+    from datetime import timedelta
+
     from django.contrib.auth.models import User
+    from django.db.models import Count, Sum
+    from django.utils import timezone
+
     from companies.models import Company
     from registration.models import CompanySubscription
     now = timezone.now()

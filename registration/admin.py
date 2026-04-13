@@ -38,7 +38,8 @@ class PropterTenantAdmin(admin.ModelAdmin):
 
 
 # ── Ugovori i dokumenti ──
-from registration.models_contracts import ServiceProvider, ServiceAgreement, CompanyDocument
+from registration.models_contracts import CompanyDocument, ServiceAgreement, ServiceProvider
+
 
 @admin.register(ServiceProvider)
 class ServiceProviderAdmin(admin.ModelAdmin):

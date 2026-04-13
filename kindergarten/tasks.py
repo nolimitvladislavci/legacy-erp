@@ -8,10 +8,11 @@ Kindergarten Celery tasks — automatizacija notifikacija i naplate.
 - generate_monthly_billings: 1. u mjesecu, automatski za sve aktivne
 """
 import logging
-from celery import shared_task
-from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
+
+from celery import shared_task
+from django.utils import timezone
 
 logger = logging.getLogger('kindergarten.tasks')
 
@@ -19,7 +20,7 @@ logger = logging.getLogger('kindergarten.tasks')
 @shared_task(name='kindergarten.send_daily_report_notification')
 def send_daily_report_notification():
     """Posalji notifikaciju roditeljima kad odgajateljica objavi dnevni izvjestaj."""
-    from kindergarten.models import DailyReport, ChildGuardian
+    from kindergarten.models import ChildGuardian, DailyReport
 
     today = timezone.now().date()
     reports = DailyReport.objects.filter(
@@ -110,7 +111,7 @@ def send_absence_alert():
 @shared_task(name='kindergarten.send_billing_reminder')
 def send_billing_reminder():
     """Posalji podsjetnik za placanje 5 dana prije due_date."""
-    from kindergarten.models import MonthlyBilling, ChildGuardian
+    from kindergarten.models import ChildGuardian, MonthlyBilling
 
     target_date = timezone.now().date() + timedelta(days=5)
     billings = MonthlyBilling.objects.filter(

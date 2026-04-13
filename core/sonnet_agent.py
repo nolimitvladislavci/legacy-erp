@@ -20,6 +20,7 @@ import os
 import re
 import subprocess
 from datetime import datetime
+
 from django.conf import settings
 
 logger = logging.getLogger('sonnet_agent')
@@ -92,7 +93,7 @@ def _get_full_context():
         r = subprocess.run(['git', 'log', '--oneline', '-20'],
                            cwd='/var/www/fina-connect', capture_output=True, text=True, timeout=10)
         ctx['git_log'] = r.stdout.strip()
-    except (ValueError, AttributeError) as e:
+    except (ValueError, AttributeError):
         ctx['git_log'] = 'N/A'
 
     # Git diff --stat (zadnji commit)
@@ -100,13 +101,14 @@ def _get_full_context():
         r = subprocess.run(['git', 'diff', '--stat', 'HEAD~1', 'HEAD'],
                            cwd='/var/www/fina-connect', capture_output=True, text=True, timeout=10)
         ctx['git_last_diff'] = r.stdout.strip()[:2000]
-    except (ValueError, AttributeError) as e:
+    except (ValueError, AttributeError):
         ctx['git_last_diff'] = 'N/A'
 
     # System test
     try:
-        from django.core.management import call_command
         from io import StringIO
+
+        from django.core.management import call_command
         out = StringIO()
         call_command('run_system_test', notify='skip', quick=True, stdout=out)
         lines = [l for l in out.getvalue().split('\n') if any(
@@ -122,14 +124,14 @@ def _get_full_context():
         task_files = glob.glob('/var/www/fina-connect/GEMINI_TASK_*.md') + \
                      glob.glob('/var/www/fina-connect/CC_TASK_*.md')
         ctx['aktivni_taskovi'] = '\n'.join(os.path.basename(f) for f in sorted(task_files))
-    except OSError as e:
+    except OSError:
         ctx['aktivni_taskovi'] = 'N/A'
 
     # Sprint cilj (ako postoji)
     try:
         with open('/var/www/fina-connect/SPRINT_CILJ.md') as f:
             ctx['sprint_cilj'] = f.read()
-    except (FileNotFoundError, PermissionError, IOError) as e:
+    except (FileNotFoundError, PermissionError, IOError):
         ctx['sprint_cilj'] = 'Nema definiranog sprint cilja.'
 
     # Django check i migracije
@@ -141,7 +143,7 @@ def _get_full_context():
         )
         pending = [l for l in r.stdout.split('\n') if '[ ]' in l]
         ctx['pending_migracije'] = f'{len(pending)} neprimijenjenih' if pending else '0 neprimijenjenih'
-    except (ValueError, AttributeError) as e:
+    except (ValueError, AttributeError):
         ctx['pending_migracije'] = 'N/A'
 
     # AI health

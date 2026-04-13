@@ -1,8 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from . import views
-from . import views_modules
+from . import views, views_modules
 
 router = DefaultRouter()
 router.register(r"api", views.CompanyViewSet)
@@ -34,6 +33,7 @@ urlpatterns = [
 
 # KS LIMIT Komitent Manager
 from companies import views_komitent
+
 urlpatterns += [
     path('komitenti/', views_komitent.komitent_dashboard, name='komitent_dashboard'),
     path('komitenti/novi/', views_komitent.komitent_create, name='komitent_create'),

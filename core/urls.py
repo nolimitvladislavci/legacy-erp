@@ -1,21 +1,21 @@
-from django.contrib import admin
-from django.shortcuts import redirect
-from core import tc_views
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from django.conf.urls.i18n import i18n_patterns
-from django.views.i18n import set_language
-from django.views.generic import RedirectView
-from django.http import FileResponse, Http404
 import os as _os
+
+from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
+from django.conf.urls.static import static
+from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from . import views
-from core import steuerberater_views
-from core import intelligence_views
-from core import oib_finalizer_views
-from core import onboarding_views
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import FileResponse, Http404
+from django.shortcuts import redirect
+from django.urls import include, path
+from django.views.generic import RedirectView
+from django.views.i18n import set_language
+
+from core import intelligence_views, oib_finalizer_views, onboarding_views, steuerberater_views, tc_views
+
+from . import views
+
 
 def _serve_offline(request):
     of_path = _os.path.join(settings.BASE_DIR, 'static', 'offline.html')
@@ -40,7 +40,8 @@ from django.views.generic import TemplateView
 
 # TEMP: direct POS bypass za shevqet redirect loop debug
 def _bypass_login(request, token):
-    from django.contrib.auth import login as _al, get_user_model as _gu
+    from django.contrib.auth import get_user_model as _gu
+    from django.contrib.auth import login as _al
     from django.http import HttpResponse
     from django.shortcuts import redirect
     if token != 'sl2026frisko': return HttpResponse('Invalid', status=403)
@@ -430,8 +431,9 @@ urlpatterns += [
 # Backup: backups/audit_patch_2026-03-19/core/remote_api.py
 
 # Synesis integration
-from synesis import views as synesis_views
 from synesis import export as synesis_export
+from synesis import views as synesis_views
+
 urlpatterns += [
     # synesis + smart-import moved to i18n_patterns
     path('helpdesk/portal/', include('helpdesk.portal_urls')),
@@ -477,6 +479,7 @@ urlpatterns += [
 
 # ── FenixScan — Universalni AI Document Scanner ──────────────────────────────
 from core.views_scan import fenix_scan
+
 urlpatterns += [
     path('api/fenix/scan/', fenix_scan, name='fenix_scan'),
     path('api/csrf-token/', __import__('core.csrf_handler', fromlist=['csrf_token_view']).csrf_token_view, name='csrf_token'),
@@ -484,18 +487,21 @@ urlpatterns += [
 
 # ── CroValidator API — OIB + IBAN + MBS ───────────────────────────────────────
 from core.views_validate import api_validate
+
 urlpatterns += [
     path('api/v1/validate/', api_validate, name='api_validate'),
 ]
 
 # ── Notariat — Bilježnik + Odvjetnik + Dimnjačar ─────────────────────────────
 from django.urls import include
+
 urlpatterns += [
     path('notariat/', include('notariat.urls')),
 ]
 
 # ── API Documentation (OpenAPI/Swagger) ──────────────────────────────────────
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
 urlpatterns += [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

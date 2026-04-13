@@ -18,12 +18,11 @@ Modeli:
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import models
-from django.db import transaction
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from core.managers import CompanyManager
 
+from core.managers import CompanyManager
 
 # ═══════════════════════════════════════════════════════════════════
 # EXPERIENCE — Aktivnost na OPG-u
@@ -336,8 +335,8 @@ class ExperienceBooking(models.Model):
         # KORAK 2: Konačni račun za naknadu nedolaska
         try:
             sid2 = transaction.savepoint()
-            from invoicing.services.invoice_service import create_invoice
             from invoicing.models import InvoiceItem
+            from invoicing.services.invoice_service import create_invoice
 
             storno_ref = ''
             if storno_result and storno_result.get('success'):
@@ -411,8 +410,8 @@ class ExperienceBooking(models.Model):
         logger = logging.getLogger('experiences.deposit')
         try:
             sid = transaction.savepoint()
-            from invoicing.services.invoice_service import create_invoice
             from invoicing.models import InvoiceItem
+            from invoicing.services.invoice_service import create_invoice
 
             experience = self.schedule.experience
             company = experience.company
@@ -811,8 +810,8 @@ class RecallEvent(models.Model):
         Pronađi sve pogođene — goste, narudžbe, restorane.
         Vrača dict s listama pogođenih entiteta.
         """
-        from marketplace.models import MarketplaceProduct, MarketplaceOrderItem
         from gastro_menu.models import MenuItemIngredient
+        from marketplace.models import MarketplaceOrderItem, MarketplaceProduct
 
         affected = {
             'marketplace_products': [],

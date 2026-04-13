@@ -1,10 +1,11 @@
 import logging
+
 from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
-from django.views.decorators.http import require_GET
 from django.views.decorators.cache import cache_page
+from django.views.decorators.http import require_GET
 
 logger = logging.getLogger(__name__)
 

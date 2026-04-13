@@ -10,12 +10,12 @@ PRAVNI ŠTIT: AI nikada ne "preporučuje" — samo "simulacija pokazuje".
 """
 import logging
 from datetime import date
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 from django.utils import timezone
 
-from tax_wizard.models import PausalTier, TaxWizardSession, TaxAuditLog
+from tax_wizard.models import PausalTier, TaxAuditLog, TaxWizardSession
 
 logger = logging.getLogger(__name__)
 
@@ -351,6 +351,7 @@ def create_posd_session(user, company, year, referred_by=None, referral_company=
                         locale='hr') -> TaxWizardSession:
     """Kreiraj novu PO-SD wizard sesiju."""
     import secrets
+
     from tax_wizard.models import TaxFormTemplate
 
     template = TaxFormTemplate.objects.filter(

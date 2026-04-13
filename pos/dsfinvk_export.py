@@ -23,7 +23,6 @@ import io
 import zipfile
 from datetime import datetime
 
-
 # DSFinV-K Zahlungsart Mapping
 ZAHLUNGSART = {
     'CASH': 'Bar',

@@ -1,7 +1,8 @@
-from django.test import TestCase
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-from .models import TrackingStatus, TrackedItem, TrackingEvent
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
+
+from .models import TrackedItem, TrackingEvent, TrackingStatus
 
 
 class TrackingStatusTest(TestCase):

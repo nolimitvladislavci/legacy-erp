@@ -3,11 +3,12 @@ Turistički ZKI — TuristPrijava.xml generator.
 Svaki booking check-in → potpisan XML s lokalnim ZKI kodom.
 Za obranu kad eVisitor padne.
 """
+import hashlib
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-import hashlib
-from django.utils import timezone
+
 from django.db import DatabaseError
+from django.utils import timezone
 
 
 class TouristRegistrationGenerator:

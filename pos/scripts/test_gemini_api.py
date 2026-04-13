@@ -1,10 +1,12 @@
 """Test: Gemini JSON Ugovori A/B/C"""
-from django.test import RequestFactory
-from django.contrib.auth.models import User
+import json
 from unittest.mock import patch
+
+from django.contrib.auth.models import User
+from django.test import RequestFactory
+
 from companies.models import Company
 from pos.models import POSSession, POSTerminal
-import json
 
 su = User.objects.get(username="superadmin")
 konjik = Company.objects.get(name__icontains="Konjik")
@@ -32,6 +34,7 @@ print("UGOVOR A: GET /api/pos/items/ — Paginacija artikala")
 print("=" * 70)
 
 from pos.views import api_pos_items
+
 
 def test_a1():
     req = factory.get("/pos/api/pos/items/?page=1&per_page=10")
@@ -95,8 +98,8 @@ print("\n" + "=" * 70)
 print("UGOVOR B: POST /api/pos/checkout/ — Naplata")
 print("=" * 70)
 
-from pos.views import api_pos_checkout
 from inventory.models import InventoryItem
+from pos.views import api_pos_checkout
 
 pizza = InventoryItem.objects.get(company=konjik, sku="TEST-PIZZA")
 kava = InventoryItem.objects.get(company=konjik, sku="TEST-KAVA")

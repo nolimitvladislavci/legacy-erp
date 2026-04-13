@@ -6,16 +6,17 @@ import logging
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-
-from core.company_utils import get_user_company
-from .models import DigitalMenu, MenuCategory, MenuItem, TableQR, TableOrder
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from core.company_utils import get_user_company
+
+from .models import DigitalMenu, MenuCategory, MenuItem, TableOrder, TableQR
 
 logger = logging.getLogger('gastro_menu')
 
@@ -250,8 +251,9 @@ def update_price(request):
         item.price = price
         item.save(update_fields=['price'])
         try:
-            from inventory.models import InventoryItem
             from django.utils.text import slugify
+
+            from inventory.models import InventoryItem
             InventoryItem.objects.filter(
                 company=company, sku=slugify(item.name)[:40]
             ).update(unit_price=price)

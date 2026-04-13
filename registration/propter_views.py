@@ -6,16 +6,16 @@ import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Count, Sum, Q
-from django.shortcuts import get_object_or_404, redirect, render
+from django.db import DatabaseError, IntegrityError
+from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .models import PropterTenant
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('propter.security')
 
@@ -37,8 +37,9 @@ def _audit_log(request, action, tenant, details=''):
         tenant.company.oib, details,
     )
     try:
-        from borg_ops.models import CardActivity
         from django.contrib.contenttypes.models import ContentType
+
+        from borg_ops.models import CardActivity
         ct = ContentType.objects.get_for_model(PropterTenant)
         CardActivity.objects.create(
             content_type=ct,
@@ -332,8 +333,9 @@ def propter_create_tenant(request):
 @user_passes_test(is_superadmin)
 def propter_api_stats(request):
     """API endpoint for dashboard chart data."""
-    from eracun.models import ERacun
     from django.db.models.functions import TruncMonth
+
+    from eracun.models import ERacun
 
     # Monthly e-racun volume (last 12 months)
     monthly = (
@@ -364,6 +366,7 @@ def propter_api_stats(request):
 def propter_regenerate_api_key(request, pk):
     """Regenerate API key for a tenant. POST only."""
     import secrets
+
     from eracun.models import ERacunConfig
     tenant = get_object_or_404(PropterTenant, pk=pk)
     cfg, _ = ERacunConfig.objects.get_or_create(

@@ -3,12 +3,13 @@ konto/views_bank.py
 Bank dashboard — account management, multi-format statement upload, reconciliation.
 Supported formats: camt.053 XML (SEPA), CSV (FINA/HR banke), MT940 (SWIFT).
 """
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.translation import gettext as _
-from core.company_utils import get_user_company
+from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
+
+from core.company_utils import get_user_company
 
 
 @login_required
@@ -119,7 +120,7 @@ def bank_upload(request):
                     content = raw.decode('utf-8-sig')
                 except UnicodeDecodeError:
                     content = raw.decode('cp1250', errors='replace')
-        except IOError as e:
+        except IOError:
             messages.error(request, _('Datoteka se ne može pročitati. Provjerite format i pokušajte ponovo.'))
             return redirect('konto:bank_upload')
 
@@ -162,16 +163,16 @@ def bank_upload(request):
                 if recon['matched'] > 0:
                     messages.success(request,
                         f'Automatski parirano: {recon["matched"]} transakcija!')
-            except ImportError as e:
+            except ImportError:
                 pass  # Non-critical
 
             # Recalculate all account balances
             for acct in BankAccount.objects.filter(company=company).select_related("company", "konto_account"):
                 acct.recalculate_balance()
 
-        except ValueError as e:
+        except ValueError:
             messages.error(request, _('Neispravan format datoteke. Provjerite strukturu podataka.'))
-        except DatabaseError as e:
+        except DatabaseError:
             messages.error(request, _('Uvoz nije uspio. Provjerite format datoteke i pokušajte ponovo.'))
 
         return redirect('konto:bank_dashboard')
@@ -212,8 +213,8 @@ def _detect_format(filename, content):
 def bank_reconcile(request, pk):
     """Manual reconciliation — match transaction to invoice."""
     company = get_user_company(request)
-    from konto.models import BankTransaction
     from invoicing.models import Invoice
+    from konto.models import BankTransaction
 
     tx = get_object_or_404(BankTransaction, pk=pk, company=company)
 

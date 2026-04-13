@@ -9,14 +9,12 @@ Usage:
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
-from django.db import transaction
+from django.db import DatabaseError, IntegrityError, transaction
 
 from companies.models import Company
 from invoicing.models import Invoice
-from konto.models import JournalEntry, LedgerLine, KontoAccount
+from konto.models import JournalEntry, KontoAccount, LedgerLine
 from konto.services_file import _next_entry_number
-from django.db import IntegrityError, DatabaseError
-
 
 # Default konto plan mapping
 KONTO_MAP = {

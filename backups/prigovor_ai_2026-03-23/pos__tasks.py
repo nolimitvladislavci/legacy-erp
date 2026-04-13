@@ -2,6 +2,7 @@
 POS Celery Tasks — pozadinski procesi.
 """
 import logging
+
 from celery import shared_task
 from django.db.models import Q
 
@@ -27,10 +28,12 @@ def retry_fiscalization():
     - fiscal_retry_count i fiscal_last_error per-receipt
     - Notifikacija superadminu za račune > 24h bez JIR-a
     """
+    from datetime import timedelta
+
+    from django.utils import timezone
+
     from pos.models import POSReceipt
     from pos.services import _attempt_fiscalization
-    from django.utils import timezone
-    from datetime import timedelta
 
     now = timezone.now()
 
@@ -152,7 +155,7 @@ def generate_missing_daily_reports():
     Generiraj POSDailyReport za zatvorene sesije koje ga nemaju.
     Pokriva slučaj kad signal nije pokrenut (restart servera, bug, itd.)
     """
-    from pos.models import POSSession, POSDailyReport
+    from pos.models import POSDailyReport, POSSession
 
     closed_sessions = POSSession.objects.filter(
         status__in=['closed', 'z_done']
@@ -177,9 +180,11 @@ def cleanup_zombie_sessions():
     Automatski zatvori sesije otvorene duže od 16 sati.
     Sprječava zombie sesije od zaboravljenih logout-ova.
     """
-    from pos.models import POSSession, POSDailyReport
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from pos.models import POSDailyReport, POSSession
 
     cutoff = timezone.now() - timedelta(hours=16)
     zombies = POSSession.objects.filter(
@@ -213,12 +218,14 @@ def nightly_owner_zreport(self):
     Svaku vecer u 23:55 — vlasnik dobije dnevni sazetak.
     Psiholoski: dopaminska ovisnost o poruci = 0% churn.
     """
-    from companies.models import Company
-    from pos.models import POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
+    import logging
+
     from django.db.models import Sum
     from django.utils import timezone
+
+    from companies.models import Company
     from core.whatsapp import send_text
-    import logging
+    from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession
 
     logger = logging.getLogger('pos.nightly')
     today = timezone.now().date()

@@ -4,22 +4,26 @@ experiences/views.py — Agro-Turizam 360 views
 from decimal import Decimal
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.db import models
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
-from .models import (
-    Experience, ExperienceSchedule, ExperienceBooking,
-    ExperienceReview,
-    AgroPackage, RecallEvent, RecallNotification,
-)
 
+from .models import (
+    AgroPackage,
+    Experience,
+    ExperienceBooking,
+    ExperienceReview,
+    ExperienceSchedule,
+    RecallEvent,
+    RecallNotification,
+)
 
 # ═══════════════════════════════════════════════════════════════════
 # EXPERIENCE CRUD
@@ -521,8 +525,9 @@ def normativ_preview(request, pk):
     GET /experiences/<pk>/normativ/?pax=10
     Vraća JSON s normativom za zadani broj gostiju + stock status.
     """
-    from .models import Experience
     from django.http import JsonResponse
+
+    from .models import Experience
 
     exp = get_object_or_404(Experience, pk=pk)
     pax = int(request.GET.get('pax', 1))

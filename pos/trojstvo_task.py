@@ -10,8 +10,8 @@ Tok:
      - Slažu se (≥65%, zajednička ključna riječ) → log file, bez WhatsApp
      - Ne slažu se → WhatsApp Ivanu
 """
-import logging
 import json
+import logging
 from datetime import datetime
 
 from celery import shared_task
@@ -26,8 +26,9 @@ CONFLICT_LOG = '/var/log/trojstvo/conflict.log'
 
 @shared_task(bind=True, soft_time_limit=180, max_retries=1)
 def trojstvo_rijesi(self, suggestion_id):
-    from pos.models import ImprovementSuggestion
     from django.db import transaction
+
+    from pos.models import ImprovementSuggestion
 
     try:
         with transaction.atomic():

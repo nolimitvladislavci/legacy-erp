@@ -1,6 +1,7 @@
 import logging
+
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('ai_assistant.patrol')
 
@@ -8,9 +9,9 @@ logger = logging.getLogger('ai_assistant.patrol')
 @shared_task(bind=True, soft_time_limit=120, max_retries=2, retry_backoff=True)
 def ai_midnight_patrol_company(self, company_id):
     """Patrol za jednu firmu — poziva se kao subtask iz ai_midnight_patrol."""
-    from companies.models import Company
-    from ai_assistant.patrol import run_patrol
     from ai_assistant.models import PatrolReport
+    from ai_assistant.patrol import run_patrol
+    from companies.models import Company
 
     try:
         company = Company.objects.get(pk=company_id)
@@ -54,7 +55,7 @@ def ai_midnight_patrol_company(self, company_id):
                 )
 
             if report['has_issues'] and admin_profiles:
-                from core.whatsapp import send_text, is_gateway_healthy
+                from core.whatsapp import is_gateway_healthy, send_text
                 if is_gateway_healthy():
                     phone = getattr(admin_profiles[0], 'phone', '') or ''
                     if phone:

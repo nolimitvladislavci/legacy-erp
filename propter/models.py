@@ -5,10 +5,11 @@ Faza A: BillingPeriod, Otpremnica, OtpremnicaItem
 Faza B: PropterTenant, PropterOperator
 """
 import uuid
+
 from django.db import models
 from django.utils import timezone
-from core.managers import CompanyManager
 
+from core.managers import CompanyManager
 
 # =============================================================================
 # FAZA A -- BillingPeriod + Otpremnica

@@ -4,6 +4,7 @@ Usage: python manage.py seed_production <company_uuid>
 """
 
 from decimal import Decimal
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -18,8 +19,11 @@ class Command(BaseCommand):
         from companies.models import Company
         from inventory.models import InventoryItem
         from production.models import (
-            Workstation, BillOfMaterials, BOMLine,
-            ProductionOrder, ProductionStep,
+            BillOfMaterials,
+            BOMLine,
+            ProductionOrder,
+            ProductionStep,
+            Workstation,
         )
 
         company = Company.objects.get(pk=options['company_id'])

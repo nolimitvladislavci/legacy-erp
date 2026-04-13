@@ -7,8 +7,12 @@ Pokretanje:
   ./venv/bin/python scripts/borg0_classify.py --dry-run
   ./venv/bin/python scripts/borg0_classify.py --execute
 """
-import django, os, sys, re
+import os
+import re
+import sys
 from collections import Counter
+
+import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()

@@ -11,6 +11,7 @@ Koristi lxml.etree za namespace-aware XML s XSD validacijom.
 """
 import logging
 from decimal import Decimal
+
 from lxml import etree
 
 logger = logging.getLogger('konto.saft')
@@ -101,8 +102,8 @@ class SAFTGenerator:
                 self._el(account_el, 'OpeningCreditBalance', f'{abs(balance):.2f}')
 
     def _build_customers(self, mf):
-        from partners.models import Partner
         from invoicing.models import Invoice
+        from partners.models import Partner
 
         # Partners koji imaju prodajne fakture u periodu
         customer_ids = Invoice.objects.filter(
@@ -135,8 +136,8 @@ class SAFTGenerator:
                 self._el(c, 'TaxID', partner.oib)
 
     def _build_suppliers(self, mf):
-        from partners.models import Partner
         from invoicing.models import Invoice
+        from partners.models import Partner
 
         # Partners koji imaju ulazne fakture u periodu
         supplier_ids = Invoice.objects.filter(

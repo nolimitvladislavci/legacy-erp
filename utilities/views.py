@@ -1,12 +1,13 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
-from .models import UtilityContract, MeterReading, UtilityBill
+
+from .models import MeterReading, UtilityBill, UtilityContract
 
 
 @login_required

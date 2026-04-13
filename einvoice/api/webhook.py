@@ -1,10 +1,12 @@
 """Webhook endpoint for posrednik status callbacks."""
 import json
 import logging
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from einvoice.services.webhook_receiver import verify_webhook_signature, process_webhook_payload
+
+from einvoice.services.webhook_receiver import process_webhook_payload, verify_webhook_signature
 
 logger = logging.getLogger("propter.einvoice.webhook")
 

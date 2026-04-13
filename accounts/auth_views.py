@@ -15,6 +15,8 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
@@ -22,8 +24,6 @@ from django.utils.translation import gettext_lazy as _
 from core.email_tasks import send_email_task
 
 from .auth_models import LoginAttempt, MagicToken
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,7 @@ def _check_concurrent_login(user, current_ip, current_ua):
     Šalje WhatsApp/push alert korisniku: "Netko se prijavio s vašim računom."
     """
     from datetime import timedelta
+
     from django.utils import timezone
 
     since = timezone.now() - timedelta(minutes=30)
@@ -410,7 +411,7 @@ def verify_2fa(request):
             else:
                 LoginAttempt.objects.create(email=attempt_key, ip_address=ip, success=False, method='2fa')
                 messages.error(request, _('Pogrešan kod. Pokušajte ponovo.'))
-        except ObjectDoesNotExist as e:
+        except ObjectDoesNotExist:
             messages.error(request, _('Greška provjere.'))
             return redirect('login')
 
@@ -778,7 +779,8 @@ def device_token_detail(request, token_id):
         return redirect('device_token_manage')
 
     # Generiraj barcode sliku (Code128 + QR)
-    import io, base64
+    import base64
+    import io
     try:
         import barcode
         from barcode.writer import ImageWriter
@@ -821,8 +823,10 @@ def device_token_login(request):
     Returns {ok, redirect_url} ili {ok: false, error}
     """
     import json
-    from accounts.models import DeviceToken
+
     from django.utils import timezone
+
+    from accounts.models import DeviceToken
 
     try:
         data = json.loads(request.body)
@@ -895,8 +899,9 @@ def device_token_auto_login(request):
     Koristi se kad POS radi na istom mobitelu.
     URL: /auth/device-login/?token=uuid
     """
-    from accounts.models import DeviceToken
     from django.utils import timezone
+
+    from accounts.models import DeviceToken
 
     token_uuid = request.GET.get('token', '')
     if not token_uuid:
@@ -944,8 +949,9 @@ def device_token_auto_login(request):
 @login_required
 def device_token_qr_image(request, token_id):
     """Serve QR code as PNG image for inline display."""
-    from accounts.models import DeviceToken
     import io
+
+    from accounts.models import DeviceToken
     token = DeviceToken.objects.filter(pk=token_id, user=request.user).first()
     if not token:
         return HttpResponse(status=404)

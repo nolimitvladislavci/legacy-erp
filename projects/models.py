@@ -26,9 +26,10 @@ class Project(models.Model):
     @property
     def actual_cost(self):
         """Stvarni trošak = suma (sati × satnica) iz TimeEntry-ja."""
-        from django.db.models import Sum, F, DecimalField
-        from django.db.models.functions import Coalesce
         from decimal import Decimal
+
+        from django.db.models import DecimalField, F, Sum
+        from django.db.models.functions import Coalesce
         total = self.time_entries.aggregate(
             cost=Coalesce(
                 Sum(F('hours') * F('user__employeeprofile__hourly_rate'),

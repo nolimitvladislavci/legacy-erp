@@ -1,21 +1,23 @@
 import os
+
+from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
+from django.db import DatabaseError
 from django.shortcuts import render
 from django.utils import timezone
-from django.conf import settings
-from django.db import DatabaseError
 
 
 @user_passes_test(lambda u: u.is_superuser)
 def knjiga_pristupnih_podataka(request):
     """Knjiga pristupnih podataka - interno, samo za superadmina."""
-    from companies.models import Company
     from django.contrib.auth.models import User
+
     from accounts.models import UserProfile
-    from synesis.models import SynesisConfig
-    from pos.models import POSTerminal, POSCashier
+    from companies.models import Company
     from fiskalizacija.models import FiscalConfig
+    from pos.models import POSCashier, POSTerminal
     from smart_import.models import CompanyMailbox
+    from synesis.models import SynesisConfig
 
     # Companies
     all_companies = Company.objects.all().order_by('name')
@@ -129,12 +131,13 @@ def knjiga_boljitaka(request):
     context = {'company': company, 'date': timezone.now().strftime('%d.%m.%Y')}
 
     if fmt == 'pdf':
-        from django.template.loader import render_to_string
         from django.http import HttpResponse
+        from django.template.loader import render_to_string
         html = render_to_string('core/knjiga_boljitaka.html', context)
         try:
-            from xhtml2pdf import pisa
             from io import BytesIO
+
+            from xhtml2pdf import pisa
             buf = BytesIO()
             pisa.CreatePDF(html, dest=buf)
             buf.seek(0)

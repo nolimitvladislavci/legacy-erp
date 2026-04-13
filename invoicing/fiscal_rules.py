@@ -5,8 +5,7 @@ Izvor: LEGAL_PARAMS_MASTER.md (2026-03-27)
 JEDINA ISTINA o propisima u kodu.
 """
 from datetime import date
-from typing import Tuple, Optional
-
+from typing import Optional, Tuple
 
 # ═══════════════════════════════════════
 # HR PDV STOPE — po datumu i kategoriji

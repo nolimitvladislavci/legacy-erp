@@ -11,8 +11,8 @@ Testovi koji moraju proći FAIL → PASS:
 """
 import datetime
 from decimal import Decimal
-from django.test import TestCase, SimpleTestCase
 
+from django.test import SimpleTestCase, TestCase
 
 # ═══════════════════════════════════════════════════════
 # PURE FUNCTION TESTOVI (ne trebaju DB)
@@ -108,9 +108,10 @@ class Test63_AntiCrush(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from companies.models import Company
-        from marketplace.models import MarketplaceProduct, MarketplaceCategory
         from django.contrib.auth import get_user_model
+
+        from companies.models import Company
+        from marketplace.models import MarketplaceCategory, MarketplaceProduct
         User = get_user_model()
 
         cls.company = Company.objects.create(name='AntiCrush Hub', oib='88888888801')
@@ -131,9 +132,10 @@ class Test63_AntiCrush(TestCase):
         )
 
     def _rollwagen_s_krhkim(self):
-        from marketplace.models import MarketplaceOrder, MarketplaceOrderItem
-        from delivery.models import Rollwagen, ConsolidatedDelivery
         from django.utils import timezone
+
+        from delivery.models import ConsolidatedDelivery, Rollwagen
+        from marketplace.models import MarketplaceOrder, MarketplaceOrderItem
         order = MarketplaceOrder.objects.create(buyer_company=self.buyer, status='confirmed')
         MarketplaceOrderItem.objects.create(
             order=order, product=self.salata, seller_company=self.company,
@@ -171,8 +173,8 @@ class Test64_GenesisScan_IFCO_Lock(TestCase):
         cls.buyer = Company.objects.create(name='Genesis Buyer', oib='77777777711')
 
     def _rollwagen(self, qr, ifco_count=0):
+        from delivery.models import ConsolidatedDelivery, Rollwagen
         from marketplace.models import MarketplaceOrder
-        from delivery.models import Rollwagen, ConsolidatedDelivery
         order = MarketplaceOrder.objects.create(buyer_company=self.buyer, status='confirmed')
         cd = ConsolidatedDelivery.objects.create(hub_company=self.company, buyer_company=self.buyer)
         pkg = {'ifco': ifco_count} if ifco_count > 0 else {}

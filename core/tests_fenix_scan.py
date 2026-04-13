@@ -19,12 +19,12 @@ Run:
 import base64
 import io
 import json
-from decimal import Decimal
 from datetime import date, timedelta
-from unittest.mock import patch, MagicMock
+from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
 User = get_user_model()
@@ -73,8 +73,8 @@ class ScanTestMixin:
 
     def setUp(self):
         super().setUp()
-        from companies.models import Company
         from accounts.models import UserProfile
+        from companies.models import Company
 
         self.company = Company.objects.create(
             name='Test OPG Kovačević',
@@ -590,7 +590,7 @@ class TestScanMarketplaceBridge(ScanTestMixin, TestCase):
 
     def test_80_egg_record_to_marketplace(self):
         """Scan jaja → unos u EggRecord → Ponudi na burzi → MarketplaceProduct."""
-        from udruge.models import Flock, EggRecord
+        from udruge.models import EggRecord, Flock
 
         flock = Flock.objects.create(
             company=self.company, naziv='Nesiljke A',
@@ -616,7 +616,7 @@ class TestScanMarketplaceBridge(ScanTestMixin, TestCase):
 
     def test_81_karenca_blocks_egg_publish(self):
         """Jata pod karencom NE MOŽE objaviti jaja na burzi."""
-        from udruge.models import Flock, EggRecord, FlockHealthRecord
+        from udruge.models import EggRecord, Flock, FlockHealthRecord
 
         flock = Flock.objects.create(
             company=self.company, naziv='Nesiljke B',
@@ -679,7 +679,7 @@ class TestScanMarketplaceBridge(ScanTestMixin, TestCase):
 
     def test_84_opg_required_for_food(self):
         """Prehrambeni proizvodi zahtijevaju OPG broj."""
-        from udruge.models import Flock, EggRecord
+        from udruge.models import EggRecord, Flock
 
         flock = Flock.objects.create(
             company=self.company, naziv='Nesiljke C',
@@ -712,7 +712,7 @@ class TestScanAuctionIntegration(ScanTestMixin, TestCase):
 
     def test_90_golub_publish_creates_auction(self):
         """Sealed golub objava na burzi kreira auction listing."""
-        from udruge.models import Golubinjak, Golub
+        from udruge.models import Golub, Golubinjak
 
         gj = Golubinjak.objects.create(
             company=self.company, naziv='Test loft',
@@ -740,8 +740,8 @@ class TestScanAuctionIntegration(ScanTestMixin, TestCase):
 
     def test_91_auction_bid_model(self):
         """AuctionBid kreira se s ispravnim podacima."""
-        from marketplace.models import MarketplaceProduct, AuctionBid
         from companies.models import Company
+        from marketplace.models import AuctionBid, MarketplaceProduct
 
         buyer = Company.objects.create(name='Kupac d.o.o.', oib='99988877766')
 

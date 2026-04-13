@@ -2,11 +2,12 @@
 invoicing/tasks.py -- Dunning Engine
 """
 import logging
+
 from celery import shared_task
-from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ def _build_message(invoice, tone, is_hr):
 
 
 def _send_dunning_step(invoice, rule, company_admin_emails=None):
-    from .models import InvoiceEvent, DunningHistory, DunningRule
+    from .models import DunningHistory, DunningRule, InvoiceEvent
     is_hr = getattr(invoice, "is_hr", True) or invoice.country == "HR"
     tone = rule["tone"]
     channel = rule["channel"]
@@ -135,7 +136,8 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
         except DatabaseError:
             pass
         try:
-            from core.whatsapp import send_text as wa_send, is_gateway_healthy
+            from core.whatsapp import is_gateway_healthy
+            from core.whatsapp import send_text as wa_send
             if phone and is_gateway_healthy():
                 wa_text = f"{subject}{NL}{NL}{body[:300]}"
                 wa_result = wa_send(phone, wa_text)
@@ -163,8 +165,8 @@ def _send_dunning_step(invoice, rule, company_admin_emails=None):
 
 @shared_task
 def check_overdue_invoices():
-    from invoicing.models import Invoice
     from accounts.models import UserProfile
+    from invoicing.models import Invoice
     today = timezone.now().date()
     Invoice.objects.filter(status__in=["SENT", "UNPAID"], date_due__lt=today).update(status="OVERDUE")
     overdue_qs = Invoice.objects.filter(status="OVERDUE", date_due__isnull=False, company__isnull=False).select_related("company")
@@ -200,9 +202,9 @@ def check_overdue_invoices():
 @shared_task
 def run_dunning_cycle():
     """Celery beat task -- radnim danima u 08:00. Full dunning cycle."""
-    from invoicing.models import Invoice
     from accounts.models import UserProfile
     from companies.models import Company
+    from invoicing.models import Invoice
     today = timezone.now().date()
     summary = {"overdue_marked": 0, "reminders_sent": 0, "errors": 0, "invoices_processed": 0, "companies_processed": 0}
     marked = Invoice.objects.filter(status__in=["SENT", "UNPAID"], date_due__lt=today).update(status="OVERDUE")

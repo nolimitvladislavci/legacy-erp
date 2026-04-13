@@ -15,8 +15,8 @@ DE SKR03:
   7=troškovi(expense), 8=financ.rashodi/prihodi(mixed), 9=statistički
 """
 from django.core.management.base import BaseCommand
-from konto.models import KontoAccount
 
+from konto.models import KontoAccount
 
 # ── HR RRF ──
 HR_TYPE_MAP = {

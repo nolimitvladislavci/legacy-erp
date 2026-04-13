@@ -1,6 +1,7 @@
 """TransportRouter — decides HOW to deliver each invoice."""
 import logging
 from dataclasses import dataclass
+
 from django.conf import settings
 
 logger = logging.getLogger("propter.einvoice.router")
@@ -21,7 +22,7 @@ class TransportRouter:
         self._backends = {}
 
     def resolve(self, company_id, sender_oib, receiver_oib, receiver_is_individual=False):
-        from einvoice.models import TransportConfiguration, TransportType, PeppolParticipant
+        from einvoice.models import PeppolParticipant, TransportConfiguration, TransportType
 
         try:
             config = TransportConfiguration.objects.get(company_id=company_id)

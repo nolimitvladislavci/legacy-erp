@@ -1,8 +1,14 @@
 from django.contrib import admin
+
 from .models import (
-    CompetitorProfile, ComparisonFeature, CompetitorFeatureStatus,
-    MigrationRequest, ReferralProgram, ReferralRedemption,
-    FreeToolUsage, SwitchWeekCampaign,
+    ComparisonFeature,
+    CompetitorFeatureStatus,
+    CompetitorProfile,
+    FreeToolUsage,
+    MigrationRequest,
+    ReferralProgram,
+    ReferralRedemption,
+    SwitchWeekCampaign,
 )
 
 

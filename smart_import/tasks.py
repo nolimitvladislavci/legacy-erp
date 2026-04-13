@@ -5,7 +5,7 @@ import logging
 import re
 
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,9 @@ def _release_lock(batch_id):
 def process_import_batch(self, batch_id):
     """Parse uploaded file and create ImportBatchItems with fuzzy-matched inventory items."""
     from django.utils import timezone
+
     from smart_import.models import ImportBatch, ImportBatchItem
-    from smart_import.services import parse_xml, parse_pdf, parse_image, match_items
+    from smart_import.services import match_items, parse_image, parse_pdf, parse_xml
 
     try:
         batch = ImportBatch.objects.get(pk=batch_id)
@@ -139,8 +140,9 @@ def process_import_batch(self, batch_id):
 
 def _process_multipage(batch):
     """Process multi-page camera capture: parse each page image and merge results."""
-    from smart_import.services import parse_image
     import os
+
+    from smart_import.services import parse_image
 
     raw = batch.raw_json or {}
     page_paths = raw.get("page_paths", [])
@@ -190,14 +192,16 @@ def fetch_invoices_from_email(self):
     Skenira CompanyMailbox zapise (DB) + .env fallback.
     Podrzava Gmail + addressing za multi-company routing.
     """
-    import os
-    import imaplib
     import email as email_mod
+    import imaplib
+    import os
     from email.header import decode_header
+
     from django.core.files.base import ContentFile
     from django.utils import timezone
+
     from companies.models import Company
-    from smart_import.models import ImportBatch, CompanyMailbox, FailedImport
+    from smart_import.models import CompanyMailbox, FailedImport, ImportBatch
 
     ALLOWED_EXTS = {
         ".xml": "xml", ".pdf": "pdf",
@@ -446,8 +450,10 @@ def fetch_invoices_from_email(self):
 @shared_task
 def detect_stale_batches():
     """Detect ImportBatch stuck in pending/processing > 5 min."""
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
     from smart_import.models import ImportBatch
 
     cutoff = timezone.now() - timedelta(minutes=5)
@@ -482,10 +488,11 @@ def process_staging_batch(self, staging_batch_id):
     Svaki fajl = 1 Gemini request. Live progress u StagingBatch.last_message.
     """
     import time as _time
+
     from django.utils import timezone
 
-    from .models import StagingBatch, ImportBatch, ImportBatchItem
-    from .services import parse_image, parse_image_enhanced, match_items
+    from .models import ImportBatch, ImportBatchItem, StagingBatch
+    from .services import match_items, parse_image, parse_image_enhanced
 
     RATE_LIMIT_DELAY = 7.5  # 8 req/min
     MAX_CONSECUTIVE_ERRORS = 10
@@ -540,9 +547,10 @@ def process_staging_batch(self, staging_batch_id):
 
                 # ── HEADER EXTRACTION + AUTO-MATCH (inovacija 21.03.) ────
                 try:
-                    from .services import extract_invoice_header
-                    from .models import StagingFileHeader
                     from decimal import Decimal as _D
+
+                    from .models import StagingFileHeader
+                    from .services import extract_invoice_header
 
                     header_data = extract_invoice_header(sf.file.path)
                     if header_data and header_data.get('supplier_name'):
@@ -713,9 +721,11 @@ def classify_inbox_item(self, item_id):
 @shared_task(name='smart_import.fenix_inbox_digest')
 def fenix_inbox_digest():
     """Batch WhatsApp digest — N URA = 1 poruka, ne spam."""
-    from smart_import.models import FenixInboxItem
-    from django.utils import timezone
     import os
+
+    from django.utils import timezone
+
+    from smart_import.models import FenixInboxItem
 
     marija = os.environ.get('MARIJA_WHATSAPP', '')
     if not marija:

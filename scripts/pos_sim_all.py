@@ -3,22 +3,29 @@ POS SIMULACIJA — Svi scenariji (v2 — clean)
 ============================================
 venv/bin/python scripts/pos_sim_all.py
 """
-import os, random
+import os
+import random
 from decimal import Decimal
+
 from django.utils import timezone
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
+
 django.setup()
 
+from django.contrib.auth import get_user_model
+
+from companies.models import Company
+from inventory.models import InventoryItem
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSReceiptItem,
+    POSReceipt,
+    POSReceiptItem,
+    POSSession,
+    POSTerminal,
     get_default_quick_actions,
 )
-from inventory.models import InventoryItem
-from companies.models import Company
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 results = []

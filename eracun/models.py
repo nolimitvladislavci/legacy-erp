@@ -1,8 +1,11 @@
 from core.fields import FernetEncryptedCharField
+
 """e-Račun models — multi-tenant e-invoice gateway."""
-from django.db import models
-from core.managers import CompanyManager
 import uuid
+
+from django.db import models
+
+from core.managers import CompanyManager
 
 
 class ERacunConfig(models.Model):

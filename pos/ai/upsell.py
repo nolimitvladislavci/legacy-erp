@@ -3,8 +3,8 @@ pos/ai/upsell.py — AI Upsell Engine za POS Joker.
 Haiku analizira košaricu i predlaže 1-3 komplementarna artikla.
 Cache per (items_hash, company_id) — 24h.
 """
-import json
 import hashlib
+import json
 import logging
 
 from django.conf import settings

@@ -6,16 +6,16 @@ Pokretanje:
     python manage.py test tests.test_pos_propter_integration -v2
 """
 from decimal import Decimal
-from django.test import TestCase
+
 from django.contrib.auth.models import User
+from django.test import TestCase
 
 from companies.models import Company
-from pos.models import POSTerminal, POSSession, POSReceipt
-from pos.services import open_session, create_receipt, add_receipt_item, process_payment
-
-from propter.models import BillingPeriod, Otpremnica, OtpremnicaItem
-from propter.services.aggregate import close_period, aggregate_to_eracun
 from eracun.models import ERacun, ERacunItem
+from pos.models import POSReceipt, POSSession, POSTerminal
+from pos.services import add_receipt_item, create_receipt, open_session, process_payment
+from propter.models import BillingPeriod, Otpremnica, OtpremnicaItem
+from propter.services.aggregate import aggregate_to_eracun, close_period
 
 
 class POSMathAndPaymentTest(TestCase):

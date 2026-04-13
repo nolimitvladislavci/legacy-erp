@@ -2,19 +2,21 @@
 """End-to-end test za Social Import"""
 import os
 import sys
+
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
-from django.contrib.auth.models import User
-from companies.models import Company
-from boxgram.models import PetProfile, SocialImport, LifeEvent
-from boxgram.services.social_import import (
-    detect_platform, fetch_oembed, create_social_import
-)
 import uuid
+
+from django.contrib.auth.models import User
+
+from boxgram.models import LifeEvent, PetProfile, SocialImport
+from boxgram.services.social_import import create_social_import, detect_platform, fetch_oembed
+from companies.models import Company
+
 
 def main():
     print("=" * 70)

@@ -1,18 +1,26 @@
 import random
+
 """
 Testovi za branitelji + lov module.
 Pokretanje: venv/bin/python manage.py test udruge.tests.test_branitelji_lov -v2
 """
 from decimal import Decimal
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.urls import reverse
 from unittest.mock import patch
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.urls import reverse
 
 from companies.models import Company
 from udruge.models import (
-    Clan, StatusBranitelja, OdlikovanjeBranitelja,
-    Loviste, LovackaIskaznica, DopustenjeLova, ZapisnikLova, Trofej,
+    Clan,
+    DopustenjeLova,
+    LovackaIskaznica,
+    Loviste,
+    OdlikovanjeBranitelja,
+    StatusBranitelja,
+    Trofej,
+    ZapisnikLova,
 )
 
 User = get_user_model()
@@ -74,8 +82,9 @@ class LovModelTest(TestCase):
         self.assertIn('1500', str(self.loviste))
 
     def test_iskaznica_aktivna(self):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
         isk = LovackaIskaznica.objects.create(
             company=self.company, clan=self.clan,
             broj_iskaznice='HR-12345',
@@ -87,8 +96,9 @@ class LovModelTest(TestCase):
         self.assertFalse(isk.treba_markicu)
 
     def test_iskaznica_istekla(self):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
         isk = LovackaIskaznica.objects.create(
             company=self.company, clan=self.clan,
             broj_iskaznice='HR-99999',
@@ -98,8 +108,9 @@ class LovModelTest(TestCase):
         self.assertFalse(isk.je_aktivna)
 
     def test_iskaznica_treba_markicu(self):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
         isk = LovackaIskaznica.objects.create(
             company=self.company, clan=self.clan,
             broj_iskaznice='HR-55555',

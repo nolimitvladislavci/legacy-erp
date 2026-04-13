@@ -5,13 +5,17 @@ Target: 15 tests.
 from datetime import date
 from decimal import Decimal
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.utils import timezone
 
 from kindergarten.models import (
-    KindergartenGroup, Child, Guardian, ChildGuardian,
-    Attendance, MonthlyBilling,
+    Attendance,
+    Child,
+    ChildGuardian,
+    Guardian,
+    KindergartenGroup,
+    MonthlyBilling,
 )
 
 User = get_user_model()

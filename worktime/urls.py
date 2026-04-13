@@ -1,7 +1,7 @@
 from django.urls import path
 
-from . import timesheet_views, views, travel_views
-from .views import api_clock_in, api_clock_out, api_auditor_flags
+from . import timesheet_views, travel_views, views
+from .views import api_auditor_flags, api_clock_in, api_clock_out
 
 app_name = 'worktime'
 urlpatterns = [

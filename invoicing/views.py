@@ -1,26 +1,25 @@
-from django.core.exceptions import ObjectDoesNotExist
-from core.models import BookingSignature
 import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.models import BookingSignature
 from permissions.decorators import require_permission
 
 logger = logging.getLogger(__name__)
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import DatabaseError, IntegrityError, transaction
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions, viewsets
 
 from core.company_utils import get_user_company
 
 from .models import Invoice, InvoiceItem
 from .serializers import InvoiceItemSerializer, InvoiceSerializer
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
 
 
 # ── REST API
@@ -112,8 +111,10 @@ def index(request):
     ).values_list('synesis_year', flat=True).distinct().order_by('-synesis_year')
 
     # ── POS daily aggregate (Simbioza Sprint 1) ──
+    from django.db.models import Count as _Count
+    from django.db.models import Sum as _Sum
+
     from pos.models import POSReceipt as _PR
-    from django.db.models import Sum as _Sum, Count as _Count
     _pos_today = _PR.objects.filter(
         session__terminal__company=company,
         session__opened_at__date=today,
@@ -235,7 +236,7 @@ def send_invoice_whatsapp(request, pk):
             messages.success(request, _(f'WhatsApp poslan na {phone}!'))
         else:
             messages.warning(request, _(f'WhatsApp: {result.get("error", "Greška")}. Kopirajte link: {portal_url}'))
-    except ImportError as e:
+    except ImportError:
         messages.warning(request, _(f'WhatsApp nije dostupan. Portal link: {portal_url}'))
     return redirect('invoicing:index')
 
@@ -506,8 +507,8 @@ def invoice_wizard(request):
         "prefill_receipt": prefill_receipt,
     }
     # Onboarding: check if company has inventory items
-    from inventory.models import InventoryItem
     from core.company_utils import get_user_company
+    from inventory.models import InventoryItem
     _wb_company = get_user_company(request)
     ctx["has_items"] = InventoryItem.objects.filter(company=_wb_company, is_active=True).exists() if _wb_company else False
     ctx["company_name"] = _wb_company.name if _wb_company else ""
@@ -699,7 +700,7 @@ def invoice_save(request):
                 )
             except (IntegrityError, DatabaseError) as _ev_err:
                 logger.warning(f'InvoiceEvent edited failed: {_ev_err}')
-    except (IntegrityError, DatabaseError) as e:
+    except (IntegrityError, DatabaseError):
         messages.error(request, _('Spremanje dokumenta nije uspjelo. Provjerite sva obavezna polja i pokušajte ponovo.'))
         logger.error("Invoice save error", exc_info=True)
         inv_id = request.POST.get('invoice_id')
@@ -915,7 +916,7 @@ def invoice_add_hours(request, pk):
     if not entry_ids:
         return JsonResponse({'error': 'Nema odabranih unosa'}, status=400)
 
-    entries = TimeEntry.objects.filter(pk__in=entry_ids, is_billed=False)
+    entries = TimeEntry.objects.filter(pk__in=entry_ids, is_billed=False).select_related("user", "project")
     if not entries.exists():
         return JsonResponse({'error': 'Nema dostupnih unosa'}, status=400)
 
@@ -1022,7 +1023,7 @@ def _notify_quote_action(invoice, action: str):
     )
 
     try:
-        from core.whatsapp import send_text, normalize_phone
+        from core.whatsapp import normalize_phone, send_text
         for phone in admin_phones:
             if phone and len(phone) >= 8:
                 normalized = normalize_phone(phone)
@@ -1033,8 +1034,8 @@ def _notify_quote_action(invoice, action: str):
 
     # ── Email ───────────────────────────────────────────────────
     try:
-        from django.core.mail import send_mail
         from django.conf import settings
+        from django.core.mail import send_mail
 
         subject = f"{emoji} Ponuda {invoice.number} — {verb_hr} ({invoice.client_name})"
         body = (
@@ -1220,7 +1221,7 @@ def api_import(request, module):
                 })
         elif module == 'projects':
             from projects.models import Project
-            projects = Project.objects.filter(status='active')[:20]
+            projects = Project.objects.filter(status='active').select_related("client")[:20]
             for p in projects:
                 data.append({
                     'title': f'Projekt – {p.name}',
@@ -1242,8 +1243,9 @@ def api_import(request, module):
 @login_required
 def invoice_office_wizard(request):
     """Desktop 5-step invoice wizard for office/accounting staff."""
-    from .fiscal_models import BusinessLocation, FiscalOperator, InvoiceProfile
     from core.company_utils import get_user_company as _guc2
+
+    from .fiscal_models import BusinessLocation, FiscalOperator, InvoiceProfile
     _co2 = _guc2(request)
     profiles = InvoiceProfile.objects.filter(is_active=True, company=_co2).select_related("default_tax_rate", "company", "branch").order_by('-is_default', 'company_name') if _co2 else InvoiceProfile.objects.filter(is_active=True).order_by('-is_default', 'company_name')
     default_profile = InvoiceProfile.get_default()
@@ -1290,8 +1292,10 @@ def api_field_create(request):
 
     import datetime
     from decimal import Decimal, InvalidOperation
-    from .fiscal_models import InvoiceProfile
+
     from invoicing.services.entry_point import DocumentEntry
+
+    from .fiscal_models import InvoiceProfile
 
     try:
         profile = InvoiceProfile.get_default()
@@ -1566,7 +1570,8 @@ def api_partner_hint(request):
 
 def email_tracking_pixel(request, token):
     """1x1 transparent GIF tracking pixel with HMAC verification."""
-    import hashlib, hmac
+    import hashlib
+    import hmac
     GIF = bytes.fromhex('47494638396101000100800000ffffff00000021f90400000000002c00000000010001000002024401003b')
     resp = HttpResponse(GIF, content_type='image/gif')
     resp['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
@@ -1584,8 +1589,9 @@ def email_tracking_pixel(request, token):
         if not hmac.compare_digest(sig, expected):
             return resp
         pk = int(pk_str)
-        from documents.models import ArhivaEntry
         from django.utils import timezone
+
+        from documents.models import ArhivaEntry
         ArhivaEntry.objects.filter(pk=pk).update(
             email_opened_at=models.Case(
                 models.When(email_opened_at__isnull=True, then=models.Value(timezone.now())),
@@ -1670,9 +1676,10 @@ def fiscal_batch_create(request):
     if request.method != 'POST':
         return redirect('invoicing:fiscal_batch')
     from django.contrib import messages as _msg
+    from django.utils import timezone as _tz
+
     from invoicing.fiscal_models import FiscalBatch
     from invoicing.fiscalization import send_to_cis
-    from django.utils import timezone as _tz
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
     invoice_ids = request.POST.getlist('invoice_ids')
     if not invoice_ids:
@@ -1728,8 +1735,9 @@ def fiscal_certificate_upload(request):
     if request.method != 'POST':
         return redirect('invoicing:fiscal_certificates')
     from django.contrib import messages as _msg
-    from invoicing.fiscal_models import FiscalCertificate
+
     from invoicing import cert_manager
+    from invoicing.fiscal_models import FiscalCertificate
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
     cert_file = request.FILES.get('cert_file')
     if not cert_file:
@@ -1751,10 +1759,11 @@ def fiscal_certificate_test(request, pk):
     if request.method != 'POST':
         return redirect('invoicing:fiscal_certificates')
     from django.contrib import messages as _msg
-    from invoicing.fiscal_models import FiscalCertificate
-    from invoicing import cert_manager
-    from django.utils import timezone as _tz
     from django.http import Http404
+    from django.utils import timezone as _tz
+
+    from invoicing import cert_manager
+    from invoicing.fiscal_models import FiscalCertificate
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
     try:
         cert = FiscalCertificate.objects.get(pk=pk, company=company)
@@ -1777,8 +1786,9 @@ def fiscal_certificate_delete(request, pk):
     if request.method != 'POST':
         return redirect('invoicing:fiscal_certificates')
     from django.contrib import messages as _msg
-    from invoicing.fiscal_models import FiscalCertificate
     from django.http import Http404
+
+    from invoicing.fiscal_models import FiscalCertificate
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
     try:
         cert = FiscalCertificate.objects.get(pk=pk, company=company)
@@ -1816,6 +1826,7 @@ def api_smart_lookup(request):
     GET /invoicing/api/smart-lookup/?q=92922919857
     """
     import re
+
     from core.company_utils import get_user_company
     from partners.models import Partner
 
@@ -1945,6 +1956,7 @@ def api_invoice_morph(request, pk):
         return JsonResponse({'error': 'POST required'}, status=405)
 
     import json
+
     from .models import InvoiceEvent
 
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -1999,8 +2011,8 @@ def transaction_canvas(request):
     New invoice creation with Smart Command Bar, morphing, and timeline.
     """
     from core.company_utils import get_user_company
-    from invoicing.fiscal_models import InvoiceProfile
     from inventory.models import InventoryItem
+    from invoicing.fiscal_models import InvoiceProfile
 
     company = get_user_company(request)
     profiles = []
@@ -2064,8 +2076,9 @@ def transaction_canvas(request):
 @login_required
 def invoice_profiles_list(request):
     """List and manage invoice profiles for current company."""
-    from .fiscal_models import InvoiceProfile
     from core.company_utils import get_user_company
+
+    from .fiscal_models import InvoiceProfile
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
@@ -2081,8 +2094,9 @@ def invoice_profile_save(request):
     """Create or update an InvoiceProfile (AJAX)."""
     if request.method != 'POST':
         return JsonResponse({'ok': False, 'error': 'POST required'})
-    from .fiscal_models import InvoiceProfile
     from core.company_utils import get_user_company
+
+    from .fiscal_models import InvoiceProfile
     company = get_user_company(request)
     if not company:
         return JsonResponse({'ok': False, 'error': 'Nema tvrtke'})
@@ -2134,8 +2148,9 @@ def invoice_profile_delete(request, pk):
     """Deactivate an InvoiceProfile."""
     if request.method != 'POST':
         return JsonResponse({'ok': False, 'error': 'POST required'})
-    from .fiscal_models import InvoiceProfile
     from core.company_utils import get_user_company
+
+    from .fiscal_models import InvoiceProfile
     company = get_user_company(request)
     try:
         profile = InvoiceProfile.objects.get(pk=pk, company=company)
@@ -2192,9 +2207,10 @@ def api_invoice_items(request, pk):
 
 @login_required
 def dunning_dashboard(request):
-    from django.utils import timezone
     from django.db.models import Sum
-    from .models import Invoice, DunningHistory, DunningRule
+    from django.utils import timezone
+
+    from .models import DunningHistory, DunningRule, Invoice
     from .tasks import run_dunning_cycle
 
     company = get_user_company(request)
@@ -2259,8 +2275,9 @@ def ira_ura_dashboard(request):
     """GAP7: Unified IRA/URA dashboard — all invoices in one place."""
     from django.db.models import Sum
     from django.utils import timezone
-    from invoicing.models import Invoice
+
     from core.company_utils import get_user_company
+    from invoicing.models import Invoice
 
     company = get_user_company(request)
     if not company:

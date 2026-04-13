@@ -39,7 +39,7 @@ def send_push(subscription_json: str, title: str, body: str,
     })
 
     try:
-        from pywebpush import webpush, WebPushException
+        from pywebpush import WebPushException, webpush
         webpush(
             subscription_info=sub,
             data=payload,

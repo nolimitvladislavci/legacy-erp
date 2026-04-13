@@ -6,14 +6,18 @@ create_payment (cash + gateway), complete_payment, check_btcpay_status.
 """
 import uuid
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from django.test import TestCase
 from django.utils import timezone
 
 from companies.models import Company
 from payments.models import Payment
 from payments.services import (
-    get_config, create_payment, complete_payment, check_btcpay_status,
+    check_btcpay_status,
+    complete_payment,
+    create_payment,
+    get_config,
 )
 
 

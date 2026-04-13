@@ -2,10 +2,11 @@
 konto/tests_tax.py — Tax Compliance Module tests
 Tests for VAT calculation, corporate tax, PDV-S bridge, and tax dashboard.
 """
-from decimal import Decimal
 from datetime import date, datetime
-from django.test import TestCase, RequestFactory
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
+from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
 User = get_user_model()
@@ -109,8 +110,8 @@ class TestVATCalculation(TestCase):
 
     def test_tax_period_unique(self):
         """Ponovljeni poziv za isti mjesec updateira, ne duplicira."""
-        from konto.services import calculate_vat_period
         from konto.models import TaxPeriod
+        from konto.services import calculate_vat_period
         calculate_vat_period(self.company, 'monthly', 2025, 3)
         calculate_vat_period(self.company, 'monthly', 2025, 3)
         count = TaxPeriod.objects.filter(
@@ -176,8 +177,8 @@ class TestPDVSBridge(TestCase):
 
     def test_generate_from_tax_period(self):
         """generate_pdv_s_from_tax_period kreira PDVSReport."""
-        from pdv_s.service import generate_pdv_s_from_tax_period
         from pdv_s.models import PDVSReport
+        from pdv_s.service import generate_pdv_s_from_tax_period
         _make_invoice(self.company, 'URA', total=5000, tax_amount=1000,
                       dt=timezone.make_aware(datetime(2025, 3, 10)))
         report = generate_pdv_s_from_tax_period(self.company, 2025, 3, self.user)
@@ -232,9 +233,9 @@ class TestSupplierRisk(TestCase):
 
     def test_risk_alert_created_for_overdue(self):
         """Overdue URA kreira SupplierRiskAlert."""
-        from partners.models import Partner
-        from limit_connect_ai.tasks_risk import scan_supplier_risk
         from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+        from limit_connect_ai.tasks_risk import scan_supplier_risk
+        from partners.models import Partner
 
         supplier = Partner.objects.create(
             company=self.company, name='Dobavljac X',

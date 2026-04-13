@@ -1,5 +1,6 @@
 """Tests for Fiskalizacija module."""
 from django.test import TestCase
+
 from companies.models import Company
 from fiskalizacija.models import FiscalConfig
 

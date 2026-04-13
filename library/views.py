@@ -9,19 +9,26 @@ import re
 from datetime import timedelta
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.db.models import Count, Q, F
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, F, Q
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
+
 from .models import (
-    Author, Category, Book, BookCopy, MembershipType,
-    LibraryMember, Loan, Reservation,
+    Author,
+    Book,
+    BookCopy,
+    Category,
+    LibraryMember,
+    Loan,
+    MembershipType,
+    Reservation,
 )
 
 
@@ -192,8 +199,8 @@ def isbn_lookup(request):
     if not isbn or len(isbn) not in (10, 13):
         return JsonResponse({"error": "Neispravan ISBN"}, status=400)
 
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     # OpenLibrary API
     url = f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data"

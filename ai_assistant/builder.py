@@ -5,19 +5,21 @@ Split-screen IDE: chat lijevo, code preview desno.
 Gemini 2.5 Pro za code generation, PendingAIAction za sigurnost.
 """
 import json
-import os
 import logging
+import os
 import traceback
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
 
-from .models import Conversation, Message
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import DatabaseError, IntegrityError
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from superadmin_ai.models import AIActionLog, AIModulePermission, PendingAIAction
+
 from .claude_client import get_claude_client
-from superadmin_ai.models import AIModulePermission, PendingAIAction, AIActionLog
+from .models import Conversation, Message
 
 logger = logging.getLogger(__name__)
 

@@ -12,17 +12,17 @@ Povezuje vanjske besplatne izvore knjiga u jedinstven katalog:
 """
 import json
 import re
-import urllib.request
 import urllib.error
 import urllib.parse
+import urllib.request
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from core.company_utils import get_user_company
-from .models import Book, Author, BookCopy
 
+from .models import Author, Book, BookCopy
 
 SOURCES = {
     "gutenberg": {

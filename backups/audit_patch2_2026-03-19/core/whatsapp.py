@@ -98,8 +98,9 @@ def is_gateway_healthy():
 def _wa_rate_ok(daily_limit=500):
     """Redis daily rate limit za WhatsApp poruke (globalni)."""
     try:
-        import redis
         from datetime import date
+
+        import redis
         r = redis.Redis.from_url(getattr(settings, 'CELERY_BROKER_URL', 'redis://localhost:6379/0'))
         key = 'wa_global:%s' % date.today().isoformat()
         count = r.incr(key)

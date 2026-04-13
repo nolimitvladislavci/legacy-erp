@@ -1,7 +1,8 @@
 import logging
+from datetime import timedelta
+
 from celery import shared_task
 from django.utils import timezone
-from datetime import timedelta
 
 logger = logging.getLogger('udruge')
 
@@ -9,8 +10,9 @@ logger = logging.getLogger('udruge')
 @shared_task(bind=True, soft_time_limit=120)
 def send_expiry_reminders(self):
     """Pon 09:00 — WhatsApp podsjetnici za istjecanje clanstva."""
-    from .models import Clan
     from core.whatsapp import send_text
+
+    from .models import Clan
 
     today = timezone.now().date()
     expiring = Clan.objects.filter(
@@ -46,7 +48,7 @@ def evaluate_subscriptions(self):
     + auto-renew za aktivne planove
     + dunning email za grace period
     """
-    from .models import MemberSubscription, Clanarina
+    from .models import Clanarina, MemberSubscription
 
     today = timezone.now().date()
     processed = {'active': 0, 'grace': 0, 'suspended': 0, 'renewed': 0, 'reminded': 0}
@@ -201,9 +203,11 @@ def send_email_campaign(self, campaign_id):
     Prevents SMTP blacklisting and spam flags.
     """
     import time
-    from .models import EmailKampanja, EmailLog
+
     from django.core.mail import send_mail
     from django.utils import timezone as tz
+
+    from .models import EmailKampanja, EmailLog
 
     BATCH_SIZE = 50
     BATCH_DELAY = 2  # seconds between batches

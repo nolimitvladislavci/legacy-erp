@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
-import os, sys, subprocess, ssl, socket, re
+import os
+import re
+import socket
+import ssl
+import subprocess
+import sys
 from datetime import datetime, timedelta
+
 sys.path.insert(0, '/var/www/fina-connect')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 import django
+
 django.setup()
 from django.conf import settings
 from django.utils import timezone
+
 passed = 0
 warnings = 0
 failed = 0
@@ -91,12 +99,13 @@ except ImportError: warn("konto app not available")
 except Exception as e: fail(f"JournalEntry error: {e}")
 section(6, TOTAL, "DATABASE INTEGRITY")
 try:
-    from companies.models import Company
     from django.contrib.auth import get_user_model
-    from partners.models import Partner
+
+    from accounts.models import CompanyMembership
+    from companies.models import Company
     from inventory.models import InventoryItem
     from invoicing.models import Invoice
-    from accounts.models import CompanyMembership
+    from partners.models import Partner
     from registration.models import CompanySubscription
     User = get_user_model()
     data = {"Companies": Company.objects.count(), "Users": User.objects.count(), "Partners": Partner.objects.using("default").count(), "Inventory Items": InventoryItem.objects.using("default").count(), "Invoices": Invoice.objects.using("default").count()}

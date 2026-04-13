@@ -81,8 +81,8 @@ class Command(BaseCommand):
         return list(reader)
 
     def _sync_partners(self, company, cfg, storage_path):
-        from synesis.views import _import_partners
         from synesis.models import SynesisLog
+        from synesis.views import _import_partners
 
         self.stdout.write('--- Syncing PARTNERS ---')
         t0 = time.time()
@@ -118,8 +118,8 @@ class Command(BaseCommand):
         ))
 
     def _sync_items(self, company, cfg, storage_path):
-        from synesis.views import _import_items
         from synesis.models import SynesisLog
+        from synesis.views import _import_items
 
         self.stdout.write('--- Syncing ITEMS ---')
         t0 = time.time()
@@ -155,8 +155,8 @@ class Command(BaseCommand):
         ))
 
     def _sync_pos(self, company, cfg, pos_path):
-        from synesis.views import _import_pos
         from synesis.models import SynesisLog
+        from synesis.views import _import_pos
 
         self.stdout.write(f'--- Syncing POS from {pos_path} ---')
         t0 = time.time()

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import VirtualMailbox, IncomingMail, MailNotification
+
+from .models import IncomingMail, MailNotification, VirtualMailbox
 
 
 @admin.register(VirtualMailbox)

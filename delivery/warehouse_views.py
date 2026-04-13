@@ -10,12 +10,15 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import (
-    PickWave, PickTask, Rollwagen, PackagingExchange,
+    PackagingExchange,
+    PickTask,
+    PickWave,
+    Rollwagen,
 )
 
 logger = logging.getLogger(__name__)
@@ -280,8 +283,9 @@ def pack_station(request, order_pk):
 @require_POST
 def create_wave(request):
     """Create a pick wave from selected orders or a route."""
-    from marketplace.models import MarketplaceOrder, MarketplaceOrderItem
     from django.db.models import Sum
+
+    from marketplace.models import MarketplaceOrder, MarketplaceOrderItem
 
     company = request.user.profile.company
     order_pks = request.POST.getlist('order_pks')

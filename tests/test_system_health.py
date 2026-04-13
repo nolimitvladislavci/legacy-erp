@@ -3,13 +3,13 @@ LIMIT Connect — System Health Tests
 Covers: URL resolution, template rendering, model integrity, untested modules.
 29.03.2026 — Full system audit — 30 testova
 """
-import re
 import os
+import re
 
-from django.test import TestCase
-from django.urls import reverse, NoReverseMatch
 from django.apps import apps
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.urls import NoReverseMatch, reverse
 
 User = get_user_model()
 
@@ -49,7 +49,7 @@ class TemplateURLTest(TestCase):
     """Verify critical templates have no broken URL tags."""
 
     def test_template_url_tags_no_critical_breaks(self):
-        from django.urls import reverse, NoReverseMatch
+        from django.urls import NoReverseMatch, reverse
         url_pattern = re.compile(r"{%\s*url\s+['\"]([^'\"]+)['\"]")
         critical_dirs = [
             '/var/www/fina-connect/templates/base.html',

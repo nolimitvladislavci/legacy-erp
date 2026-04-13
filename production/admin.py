@@ -1,8 +1,14 @@
 from django.contrib import admin
+
 from .models import (
-    Workstation, BillOfMaterials, BOMLine,
-    ProductionOrder, ProductionStep, QualityCheck, ProductionLog,
+    BillOfMaterials,
+    BOMLine,
     MRPPlannedOrder,
+    ProductionLog,
+    ProductionOrder,
+    ProductionStep,
+    QualityCheck,
+    Workstation,
 )
 
 

@@ -2,12 +2,16 @@
 Seed 20 pravih knjiga za demo — s naslovnicama iz OpenLibrary.
 Pokreni: python manage.py shell < library_seed.py
 """
-import os, sys, django
+import os
+import sys
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from companies.models import Company
-from library.models import Book, Author, BookCopy, Category, MembershipType
+from library.models import Author, Book, BookCopy, Category, MembershipType
 
 # Uzmi prvu firmu za demo (ili kreiraj)
 company = Company.objects.first()

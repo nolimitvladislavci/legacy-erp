@@ -1,5 +1,10 @@
 """Dev-only: remote exec za Claude session. Whitelist zastita."""
-import subprocess, json, os, re, logging
+import json
+import logging
+import os
+import re
+import subprocess
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST

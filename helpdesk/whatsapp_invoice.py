@@ -159,8 +159,8 @@ def send_batch_result(phone, batch_id):
     """Send parsed batch results back to WhatsApp.
     Called by Celery task after processing completes.
     """
-    from smart_import.models import ImportBatch
     from core.whatsapp import send_text
+    from smart_import.models import ImportBatch
 
     try:
         batch = ImportBatch.objects.get(pk=batch_id)

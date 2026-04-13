@@ -2,16 +2,16 @@
 worktime/tests/test_hybrid_tracking.py
 Hybrid Time Tracking — ArbZG breaks, Geofence, Invisible Auditor
 """
+import datetime
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.db import DatabaseError, IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
-import datetime
 
 from companies.models import Company
-from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -209,7 +209,7 @@ class InvisibleAuditorTests(TestCase):
 
     def test_90min_gap_flagged(self):
         """Worker clocks in at 05:00, first scan at 06:30 -> 90min gap flagged."""
-        from worktime.models import TimeLog, ActivityEvent
+        from worktime.models import ActivityEvent, TimeLog
 
         clock_in = timezone.make_aware(datetime.datetime(2026, 3, 10, 5, 0, 0))
         first_scan = timezone.make_aware(datetime.datetime(2026, 3, 10, 6, 30, 0))
@@ -250,7 +250,7 @@ class InvisibleAuditorTests(TestCase):
 
     def test_no_gap_not_flagged(self):
         """Worker clocks in at 06:00, first scan at 06:05 -> not flagged."""
-        from worktime.models import TimeLog, ActivityEvent
+        from worktime.models import ActivityEvent, TimeLog
 
         clock_in = timezone.make_aware(datetime.datetime(2026, 3, 11, 6, 0, 0))
         first_scan = timezone.make_aware(datetime.datetime(2026, 3, 11, 6, 5, 0))

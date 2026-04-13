@@ -28,9 +28,8 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.cache import cache
-from django.db import models
+from django.db import DatabaseError, models
 from django.utils import timezone
-from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

@@ -20,7 +20,6 @@ from decimal import Decimal
 from django.db.models import Sum
 from django.utils import timezone
 
-
 # Configurable defaults
 MIN_DATA_DAYS = 90       # Minimum days of movement history required
 LOOKBACK_DAYS = 90       # Days to look back for avg consumption
@@ -168,8 +167,9 @@ def predict_weekly_demand(item, weeks_ahead=2):
     Gives more weight to recent weeks (2x for last 45 days).
     Returns dict with daily avg, weekly demand, stockout prediction.
     """
-    from inventory.models import StockMovement
     from django.db.models import Sum
+
+    from inventory.models import StockMovement
 
     now = timezone.now()
     lookback = now - timedelta(days=90)
@@ -244,9 +244,10 @@ def generate_draft_po(company, supplier=None, items=None):
 
     Returns list of created PurchaseOrder PKs.
     """
+    from django.db.models import Q
+
     from inventory.models import InventoryItem
     from procurement.models import PurchaseOrder, PurchaseOrderItem, SupplierPriceList
-    from django.db.models import Q
 
     today = timezone.now().date()
     created_pos = []

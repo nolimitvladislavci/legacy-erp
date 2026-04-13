@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import MigrationProject, MigrationFile, MigrationLog, PermanentMigrationAudit
+
+from .models import MigrationFile, MigrationLog, MigrationProject, PermanentMigrationAudit
 
 
 class MigrationFileInline(admin.TabularInline):

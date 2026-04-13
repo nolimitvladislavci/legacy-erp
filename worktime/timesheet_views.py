@@ -2,21 +2,21 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Sum
 from django.http import HttpResponse, JsonResponse
-from notifications.services import notify
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.tenant import get_current_company
+from notifications.services import notify
 
 from .models import ActiveTimer, DailyNote, EmployeeProfile, Project, TimeEntry, TimeEntryTemplate
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def _user_company(user):
@@ -586,7 +586,7 @@ def copy_previous_day(request):
     prev = today - timedelta(days=1)
     while prev.weekday() >= 5:
         prev -= timedelta(days=1)
-    entries = TimeEntry.objects.filter(user=request.user, date=prev)
+    entries = TimeEntry.objects.filter(user=request.user, date=prev).select_related("project")
     if not entries.exists():
         messages.warning(request, f'Nema unosa za {prev.strftime("%d.%m.%Y")}')
         return redirect('worktime:ts_worker')
@@ -620,7 +620,7 @@ def copy_day(request):
     except ValueError:
         messages.error(request, _('Neispravan datum.'))
         return redirect('worktime:ts_worker')
-    entries = TimeEntry.objects.filter(user=request.user, date=source)
+    entries = TimeEntry.objects.filter(user=request.user, date=source).select_related("project")
     if not entries.exists():
         messages.warning(request, f'Nema unosa za {source.strftime("%d.%m.%Y")}')
         return redirect('worktime:ts_worker')
@@ -776,7 +776,7 @@ def template_save(request):
             }
         )
         messages.success(request, f'✓ Predložak {"kreiran" if created else "ažuriran"}: {name}')
-    except ObjectDoesNotExist as e:
+    except ObjectDoesNotExist:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect('worktime:ts_worker')
 
@@ -937,7 +937,7 @@ def worker_profile(request):
                 if new_weekly: emp.weekly_hours = Decimal(str(new_weekly).replace(',','.'))
                 emp.save()
                 messages.success(request, f'✓ Satnica ažurirana: €{emp.hourly_rate}/h (prekovremeno: €{emp.overtime_rate}/h)')
-            except (ValueError, TypeError) as e:
+            except (ValueError, TypeError):
                 messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
             return redirect('worktime:ts_profile')
         # change_password action removed — use /accounts/password/
@@ -1462,7 +1462,7 @@ def billable_hours(request):
 def export_timesheet_excel(request):
     """Export timesheet to Excel (.xlsx) via openpyxl."""
     import openpyxl
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
     from openpyxl.utils import get_column_letter
 
     company = _user_company(request.user)
@@ -1682,9 +1682,10 @@ def worker_mine(request):
     Prikazuje vlastite sate. Nema satnica, nema financija.
     Zakon: ZOR + ArbZG §16.
     """
-    from worktime.models import TimeEntry, EmployeeProfile
     from datetime import timedelta
     from decimal import Decimal
+
+    from worktime.models import EmployeeProfile, TimeEntry
 
     company = _user_company(request.user)
     today = timezone.now().date()
@@ -1748,9 +1749,10 @@ def clock_inout(request):
 @require_POST
 def dispute_revision(request, revision_id):
     """Radnik prijavljuje neslaganje s izmjenom sata."""
-    from worktime.models import TimeLogRevision
-    from django.utils import timezone
     from django.http import JsonResponse
+    from django.utils import timezone
+
+    from worktime.models import TimeLogRevision
 
     rev = get_object_or_404(
         TimeLogRevision,

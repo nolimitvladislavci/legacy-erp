@@ -9,11 +9,12 @@ Matematika, ne magija:
 
 Niži score = bolji kandidat.
 """
-import math
 import logging
+import math
 from datetime import timedelta
-from django.utils import timezone
+
 from django.db.models import Q
+from django.utils import timezone
 
 logger = logging.getLogger('borg.dispatch')
 
@@ -308,8 +309,9 @@ def estimate_budget(category, company=None, percentile=75):
         sample_size: int, percentile: int
     }
     """
-    from interventions.models import HitnaIntervencija
     from decimal import Decimal
+
+    from interventions.models import HitnaIntervencija
 
     qs = HitnaIntervencija.objects.filter(
         status='FAKTURIRANO',

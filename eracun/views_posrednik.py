@@ -2,11 +2,12 @@
 eracun/views_posrednik.py
 Posrednik setup wizard + "Veliko Dugme" za slanje e-racuna.
 """
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
+
 from core.company_utils import get_user_company
 
 
@@ -88,6 +89,7 @@ def send_eracun_button(request, invoice_pk):
     Step 3: Slanje (POST confirm=2) — "ZADNJA SANSA — posalji?"
     """
     from invoicing.models import Invoice
+
     from .models import ERacunConfig
 
     company = get_user_company(request)

@@ -11,8 +11,8 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
-from django.db.models import Sum, Count, Avg, F, Q
-from django.db.models.functions import TruncMonth, ExtractMonth
+from django.db.models import Avg, Count, F, Q, Sum
+from django.db.models.functions import ExtractMonth, TruncMonth
 from django.utils import timezone
 
 logger = logging.getLogger('borg.predictions')
@@ -118,8 +118,8 @@ def detect_churn_risk():
     - Declining invoice frequency
     - Increasing payment delays
     """
-    from partners.models import Partner
     from invoicing.models import Invoice
+    from partners.models import Partner
 
     now = timezone.now().date()
     ninety_ago = now - timedelta(days=90)

@@ -6,14 +6,21 @@ Usporedba za svih 87 firmi.
 POKRETANJE:
   venv/bin/python synesis_compare.py [--csv] [--summary] [--company OIB] [--only-ira] [--only-ura]
 """
-import os, sys, csv, io, subprocess, argparse, glob
+import argparse
+import csv
+import glob
+import io
+import os
+import subprocess
+import sys
+from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from collections import defaultdict
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 import django
+
 django.setup()
 
 from companies.models import Company
@@ -51,7 +58,8 @@ def _dec(val):
 def _date(s):
     s = _clean(s)
     if not s: return ''
-    from datetime import timedelta, date as _d
+    from datetime import date as _d
+    from datetime import timedelta
     for fmt in ('%m/%d/%y %H:%M:%S', '%m/%d/%Y %H:%M:%S', '%m/%d/%y', '%Y-%m-%d'):
         try:
             return datetime.strptime(s, fmt).strftime('%Y-%m-%d')

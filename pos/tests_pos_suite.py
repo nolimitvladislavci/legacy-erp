@@ -9,17 +9,20 @@ import time
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 from django.utils import timezone
 
 from companies.models import Company
+from inventory.models import InventoryItem
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSReceiptItem,
+    POSReceipt,
+    POSReceiptItem,
+    POSSession,
+    POSTerminal,
     Voucher,
 )
 from pos.services.checkout import CheckoutService, CheckoutValidationError
-from inventory.models import InventoryItem
 
 
 class POSTestBase(TestCase):
@@ -429,8 +432,9 @@ class T25_FiscalRouting(POSTestBase):
         self.assertIn('TSE_AUSFALL', receipt.tse_error)
 
     def test_t30_fina_napojnica_xml(self):
-        from fiskalizacija.fisk import _build_racun
         from lxml import etree
+
+        from fiskalizacija.fisk import _build_racun
         session = self._open_session()
         payload = self._make_payload(session, [
             {'item_id': self.item.pk, 'quantity': 1, 'unit_price': '2.50', 'tax_rate': 25},
@@ -444,9 +448,11 @@ class T25_FiscalRouting(POSTestBase):
         self.assertIn('IznosN', xml)
 
     def test_t31_dsfinvk_export(self):
-        from pos.dsfinvk_export import generate_dsfinvk_export
+        import io
+        import zipfile
         from datetime import date
-        import zipfile, io
+
+        from pos.dsfinvk_export import generate_dsfinvk_export
         zb = generate_dsfinvk_export(self.company, date(2026, 1, 1), date(2026, 12, 31))
         zf = zipfile.ZipFile(io.BytesIO(zb))
         names = zf.namelist()
@@ -533,8 +539,9 @@ class T36_ZReport(POSTestBase):
         self.assertEqual(session.total_sales, Decimal('0.00'))
 
     def test_t40_kassenbuch_generator(self):
-        from pos.kassenbuch import generate_kassenbuch
         from datetime import date
+
+        from pos.kassenbuch import generate_kassenbuch
         xlsx = generate_kassenbuch(self.company, date(2026, 3, 1), date(2026, 3, 20))
         self.assertGreater(len(xlsx), 100)
 
@@ -635,8 +642,9 @@ class T47_Performance(POSTestBase):
         self.assertLess(elapsed, 2.0, f'Z-report calc took {elapsed:.2f}s (limit 2s)')
 
     def test_t49_dsfinvk_under_3s(self):
-        from pos.dsfinvk_export import generate_dsfinvk_export
         from datetime import date
+
+        from pos.dsfinvk_export import generate_dsfinvk_export
         start = time.time()
         zb = generate_dsfinvk_export(self.company, date(2026, 1, 1), date(2026, 12, 31))
         elapsed = time.time() - start
@@ -644,8 +652,9 @@ class T47_Performance(POSTestBase):
         self.assertGreater(len(zb), 0)
 
     def test_t50_kassenbuch_under_2s(self):
-        from pos.kassenbuch import generate_kassenbuch
         from datetime import date
+
+        from pos.kassenbuch import generate_kassenbuch
         start = time.time()
         xlsx = generate_kassenbuch(self.company, date(2026, 1, 1), date(2026, 3, 31))
         elapsed = time.time() - start

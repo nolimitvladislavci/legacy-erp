@@ -2,8 +2,9 @@
 konto/tasks.py
 Celery tasks for async bookkeeping operations.
 """
-from celery import shared_task
 import logging
+
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +32,6 @@ def ai_bookkeeper_process(self, archive_entry_id, auto_commit=False):
 # Re-export monthly_vat_calculation so Celery beat can find it via konto.tasks
 from konto.tasks_vat import monthly_vat_calculation  # noqa: F401
 
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 # SAF-T HR Export — OECD Standard Audit File for Tax
 # ══════════════════════════════════════════════════════════════════════════════
@@ -45,6 +44,7 @@ def generate_saft_export(self, company_id, period_from_str, period_to_str):
     """
     import os
     from datetime import date
+
     from companies.models import Company
     from konto.saft_generator import SAFTGenerator
 
@@ -99,7 +99,9 @@ def generate_saft_export(self, company_id, period_from_str, period_to_str):
 def tax_deadline_notifier():
     """Upozorenje Mariji za rokove poreznih prijava. Dnevno u 08:00."""
     import os
+
     from django.utils import timezone
+
     from konto.models import TaxPeriod
 
     marija = os.environ.get('MARIJA_WHATSAPP', '')

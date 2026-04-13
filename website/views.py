@@ -1,10 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
-from django.db import DatabaseError
 
 from .forms import HitnaIntervencijaForm
 from .models import Brand, GalleryImage, HitnaIntervencija, VideoGallery
@@ -239,8 +239,10 @@ def grosmarkt_partners_api(request):
 
 
 import json as _json
+
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST as _require_POST
+
 
 # CSRF exempt: external data import API — token auth
 @csrf_exempt
@@ -251,11 +253,13 @@ def grosmarkt_anfrage(request):
     CORS je riješen nginx-om za grosmarkt-online.eu.
     Sprema u bazu + šalje email na viskovic.bau@gmail.com.
     """
-    from django.http import JsonResponse
     from django.conf import settings
+    from django.http import JsonResponse
     from django.utils.timezone import now
-    from .models import GrosmarktAnfrage
+
     from core.email_tasks import send_html_email_task
+
+    from .models import GrosmarktAnfrage
 
     try:
         # Prihvati i JSON i form-data
@@ -373,7 +377,7 @@ def grosmarkt_anfrage(request):
             "id": anfrage.pk,
         })
 
-    except (json.JSONDecodeError, ValueError) as e:
+    except (json.JSONDecodeError, ValueError):
         import logging
         logging.getLogger(__name__).exception("grosmarkt_anfrage error")
         return JsonResponse({"success": False, "error": "Serverfehler. Bitte später erneut versuchen."}, status=500)
@@ -381,8 +385,8 @@ def grosmarkt_anfrage(request):
 
 def pricing_page(request):
     """Public pricing page for limit-connect.com."""
-    from registration.models import PricingPlan
     from registration.constants import PLAN_FEATURES
+    from registration.models import PricingPlan
     plans = PricingPlan.objects.filter(is_active=True).order_by('sort_order')
     lang = request.GET.get('lang', 'hr')
     profile = request.GET.get('profile', '')
@@ -487,7 +491,9 @@ def pricing_ai_advisor(request):
 
 
 from django.contrib.auth.decorators import login_required
+
 from core.company_utils import get_user_company
+
 
 @login_required
 def gallery_manage(request):

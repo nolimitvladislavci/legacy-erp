@@ -7,6 +7,7 @@ Thin facade over konto.services.bank_import parsers with dedup + BankTransaction
 import logging
 import uuid
 from decimal import Decimal
+
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -19,8 +20,8 @@ def parse_camt053(xml_content, bank_account, company):
     Dedup: skips entries where external_id already exists.
     Returns: list of created BankTransaction objects.
     """
+    from konto.models import BankAccount, BankTransaction, KontoAccount
     from konto.services.bank_import import parse_camt053 as _parse
-    from konto.models import BankTransaction, BankAccount, KontoAccount
 
     data = _parse(xml_content)
 
@@ -109,8 +110,9 @@ def parse_csv_fina(csv_content, bank_account, company):
     """
     import csv
     import io
-    from decimal import InvalidOperation
     from datetime import datetime
+    from decimal import InvalidOperation
+
     from konto.models import BankTransaction
 
     content = csv_content.strip()
@@ -266,8 +268,8 @@ def parse_mt940(content, bank_account, company):
     Tag :61: for transactions, :86: for details.
     Returns: list of created BankTransaction objects.
     """
+    from konto.models import BankAccount, BankTransaction, KontoAccount
     from konto.services.bank_import import parse_mt940 as _parse
-    from konto.models import BankTransaction, BankAccount, KontoAccount
 
     data = _parse(content)
 

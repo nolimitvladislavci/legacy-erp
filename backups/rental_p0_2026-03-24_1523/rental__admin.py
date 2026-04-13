@@ -1,6 +1,18 @@
-from rental.models import Property, Booking, SeasonalPrice, HousekeepingLog, Guest, GuestDocument, RentalInvoice, TrafficRecord
 from django.contrib import admin
-from .models import Property, Booking, SeasonalPrice, HousekeepingLog
+
+from rental.models import (
+    Booking,
+    Guest,
+    GuestDocument,
+    HousekeepingLog,
+    Property,
+    RentalInvoice,
+    SeasonalPrice,
+    TrafficRecord,
+)
+
+from .models import Booking, HousekeepingLog, Property, SeasonalPrice
+
 
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):

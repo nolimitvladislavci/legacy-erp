@@ -1,13 +1,14 @@
 """Tests for accounting period lock - DB triggers + view."""
 import datetime
+
 from django.contrib.auth.models import User
 from django.db.utils import InternalError
 from django.test import TransactionTestCase, override_settings
 
-from companies.models import Company
 from accounts.models import UserProfile
-from konto.models import AccountingPeriod, JournalEntry
+from companies.models import Company
 from invoicing.models import Invoice
+from konto.models import AccountingPeriod, JournalEntry
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)

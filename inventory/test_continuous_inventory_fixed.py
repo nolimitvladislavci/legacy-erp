@@ -15,7 +15,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from companies.models import Company
-from inventory.models import InventoryItem, StockBatch, InventoryCountLog
+from inventory.models import InventoryCountLog, InventoryItem, StockBatch
 
 User = get_user_model()
 

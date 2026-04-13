@@ -1,10 +1,9 @@
-from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError, transaction
+
 """Invoice business logic — extracted from views.py."""
 import datetime
 from decimal import Decimal, InvalidOperation
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Number generation
@@ -40,8 +39,9 @@ def ensure_partner(company, invoice):
     name = (invoice.client_name or '').strip()
     if not name or not company:
         return
-    from partners.models import Partner
     from django.db import IntegrityError
+
+    from partners.models import Partner
     defaults = {
         'name': name,
         'email': invoice.client_email or '',
@@ -241,10 +241,11 @@ def save_invoice_from_post(request):
     Returns the saved Invoice instance.
     Attaches ._gobd_warnings list if GoBD issues found.
     """
-    from invoicing.models import Invoice
-    from core.company_utils import get_user_company
     from django.shortcuts import get_object_or_404
     from django.utils import timezone as tz
+
+    from core.company_utils import get_user_company
+    from invoicing.models import Invoice
 
     post = request.POST
     invoice_id = post.get('invoice_id')
@@ -455,7 +456,7 @@ def _create_otpremnica_for_invoice(invoice):
         if not items_with_inv.exists():
             return None
 
-        from propter.models import Otpremnica, OtpremnicaItem, BillingPeriod
+        from propter.models import BillingPeriod, Otpremnica, OtpremnicaItem
 
         if Otpremnica.objects.filter(invoice_id=str(invoice.pk)).exists():
             return Otpremnica.objects.filter(invoice_id=str(invoice.pk)).first()
@@ -540,8 +541,9 @@ def bulk_create_invoices(invoice_list):
     Radi atomic: ili sve ili ništa.
     Garantira otpremnice za svaku fakturu (signal-agnostic).
     """
-    from invoicing.models import Invoice, InvoiceItem
     import logging
+
+    from invoicing.models import Invoice, InvoiceItem
     logger = logging.getLogger('invoicing.services')
 
     created = []

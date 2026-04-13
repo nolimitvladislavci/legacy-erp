@@ -3,7 +3,13 @@
 Synesis P1 Validation: MDB INVOICES/URAEU count vs LC Invoice count per company.
 Also checks TINVOICES line items.
 """
-import csv, io, os, subprocess, sys, django
+import csv
+import io
+import os
+import subprocess
+import sys
+
+import django
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 sys.path.insert(0, '/var/www/fina-connect')

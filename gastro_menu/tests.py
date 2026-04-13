@@ -1,6 +1,8 @@
 """Tests for Gastro Menu module."""
 from decimal import Decimal
+
 from django.test import TestCase
+
 from companies.models import Company
 from gastro_menu.models import DigitalMenu, MenuCategory, MenuItem
 

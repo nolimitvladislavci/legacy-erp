@@ -11,9 +11,10 @@ Svaki task generira AIAccessToken koji definira sto smije:
 
 AI_POLICY_VIOLATION se logira i moze triggerirati WhatsApp alarm.
 """
-import uuid
 import logging
+import uuid
 from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
 

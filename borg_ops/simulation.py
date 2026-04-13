@@ -6,6 +6,7 @@ Phase 2: LLM-driven simulacija za slozenije promjene.
 """
 import logging
 from decimal import Decimal
+
 from django.utils import timezone
 
 logger = logging.getLogger('borg.simulation')
@@ -26,8 +27,9 @@ class ComplianceSimulator:
             'details': str,
         }
         """
-        from invoicing.models import Invoice
         from datetime import timedelta
+
+        from invoicing.models import Invoice
 
         old_rate = Decimal(str(old_rate))
         new_rate = Decimal(str(new_rate))

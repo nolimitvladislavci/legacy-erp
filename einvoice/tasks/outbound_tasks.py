@@ -7,6 +7,7 @@ Features:
 - Bulk send support
 """
 import logging
+
 from celery import shared_task
 from django.utils import timezone
 
@@ -20,8 +21,8 @@ DLQ_MAX_RETRIES = 5
 def send_invoice_task(self, message_id):
     """Send a single invoice through transport pipeline."""
     from einvoice.models import AS4Message
+    from einvoice.services.metrics import record_retry, record_sent
     from einvoice.services.transport_router import TransportRouter
-    from einvoice.services.metrics import record_sent, record_retry
 
     try:
         message = AS4Message.objects.get(id=message_id)
@@ -67,11 +68,13 @@ def send_invoice_task(self, message_id):
 @shared_task
 def send_via_pipeline_task(invoice_id, user_id=None, profile="HR"):
     """Full pipeline task: Invoice -> UBL -> Validate -> Route -> Submit."""
+    import time
+
+    from django.contrib.auth.models import User
+
+    from einvoice.services.metrics import record_pipeline_stage
     from einvoice.services.outbound_pipeline import OutboundPipeline
     from invoicing.models import Invoice
-    from django.contrib.auth.models import User
-    from einvoice.services.metrics import record_pipeline_stage
-    import time
 
     try:
         invoice = Invoice.objects.select_related("company").get(id=invoice_id)
@@ -108,9 +111,10 @@ def send_via_pipeline_task(invoice_id, user_id=None, profile="HR"):
 @shared_task
 def bulk_send_task(invoice_ids, user_id=None, profile="HR"):
     """Bulk send multiple invoices through pipeline."""
+    from django.contrib.auth.models import User
+
     from einvoice.services.outbound_pipeline import OutboundPipeline
     from invoicing.models import Invoice
-    from django.contrib.auth.models import User
 
     user = None
     if user_id:

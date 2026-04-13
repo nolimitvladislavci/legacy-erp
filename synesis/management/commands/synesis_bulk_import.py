@@ -2,10 +2,16 @@
 synesis/management/commands/synesis_bulk_import.py
 Bulk import from Synesis archive -- scans directory for client folders.
 """
-import csv, io, os, subprocess, time, re
+import csv
+import io
+import os
+import re
+import subprocess
+import time
 from collections import defaultdict
+
 from django.core.management.base import BaseCommand, CommandError
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 
 class Command(BaseCommand):
@@ -140,8 +146,8 @@ class Command(BaseCommand):
         return list(csv.DictReader(io.StringIO(r.stdout)))
 
     def _import_folder(self, company, fi, sync_type):
-        from synesis.views import _import_partners, _import_items
         from synesis.models import SynesisLog
+        from synesis.views import _import_items, _import_partners
         stats = defaultdict(int)
         if not fi['has_storage']:
             self.stdout.write(self.style.WARNING('  No Storage.mdb -- skipping'))

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Company, NKDCode, TaxRate, CompanyPartnership
+from .models import Company, CompanyPartnership, NKDCode, TaxRate
 
 try:
     from boxgram.models import PetProfile
@@ -134,12 +134,14 @@ class ServiceTemplateAdmin(admin.ModelAdmin):
 
 from .models import WhiteLabelConfig
 
+
 @admin.register(WhiteLabelConfig)
 class WhiteLabelConfigAdmin(admin.ModelAdmin):
     list_display = ('brand_name', 'subdomain', 'fiscal_system', 'is_active', 'created_at')
     list_filter = ('fiscal_system', 'is_active')
 
 from .models import LicenseToken
+
 
 @admin.register(LicenseToken)
 class LicenseTokenAdmin(admin.ModelAdmin):

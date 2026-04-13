@@ -14,8 +14,9 @@ Usage:
   python manage.py export_fsm_policy --markdown    # Markdown export
 """
 import json
-from django.core.management.base import BaseCommand
+
 from django.apps import apps
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):

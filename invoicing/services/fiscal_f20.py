@@ -3,8 +3,10 @@ invoicing/services/fiscal_f20.py
 Fiskalizacija 2.0 handler — delegira na informacijskog posrednika.
 """
 import logging
+
+from django.db import DatabaseError, IntegrityError
+
 from .entry_point import BaseFiscalHandler, FiscalResult
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 

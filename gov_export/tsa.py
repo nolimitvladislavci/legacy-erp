@@ -10,6 +10,7 @@ Podržani TSA serveri:
 """
 import hashlib
 import logging
+
 import requests
 from django.conf import settings
 
@@ -47,9 +48,9 @@ def get_timestamp_token(data_bytes, tsa_server=None):
     # RFC 3161 TimeStampReq — ručna konstrukcija (bez rfc3161ng dependency)
     # Koristimo ASN.1 DER encoding za minimalni TSReq
     try:
-        import asn1crypto.tsp as tsp
         import asn1crypto.algos as algos
         import asn1crypto.core as core
+        import asn1crypto.tsp as tsp
 
         msg_imprint = tsp.MessageImprint({
             'hash_algorithm': algos.DigestAlgorithm({'algorithm': 'sha256'}),

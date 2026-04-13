@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import PurchaseOrder, PurchaseOrderItem, SupplierPriceList
+
 
 class POItemInline(admin.TabularInline):
     model = PurchaseOrderItem

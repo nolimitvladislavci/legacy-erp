@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import BillingPeriod, Otpremnica, OtpremnicaItem, PropterConfig, EkoStats
+
+from .models import BillingPeriod, EkoStats, Otpremnica, OtpremnicaItem, PropterConfig
 
 
 class OtpremnicaItemInline(admin.TabularInline):

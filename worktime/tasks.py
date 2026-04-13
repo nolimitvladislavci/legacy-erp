@@ -1,6 +1,7 @@
 import logging
+
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('worktime')
 
@@ -12,9 +13,11 @@ def worktime_anomaly_patrol(self):
     Pokrece se svake noci u 02:30.
     """
     import os
-    from worktime.models import TimeLog, ActivityEvent, AnomalyReport
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from worktime.models import ActivityEvent, AnomalyReport, TimeLog
 
     now = timezone.now()
     yesterday = now - timedelta(days=1)
@@ -70,8 +73,9 @@ def worktime_anomaly_patrol(self):
     # 3. AI analiza
     ai_summary = 'AI analiza nedostupna'
     try:
-        import anthropic
         import json
+
+        import anthropic
         api_key = os.environ.get('ANTHROPIC_API_KEY', '')
         if api_key:
             client = anthropic.Anthropic(api_key=api_key)
@@ -110,8 +114,9 @@ def worktime_anomaly_patrol(self):
 
     # 5. Notifikacija superadminima
     try:
-        from notifications.services import notify
         from django.contrib.auth import get_user_model
+
+        from notifications.services import notify
         User = get_user_model()
         for admin in User.objects.filter(is_superuser=True, is_active=True):
             notify(
@@ -136,8 +141,10 @@ def worktime_anomaly_patrol(self):
 @shared_task(name='worktime.tasks.iban_vault_check')
 def iban_vault_check():
     """Nightly: archive IBAN for terminated employees after 30 days."""
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
     from .models import EmployeeProfile
 
     cutoff = timezone.now().date() - timedelta(days=30)

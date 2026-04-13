@@ -350,7 +350,8 @@ class ArhivaEntry(models.Model):
 
     def set_deletion_protection(self):
         """11 godina od doc_date - HR zakonski rok cuvanja."""
-        from datetime import timedelta, date as _date
+        from datetime import date as _date
+        from datetime import timedelta
         if self.doc_date:
             # Ensure doc_date is a date object, not string
             if isinstance(self.doc_date, str):
@@ -610,6 +611,7 @@ class StorageConfig(models.Model):
 # ════════════════════════════════════════════════════════════
 
 from django.conf import settings as _settings
+
 
 class ArhivaBookmark(models.Model):
     user = models.ForeignKey(_settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

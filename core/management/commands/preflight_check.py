@@ -10,9 +10,10 @@ Exit codes:
   1 = neregistrirane migracije
   2 = schema drift detektiran
 """
-from django.core.management.base import BaseCommand
-from django.core.management import call_command
 from io import StringIO
+
+from django.core.management import call_command
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
@@ -55,8 +56,9 @@ class Command(BaseCommand):
 
         # 3. Schema drift (quick check — top 10 tablica)
         self.stdout.write('\n[3/3] Quick schema drift check...')
-        from borg_ops.tasks import _get_db_columns, _get_model_columns
         from django.apps import apps
+
+        from borg_ops.tasks import _get_db_columns, _get_model_columns
 
         drift_count = 0
         for model in list(apps.get_models())[:50]:

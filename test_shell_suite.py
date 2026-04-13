@@ -12,13 +12,15 @@
 
 import os
 import sys
+
 import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-from django.test import Client
 from django.contrib.auth.models import User
 from django.template.loader import get_template
+from django.test import Client
 
 # ─────────────────────────────────────────────────────────────────────────
 # BOJE ZA OUTPUT
@@ -473,6 +475,7 @@ except FileNotFoundError:
 head("9. GIT STANJE")
 
 import subprocess
+
 result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True)
 uncommited = [l for l in result.stdout.strip().split('\n') if l.strip()]
 uncommited_shell = [l for l in uncommited if any(x in l for x in ['base.html','shell','panel','konto','doktor','pos'])]

@@ -1,7 +1,11 @@
 from django.contrib import admin
+
 from .models import (
-    AIAgentMission, AIReportLog, FundApplicationDraft,
-    ComplianceWatchItem, CampaignPlan,
+    AIAgentMission,
+    AIReportLog,
+    CampaignPlan,
+    ComplianceWatchItem,
+    FundApplicationDraft,
 )
 
 
@@ -47,8 +51,12 @@ class CampaignPlanAdmin(admin.ModelAdmin):
 
 # ── BORG FENIX: Knowledge Graph Admin ──────────────────────────────────────
 from .models_knowledge_graph import (
-    RegulatorySource, RegulatoryUpdate, ImpactDomain,
-    AdaptationRule, LegalOpportunity, ClientOpportunityMatch,
+    AdaptationRule,
+    ClientOpportunityMatch,
+    ImpactDomain,
+    LegalOpportunity,
+    RegulatorySource,
+    RegulatoryUpdate,
 )
 
 
@@ -100,6 +108,7 @@ class ClientOpportunityMatchAdmin(admin.ModelAdmin):
 
 # ── BORG Signal Admin ──
 from limit_connect_ai.models_signal import FenixSignal
+
 
 @admin.register(FenixSignal)
 class FenixSignalAdmin(admin.ModelAdmin):

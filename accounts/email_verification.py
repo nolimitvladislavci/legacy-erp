@@ -16,6 +16,7 @@ Flow:
 Token: MagicToken(token_type='verify', hours=72)
 """
 import logging
+
 from django.conf import settings
 from django.utils import timezone
 

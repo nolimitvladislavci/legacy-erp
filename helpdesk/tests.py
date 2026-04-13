@@ -1,6 +1,7 @@
 """Tests for Helpdesk module."""
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+
 from companies.models import Company
 from helpdesk.models import Ticket, TicketMessage
 

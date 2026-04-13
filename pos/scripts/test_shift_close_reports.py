@@ -2,15 +2,16 @@
 TEST: Završetak smjene — radni sati, blagajnički izvještaj, Z-report
 Simulacija: 3 konobara + 1 recepcija rade smjenu, zatvaraju, generiraju izvještaje
 """
-from decimal import Decimal
-from django.utils import timezone
-from django.contrib.auth.models import User
-from datetime import timedelta
 import json
+from datetime import timedelta
+from decimal import Decimal
+
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 from companies.models import Company
-from pos.models import *
 from inventory.models import InventoryItem
+from pos.models import *
 from pos.worktime_bridge import cashier_clock_in, cashier_clock_out
 
 konjik = Company.objects.get(name__icontains="Konjik")

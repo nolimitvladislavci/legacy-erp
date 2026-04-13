@@ -1,6 +1,7 @@
 """PDV-S (Prijava PDV-a) — modeli."""
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 from core.managers import CompanyManager
 
 

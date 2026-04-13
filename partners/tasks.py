@@ -1,9 +1,10 @@
 """Agent provizija — mjesečni obračun."""
 import logging
 from decimal import Decimal
+
 from celery import shared_task
-from django.utils import timezone as tz
 from django.db import DatabaseError
+from django.utils import timezone as tz
 
 logger = logging.getLogger('agents')
 
@@ -14,7 +15,7 @@ def calculate_agent_commissions():
     Mjesečno: izračunaj proviziju za sve aktivne agente.
     Pokreće se 1. u mjesecu za prethodni mjesec.
     """
-    from partners.models import AgentReferral, AgentPayout
+    from partners.models import AgentPayout, AgentReferral
     from registration.models import CompanySubscription
 
     now = tz.now()
@@ -106,9 +107,11 @@ def cleanup_stale_wizard_drafts():
     - Stariji od 90 dana I jesu completed (arhivirani)
     Pokretati: svaki dan u 03:00
     """
-    from partners.models import WizardDraft
-    from django.utils import timezone as tz
     from datetime import timedelta
+
+    from django.utils import timezone as tz
+
+    from partners.models import WizardDraft
 
     now = tz.now()
     stale = WizardDraft.objects.filter(
@@ -198,8 +201,9 @@ def _infer_nkd_from_context(company) -> 'NKDCode | None':
 
     # Strategija 2: Invoice descriptions keyword match
     try:
-        from invoicing.models import Invoice
         from django.db.models import Q
+
+        from invoicing.models import Invoice
         desc_words = []
         for inv in Invoice.objects.filter(company=company).values_list('notes', flat=True)[:20]:
             if inv:
@@ -241,9 +245,10 @@ def _haiku_infer_nkd(company_name: str):
     Batch-friendly — poziva se jednom po firmi, ~0.01 USD.
     Returns NKDCode object ili None.
     """
-    import os
-    import requests as req
     import json as _json
+    import os
+
+    import requests as req
 
     api_key = os.environ.get('ANTHROPIC_API_KEY', '')
     if not api_key:
@@ -301,9 +306,10 @@ def classify_buyer_types_batch(company_id=None):
     Batch klasifikacija buyer_type za partnere.
     Poziva istu logiku kao management command classify_buyer_types.
     """
+    import logging
+
     from partners.management.commands.classify_buyer_types import classify_partner
     from partners.models import Partner
-    import logging
 
     logger = logging.getLogger('partners.tasks')
 
@@ -349,13 +355,15 @@ def vies_batch_validate(self, batch_size=500):
     Provjerava SVE buyer_type kategorije uključujući b2b_novat i udruga_novat.
     Ako je VIES valid → upgradea buyer_type i postavlja is_vat_registered + vat_id.
     """
-    import requests
     import time
     from xml.etree import ElementTree as ET
-    from partners.models import Partner
-    from partners.hr_registry import _parse_address
-    from django.utils import timezone as tz
+
+    import requests
     from django.db.models import Q
+    from django.utils import timezone as tz
+
+    from partners.hr_registry import _parse_address
+    from partners.models import Partner
 
     VIES_URL = 'https://ec.europa.eu/taxation_customs/vies/services/checkVatService'
     SOAP_TPL = """<?xml version="1.0" encoding="UTF-8"?>

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import WaitlistEntry, TimeCapsule, MemoryVault, FamilyStory
+
+from .models import FamilyStory, MemoryVault, TimeCapsule, WaitlistEntry
 
 
 @admin.register(WaitlistEntry)

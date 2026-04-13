@@ -15,8 +15,8 @@ Sigurnosne provjere:
   - Samo DRAFT_ tvrtke se mogu finalizirati
 """
 import logging
-from django.db import transaction
-from django.db import DatabaseError
+
+from django.db import DatabaseError, transaction
 
 logger = logging.getLogger('partners.oib_finalizer')
 
@@ -149,8 +149,9 @@ def _run_vies_check(company, oib):
         ])
 
         # Update all Partner records with this OIB
-        from partners.models import Partner
         from django.utils import timezone
+
+        from partners.models import Partner
         now = timezone.now()
 
         partners_updated = 0

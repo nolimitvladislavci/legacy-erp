@@ -8,11 +8,11 @@ Pravila:
 - Sve promjene zaliha, fiskalizacija i placanje u jednoj atomarnoj transakciji
 """
 import logging
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from django.db import models, transaction
-from django.utils import timezone as tz
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError, models, transaction
+from django.utils import timezone as tz
 
 logger = logging.getLogger('pos_checkout')
 
@@ -45,6 +45,7 @@ class CheckoutService:
     def _next_receipt_number(session):
         # select_for_update on session: serializes receipt_number per session (race condition fix)
         from django.db.models import Max
+
         from pos.models import POSSession
         POSSession.objects.select_for_update().filter(pk=session.pk).first()
         max_num = session.receipts.aggregate(m=Max('receipt_number'))['m'] or 0
@@ -269,8 +270,8 @@ class CheckoutService:
             session_id, items[], payment_method, amount_paid,
             cashier_id, tip_amount, note, voucher_code, voucher_amount
         """
-        from pos.models import POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
         from inventory.models import InventoryItem
+        from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession
 
         # ── 1. PARSE ──
         session_id = payload.get('session_id')
@@ -533,7 +534,7 @@ class CheckoutService:
             # ── CLANARINA AUTO-LINK ──
             if getattr(inv, 'is_nonprofit_activity', False):
                 try:
-                    from udruge.models import MembershipPlan, Clanarina, Clan
+                    from udruge.models import Clan, Clanarina, MembershipPlan
                     mp = MembershipPlan.objects.filter(linked_item=inv, company=company, is_active=True).first()
                     if mp and member_name:
                         card_uid = (payload.get('member_card') or '').strip()
@@ -620,6 +621,7 @@ class CheckoutService:
             limit = getattr(company, 'cash_register_limit', None)
             if limit and limit > 0:
                 from django.db.models import Sum
+
                 from pos.models import POSPaymentLine
                 current_cash = session.receipts.filter(
                     status='paid',
@@ -778,7 +780,7 @@ class CheckoutService:
 
         # Loyalty points earn (non-blocking)
         try:
-            from pos.models import LoyaltyProgram, GuestLoyalty
+            from pos.models import GuestLoyalty, LoyaltyProgram
             loyalty = LoyaltyProgram.objects.filter(company=company, is_active=True).first()
             if loyalty and receipt.member_clan_id:
                 points = int(float(receipt.total) * float(loyalty.points_per_euro or 1))

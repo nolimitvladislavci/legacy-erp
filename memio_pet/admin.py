@@ -2,15 +2,20 @@
 memio_pet/admin.py -- Admin za memio.pet modul
 Ljubeta unosi podatke ovdje. Inline pomoc na svakom koraku.
 """
-from django.contrib import admin
-from django.utils.html import format_html, mark_safe
+from django.contrib import admin, messages
 from django.db import IntegrityError
-from django.contrib import messages
-from memio_pet.models import (
-    BreederProfile, AnimalProfile, PetHealthRecord,
-    PetOwnership, WaitlistEntry, VeterinarProfile, VerificationLog, BreederReview,
-)
+from django.utils.html import format_html, mark_safe
 
+from memio_pet.models import (
+    AnimalProfile,
+    BreederProfile,
+    BreederReview,
+    PetHealthRecord,
+    PetOwnership,
+    VerificationLog,
+    VeterinarProfile,
+    WaitlistEntry,
+)
 
 # ── INLINE HELP ─────────────────────────────────────────────────────────
 
@@ -400,6 +405,7 @@ class BreederReviewAdmin(admin.ModelAdmin):
 
 from memio_pet.models import RawFoodListing, RawFoodOrder
 
+
 @admin.register(RawFoodListing)
 class RawFoodListingAdmin(admin.ModelAdmin):
     list_display = ('company_name', 'product_type', 'quantity_kg', 'price_eur_kg', 'status', 'is_free_range')
@@ -414,6 +420,7 @@ class RawFoodOrderAdmin(admin.ModelAdmin):
 
 
 from memio_pet.models import DogTrainingSession, PetBoardingReservation
+
 
 @admin.register(DogTrainingSession)
 class DogTrainingSessionAdmin(admin.ModelAdmin):

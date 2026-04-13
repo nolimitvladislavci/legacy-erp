@@ -10,13 +10,13 @@ Upotreba:
 """
 from __future__ import annotations
 
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -349,7 +349,7 @@ class Command(BaseCommand):
     # ── POS ────────────────────────────────────────────────────────────────────
 
     def _ensure_pos(self, company, operator):
-        from pos.models import POSTerminal, POSSession
+        from pos.models import POSSession, POSTerminal
         terminal, _ = POSTerminal.objects.get_or_create(
             company=company,
             terminal_code="VIS-POS-001",
@@ -481,8 +481,9 @@ class Command(BaseCommand):
     # ── appointments ───────────────────────────────────────────────────────────
 
     def _ensure_appointments(self, company, partners, employee):
-        from appointments.models import Appointment
         from datetime import time
+
+        from appointments.models import Appointment
         muller, weber, schmidt = partners[0], partners[1], partners[2]
 
         def dt(days_delta, hour=10):

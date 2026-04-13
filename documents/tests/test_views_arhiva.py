@@ -20,21 +20,23 @@ import os
 import tempfile
 from datetime import date, timedelta
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, Client, override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from accounts.models import UserProfile
 from companies.models import Company
 from documents.models import (
-    ArhivaEntry, ArhivaBookmark, ArhivaLabel,
-    ScanBatch, ScanBatchImage,
+    ArhivaBookmark,
+    ArhivaEntry,
+    ArhivaLabel,
+    ScanBatch,
+    ScanBatchImage,
 )
-
 
 # ════════════════════════════════════════════════════════════
 # Helpers — match project conventions from test_views.py

@@ -1,4 +1,5 @@
 from django.db import models
+
 from core.managers import CompanyManager
 
 
@@ -305,6 +306,7 @@ class BookingSignature(models.Model):
 
     def _compute_hash(self):
         import hashlib
+
         from django.conf import settings
         salt = getattr(settings, 'BOOKING_SIGNATURE_SALT', settings.SECRET_KEY[:32])
         raw = f"{self.user_id}|{self.action}|{self.target_model}|{self.target_id}|{self.timestamp}|{salt}"
@@ -313,6 +315,7 @@ class BookingSignature(models.Model):
     def verify_integrity(self):
         """Provjeri da zapis nije mijenjan."""
         import hashlib
+
         from django.conf import settings
         salt = getattr(settings, 'BOOKING_SIGNATURE_SALT', settings.SECRET_KEY[:32])
         raw = f"{self.user_id}|{self.action}|{self.target_model}|{self.target_id}|{self.timestamp}|{salt}"

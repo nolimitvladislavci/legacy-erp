@@ -4,8 +4,9 @@ Auto-generiranje TimeEntry iz POS cashier PIN login/logout.
 """
 import logging
 from decimal import Decimal
+
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('pos.worktime')
 

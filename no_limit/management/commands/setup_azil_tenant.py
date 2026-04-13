@@ -10,10 +10,10 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
+from django.db import DatabaseError
 
 from accounts.models import UserProfile
 from companies.models import Company
-from django.db import DatabaseError
 
 
 class Command(BaseCommand):

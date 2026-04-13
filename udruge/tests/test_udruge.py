@@ -1,9 +1,9 @@
 """Udruge modul testovi — 12 testova."""
 from datetime import date, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 User = get_user_model()

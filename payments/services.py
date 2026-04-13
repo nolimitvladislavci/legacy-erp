@@ -16,8 +16,10 @@ Usage from any module:
     # payment.external_url -> redirect user here for Stripe/BTCPay
 """
 import logging
+
 import requests
 from django.utils import timezone
+
 from .models import Payment, PaymentConfig
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,9 @@
 """Tests for marketplace views."""
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
+from django.test import Client, TestCase
+
 from accounts.models import UserProfile
 from companies.models import Company
 from marketplace.models import MarketplaceCategory, MarketplaceProduct

@@ -3,6 +3,7 @@ sales/urls.py — URL patterns za prodajni modul.
 """
 
 from django.urls import path
+
 from . import views
 
 app_name = 'sales'

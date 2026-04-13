@@ -1,11 +1,11 @@
 """
 POS Signals — auto-generiranje dnevnog izvještaja i auto-knjiženje na zatvaranju sesije.
 """
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from pos.models import POSSession
-from django.core.exceptions import ObjectDoesNotExist
 
 
 @receiver(post_save, sender=POSSession)
@@ -15,7 +15,8 @@ def generate_daily_report_on_close(sender, instance, **kwargs):
         session_pk = instance.pk
         def _gen():
             try:
-                from pos.models import POSSession as _PS, POSDailyReport as _PDR
+                from pos.models import POSDailyReport as _PDR
+                from pos.models import POSSession as _PS
                 sess = _PS.objects.get(pk=session_pk)
                 _PDR.generate_from_session(sess)
             except ObjectDoesNotExist:

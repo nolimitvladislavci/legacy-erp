@@ -10,14 +10,14 @@ import json
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.db.models import Count, Q
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.db.models import Count, Q
 from django.views.decorators.http import require_POST
 
-from core.company_utils import get_user_company
 from core.audit_access import audit_sensitive_access
+from core.company_utils import get_user_company
 
 logger = logging.getLogger(__name__)
 

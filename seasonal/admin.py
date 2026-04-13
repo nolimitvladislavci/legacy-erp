@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import SeasonalWorker, SeasonalContract, SeasonalPayment
+
+from .models import SeasonalContract, SeasonalPayment, SeasonalWorker
 
 
 @admin.register(SeasonalWorker)

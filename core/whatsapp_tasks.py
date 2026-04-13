@@ -3,6 +3,7 @@ Celery tasks for WhatsApp messaging via WAHA gateway.
 All tasks are idempotent with graceful retry on gateway errors.
 """
 import logging
+
 from celery import shared_task
 from django.conf import settings
 
@@ -93,9 +94,10 @@ def send_appointment_reminder_whatsapp(self, appointment_id):
 @shared_task(bind=True, max_retries=3, retry_backoff=True)
 def send_intervention_assignment_whatsapp(self, intervention_id, worker_user_id):
     """Send WhatsApp notification to assigned worker about new intervention."""
-    from interventions.models import HitnaIntervencija
     from django.contrib.auth.models import User
+
     from core.whatsapp import send_text
+    from interventions.models import HitnaIntervencija
 
     try:
         interv = HitnaIntervencija.objects.unscoped().get(pk=intervention_id)

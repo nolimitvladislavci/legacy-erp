@@ -1,4 +1,6 @@
 from django.db import DatabaseError
+
+
 def get_managed_companies(user):
     """
     Vraća queryset firmi kojima korisnik ima pristup kao partner/reseller.

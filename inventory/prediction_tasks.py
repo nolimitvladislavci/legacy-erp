@@ -1,5 +1,6 @@
 """Celery tasks for predictive inventory analytics."""
 import logging
+
 from celery import shared_task
 
 logger = logging.getLogger('inventory.predictions')
@@ -12,11 +13,12 @@ def check_predictive_stockouts(self):
     If critical items found, notify admins + auto-generate draft POs.
     Runs daily at 06:30 via Celery Beat.
     """
+    from django.contrib.auth import get_user_model
+
     from companies.models import Company
     from inventory.models import InventoryItem
-    from inventory.reorder import predict_reorder, generate_draft_po
+    from inventory.reorder import generate_draft_po, predict_reorder
     from notifications.services import notify
-    from django.contrib.auth import get_user_model
 
     User = get_user_model()
 

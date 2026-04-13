@@ -1,13 +1,15 @@
 import json
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_POST
-from django.db import models, DatabaseError, IntegrityError
-from django.utils import timezone
 
-from .models import AIModulePermission, PendingAIAction, AIActionLog
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError, models
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from .models import AIActionLog, AIModulePermission, PendingAIAction
+
 
 def is_superadmin(user):
     return user.is_superuser or user.is_staff
@@ -216,6 +218,7 @@ def bulk_all(request):
 # ══════════════════════════════════════════════════════════
 
 import os
+
 AI_AGENT_TOKEN = os.environ.get('DEV_API_TOKEN', '')
 
 def _check_agent_auth(request):
@@ -395,7 +398,9 @@ def agent_gateway(request):
     # AI Self-Report — agent objašnjava što je napravio
     if result.get('ok') and level >= AIModulePermission.ACCESS_AUTONOMOUS:
         try:
-            import os, anthropic
+            import os
+
+            import anthropic
             api_key = os.environ.get('ANTHROPIC_API_KEY', '')
             if api_key:
                 client = anthropic.Anthropic(api_key=api_key)
@@ -452,7 +457,9 @@ def _execute_agent_action(action, module, payload, company, ip):
             qs = Model.objects.filter(**filters)[:limit]
             data = list(qs.values())
             # Serialize special types
-            import decimal, datetime, uuid
+            import datetime
+            import decimal
+            import uuid
             for row in data:
                 for k, v in row.items():
                     if isinstance(v, (decimal.Decimal,)): row[k] = float(v)
@@ -684,11 +691,12 @@ def live_metrics(request):
 @user_passes_test(is_superadmin)
 def subscription_cockpit(request):
     """ARR/MRR cockpit — monetizacijski pregled za superadmina."""
-    from registration.models import CompanySubscription
-    from companies.models import Company
-    from decimal import Decimal
-    from datetime import timedelta
     from collections import Counter, defaultdict
+    from datetime import timedelta
+    from decimal import Decimal
+
+    from companies.models import Company
+    from registration.models import CompanySubscription
 
     today = timezone.now().date()
 

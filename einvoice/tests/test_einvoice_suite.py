@@ -2,9 +2,10 @@
 eInvoice Test Suite — FINA / Peppol / UBL 2.1
 Priprema za testiranje sukladnosti Porezne uprave.
 """
-from django.test import TestCase
-from unittest.mock import patch
 import hashlib
+from unittest.mock import patch
+
+from django.test import TestCase
 
 
 class AS4MessageModelTest(TestCase):

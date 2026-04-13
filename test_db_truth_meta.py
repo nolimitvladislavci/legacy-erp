@@ -5,6 +5,7 @@ sys.path.append('/var/www/fina-connect')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
+
 django.setup()
 
 from django.db import connection

@@ -4,9 +4,11 @@ delivery/models.py - Logistika i dostava za Grossmarkt Online
 Vozila, rute, GPS tracking, temperatura hladnog lanca.
 """
 from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from core.managers import CompanyManager
 
 
@@ -919,8 +921,9 @@ def analyze_readings(smart_box, readings_qs=None):
     Returns:
         list[HACCPIncident]: kreirani incidenti (ako ima)
     """
-    from django.utils import timezone as tz
     from datetime import timedelta
+
+    from django.utils import timezone as tz
 
     SUSTAINED_THRESHOLD_MIN = 10  # minuta
     CRITICAL_TEMP = Decimal('15.0')
@@ -1098,8 +1101,9 @@ class PickWave(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.wave_number:
-            from django.utils import timezone
             import random
+
+            from django.utils import timezone
             ts = timezone.now().strftime('%y%m%d%H%M')
             self.wave_number = f"WV-{ts}-{random.randint(10,99)}"
         super().save(*args, **kwargs)

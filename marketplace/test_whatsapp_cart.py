@@ -9,13 +9,15 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from django.db import DatabaseError, IntegrityError
 
 from companies.models import Company
 from marketplace.models import (
-    CartSnapshot, MarketplaceProduct, MarketplaceCategory,
+    CartSnapshot,
+    MarketplaceCategory,
+    MarketplaceProduct,
 )
 
 

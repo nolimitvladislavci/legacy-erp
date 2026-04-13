@@ -1,5 +1,6 @@
 """Smart Mailbox — inbound invoice processing."""
 import uuid
+
 from django.db import models
 
 

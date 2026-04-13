@@ -14,11 +14,11 @@ Output: .dsfinvk ZIP containing:
 """
 import csv
 import io
+import logging
 import zipfile
 from datetime import date, datetime
 from decimal import Decimal
 
-import logging
 logger = logging.getLogger(__name__)
 
 

@@ -40,7 +40,8 @@ def match_opportunities_for_company(company):
         dict: {company_id, company_name, total_savings, count, matches[], scanned_at}
     """
     from limit_connect_ai.models_knowledge_graph import (
-        LegalOpportunity, ClientOpportunityMatch,
+        ClientOpportunityMatch,
+        LegalOpportunity,
     )
 
     now = timezone.now().date()

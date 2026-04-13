@@ -5,8 +5,10 @@ Auto-generates AdaptationRule candidates when RegulatoryUpdate is created.
 Pipeline: NN Scraper → RegulatoryUpdate.post_save → auto-generate AdaptationRule
 """
 import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate
 
 logger = logging.getLogger('borg.kg_signals')

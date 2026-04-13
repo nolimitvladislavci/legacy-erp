@@ -15,7 +15,7 @@ import json
 import uuid
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client, override_settings
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
 User = get_user_model()

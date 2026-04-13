@@ -1,14 +1,15 @@
 """Work Orders views tests with real data."""
 import datetime
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'WO {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -39,8 +40,9 @@ def _make_partner(company, name='WO Partner'):
 
 
 def _make_work_order(company, user, partner=None, status='OPEN', order_num=None):
-    from work_orders.models import WorkOrder
     import uuid
+
+    from work_orders.models import WorkOrder
     return WorkOrder.objects.create(
         company=company,
         order_number=order_num or f'WO-{uuid.uuid4().hex[:6].upper()}',

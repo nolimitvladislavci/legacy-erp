@@ -3,12 +3,21 @@ core/views_validate.py — CroValidator API
 POST /api/v1/validate/ — validacija OIB, IBAN, MBS
 """
 import json
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+
 from core.oib_validator import (
-    validate_oib_hr, validate_hr_iban, validate_iban, validate_mbs,
-    validate_jibg, validate_jzb, validate_ueln, validate_chip_iso, validate_nkd,
+    validate_chip_iso,
+    validate_hr_iban,
+    validate_iban,
+    validate_jibg,
+    validate_jzb,
+    validate_mbs,
+    validate_nkd,
+    validate_oib_hr,
+    validate_ueln,
     validate_vat_id,
 )
 

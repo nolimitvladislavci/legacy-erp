@@ -1,5 +1,6 @@
 """Celery tasks for delivery status tracking."""
 import logging
+
 from celery import shared_task
 
 logger = logging.getLogger("propter.einvoice.tasks.status")
@@ -8,8 +9,8 @@ logger = logging.getLogger("propter.einvoice.tasks.status")
 @shared_task
 def check_delivery_statuses():
     from einvoice.models import AS4Message, MessageStatus
-    from einvoice.services.posrednik_client import PosrednikClient
     from einvoice.services.archive_service import ArchiveService
+    from einvoice.services.posrednik_client import PosrednikClient
 
     posrednik = PosrednikClient()
     archive_svc = ArchiveService()

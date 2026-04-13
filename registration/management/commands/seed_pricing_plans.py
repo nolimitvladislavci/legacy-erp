@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
-from registration.models import PricingPlan
 
+from registration.models import PricingPlan
 
 PLANS = [
     {

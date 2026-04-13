@@ -1,16 +1,17 @@
 """Invoicing views extra tests — wizard, edit, clone, API endpoints."""
 import datetime
 import json
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]
 
 
 def _setup_inv_user(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'INV {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -41,8 +42,9 @@ def _make_partner(company, name='INV Partner'):
 
 
 def _make_invoice(company, user, partner=None, doctype='INVOICE', number=None):
-    from invoicing.models import Invoice
     import uuid
+
+    from invoicing.models import Invoice
     return Invoice.objects.create(
         company=company,
         number=number or f'KNJ-{uuid.uuid4().hex[:6].upper()}',

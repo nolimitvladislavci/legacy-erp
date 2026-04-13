@@ -1,14 +1,15 @@
 """Extra invoicing tests — covering more view lines: workflow, API, fiscal, clone, etc."""
 import datetime
 import json
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_invoicing_user(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'INV {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -34,8 +35,9 @@ ALLOWED = [200, 301, 302, 400, 403, 404, 405, 500, 501]
 
 
 def _make_invoice(company, user, doctype='invoice'):
-    from invoicing.models import Invoice
     import uuid
+
+    from invoicing.models import Invoice
     return Invoice.objects.create(
         company=company,
         created_by=user,

@@ -1,8 +1,10 @@
 import logging
-from django.utils.deprecation import MiddlewareMixin
+
 from django.conf import settings
-from core.tenant import set_current_company
+from django.utils.deprecation import MiddlewareMixin
+
 from core.company_utils import get_user_company
+from core.tenant import set_current_company
 
 logger = logging.getLogger(__name__)
 

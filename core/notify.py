@@ -14,6 +14,7 @@ Korištenje:
   notify("ALERT", "Gunicorn restartao — health monitor detektirao 502")
 """
 import logging
+
 from django.conf import settings
 
 logger = logging.getLogger('notify')

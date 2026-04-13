@@ -2,13 +2,13 @@ import io
 import logging
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
-from django.db import DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext as _
 
 from .models import Calculation, CalculationItem, Normative
 
@@ -89,10 +89,13 @@ def bathroom_anfrage(request):
         from django.shortcuts import redirect
         return redirect('calculator:bathroom_public')
 
-    import io, uuid
+    import io
+    import uuid
+
     from django.utils import timezone
-    from companies.models import Company
+
     from burza.models import ProjectLead
+    from companies.models import Company
     from documents.models import Document
 
     # ── Contact data from form ─────────────────────────────────────────────
@@ -157,9 +160,9 @@ def bathroom_anfrage(request):
     # ── Generate PDF and save to Document archive ──────────────────────────
     pdf_saved = False
     try:
-        from xhtml2pdf import pisa
-        from django.template.loader import render_to_string
         from django.core.files.base import ContentFile
+        from django.template.loader import render_to_string
+        from xhtml2pdf import pisa
 
         pdf_context = {
             'lead': lead,
@@ -373,8 +376,9 @@ def export_to_synesis(request, pk):
     Windows sync skripta pokupi i upiše u Synesis ITEMS tablicu.
     """
     from django.http import JsonResponse
+
     from core.company_utils import get_user_company
-    from synesis.models import SynesisExportQueue, SynesisConfig
+    from synesis.models import SynesisConfig, SynesisExportQueue
 
     if request.method != 'POST':
         from django.http import HttpResponseNotAllowed
@@ -483,8 +487,9 @@ def export_pkv_to_synesis(request, pk):
       - DESCRIPTION            = naziv projekta
     """
     from django.http import JsonResponse
+
     from core.company_utils import get_user_company
-    from synesis.models import SynesisExportQueue, SynesisConfig
+    from synesis.models import SynesisConfig, SynesisExportQueue
 
     if request.method != 'POST':
         from django.http import HttpResponseNotAllowed
@@ -632,13 +637,16 @@ def aufnahme_save(request):
         from django.http import JsonResponse
         return JsonResponse({'ok': False, 'error': 'POST only'})
 
-    import io, uuid
-    from django.utils import timezone
-    from django.http import JsonResponse
-    from companies.models import Company
-    from burza.models import ProjectLead
-    from documents.models import Document
+    import io
+    import uuid
+
     from django.core.files.base import ContentFile
+    from django.http import JsonResponse
+    from django.utils import timezone
+
+    from burza.models import ProjectLead
+    from companies.models import Company
+    from documents.models import Document
 
     ref  = 'AUF-' + timezone.now().strftime('%Y%m%d') + '-' + uuid.uuid4().hex[:4].upper()
     name = request.POST.get('contact_name', '').strip()
@@ -706,6 +714,7 @@ def aufnahme_save(request):
                 _, data = b64data.split(',', 1)
                 img_bytes = b64mod.b64decode(data)
                 from django.core.files.base import ContentFile
+
                 from burza.models import ProjectPhoto
                 photo = ProjectPhoto(project_lead=lead, user=request.user)
                 photo.photo.save(f"{ref}_photo_{pi}.jpg", ContentFile(img_bytes), save=True)
@@ -716,8 +725,8 @@ def aufnahme_save(request):
     # Generate PDF
     pdf_url = None
     try:
-        from xhtml2pdf import pisa
         from django.template.loader import render_to_string
+        from xhtml2pdf import pisa
         ctx = {
             'ref': ref, 'name': name, 'phone': phone, 'location': loc,
             'datum': datum, 'notes': notes, 'next_step': next_step,

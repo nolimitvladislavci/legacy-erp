@@ -2,8 +2,8 @@
 invoicing/services/confirm.py
 Invoice confirmation and locking logic.
 """
-from .fiscalize import lock_invoice
 from .events import log_invoice_event
+from .fiscalize import lock_invoice
 
 
 def confirm_invoice(invoice, user=None, ip_address=None):

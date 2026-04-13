@@ -9,15 +9,13 @@ Dva sustava:
 LIMIT Connect ERP — 2026-03-25
 """
 import io
-import os
 import logging
+import os
 
-from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import DatabaseError, models
 from django.http import JsonResponse
-
-from PIL import Image, ExifTags
-from django.db import DatabaseError
+from PIL import ExifTags, Image
 
 logger = logging.getLogger(__name__)
 

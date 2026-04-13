@@ -4,9 +4,11 @@ Potpuni lanac: Ugovor → Očitanje → Račun → Knjiženje → Anomaly alert.
 """
 import uuid
 from decimal import Decimal
-from django.db import models
+
 from django.conf import settings
+from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from core.managers import CompanyManager
 
 
@@ -236,7 +238,7 @@ class UtilityBill(models.Model):
 
     def book(self, user=None):
         """Book utility bill to konto: D:expense+D:1400 / P:2200."""
-        from konto.models import KontoAccount, JournalEntry, LedgerLine
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
         if self.status == 'booked':
             return None
 

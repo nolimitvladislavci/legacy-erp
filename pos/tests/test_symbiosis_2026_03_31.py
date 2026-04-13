@@ -18,16 +18,20 @@ import logging
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import TestCase, RequestFactory, Client
-from django.utils import timezone
 from django.contrib.auth.models import User
-from django.urls import reverse, NoReverseMatch
+from django.test import Client, RequestFactory, TestCase
+from django.urls import NoReverseMatch, reverse
+from django.utils import timezone
 
 from companies.models import Company, TaxRate
 from inventory.models import InventoryItem
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSReceiptItem,
-    POSCashier, POSPulseEvent,
+    POSCashier,
+    POSPulseEvent,
+    POSReceipt,
+    POSReceiptItem,
+    POSSession,
+    POSTerminal,
 )
 from pos.services.checkout import CheckoutService, CheckoutValidationError
 

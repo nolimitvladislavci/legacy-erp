@@ -1,7 +1,8 @@
+import time
 from functools import wraps
+
 from django.core.cache import cache
 from django.http import JsonResponse
-import time
 
 
 def rate_limit(max_requests, window_seconds, key_func=None):

@@ -7,6 +7,7 @@ Radi sam dok je Ivan na baušteli:
 3. daily_signal_digest — jutarnji sažetak za tim
 """
 import logging
+
 from celery import shared_task
 from django.utils import timezone
 
@@ -17,7 +18,7 @@ logger = logging.getLogger("borg.signal.tasks")
 def triage_new_signal(self, signal_id):
     """Odmah triažiraj novi signal kroz Haiku."""
     from limit_connect_ai.models_signal import FenixSignal
-    from limit_connect_ai.signal_triage import triage_signal, apply_triage
+    from limit_connect_ai.signal_triage import apply_triage, triage_signal
 
     try:
         signal = FenixSignal.objects.get(id=signal_id)
@@ -65,8 +66,9 @@ def daily_signal_digest():
     Jutarnji digest — sažetak signala za proteklih 24h.
     Sprema se kao FenixSignal tipa 'system' za audit trail.
     """
-    from limit_connect_ai.models_signal import FenixSignal
     from django.db.models import Count
+
+    from limit_connect_ai.models_signal import FenixSignal
 
     since = timezone.now() - timezone.timedelta(hours=24)
     signals = FenixSignal.objects.filter(created_at__gte=since)

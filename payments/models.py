@@ -1,7 +1,9 @@
-from core.fields import FernetEncryptedCharField
+import uuid
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-import uuid
+
+from core.fields import FernetEncryptedCharField
 from core.managers import CompanyManager
 
 

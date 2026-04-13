@@ -9,14 +9,14 @@ from datetime import date
 from decimal import Decimal
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError
 from django.db.models import Q, Sum
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 
-from companies.models import Company, KomitentProfile, KomitentEvent, KomitentStatus
-from django.db import DatabaseError
+from companies.models import Company, KomitentEvent, KomitentProfile, KomitentStatus
 
 logger = logging.getLogger(__name__)
 
@@ -211,8 +211,9 @@ def komitent_detail(request, pk):
         stats['entries'] = company.journal_entries.count()
         stats['items'] = company.inventory_items.count()
 
-        from invoicing.models import Invoice
         from django.db.models import Sum
+
+        from invoicing.models import Invoice
         inv_agg = Invoice.objects.filter(company=company).exclude(
             status__in=['CANCELLED', 'STORNO', 'DRAFT']
         ).aggregate(total=Sum('total'))
@@ -270,7 +271,7 @@ def komitent_create(request):
 
             messages.success(request, f'Komitent {c.name} kreiran.')
             return redirect('companies:komitent_detail', pk=p.pk)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'companies/komitent_form.html', {

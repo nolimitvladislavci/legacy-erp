@@ -1,10 +1,12 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
+
 from core.company_utils import get_user_company
-from .models import Livestock, Field, CropPlan
-from django.db import IntegrityError, DatabaseError
+
+from .models import CropPlan, Field, Livestock
 
 
 @login_required
@@ -72,7 +74,7 @@ def livestock_create(request):
             animal.save()
             messages.success(request, f'Grlo {animal.ear_tag} uspjesno dodano.')
             return redirect('livestock:detail', pk=animal.pk)
-        except (IntegrityError, DatabaseError) as e:
+        except (IntegrityError, DatabaseError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/livestock_create.html', {
@@ -107,8 +109,10 @@ def crop_list(request):
 
 def vet_quick_entry(request, farm_token):
     """Public page for vet to log treatment -- no login, token auth."""
-    from companies.models import Company
     from django.utils import timezone
+
+    from companies.models import Company
+
     from .models import HealthRecord
 
     company = Company.objects.filter(booking_slug=farm_token).first()
@@ -137,8 +141,8 @@ def vet_quick_entry(request, farm_token):
 
         # Notify farmer via WhatsApp
         try:
-            from core.whatsapp import send_text, normalize_phone
             from accounts.models import UserProfile
+            from core.whatsapp import normalize_phone, send_text
             # Pokušaj phone iz company, pa iz admin korisnika firme
             owner_phone = company.phone or getattr(company, 'mobile', None)
             if not owner_phone:
@@ -180,11 +184,13 @@ def vet_quick_entry(request, farm_token):
 @login_required
 def vet_dashboard(request):
     """Veterinar dashboard -- sve farme koje obilazi."""
-    from accounts.models import CompanyMembership
     from django.utils import timezone
+
+    from accounts.models import CompanyMembership
+
     from .models import HealthRecord
 
-    memberships = CompanyMembership.objects.filter(user=request.user, is_active=True)
+    memberships = CompanyMembership.objects.filter(user=request.user, is_active=True).select_related("company")
     companies = [m.company for m in memberships]
 
     all_animals = Livestock.objects.filter(company__in=companies, status='aktivno').select_related("company", "jibg_farm")
@@ -211,6 +217,7 @@ from django.http import JsonResponse
 def robot_identify(request):
     """API for milking robot -- identify animal by ear tag, check karencija."""
     import json
+
     from companies.models import Company
 
     if request.method != 'POST':
@@ -277,6 +284,7 @@ def robot_identify(request):
     vecernja = data.get('vecernja_l')
     if not is_blocked and (jutarnja is not None or vecernja is not None):
         from django.utils import timezone as _tz
+
         from .models import MilkRecord
         today = _tz.now().date()
         mr, created = MilkRecord.objects.get_or_create(
@@ -302,7 +310,8 @@ def robot_identify(request):
 def institutional_api(request, scope):
     """API za institucije — token auth, rate limited, audited."""
     from django.http import JsonResponse
-    from .models import InstitutionalAccessToken, InstitutionalAccessLog, Livestock, HealthRecord
+
+    from .models import HealthRecord, InstitutionalAccessLog, InstitutionalAccessToken, Livestock
 
     auth = request.META.get('HTTP_AUTHORIZATION', '').replace('Bearer ', '')
     api_key = request.GET.get('token', '') or auth
@@ -412,6 +421,7 @@ def institutional_api(request, scope):
 def token_management(request):
     """Farmer manages institutional access tokens."""
     from core.company_utils import get_user_company
+
     from .models import InstitutionalAccessToken
     company = get_user_company(request)
     if not company:
@@ -452,8 +462,9 @@ def token_management(request):
 
 def inspector_live_view(request, scope, token):
     """Read-only HTML view za inspektora — skenira QR, vidi podatke."""
-    from .models import InstitutionalAccessToken, Livestock, HealthRecord
     from django.utils import timezone
+
+    from .models import HealthRecord, InstitutionalAccessToken, Livestock
 
     try:
         tok = InstitutionalAccessToken.objects.select_related('company').get(
@@ -487,9 +498,11 @@ def inspector_live_view(request, scope, token):
 @login_required
 def inspector_panic_button(request):
     """Panic button — farmer generira QR + PDF za inspekciju."""
-    from core.company_utils import get_user_company
-    from .models import InstitutionalAccessToken, HealthRecord
     from django.utils import timezone
+
+    from core.company_utils import get_user_company
+
+    from .models import HealthRecord, InstitutionalAccessToken
 
     company = get_user_company(request)
     if not company:
@@ -532,10 +545,12 @@ def inspector_panic_button(request):
 def generate_inspection_pdf(request):
     """Generira PDF Knjigu lijecenja za inspekciju — WeasyPrint."""
     from django.http import HttpResponse
-    from core.company_utils import get_user_company
-    from .models import Livestock, HealthRecord
-    from core.doc_integrity import get_integrity_badge_context
     from django.utils import timezone
+
+    from core.company_utils import get_user_company
+    from core.doc_integrity import get_integrity_badge_context
+
+    from .models import HealthRecord, Livestock
 
     company = get_user_company(request)
     if not company:
@@ -597,11 +612,13 @@ def generate_inspection_pdf(request):
 
 from django.contrib.auth.decorators import login_required
 
+
 @login_required
 def farm_register(request):
     """Slikaj IKG karticu → registriraj gospodarstvo."""
-    from .models import FarmIdentification
     from core.company_utils import get_user_company
+
+    from .models import FarmIdentification
 
     company = get_user_company(request)
     if not company:
@@ -680,8 +697,9 @@ def farm_register(request):
 @login_required
 def farm_list(request):
     """Lista registriranih gospodarstava."""
-    from .models import FarmIdentification
     from core.company_utils import get_user_company
+
+    from .models import FarmIdentification
     company = get_user_company(request)
     farms = FarmIdentification.objects.filter(company=company).select_related("company", "created_by")
     return render(request, 'livestock/farm_list.html', {

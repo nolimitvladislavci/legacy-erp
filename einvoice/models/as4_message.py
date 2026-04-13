@@ -9,8 +9,9 @@ Design principles:
 - Multi-tenant: always scoped to company
 - Archive-ready: SHA-256 hash for legal compliance
 """
-import uuid
 import hashlib
+import uuid
+
 from django.db import models
 from django.utils import timezone
 

@@ -5,12 +5,12 @@ Human review UI for AI bookkeeper proposals.
 import logging
 from decimal import Decimal
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from documents.models import ArhivaEntry
 
@@ -176,7 +176,7 @@ def _parse_edited_lines(post_data):
 @transaction.atomic
 def _create_journal_entry(company, archive_entry, debit_lines, credit_lines, user):
     """Create a JournalEntry with LedgerLines from proposal lines."""
-    from konto.models import KontoAccount, JournalEntry, LedgerLine
+    from konto.models import JournalEntry, KontoAccount, LedgerLine
     from konto.services_file import _next_entry_number
 
     je = JournalEntry.objects.create(

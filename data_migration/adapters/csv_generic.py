@@ -19,9 +19,9 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 import chardet
+from django.db import DatabaseError
 
 from .base import AdapterResult, BaseAdapter, MappingField, register_adapter
-from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

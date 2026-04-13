@@ -1,7 +1,8 @@
-from core.fields import FernetEncryptedCharField
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from core.fields import FernetEncryptedCharField
 from core.managers import CompanyManager
 
 
@@ -201,9 +202,9 @@ class CompanyMembership(models.Model):
 # DeviceToken — Mobilni barcode login (mobitel = čip kartica)
 # ═══════════════════════════════════════════════════════════════
 
-import uuid as _uuid
 import hashlib as _hashlib
 import urllib.parse as _urllib_parse
+import uuid as _uuid
 
 
 class DeviceToken(models.Model):

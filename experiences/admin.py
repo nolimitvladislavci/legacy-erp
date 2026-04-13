@@ -1,9 +1,15 @@
 from django.contrib import admin
+
 from .models import (
-    Experience, ExperienceSchedule, ExperienceBooking,
-    ExperienceInclusion, ExperienceReview,
-    AgroPackage, PackageComponent,
-    RecallEvent, RecallNotification,
+    AgroPackage,
+    Experience,
+    ExperienceBooking,
+    ExperienceInclusion,
+    ExperienceReview,
+    ExperienceSchedule,
+    PackageComponent,
+    RecallEvent,
+    RecallNotification,
 )
 
 

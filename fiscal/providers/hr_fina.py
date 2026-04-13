@@ -4,11 +4,11 @@ Prema: Zakon o fiskalizaciji u prometu gotovinom (NN 133/12, 115/16, 106/18)
 ZKI: RSA-MD5 potpis prema Pravilniku
 CIS SOAP: https://cis.porezna-uprava.hr:8449/FiskalizacijaService
 """
-import os
-import uuid
 import hashlib
 import logging
+import os
 import tempfile
+import uuid
 from datetime import datetime
 
 from ..base import BaseFiscalProvider, FiscalResult
@@ -79,9 +79,9 @@ class HRFinaProvider(BaseFiscalProvider):
 
     def _generate_zki(self, data, cert_path=None, cert_password=None):
         try:
+            from cryptography.hazmat.backends import default_backend
             from cryptography.hazmat.primitives import hashes
             from cryptography.hazmat.primitives.asymmetric import padding
-            from cryptography.hazmat.backends import default_backend
             from cryptography.hazmat.primitives.serialization import pkcs12
 
             if cert_path and os.path.exists(cert_path):
@@ -279,10 +279,10 @@ class HRFinaProvider(BaseFiscalProvider):
     @staticmethod
     def _sign_xml(xml_string, cert_path, cert_password):
         try:
-            from cryptography.hazmat.primitives.serialization import pkcs12
             from cryptography.hazmat.backends import default_backend
-            from signxml import XMLSigner
+            from cryptography.hazmat.primitives.serialization import pkcs12
             from lxml import etree
+            from signxml import XMLSigner
 
             with open(cert_path, 'rb') as f:
                 cert_data = f.read()
@@ -301,10 +301,8 @@ class HRFinaProvider(BaseFiscalProvider):
     @staticmethod
     def _extract_pem(cert_path, cert_password):
         try:
-            from cryptography.hazmat.primitives.serialization import (
-                pkcs12, Encoding, PrivateFormat, NoEncryption
-            )
             from cryptography.hazmat.backends import default_backend
+            from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, pkcs12
 
             with open(cert_path, 'rb') as f:
                 cert_data = f.read()

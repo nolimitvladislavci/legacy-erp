@@ -7,8 +7,9 @@ Generates XML per:
 - Croatian CIUS-2025 (domestic B2B/B2G per NN 89/25)
 - HR Extension urn:mfin.gov.hr:ext-2025:1.0
 """
-from lxml import etree
 from decimal import Decimal
+
+from lxml import etree
 
 # Namespaces
 NS = {

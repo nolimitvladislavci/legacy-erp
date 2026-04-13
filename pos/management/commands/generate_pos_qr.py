@@ -6,11 +6,11 @@ Usage:
     python manage.py generate_pos_qr --company "UVIJEK FRIŠKO"
     python manage.py generate_pos_qr  # all terminals
 """
-import os
 import io
+import os
 
-from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management.base import BaseCommand
 
 from pos.models import POSTerminal
 
@@ -25,8 +25,8 @@ class Command(BaseCommand):
         import qrcode
         from reportlab.lib.pagesizes import A6
         from reportlab.lib.units import cm
-        from reportlab.pdfgen import canvas as pdf_canvas
         from reportlab.lib.utils import ImageReader
+        from reportlab.pdfgen import canvas as pdf_canvas
 
         company_filter = options["company"]
         qs = POSTerminal.objects.filter(is_active=True).select_related("company")

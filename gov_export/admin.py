@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import GovInstitution, GovDocumentType, GovExport, GovExportLog
+
+from .models import GovDocumentType, GovExport, GovExportLog, GovInstitution
 
 
 class GovExportLogInline(admin.TabularInline):

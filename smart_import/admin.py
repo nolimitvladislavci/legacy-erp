@@ -1,9 +1,14 @@
 from django.contrib import admin
-from smart_import.models import (
-    ImportBatch, ImportBatchItem, VendorItemMapping, CompanyMailbox,
-    FailedImport, ProblemReport,
-)
+
 from smart_import.gemini_log import GeminiUsageLog
+from smart_import.models import (
+    CompanyMailbox,
+    FailedImport,
+    ImportBatch,
+    ImportBatchItem,
+    ProblemReport,
+    VendorItemMapping,
+)
 
 
 @admin.register(ImportBatch)
@@ -61,6 +66,7 @@ class ProblemReportAdmin(admin.ModelAdmin):
 
 
 from smart_import.models import FenixInboxItem
+
 
 @admin.register(FenixInboxItem)
 class FenixInboxItemAdmin(admin.ModelAdmin):

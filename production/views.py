@@ -9,14 +9,14 @@ import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db import transaction, DatabaseError
+from django.db import DatabaseError, transaction
 from django.db.models import Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
@@ -35,8 +35,8 @@ from .models import (
     ProductionStep,
     Workstation,
 )
+from .mrp import calculate_workstation_load, create_purchase_suggestions, mrp_run
 from .services import calculate_costs, check_availability, consume_materials, produce_output
-from .mrp import mrp_run, create_purchase_suggestions, calculate_workstation_load
 
 logger = logging.getLogger(__name__)
 
@@ -493,7 +493,7 @@ def order_produce(request, pk):
                 user=request.user,
             )
         messages.success(request, f"Evidentirano: {qty} {order.bom.output_unit} proizvedeno.")
-    except (IntegrityError, DatabaseError) as e:
+    except (IntegrityError, DatabaseError):
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return redirect('production:order_detail', pk=pk)

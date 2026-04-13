@@ -2,9 +2,10 @@
 experiences/tasks.py — Celery taskovi za Agro-Turizam 360
 """
 import logging
+from datetime import timedelta
+
 from celery import shared_task
 from django.utils import timezone
-from datetime import timedelta
 
 logger = logging.getLogger('experiences')
 
@@ -15,8 +16,9 @@ def send_experience_reminders(self):
     Svakih 6h — WhatsApp podsjetnik gostima za sutrašnje aktivnosti.
     18h prije + 2h prije.
     """
-    from .models import ExperienceSchedule
     from datetime import datetime
+
+    from .models import ExperienceSchedule
 
     now = timezone.now()
     tomorrow = now + timedelta(hours=18)
@@ -137,7 +139,7 @@ def inventory_depletion_check(self):
     Svakih 6h — provjeri hoće li zalihe izdržati za sutrašnje aktivnosti.
     Upozorava: "Ako prodaš još 5 paketa, nećeš imati dovoljno jagoda za doručak."
     """
-    from .models import ExperienceSchedule, ExperienceInclusion
+    from .models import ExperienceInclusion, ExperienceSchedule
 
     today = timezone.now().date()
     tomorrow = today + timedelta(days=1)

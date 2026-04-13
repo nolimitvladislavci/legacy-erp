@@ -58,7 +58,7 @@ class AntiCrushTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         from companies.models import Company
-        from marketplace.models import MarketplaceProduct, MarketplaceCategory
+        from marketplace.models import MarketplaceCategory, MarketplaceProduct
 
         cls.company = Company.objects.create(name='Test Warehouse Co', oib='99999999901')
         cls.buyer = Company.objects.create(name='Test Buyer Co', oib='99999999911')
@@ -86,8 +86,8 @@ class AntiCrushTest(TestCase):
         )
 
     def _make_order_with_rollwagen(self, qr_code, packed_product=None):
+        from delivery.models import ConsolidatedDelivery, Rollwagen
         from marketplace.models import MarketplaceOrder, MarketplaceOrderItem
-        from delivery.models import Rollwagen, ConsolidatedDelivery
 
         order = MarketplaceOrder.objects.create(
             buyer_company=self.buyer,
@@ -130,8 +130,8 @@ class AntiCrushTest(TestCase):
         self.assertTrue(ok, 'Non-heavy item on fragile should be allowed')
 
     def test_heavy_on_empty_rollwagen_allowed(self):
+        from delivery.models import ConsolidatedDelivery, Rollwagen
         from delivery.warehouse_views import _check_anti_crush
-        from delivery.models import Rollwagen, ConsolidatedDelivery
 
         cd = ConsolidatedDelivery.objects.create(
             hub_company=self.company,
@@ -157,8 +157,8 @@ class PackagingLockTest(TestCase):
         cls.user = User.objects.create_user(username='driver1', password='test123')
 
     def test_order_without_rollwagen_has_no_packaging(self):
-        from marketplace.models import MarketplaceOrder
         from delivery.models import Rollwagen
+        from marketplace.models import MarketplaceOrder
 
         order = MarketplaceOrder.objects.create(
             buyer_company=self.buyer, status='confirmed',
@@ -167,8 +167,8 @@ class PackagingLockTest(TestCase):
         self.assertFalse(has_rollwagen, 'Order should have no rollwagen initially')
 
     def test_order_with_rollwagen_has_packaging(self):
+        from delivery.models import ConsolidatedDelivery, Rollwagen
         from marketplace.models import MarketplaceOrder
-        from delivery.models import Rollwagen, ConsolidatedDelivery
 
         order = MarketplaceOrder.objects.create(
             buyer_company=self.buyer, status='confirmed',

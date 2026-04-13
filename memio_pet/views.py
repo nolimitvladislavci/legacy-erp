@@ -10,16 +10,18 @@ Endpointi:
   GET/POST /ljubimac/token/<tok>/ -- Dodaj ljubimca putem magic tokena
 """
 import io
+
 import qrcode
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET, require_POST
+from django.db import DatabaseError, IntegrityError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
-from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord, PetOwnership, BreederReview
-from django.db import IntegrityError, DatabaseError
+from django.views.decorators.http import require_GET, require_POST
+
+from memio_pet.models import AnimalProfile, BreederProfile, BreederReview, PetHealthRecord, PetOwnership
 
 
 def _find_animal(chip_or_tag):
@@ -56,7 +58,7 @@ def pet_profile_page(request, chip_or_tag):
         reviews = list(BreederReview.objects.using(db).filter(breeder=breeder, is_published=True).order_by("-created_at")[:10])
 
     # Memorial context
-    from memio_pet.models import MemorialProfile, LifeMilestone
+    from memio_pet.models import LifeMilestone, MemorialProfile
     is_memorial = (animal.status == 'uginulo')
     memorial = None
     if is_memorial:
@@ -165,8 +167,9 @@ def njuskalo_badge(request, breeder_id):
 
 
 def barf_listings(request):
-    from memio_pet.models import RawFoodListing
     from django.utils import timezone
+
+    from memio_pet.models import RawFoodListing
     today = timezone.now().date()
     listings = RawFoodListing.objects.using('memio_pets').filter(status='available', expires_at__gte=today).order_by('-created_at')[:50]
     return render(request, 'memio_pet/barf_listings.html', {'listings': listings, 'page_title': 'BARF Marketplace'})
@@ -174,8 +177,8 @@ def barf_listings(request):
 
 @login_required
 def barf_create(request):
-    from memio_pet.models import RawFoodListing
     from core.company_utils import get_user_company
+    from memio_pet.models import RawFoodListing
     company = get_user_company(request)
     if not company:
         return redirect('/')
@@ -191,7 +194,7 @@ def barf_create(request):
             )
             messages.success(request, f'BARF ponuda kreirana: {listing}')
             return redirect('memio_pet:barf_listings')
-        except (IntegrityError, DatabaseError) as e:
+        except (IntegrityError, DatabaseError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'memio_pet/barf_create.html', {
         'company': company, 'product_types': RawFoodListing.PRODUCT_CHOICES, 'page_title': 'Nova BARF ponuda',
@@ -231,7 +234,7 @@ def pet_hotel_booking(request):
                 return redirect('memio_pet:pet_hotel_booking')
             else:
                 messages.error(request, _('Unesite ime ljubimca ili broj mikrocipa.'))
-        except (IntegrityError, DatabaseError) as e:
+        except (IntegrityError, DatabaseError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'memio_pet/pet_hotel_booking.html', {
         'hotels': hotels, 'room_types': PetBoardingReservation.ROOM_TYPES, 'page_title': 'Pet Hotel — Rezervacija',
@@ -1111,8 +1114,9 @@ def social_import_wizard(request):
             title = request.POST.get('title', '').strip()
             if not title:
                 title = 'Objava s društvene mreže'
-            from memio_pet.models import LifeMilestone
             from django.utils import timezone
+
+            from memio_pet.models import LifeMilestone
             LifeMilestone.objects.using(db).create(
                 animal=animal,
                 type='custom',

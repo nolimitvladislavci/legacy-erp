@@ -35,9 +35,8 @@ from datetime import datetime as _dt
 from decimal import Decimal, InvalidOperation
 
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+from django.db import DatabaseError, transaction
 from django.utils import timezone
-from django.db import DatabaseError
 
 ARCHIVE_PATH = "/var/www/fina-connect/synesis/KONJIK_ARHIVA/Synesis/"
 
@@ -415,7 +414,7 @@ class Command(BaseCommand):
         return {'items_created': c, 'items_updated': u, 'items_errors': e}
 
     def _import_accounts(self, company, fi, dry_run):
-        from konto.models import KontoAccount, AccountType
+        from konto.models import AccountType, KontoAccount
         t0 = time.time()
         rows = mdb_export(fi['storage_path'], 'ACCOUNTS')
         if not rows:
@@ -458,7 +457,7 @@ class Command(BaseCommand):
         return {'accounts_created': created, 'accounts_updated': updated, 'accounts_errors': errors}
 
     def _import_temeljnice(self, company, fi, dry_run):
-        from konto.models import JournalEntry, LedgerLine, KontoAccount
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
         t0 = time.time()
 
         headers = mdb_export(fi['storage_path'], 'ACCOUNTING')
@@ -657,7 +656,7 @@ class Command(BaseCommand):
         return {'invoices_created': c, 'invoices_updated': u, 'invoices_errors': e}
 
     def _import_ura(self, company, fi, dry_run):
-        from konto.models import JournalEntry, LedgerLine, KontoAccount
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
         t0 = time.time()
 
         headers = mdb_export(fi['storage_path'], 'URAEU')
@@ -866,7 +865,7 @@ class Command(BaseCommand):
         return {'employees_created': c, 'employees_updated': u, 'employees_errors': e}
 
     def _import_payroll(self, company, fi, dry_run):
-        from konto.models import JournalEntry, LedgerLine, KontoAccount
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
         from payroll.models import PayrollRun
         t0 = time.time()
 

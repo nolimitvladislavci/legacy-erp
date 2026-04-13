@@ -1,16 +1,17 @@
 """Appointments views extra tests — calendar, list, create, dossier, services."""
 import datetime
 import json
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]
 
 
 def _setup_appt_user(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'APT {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -42,6 +43,7 @@ def _make_partner(company, name='Termin Klijent'):
 
 def _make_service(company, name='Test usluga'):
     import datetime as dt
+
     from appointments.models import BookingService
     return BookingService.objects.create(
         name=name,

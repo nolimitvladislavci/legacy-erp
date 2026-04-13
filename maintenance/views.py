@@ -1,14 +1,17 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.http import JsonResponse
-from django.db.models import Q, Sum
-from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q, Sum
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
 from core.company_utils import get_user_company
-from .models import Asset, MaintenanceSchedule, MaintenanceLog
+
+from .models import Asset, MaintenanceLog, MaintenanceSchedule
 
 
 def _get_company(request):

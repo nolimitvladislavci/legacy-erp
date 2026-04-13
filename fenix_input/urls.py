@@ -1,4 +1,5 @@
 from django.urls import path
+
 from fenix_input import views
 
 app_name = 'fenix_input'

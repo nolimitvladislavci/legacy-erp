@@ -5,10 +5,10 @@ Usage:
     python manage.py seed_azil_compliance
     python manage.py seed_azil_compliance --company-id 123
 """
-from django.core.management.base import BaseCommand
-from django.utils import timezone
 from datetime import timedelta
 
+from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 COMPLIANCE_ARTICLES = [
     {
@@ -112,8 +112,8 @@ class Command(BaseCommand):
         parser.add_argument('--company-id', type=int, help='Specific company ID')
 
     def handle(self, *args, **options):
-        from limit_connect_ai.models import ComplianceWatchItem
         from companies.models import Company
+        from limit_connect_ai.models import ComplianceWatchItem
 
         if options['company_id']:
             companies = Company.objects.filter(pk=options['company_id'])

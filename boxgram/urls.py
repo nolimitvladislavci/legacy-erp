@@ -1,13 +1,19 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    PetProfileViewSet, LifeEventViewSet, CompetitionViewSet, SocialImportViewSet,
-    public_profile, public_feed, competition_detail, competition_vote_web,
-    add_event_web, boxgram_landing,
+    CompetitionViewSet,
+    LifeEventViewSet,
+    PetProfileViewSet,
+    SocialImportViewSet,
+    add_event_web,
+    boxgram_landing,
+    competition_detail,
+    competition_vote_web,
+    public_feed,
+    public_profile,
 )
-from .views_social import (
-    import_url_preview, import_url_confirm, import_inbox, import_reject
-)
+from .views_social import import_inbox, import_reject, import_url_confirm, import_url_preview
 
 app_name = 'boxgram'
 

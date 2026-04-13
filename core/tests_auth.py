@@ -1,15 +1,17 @@
 """Smoke tests for authentication views — login, logout, password reset."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user(username, is_superuser=False):
-    from companies.models import Company
-    from accounts.models import UserProfile
-    from registration.models import CompanySubscription
     import uuid
+
+    from accounts.models import UserProfile
+    from companies.models import Company
+    from registration.models import CompanySubscription
     oib = str(uuid.uuid4().int)[:11]
     company = Company.objects.create(name=f'Auth {username}', oib=oib)
     if is_superuser:

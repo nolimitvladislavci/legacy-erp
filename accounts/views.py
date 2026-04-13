@@ -1,16 +1,17 @@
-from core.models import BookingSignature
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_POST
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
-from .models import UserProfile
 from core.company_utils import get_user_company
-from django.db import IntegrityError, DatabaseError
+from core.models import BookingSignature
+
+from .models import UserProfile
 
 
 class UserListView(ListView):
@@ -158,7 +159,7 @@ def translation_manager(request, lang_code='de'):
                     messages.success(request, f'✨ Uspješno prevedeno {count} pojmova u cijelom sustavu.')
                 else:
                     messages.success(request, f'✨ Uspješno prevedeno {count} pojmova u modulu: {target_module.upper()}.')
-            except (IntegrityError, DatabaseError) as e:
+            except (IntegrityError, DatabaseError):
                 messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
             return redirect('accounts:translation_manager', lang_code=lang_code)
 
@@ -279,7 +280,9 @@ def quick_register(request):
         # Kreiraj ili poveži firmu
         try:
             import uuid
+
             from django.utils import timezone
+
             from companies.models import Company
             from registration.models import CompanySubscription, PricingPlan
 
@@ -470,8 +473,9 @@ def odaberi_komitente(request):
       - TUĐE: firme koje ima netko drugi → NEVIDLJIVE
     """
     import uuid as _uuid
-    from companies.models import Company, CompanyPartnership
+
     from accounts.models import CompanyMembership
+    from companies.models import Company, CompanyPartnership
 
     # Moje firme
     my_memberships = set(

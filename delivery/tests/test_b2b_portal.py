@@ -16,8 +16,7 @@ import datetime
 import uuid
 from decimal import Decimal
 
-from django.test import TestCase, SimpleTestCase, override_settings
-
+from django.test import SimpleTestCase, TestCase, override_settings
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SCENARIJ 8.1 — Tenant Data Leak (Curenje podataka stanara)
@@ -33,8 +32,8 @@ class Test81_TenantDataLeak(TestCase):
     @classmethod
     def setUpTestData(cls):
         from companies.models import Company
-        from partners.models import Partner
         from invoicing.models import Invoice
+        from partners.models import Partner
 
         # Hub firma (seller)
         cls.hub = Company.objects.create(name='Hub Grosmarkt', oib='11100000001')
@@ -164,8 +163,8 @@ class Test82_LegalVaultPrematureAccess(TestCase):
     @classmethod
     def setUpTestData(cls):
         from companies.models import Company
-        from partners.models import Partner
         from marketplace.models import MarketplaceOrder
+        from partners.models import Partner
 
         cls.hub = Company.objects.create(name='Legal Vault Hub', oib='22200000001')
         cls.buyer_co = Company.objects.create(name='Legal Buyer Co', oib='22200000011')
@@ -245,8 +244,8 @@ class Test82_LegalVaultPrematureAccess(TestCase):
         """
         Svi statusi koji su "aktivni" (roba se fizički kreće) moraju biti blokirani.
         """
-        from partners.b2b_portal import check_legal_vault_access
         from marketplace.models import MarketplaceOrder
+        from partners.b2b_portal import check_legal_vault_access
 
         blocked_statuses = ['pending', 'confirmed', 'in_transit', 'picking', 'packing']
         allowed_statuses = ['delivered', 'completed', 'cancelled']

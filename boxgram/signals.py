@@ -7,9 +7,10 @@ Princip: "inform aggressively, execute conservatively"
 - Nikad ne blokira original save()
 - Tiho preskače ako nema PetProfile za tu company
 """
-from django.db.models.signals import post_save
 import logging
-from django.db import IntegrityError, DatabaseError
+
+from django.db import DatabaseError, IntegrityError
+from django.db.models.signals import post_save
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def on_honey_harvest_saved(sender, instance, created, **kwargs):
     if not created:
         return
     try:
-        from .models import PetProfile, LifeEvent
+        from .models import LifeEvent, PetProfile
 
         # Traži PetProfile po company (Apiary.company → PetProfile.company)
         company = getattr(instance.apiary, 'company', None)
@@ -74,7 +75,7 @@ def on_hive_inspection_saved(sender, instance, created, **kwargs):
     if not instance.tretman_varroa and not instance.varroa_posip:
         return
     try:
-        from .models import PetProfile, LifeEvent
+        from .models import LifeEvent, PetProfile
 
         company = getattr(instance.hive.apiary, 'company', None)
         if not company:
@@ -114,7 +115,7 @@ def on_epp_dojava_saved(sender, instance, created, **kwargs):
     if not instance.predano:
         return
     try:
-        from .models import PetProfile, LifeEvent
+        from .models import LifeEvent, PetProfile
 
         pets = PetProfile.objects.filter(company=instance.company, species='pcela')
         for pet in pets:
@@ -160,9 +161,11 @@ def on_animal_saved(sender, instance, created, **kwargs):
     if not created:
         return
     try:
-        from .models import PetProfile, LifeEvent
-        from django.utils.text import slugify
         import datetime
+
+        from django.utils.text import slugify
+
+        from .models import LifeEvent, PetProfile
 
         company = getattr(instance, 'company', None)
         if not company:
@@ -233,8 +236,9 @@ def on_invoice_saved(sender, instance, created, **kwargs):
     if not created:
         return
     try:
-        from .models import LifeEvent
         from livestock.models import HoneyHarvest
+
+        from .models import LifeEvent
 
         harvests = HoneyHarvest.objects.filter(invoice=instance)
         for harvest in harvests:

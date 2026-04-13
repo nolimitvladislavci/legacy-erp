@@ -6,17 +6,19 @@ Propter integracija -- testovi za:
   - PropterConfig views HTTP response
 """
 from decimal import Decimal
-from django.test import TestCase, override_settings, Client
+
 from django.contrib.auth import get_user_model
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
 
 def make_company(oib=None):
-    from companies.models import Company
     import uuid
+
+    from companies.models import Company
     return Company.objects.create(
         name="Integ Test d.o.o.",
         oib=oib or str(uuid.uuid4().int)[:11],
@@ -33,8 +35,8 @@ class TestPropterTenantSync(TestCase):
         self.company = make_company()
 
     def test_sync_creates_propter_config(self):
-        from registration.models import PropterTenant
         from propter.models import PropterConfig
+        from registration.models import PropterTenant
 
         tenant = PropterTenant.objects.create(
             company=self.company,
@@ -52,8 +54,8 @@ class TestPropterTenantSync(TestCase):
         self.assertEqual(cfg.max_clients, 60)
 
     def test_sync_updates_existing_config(self):
-        from registration.models import PropterTenant
         from propter.models import PropterConfig
+        from registration.models import PropterTenant
 
         # Kreiraj tenant
         tenant = PropterTenant.objects.create(

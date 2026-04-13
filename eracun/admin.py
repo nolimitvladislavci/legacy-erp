@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import ERacunConfig, ERacun, ERacunItem, ERacunTaxSummary, ERacunLog
+
+from .models import ERacun, ERacunConfig, ERacunItem, ERacunLog, ERacunTaxSummary
 
 
 class ERacunItemInline(admin.TabularInline):
@@ -34,6 +35,7 @@ class ERacunAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
 
 from .models import SukladnostTestRun
+
 
 @admin.register(SukladnostTestRun)
 class SukladnostTestRunAdmin(admin.ModelAdmin):

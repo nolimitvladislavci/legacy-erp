@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Partner, AgentReferral, AgentPayout
+from .models import AgentPayout, AgentReferral, Partner
 
 
 @admin.register(Partner)

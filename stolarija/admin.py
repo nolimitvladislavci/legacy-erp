@@ -1,10 +1,20 @@
 from django.contrib import admin
+
 from .models import (
-    WindowProfile, GlassType, MeasurementSession,
-    Measurement, WindowOffer, WindowWarranty, ServiceVisit,
-    ProductionOrder, BOMItem, InstallationOrder,
-    InstallationChecklist, HandoverProtocol,
-    ServiceRiskProfile, ServiceMessage,
+    BOMItem,
+    GlassType,
+    HandoverProtocol,
+    InstallationChecklist,
+    InstallationOrder,
+    Measurement,
+    MeasurementSession,
+    ProductionOrder,
+    ServiceMessage,
+    ServiceRiskProfile,
+    ServiceVisit,
+    WindowOffer,
+    WindowProfile,
+    WindowWarranty,
 )
 
 

@@ -22,14 +22,12 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client, override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from companies.models import Company
-from marketplace.models import (
-    MarketplaceOrder, MarketplaceOrderItem, MarketplaceProduct, OrderComplaint
-)
+from marketplace.models import MarketplaceOrder, MarketplaceOrderItem, MarketplaceProduct, OrderComplaint
 from registration.models import CompanySubscription
 
 User = get_user_model()
@@ -192,7 +190,7 @@ class SmartCartTests(TestCase):
         NAPOMENA: Testiramo template context, ne JSON response.
         """
         print("\n--- [TEST 1.2] Pfand Wallet: DB agregacija ---")
-        from delivery.models import Vehicle, DeliveryRoute, DeliveryStop, PackagingExchange
+        from delivery.models import DeliveryRoute, DeliveryStop, PackagingExchange, Vehicle
 
         driver = User.objects.create_user(username="driver_pfand_12", password="pwd")
         vehicle = Vehicle.objects.create(

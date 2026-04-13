@@ -4,14 +4,14 @@ Partner pristupa putem portal_token (UUID), bez login-a.
 """
 import json
 
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.http import require_POST
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Sum
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_POST
 
-from partners.models import Partner
 from invoicing.models import Invoice
-from django.db import IntegrityError, DatabaseError
+from partners.models import Partner
 
 
 def _partner(token):
@@ -208,8 +208,8 @@ def b2b_invoice_pdf(request, token, pk):
 
     # Try to generate real PDF with weasyprint
     try:
-        from django.template.loader import render_to_string
         import weasyprint
+        from django.template.loader import render_to_string
 
         html_string = render_to_string(template_name, {
             'invoice': invoice,

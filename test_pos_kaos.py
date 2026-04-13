@@ -2,9 +2,10 @@
 POS Chaos Test — Playwright E2E test za offline resilience.
 Pokreni: cd /var/www/fina-connect && source venv/bin/activate && python test_pos_kaos.py
 """
-from playwright.sync_api import sync_playwright
-import time
 import json
+import time
+
+from playwright.sync_api import sync_playwright
 
 # --- KONFIGURACIJA ---
 BASE_URL = "https://limit-connect.com"
@@ -42,10 +43,10 @@ def run_chaos_test():
         if "Otvori smjenu" in page_text or "opening_cash" in page_text:
             print("    Nema otvorene sesije — otvaram...")
             cash_input = page.locator("input[name='opening_cash']")
-            if cash_input.count() > 0:
+            if cash_input.exists():
                 cash_input.fill("100")
             submit = page.locator("button[type='submit']")
-            if submit.count() > 0:
+            if submit.exists():
                 submit.first.click()
                 page.wait_for_load_state("networkidle", timeout=15000)
                 print(f"    Sesija otvorena. URL: {page.url}")
@@ -67,15 +68,15 @@ def run_chaos_test():
             time.sleep(0.5)
             # PIN modal se otvara — unesu PIN
             pin_modal = page.locator("#pinModal.show, #pinModal.qmodal.show")
-            if pin_modal.count() > 0:
+            if pin_modal.exists():
                 print("    PIN modal otvoren — unosim PIN 1234...")
                 pin_input = page.locator("#pinModal input[type='password'], #pinModal input[type='number'], #pinInput")
-                if pin_input.count() > 0:
+                if pin_input.exists():
                     pin_input.first.fill("1234")
                     time.sleep(0.3)
                     # Submit PIN
                     pin_submit = page.locator("#pinModal button:has-text('OK'), #pinModal button[type='submit'], #pinSubmit")
-                    if pin_submit.count() > 0:
+                    if pin_submit.exists():
                         pin_submit.first.click()
                     else:
                         pin_input.first.press("Enter")

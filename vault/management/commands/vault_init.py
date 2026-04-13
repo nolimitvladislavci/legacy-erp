@@ -6,10 +6,11 @@ Pokretanje:
   venv/bin/python manage.py vault_init
   venv/bin/python manage.py vault_init --add-member ivan_brtan --trojstvo ALL
 """
-from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
-from cryptography.fernet import Fernet
 import os
+
+from cryptography.fernet import Fernet
+from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):

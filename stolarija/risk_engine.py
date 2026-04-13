@@ -250,7 +250,7 @@ def calculate_risk(warranty) -> dict:
 
 def recalculate_all_risks():
     """Recalculate risk profiles for all active warranties."""
-    from stolarija.models import WindowWarranty, ServiceRiskProfile
+    from stolarija.models import ServiceRiskProfile, WindowWarranty
 
     warranties = WindowWarranty.objects.filter(
         handover_date__isnull=False,

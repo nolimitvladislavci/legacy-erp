@@ -1,21 +1,17 @@
 import json
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
 
-from .models import (
-    MeasurementSession, Measurement,
-    WindowProfile, GlassType, WindowOffer
-)
+from .models import GlassType, Measurement, MeasurementSession, WindowOffer, WindowProfile
 from .voice_parser import parse_voice_input
-
 
 # ─── HELPER ───────────────────────────────────────────────────────────────────
 
@@ -282,9 +278,10 @@ def offer_detail(request, offer_id):
 @login_required
 def create_production_order(request, offer_id):
     """Prihvaćena ponuda → proizvodni nalog + BOM."""
-    from stolarija.models import WindowOffer, ProductionOrder, BOMItem
-    from core.models import BookingSignature
     from decimal import Decimal
+
+    from core.models import BookingSignature
+    from stolarija.models import BOMItem, ProductionOrder, WindowOffer
 
     company = _company(request)
     offer = get_object_or_404(WindowOffer, pk=offer_id, company=company)
@@ -443,7 +440,7 @@ def _group_bom(bom):
 @login_required
 def create_installation(request, order_id):
     """Kreiraj nalog za ugradnju iz gotovog proizvodnog naloga."""
-    from stolarija.models import ProductionOrder, InstallationOrder, InstallationChecklist
+    from stolarija.models import InstallationChecklist, InstallationOrder, ProductionOrder
 
     company = _company(request)
     order = get_object_or_404(ProductionOrder, pk=order_id, company=company)
@@ -531,7 +528,7 @@ def installation_detail(request, install_id):
 @login_required
 def handover(request, install_id):
     """Kupac potpisuje primopredaju → garancija se generira."""
-    from stolarija.models import InstallationOrder, HandoverProtocol, WindowWarranty
+    from stolarija.models import HandoverProtocol, InstallationOrder, WindowWarranty
 
     company = _company(request)
     install = get_object_or_404(InstallationOrder, pk=install_id, company=company)
@@ -570,8 +567,9 @@ def handover(request, install_id):
         )
 
         # Kreiraj prvi servisni pregled (6 mjeseci)
-        from stolarija.models import ServiceVisit
         from datetime import timedelta
+
+        from stolarija.models import ServiceVisit
         ServiceVisit.objects.create(
             warranty=warranty,
             scheduled=now().date() + timedelta(days=180),
@@ -772,8 +770,9 @@ def service_detail(request, visit_id):
             visit.save()
 
             # Auto-schedule next visit (6 months or 12 months)
-            from .models import ServiceVisit as SV
             from datetime import timedelta
+
+            from .models import ServiceVisit as SV
             next_date = visit.completed + timedelta(days=180)
             if not SV.objects.filter(warranty=warranty, scheduled=next_date).exists():
                 SV.objects.create(warranty=warranty, scheduled=next_date)
@@ -852,7 +851,7 @@ def offer_pdf(request, offer_id):
     measurements = session.measurements.filter(confirmed=True)
 
     # Generiraj SVG vizualizacije za svako mjerenje (po tipu)
-    from .svg_window import generate_window_svg, generate_door_svg, generate_mosquito_svg
+    from .svg_window import generate_door_svg, generate_mosquito_svg, generate_window_svg
     measurement_list = list(measurements)
     for m in measurement_list:
         if m.element_type in ('interior_door', 'door', 'balcony_door'):
@@ -943,7 +942,9 @@ def offer_send_whatsapp(request, offer_id):
         return redirect('stolarija:offer_detail', offer_id=offer.pk)
 
     # Generiraj PDF u temp file
-    import tempfile, os
+    import os
+    import tempfile
+
     from django.template.loader import render_to_string
     session = offer.session
     measurements = session.measurements.filter(confirmed=True)

@@ -2,6 +2,7 @@
 utilities/signals.py — Auto-link Arhiva → UtilityBill + anomaly WhatsApp.
 """
 import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -18,7 +19,7 @@ def auto_link_utility_bill(sender, instance, created, **kwargs):
         return
 
     try:
-        from utilities.models import UtilityContract, UtilityBill
+        from utilities.models import UtilityBill, UtilityContract
         company = instance.company
         if not company:
             return

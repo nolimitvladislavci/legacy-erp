@@ -4,9 +4,9 @@ Permission decorators for views
 from functools import wraps
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 
 from .engine import get_engine
 

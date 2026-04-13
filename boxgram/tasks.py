@@ -1,10 +1,12 @@
-from celery import shared_task
-import qrcode
 import io
-from django.core.files.base import ContentFile
-from .models import Competition, SocialImport, PetProfile
 import logging
+
+import qrcode
+from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.base import ContentFile
+
+from .models import Competition, PetProfile, SocialImport
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +81,7 @@ def generate_pet_qr(pet_id):
 def bulk_sync_company_to_boxgram(company_id):
     try:
         from companies.models import Company
+
         from .models import PetProfile
 
         company = Company.objects.get(id=company_id)

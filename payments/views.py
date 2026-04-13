@@ -1,14 +1,17 @@
 import json
 import logging
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect
+
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+
 from core.company_utils import get_user_company
-from .models import Payment, PaymentConfig
+
 from . import services
-from django.core.exceptions import ObjectDoesNotExist
+from .models import Payment, PaymentConfig
 
 logger = logging.getLogger(__name__)
 
@@ -316,8 +319,9 @@ def payment_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from django.db.models import Sum, Count, Q
     from datetime import timedelta
+
+    from django.db.models import Count, Q, Sum
     from django.utils import timezone
 
     now = timezone.now()

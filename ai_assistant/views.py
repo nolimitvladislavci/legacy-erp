@@ -1,15 +1,16 @@
 import json
 import logging
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST, require_GET
-from django.db import DatabaseError, IntegrityError
 
-from .models import Conversation, Message, AIUsageLog
-from .claude_client import chat_with_claude, estimate_cost, _build_contextual_system_prompt
-from .tools import TOOLS
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_GET, require_POST
+
+from .claude_client import _build_contextual_system_prompt, chat_with_claude, estimate_cost
+from .models import AIUsageLog, Conversation, Message
 from .tool_handlers import handle_tool_call
+from .tools import TOOLS
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +29,9 @@ def _ai_rate_check(user, max_calls=30, window_seconds=3600):
     if count is not None:
         return count < max_calls
     # Fallback to DB if cache miss
-    from django.utils import timezone
     import datetime
+
+    from django.utils import timezone
     cutoff = timezone.now() - datetime.timedelta(seconds=window_seconds)
     recent = AIUsageLog.objects.filter(user=user, created_at__gte=cutoff).count()
     cache.set(cache_key, recent, timeout=60)  # cache 60s
@@ -261,6 +263,7 @@ def chat_widget_data(request):
 def patrol_page(request):
     """Show patrol reports for user's company."""
     from core.company_utils import get_user_company
+
     from .models import PatrolReport
     company = get_user_company(request)
     reports = PatrolReport.objects.filter(company=company)[:30] if company else PatrolReport.objects.none()
@@ -408,9 +411,10 @@ def ai_context_widget(request):
 @require_GET
 def patrol_insights_api(request):
     """Return latest patrol insights as JSON for dashboard widget."""
+    from core.company_utils import get_user_company
+
     from .models import PatrolReport
     from .patrol import generate_insights
-    from core.company_utils import get_user_company
     company = get_user_company(request)
     if not company:
         return JsonResponse({'insights': [], 'summary': '', 'has_issues': False})
@@ -451,7 +455,9 @@ def analyze_image(request):
         return JsonResponse({'error': 'Rate limit exceeded'}, status=429)
 
     try:
-        import anthropic, os
+        import os
+
+        import anthropic
         client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
         response = client.messages.create(
             model='claude-haiku-4-5-20251001',

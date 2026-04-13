@@ -11,27 +11,27 @@ Views:
 - complaint_inspect: InspectionToken read-only pristup
 - complaint_archive_pdf: Auto-archive u DocumentBlob
 """
-import json
 import hashlib
+import json
 import logging
 from datetime import timedelta
 from io import BytesIO
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Avg, Count, Q
 from django.db.models.functions import TruncMonth
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from companies.models import Company
 from core.company_utils import get_user_company
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -294,6 +294,7 @@ def complaint_api_public(request):
     audio_b64 = data.get('audio_recording', '')
     if audio_b64:
         import base64
+
         from django.core.files.base import ContentFile
         try:
             audio_data = base64.b64decode(audio_b64.split(',')[-1])
@@ -942,8 +943,8 @@ def _send_complaint_confirmation_wa(p):
 
 def _send_complaint_confirmation_email(p):
     """Email potvrda potrošaču."""
-    from django.core.mail import send_mail
     from django.conf import settings
+    from django.core.mail import send_mail
     type_label = dict(p.RECORD_TYPES).get(p.record_type, p.record_type)
     subject = f'{type_label} #{p.redni_broj} — {p.company.name}'
     body = (
@@ -980,8 +981,8 @@ def _send_response_wa(p):
 
 def _send_response_email(p):
     """Email dostava odgovora potrošaču s ADR informacijama."""
-    from django.core.mail import send_mail
     from django.conf import settings
+    from django.core.mail import send_mail
     adr = _get_adr_info(p)
     subject = f'Odgovor na zapis #{p.redni_broj} — {p.company.name}'
     body = (

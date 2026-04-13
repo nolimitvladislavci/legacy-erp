@@ -11,6 +11,7 @@ Modeli:
 - ClientOpportunityMatch: Spoj firma ↔ olakšica — WhatsApp "pronašli smo 4 prilike"
 """
 import uuid
+
 from django.db import models
 from django.utils import timezone
 

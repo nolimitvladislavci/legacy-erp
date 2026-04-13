@@ -7,11 +7,15 @@ Baza: memio_pets (PostgreSQL, odvojena od fina_erp)
 """
 import hashlib
 import uuid
+
 from django.db import models
+
 from memio_pet.encrypted_fields import MemioEncryptedField
 from memio_pet.validators import (
+    validate_chip_number,
+    validate_free_text,
+    validate_name_field,
     validate_oib_format,
-    validate_chip_number, validate_name_field, validate_free_text,
 )
 
 
@@ -404,7 +408,8 @@ class VerificationLog(models.Model):
         verbose_name_plural = 'Verifikacijski zapisi'
 
     def save(self, *args, **kwargs):
-        import hashlib, json
+        import hashlib
+        import json
         if self.snapshot_data and not self.sha256_hash:
             raw = json.dumps(self.snapshot_data, sort_keys=True, ensure_ascii=False)
             self.sha256_hash = hashlib.sha256(raw.encode()).hexdigest()
@@ -693,8 +698,9 @@ class AddAnimalToken(models.Model):
 
     @classmethod
     def create(cls, breeder, email, ip=None):
-        from django.utils import timezone
         import datetime
+
+        from django.utils import timezone
         return cls.objects.using('memio_pets').create(
             breeder=breeder, email=email, ip=ip,
             expires_at=timezone.now() + datetime.timedelta(minutes=30))

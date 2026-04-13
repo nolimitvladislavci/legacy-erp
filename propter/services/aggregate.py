@@ -13,6 +13,7 @@ Kljucni tokovi:
 """
 import logging
 from decimal import Decimal
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -141,8 +142,8 @@ def aggregate_to_eracun(period, user=None):
     jednom mjesecno kroz pristupnu tocku.
     Svaki klijent potpisuje VLASTITIM certifikatom.
     """
-    from propter.models import Otpremnica, EkoStats
     from eracun.models import ERacun, ERacunItem, ERacunTaxSummary
+    from propter.models import EkoStats, Otpremnica
 
     # Idempotentno: ako je vec INVOICED, vrati postojeci e-Racun
     if period.zbirni_eracun_id:

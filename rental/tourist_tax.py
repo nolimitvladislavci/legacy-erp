@@ -6,7 +6,6 @@ Odluku o iznosu donosi JLS (grad/općina).
 """
 from decimal import Decimal
 
-
 TOURIST_TAX_RATES = {
     'high': {'adult': Decimal('2.65'), 'youth': Decimal('1.33'), 'child': Decimal('0')},
     'medium': {'adult': Decimal('1.86'), 'youth': Decimal('0.93'), 'child': Decimal('0')},

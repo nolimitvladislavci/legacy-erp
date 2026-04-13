@@ -13,6 +13,7 @@ from celery import shared_task
 def daily_overdue_check():
     """Svaki dan u 08:00 — provjeri prekoračene rokove i pošalji podsjetnik."""
     from django.utils import timezone
+
     from .models import BookLoan, BookReservation
 
     today = timezone.localdate()
@@ -41,8 +42,10 @@ def daily_overdue_check():
 @shared_task(name='knjiznica.membership_expiry_check')
 def membership_expiry_check():
     """Ponedjeljak 09:00 — upozorenje za članove kojima ističe iskaznica za 7 dana."""
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
     from .models import LibraryMember
 
     today = timezone.localdate()
@@ -75,9 +78,11 @@ def membership_expiry_check():
 @shared_task(name='knjiznica.weekly_reading_digest')
 def weekly_reading_digest():
     """Nedjelja 18:00 — roditelju šalje tjedni pregled čitanja djece."""
-    from django.utils import timezone
     from datetime import timedelta
-    from .models import LibraryMember, ChildReader, ReadingLog
+
+    from django.utils import timezone
+
+    from .models import ChildReader, LibraryMember, ReadingLog
 
     today = timezone.localdate()
     week_ago = today - timedelta(days=7)
@@ -123,6 +128,7 @@ def weekly_reading_digest():
 def expire_challenges():
     """Ponoć — označi istekle FamilyChallenge."""
     from django.utils import timezone
+
     from .models import FamilyChallenge
 
     today = timezone.localdate()

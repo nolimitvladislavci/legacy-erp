@@ -7,9 +7,9 @@ import os
 from datetime import timedelta
 
 from celery import shared_task
-from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.utils import timezone
 
 logger = logging.getLogger("limit_connect_ai")
 
@@ -40,9 +40,10 @@ def morning_report_all(self):
 
 def send_morning_report(mission_id):
     """Generate and send a morning report for a single mission."""
-    from .models import AIAgentMission, AIReportLog
-    from core.whatsapp import send_text
     from core.email_tasks import send_email_task
+    from core.whatsapp import send_text
+
+    from .models import AIAgentMission, AIReportLog
 
     mission = AIAgentMission.objects.select_related("company").get(id=mission_id)
     company = mission.company
@@ -106,7 +107,7 @@ def send_morning_report(mission_id):
 
 def _gather_company_context(company):
     """Gather POS, inventory, invoice data for the company."""
-    from django.db.models import Sum, Count, F
+    from django.db.models import Count, F, Sum
 
     today = timezone.now().date()
     ctx = {
@@ -313,6 +314,7 @@ def fund_check_all(self):
 def _check_funds_for_company(mission):
     """Check new fund opportunities and create drafts if eligible."""
     from intelligence.models import FundOpportunity
+
     from .models import FundApplicationDraft
 
     company = mission.company
@@ -455,11 +457,12 @@ def fenix_post_import_scan(self, company_id, project_id=None):
     """
     # ── Svi importi unutar funkcije (circular import zaštita) ────────
     from companies.models import Company
-    from partners.models import Partner
-    from limit_connect_ai.services.opportunity_scanner import (
-        match_opportunities_for_company, generate_onboarding_report,
-    )
     from fiskalizacija.fina_bonitet_service import get_supplier_risk
+    from limit_connect_ai.services.opportunity_scanner import (
+        generate_onboarding_report,
+        match_opportunities_for_company,
+    )
+    from partners.models import Partner
 
     try:
         company = Company.objects.get(pk=company_id)
@@ -612,8 +615,8 @@ def request_adaptation_approval(rule_id):
     Šalje WhatsApp + In-App notifikaciju administratoru.
     FENIX NIKAD ne primjenjuje promjenu bez ljudske potvrde.
     """
-    from limit_connect_ai.models_knowledge_graph import AdaptationRule
     from core.notify import notify
+    from limit_connect_ai.models_knowledge_graph import AdaptationRule
 
     try:
         rule = AdaptationRule.objects.select_related('regulatory_update').get(pk=rule_id)
@@ -640,8 +643,9 @@ def request_adaptation_approval(rule_id):
 
     # In-app notifikacija
     try:
-        from notifications.services import notify as notify_inapp
         from django.contrib.auth import get_user_model
+
+        from notifications.services import notify as notify_inapp
         User = get_user_model()
         for admin in User.objects.filter(is_staff=True, is_superuser=True, is_active=True)[:3]:
             notify_inapp(
@@ -850,6 +854,7 @@ def fenix_intercept_incoming(self, eracun_id):
 
 from celery import shared_task
 
+
 @shared_task(name='limit_connect_ai.classify_nn_updates')
 def classify_nn_updates():
     """
@@ -858,8 +863,9 @@ def classify_nn_updates():
     klasificiraj relevantnost i kreiraj BorgTask/BorgAuditEntry ako treba.
     """
     import logging
-    from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate, TenantRegulatoryImpact
+
     from companies.models import Company
+    from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate, TenantRegulatoryImpact
     from limit_connect_ai.services.nn_classifier import classify_and_store
 
     logger = logging.getLogger('borg.nn_classifier')
@@ -914,10 +920,12 @@ def growth_patrol(self):
     Rezultat: ImprovementSuggestion(source='system') → Trojstvo analizira
     """
     import os
-    from django.utils import timezone
     from datetime import timedelta
-    from pos.models import ImprovementSuggestion
+
+    from django.utils import timezone
+
     from companies.models import Company
+    from pos.models import ImprovementSuggestion
 
     now = timezone.now()
     yesterday = now - timedelta(hours=24)

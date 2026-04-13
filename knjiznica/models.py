@@ -1,10 +1,11 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 from decimal import Decimal
-from core.managers import CompanyManager
-from borg_ops.mixins import FSMMixin
 
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from borg_ops.mixins import FSMMixin
+from core.managers import CompanyManager
 
 # ═══════════════════════════════════════════════════════
 # CORE MODELS (MVP)

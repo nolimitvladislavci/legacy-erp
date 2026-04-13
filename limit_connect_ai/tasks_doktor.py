@@ -15,6 +15,7 @@ HAIKU_MODEL = "claude-haiku-4-5-20251001"
 def run_clinic_diagnostics_all(self):
     """Master: sve aktivne firme, preskoci vec done."""
     from companies.models import Company
+
     from .models_doktor import DiagnosisReport
     today = date.today()
     already_done = set(DiagnosisReport.objects.filter(
@@ -35,6 +36,7 @@ def run_clinic_diagnostics_all(self):
 def run_clinic_diagnostics_single(self, company_id):
     """Dijagnostika jedne firme: collect -> score -> haiku -> save -> notify."""
     from companies.models import Company
+
     from .models_doktor import DiagnosisReport
     today = date.today()
     company = Company.objects.get(id=company_id)

@@ -4,16 +4,20 @@ memio_pet/views_admin.py — Superadmin dashboard za memio.pet + memio.farm
 Auth: memio session (email whitelist) ILI Django staff.
 Nema redirect na Django admin — vlastiti login screen.
 """
-import hashlib
 import functools
-from django.shortcuts import render, redirect
+import hashlib
+
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from memio_pet.models import (
-    BreederProfile, AnimalProfile, PetHealthRecord, WaitlistEntry,
+    AnimalProfile,
+    BreederProfile,
+    PetHealthRecord,
+    WaitlistEntry,
 )
 
 # Admin email whitelist (SHA-256 hashevi)
@@ -189,7 +193,7 @@ def admin_profile_action(request, profile_id):
 def _get_farm_stats():
     """Dohvati statistike memio.farm baze."""
     try:
-        from memio_farm.models import FarmProfile, FarmAnimal, Beehive
+        from memio_farm.models import Beehive, FarmAnimal, FarmProfile
         db = 'memio_farm'
         return {
             'farms': FarmProfile.objects.using(db).count(),

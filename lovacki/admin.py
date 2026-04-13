@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import HuntingGround, GameSpecies, HuntingQuota, HuntRecord
+
+from .models import GameSpecies, HuntingGround, HuntingQuota, HuntRecord
 
 
 @admin.register(GameSpecies)

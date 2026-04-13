@@ -3,13 +3,15 @@ eracun/views_inbox.py
 Views for receiving e-invoices — upload, API, dashboard.
 """
 import json
-from django.shortcuts import render, redirect, get_object_or_404
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
-from django.contrib import messages
-from django.utils.translation import gettext as _
+
 from core.company_utils import get_user_company
 
 
@@ -85,9 +87,10 @@ def inbox_detail(request, pk):
 @require_POST
 def inbox_book(request, pk):
     """Book incoming e-invoice into URA (create purchase invoice)."""
-    from .models import ERacun, ERacunLog
     from invoicing.models import Invoice, InvoiceItem
     from partners.models import Partner
+
+    from .models import ERacun, ERacunLog
 
     company = get_user_company(request)
     eracun = get_object_or_404(ERacun, pk=pk, direction='incoming', company=company)

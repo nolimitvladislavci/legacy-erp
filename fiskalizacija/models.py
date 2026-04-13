@@ -1,7 +1,7 @@
 """FiscalConfig – per-company FINA certificate configuration."""
 import base64
-import os
 import hashlib
+import os
 
 from cryptography.fernet import Fernet
 from django.conf import settings

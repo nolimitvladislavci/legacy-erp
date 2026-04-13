@@ -3,6 +3,7 @@ intelligence/tasks.py
 Autonomni nocni patrol -- pokrece se svako jutro u 03:30.
 """
 import logging
+
 from celery import shared_task
 from django.db import DatabaseError
 
@@ -12,9 +13,9 @@ logger = logging.getLogger('intelligence')
 @shared_task(bind=True, soft_time_limit=600, max_retries=0)
 def intelligence_nightly_patrol(self):
     """Pokrece se u 03:30 svako jutro."""
+    from core.notify import notify
     from intelligence.models import IntelligenceJob
     from intelligence.services import run_intelligence_job
-    from core.notify import notify
 
     jobs = IntelligenceJob.objects.filter(aktivan=True).select_related('company')
     total_results = 0
@@ -41,8 +42,10 @@ def check_auto_listings(self):
     Ako Livestock krava u karenciji -> upozorava.
     """
     import datetime
-    from livestock.models import CropPlan, Livestock
+
     from django.utils import timezone
+
+    from livestock.models import CropPlan, Livestock
 
     today = timezone.now().date()
 
@@ -71,8 +74,8 @@ def check_auto_listings(self):
 
     for grlo in grla:
         try:
-            from core.whatsapp import send_text
             from accounts.models import UserProfile
+            from core.whatsapp import send_text
             admin = UserProfile.objects.filter(company=grlo.company, role='company_admin').first()
             if admin and admin.user:
                 phone = getattr(admin.user, 'phone', '') or ''

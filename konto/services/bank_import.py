@@ -2,12 +2,13 @@
 konto/services/bank_import.py
 camt.053 parser + bank statement import + auto-reconciliation.
 """
-import re
 import logging
+import re
 from decimal import Decimal, InvalidOperation
 from xml.etree import ElementTree as ET
+
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -255,8 +256,8 @@ def auto_reconcile(company):
     2. Amount matches + counterparty OIB matches client OIB
     3. Amount matches + counterparty name fuzzy matches client name
     """
-    from konto.models import BankTransaction
     from invoicing.models import Invoice
+    from konto.models import BankTransaction
 
     unmatched = BankTransaction.objects.filter(
         company=company, status='unmatched', transaction_type='inflow'
@@ -579,8 +580,9 @@ def import_any_statement(company, bank_account, file_content, filename=''):
 
 def import_bank_statement_from_parsed(company, bank_account, data):
     """Import pre-parsed statement data into BankTransaction records."""
-    from konto.models import BankTransaction
     from datetime import date as _date
+
+    from konto.models import BankTransaction
 
     batch_id = f'import_{timezone.now().strftime("%Y%m%d_%H%M%S")}'
     created = skipped = errors = 0

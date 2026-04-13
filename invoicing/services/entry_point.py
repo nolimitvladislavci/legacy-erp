@@ -4,13 +4,12 @@ invoicing/services/entry_point.py
 DocumentEntry — jedina klasa koja smije kreirati poslovni dokument.
 Sve pristupne tocke (POS, Invoice, Import, API, eRacun inbox) prolaze ovdje.
 """
+import logging
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Optional
-import logging
 
-from django.db import transaction
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError, transaction
 
 logger = logging.getLogger(__name__)
 

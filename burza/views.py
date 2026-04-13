@@ -1,15 +1,17 @@
 import logging
-from django.db import IntegrityError, DatabaseError
+
+from django.db import DatabaseError, IntegrityError
+
 logger = logging.getLogger(__name__)
 import json
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .models import ProjectLead
@@ -70,8 +72,9 @@ def lead_detail(request, pk):
             return JsonResponse({'ok': False, 'error': 'Nemate pristup.'}, status=403)
 
     # CardActivity timeline (new BORG audit trail)
-    from borg_ops.models import CardActivity
     from django.contrib.contenttypes.models import ContentType
+
+    from borg_ops.models import CardActivity
     card_activities = CardActivity.objects.filter(
         content_type=ContentType.objects.get_for_model(lead),
         object_id=str(lead.pk),
@@ -225,7 +228,7 @@ def lead_new(request):
             lead.save()
             messages.success(request, _('Kartica kreirana uspješno.'))
             return redirect('burza:kanban')
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'burza/lead_form.html', {
         'categories': ProjectLead.Category.choices, 'is_superadmin': sa,
@@ -280,13 +283,16 @@ def create_invoice_from_lead(request, pk):
 
 @login_required
 def bathroom_to_project(request, lead_pk):
-    import re, uuid
+    import re
+    import uuid
+
     from django.utils import timezone
-    from core.company_utils import get_user_company
+
     from burza.models import ProjectLead
-    from projects.models import Project
     from calculator.models import Calculation, CalculationItem, Normative
+    from core.company_utils import get_user_company
     from partners.models import Partner
+    from projects.models import Project
 
     lead = get_object_or_404(ProjectLead, pk=lead_pk)
     company = get_user_company(request)
@@ -363,11 +369,14 @@ def bathroom_to_project(request, lead_pk):
 
 @login_required
 def bathroom_pdf(request, pk):
-    import io, re
-    from calculator.models import Calculation
-    from burza.models import ProjectLead
-    from projects.models import Project
+    import io
+    import re
+
     from django.template.loader import get_template
+
+    from burza.models import ProjectLead
+    from calculator.models import Calculation
+    from projects.models import Project
 
     # pk moze biti Calculation.pk ili Lead.pk — probaj oba
     calculation = Calculation.objects.filter(pk=pk).first()
@@ -378,7 +387,7 @@ def bathroom_pdf(request, pk):
         if codes:
             proj = Project.objects.filter(code=codes[-1]).first()
             if proj:
-                calculation = Calculation.objects.filter(project=proj).first()
+                calculation = Calculation.objects.filter(project=proj).select_related("project").first()
         if not calculation:
             return HttpResponse(
                 "<h2 style='font-family:sans-serif;padding:40px'>Keine Kalkulation gefunden.</h2>"

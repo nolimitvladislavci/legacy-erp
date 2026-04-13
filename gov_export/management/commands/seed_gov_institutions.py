@@ -6,7 +6,7 @@ class Command(BaseCommand):
     help = 'Seed GovExport institucije i tipove dokumenata'
 
     def handle(self, *args, **options):
-        from gov_export.models import GovInstitution, GovDocumentType
+        from gov_export.models import GovDocumentType, GovInstitution
 
         institutions = [
             {'code': 'PU', 'name': 'Porezna uprava', 'transport': 'soap', 'auth_type': 'cert',

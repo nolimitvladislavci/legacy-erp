@@ -24,12 +24,14 @@ class Command(BaseCommand):
         parser.add_argument('--dry-run', action='store_true', help='Show what would be created')
 
     def handle(self, *args, **options):
-        from companies.models import Company
-        from konto.models import JournalEntry
-        from invoicing.models import Invoice
-        from konto.services import calculate_vat_period
-        from django.db.models import Min
         import datetime
+
+        from django.db.models import Min
+
+        from companies.models import Company
+        from invoicing.models import Invoice
+        from konto.models import JournalEntry
+        from konto.services import calculate_vat_period
 
         if options['company_id']:
             companies = Company.objects.filter(id=options['company_id'])

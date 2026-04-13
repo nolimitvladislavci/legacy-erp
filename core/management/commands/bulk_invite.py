@@ -11,10 +11,11 @@ Pokretanje:
 """
 import secrets
 import string
-from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
-from django.template.loader import render_to_string
+
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+from django.template.loader import render_to_string
 
 
 class Command(BaseCommand):
@@ -39,8 +40,8 @@ class Command(BaseCommand):
         company_filter = options["company"]
         force = options["force"]
 
-        from registration.models import CompanySubscription
         from core.email_tasks import send_html_email_task
+        from registration.models import CompanySubscription
 
         if dry_run:
             self.stdout.write(self.style.WARNING("═══ DRY RUN — ništa se ne šalje ═══\n"))

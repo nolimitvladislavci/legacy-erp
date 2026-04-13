@@ -3,6 +3,7 @@ konto/signals.py
 Automatic booking when BankTransaction gets matched to an invoice.
 """
 import logging
+
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -52,6 +53,7 @@ def _clear_booking_flag(sender, instance, **kwargs):
 
 
 from django.db.models.signals import post_save
+
 
 @receiver(post_save, sender='konto.BankTransaction')
 def _execute_booking(sender, instance, **kwargs):

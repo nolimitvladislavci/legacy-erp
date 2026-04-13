@@ -4,6 +4,7 @@ Spaja AnimalProfile s PetProfile, PetHealthRecord s LifeEvent.
 Jednosmjerni sync: memio_pet → boxgram (javni profil).
 """
 import logging
+
 from django.utils.text import slugify
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ def sync_animal_to_boxgram(animal):
     AnimalProfile → PetProfile + LifeEvent(rodenje).
     Idempotentno — ne kreira duplikate.
     """
-    from boxgram.models import PetProfile, LifeEvent
+    from boxgram.models import LifeEvent, PetProfile
 
     ref = f'memio_pet:{animal.pk}'
 
@@ -82,7 +83,7 @@ def sync_health_record_to_boxgram(health_record):
     """
     PetHealthRecord → LifeEvent(vet/cijepljenje).
     """
-    from boxgram.models import PetProfile, LifeEvent
+    from boxgram.models import LifeEvent, PetProfile
 
     ref = f'memio_pet:{health_record.animal_id}'
     try:

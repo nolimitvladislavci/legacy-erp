@@ -1,16 +1,17 @@
+import inspect
 import os
 import sys
-import inspect
 from importlib import import_module
 
 sys.path.append('/var/www/fina-connect')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
+
 django.setup()
 
-from django.conf import settings
 from django.apps import apps
+from django.conf import settings
 from django.db import DatabaseError, IntegrityError
 
 print("="*70)

@@ -45,6 +45,7 @@ class CMRAdmin(admin.ModelAdmin):
 
 from .models import ArhivaEntry
 
+
 @admin.register(ArhivaEntry)
 class ArhivaEntryAdmin(admin.ModelAdmin):
     list_display = ('doc_number', 'source_type', 'partner_name', 'amount', 'doc_date', 'archived_at')

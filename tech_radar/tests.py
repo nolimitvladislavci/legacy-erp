@@ -1,7 +1,8 @@
 """Tech Radar — 8+ testova za model, threshold, task."""
 from decimal import Decimal
-from django.test import TestCase
+
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 
 User = get_user_model()
 
@@ -92,7 +93,7 @@ class CapacityThresholdTest(TestCase):
 
 class TaskImportTest(TestCase):
     def test_11_tasks_importable(self):
-        from tech_radar.tasks import tech_radar_scan, capacity_check, cleanup_signals
+        from tech_radar.tasks import capacity_check, cleanup_signals, tech_radar_scan
         self.assertEqual(tech_radar_scan.name, 'tech_radar.tasks.tech_radar_scan')
         self.assertEqual(capacity_check.name, 'tech_radar.tasks.capacity_check')
         self.assertEqual(cleanup_signals.name, 'tech_radar.tasks.cleanup_signals')

@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
 """BORG-0 Haiku batch: classify remaining 'other' items."""
-import django, os, json, time
+import json
+import os
+import time
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from dotenv import load_dotenv
+
 load_dotenv('/var/www/fina-connect/.env')
 
-import anthropic
-from inventory.models import InventoryItem
 from collections import Counter
+
+import anthropic
+
+from inventory.models import InventoryItem
 
 client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
 

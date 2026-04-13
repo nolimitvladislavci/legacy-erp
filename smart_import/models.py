@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+
 from core.managers import CompanyManager
 
 
@@ -137,7 +138,7 @@ class GeminiUsageLog(models.Model):
 
     @classmethod
     def daily_summary(cls):
-        from django.db.models import Sum, Count
+        from django.db.models import Count, Sum
         today = _tz.now().date()
         return cls.objects.filter(called_at__date=today).aggregate(
             total_calls=Count("id"),

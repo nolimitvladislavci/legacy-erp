@@ -24,7 +24,6 @@ from livestock.models import (
     MilkRecord,
 )
 
-
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 def make_company(oib='99999999999', name='Test OPG'):

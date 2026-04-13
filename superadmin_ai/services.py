@@ -13,7 +13,7 @@ Uporaba iz bilo kojeg modula:
     else:
         # blokirano
 """
-from .models import AIModulePermission, PendingAIAction, AIActionLog
+from .models import AIActionLog, AIModulePermission, PendingAIAction
 
 
 class AIGateResult:

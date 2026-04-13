@@ -236,7 +236,7 @@ def auto_fill_and_calculate(company, year, already_paid=ZERO, prefer_source="aut
     Returns:
         dict: {form_data: {...}, calculated: {...}, ai_messages: [...]}
     """
-    from tax_wizard.services import POSDCalculator, AIAdvisor
+    from tax_wizard.services import AIAdvisor, POSDCalculator
 
     # Auto-fill
     form_data = auto_fill_posd(company, year, prefer_source)

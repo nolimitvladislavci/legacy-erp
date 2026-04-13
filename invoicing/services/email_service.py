@@ -5,9 +5,9 @@ import logging
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+from django.db import DatabaseError
 from django.template.loader import render_to_string
 from django.utils import timezone
-from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 

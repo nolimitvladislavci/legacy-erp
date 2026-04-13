@@ -9,9 +9,11 @@ Pravila:
 4. Svaki nudge nosi "Powered by LIMIT Connect" branding
 """
 import logging
+from datetime import timedelta
+
 from celery import shared_task
 from django.utils import timezone
-from datetime import timedelta
+
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('nudge')
@@ -29,8 +31,9 @@ NUDGE_SCENARIOS = [
 @shared_task(bind=True, max_retries=1, soft_time_limit=300)
 def user_nudge_patrol(self):
     """Globalni nudge patrol — svakih 4h."""
-    from companies.models import Company
     from django.core.cache import cache
+
+    from companies.models import Company
 
     results = {'checked': 0, 'nudged': 0, 'skipped': 0}
     now = timezone.now()

@@ -6,6 +6,7 @@ Nema request objekt, nema messages, nema redirect.
 import hashlib
 import logging
 import os
+
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -14,9 +15,10 @@ logger = logging.getLogger(__name__)
 def generate_qr(invoice):
     """Generate QR code base64 for fiscal invoice."""
     try:
-        import qrcode
         import base64
         from io import BytesIO
+
+        import qrcode
         url = f"https://porezna.gov.hr/rn?jir={invoice.jir}&datv={invoice.fiscal_datetime}&izn={invoice.total}"
         qr = qrcode.make(url)
         buf = BytesIO()

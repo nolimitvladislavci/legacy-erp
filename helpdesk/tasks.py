@@ -1,7 +1,9 @@
 from celery import shared_task
-from helpdesk.models import Ticket
-from superadmin_ai.models import PendingAIAction, AIModulePermission
 from django.core.exceptions import ObjectDoesNotExist
+
+from helpdesk.models import Ticket
+from superadmin_ai.models import AIModulePermission, PendingAIAction
+
 
 @shared_task
 def analyze_ticket_and_propose_action(ticket_id):

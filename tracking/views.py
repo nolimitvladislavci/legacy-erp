@@ -1,10 +1,13 @@
 import json
+
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from .models import TrackedItem, TrackingStatus
+
 from delivery.models import ConsolidatedDelivery, SensorReading
+
+from .models import TrackedItem, TrackingStatus
 
 
 def tracking_status_api(request, token):
@@ -121,7 +124,7 @@ def tracking_public(request, token):
             if not readings.exists() and cd.cold_chain_zone:
                 readings = cd.cold_chain_zone.sensor_readings.order_by('-timestamp')[:10]
             if readings.exists():
-                from django.db.models import Min, Max
+                from django.db.models import Max, Min
                 latest = readings.first()
                 agg = readings.aggregate(
                     min_temp=Min('temperature'),

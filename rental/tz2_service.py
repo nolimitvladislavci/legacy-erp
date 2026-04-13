@@ -16,10 +16,10 @@ Inovacija #2: Točka 17 — ukupni primitci auto iz EP evidencije
 Inovacija #3: XML export za ePorezna (uz PDF za arhivu)
 """
 import logging
+import xml.etree.ElementTree as ET
 from datetime import date
 from decimal import Decimal
 from io import BytesIO
-import xml.etree.ElementTree as ET
 
 from django.db.models import Sum
 from django.template.loader import render_to_string
@@ -46,7 +46,7 @@ def generate_tz2_data(company, year=None):
       - Ukupne primitke iz EP evidencije (Točka 17)
       - Popust 20% za potpomognuta područja
     """
-    from rental.models import Property, LandlordProfile, TrafficRecord
+    from rental.models import LandlordProfile, Property, TrafficRecord
 
     if year is None:
         year = timezone.now().year

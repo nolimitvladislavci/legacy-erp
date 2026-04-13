@@ -11,8 +11,8 @@ import json
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
 User = get_user_model()
@@ -31,8 +31,8 @@ class FestScenarioTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         from companies.models import Company
-        from pos.models import POSTerminal, POSSession, Table
         from inventory.models import InventoryItem
+        from pos.models import POSSession, POSTerminal, Table
 
         n = _uid()
         cls.company = Company.objects.create(

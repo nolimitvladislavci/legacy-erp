@@ -13,6 +13,7 @@ FINA zahtijeva XAdES-BES profil (Basic Electronic Signature):
 Zamjenjuje stari sign_xml() koji je radio goli XML-DSIG.
 """
 import logging
+
 from lxml import etree
 
 logger = logging.getLogger("eracun.xades_signer")
@@ -30,8 +31,8 @@ def sign_xades_b(root, cert_pem, key_pem):
     Returns:
         lxml Element — potpisani XML s XAdES QualifyingProperties
     """
-    from signxml.xades import XAdESSigner, XAdESDataObjectFormat
     from signxml import methods
+    from signxml.xades import XAdESDataObjectFormat, XAdESSigner
 
     data_object = XAdESDataObjectFormat(
         Description="FINA eRacun / Fiskalizacija",

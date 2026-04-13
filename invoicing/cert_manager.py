@@ -4,9 +4,8 @@ Upravljanje fiskalnim certifikatima: validacija .p12, parsiranje metapodataka,
 testiranje veze prema CIS serveru.
 """
 import logging
-import tempfile
 import os
-
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +23,8 @@ def validate_and_save_cert(instance, file_obj, password: str) -> dict:
         {'ok': True, 'info': {...}} ili {'ok': False, 'error': '...'}
     """
     try:
-        from cryptography.hazmat.primitives.serialization import pkcs12
         from cryptography.hazmat.backends import default_backend
+        from cryptography.hazmat.primitives.serialization import pkcs12
     except ImportError:
         # cryptography nije instaliran — prihvati certifikat bez validacije
         logger.warning("cryptography paket nije dostupan — cert se sprema bez parsiranja")
@@ -160,8 +159,8 @@ def test_cert_against_cis(instance, use_production: bool = False) -> dict:
 def _attr(subject, oid_dotted: str) -> str:
     """Izvuci vrijednost atributa iz X.509 subject-a po OID-u."""
     try:
-        from cryptography.x509.oid import NameOID
         from cryptography import x509
+        from cryptography.x509.oid import NameOID
         for attr in subject:
             if attr.oid.dotted_string == oid_dotted:
                 return attr.value

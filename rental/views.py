@@ -1,16 +1,19 @@
 import logging
 from datetime import date, timedelta
 from decimal import Decimal
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+
 from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.utils import timezone
-from django.db.models import Sum
-from core.company_utils import get_user_company
-from .models import Property, Booking, HousekeepingLog
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Sum
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
+from core.company_utils import get_user_company
+
+from .models import Booking, HousekeepingLog, Property
 
 logger = logging.getLogger(__name__)
 
@@ -474,7 +477,7 @@ def guest_ocr_upload(request, pk):
 
     # GDPR: postavi brisanje 24h nakon check-outa
     if booking.check_out:
-        from datetime import timedelta, datetime
+        from datetime import datetime, timedelta
         checkout_dt = datetime.combine(booking.check_out, datetime.min.time())
         from django.utils.timezone import make_aware
         doc.delete_after = make_aware(checkout_dt) + timedelta(hours=24)
@@ -549,9 +552,9 @@ def rental_invoice_pdf(request, pk):
 @login_required
 def rental_accountant_dashboard(request):
     """Marija vidi sve klijente iznajmljivače."""
-    from rental.models import Property
-    from rental.ai_assistant import check_annual_limit_warning
     from companies.models import Company
+    from rental.ai_assistant import check_annual_limit_warning
+    from rental.models import Property
 
     # Sve firme koje imaju rental objekte
     company_ids = Property.objects.filter(

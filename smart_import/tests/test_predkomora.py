@@ -9,14 +9,14 @@ from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import User
-from django.test import TestCase, RequestFactory
-
+from django.test import RequestFactory, TestCase
 
 # ── Helper factories ──────────────────────────────────────────────────────
 
 def _make_company():
-    from companies.models import Company
     import uuid
+
+    from companies.models import Company
     return Company.objects.create(
         name='Test Predkomora Co ' + str(uuid.uuid4())[:8],
         oib='TEST' + str(uuid.uuid4().int)[:7],
@@ -55,6 +55,7 @@ def _1px_png():
 
 def _make_staging_file(batch, filename='test.jpg'):
     from django.core.files.base import ContentFile
+
     from smart_import.models import StagingFile
     sf = StagingFile(staging_batch=batch, original_filename=filename, status='pending')
     sf.file.save(filename, ContentFile(_1px_png()), save=True)
@@ -79,6 +80,7 @@ def _make_header(sf, oib='12345678901', invoice_number='R-001', total='100.00',
 
 # Inject json into smart_import.views module so review_approve can use it
 import smart_import.views as _views_mod
+
 if not hasattr(_views_mod, 'json'):
     import json as _json_mod
     _views_mod.json = _json_mod
@@ -246,7 +248,7 @@ class TestProcessStagingBatch(TestCase):
     @patch('smart_import.services.match_items')
     def test_header_error_no_crash(self, mock_match, mock_parse, mock_header):
         """Test 8: header extraction error does not crash the task."""
-        from smart_import.models import StagingFileHeader, ImportBatch
+        from smart_import.models import ImportBatch, StagingFileHeader
 
         mock_parse.return_value = [{'vendor_name': 'ABC', 'quantity': 1, 'purchase_price': 5}]
         mock_header.side_effect = Exception('Header boom')
@@ -267,7 +269,7 @@ class TestProcessStagingBatch(TestCase):
     @patch('smart_import.services.match_items')
     def test_auto_match_partner_in_task(self, mock_match, mock_parse, mock_header):
         """Test 9: process_staging_batch auto-matches partner by OIB."""
-        from smart_import.models import StagingFileHeader, ImportBatch
+        from smart_import.models import ImportBatch, StagingFileHeader
 
         partner = _make_partner(self.company, oib='12345678901')
         mock_parse.return_value = [{'vendor_name': 'X', 'quantity': 1, 'purchase_price': 10}]

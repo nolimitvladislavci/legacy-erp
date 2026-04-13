@@ -1,7 +1,8 @@
 """Celery tasks for inbound invoice processing."""
 import logging
+
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger("propter.einvoice.tasks.inbound")
 
@@ -9,8 +10,11 @@ logger = logging.getLogger("propter.einvoice.tasks.inbound")
 @shared_task
 def poll_inbox():
     from einvoice.models import (
-        AS4Message, TransportConfiguration,
-        MessageDirection, MessageStatus, TransportType,
+        AS4Message,
+        MessageDirection,
+        MessageStatus,
+        TransportConfiguration,
+        TransportType,
     )
     from einvoice.services.posrednik_client import PosrednikClient
     from einvoice.services.smart_mailbox import SmartMailboxService

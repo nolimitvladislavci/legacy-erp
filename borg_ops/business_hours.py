@@ -5,10 +5,11 @@ BORG v2: Dinamički praznici via `holidays` package.
 Podržava: HR + DE kalendar, konfigurabilan po kompaniji.
 Nema hardkodiranih datuma — računa pomične praznike matematički zauvijek.
 """
-from datetime import date, datetime, time, timedelta
-from django.utils import timezone
 import logging
+from datetime import date, datetime, time, timedelta
+
 from django.db import DatabaseError
+from django.utils import timezone
 
 logger = logging.getLogger('borg.sla')
 

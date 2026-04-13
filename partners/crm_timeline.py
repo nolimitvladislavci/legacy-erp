@@ -13,6 +13,7 @@ Rezultat je kronoloski timeline svih dogadjaja.
 """
 import logging
 from datetime import date
+
 from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)

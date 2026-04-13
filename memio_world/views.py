@@ -2,7 +2,7 @@ import json
 import logging
 
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 from .models import WaitlistEntry
 
@@ -48,10 +48,10 @@ def waitlist_count(request):
     return JsonResponse({'count': count})
 
 
-from django.shortcuts import render, redirect
-from django.views.decorators.cache import cache_page
 from django.contrib import messages
+from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import cache_page
 
 
 def registracija_page(request):

@@ -1,8 +1,12 @@
 """Public library portal URLs — outside i18n, public-facing."""
 from django.urls import path
+
 from .public_views import (
-    public_home, public_search, public_book,
-    public_reserve, public_member_portal,
+    public_book,
+    public_home,
+    public_member_portal,
+    public_reserve,
+    public_search,
 )
 
 # These are mounted at /lib/<slug>/ in core/urls.py

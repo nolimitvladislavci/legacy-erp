@@ -13,10 +13,10 @@ NAPOMENA: Pomoćni kreveti se NE oporezuju paušalnim porezom na dohodak!
 (Samo TZ članarina ih uključuje.)
 """
 import logging
+import xml.etree.ElementTree as ET
 from datetime import date
 from decimal import Decimal
 from io import BytesIO
-import xml.etree.ElementTree as ET
 
 from django.db.models import Sum
 from django.template.loader import render_to_string
@@ -42,7 +42,7 @@ def generate_posd_data(company, year, quarter=None):
     Ako quarter=None → godišnji pregled (sva 4 kvartala).
     Ako quarter=1-4 → tromjesečni obrazac.
     """
-    from rental.models import Property, AccommodationUnit, LandlordProfile, TrafficRecord
+    from rental.models import AccommodationUnit, LandlordProfile, Property, TrafficRecord
 
     # ═══ VALIDACIJA ═══
     try:

@@ -3,25 +3,31 @@ sales/views.py — Cjenici, Narudžbe kupaca, Saldakonti (25+ views).
 """
 
 import logging
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Sum, F
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.db import DatabaseError
+from django.db.models import F, Q, Sum
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
+
+from .ai_services import order_predictor, payment_predictor, resolve_price, smart_pricing_suggest
 from .models import (
-    RabatGroup, CustomerPriceList, PriceListLine,
-    SalesOrder, SalesOrderLine, OpenItem, IOSReport,
+    CustomerPriceList,
+    IOSReport,
+    OpenItem,
+    PriceListLine,
+    RabatGroup,
+    SalesOrder,
+    SalesOrderLine,
 )
-from .ai_services import smart_pricing_suggest, order_predictor, payment_predictor, resolve_price
-from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +70,8 @@ def price_list_create(request, pk=None):
     if not company:
         return redirect('home')
 
-    from partners.models import Partner
     from inventory.models import InventoryItem
+    from partners.models import Partner
 
     obj = None
     if pk:
@@ -194,8 +200,8 @@ def resolve_price_api(request):
     if not partner_id or not item_id:
         return JsonResponse({'error': 'Nedostaje partner_id ili item_id'}, status=400)
 
-    from partners.models import Partner
     from inventory.models import InventoryItem
+    from partners.models import Partner
     partner = get_object_or_404(Partner, pk=partner_id, company=company)
     item = get_object_or_404(InventoryItem, pk=item_id, company=company)
 
@@ -287,8 +293,8 @@ def order_create(request):
     if not company:
         return redirect('home')
 
-    from partners.models import Partner
     from inventory.models import InventoryItem
+    from partners.models import Partner
 
     if request.method == 'POST':
         order = SalesOrder(company=company, created_by=request.user)
@@ -461,7 +467,7 @@ def order_ship(request, pk):
         order.save(update_fields=['status', 'otpremnica', 'updated_at'])
         messages.success(request, f'Otpremnica {otp.number} kreirana za narudžbu {order.order_number}.')
 
-    except Exception as e:
+    except Exception:
         logger.exception('Greška pri kreiranju otpremnice')
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
@@ -524,7 +530,7 @@ def order_invoice(request, pk):
         order.save(update_fields=['status', 'invoice', 'updated_at'])
         messages.success(request, f'Faktura {inv.number} kreirana iz narudžbe {order.order_number}.')
 
-    except Exception as e:
+    except Exception:
         logger.exception('Greška pri kreiranju fakture')
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
@@ -791,7 +797,7 @@ def ios_send_email(request, pk):
         ios.save(update_fields=['sent_at'])
         messages.success(request, f'IOS poslan na {email}.')
 
-    except ImportError as e:
+    except ImportError:
         logger.exception('IOS send email error')
         messages.error(request, _('Slanje nije uspjelo. Provjerite internetsku vezu i pokušajte ponovo.'))
 

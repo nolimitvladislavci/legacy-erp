@@ -8,11 +8,12 @@ Logički i integracijski testovi za razine admina:
 
 73+ testova u 12 kategorija.
 """
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
+
+from accounts.models import CompanyMembership, UserProfile
 from companies.models import Company
-from accounts.models import UserProfile, CompanyMembership
 from registration.models import CompanySubscription
 
 

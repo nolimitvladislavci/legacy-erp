@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import TrackingStatus, TrackedItem, TrackingEvent
+
+from .models import TrackedItem, TrackingEvent, TrackingStatus
 
 
 class TrackingEventInline(admin.TabularInline):

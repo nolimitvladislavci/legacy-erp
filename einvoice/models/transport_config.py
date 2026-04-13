@@ -1,5 +1,6 @@
 """Per-company transport configuration."""
 import uuid
+
 from django.db import models
 
 

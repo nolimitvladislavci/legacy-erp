@@ -5,10 +5,10 @@ WAHA webhook handler — creates/appends helpdesk tickets from WhatsApp messages
 import json
 import logging
 
+from django.db import DatabaseError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError
 
 logger = logging.getLogger('helpdesk.whatsapp')
 
@@ -25,6 +25,7 @@ def _get_vip(phone):
 
 # Normalizacija telefona — centralizirana u core.whatsapp
 from core.whatsapp import normalize_phone as _normalize_phone_core
+
 
 def _normalize_phone(raw):
     """Strip WhatsApp suffix and normalize. Delegira na core.whatsapp.normalize_phone."""
@@ -77,8 +78,9 @@ def whatsapp_webhook(request):
     if not phone or not body.strip():
         return JsonResponse({'ok': True, 'skipped': 'empty'})
 
-    from helpdesk.models import Ticket, TicketMessage
     from django.contrib.auth import get_user_model
+
+    from helpdesk.models import Ticket, TicketMessage
     User = get_user_model()
 
     # Check VIP

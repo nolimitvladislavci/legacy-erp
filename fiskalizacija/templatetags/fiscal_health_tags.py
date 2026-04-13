@@ -6,8 +6,8 @@ Fiscal Health template tag v2 — 3 drona neutralizirana:
 """
 from django import template
 from django.core.cache import cache
-from django.utils import timezone
 from django.db import DatabaseError
+from django.utils import timezone
 
 register = template.Library()
 

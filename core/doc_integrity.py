@@ -9,6 +9,7 @@ Usage:
     # ctx sadrzi: doc_hash, timestamp, generated_by, verified_text
 """
 import hashlib
+
 from django.utils import timezone
 
 

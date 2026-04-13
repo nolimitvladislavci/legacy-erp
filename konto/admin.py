@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import KontoAccount, BankAccount, BankTransaction, JournalEntry, LedgerLine, TaxPeriod, TaxLineDetail
+
+from .models import BankAccount, BankTransaction, JournalEntry, KontoAccount, LedgerLine, TaxLineDetail, TaxPeriod
 
 
 class LedgerLineInline(admin.TabularInline):

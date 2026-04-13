@@ -22,8 +22,8 @@ class Command(BaseCommand):
         parser.add_argument('--dry-run', action='store_true', help='Samo prikaži, ne kreiraj')
 
     def handle(self, *args, **options):
-        from companies.models import Company
         from accounts.models import UserProfile
+        from companies.models import Company
         from registration.models import CompanyClaimRequest
 
         umbrella = Company.objects.filter(name__icontains=options['umbrella']).first()

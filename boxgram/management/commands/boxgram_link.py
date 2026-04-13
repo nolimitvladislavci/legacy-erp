@@ -1,8 +1,10 @@
+import logging
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
+
 from boxgram.models import PetProfile
 from companies.models import Company
-import logging
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

@@ -2,6 +2,7 @@
 Konto business logic - double-entry bookkeeping, bank reconciliation, reports.
 """
 from decimal import Decimal
+
 from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
@@ -48,7 +49,7 @@ def book_invoice(invoice, user=None):
       Duguje: 1400 Pretporez                 95,00€
       Potražuje: 2200 Obveze prema dobavljačima 595,00€
     """
-    from .models import KontoAccount, JournalEntry, LedgerLine
+    from .models import JournalEntry, KontoAccount, LedgerLine
 
     company = invoice.invoice_profile.company if hasattr(invoice, 'invoice_profile') and invoice.invoice_profile else None
     if not company:
@@ -280,7 +281,7 @@ def book_bank_transactions(transactions_qs, user=None):
       Duguje: 2200 Obveze prema dobavljačima  500,00€
       Potražuje: 1000 Žiro račun              500,00€
     """
-    from .models import KontoAccount, JournalEntry, LedgerLine
+    from .models import JournalEntry, KontoAccount, LedgerLine
 
     booked = []
     for txn in transactions_qs:
@@ -432,8 +433,9 @@ def auto_match_transactions(company):
     4. If 100% match found -> link automatically
     5. Return list of matched pairs
     """
-    from .models import BankTransaction
     from invoicing.models import Invoice
+
+    from .models import BankTransaction
 
     unmatched = BankTransaction.objects.filter(
         company=company, status='unmatched', transaction_type='inflow'
@@ -495,9 +497,11 @@ def get_open_receivables(company):
 
     Returns list of: {client, invoice, date, due_date, total, paid, remaining, days_overdue}
     """
-    from invoicing.models import Invoice
-    from .models import BankTransaction
     from datetime import date as dt_date
+
+    from invoicing.models import Invoice
+
+    from .models import BankTransaction
 
     today = dt_date.today()
     invoices = Invoice.objects.filter(
@@ -539,9 +543,11 @@ def get_open_payables(company):
 
     Returns list of: {supplier, invoice, date, due_date, total, paid, remaining, days_overdue}
     """
-    from invoicing.models import Invoice
-    from .models import BankTransaction
     from datetime import date as dt_date
+
+    from invoicing.models import Invoice
+
+    from .models import BankTransaction
 
     today = dt_date.today()
     # Incoming invoices (doctype 'S' for storno or custom incoming)
@@ -774,9 +780,12 @@ def calculate_vat_period(company, period_type, year, month=None, quarter=None):
     """
     import calendar
     import datetime
-    from .models import TaxPeriod, TaxLineDetail, KontoAccount, LedgerLine
-    from invoicing.models import Invoice, InvoiceItem
+
     from django.db.models import Sum as DSum
+
+    from invoicing.models import Invoice, InvoiceItem
+
+    from .models import KontoAccount, LedgerLine, TaxLineDetail, TaxPeriod
 
     # --- date range ---
     if period_type == 'monthly':
@@ -916,8 +925,10 @@ def get_annual_tax_summary(company, year):
     Returns a dict with all computed values.
     """
     import datetime
-    from .models import KontoAccount, LedgerLine
+
     from django.db.models import Sum as DSum
+
+    from .models import KontoAccount, LedgerLine
 
     date_from = datetime.date(year, 1, 1)
     date_to   = datetime.date(year, 12, 31)
@@ -1039,9 +1050,12 @@ def get_annual_tax_summary(company, year):
 def calculate_corporate_tax(company, year):
     """PD obrazac — Porez na dobit za d.o.o. (Čl.28 ZPD, NN 177/04, izmjena NN 114/23)."""
     import datetime
-    from .models import KontoAccount, LedgerLine
-    from invoicing.models import Invoice
+
     from django.db.models import Sum as DSum
+
+    from invoicing.models import Invoice
+
+    from .models import KontoAccount, LedgerLine
 
     date_from = datetime.date(year, 1, 1)
     date_to = datetime.date(year, 12, 31)
@@ -1172,8 +1186,10 @@ def get_euer_report(company, year):
     Returns dict: {income_items, expense_items, total_income, total_expenses, profit}
     """
     import datetime
-    from .models import KontoAccount, LedgerLine
+
     from django.db.models import Sum as DSum
+
+    from .models import KontoAccount, LedgerLine
 
     date_from = datetime.date(year, 1, 1)
     date_to   = datetime.date(year, 12, 31)
@@ -1270,8 +1286,9 @@ def book_pos_session(session, user=None):
 
     Returns JournalEntry or None if already booked / no sales.
     """
-    from .models import KontoAccount, JournalEntry, LedgerLine
     from pos.models import POSReceipt
+
+    from .models import JournalEntry, KontoAccount, LedgerLine
 
     company = session.terminal.company
 
@@ -1450,8 +1467,10 @@ def calculate_po_sd(company, year):
     Prirez: ovisno o općini/gradu prebivališta (0-18%)
     """
     import datetime
-    from invoicing.models import Invoice
+
     from django.db.models import Sum as DSum
+
+    from invoicing.models import Invoice
     from konto.models import BankTransaction
 
     date_from = datetime.date(year, 1, 1)
@@ -1570,9 +1589,12 @@ def calculate_koerperschaftsteuer(company, year):
     Ref: KStG §23 Abs. 1, SolzG §4, GewStG §11
     """
     import datetime
-    from .models import KontoAccount, LedgerLine
-    from invoicing.models import Invoice
+
     from django.db.models import Sum as DSum
+
+    from invoicing.models import Invoice
+
+    from .models import KontoAccount, LedgerLine
 
     date_from = datetime.date(year, 1, 1)
     date_to = datetime.date(year, 12, 31)
@@ -1684,8 +1706,9 @@ def book_rental_booking(booking, user=None):
       D: 2500 Obveze za boravišnu pristojbu   30,00€ (prolazna stavka)
       P: 1200 Potraživanja (pristojba)        30,00€
     """
-    from .models import KontoAccount, JournalEntry, LedgerLine
     from decimal import Decimal
+
+    from .models import JournalEntry, KontoAccount, LedgerLine
 
     company = booking.rental_property.company if hasattr(booking.rental_property, 'company') else None
     if not company:

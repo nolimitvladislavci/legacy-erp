@@ -21,9 +21,9 @@ import os
 import time
 from datetime import datetime
 
+import html2text
 import requests
 from bs4 import BeautifulSoup
-import html2text
 from django.utils import timezone
 
 from limit_connect_ai.models_knowledge_graph import RegulatorySource, RegulatoryUpdate

@@ -2,12 +2,12 @@
 Udruge segmenti testovi — DVD, KUD, Ribari, Pčelari, Rakija, Voćari.
 Min 30 testova za sve segmente.
 """
-from decimal import Decimal
 from datetime import date, timedelta
+from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
 User = get_user_model()
@@ -264,7 +264,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_12_ribari_create_dozvola(self):
         """Kreiranje ribolovne dozvole."""
-        from udruge.models import RibolovnaDozvola, Revir
+        from udruge.models import Revir, RibolovnaDozvola
         clan = self._clan()
         revir = Revir.objects.create(
             company=self.company, naziv='Rijeka Drava', tip='rijeka',
@@ -285,7 +285,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_13_ribari_create_ulov(self):
         """Kreiranje evidencije ulova."""
-        from udruge.models import UlovEvidencija, Revir
+        from udruge.models import Revir, UlovEvidencija
         clan = self._clan()
         revir = Revir.objects.create(
             company=self.company, naziv='Jezero Kopačevo', tip='jezero',
@@ -397,7 +397,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_18_pcelari_create_kosnica(self):
         """Kreiranje košnice u pčelinjaku."""
-        from udruge.models import Pcelinjak, Kosnica
+        from udruge.models import Kosnica, Pcelinjak
         clan = self._clan()
         pcelinjak = Pcelinjak.objects.create(
             company=self.company, vlasnik=clan,
@@ -417,7 +417,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_19_pcelari_create_tretman(self):
         """Kreiranje tretmana košnice (varroa)."""
-        from udruge.models import Pcelinjak, Kosnica, TretmanKosnice
+        from udruge.models import Kosnica, Pcelinjak, TretmanKosnice
         clan = self._clan()
         pcelinjak = Pcelinjak.objects.create(
             company=self.company, vlasnik=clan,
@@ -439,7 +439,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_20_pcelari_create_med(self):
         """Kreiranje zapisa proizvodnje meda."""
-        from udruge.models import Pcelinjak, MedProizvodnja
+        from udruge.models import MedProizvodnja, Pcelinjak
         clan = self._clan()
         pcelinjak = Pcelinjak.objects.create(
             company=self.company, vlasnik=clan,
@@ -587,7 +587,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_28_vocari_create_berba(self):
         """Kreiranje evidencije berbe."""
-        from udruge.models import Vocnjak, BerbaLog
+        from udruge.models import BerbaLog, Vocnjak
         clan = self._clan()
         vocnjak = Vocnjak.objects.create(
             company=self.company, vlasnik=clan,
@@ -610,7 +610,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_29_vocari_tretman_karencija_auto(self):
         """Test auto-izračuna karencija_do kod tretmana voćnjaka."""
-        from udruge.models import Vocnjak, TretmanVocnjaka
+        from udruge.models import TretmanVocnjaka, Vocnjak
         clan = self._clan()
         vocnjak = Vocnjak.objects.create(
             company=self.company, vlasnik=clan,
@@ -672,7 +672,7 @@ class UdrugeSegmentsTest(TestCase):
 
     def test_32_task_check_tretman_kosnica(self):
         """Test taska za provjeru tretmana košnica."""
-        from udruge.models import Pcelinjak, Kosnica
+        from udruge.models import Kosnica, Pcelinjak
         clan = self._clan()
         pcelinjak = Pcelinjak.objects.create(
             company=self.company, vlasnik=clan,

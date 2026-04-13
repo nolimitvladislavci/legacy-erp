@@ -26,7 +26,7 @@ BORG VETO: Svako polje u ovom fajlu dolazi iz cat models.py — nula pretpostavk
 """
 import logging
 from dataclasses import dataclass, field
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.db.models import Q
 

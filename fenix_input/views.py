@@ -8,15 +8,16 @@ fenix_input/views.py — API endpointi za sve ulazne kanale
 """
 import json
 import logging
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
 
-from fenix_input.models import InputMessage, SMSDevice
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
+from django.http import JsonResponse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
 from fenix_input.interpreter import interpret_message, parse_sms_by_pattern
-from django.db import IntegrityError, DatabaseError
+from fenix_input.models import InputMessage, SMSDevice
 
 logger = logging.getLogger('fenix_input')
 

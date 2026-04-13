@@ -3,9 +3,9 @@ eracun/services/ai_config_parser.py
 AI-powered parser for posrednik configuration.
 Extracts API keys, URLs, credentials from emails/documents.
 """
-import re
 import json
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -119,8 +119,9 @@ def parse_posrednik_config_ai(text):
     Falls back to regex parser if AI unavailable.
     """
     try:
-        import google.generativeai as genai
         import os
+
+        import google.generativeai as genai
 
         api_key = os.environ.get('GEMINI_API_KEY', '')
         if not api_key:

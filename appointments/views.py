@@ -1,22 +1,23 @@
 import logging
 
-from django.db import transaction, DatabaseError
+from django.db import DatabaseError, transaction
 
 logger = logging.getLogger(__name__)
 import json
 from datetime import datetime, timedelta
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.dateparse import parse_date
 from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions, viewsets
 
 from core.company_utils import get_user_company
@@ -25,8 +26,6 @@ from partners.models import Partner
 from .forms import AppointmentForm
 from .models import BRANCH_TYPES, Appointment, BookingResource, BookingService, WorkingHours
 from .serializers import AppointmentSerializer
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
 
 
 @extend_schema_view(list=extend_schema(tags=["Appointments"]))
@@ -1064,9 +1063,10 @@ def dossier_list(request):
 
 @login_required
 def dossier_detail(request, partner_id):
-    from appointments.models import ClientDossier, DossierEntry as DE
-    from partners.models import Partner
+    from appointments.models import ClientDossier
+    from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
+    from partners.models import Partner
     client = get_object_or_404(Partner, pk=partner_id)
     company = get_user_company(request)
     dossier, created = ClientDossier.objects.get_or_create(
@@ -1091,9 +1091,10 @@ def dossier_detail(request, partner_id):
 
 @login_required
 def dossier_entry_create(request, partner_id):
-    from appointments.models import ClientDossier, DossierEntry as DE
-    from partners.models import Partner
+    from appointments.models import ClientDossier
+    from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
+    from partners.models import Partner
     client  = get_object_or_404(Partner, pk=partner_id)
     company = get_user_company(request)
     dossier, _ = ClientDossier.objects.get_or_create(
@@ -1144,9 +1145,10 @@ def dossier_entry_create(request, partner_id):
 
 @login_required
 def dossier_entry_edit(request, partner_id, entry_id):
-    from appointments.models import ClientDossier, DossierEntry as DE
-    from partners.models import Partner
+    from appointments.models import ClientDossier
+    from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
+    from partners.models import Partner
     client  = get_object_or_404(Partner, pk=partner_id)
     company = get_user_company(request)
     dossier = get_object_or_404(ClientDossier, company=company, client=client)
@@ -1182,9 +1184,10 @@ def dossier_entry_edit(request, partner_id, entry_id):
 @login_required
 @require_POST
 def dossier_entry_delete(request, partner_id, entry_id):
-    from appointments.models import ClientDossier, DossierEntry as DE
-    from partners.models import Partner
+    from appointments.models import ClientDossier
+    from appointments.models import DossierEntry as DE
     from core.company_utils import get_user_company
+    from partners.models import Partner
     client  = get_object_or_404(Partner, pk=partner_id)
     dossier = get_object_or_404(ClientDossier, company=get_user_company(request), client=client)
     entry   = get_object_or_404(DE, pk=entry_id, dossier=dossier)
@@ -1261,8 +1264,9 @@ def public_booking_by_slug(request, company_slug):
 def send_reminder(request, pk):
     from django.contrib import messages
     from django.shortcuts import redirect
-    from appointments.tasks import _send_reminder_whatsapp, _send_reminder_email
+
     from appointments.models import Appointment
+    from appointments.tasks import _send_reminder_email, _send_reminder_whatsapp
     appt = get_object_or_404(Appointment, pk=pk)
     sent = []
     wa = appt.whatsapp_number or (appt.client.phone if appt.client else '')
@@ -1294,6 +1298,7 @@ def send_reminder(request, pk):
 def send_reminders_now(request):
     from django.contrib import messages
     from django.shortcuts import redirect
+
     from appointments.tasks import send_appointment_reminders
     result = send_appointment_reminders()
     messages.success(request, _('Podsjetnici: {} email + {} WhatsApp (od {} termina)').format(
@@ -1462,7 +1467,9 @@ def api_double_lock_slots(request):
     Returns all time slots with Double-Lock availability check.
     Response: {slots: [{time: "08:00", available: true}, ...], service_name: str}
     """
-    from datetime import datetime as dt_class, timedelta as td
+    from datetime import datetime as dt_class
+    from datetime import timedelta as td
+
     from appointments.scheduling import check_availability
     from companies.models import Company
 
@@ -1561,9 +1568,10 @@ def booking_calendar_view(request):
 def api_booking_guest_register(request):
     """Korak 1: Gost unese ime+email+telefon → šalje email verify link + WA PIN."""
     import secrets
+
     from django.core.cache import cache
-    from django.core.validators import validate_email
     from django.core.exceptions import ValidationError
+    from django.core.validators import validate_email
 
     try:
         data   = json.loads(request.body)
@@ -1584,6 +1592,7 @@ def api_booking_guest_register(request):
 
     # Nađi ili kreiraj gosta u bazi
     from django.db import connection as _conn
+
     from companies.models import Company
 
     company = None
@@ -1831,7 +1840,10 @@ def api_booking_qr_login(request):
 @csrf_exempt
 def api_booking_generate_qr(request):
     """Generiraj QR kod sliku za gosta (PNG base64)."""
-    import qrcode, io, base64 as _b64
+    import base64 as _b64
+    import io
+
+    import qrcode
     from django.db import connection as _conn
 
     guest_id = request.GET.get('guest', '').strip()

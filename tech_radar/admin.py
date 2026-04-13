@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import TechSignal, CapacityThreshold
+
+from .models import CapacityThreshold, TechSignal
 
 
 @admin.register(TechSignal)

@@ -16,22 +16,30 @@ Ovi testovi verificiraju da:
 9. Svi postojeći fajlovi su u ArhivaEntry
 10. File path ključevi su unikatni
 """
-import os
-import io
 import hashlib
+import io
+import os
 import uuid
 from datetime import date
-from django.test import TestCase
-from django.contrib.auth.models import User
-from django.utils import timezone
-from django.conf import settings
 
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils import timezone
+
+from companies.models import Company
 from documents.models import ArhivaEntry, DocumentBlob, StorageConfig
 from documents.storage_backends import (
-    store_document, retrieve_document, compress_image,
-    LocalStorageBackend, DatabaseStorageBackend, get_file_hash, generate_storage_path, IMAGE_TARGET_SIZE, DB_MAX_SIZE,
+    DB_MAX_SIZE,
+    IMAGE_TARGET_SIZE,
+    DatabaseStorageBackend,
+    LocalStorageBackend,
+    compress_image,
+    generate_storage_path,
+    get_file_hash,
+    retrieve_document,
+    store_document,
 )
-from companies.models import Company
 
 
 class ArhivaEntryModelTest(TestCase):

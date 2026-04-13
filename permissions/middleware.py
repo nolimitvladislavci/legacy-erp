@@ -1,5 +1,5 @@
-from django.utils.deprecation import MiddlewareMixin
 from django.db import DatabaseError
+from django.utils.deprecation import MiddlewareMixin
 
 
 class RolePermissionMiddleware(MiddlewareMixin):

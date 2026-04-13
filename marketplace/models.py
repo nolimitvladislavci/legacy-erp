@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 """
 marketplace/models.py - Grossmarkt Online tržnica
 
@@ -9,6 +10,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
 from core.managers import CompanyManager
 
 
@@ -874,7 +876,8 @@ class CartSnapshot(models.Model):
 
     @staticmethod
     def compute_hash(cart_data):
-        import hashlib, json
+        import hashlib
+        import json
         raw = json.dumps(cart_data, sort_keys=True, default=str)
         return hashlib.sha256(raw.encode('utf-8')).hexdigest()
 

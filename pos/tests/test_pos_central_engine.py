@@ -15,13 +15,16 @@ from datetime import date
 from decimal import Decimal
 from unittest.mock import patch
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
-from django.contrib.auth.models import User
 
 from companies.models import Company
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt, POSReceiptItem,
+    POSReceipt,
+    POSReceiptItem,
+    POSSession,
+    POSTerminal,
 )
 from pos.services.checkout import CheckoutService
 
@@ -49,7 +52,7 @@ class POSCentralEngineTest(TestCase):
             country="HR",
             fiscal_system="hr_fiscal",
         )
-        from rental.models import Property, AccommodationUnit, LandlordProfile
+        from rental.models import AccommodationUnit, LandlordProfile, Property
         cls.landlord = LandlordProfile.objects.create(
             company=cls.company_rental,
             first_name="Ana",
@@ -414,8 +417,8 @@ class POSCentralEngineTest(TestCase):
         POSDCalculator mora ispravno izračunati porez za paušalca
         na temelju kvartalnih primitaka.
         """
-        from tax_wizard.services import POSDCalculator
         from tax_wizard.models import PausalTier
+        from tax_wizard.services import POSDCalculator
 
         # Kreiraj tier tablicu za test
         for tier_num, (mn, mx, at, mt, mc) in enumerate([
@@ -453,8 +456,8 @@ class POSCentralEngineTest(TestCase):
 
     def test_posd_calculator_exceeds_limit(self):
         """65K > 60K — paušal nije moguć, mora prijeći na dohodak."""
-        from tax_wizard.services import POSDCalculator
         from tax_wizard.models import PausalTier
+        from tax_wizard.services import POSDCalculator
 
         # Ensure tiers exist
         if not PausalTier.objects.filter(valid_year=2026).exists():
@@ -549,8 +552,9 @@ class POSCentralEngineTest(TestCase):
         Paušalni porez se računa po STALNIM krevetima.
         Pomoćni se NE računaju. Ovo je zakonska obveza.
         """
-        from rental.models import AccommodationUnit
         from django.db.models import Sum
+
+        from rental.models import AccommodationUnit
 
         total_permanent = AccommodationUnit.objects.filter(
             rental_property__company=self.company_rental,

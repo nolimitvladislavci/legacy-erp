@@ -13,9 +13,8 @@ import json
 import logging
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 

@@ -1,13 +1,13 @@
 """Management command: backfill_arhiva_pdfs — generira PDF za sve invoice ArhivaEntry bez PDF-a."""
 import gc
-import os
 import logging
+import os
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from documents.models import ArhivaEntry
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 

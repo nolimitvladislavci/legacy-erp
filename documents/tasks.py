@@ -2,7 +2,7 @@ import json
 import logging
 
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +15,13 @@ def arhiva_ai_monitor(self):
     2. Cross-firma anomalije (managed firme)
     3. Nedostajući dokumenti (očekivani periodicitet)
     """
-    from django.utils import timezone
     from datetime import timedelta
-    from django.db.models import Count, Avg, StdDev
-    from documents.models import ArhivaEntry
+
+    from django.db.models import Avg, Count, StdDev
+    from django.utils import timezone
+
     from companies.models import Company
+    from documents.models import ArhivaEntry
 
     alerts = []
     now = timezone.now()
@@ -104,6 +106,7 @@ def arhiva_ai_monitor(self):
     # ── 5. Notifikacija superadminima + company adminima ──
     try:
         from django.contrib.auth import get_user_model
+
         from notifications.services import notify
         User = get_user_model()
 
@@ -174,11 +177,13 @@ def arhiva_morning_brief(self):
     Svaki dan u 06:00 — salje brief o stanju arhive svim superadminima.
     Claude Haiku generira personalizirani summary.
     """
-    from documents.models import ArhivaEntry
+    import os
+    from datetime import timedelta
+
     from django.db.models import Sum
     from django.utils import timezone
-    from datetime import timedelta
-    import os
+
+    from documents.models import ArhivaEntry
 
     now = timezone.now()
     yesterday = now - timedelta(days=1)
@@ -221,8 +226,9 @@ def arhiva_morning_brief(self):
 
     # Notifikacija
     try:
-        from notifications.services import notify_bulk
         from django.contrib.auth import get_user_model
+
+        from notifications.services import notify_bulk
         User = get_user_model()
         admins = list(User.objects.filter(is_superuser=True, is_active=True))
         if admins:
@@ -238,12 +244,17 @@ def arhiva_morning_brief(self):
 @shared_task(bind=True, soft_time_limit=600)
 def generate_revizija_zip(self, company_id, date_from, date_to, user_email):
     """Async ZIP generacija za velike revizorske pakete. Salje email kad zavrsi."""
-    import zipfile, csv, io, os
-    from documents.models import ArhivaEntry
-    from companies.models import Company
+    import csv
+    import io
+    import os
+    import zipfile
+    from datetime import datetime
+
     from django.conf import settings as _s
     from django.db.models import Sum
-    from datetime import datetime
+
+    from companies.models import Company
+    from documents.models import ArhivaEntry
 
     company = Company.objects.get(pk=company_id)
     entries = ArhivaEntry.objects.filter(
@@ -349,9 +360,14 @@ def generate_ai_proposal(self, entry_id):
     Za dani ArhivaEntry — pročitaj dokument, pošalji AI-u, spremi prijedlog knjiženja.
     Poziva se async nakon svakog uploada ili email importa.
     """
-    import os, anthropic, base64, re
-    from documents.models import ArhivaEntry
+    import base64
+    import os
+    import re
+
+    import anthropic
     from django.conf import settings as _s
+
+    from documents.models import ArhivaEntry
 
     try:
         entry = ArhivaEntry.objects.get(pk=entry_id)
@@ -444,8 +460,8 @@ def generate_ai_proposal(self, entry_id):
 
         # Notifikacija kompanijskom adminu
         try:
-            from notifications.services import notify
             from accounts.models import CompanyMembership
+            from notifications.services import notify
             admins = CompanyMembership.objects.filter(
                 company=entry.company,
                 role__in=['owner', 'admin', 'company_admin'],
@@ -504,12 +520,13 @@ def send_ai_inbox_summary_email(self, company_id=None):
     Ako je company_id=None — salje svim kompanijama koje imaju pending dokumente.
     Moze se trigirati rucno ili automatski (svaki radni dan u 08:00).
     """
-    from documents.models import ArhivaEntry
-    from companies.models import Company
     from django.core.mail import EmailMultiAlternatives
     from django.db.models import Sum
     from django.utils import timezone
+
     from accounts.models import CompanyMembership
+    from companies.models import Company
+    from documents.models import ArhivaEntry
 
     now = timezone.now()
 
@@ -764,6 +781,7 @@ def verify_arhiva_integrity(self):
         # Notify superadmins
         try:
             from django.contrib.auth import get_user_model
+
             from notifications.services import notify
             User = get_user_model()
             for admin in User.objects.filter(is_superuser=True, is_active=True):
@@ -793,8 +811,9 @@ def auto_book_high_confidence(self):
     """
     from documents.models import ArhivaEntry
     from documents.views import (
-        _normalize_confidence, _proposal_has_debit_credit,
         _create_journal_entry_from_proposal,
+        _normalize_confidence,
+        _proposal_has_debit_credit,
     )
 
     qs = ArhivaEntry.objects.filter(

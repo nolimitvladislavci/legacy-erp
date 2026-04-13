@@ -1,15 +1,19 @@
 import hashlib
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.db import DatabaseError, IntegrityError
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
 
 from .models import (
-    CompetitorProfile, ComparisonFeature, CompetitorFeatureStatus,
-    MigrationRequest, ReferralProgram, FreeToolUsage, SwitchWeekCampaign,
+    ComparisonFeature,
+    CompetitorFeatureStatus,
+    CompetitorProfile,
+    FreeToolUsage,
+    MigrationRequest,
+    ReferralProgram,
+    SwitchWeekCampaign,
 )
-
 
 # ─── PUBLIC PAGES (no login required) ───────────────────────────────
 

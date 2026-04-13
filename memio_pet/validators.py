@@ -5,9 +5,10 @@ Doktrina: "Blockchain razina" — svaki unos prolazi kroz validaciju
 prije nego dođe do baze. Ni jedan script, ni jedan SQL payload,
 ni jedna nelegalna vrijednost ne smije ući.
 """
-import re
 import html
 import logging
+import re
+
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger('memio_pet.security')

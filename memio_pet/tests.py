@@ -2,8 +2,9 @@
 memio_pet/tests.py — Funkcionalni testovi za memio.pet views
 Pokrivenost: HTTP status codes, .using("memio_pets") korekcija, 404 logika
 """
-from django.test import TestCase, Client
 import uuid
+
+from django.test import Client, TestCase
 
 
 class MemioPublicEndpointsTest(TestCase):
@@ -99,7 +100,7 @@ class MemioWithDataTest(TestCase):
     databases = ['default', 'memio_pets']
 
     def setUp(self):
-        from memio_pet.models import BreederProfile, AnimalProfile
+        from memio_pet.models import AnimalProfile, BreederProfile
         self.breeder = BreederProfile.objects.using('memio_pets').create(
             name='Test Uzgajivač d.o.o.',
             account_type='breeder',

@@ -1,14 +1,15 @@
 """Test: Refund, Pfand Return, Napojnica"""
+import json
 from decimal import Decimal
-from django.utils import timezone
+from unittest.mock import patch
+
 from django.contrib.auth.models import User
 from django.test import RequestFactory
-from unittest.mock import patch
-import json
+from django.utils import timezone
 
 from companies.models import Company
-from pos.models import *
 from inventory.models import InventoryItem, StockMovement
+from pos.models import *
 
 konjik = Company.objects.get(name__icontains="Konjik")
 su = User.objects.get(username="superadmin")
@@ -57,6 +58,7 @@ print(f"  Pivo nakon prodaje 3 kom: {pivo.quantity}")
 
 # Refund 2
 from pos.views import refund_receipt
+
 req = factory.post(
     "/pos/receipt/%d/refund/" % r1.pk,
     data=json.dumps({"items": [{"item_id": ri1.pk, "quantity": 2}], "reason": "Toplo pivo"}),
@@ -94,6 +96,7 @@ pfand_before = pfand_item.quantity
 print(f"  Pfand stock prije: {pfand_before}")
 
 from pos.views import pfand_return
+
 req2 = factory.post(
     "/pos/api/pfand-return/",
     data=json.dumps({"pfand_item_id": pfand_item.pk, "quantity": 5, "session_id": session.pk}),
@@ -159,6 +162,7 @@ print("TEST 4: NAPOJNICA IZVJEŠTAJ — po konobaru")
 print("=" * 60)
 
 from pos.views import tip_report
+
 req3 = factory.get("/pos/tips/?format=json")
 req3.user = su
 with patch("pos.views.get_user_company", return_value=konjik):

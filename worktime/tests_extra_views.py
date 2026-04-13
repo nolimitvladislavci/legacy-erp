@@ -1,16 +1,17 @@
 """Worktime timesheet views extra tests."""
 import datetime
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]
 
 
 def _setup_wt_user(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'WT {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')

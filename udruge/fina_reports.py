@@ -12,8 +12,7 @@ from decimal import Decimal
 
 from django.db.models import Sum
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
-
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PR-RAS-NPF: AOP mapping (konto -> AOP)
@@ -176,8 +175,9 @@ PRRAS_ROWS = [
 
 def _get_konto_balance(company, konto_prefix, year, period_end_month=12):
     """Dohvati saldo za konto prefix iz JournalEntry/LedgerLine."""
-    from konto.models import KontoAccount
     from django.db.models import Sum
+
+    from konto.models import KontoAccount
 
     # Dohvati sve konta koja pocnu s prefixom
     accounts = KontoAccount.objects.filter(
@@ -546,8 +546,9 @@ def _get_konto_balance_at_date(company, konto_prefix, year, month, day):
     Dohvati kumulativni saldo za konto prefix do zadanog datuma.
     Za bilancu trebamo stanje na 1.1. (sve do 31.12. prethodne) i na 31.12. tekuce.
     """
-    from konto.models import KontoAccount
     from django.db.models import Sum
+
+    from konto.models import KontoAccount
 
     accounts = KontoAccount.objects.filter(
         company=company, code__startswith=konto_prefix, is_active=True,

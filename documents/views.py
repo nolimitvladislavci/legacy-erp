@@ -7,11 +7,12 @@
 import logging
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from rest_framework import viewsets
 
 from core.company_utils import get_user_company
@@ -19,8 +20,6 @@ from partners.models import Partner
 
 from .models import Document
 from .serializers import DocumentSerializer
-from django.core.exceptions import ObjectDoesNotExist
-
 
 logger = logging.getLogger(__name__)
 
@@ -128,8 +127,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
 # ════════════════════════════════════════════════════════════
 # Re-export all views from submodules
 # ════════════════════════════════════════════════════════════
+from .views_ai_inbox import *  # noqa: F401,F403
 from .views_arhiva import *  # noqa: F401,F403
 from .views_process_docs import *  # noqa: F401,F403
-from .views_ai_inbox import *  # noqa: F401,F403
-from .views_scan import *  # noqa: F401,F403
 from .views_reports import *  # noqa: F401,F403
+from .views_scan import *  # noqa: F401,F403

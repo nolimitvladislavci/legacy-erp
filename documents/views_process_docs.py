@@ -3,21 +3,26 @@ import io
 from datetime import date
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.db import DatabaseError
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.db import DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
 from partners.models import Partner
 
 from .models import (
-    CMR, CMRItem, OtkupniBlok, OtkupniBlokItem, Otpremnica, OtpremnicaItem,
+    CMR,
+    CMRItem,
+    OtkupniBlok,
+    OtkupniBlokItem,
+    Otpremnica,
+    OtpremnicaItem,
 )
 
 DOC_MAP = {
@@ -68,6 +73,7 @@ def _doc_detail(request, pk, model_cls, template, title):
     ctx = {'doc': doc, 'title': title}
     try:
         from django.contrib.contenttypes.models import ContentType
+
         from tracking.models import TrackedItem, TrackingStatus
         ct = ContentType.objects.get_for_model(doc)
         ctx['tracked_item'] = TrackedItem.objects.filter(content_type=ct, object_id=str(doc.pk)).first()

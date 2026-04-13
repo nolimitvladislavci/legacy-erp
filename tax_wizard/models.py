@@ -12,17 +12,17 @@ Pravni štit: AI SIMULIRA scenarije, NE SAVJETUJE.
 B2B2C: referred_by na TaxWizardSession omogućava računovođi
 da vidi draft svog klijenta prije podnošenja.
 """
-import uuid
 import hashlib
 import json
-
+import uuid
 from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from core.managers import CompanyManager
 
+from core.managers import CompanyManager
 
 # ═══════════════════════════════════════════════════════════════════
 #  1. JSON FORM ENGINE — Srce sustava

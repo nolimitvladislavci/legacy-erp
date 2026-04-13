@@ -14,6 +14,7 @@ This creates an immutable hash chain — any retroactive modification
 of a booked entry breaks the chain and is immediately detectable.
 """
 import hashlib
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 

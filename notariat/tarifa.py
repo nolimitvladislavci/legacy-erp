@@ -5,7 +5,6 @@ Zakon o javnobiljeznicki pristojbama (NN 115/12)
 """
 from decimal import Decimal
 
-
 TARIFE = {
     'punomoc': {
         'osnova': Decimal('10.00'),

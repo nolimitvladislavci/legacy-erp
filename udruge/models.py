@@ -5,6 +5,7 @@ Cross-sell: clan udruge -> potencijalni OPG/obrt korisnik LC-a.
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+
 from core.managers import CompanyManager
 
 
@@ -2377,7 +2378,8 @@ class Golub(models.Model):
         return f'{self.prsten_broj} — {self.naziv or "bez naziva"}'
 
     def izracunaj_genetics_hash(self):
-        import hashlib, json
+        import hashlib
+        import json
         data = {
             'prsten':       self.prsten_broj,
             'datum':        str(self.datum_izlijeganja),

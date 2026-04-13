@@ -1,14 +1,16 @@
-import re
 import logging
+import re
 from datetime import date
 from decimal import Decimal
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import now
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.email_tasks import send_email_task
@@ -17,15 +19,13 @@ from .constants import PLAN_FEATURES
 
 # forms no longer needed for self-service flow
 from .models import CompanyRegistration, CompanySubscription
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
 # Auto-registration imports
-from website.models import CompanyWebsite
 from django.utils.text import slugify
 
+from website.models import CompanyWebsite
 
 
 def _auto_create_website(company):
@@ -65,8 +65,8 @@ def _generate_company_email(company):
 def _seed_demo_data(company, user):
     """Create demo data so new user is not staring at empty screens."""
     try:
-        from partners.models import Partner
         from inventory.models import InventoryItem
+        from partners.models import Partner
 
         # 3 demo partners
         for name, oib, ptype in [
@@ -620,7 +620,7 @@ def register_step4(request):
 
             return redirect("registration:register_success")
 
-        except ObjectDoesNotExist as e:
+        except ObjectDoesNotExist:
             logger.exception("Self-service registration error")
             messages.error(request, _('Registracija nije uspjela. Provjerite podatke i pokušajte ponovo.'))
             return redirect("registration:register_step4")
@@ -842,8 +842,9 @@ def api_check_promo(request):
 @login_required
 def umbrella_invite_manage(request):
     """Umbrella admin manages invite codes."""
-    from .models import UmbrellaInviteCode
     from core.company_utils import get_user_company
+
+    from .models import UmbrellaInviteCode
     company = get_user_company(request)
     if not company or not company.is_umbrella:
         from django.contrib import messages as msg
@@ -909,9 +910,13 @@ def sales_wizard(request):
 @require_POST
 def sales_wizard_submit(request):
     """Submit signed sales lead."""
-    import json, base64, os
+    import base64
+    import json
+    import os
+
     from django.http import JsonResponse
     from django.utils import timezone as tz
+
     from registration.models import SalesLead
 
     data = json.loads(request.body)
@@ -1046,10 +1051,14 @@ def sales_wizard_submit(request):
 @login_required
 def agent_dashboard(request):
     """Agent referral dashboard 10/10 — KPI, QR, ghost firme, komisija."""
-    from registration.models import SalesLead
-    from companies.models import Company
+    import base64
+    import io
     from decimal import Decimal
-    import qrcode, io, base64
+
+    import qrcode
+
+    from companies.models import Company
+    from registration.models import SalesLead
 
     leads = SalesLead.objects.filter(agent=request.user).select_related('company').order_by('-created_at')
 
@@ -1238,6 +1247,7 @@ def api_name_search(request):
     Bruno upiše "Valiant" → nađe u Partner tablici → auto-fill.
     """
     from django.http import JsonResponse
+
     from companies.models import Company
     from partners.models import Partner
 
@@ -1279,8 +1289,8 @@ def api_name_search(request):
 
 def claim_company_form(request, company_id):
     """GET /firma/preuzmi/<uuid>/ — vlasnik traži pristup ghost firmi."""
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanyClaimRequest
 
     company = get_object_or_404(Company, id=company_id)
@@ -1320,10 +1330,11 @@ def claim_company_form(request, company_id):
 
 def submit_claim(request, company_id):
     """POST /firma/preuzmi/<uuid>/submit/ — kreira ClaimRequest."""
-    from companies.models import Company
-    from accounts.models import UserProfile
-    from registration.models import CompanyClaimRequest
     from django.utils import timezone
+
+    from accounts.models import UserProfile
+    from companies.models import Company
+    from registration.models import CompanyClaimRequest
 
     if request.method != 'POST':
         return redirect('claim_company', company_id=company_id)
@@ -1433,8 +1444,8 @@ def approve_claim(request, claim_id):
 
             # Email s login podacima
             try:
-                from django.core.mail import send_mail
                 from django.conf import settings
+                from django.core.mail import send_mail
                 send_mail(
                     f'Pristup LIMIT Connect — {claim.company.name}',
                     f'Poštovani {claim.first_name},\n\n'
@@ -1510,9 +1521,10 @@ def pending_claims(request):
 @login_required
 def send_company_invite(request, company_id):
     """POST /posrednik/invite/<uuid>/ — Marija šalje invite link."""
+    from django.utils import timezone
+
     from companies.models import Company
     from registration.models import CompanyClaimRequest
-    from django.utils import timezone
 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -1575,8 +1587,10 @@ def register_quick(request):
 
     if request.method == "POST":
         import uuid
+
         from django.contrib.auth import login
         from django.db import transaction
+
         from accounts.models import UserProfile
         from companies.models import Company
 
@@ -1651,9 +1665,11 @@ def register_quick(request):
                 from registration.models import PricingPlan
                 plan = PricingPlan.objects.filter(slug=plan_slug, is_active=True).first()
                 if plan:
-                    from companies.models import Subscription
-                    from django.utils import timezone as _tz
                     from datetime import timedelta
+
+                    from django.utils import timezone as _tz
+
+                    from companies.models import Subscription
                     Subscription.objects.create(
                         company=company, plan=plan,
                         started_at=_tz.now(),
@@ -1682,6 +1698,7 @@ def api_plan_suggest(request):
     Vraca: {"plan": "starter", "reason": "...", "confidence": "ai|keyword"}
     """
     from django.http import JsonResponse
+
     from registration.borg_advisor import recommend_plan_by_keyword
 
     name = request.GET.get('name', '').strip()
@@ -1715,7 +1732,7 @@ def distributor_apply(request):
             )
             messages.success(request, _('Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h.'))
             return redirect('distributor_apply')
-        except (IntegrityError, DatabaseError) as e:
+        except (IntegrityError, DatabaseError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'registration/distributor_apply.html', {
@@ -1731,12 +1748,15 @@ def register_trikey(request):
 
     if request.method == "POST":
         from datetime import timedelta
+
         from django.contrib.auth import login as auth_login
         from django.db import transaction as db_transaction
+
         from accounts.models import UserProfile
         from accounts.trikey import TriKeyProfile, generate_pin
         from companies.models import Company
-        from .models import PricingPlan, CompanySubscription
+
+        from .models import CompanySubscription, PricingPlan
 
         oib = request.POST.get("oib", "").strip()
         company_name = request.POST.get("company_name", "").strip()
@@ -1850,7 +1870,7 @@ def register_trikey(request):
 
                 messages.success(request, f"Dobrodošli! Vaš PIN: {pin} — zapišite ga ili provjerite email.")
                 return redirect("dashboard")
-        except (IntegrityError, DatabaseError) as e:
+        except (IntegrityError, DatabaseError):
             logger.exception("TriKey registration error")
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 

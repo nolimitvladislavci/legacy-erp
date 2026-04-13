@@ -1,7 +1,8 @@
 """Superadmin AI + Security tests."""
 import json
-from django.test import TestCase
+
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 
 User = get_user_model()
 
@@ -82,22 +83,25 @@ class PasswordValidatorTest(TestCase):
     """Test StrongPasswordValidator."""
 
     def test_no_uppercase_rejected(self):
-        from core.validators import StrongPasswordValidator
         from django.core.exceptions import ValidationError
+
+        from core.validators import StrongPasswordValidator
         v = StrongPasswordValidator()
         with self.assertRaises(ValidationError):
             v.validate('alllowercase1!')
 
     def test_no_number_rejected(self):
-        from core.validators import StrongPasswordValidator
         from django.core.exceptions import ValidationError
+
+        from core.validators import StrongPasswordValidator
         v = StrongPasswordValidator()
         with self.assertRaises(ValidationError):
             v.validate('NoNumberHere!')
 
     def test_no_special_rejected(self):
-        from core.validators import StrongPasswordValidator
         from django.core.exceptions import ValidationError
+
+        from core.validators import StrongPasswordValidator
         v = StrongPasswordValidator()
         with self.assertRaises(ValidationError):
             v.validate('NoSpecial123')
@@ -114,7 +118,7 @@ class CouncilTest(TestCase):
         cls.superuser = User.objects.create_superuser('council_admin', 'council@test.com', 'Test123!')
 
     def test_council_needs_two_thirds(self):
-        from superadmin_ai.models import PendingAIAction, AICouncilVote
+        from superadmin_ai.models import AICouncilVote, PendingAIAction
         pending = PendingAIAction.objects.create(
             module='finance', action_type='write',
             description='Test council', status='pending',
@@ -133,7 +137,7 @@ class CouncilTest(TestCase):
         self.assertEqual(AICouncilVote.get_decision(pending), 'approved')
 
     def test_council_rejects_on_majority_against(self):
-        from superadmin_ai.models import PendingAIAction, AICouncilVote
+        from superadmin_ai.models import AICouncilVote, PendingAIAction
         pending = PendingAIAction.objects.create(
             module='finance', action_type='delete',
             description='Test reject', status='pending',
@@ -143,7 +147,7 @@ class CouncilTest(TestCase):
         self.assertEqual(AICouncilVote.get_decision(pending), 'rejected')
 
     def test_council_no_consensus_rejects(self):
-        from superadmin_ai.models import PendingAIAction, AICouncilVote
+        from superadmin_ai.models import AICouncilVote, PendingAIAction
         pending = PendingAIAction.objects.create(
             module='pos', action_type='exec',
             description='Test no consensus', status='pending',

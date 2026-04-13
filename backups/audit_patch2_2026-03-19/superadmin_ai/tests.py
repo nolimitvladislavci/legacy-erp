@@ -1,7 +1,8 @@
 """Superadmin AI module tests — security, permissions, audit logging."""
 import json
-from django.test import TestCase, RequestFactory
+
 from django.contrib.auth import get_user_model
+from django.test import RequestFactory, TestCase
 
 User = get_user_model()
 
@@ -141,15 +142,17 @@ class PasswordValidatorTest(TestCase):
     """Test StrongPasswordValidator."""
 
     def test_weak_password_rejected(self):
-        from core.validators import StrongPasswordValidator
         from django.core.exceptions import ValidationError
+
+        from core.validators import StrongPasswordValidator
         v = StrongPasswordValidator()
         with self.assertRaises(ValidationError):
             v.validate('alllowercase')
 
     def test_no_number_rejected(self):
-        from core.validators import StrongPasswordValidator
         from django.core.exceptions import ValidationError
+
+        from core.validators import StrongPasswordValidator
         v = StrongPasswordValidator()
         with self.assertRaises(ValidationError):
             v.validate('NoNumberHere!')

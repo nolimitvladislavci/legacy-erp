@@ -11,12 +11,18 @@ from django.test import TestCase
 from django.utils import timezone
 
 from companies.models import Company
-from partners.models import Partner
 from inventory.models import InventoryItem
+from partners.models import Partner
 
 from .models import (
-    BookMeta, LibraryMember, BookLoan, BookReservation,
-    ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,
+    BadgeDefinition,
+    BookLoan,
+    BookMeta,
+    BookReservation,
+    ChildReader,
+    EarnedBadge,
+    LibraryMember,
+    ReadingLog,
 )
 
 

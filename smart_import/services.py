@@ -2,9 +2,9 @@
    v2 - 2026-03-17: Enhanced image fallback, better error handling, Gemini usage logging.
 """
 import base64
-import os
 import json
 import logging
+import os
 import re
 from decimal import Decimal, InvalidOperation
 from difflib import SequenceMatcher
@@ -258,10 +258,11 @@ def _gemini_vision_extract(image_b64, media_type):
     )
 
     try:
-        from google import genai as _genai
-        from django.conf import settings
-        from PIL import Image as PILImage
         import io
+
+        from django.conf import settings
+        from google import genai as _genai
+        from PIL import Image as PILImage
 
         api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
         if not api_key:
@@ -302,10 +303,11 @@ def _gemini_vision_extract_enhanced(image_b64, media_type):
     )
 
     try:
-        from google import genai as _genai
-        from django.conf import settings
-        from PIL import Image as PILImage
         import io
+
+        from django.conf import settings
+        from google import genai as _genai
+        from PIL import Image as PILImage
 
         api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
         if not api_key:
@@ -352,7 +354,8 @@ def _log_gemini_usage(response, caller):
 
 def _encode_image(file_path):
     try:
-        from PIL import Image as PILImage, ImageEnhance
+        from PIL import Image as PILImage
+        from PIL import ImageEnhance
         img = PILImage.open(file_path)
 
         # Auto-rotate based on EXIF (mobile camera photos)
@@ -397,7 +400,8 @@ def _encode_image(file_path):
 def _encode_image_enhanced(file_path):
     """Enhanced encoding: grayscale, higher contrast, larger resolution for OCR."""
     try:
-        from PIL import Image as PILImage, ImageEnhance, ImageFilter, ImageOps
+        from PIL import Image as PILImage
+        from PIL import ImageEnhance, ImageFilter, ImageOps
         img = PILImage.open(file_path)
 
         # Auto-rotate
@@ -450,8 +454,8 @@ def _claude_extract_lines(text, source_type="text"):
         "If unit price unclear, use 0.\n\n---\n{}"
     ).format(source_type, text[:6000])
     try:
-        from google import genai as _genai
         from django.conf import settings
+        from google import genai as _genai
 
         api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
         if not api_key:
@@ -505,8 +509,8 @@ def _parse_json_rows(raw):
 def match_items(batch):
     """Fuzzy-match ImportBatchItems to InventoryItems.
     Score: 1.0=exact mapping, >=0.8 green, 0.6-0.8 yellow, <0.6 red."""
-    from smart_import.models import VendorItemMapping
     from inventory.models import InventoryItem
+    from smart_import.models import VendorItemMapping
 
     company  = batch.company
     supplier = batch.supplier
@@ -599,10 +603,12 @@ def extract_invoice_header(file_path):
     )
 
     try:
-        from google import genai as _genai
+        import io
+        import json
+
         from django.conf import settings
+        from google import genai as _genai
         from PIL import Image as PILImage
-        import io, json
 
         api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
         if not api_key:
@@ -657,10 +663,11 @@ def extract_unified(file_path):
     )
 
     try:
-        from google import genai as _genai
-        from django.conf import settings
-        from PIL import Image as PILImage
         import io
+
+        from django.conf import settings
+        from google import genai as _genai
+        from PIL import Image as PILImage
 
         api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
         if not api_key:

@@ -6,11 +6,11 @@ All tests use Client(raise_request_exception=False) and check status codes in AL
 import datetime
 from unittest.mock import patch
 
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 ALLOWED = [200, 301, 302, 400, 403, 404, 405, 500]
 
@@ -18,8 +18,8 @@ ALLOWED = [200, 301, 302, 400, 403, 404, 405, 500]
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 def _setup_user(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'FC {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -56,8 +56,9 @@ def _make_cert(company):
 
 
 def _make_invoice(company, user, fiscalized=False, doctype='R'):
-    from invoicing.models import Invoice
     import uuid
+
+    from invoicing.models import Invoice
     return Invoice.objects.create(
         company=company,
         number=f'KNJ-{uuid.uuid4().hex[:6].upper()}',

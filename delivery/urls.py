@@ -1,8 +1,6 @@
 from django.urls import path
 
-from . import api, views
-from . import haccp_views
-from . import warehouse_views
+from . import api, haccp_views, views, warehouse_views
 
 app_name = "delivery"
 

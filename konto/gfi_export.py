@@ -6,11 +6,11 @@ Generates balance sheet (bilanca) + profit/loss (RDG) data mapped to
 official AOP positions per Croatian Financial Agency (FINA) requirements.
 """
 import datetime
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
-from decimal import Decimal
-
 import logging
+import xml.etree.ElementTree as ET
+from decimal import Decimal
+from xml.dom import minidom
+
 logger = logging.getLogger(__name__)
 
 
@@ -65,8 +65,9 @@ def generate_gfi_pod(company, year):
 
     Returns dict with keys: bilanca, rdg, meta, xml
     """
-    from konto.models import KontoAccount, LedgerLine
     from django.db.models import Sum
+
+    from konto.models import KontoAccount, LedgerLine
 
     current_start = datetime.date(year, 1, 1)
     current_end = datetime.date(year, 12, 31)

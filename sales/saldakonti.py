@@ -17,7 +17,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
-from .models import OpenItem, IOSReport
+from .models import IOSReport, OpenItem
 
 logger = logging.getLogger(__name__)
 

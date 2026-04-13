@@ -8,8 +8,9 @@ Svaki test je scenarij koji može puknuti u produkciji.
 """
 from datetime import date, timedelta
 from decimal import Decimal
-from django.test import TestCase
+
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.utils import timezone
 
 User = get_user_model()
@@ -371,8 +372,9 @@ class TachographEntryTests(TestCase):
 
     # T33 — unique_together (driver, date): duplikat puca
     def test_33_unique_driver_date(self):
-        from delivery.models import TachographEntry
         from django.db import IntegrityError
+
+        from delivery.models import TachographEntry
         d = date.today()
         TachographEntry.objects.create(
             driver=self.driver, vehicle=self.vehicle, date=d,
@@ -419,8 +421,9 @@ class FuelEntryTests(TestCase):
 
     # T36 — Gorivo vezano na TransportOrder
     def test_36_fuel_linked_to_transport_order(self):
-        from delivery.models import FuelEntry, TransportOrder
         from django.contrib.auth import get_user_model
+
+        from delivery.models import FuelEntry, TransportOrder
         User = get_user_model()
         n = _uid()
         driver = User.objects.create_user(username='fd%d' % n, password='x')

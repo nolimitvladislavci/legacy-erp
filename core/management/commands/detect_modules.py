@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from companies.models import Company, CompanyModuleConfig
-        from core.module_registry import auto_detect_modules, MODULE_REGISTRY
+        from core.module_registry import MODULE_REGISTRY, auto_detect_modules
 
         apply = options['apply']
         company_id = options.get('company_id')

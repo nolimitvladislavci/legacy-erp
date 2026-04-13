@@ -87,7 +87,7 @@ class DocumentProcessor:
     @staticmethod
     def prepare_image(image_path):
         try:
-            from PIL import Image, ImageEnhance, ExifTags
+            from PIL import ExifTags, Image, ImageEnhance
             img = Image.open(image_path)
             try:
                 for k in ExifTags.TAGS:

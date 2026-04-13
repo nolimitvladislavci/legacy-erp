@@ -1,8 +1,9 @@
 """AML — views."""
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from datetime import date
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 
 from core.company_utils import get_user_company
 
@@ -128,7 +129,7 @@ def aml_transaction_report(request):
     company = get_user_company(request)
 
     if request.method == 'POST':
-        from aml.models import AMLTransaction, AMLClientProfile
+        from aml.models import AMLClientProfile, AMLTransaction
 
         profile_id = request.POST.get('client_profile')
         profile = AMLClientProfile.objects.get(pk=profile_id) if profile_id else None

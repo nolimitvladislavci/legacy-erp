@@ -2,11 +2,16 @@
 FENIX MCP Server — direktni pristup za Sonnet
 Pokrece se kao: venv/bin/python core/mcp_server.py
 """
-import os, sys, subprocess, json
+import json
+import os
+import subprocess
+import sys
+
 sys.path.insert(0, '/var/www/fina-connect')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
+
 django.setup()
 
 from fastmcp import FastMCP
@@ -147,9 +152,10 @@ def system_status() -> str:
 @mcp.tool()
 def pos_today() -> str:
     """POS statistike za danas."""
-    from pos.models import POSReceipt
+    from django.db.models import Count, Sum
     from django.utils import timezone
-    from django.db.models import Sum, Count
+
+    from pos.models import POSReceipt
     today = timezone.now().date()
     qs = POSReceipt.objects.filter(created_at__date=today, status='paid')
     by_company = list(

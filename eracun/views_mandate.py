@@ -4,12 +4,12 @@ Marija vidi sve punomoći, kreira nove, bulk umbrella.
 """
 import logging
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger('eracun.mandate')
 
@@ -43,8 +43,8 @@ def mandate_list(request):
 @login_required
 def mandate_create(request):
     """POST /eracun/mandati/novi/ — kreira novi mandat."""
-    from einvoice.models.mandate import Mandate, MandateStatus, MandateType
     from companies.models import Company
+    from einvoice.models.mandate import Mandate, MandateStatus, MandateType
 
     if request.method != 'POST':
         # GET — prikaži formu s listom umbrella firmi
@@ -106,8 +106,8 @@ def mandate_revoke(request, pk):
 @login_required
 def mandate_bulk_umbrella(request):
     """POST /eracun/mandati/bulk-umbrella/ — bulk kreiranje za sve umbrella firme."""
-    from einvoice.models.mandate import Mandate, MandateStatus, MandateType
     from companies.models import Company
+    from einvoice.models.mandate import Mandate, MandateStatus, MandateType
 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)

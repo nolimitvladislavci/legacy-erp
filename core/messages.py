@@ -15,7 +15,6 @@ Korištenje:
 from django.contrib import messages
 from django.utils.translation import gettext as _
 
-
 # ═══════════════════════════════════════════════════════════════
 # MESSAGE CATALOG — Svaka poruka je (level, template, hint)
 # ═══════════════════════════════════════════════════════════════

@@ -4,6 +4,7 @@ Pokriva: Source, FundOpportunity, Job, Result, Application, Service logic.
 """
 from datetime import date, timedelta
 from decimal import Decimal
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
@@ -12,8 +13,8 @@ from django.utils import timezone
 class IntelTestBase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        from companies.models import Company
         from accounts.models import UserProfile
+        from companies.models import Company
         cls.company = Company.objects.create(name='Intel Test OPG', oib='99988877766', country='HR', business_type='opg')
         cls.user = User.objects.create_user(username='intel_test', password='IntelTest2026!')
         UserProfile.objects.update_or_create(user=cls.user, defaults={'company': cls.company, 'role': 'company_admin'})
@@ -105,7 +106,7 @@ class ResultTest(IntelTestBase):
 
 class ApplicationTest(IntelTestBase):
     def test_lifecycle(self):
-        from intelligence.models import FundOpportunity, FundApplication
+        from intelligence.models import FundApplication, FundOpportunity
         fund = FundOpportunity.objects.create(naziv='LC', tip='eu_esf', tijelo='SAFU', opis='T', rok_prijave=date.today() + timedelta(days=30))
         app = FundApplication.objects.create(company=self.company, opportunity=fund, trazeni_iznos_eur=Decimal('25000'))
         self.assertEqual(app.status, 'priprema')
@@ -117,7 +118,8 @@ class ApplicationTest(IntelTestBase):
 
     def test_unique_constraint(self):
         from django.db import IntegrityError
-        from intelligence.models import FundOpportunity, FundApplication
+
+        from intelligence.models import FundApplication, FundOpportunity
         fund = FundOpportunity.objects.create(naziv='UQ', tip='hr_apprrr', tijelo='A', opis='T')
         FundApplication.objects.create(company=self.company, opportunity=fund)
         with self.assertRaises(IntegrityError):
@@ -130,7 +132,8 @@ class ServiceLogicTest(IntelTestBase):
         self.assertFalse(59 >= 60)
 
     def test_json_parsing(self):
-        import json, re
+        import json
+        import re
         llm = 'Evo: {"pronasci": [{"naslov": "EU fond", "relevantnost": 85}]} kraj'
         m = re.search(r'\{.*"pronasci".*\}', llm, re.DOTALL)
         self.assertIsNotNone(m)

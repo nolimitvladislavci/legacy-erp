@@ -18,7 +18,6 @@ from pos.hashchain import (
     verify_single,
 )
 
-
 # ── Helper factories ──────────────────────────────────────────────────────
 
 def _make_company():

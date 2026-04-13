@@ -1,8 +1,7 @@
 """Registration views tests covering registration wizard steps."""
-from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
-
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 ALLOWED = [200, 302, 400, 403, 404, 405, 500]
 

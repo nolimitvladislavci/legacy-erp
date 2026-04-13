@@ -23,17 +23,22 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from companies.models import Company
 from inventory.models import InventoryItem
 from production.models import (
-    Workstation, BillOfMaterials, BOMLine,
-    ProductionOrder, ProductionStep, ProductionLog,
+    BillOfMaterials,
+    BOMLine,
+    ProductionLog,
+    ProductionOrder,
+    ProductionStep,
+    Workstation,
 )
 from production.services import (
-    check_availability, calculate_costs,
+    calculate_costs,
+    check_availability,
 )
 
 User = get_user_model()

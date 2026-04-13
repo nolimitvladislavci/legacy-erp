@@ -5,8 +5,8 @@ proactive widget, opportunity scanner math.
 
 Run: python manage.py test limit_connect_ai.tests_150_push --verbosity=2
 """
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -16,8 +16,8 @@ from django.utils import timezone
 class PushTestBase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        from companies.models import Company, TaxRate
         from accounts.models import UserProfile
+        from companies.models import Company, TaxRate
         cls.company = Company.objects.create(
             name='Push Test Ltd', oib='55544433322', country='HR',
             business_type='doo', city='Split', has_signed_tc_consent=True,
@@ -40,8 +40,8 @@ class PushTestBase(TestCase):
 class BorgTaskConnectorTest(PushTestBase):
 
     def test_sync_creates_signal_tasks(self):
-        from limit_connect_ai.models_signal import FenixSignal
         from borg_ops.connector import sync_ops_tasks
+        from limit_connect_ai.models_signal import FenixSignal
         FenixSignal.objects.create(signal_type='bug', message='Test signal for task', status='new')
         result = sync_ops_tasks()
         self.assertGreaterEqual(result['signals'], 0)
@@ -69,10 +69,12 @@ class BorgTaskConnectorTest(PushTestBase):
 class AdaptationEngineExtraTest(PushTestBase):
 
     def test_apply_notification_rule(self):
-        from limit_connect_ai.services.adaptation_engine import apply_rule
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, AdaptationRule,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
+        from limit_connect_ai.services.adaptation_engine import apply_rule
         src, _ = RegulatorySource.objects.get_or_create(
             source_type='custom', defaults={'name': 'T', 'url_endpoint': 'http://t.hr'},
         )
@@ -89,10 +91,12 @@ class AdaptationEngineExtraTest(PushTestBase):
         self.assertIsNotNone(result)
 
     def test_apply_nonexistent_type_falls_to_notification(self):
-        from limit_connect_ai.services.adaptation_engine import apply_rule
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, AdaptationRule,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
+        from limit_connect_ai.services.adaptation_engine import apply_rule
         src = RegulatorySource.objects.first() or RegulatorySource.objects.create(
             name='T2', source_type='custom', url_endpoint='http://t2.hr',
         )

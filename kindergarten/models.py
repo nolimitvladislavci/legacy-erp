@@ -11,11 +11,12 @@ Modeli:
   DailyReport — Dnevni izvještaj odgajateljice
   Announcement — Obavijest roditeljima
 """
-from django.db import models
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
+from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from decimal import Decimal
 
 from core.managers import CompanyManager
 

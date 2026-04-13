@@ -9,6 +9,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
+
 from lxml import etree
 
 logger = logging.getLogger("propter.einvoice.validator")

@@ -14,11 +14,11 @@ Usage:
     python manage.py test_fina_sandbox
     python manage.py test_fina_sandbox --live   # When real sandbox available
 """
-import os
-import time
 import hashlib
-import tempfile
 import logging
+import os
+import tempfile
+import time
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -84,8 +84,8 @@ class Command(BaseCommand):
 
     def _step_cert(self, oib):
         self._header("STEP 1: Certificate Loading")
-        from eracun.models import ERacunConfig
         from companies.models import Company
+        from eracun.models import ERacunConfig
 
         company = Company.objects.filter(oib=oib).first()
         if not company:
@@ -104,8 +104,8 @@ class Command(BaseCommand):
 
         # Load and verify
         try:
+            from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
             from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
-            from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
 
             pw_path = os.path.join(os.path.dirname(cert_path), ".cert_password")
             with open(pw_path) as f:
@@ -152,8 +152,8 @@ class Command(BaseCommand):
 
     def _step_invoice(self, oib):
         self._header("STEP 2: Test Invoice")
-        from eracun.models import ERacun
         from companies.models import Company
+        from eracun.models import ERacun
 
         company = Company.objects.filter(oib=oib).first()
 

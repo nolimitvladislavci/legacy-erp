@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class DiagnosisReport(models.Model):
     company = models.ForeignKey("companies.Company", on_delete=models.CASCADE,
         related_name="diagnosis_reports", verbose_name="Firma")

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db import models, DatabaseError
+from django.db import DatabaseError, models
 from django.utils.translation import gettext_lazy as _
 
 from core.managers import CompanyManager
@@ -591,8 +591,9 @@ class GoodsReceipt(models.Model):
 
     def _create_journal_entry(self):
         """Create konto booking from confirmed GoodsReceipt."""
-        from konto.models import JournalEntry, LedgerLine, KontoAccount
         import logging
+
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
         log = logging.getLogger('inventory')
 
         company = self.company

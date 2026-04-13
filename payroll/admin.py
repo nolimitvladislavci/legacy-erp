@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import PayrollRun, Payslip
+
 
 class PayslipInline(admin.TabularInline):
     model = Payslip

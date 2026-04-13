@@ -1,7 +1,9 @@
 import uuid
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+
 from core.managers import CompanyManager
 
 
@@ -253,14 +255,13 @@ class CampaignPlan(models.Model):
 
 
 # ── BORG FENIX: Knowledge Graph modeli ──────────────────────────────────────
+from limit_connect_ai.models_ai_action import AIAction  # noqa: F401
+from limit_connect_ai.models_doktor import DiagnosisReport  # noqa: E402, F401
 from limit_connect_ai.models_knowledge_graph import (  # noqa: E402, F401
+    AdaptationRule,
+    ClientOpportunityMatch,
+    ImpactDomain,
+    LegalOpportunity,
     RegulatorySource,
     RegulatoryUpdate,
-    ImpactDomain,
-    AdaptationRule,
-    LegalOpportunity,
-    ClientOpportunityMatch,
 )
-from limit_connect_ai.models_ai_action import AIAction  # noqa: F401
-
-from limit_connect_ai.models_doktor import DiagnosisReport  # noqa: E402, F401

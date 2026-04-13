@@ -1,5 +1,7 @@
 from django.db import DatabaseError
+
 from core.models import BookingSignature
+
 """
 accounts/trikey_views.py — TriKey autentifikacija views
 
@@ -13,15 +15,15 @@ import json
 import logging
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
-from .trikey import TriKeyProfile, oib_lookup, generate_pin
+from .trikey import TriKeyProfile, generate_pin, oib_lookup
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +175,8 @@ def passkey_register_options(request):
     trikey, _created = TriKeyProfile.objects.get_or_create(user=request.user)
 
     # Generate challenge
-    import secrets, base64
+    import base64
+    import secrets
     challenge = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
 
     request.session['webauthn_challenge'] = challenge
@@ -247,7 +250,7 @@ def business_key_register(request):
             cert_bytes = fina_cert.read()
             fingerprint = trikey.register_fina_cert(cert_bytes)
             registered.append(f'FINA cert (fingerprint: {fingerprint[:12]}...)')
-        except IOError as e:
+        except IOError:
             messages.error(request, _('Problem s FINA certifikatom. Provjerite certifikat i pokušajte ponovo.'))
 
     if api_key:

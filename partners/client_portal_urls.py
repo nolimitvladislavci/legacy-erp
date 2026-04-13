@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import client_portal_views as views
 
 app_name = 'client_portal'

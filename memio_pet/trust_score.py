@@ -15,6 +15,7 @@ Kategorije:
 """
 import logging
 from datetime import timedelta
+
 from django.utils import timezone
 
 logger = logging.getLogger("memio_pet")

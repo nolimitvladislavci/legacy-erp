@@ -1,13 +1,12 @@
 """Scan Views — QR scan + Scan Batch (Enterprise Architecture)."""
+import base64 as _b64
+import io as _io
 import json
 import logging
 import uuid as _uuid
 
-import base64 as _b64
-import io as _io
-import redis as _redis
 import qrcode as _qrcode
-
+import redis as _redis
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt as _csrf_exempt
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
+
 from .models import ScanBatch, ScanBatchImage
 
 logger = logging.getLogger(__name__)

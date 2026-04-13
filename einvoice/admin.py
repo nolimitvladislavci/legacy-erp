@@ -1,8 +1,13 @@
 from django.contrib import admin
+
 from einvoice.models import (
-    AS4Message, AS4MessageEvent, PeppolParticipant,
-    TransportConfiguration, InboundInvoice, DocumentArchive,
+    AS4Message,
+    AS4MessageEvent,
+    DocumentArchive,
+    InboundInvoice,
     Mandate,
+    PeppolParticipant,
+    TransportConfiguration,
 )
 
 

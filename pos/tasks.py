@@ -2,9 +2,10 @@
 POS Celery Tasks — pozadinski procesi.
 """
 import logging
+
 from celery import shared_task
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Q
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('pos.tasks')
 
@@ -28,10 +29,12 @@ def retry_fiscalization():
     - fiscal_retry_count i fiscal_last_error per-receipt
     - Notifikacija superadminu za račune > 24h bez JIR-a
     """
+    from datetime import timedelta
+
+    from django.utils import timezone
+
     from pos.models import POSReceipt
     from pos.services import _attempt_fiscalization
-    from django.utils import timezone
-    from datetime import timedelta
 
     now = timezone.now()
 
@@ -153,7 +156,7 @@ def generate_missing_daily_reports():
     Generiraj POSDailyReport za zatvorene sesije koje ga nemaju.
     Pokriva slučaj kad signal nije pokrenut (restart servera, bug, itd.)
     """
-    from pos.models import POSSession, POSDailyReport
+    from pos.models import POSDailyReport, POSSession
 
     closed_sessions = POSSession.objects.filter(
         status__in=['closed', 'z_done']
@@ -178,9 +181,11 @@ def cleanup_zombie_sessions():
     Automatski zatvori sesije otvorene duže od 16 sati.
     Sprječava zombie sesije od zaboravljenih logout-ova.
     """
-    from pos.models import POSSession, POSDailyReport
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from pos.models import POSDailyReport, POSSession
 
     cutoff = timezone.now() - timedelta(hours=16)
     zombies = POSSession.objects.filter(
@@ -214,12 +219,14 @@ def nightly_owner_zreport(self):
     Svaku vecer u 23:55 — vlasnik dobije dnevni sazetak.
     Psiholoski: dopaminska ovisnost o poruci = 0% churn.
     """
-    from companies.models import Company
-    from pos.models import POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
+    import logging
+
     from django.db.models import Sum
     from django.utils import timezone
+
+    from companies.models import Company
     from core.whatsapp import send_text
-    import logging
+    from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession
 
     logger = logging.getLogger('pos.nightly')
     today = timezone.now().date()
@@ -307,9 +314,12 @@ def ai_analyze_prigovor(self, prigovor_id):
     AI analiza prigovora potrošača — kategorizacija, sentiment, prijedlog odgovora.
     Koristi Claude Haiku za brzu analizu na hrvatskom jeziku.
     """
-    import os, json
-    from pos.models import KnjigaPrigovora
+    import json
+    import os
+
     from django.utils import timezone
+
+    from pos.models import KnjigaPrigovora
 
     try:
         p = KnjigaPrigovora.objects.get(pk=prigovor_id)
@@ -487,9 +497,11 @@ def check_fiscal_deadline():
 
     Anti-spam: svaki tier se šalje samo jednom per receipt (prati se u fiscal_last_error).
     """
-    from pos.models import POSReceipt
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from pos.models import POSReceipt
 
     now = timezone.now()
 
@@ -649,8 +661,8 @@ def check_fiscal_deadline():
 @shared_task(bind=True, soft_time_limit=60)
 def archive_prigovor_pdf(self, prigovor_id):
     """Auto-archive prigovora u DocumentBlob kao PDF."""
-    from pos.models import KnjigaPrigovora
     from pos.complaint_views import archive_prigovor_to_blob
+    from pos.models import KnjigaPrigovora
 
     try:
         p = KnjigaPrigovora.objects.get(pk=prigovor_id)
@@ -672,8 +684,9 @@ def auto_escalate_complaints():
     Auto-eskalacija za prigovore koji su 3 dana do roka bez odgovora.
     Celery beat: svaki dan u 09:00.
     """
-    from pos.models import KnjigaPrigovora
     from django.utils import timezone
+
+    from pos.models import KnjigaPrigovora
 
     now = timezone.now().date()
     escalated = 0
@@ -711,10 +724,12 @@ def weekly_complaints_digest():
     Weekly digest email adminu — koliko novih prigovora, koliko čeka odgovor.
     Celery beat: ponedjeljak 08:00.
     """
-    from pos.models import KnjigaPrigovora
-    from companies.models import Company
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from companies.models import Company
+    from pos.models import KnjigaPrigovora
 
     week_ago = timezone.now().date() - timedelta(days=7)
     sent = 0
@@ -744,8 +759,8 @@ def weekly_complaints_digest():
         if not admin or not admin.user.email:
             continue
 
-        from django.core.mail import send_mail
         from django.conf import settings
+        from django.core.mail import send_mail
 
         subject = 'Knjiga boljitaka — tjedni pregled (%s)' % company.name
         body = (
@@ -782,6 +797,7 @@ def moderate_prigovor_content(self, prigovor_id):
     """
     import os
     import re
+
     from pos.models import KnjigaPrigovora
 
     try:

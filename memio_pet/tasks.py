@@ -4,6 +4,7 @@ memio_pet/tasks.py -- Celery periodic tasks
 trust_score_refresh: Svaka 24h recalculate Trust Score za sve breedere.
 """
 import logging
+
 from celery import shared_task
 
 logger = logging.getLogger("memio_pet")
@@ -20,6 +21,7 @@ def trust_score_refresh():
 
 import math
 
+
 def _haversine_km(lat1, lon1, lat2, lon2):
     R = 6371
     dlat = math.radians(lat2 - lat1)
@@ -31,8 +33,9 @@ def _haversine_km(lat1, lon1, lat2, lon2):
 @shared_task(name='memio_pet.notify_barf_breeders')
 def notify_barf_breeders(listing_id):
     """Notificiraj BARF partnere u radijusu o novoj ponudi."""
-    from memio_pet.models import RawFoodListing, BreederProfile
     from django.core.cache import cache
+
+    from memio_pet.models import BreederProfile, RawFoodListing
 
     try:
         listing = RawFoodListing.objects.get(pk=listing_id, status='available')

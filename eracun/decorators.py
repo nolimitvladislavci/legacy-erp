@@ -9,6 +9,7 @@ Ova zaštita nije opcijska — ona je arhitektonski zahtjev (Gemini, 2026-03-24)
 """
 import logging
 from functools import wraps
+
 from django.core.exceptions import PermissionDenied
 
 logger = logging.getLogger('eracun.security')

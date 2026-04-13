@@ -2,8 +2,7 @@
 QA Inžinjerski testovi — 07.04.2026.
 Blokovi A, B, C, D, E, F iz CC_TASK_QA_INZENJERSKI.md
 """
-from django.test import TestCase, Client
-
+from django.test import Client, TestCase
 
 # ════════════════════════════════════════════════════════════════
 # BLOK A — memio.pet REGISTRACIJA
@@ -85,6 +84,7 @@ class ProfilEdgeCaseTest(TestCase):
 class TriKeyTest(TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
+
         from accounts.trikey import TriKeyProfile
         self.user = User.objects.create_user('qa_trikey', 'tk_qa@test.hr', 'old_pw')
         self.profile = TriKeyProfile.objects.create(user=self.user)

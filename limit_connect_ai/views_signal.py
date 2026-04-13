@@ -5,9 +5,10 @@ Rate-limited: max 10 signala po korisniku/IP u 5 minuta.
 """
 import json
 import logging
+
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.core.cache import cache
 
 from limit_connect_ai.models_signal import FenixSignal
 

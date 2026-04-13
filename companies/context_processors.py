@@ -1,4 +1,5 @@
 from django.db import DatabaseError
+
 """
 companies/context_processors.py
 Injects sidebar_modules into every template context.
@@ -19,7 +20,9 @@ def sidebar_modules(request):
 
         from companies.models import CompanyModuleConfig
         from companies.module_registry import (
-            MODULES, CATEGORIES, get_quick_actions,
+            CATEGORIES,
+            MODULES,
+            get_quick_actions,
         )
 
         config = CompanyModuleConfig.objects.filter(company=company).first()
@@ -39,7 +42,7 @@ def sidebar_modules(request):
             enabled = [m['id'] for m in MODULES]
 
         # Resolve module URLs with i18n prefix
-        from django.urls import reverse, NoReverseMatch
+        from django.urls import NoReverseMatch, reverse
         for m in MODULES:
             url_name = m.get('url_name', '')
             if url_name:

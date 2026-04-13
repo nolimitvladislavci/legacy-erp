@@ -2,11 +2,12 @@
 limit_connect_ai/tasks_risk.py — Supplier Risk Scoring
 Analyses payment behavior from URA invoices to populate SupplierRiskAlert.
 """
-from celery import shared_task
-from decimal import Decimal
-from django.utils import timezone
-from django.db.models import Sum
 import logging
+from decimal import Decimal
+
+from celery import shared_task
+from django.db.models import Sum
+from django.utils import timezone
 
 logger = logging.getLogger('borg_fenix')
 
@@ -29,8 +30,8 @@ def scan_supplier_risk(self, company_id=None):
     """
     from companies.models import Company
     from invoicing.models import Invoice
-    from partners.models import Partner
     from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+    from partners.models import Partner
 
     if company_id:
         companies = Company.objects.filter(id=company_id)

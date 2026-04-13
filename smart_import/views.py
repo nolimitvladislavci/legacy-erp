@@ -1,4 +1,5 @@
 import json
+
 """smart_import/views.py -- Upload, staging, confirm with full CRUD.
    v2 - 2026-03-17: Problem report, better status API, retry endpoint.
 """
@@ -16,7 +17,7 @@ from django.views.decorators.http import require_POST
 from core.company_utils import get_user_company
 from inventory.models import GoodsReceipt, GoodsReceiptItem, InventoryItem
 from partners.models import Partner
-from smart_import.models import ImportBatch, ImportBatchItem, VendorItemMapping, ProblemReport
+from smart_import.models import ImportBatch, ImportBatchItem, ProblemReport, VendorItemMapping
 from smart_import.tasks import process_import_batch
 
 logger = logging.getLogger(__name__)
@@ -423,6 +424,7 @@ def confirm_view(request, pk):
 def manual_entry_view(request, pk):
     """Manual data entry for failed Smart Import batch -- fallback when AI fails."""
     from django.utils.translation import gettext as _
+
     from documents.models import ArhivaEntry
 
     company = get_user_company(request)
@@ -513,8 +515,9 @@ def manual_entry_view(request, pk):
 
 
 # -- WEBHOOK RAMPA (Push arhitektura za email racune) --
-from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
 from companies.models import Company
 
 
@@ -687,8 +690,9 @@ def review_dashboard(request):
     if not company:
         return redirect('smart_import:staging_upload')
 
-    from .models import StagingFileHeader
     import json
+
+    from .models import StagingFileHeader
 
     # Svi headeri za ovu tvrtku, sortirani: needs_review=True prvi
     headers = StagingFileHeader.objects.filter(
@@ -761,9 +765,11 @@ def review_approve(request):
     - Zamka 2: matematička validacija (osnovica + PDV = ukupno ±0.02)
     - Zamka 3: atomska provjera stanja (select_for_update + conflict guard)
     """
-    from .models import StagingFileHeader
     from decimal import Decimal, InvalidOperation
+
     from django.db import transaction
+
+    from .models import StagingFileHeader
 
     company = get_user_company(request)
     try:

@@ -7,10 +7,10 @@ Germany requires CII (Cross Industry Invoice) format, NOT UBL.
 XRechnung is the German CIUS (Core Invoice Usage Specification).
 ZUGFeRD 2.x embeds CII XML inside a PDF/A-3.
 """
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
-from datetime import date
 import logging
+import xml.etree.ElementTree as ET
+from datetime import date
+from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
 

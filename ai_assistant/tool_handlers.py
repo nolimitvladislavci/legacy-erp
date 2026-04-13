@@ -4,10 +4,11 @@ and returns a dict/list that will be JSON-serialized as tool_result.
 """
 import logging
 from datetime import date, timedelta
-from django.db.models import Sum, Count
-from django.utils import timezone
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
+from django.db.models import Count, Sum
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -258,8 +259,9 @@ def _get_tracking_status(params, user, company):
 
 def _analyze_inventory_value(params, user, company):
     """Sinteticki pregled skladista."""
+    from django.db.models import F, FloatField, Sum
+
     from inventory.models import InventoryItem
-    from django.db.models import Sum, F, FloatField
 
     qs = InventoryItem.objects.filter(company=company, is_active=True)
 
@@ -289,9 +291,10 @@ def _analyze_inventory_value(params, user, company):
 
 def _get_cashflow_summary(params, user, company):
     """AIR-GAPPED financijska sintetika. Nema pristupa IBAN-ovima."""
-    from finance.models import Transaction
+    from django.db.models import Count, Sum
     from django.utils import timezone
-    from django.db.models import Sum, Count
+
+    from finance.models import Transaction
 
     now = timezone.now()
     year = params.get("year") or now.year
@@ -323,8 +326,9 @@ def _get_cashflow_summary(params, user, company):
 
 def _get_pending_payments(params, user, company):
     """AIR-GAPPED pregled placanja na cekanju."""
-    from payments.models import Payment
     from django.db.models import Sum
+
+    from payments.models import Payment
 
     qs = Payment.objects.filter(company=company, status__in=['pending', 'processing'])
 
@@ -351,7 +355,8 @@ def _run_system_health_check(params, user, company):
     if not user.is_superuser:
         return {"error": "Samo superadmin moze pokretati health check."}
     """Provjera zdravlja svih servisa."""
-    import subprocess, shutil
+    import shutil
+    import subprocess
     results = {}
 
     # 1. Database
@@ -440,7 +445,7 @@ def _run_system_health_check(params, user, company):
 
 def _validate_pos_math(params, user, company):
     """Simulira POS racun u memoriji i validira matematiku."""
-    from decimal import Decimal, ROUND_HALF_UP
+    from decimal import ROUND_HALF_UP, Decimal
 
     items_data = params.get("items", [])
     amount_paid = Decimal(str(params.get("amount_paid", 0)))
@@ -598,8 +603,9 @@ def _audit_data_integrity(params, user, company):
 
     # 2. POS: Open sessions older than 24h
     try:
-        from pos.models import POSSession
         from django.utils import timezone
+
+        from pos.models import POSSession
         old_sessions = POSSession.objects.filter(
             status=POSSession.Status.OPEN,
             opened_at__lt=timezone.now() - timezone.timedelta(hours=24)
@@ -620,8 +626,9 @@ def _audit_data_integrity(params, user, company):
 
     # 4. Propter: OPEN periods from previous months
     try:
-        from propter.models import BillingPeriod
         from django.utils import timezone
+
+        from propter.models import BillingPeriod
         now = timezone.now()
         stale_periods = BillingPeriod.objects.filter(
             status=BillingPeriod.Status.OPEN
@@ -651,8 +658,9 @@ def _audit_data_integrity(params, user, company):
 
     # 7. Duplicate partners (same OIB)
     try:
-        from partners.models import Partner
         from django.db.models import Count
+
+        from partners.models import Partner
         dupes = Partner.objects.filter(company=company).values("oib").annotate(
             cnt=Count("id")
         ).filter(cnt__gt=1, oib__gt="")
@@ -795,8 +803,9 @@ def _explain_business_flow(params, user, company):
 
 def _build_timeentry_queryset(params, company):
     """Helper: gradi TimeEntry queryset iz parametara."""
-    from worktime.models import TimeEntry, WorkGroup
     from datetime import date
+
+    from worktime.models import TimeEntry, WorkGroup
 
     qs = TimeEntry.objects.filter(company=company)
 
@@ -850,7 +859,7 @@ def _build_timeentry_queryset(params, company):
 
 def _get_worktime_report(params, user, company):
     """Izvjestaj radnih sati s agregacijom."""
-    from django.db.models import Sum, Count
+    from django.db.models import Count, Sum
 
     qs = _build_timeentry_queryset(params, company)
 
@@ -919,9 +928,11 @@ def _get_worktime_report(params, user, company):
 
 def _preview_invoice_from_hours(params, user, company):
     """Suhi pregled racuna iz neobracunatih sati (dry run)."""
-    from worktime.models import Project
-    from django.db.models import Sum
     from decimal import Decimal
+
+    from django.db.models import Sum
+
+    from worktime.models import Project
 
     project_code = params.get("project_code", "")
     if not project_code:
@@ -1007,13 +1018,15 @@ def _preview_invoice_from_hours(params, user, company):
 
 def _create_invoice_from_hours(params, user, company):
     """Kreira racun iz neobracunatih sati i oznacava ih kao obracunate."""
-    from worktime.models import Project
-    from invoicing.models import Invoice, InvoiceItem
+    from datetime import timedelta
+    from decimal import Decimal
+
     from django.db import transaction
     from django.db.models import Sum
     from django.utils import timezone
-    from decimal import Decimal
-    from datetime import timedelta
+
+    from invoicing.models import Invoice, InvoiceItem
+    from worktime.models import Project
 
     project_code = params.get("project_code", "")
     if not project_code:
@@ -1131,9 +1144,10 @@ def _create_invoice_from_hours(params, user, company):
 def _get_fund_opportunities(params, user, company):
     """Dohvati relevantne EU fondove i HR poticaje. READ-ONLY, s 24h cacheom."""
     try:
-        from intelligence.models import FundOpportunity
         from django.core.cache import cache
         from django.utils import timezone as tz
+
+        from intelligence.models import FundOpportunity
         today = tz.now().date()
 
         tip = params.get('tip', 'sve')
@@ -1201,8 +1215,9 @@ def _get_fund_opportunities(params, user, company):
 def _get_livestock_status(params, user, company):
     """Status farme goveda za OPG. READ-ONLY -- nikad ne pise u bazu."""
     try:
-        from livestock.models import Livestock, HealthRecord, MilkRecord, CropPlan
         from django.db.models import Sum
+
+        from livestock.models import CropPlan, HealthRecord, Livestock, MilkRecord
         today = timezone.now().date()
         detalji = params.get('detalji', 'pregled')
 
@@ -1296,8 +1311,8 @@ def _create_futures_listing(params, user, company):
                 'pending_action_id': str(result.pending_action.id) if result.pending_action else None,
             }
         try:
-            from livestock.models import CropPlan
             from intelligence.services import create_futures_listing_from_crop
+            from livestock.models import CropPlan
             plan = CropPlan.objects.get(pk=params['crop_plan_id'], company=company)
             if params.get('cijena_eur_t'):
                 plan._override_price = params['cijena_eur_t']

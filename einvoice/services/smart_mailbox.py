@@ -1,7 +1,9 @@
 """Smart Mailbox — Rule-Based Auto-Classification (Phase 1)."""
 import logging
 from datetime import date
+
 from lxml import etree
+
 from einvoice.models import InboundInvoice, MessageStatus
 
 logger = logging.getLogger("propter.einvoice.mailbox")

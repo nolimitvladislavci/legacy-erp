@@ -2,10 +2,12 @@
 POS End-to-End Tests — pokriva cijeli POS workflow.
 """
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+
 from companies.models import Company
-from pos.models import POSTerminal, POSSession, POSReceipt, POSPaymentLine
+from pos.models import POSPaymentLine, POSReceipt, POSSession, POSTerminal
 
 User = get_user_model()
 

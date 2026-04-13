@@ -1,16 +1,18 @@
 """Eldercare Light views -- dashboard, residents, rooms, shifts, activities."""
 from datetime import date, timedelta
-from django.contrib.auth.decorators import login_required
+
 from django.contrib import messages
-from django.db.models import Count, Sum, Q
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
+from django.db.models import Count, Q, Sum
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
-from .models import Room, Resident, MonthlyCharge, StaffShift, Activity
-from django.db import IntegrityError, DatabaseError
+
+from .models import Activity, MonthlyCharge, Resident, Room, StaffShift
 
 
 def _company(request):

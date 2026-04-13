@@ -7,7 +7,6 @@ from decimal import Decimal, InvalidOperation
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-
 FIRMA_MAPA = {
     'kud': {
         'mdb': '/var/www/fina-connect/Korpa/KUD DUKAT VLADISLAVCI 2025/Storage.mdb',
@@ -121,8 +120,8 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('\nDONE — rezultat u /tmp/korpa_import_done.txt'))
 
     def _uvezi_partnere(self, company, mdb_path, execute):
-        from synesis.mdb_service import read_partners
         from partners.models import Partner
+        from synesis.mdb_service import read_partners
 
         mdb_p = read_partners(mdb_path)
         existing_oibs = set(
@@ -167,8 +166,8 @@ class Command(BaseCommand):
         return novi, skip
 
     def _uvezi_fakture(self, company, journal_path, execute):
-        from synesis.mdb_service import _mdb_export
         from documents.models import ArhivaEntry
+        from synesis.mdb_service import _mdb_export
 
         rows = _mdb_export(journal_path, 'Journal')
         if not rows:

@@ -5,10 +5,12 @@ check_sla: svakih 10 min provjerava kartice koje predugo stoje u statusu.
 archive_old_activity: mjesečno broji stare zapise (arhiva u v2).
 """
 import logging
+
 from celery import shared_task
-from borg_ops.business_hours import sla_breached, is_business_hour
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
+
+from borg_ops.business_hours import is_business_hour, sla_breached
 
 logger = logging.getLogger('borg.sla')
 
@@ -32,9 +34,10 @@ SLA_RULES = {
 @shared_task(name='borg_ops.check_sla')
 def check_sla():
     """Celery beat: svakih 10 min — SLA breach detekcija."""
-    from borg_ops.models import StatusTimestamp
-    from django.contrib.contenttypes.models import ContentType
     from django.apps import apps
+    from django.contrib.contenttypes.models import ContentType
+
+    from borg_ops.models import StatusTimestamp
 
     now = timezone.now()
     breaches = []
@@ -107,6 +110,7 @@ Detektira: orphan stupci u DB, stupci u modelu bez DB, tip mismatch
 Alarmira: WhatsApp + log
 """
 import logging
+
 from celery import shared_task
 from django.apps import apps
 from django.db import connection
@@ -302,9 +306,9 @@ def morning_briefing():
     Celery beat: svaki dan 07:45.
     Za svaki tenant s aktivnim BorgBriefingConfig salje WhatsApp briefing.
     """
-    from borg_ops.models import BorgBriefingConfig
-    from borg_ops.briefing import collect_briefing_items, format_briefing_message
     from borg_ops.audit_helpers import log_borg_audit
+    from borg_ops.briefing import collect_briefing_items, format_briefing_message
+    from borg_ops.models import BorgBriefingConfig
 
     configs = BorgBriefingConfig.objects.filter(enabled=True).select_related('company')
     sent = 0
@@ -373,8 +377,9 @@ def aggregate_signals():
     Skenira invoices/procurement za opted-in tenante,
     emitira apstraktne signale, detektira trendove.
     """
-    from borg_ops.models import BorgSignal, BorgCollabConfig, BorgInsightAlert
     from django.db.models import F
+
+    from borg_ops.models import BorgCollabConfig, BorgInsightAlert, BorgSignal
 
     configs = BorgCollabConfig.objects.filter(enabled=True).select_related('company')
     signals_emitted = 0
@@ -388,8 +393,9 @@ def aggregate_signals():
 
         # Analyze recent procurement/invoices for price trends
         try:
-            from invoicing.models import Invoice
             from datetime import timedelta
+
+            from invoicing.models import Invoice
 
             recent = timezone.now() - timedelta(days=30)
             old = timezone.now() - timedelta(days=90)
@@ -463,8 +469,8 @@ def aggregate_signals():
 
 def _notify_collab_insight(alert, region):
     """Notify opted-in companies about a collaborative insight."""
-    from borg_ops.models import BorgCollabConfig
     from borg_ops.audit_helpers import log_borg_audit
+    from borg_ops.models import BorgCollabConfig
 
     configs = BorgCollabConfig.objects.filter(
         enabled=True, company__region_code=region
@@ -495,8 +501,10 @@ def check_domain_expiry():
     """
     import logging
     from datetime import date
-    from borg_ops.models import DomainRegistry
+
     from django.core.mail import send_mail
+
+    from borg_ops.models import DomainRegistry
 
     logger = logging.getLogger('borg_ops.domain_check')
     today = date.today()

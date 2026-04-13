@@ -1,7 +1,6 @@
 from django.urls import path
 
-from . import views
-from . import propter_views
+from . import propter_views, views
 
 app_name = 'registration'
 

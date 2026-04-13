@@ -13,12 +13,13 @@ Flow:
 """
 import logging
 from datetime import date, timedelta
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
+
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from core.models import InspectionToken
-from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +95,9 @@ def _gather_porezna(company, date_from, date_to):
 
     # Fakture u periodu
     try:
+        from django.db.models import Count, Sum
+
         from invoicing.models import Invoice
-        from django.db.models import Sum, Count
 
         invoices = Invoice.objects.filter(
             company=company,
@@ -124,7 +126,7 @@ def _gather_porezna(company, date_from, date_to):
 
     # Konto bilanca
     try:
-        from konto.services_file import get_profit_loss, get_balance_sheet
+        from konto.services_file import get_balance_sheet, get_profit_loss
         data['pnl'] = get_profit_loss(company, date_from, date_to)
         data['balance_sheet'] = get_balance_sheet(company, date_to)
     except ImportError as e:
@@ -148,7 +150,7 @@ def _gather_porezna(company, date_from, date_to):
 
     # Saldakonti
     try:
-        from konto.services_file import get_open_receivables, get_open_payables
+        from konto.services_file import get_open_payables, get_open_receivables
         data['receivables'] = get_open_receivables(company)[:15]
         data['payables'] = get_open_payables(company)[:15]
     except ImportError:
@@ -164,8 +166,9 @@ def _gather_pos(company, date_from, date_to):
     data = {}
 
     try:
-        from pos.models import POSSession, POSReceipt, POSPaymentLine, POSTerminal
-        from django.db.models import Sum, Count
+        from django.db.models import Count, Sum
+
+        from pos.models import POSPaymentLine, POSReceipt, POSSession, POSTerminal
 
         # Terminali
         terminals = POSTerminal.objects.filter(company=company, is_active=True)
@@ -242,8 +245,9 @@ def _gather_radna(company, date_from, date_to):
     data = {}
 
     try:
-        from worktime.models import TimeEntry, EmployeeProfile
         from django.db.models import Sum
+
+        from worktime.models import EmployeeProfile, TimeEntry
 
         # Zaposlenici
         profiles = EmployeeProfile.objects.filter(company=company)
@@ -325,7 +329,7 @@ def _gather_radna(company, date_from, date_to):
 def _gather_livestock(company, scope):
     data = {}
     try:
-        from livestock.models import Animal, HealthRecord, Field
+        from livestock.models import Animal, Field, HealthRecord
 
         animals = Animal.objects.filter(company=company)
         data['animals_count'] = animals.count()
@@ -424,7 +428,8 @@ def panic_button(request):
 
             # Spremi fotografije privremeno
             if request.FILES.get('badge_photo'):
-                import os, tempfile
+                import os
+                import tempfile
                 f = request.FILES['badge_photo']
                 tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp')
                 for chunk in f.chunks():
@@ -433,7 +438,8 @@ def panic_button(request):
                 request.session['insp_badge_photo_path'] = tmp.name
 
             if request.FILES.get('warrant_photo'):
-                import os, tempfile
+                import os
+                import tempfile
                 f = request.FILES['warrant_photo']
                 tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg', dir='/tmp')
                 for chunk in f.chunks():
@@ -512,6 +518,7 @@ def panic_button(request):
 
             # Spremi slike znacke/naloga
             import os
+
             from django.core.files import File
             bp = request.session.pop('insp_badge_photo_path', '')
             if bp and os.path.exists(bp):

@@ -3,10 +3,10 @@ Tests for SAF-T HR Generator.
 """
 from datetime import date
 from decimal import Decimal
-from lxml import etree
 
 from django.test import TestCase
 from django.utils import timezone
+from lxml import etree
 
 
 class SAFTGeneratorTest(TestCase):
@@ -63,8 +63,8 @@ class SAFTGeneratorTest(TestCase):
 
     def test_customers_from_sales_invoices(self):
         """Customers populated from partners with sales invoices."""
-        from partners.models import Partner
         from invoicing.models import Invoice
+        from partners.models import Partner
         partner = Partner.objects.create(
             company=self.company, name='Kupac d.o.o.', oib='99988877766',
             buyer_type='b2b_vat',
@@ -84,7 +84,7 @@ class SAFTGeneratorTest(TestCase):
 
     def test_general_ledger_entries(self):
         """GL entries populated from JournalEntry + LedgerLine."""
-        from konto.models import KontoAccount, JournalEntry, LedgerLine
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
         acc1 = KontoAccount.objects.create(
             company=self.company, code='1200', name='Kupci', account_type='asset')
         acc2 = KontoAccount.objects.create(

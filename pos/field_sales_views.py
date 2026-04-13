@@ -5,17 +5,17 @@ Utovar → Ruta → Prodaja (POS) → Povratnica → Z-report
 import logging
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
 from inventory.models import InventoryItem, StockMovement
-from pos.models import POSTerminal, POSSession
-from django.db import DatabaseError
+from pos.models import POSSession, POSTerminal
 
 logger = logging.getLogger('pos.field_sales')
 
@@ -90,8 +90,8 @@ def field_start(request, terminal_id):
 
         # Auto clock-in cashier
         try:
-            from pos.worktime_bridge import cashier_clock_in
             from pos.models import POSCashier
+            from pos.worktime_bridge import cashier_clock_in
             cashier = POSCashier.objects.filter(user=request.user, company=company).first()
             if cashier:
                 cashier_clock_in(cashier)

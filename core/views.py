@@ -1,12 +1,13 @@
 import logging
+
 logger = logging.getLogger(__name__)
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.db import DatabaseError, IntegrityError
-from core.models import BookingSignature
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import redirect, render, get_object_or_404
+from django.db import DatabaseError, IntegrityError
+from django.shortcuts import get_object_or_404, redirect, render
 
+from core.models import BookingSignature
 from permissions.decorators import require_role
 
 
@@ -28,8 +29,9 @@ def _get_admin_companies(request):
 
 def _time_periods():
     """Common time period calculations used across dashboards."""
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
     today = timezone.now().date()
     return {
         'today': today,
@@ -75,8 +77,9 @@ def dashboard_router(request):
     if not profile.company:
         try:
             import uuid
-            from django.utils import timezone
             from datetime import timedelta
+
+            from django.utils import timezone
             co_name = (
                 request.user.get_full_name() or request.user.username
             )
@@ -143,6 +146,7 @@ def dashboard_router(request):
         return redirect('worker_dashboard')
 
 from django.views.decorators.csrf import ensure_csrf_cookie
+
 
 @ensure_csrf_cookie
 def login_view(request):
@@ -413,7 +417,7 @@ def superadmin_dashboard(request):
             context['promo_codes'] = []
         # Platform owner
         context['platform_owner'] = Company.objects.filter(is_platform_owner=True).first()
-    except DatabaseError as e:
+    except DatabaseError:
         context['pending_registrations'] = 0
         context['recent_registrations'] = []
         context['company_subs'] = []
@@ -445,8 +449,9 @@ def superadmin_dashboard(request):
         context['discrepancy_count'] = 0
         context['discrepancy_gap_total'] = 0
     try:
-        from superadmin_ai.models import PendingAIAction
         from django.db.models import Count as _Count
+
+        from superadmin_ai.models import PendingAIAction
         context['ai_pending_count'] = PendingAIAction.objects.filter(status='pending').count()
         context['ai_pending_by_module'] = list(
             PendingAIAction.objects.filter(status='pending')
@@ -466,11 +471,12 @@ def superadmin_dashboard(request):
 @login_required
 def umbrella_dashboard(request):
     """Enhanced umbrella dashboard - manage child companies, create new ones, view stats."""
-    from companies.models import Company
-    from core.company_utils import get_user_company
     from django.contrib.auth import get_user_model
     from django.db.models import Sum
     from django.utils import timezone
+
+    from companies.models import Company
+    from core.company_utils import get_user_company
     User = get_user_model()
 
     company = get_user_company(request)
@@ -760,6 +766,7 @@ def superadmin_edit_user(request, user_id):
         return HttpResponseForbidden()
 
     from django.contrib.auth import get_user_model
+
     from accounts.models import UserProfile
     from companies.models import Company
     User = get_user_model()
@@ -1014,9 +1021,11 @@ def company_dashboard(request):
     revenue_data   = []
     offers_data    = []
     try:
-        from invoicing.models import Invoice as _Inv
-        from django.db.models import Sum as _Sum2
         import datetime as _dt2
+
+        from django.db.models import Sum as _Sum2
+
+        from invoicing.models import Invoice as _Inv
         _today2 = timezone.now().date()
         for _i in range(5, -1, -1):
             _d = (_today2.replace(day=1) - _dt2.timedelta(days=_i*28)).replace(day=1)
@@ -1265,7 +1274,7 @@ def company_dashboard(request):
         'recent_otkupni': [],
     }
     try:
-        from documents.models import Otpremnica, OtkupniBlok
+        from documents.models import OtkupniBlok, Otpremnica
         grosmarkt_stats['otpremnice_count'] = Otpremnica.objects.count()
         grosmarkt_stats['otkupni_count']    = OtkupniBlok.objects.count()
         grosmarkt_stats['recent_otpremnice'] = list(Otpremnica.objects.order_by('-created_at')[:5])
@@ -1275,8 +1284,9 @@ def company_dashboard(request):
     context['grosmarkt_stats'] = grosmarkt_stats
     # Bank reconciliation stats
     try:
-        from konto.models import BankTransaction
         from django.db.models import Sum
+
+        from konto.models import BankTransaction
         _unm = BankTransaction.objects.filter(company=company, status='unmatched', transaction_type='inflow')
         context['unmatched_bank_count'] = _unm.count()
         context['unmatched_bank_amount'] = _unm.aggregate(t=Sum('amount'))['t'] or 0
@@ -1294,7 +1304,7 @@ def company_dashboard(request):
         'recent_otkupni': [],
     }
     try:
-        from documents.models import Otpremnica, OtkupniBlok
+        from documents.models import OtkupniBlok, Otpremnica
         grosmarkt_stats['otpremnice_count'] = Otpremnica.objects.count()
         grosmarkt_stats['otkupni_count']    = OtkupniBlok.objects.count()
         grosmarkt_stats['recent_otpremnice'] = list(Otpremnica.objects.order_by('-created_at')[:5])
@@ -2021,7 +2031,7 @@ def superadmin_create_promo(request):
                 is_active=True,
             )
             messages.success(request, _('Promo kod kreiran.'))
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect('superadmin_dashboard')
@@ -2104,8 +2114,9 @@ def control_tower_view(request):
         pass
 
     # ── System info ──
-    import django
     import platform
+
+    import django
     system_info = {
         'django_version': django.get_version(),
         'python_version': platform.python_version(),
@@ -2157,8 +2168,9 @@ def control_tower_view(request):
     drill_down = {}
     if company:
         try:
-            from companies.module_registry import MODULES
             from django.apps import apps
+
+            from companies.module_registry import MODULES
             for m in MODULES:
                 cm = m.get('counter_model')
                 if cm:
@@ -2204,9 +2216,9 @@ def control_tower_api(request):
     Returns live platform metrics as JSON — polled every 15s by frontend.
     Uses ORM aggregates to eliminate N+1 queries.
     """
-    from django.db.models import Count, Sum, Q
-    from django.utils import timezone
+    from django.db.models import Count, Q, Sum
     from django.http import JsonResponse
+    from django.utils import timezone
 
     now = timezone.now()
     today = now.date()
@@ -2305,7 +2317,7 @@ def control_tower_api(request):
 
     # ── Inventory — Blind Count / Quarantine ─────────────────────────────
     try:
-        from inventory.models import StockBatch, InventoryCountLog
+        from inventory.models import InventoryCountLog, StockBatch
         inv_agg2 = StockBatch.objects.aggregate(
             quarantined=Count('id', filter=Q(quarantine_status='quarantine')),
             total_batches=Count('id'),
@@ -2339,7 +2351,7 @@ def control_tower_api(request):
 
     # ── Webshop ──────────────────────────────────────────────────────────
     try:
-        from webshop.models import Product, Order
+        from webshop.models import Order, Product
         ws_agg = Product.objects.aggregate(
             total=Count('id'),
             active=Count('id', filter=Q(is_active=True)),
@@ -2394,10 +2406,11 @@ def control_tower_api(request):
 
     # ── Financial Radar (V3) ─────────────────────────────────────────────
     try:
-        from konto.models import BankAccount
-        from invoicing.models import Invoice
-        from finance.bank_parsers import get_partial_payment_discrepancies
         import datetime as _dt
+
+        from finance.bank_parsers import get_partial_payment_discrepancies
+        from invoicing.models import Invoice
+        from konto.models import BankAccount
 
         _co = None
         try:
@@ -2480,15 +2493,16 @@ def control_tower_api(request):
             ).count(),
             'unassigned': open_qs.filter(assigned_to__isnull=True).count(),
         }
-    except DatabaseError as e:
+    except DatabaseError:
         data['helpdesk'] = {'open ': 0, 'urgent': 0, 'overdue': 0, 'resolved_today': 0, 'unassigned': 0}
 
     data['timestamp'] = now.isoformat()
 
     # ── Arhiva / AI Inbox ────────────────────────────────────────────────
     try:
-        from documents.models import ArhivaEntry
         from django.db.models import Sum as _Sum
+
+        from documents.models import ArhivaEntry
         arhiva_total = ArhivaEntry.objects.count()
         ai_pending = ArhivaEntry.objects.filter(is_booked=False).exclude(
             ai_proposal__isnull=True).exclude(ai_proposal={}).count()
@@ -2524,7 +2538,7 @@ def smart_home(request):
     - authenticated users → role-appropriate dashboard
     - anonymous → login page
     """
-    from django.shortcuts import render, redirect
+    from django.shortcuts import redirect, render
 
     # Public website for viskovic-group.de
     host = request.get_host().split(':')[0].lower()
@@ -2577,9 +2591,10 @@ def audit_package(request):
     Sadrži: artikli, POS izvještaji, bonovi, prigovori, inventure, fiskalni logovi.
     GET ?from=2025-01-01&to=2025-12-31
     """
+    from datetime import date, datetime
+
     from core.company_utils import get_user_company
     from core.streaming_zip import build_audit_package
-    from datetime import date, datetime
 
     company = get_user_company(request)
     if not company:
@@ -2601,15 +2616,15 @@ def audit_package(request):
 # ─── COCKPIT & TIM CHAT — izvučeno u core/cockpit_views.py ───────────────────
 # Svi cockpit viewovi su u core/cockpit_views.py.
 # Ovdje su samo re-exporti radi kompatibilnosti s core/urls.py.
-from core.cockpit_views import (   # noqa: E402, F401
-    ivan_cockpit,
+from core.cockpit_views import (  # noqa: E402, F401
     cockpit_gemini_task,
-    cockpit_upload_photo,
     cockpit_photos,
     cockpit_send_whatsapp,
+    cockpit_upload_photo,
+    ivan_cockpit,
+    partner_signup_api,
     tim_chat,
     tim_chat_send,
-    partner_signup_api,
 )
 
 
@@ -2692,9 +2707,10 @@ def cross_company_dashboard(request):
         messages.error(request, _('Samo superadmin.'))
         return redirect('dashboard')
 
+    from django.db.models import Count, F, Sum
+
     from invoicing.models import Invoice
     from partners.models import Partner
-    from django.db.models import Sum, Count, F
 
     # Unpaid invoices across ALL companies
     unpaid = Invoice.objects.filter(
@@ -2794,6 +2810,7 @@ def cross_company_dashboard(request):
     # CSV export
     if request.GET.get('export') == 'csv':
         import csv
+
         from django.http import HttpResponse as HR
         response = HR(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="cross_company_debt.csv"'
@@ -2838,8 +2855,9 @@ def tc_consent_status(request):
         messages.error(request, _('Samo superadmin.'))
         return redirect('dashboard')
 
-    from companies.models import Company
     from django.contrib.auth import get_user_model
+
+    from companies.models import Company
     User = get_user_model()
 
     signed = Company.objects.filter(has_signed_tc_consent=True).order_by('-tc_consent_signed_at')
@@ -2872,9 +2890,10 @@ def tc_consent_remind(request):
     if not request.user.is_superuser or request.method != 'POST':
         return redirect('tc_consent_status')
 
-    from companies.models import Company
     from django.contrib.auth import get_user_model
     from django.core.mail import send_mail
+
+    from companies.models import Company
     User = get_user_model()
 
     unsigned = Company.objects.filter(has_signed_tc_consent=False)

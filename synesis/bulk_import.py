@@ -2,18 +2,25 @@
 synesis/bulk_import.py — Bulk import svih Synesis MDB baza u LIMIT Connect.
 Pokreni: venv/bin/python synesis/bulk_import.py
 """
-import os, sys, glob, django, time
+import glob
+import os
+import sys
+import time
+
+import django
+
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
-from companies.models import Company
-from synesis.full_import import full_import
-from konto.models import LedgerLine, JournalEntry
-from django.db.models import Sum
-
 # Disable triggers for speed
 from django.db import connection
+from django.db.models import Sum
+
+from companies.models import Company
+from konto.models import JournalEntry, LedgerLine
+from synesis.full_import import full_import
+
 with connection.cursor() as c:
     c.execute("ALTER TABLE konto_ledgerline DISABLE TRIGGER trg_check_journal_balance")
     c.execute("ALTER TABLE konto_journalentry DISABLE TRIGGER trg_period_lock_journal")

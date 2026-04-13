@@ -3,10 +3,11 @@ CroXML Verify — javna stranica za provjeru potpisa GovExport XML-ova.
 Inspektor uploada XML → sustav provjerava kriptografski potpis → zelena/crvena.
 BEZ AUTENTIFIKACIJE — javno dostupno.
 """
+import hashlib
+
+from django.db import DatabaseError
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-import hashlib
-from django.db import DatabaseError
 
 
 # CSRF exempt: public booking endpoint — uses BookingSignature

@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import TaxFormType, TaxSubmission, TaxCalendar
+
+from .models import TaxCalendar, TaxFormType, TaxSubmission
+
 
 @admin.register(TaxFormType)
 class TaxFormTypeAdmin(admin.ModelAdmin):

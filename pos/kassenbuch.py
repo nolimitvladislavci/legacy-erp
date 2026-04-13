@@ -16,7 +16,7 @@ from decimal import Decimal
 
 from django.db.models import Sum
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 
 def generate_kassenbuch(company, date_from=None, date_to=None):
@@ -26,7 +26,7 @@ def generate_kassenbuch(company, date_from=None, date_to=None):
     Svaki red = jedan dan. Stupci:
     Datum | Pocetno stanje | Priljevi (gotovina) | Odljevi | Polozi | Podizanja | Zavrsno stanje
     """
-    from pos.models import POSSession, POSReceipt, POSPaymentLine
+    from pos.models import POSPaymentLine, POSReceipt, POSSession
 
     if not date_from:
         date_from = date.today().replace(day=1)

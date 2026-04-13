@@ -1,8 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from . import views
-from . import views_arhiva
+from . import views, views_arhiva
 
 router = DefaultRouter()
 router.register(r"api", views.DocumentViewSet, basename="document")

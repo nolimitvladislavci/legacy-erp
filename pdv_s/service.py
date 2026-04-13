@@ -2,11 +2,11 @@
 PDV-S generator — izracun iz faktura + XML export.
 """
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
-from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
-from django.db import DatabaseError
+from decimal import ROUND_HALF_UP, Decimal
+from xml.dom import minidom
 
+from django.db import DatabaseError
 
 PDV_NS = 'http://e-porezna.porezna-uprava.hr/sheme/zahtjevi/PDV-S/v2-0'
 
@@ -166,6 +166,7 @@ def generate_pdv_s_from_tax_period(company, year, month, user=None):
     Returns PDVSReport instance.
     """
     from django.db import models as dm
+
     from invoicing.models import Invoice
     from pdv_s.models import PDVSReport
 

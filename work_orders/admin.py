@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import WorkOrder, WorkOrderItem, VehicleCard, ClientCard
+
+from .models import ClientCard, VehicleCard, WorkOrder, WorkOrderItem
 
 
 class WorkOrderItemInline(admin.TabularInline):

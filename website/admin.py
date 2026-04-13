@@ -124,12 +124,13 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     list_display = ['company_name', 'founded_year', 'email']
     # Kako bismo osigurali da uvijek postoji samo jedan unos
     def has_add_permission(self, request):
-        if self.model.objects.count() >= 1:
+        if self.model.objects.exists():
             return False
         return super().has_add_permission(request)
 
 
 from .models import GrosmarktAnfrage
+
 
 @admin.register(GrosmarktAnfrage)
 class GrosmarktAnfrageAdmin(admin.ModelAdmin):
@@ -145,7 +146,8 @@ class GrosmarktAnfrageAdmin(admin.ModelAdmin):
     ]
     ordering = ['-created_at']
 
-from .models import KorpasTermin, KorpasRezervacija, NoLimitPartner
+from .models import KorpasRezervacija, KorpasTermin, NoLimitPartner
+
 
 @admin.register(KorpasTermin)
 class KorpasTerminAdmin(admin.ModelAdmin):

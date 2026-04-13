@@ -2,8 +2,9 @@
 Company Isolation Tests — firma A ne smije vidjeti podatke firme B.
 Pokretanje: python manage.py test core.tests_isolation --verbosity=2
 """
-from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.test import Client, TestCase
+
 from accounts.models import UserProfile
 
 
@@ -22,9 +23,11 @@ def _make_user(company, username):
 
 class InvoiceIsolationTest(TestCase):
     def setUp(self):
-        from invoicing.models import Invoice
         import uuid
+
         from django.utils import timezone
+
+        from invoicing.models import Invoice
         self.co_a = _make_company('10000000001')
         self.co_b = _make_company('10000000002')
         self.user_b = _make_user(self.co_b, 'inv_user_b')
@@ -44,8 +47,9 @@ class InvoiceIsolationTest(TestCase):
 
 class PartnerIsolationTest(TestCase):
     def setUp(self):
-        from partners.models import Partner
         import uuid
+
+        from partners.models import Partner
         self.co_a = _make_company('20000000001')
         self.co_b = _make_company('20000000002')
         self.user_b = _make_user(self.co_b, 'par_user_b')
@@ -84,8 +88,9 @@ class ProjectIsolationTest(TestCase):
 
 class DocumentIsolationTest(TestCase):
     def setUp(self):
-        from documents.models import Document
         from django.utils import timezone
+
+        from documents.models import Document
         self.co_a = _make_company('40000000001')
         self.co_b = _make_company('40000000002')
         self.user_b = _make_user(self.co_b, 'doc_user_b')
@@ -123,8 +128,9 @@ class POSIsolationTest(TestCase):
 
 class InventoryIsolationTest(TestCase):
     def setUp(self):
-        from inventory.models import InventoryItem
         from decimal import Decimal
+
+        from inventory.models import InventoryItem
         self.co_a = _make_company('60000000001')
         self.co_b = _make_company('60000000002')
         self.user_b = _make_user(self.co_b, 'inv2_user_b')

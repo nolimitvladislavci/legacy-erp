@@ -10,6 +10,7 @@ Graduated Autonomy:
 - NIKAD full_auto za financijske/pravne akcije
 """
 import logging
+
 from django.utils import timezone
 
 logger = logging.getLogger('borg.trust')

@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 """
 Register DejaVu Sans fonts for xhtml2pdf PDF generation.
@@ -35,8 +36,8 @@ def register_pdf_fonts():
 
     # 1. Register fonts with reportlab
     from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.pdfbase.pdfmetrics import registerFontFamily
+    from reportlab.pdfbase.ttfonts import TTFont
 
     try:
         pdfmetrics.registerFont(TTFont('DejaVuSans', regular))

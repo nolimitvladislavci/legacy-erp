@@ -1,11 +1,13 @@
-from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
-from decimal import Decimal
 import datetime
-from companies.models import Company
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+
 from accounts.models import UserProfile
+from companies.models import Company
 from registration.models import CompanySubscription
-from worktime.models import TimeEntry, EmployeeProfile, Project
+from worktime.models import EmployeeProfile, Project, TimeEntry
 
 User = get_user_model()
 
@@ -232,6 +234,7 @@ class ShortShiftAndBreakComplianceTests(TestCase):
 
 
 from django.test import override_settings
+
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class PayrollViewTests(TestCase):

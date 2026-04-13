@@ -1,19 +1,20 @@
 """Propter views."""
 import json
 from decimal import Decimal
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.utils import timezone
-from django.contrib import messages
-from django.utils.translation import gettext as _
 
-from django.db import models as db_models
-from .models import BillingPeriod, Otpremnica, PropterConfig, EkoStats
-from .services.aggregate import close_period, aggregate_to_eracun
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
+from django.db import models as db_models
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from .models import BillingPeriod, EkoStats, Otpremnica, PropterConfig
+from .services.aggregate import aggregate_to_eracun, close_period
 
 
 def _company(request):
@@ -387,8 +388,8 @@ def esg_pdf(request, year=None):
     Uses WeasyPrint. URL: /propter/eko/pdf/<year>/
     """
     import weasyprint
-    from django.template.loader import render_to_string
     from django.http import HttpResponse
+    from django.template.loader import render_to_string
 
     company = _company(request)
     now = timezone.now()
@@ -528,9 +529,10 @@ def fenix_inbox(request):
         _msg.error(request, 'Nema tvrtke.')
         return redirect('/dashboard/')
 
-    from smart_import.models import FenixInboxItem
     from django.core.paginator import Paginator
     from django.db.models import Sum
+
+    from smart_import.models import FenixInboxItem
 
     status_f = request.GET.get('status', '')
     tip_f = request.GET.get('tip', '')

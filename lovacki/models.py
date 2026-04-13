@@ -3,8 +3,9 @@ lovacki/models.py — Lovački modul za evidenciju divljači.
 Zakon o lovstvu (NN 99/2018): obvezna evidencija odstrjela.
 CITES: međunarodni certifikat za zaštićene vrste.
 """
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 from core.managers import CompanyManager
 
 

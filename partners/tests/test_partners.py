@@ -5,6 +5,7 @@ Pokriva: Partner model logika, is_complete, missing_fields, update_balance,
 OIB/VAT logika, unique_together, CompanyManager scope.
 """
 from decimal import Decimal
+
 from django.test import TestCase
 
 from companies.models import Company

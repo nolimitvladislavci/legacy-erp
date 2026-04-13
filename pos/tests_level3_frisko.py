@@ -29,7 +29,6 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-
 # ════════════════════════════════════════════════════════════════
 # BASE SETUP — Uvijek Friško fixture
 # ════════════════════════════════════════════════════════════════
@@ -42,8 +41,9 @@ class FriskoTestBase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from companies.models import Company, TaxRate
         import uuid
+
+        from companies.models import Company, TaxRate
 
         # Kompanija — Uvijek Friško (OIB max 50 chars, unique)
         suffix = uuid.uuid4().hex[:6]
@@ -79,7 +79,7 @@ class FriskoTestBase(TestCase):
 
     def setUp(self):
         from inventory.models import InventoryItem
-        from pos.models import POSTerminal, POSCashier
+        from pos.models import POSCashier, POSTerminal
 
         # Terminal (po testu jer unique_together = company+terminal_code)
         self.terminal = POSTerminal.objects.create(
@@ -152,8 +152,9 @@ class TestPOSTerminal(FriskoTestBase):
         self.assertTrue(self.terminal.is_active)
 
     def test_terminal_unique_code_per_company(self):
-        from pos.models import POSTerminal
         from django.db import IntegrityError
+
+        from pos.models import POSTerminal
         with self.assertRaises(IntegrityError):
             POSTerminal.objects.create(
                 company=self.company,
@@ -244,14 +245,14 @@ class TestPOSSession(FriskoTestBase):
         self.assertIsNone(session.closed_at)
 
     def test_session_number_increments(self):
-        from pos.services import open_session, close_session
+        from pos.services import close_session, open_session
         s1 = open_session(self.terminal, self.user, Decimal("0"))
         close_session(s1, Decimal("0"))
         s2 = open_session(self.terminal, self.user, Decimal("0"))
         self.assertEqual(s2.session_number, s1.session_number + 1)
 
     def test_close_session(self):
-        from pos.services import open_session, close_session
+        from pos.services import close_session, open_session
         session = open_session(self.terminal, self.user, Decimal("50"))
         result = close_session(session, Decimal("48"))
         self.assertTrue(result)
@@ -261,8 +262,8 @@ class TestPOSSession(FriskoTestBase):
         self.assertIsNotNone(session.closed_at)
 
     def test_cannot_close_already_closed_session(self):
-        from pos.services import open_session, close_session
         from core.exceptions import SessionError
+        from pos.services import close_session, open_session
         session = open_session(self.terminal, self.user, Decimal("0"))
         close_session(session, Decimal("0"))
         with self.assertRaises(SessionError):
@@ -277,7 +278,7 @@ class TestPOSReceipt(FriskoTestBase):
 
     def setUp(self):
         super().setUp()
-        from pos.services import open_session, create_receipt
+        from pos.services import create_receipt, open_session
         self.session = open_session(self.terminal, self.user, Decimal("200"))
         self.receipt = create_receipt(self.session)
 
@@ -313,8 +314,9 @@ class TestPOSReceipt(FriskoTestBase):
         self.assertEqual(self.receipt.total, expected_total)
 
     def test_unique_receipt_number_per_session(self):
-        from pos.models import POSReceipt
         from django.db import IntegrityError
+
+        from pos.models import POSReceipt
         with self.assertRaises(IntegrityError):
             POSReceipt.objects.create(
                 session=self.session,
@@ -330,7 +332,7 @@ class TestPOSReceiptItemSave(FriskoTestBase):
 
     def setUp(self):
         super().setUp()
-        from pos.services import open_session, create_receipt
+        from pos.services import create_receipt, open_session
         session = open_session(self.terminal, self.user, Decimal("0"))
         self.receipt = create_receipt(session)
 
@@ -468,14 +470,14 @@ class TestDeductInventory(FriskoTestBase):
 
     def setUp(self):
         super().setUp()
-        from pos.services import open_session, create_receipt
+        from pos.services import create_receipt, open_session
         self.session = open_session(self.terminal, self.user, Decimal("0"))
         self.receipt = create_receipt(self.session)
 
     def test_deduct_inventory_creates_stock_movement(self):
+        from inventory.models import StockMovement
         from pos.models import POSReceiptItem
         from pos.services import _deduct_inventory
-        from inventory.models import StockMovement
 
         POSReceiptItem.objects.create(
             receipt=self.receipt,
@@ -510,9 +512,9 @@ class TestDeductInventory(FriskoTestBase):
 
     def test_item_without_inventory_link_skipped(self):
         """Stavka bez inventory_item (custom opis) ne kreira StockMovement."""
+        from inventory.models import StockMovement
         from pos.models import POSReceiptItem
         from pos.services import _deduct_inventory
-        from inventory.models import StockMovement
 
         POSReceiptItem.objects.create(
             receipt=self.receipt,
@@ -559,8 +561,9 @@ class TestDeductInventory(FriskoTestBase):
 class TestGoodsReceipt(FriskoTestBase):
 
     def test_confirm_goods_receipt_increases_stock(self):
-        from inventory.models import GoodsReceipt, GoodsReceiptItem
         import datetime
+
+        from inventory.models import GoodsReceipt, GoodsReceiptItem
 
         before = self.kruh.quantity
 
@@ -595,8 +598,9 @@ class TestGoodsReceipt(FriskoTestBase):
 
     def test_goods_receipt_item_calculate(self):
         """GoodsReceiptItem.calculate() — kalkulacija marže i MPC."""
-        from inventory.models import GoodsReceipt, GoodsReceiptItem
         import datetime
+
+        from inventory.models import GoodsReceipt, GoodsReceiptItem
 
         gr = GoodsReceipt.objects.create(
             company=self.company,
@@ -658,8 +662,8 @@ class TestQuickPay(FriskoTestBase):
         self.assertEqual(self.kruh.quantity, kruh_before - 7)
 
     def test_quick_pay_insufficient_payment_raises(self):
-        from pos.services import quick_pay
         from core.exceptions import PaymentError
+        from pos.services import quick_pay
 
         items = [
             {"inventory_item_id": self.kruh.pk, "description": "Kruh",
@@ -670,8 +674,8 @@ class TestQuickPay(FriskoTestBase):
                       amount_paid=Decimal("0.01"))  # premalo
 
     def test_quick_pay_card_no_change(self):
-        from pos.services import quick_pay
         from pos.models import POSPaymentLine
+        from pos.services import quick_pay
 
         items = [
             {"inventory_item_id": self.kruh.pk, "description": "Kruh",
@@ -731,8 +735,9 @@ class TestMultiTenantIsolation(FriskoTestBase):
 class TestArhivaEntry(FriskoTestBase):
 
     def test_arhiva_entry_create(self):
-        from documents.models import ArhivaEntry
         import datetime
+
+        from documents.models import ArhivaEntry
 
         entry = ArhivaEntry.objects.create(
             company=self.company,
@@ -750,8 +755,9 @@ class TestArhivaEntry(FriskoTestBase):
 
     def test_arhiva_source_types(self):
         """Provjeri da su svi source_type choices prisutni."""
-        from documents.models import ArhivaEntry
         import datetime
+
+        from documents.models import ArhivaEntry
 
         for stype in ["invoice_out", "invoice_in", "eracun",
                       "document", "pos_receipt"]:
@@ -767,8 +773,9 @@ class TestArhivaEntry(FriskoTestBase):
 
     def test_deletion_protected_until_set(self):
         """11-godišnja zaštita od brisanja."""
-        from documents.models import ArhivaEntry
         import datetime
+
+        from documents.models import ArhivaEntry
 
         doc_date = datetime.date(2026, 3, 15)
         entry = ArhivaEntry.objects.create(

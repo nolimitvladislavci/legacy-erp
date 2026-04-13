@@ -2,13 +2,13 @@
 worktime/tests/test_anomaly_tracker.py
 Tests for AnomalyReport model, UniversalTracker, and patrol task.
 """
-from decimal import Decimal
 from datetime import timedelta
-from unittest.mock import patch, MagicMock
+from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -70,7 +70,7 @@ class AnomalyReportModelTest(TestCase):
         self.assertIsNone(report.time_log)
 
     def test_anomaly_with_timelog(self):
-        from worktime.models import TimeLog, AnomalyReport
+        from worktime.models import AnomalyReport, TimeLog
         tl = TimeLog.objects.create(
             user=self.user, company=self.company,
             start_time=timezone.now() - timedelta(hours=14),
@@ -155,8 +155,8 @@ class UniversalTrackerTest(TransactionTestCase):
         self.user = User.objects.create_user(username='tracker_user', password='test')
 
     def test_track_creates_event(self):
-        from worktime.tracker import track
         from worktime.models import ActivityEvent
+        from worktime.tracker import track
         track(self.user, 'POS', 'POS_CHECKOUT', ref='Bon #1',
               detail='Test naplata', company=self.company)
         self.assertEqual(ActivityEvent.objects.count(), 1)
@@ -167,8 +167,8 @@ class UniversalTrackerTest(TransactionTestCase):
         self.assertEqual(event.metadata['ref'], 'Bon #1')
 
     def test_track_ignores_anonymous(self):
-        from worktime.tracker import track
         from worktime.models import ActivityEvent
+        from worktime.tracker import track
         anon = MagicMock()
         anon.is_authenticated = False
         track(anon, 'POS', 'POS_CHECKOUT')
@@ -198,7 +198,7 @@ class AnomalyPatrolTaskTest(TestCase):
         self.assertEqual(result['alerts'], 0)
 
     def test_patrol_detects_ghost_shift(self):
-        from worktime.models import TimeLog, AnomalyReport
+        from worktime.models import AnomalyReport, TimeLog
         from worktime.tasks import worktime_anomaly_patrol
         TimeLog.objects.create(
             user=self.user, company=self.company,
@@ -215,7 +215,7 @@ class AnomalyPatrolTaskTest(TestCase):
         self.assertEqual(report.user, self.user)
 
     def test_patrol_detects_missing_break(self):
-        from worktime.models import TimeLog, AnomalyReport
+        from worktime.models import AnomalyReport, TimeLog
         from worktime.tasks import worktime_anomaly_patrol
         yesterday = timezone.now() - timedelta(days=1)
         TimeLog.objects.create(
@@ -235,7 +235,7 @@ class AnomalyPatrolTaskTest(TestCase):
         self.assertEqual(report.severity, 'medium')
 
     def test_patrol_skips_shift_with_pos_activity(self):
-        from worktime.models import TimeLog, ActivityEvent, AnomalyReport
+        from worktime.models import ActivityEvent, AnomalyReport, TimeLog
         from worktime.tasks import worktime_anomaly_patrol
         TimeLog.objects.create(
             user=self.user, company=self.company,

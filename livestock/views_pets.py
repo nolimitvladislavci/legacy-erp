@@ -4,19 +4,22 @@ livestock/views_pets.py — Uzgajalište ljubimaca (Ljubeta pilot)
 Rute: /pets/
 """
 import json
-import uuid
 import logging
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponse
+import uuid
+
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.db import DatabaseError, IntegrityError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
-from django.utils import timezone
-from django.core.cache import cache
+
 from core.company_utils import get_user_company
-from .models import Livestock, HealthRecord
-from django.db import IntegrityError, DatabaseError
+
+from .models import HealthRecord, Livestock
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +73,7 @@ def pet_detail(request, pk):
                 created_by=request.user,
             )
             messages.success(request, _('Zapis dodan.'))
-        except (IntegrityError, DatabaseError) as e:
+        except (IntegrityError, DatabaseError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('livestock:pet_detail', pk=pk)
 
@@ -122,7 +125,7 @@ def pet_create(request):
             pet.save()
             messages.success(request, f'{pet.get_vrsta_display()} {name} uspješno dodan/a.')
             return redirect('livestock:pet_detail', pk=pet.pk)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/pets_create.html', {
@@ -165,7 +168,7 @@ def pet_edit(request, pk):
             pet.save()
             messages.success(request, _('Podaci ažurirani.'))
             return redirect('livestock:pet_detail', pk=pk)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/pets_edit.html', {
@@ -179,8 +182,11 @@ def pet_edit(request, pk):
 @login_required
 def pet_pedigree_pdf(request, pk):
     """Generira rodovnicu u PDF-u."""
+    import os
+    import subprocess
+    import tempfile
+
     from django.template.loader import render_to_string
-    import subprocess, tempfile, os
 
     company = get_user_company(request)
     pet = get_object_or_404(Livestock, pk=pk, company=company, vrsta__in=PET_VRSTE)
@@ -263,6 +269,7 @@ def pet_qr_code(request, pk):
     Vraća PNG ili PDF ovisno o ?format=pdf parametru.
     """
     import io
+
     import qrcode
 
     company = get_user_company(request)
@@ -284,8 +291,11 @@ def pet_qr_code(request, pk):
 
     if fmt == 'pdf':
         # PDF ogrlica — A6 format, QR + ime + chip
+        import os
+        import subprocess
+        import tempfile
+
         from django.template.loader import render_to_string
-        import subprocess, tempfile, os
 
         html = render_to_string('livestock/qr_collar.html', {
             'pet': pet,
@@ -359,8 +369,9 @@ def pet_adopt(request, pk):
     messages.success(request, f'{pet.name or pet.ear_tag} uspješno udomljen/a. Generiranje ugovora...')
 
     # Redirect na PDF ugovor
-    from django.urls import reverse
     from urllib.parse import urlencode
+
+    from django.urls import reverse
     params = urlencode({
         'name': adopter_name,
         'address': adopter_address,
@@ -376,8 +387,11 @@ def pet_adoption_contract(request, pk):
     GET /livestock/pets/<pk>/contract/
     PDF Ugovor o udomljavanju.
     """
+    import os
+    import subprocess
+    import tempfile
+
     from django.template.loader import render_to_string
-    import subprocess, tempfile, os
 
     company = get_user_company(request)
     pet = get_object_or_404(Livestock, pk=pk, company=company, vrsta__in=PET_VRSTE)

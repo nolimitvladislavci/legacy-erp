@@ -1,11 +1,13 @@
 """Smart Mailbox views — AI-powered inbound invoice processing UI."""
 import logging
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.utils.translation import gettext as _
+
 from django.contrib import messages as django_messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
+
 from core.company_utils import get_user_company
 
 logger = logging.getLogger("propter.einvoice.views")
@@ -19,7 +21,7 @@ def smart_mailbox(request):
         django_messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect("dashboard")
 
-    from einvoice.models import InboundInvoice, AS4Message, MessageDirection
+    from einvoice.models import AS4Message, InboundInvoice, MessageDirection
 
     status_filter = request.GET.get("status", "")
     qs = InboundInvoice.objects.filter(company=company).select_related("as4_message")

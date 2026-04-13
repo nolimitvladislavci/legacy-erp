@@ -1,5 +1,6 @@
 """Notification helpers — create DB notification + Web Push."""
 import logging
+
 from .models import Notification
 
 logger = logging.getLogger(__name__)

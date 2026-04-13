@@ -9,12 +9,17 @@ Setup KUD Dukat Vladislavci — glazbena škola + web stranica + pipeline vrtić
 4. Demo sati nastave
 5. Veza vrtić → KUD (djeca iz vrtića kao budući učenici)
 """
-import os, sys, django
+import os
+import sys
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
 from datetime import date, time, timedelta
+
 from companies.models import Company
 from udruge.models import Clan, GlazbenaSkola, GlazbeniUcenik, SatGlazbene
 

@@ -5,14 +5,14 @@ FAL (Fenix Access Layer) — test suite.
 from datetime import timedelta
 
 from django.contrib.auth.models import User
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
+from accounts.models import CompanyMembership, UserProfile
 from companies.models import Company
-from accounts.models import UserProfile, CompanyMembership
-from permissions.models import Permission, Role, UserRole, PermissionOverride
-from permissions.engine import PermissionEngine, AccessDecision
-from permissions.route_registry import RouteRegistry, AccessLevel
+from permissions.engine import AccessDecision, PermissionEngine
+from permissions.models import Permission, PermissionOverride, Role, UserRole
+from permissions.route_registry import AccessLevel, RouteRegistry
 
 
 class FALTestBase(TestCase):

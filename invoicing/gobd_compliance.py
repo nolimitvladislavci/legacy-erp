@@ -6,7 +6,6 @@ Provjera Pflichtangaben (§14 UStG) i kontinuiranog numeriranja računa.
 """
 from django.utils import timezone
 
-
 # ─────────────────────────────────────────────
 #  Pflichtangaben provjere (§14 UStG)
 # ─────────────────────────────────────────────

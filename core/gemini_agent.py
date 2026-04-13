@@ -99,7 +99,8 @@ class GeminiAgent:
 
     def query_db(self, code):
         try:
-            import io, sys
+            import io
+            import sys
             safe_globals = {}
             captured = io.StringIO()
             old_stdout = sys.stdout

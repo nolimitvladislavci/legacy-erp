@@ -3,7 +3,7 @@ POS Kasa — Point of Sale module
 Podržava HR fiskalizaciju, bar kod skeniranje i integraciju s invoicing app.
 """
 import uuid
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -315,8 +315,8 @@ class POSReceipt(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.global_number:
-            from django.db.models import Max
             from django.db import transaction as _tx
+            from django.db.models import Max
             company = self.session.terminal.company
             # Atomic global_number: lock company row to serialize (race condition fix)
             with _tx.atomic():
@@ -630,7 +630,8 @@ class POSCashier(models.Model):
         return self.name
 
     def set_pin(self, pin_str):
-        import hashlib, secrets
+        import hashlib
+        import secrets
         salt = secrets.token_hex(4)  # 8 hex chars
         dk = hashlib.pbkdf2_hmac('sha256', pin_str.strip().encode(), salt.encode(), 150_000)
         # Format: p$8salt$24hash = ~36 chars (fits varchar 64)
@@ -1196,6 +1197,7 @@ class POSDailyReport(models.Model):
     def generate_from_session(cls, session):
         """Generiraj dnevni izvještaj iz zatvorene sesije."""
         from decimal import Decimal
+
         from django.db.models import Sum
 
         receipts = session.receipts.filter(status='paid')
@@ -1269,8 +1271,9 @@ class POSDailyReport(models.Model):
         # Sprint 1F: Auto-generate Z-report PDF
         if not report.z_report_pdf:
             try:
-                from pos.pdf_service import generate_z_report_pdf
                 from django.core.files.base import ContentFile
+
+                from pos.pdf_service import generate_z_report_pdf
                 pdf_bytes = generate_z_report_pdf(report)
                 report.z_report_pdf.save(
                     'z_report_%s_%s.pdf' % (report.terminal.terminal_code, report.date),
@@ -1744,8 +1747,6 @@ class POSPulseEvent(models.Model):
 
 # Import ChainLink so Django model discovery includes it
 from pos.hashchain import ChainLink  # noqa: F401
-
-
 
 # ═══════════════════════════════════════════════════════════════
 #  Context-Aware QuickActions — POS kao Centar Svijeta

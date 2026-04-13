@@ -2,21 +2,21 @@
 intelligence/services.py
 Glavna logika Intelligence agenta.
 """
-import logging
-import json
-import re
 import datetime
+import json
+import logging
+import re
 
-from django.utils import timezone
 from django.db import DatabaseError
+from django.utils import timezone
 
 logger = logging.getLogger('intelligence')
 
 
 def run_intelligence_job(job):
     """Pokreni jedan job -- provjeri sve izvore i generiraj rezultate."""
-    from intelligence.models import IntelligenceResult, FundOpportunity
     from core.gemini_agent import GeminiAgent
+    from intelligence.models import FundOpportunity, IntelligenceResult
 
     results_count = 0
     sent_count = 0
@@ -162,6 +162,7 @@ def create_futures_listing_from_crop(crop_plan):
     Automatski kreira FuturesListing na Burzi kad je visak usjeva spreman.
     """
     import datetime
+
     from marketplace.models import FuturesListing, MarketplaceCategory
 
     # Provjeri nije li vec kreiran listing za ovu godinu i kulturu

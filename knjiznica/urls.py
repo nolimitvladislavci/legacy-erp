@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
-from . import portal_views
+
+from . import portal_views, views
 
 app_name = 'knjiznica'
 

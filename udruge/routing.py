@@ -2,6 +2,7 @@
 udruge/routing.py — WebSocket URL routing for live auctions.
 """
 from django.urls import re_path
+
 from . import consumers
 
 websocket_urlpatterns = [

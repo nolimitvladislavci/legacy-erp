@@ -1,13 +1,14 @@
 """Companies settings views tests."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_company_admin(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'CS {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')

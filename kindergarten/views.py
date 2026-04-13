@@ -1,20 +1,27 @@
 """Kindergarten views — dashboard, children, attendance, billing, parent portal."""
 from datetime import date, timedelta
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Q, Sum
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
-from django.db import DatabaseError, IntegrityError
 
 from core.company_utils import get_user_company
+
 from .models import (
-    KindergartenGroup, Child, Guardian, ChildGuardian,
-    Attendance, MonthlyBilling, DailyReport, Announcement,
+    Announcement,
+    Attendance,
+    Child,
+    ChildGuardian,
+    DailyReport,
+    Guardian,
+    KindergartenGroup,
+    MonthlyBilling,
 )
 
 
@@ -396,7 +403,9 @@ def bulk_import_children(request):
     import csv
     import io
     import secrets
+
     from django.contrib.auth import get_user_model
+
     from kindergarten.forms import BulkChildImportForm
 
     User = get_user_model()

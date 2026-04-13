@@ -6,7 +6,8 @@ dodaje u ArhivaEntry za 11-godišnju zaštitu.
 """
 import logging
 from decimal import Decimal
-from django.db import IntegrityError, DatabaseError
+
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 

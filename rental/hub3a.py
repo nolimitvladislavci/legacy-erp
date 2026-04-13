@@ -8,8 +8,8 @@ Banka čita barkod → sva polja se auto-popune → klijent samo potvrdi.
 
 Spec: HUB-3A v1.03 (HUBCG, 2015)
 """
-import io
 import base64
+import io
 import logging
 from decimal import Decimal
 

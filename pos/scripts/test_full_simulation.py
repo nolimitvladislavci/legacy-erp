@@ -5,14 +5,17 @@ Od ulaska gosta do "doviđenja, dođite nam opet!"
 Pokreni: venv/bin/python manage.py shell < pos/test_full_simulation.py
 """
 import os
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 from decimal import Decimal
-from django.utils import timezone
+
 from django.contrib.auth.models import User
+from django.utils import timezone
+
 from companies.models import Company
-from pos.models import *
 from inventory.models import InventoryItem, StockMovement
+from pos.models import *
 
 konjik = Company.objects.get(name__icontains="Konjik")
 su = User.objects.get(username="superadmin")

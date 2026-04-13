@@ -3,6 +3,7 @@ Provjera: koje tvrtke s NKD 56.xx (ugostiteljstvo) nemaju aktiviran
 porez na potrošnju. Zakon o lokalnim porezima NN 115/16, čl.20-22.
 """
 from django.core.management.base import BaseCommand
+
 from companies.models import Company
 
 

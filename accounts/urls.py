@@ -1,10 +1,7 @@
-from django.views.generic import RedirectView
 from django.urls import path
+from django.views.generic import RedirectView
 
-from . import views
-from . import trikey_views
-from . import deactivation
-from . import data_export
+from . import data_export, deactivation, trikey_views, views
 
 app_name = 'accounts'
 urlpatterns = [

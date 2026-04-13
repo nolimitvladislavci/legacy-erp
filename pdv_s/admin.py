@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import PDVSReport
+
 
 @admin.register(PDVSReport)
 class PDVSReportAdmin(admin.ModelAdmin):

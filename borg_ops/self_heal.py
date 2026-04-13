@@ -16,8 +16,8 @@ import subprocess
 from datetime import datetime, timedelta
 
 from celery import shared_task
-from django.utils import timezone
 from django.db import DatabaseError
+from django.utils import timezone
 
 logger = logging.getLogger('borg.self_heal')
 

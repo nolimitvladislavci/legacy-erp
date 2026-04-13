@@ -11,6 +11,7 @@ isključivo za tu firmu — u skladu s FINA uvjetima korištenja.
 """
 
 import logging
+
 import requests
 
 logger = logging.getLogger(__name__)

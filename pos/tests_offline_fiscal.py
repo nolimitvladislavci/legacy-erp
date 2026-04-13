@@ -6,17 +6,19 @@ Usage:
 """
 import json
 import uuid
-from decimal import Decimal
 from datetime import timedelta
-from unittest.mock import patch, MagicMock
+from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 from django.utils import timezone
 
 from companies.models import Company
 from pos.models import (
-    POSTerminal, POSSession, POSReceipt,
+    POSReceipt,
+    POSSession,
+    POSTerminal,
 )
 
 

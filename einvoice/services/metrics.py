@@ -12,7 +12,7 @@ logger = logging.getLogger("propter.einvoice.metrics")
 
 # Try to import prometheus_client, but don't fail if not installed
 try:
-    from prometheus_client import Counter, Histogram, Gauge, Info
+    from prometheus_client import Counter, Gauge, Histogram, Info
     PROMETHEUS_AVAILABLE = True
 except ImportError:
     PROMETHEUS_AVAILABLE = False

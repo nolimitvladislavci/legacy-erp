@@ -3,6 +3,7 @@ WhatsApp / SMS / Email notification service.
 Scenario 2.3: Meta API timeout — fallback chain.
 """
 import logging
+
 import requests
 from django.conf import settings
 

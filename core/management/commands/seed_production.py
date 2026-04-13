@@ -11,10 +11,9 @@ za funkcionalan sustav:
   6. Kontni plan (via seed_chart_of_accounts ako postoji)
   7. Pricing planovi (via seed_pricing_plans)
 """
-from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from django.db import transaction
-from django.db import DatabaseError
+from django.core.management.base import BaseCommand
+from django.db import DatabaseError, transaction
 
 User = get_user_model()
 
@@ -70,7 +69,7 @@ class Command(BaseCommand):
             ))
 
         # ── 2. Firma VISKOVIC NIKSA ──────────────────────────────────────────
-        from companies.models import Company, BusinessProfile
+        from companies.models import BusinessProfile, Company
         company, created = Company.objects.get_or_create(
             name="VISKOVIC NIKSA",
             defaults={
@@ -134,7 +133,7 @@ class Command(BaseCommand):
 
         # ── 6. Enterprise pretplata ───────────────────────────────────────────
         try:
-            from registration.models import PricingPlan, CompanySubscription
+            from registration.models import CompanySubscription, PricingPlan
             enterprise = PricingPlan.objects.filter(slug="enterprise").first()
             if enterprise:
                 sub, created = CompanySubscription.objects.get_or_create(

@@ -8,8 +8,8 @@ Koristi postojeći core.oib_validator za validaciju.
 import logging
 
 from django.core.cache import cache
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('fiskalizacija.bonitet')
 

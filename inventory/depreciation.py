@@ -5,10 +5,11 @@ Zapisi se NE spremaju u bazu — samo DepreciationDraft dict.
 Celery task šalje Mariji WhatsApp jednom mjesečno.
 """
 import logging
-from decimal import Decimal, ROUND_HALF_UP
 from datetime import date
-from django.utils import timezone
+from decimal import ROUND_HALF_UP, Decimal
+
 from django.db import DatabaseError
+from django.utils import timezone
 
 logger = logging.getLogger('inventory.depreciation')
 
@@ -109,8 +110,9 @@ def check_depreciation_reminders():
     Šalje WhatsApp Mariji: 'Nacrt amortizacije spreman, čeka vaš pregled'
     """
     try:
-        from inventory.models import InventoryItem
         from datetime import date, timedelta
+
+        from inventory.models import InventoryItem
 
         threshold = date.today() - timedelta(days=365)
         assets = InventoryItem.objects.filter(

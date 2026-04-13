@@ -3,14 +3,22 @@ Testovi za komunalno modul — Reciklažno dvorište / Zeleni otok.
 15 testova: kvote, process_delivery, scale integrity, e-ONTO batch.
 """
 from decimal import Decimal
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
+
 from companies.models import Company
 from partners.models import Partner
+
 from .models import (
-    WasteStation, WasteCategory, CitizenCard, AnnualQuota,
-    WasteDelivery, ScaleReading, OntoExportBatch,
+    AnnualQuota,
+    CitizenCard,
+    OntoExportBatch,
+    ScaleReading,
+    WasteCategory,
+    WasteDelivery,
+    WasteStation,
 )
 
 

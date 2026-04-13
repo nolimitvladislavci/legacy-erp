@@ -1,11 +1,12 @@
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from rest_framework import viewsets
-from django.db import DatabaseError, IntegrityError
 
 from core.company_utils import get_user_company
 from partners.models import Partner
@@ -13,7 +14,6 @@ from permissions.decorators import require_permission
 
 from .models import Transaction
 from .serializers import TransactionSerializer
-from django.core.exceptions import ObjectDoesNotExist
 
 
 @login_required
@@ -99,12 +99,17 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 @login_required
 def bank_import_csv(request):
-    import csv, io, uuid, datetime as _dt
+    import csv
+    import datetime as _dt
+    import io
+    import uuid
     from decimal import Decimal
+
     from django.contrib import messages
     from django.shortcuts import get_object_or_404
-    from konto.models import BankAccount, BankTransaction
+
     from core.company_utils import get_user_company
+    from konto.models import BankAccount, BankTransaction
     company = get_user_company(request)
     if not company:
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
@@ -199,9 +204,11 @@ def bank_import_csv(request):
 @login_required
 def cashflow_api(request):
     import datetime as _dt
-    from konto.models import BankTransaction
-    from core.company_utils import get_user_company
+
     from django.db.models import Sum
+
+    from core.company_utils import get_user_company
+    from konto.models import BankTransaction
     company = get_user_company(request)
     today = _dt.date.today()
     labels, inflows, outflows = [], [], []
@@ -221,10 +228,12 @@ def cashflow_api(request):
 @login_required
 def report_pnl_pdf(request):
     import datetime as _dt
+
     from django.http import HttpResponse
+    from django.utils import timezone
+
     from core.company_utils import get_user_company
     from konto import services
-    from django.utils import timezone
     company = get_user_company(request)
     if not company:
         from django.contrib import messages
@@ -260,8 +269,9 @@ def report_pnl_pdf(request):
 def report_vat_pdf(request, pk):
     from django.http import HttpResponse
     from django.utils import timezone
-    from konto.models import TaxPeriod
+
     from core.company_utils import get_user_company
+    from konto.models import TaxPeriod
     company = get_user_company(request)
     period = get_object_or_404(TaxPeriod, pk=pk, company=company)
     html = render(request, 'konto/report_vat_pdf.html', {
@@ -293,11 +303,13 @@ def bank_import_xml(request):
     Podržava ZABA, PBZ, Erste, OTP (sve .02 i .08 namespace varijante).
     Nakon importa poziva auto_match_transactions().
     """
-    from konto.models import BankAccount
-    from konto import services as konto_services
-    from core.company_utils import get_user_company
-    from .bank_parsers import SEPACamtParser
     import uuid
+
+    from core.company_utils import get_user_company
+    from konto import services as konto_services
+    from konto.models import BankAccount
+
+    from .bank_parsers import SEPACamtParser
 
     company = get_user_company(request)
     if not company:
@@ -324,7 +336,7 @@ def bank_import_xml(request):
         parser = SEPACamtParser(xml_content)
         import_batch = str(uuid.uuid4())[:8]
         stats = parser.parse(company=company, import_batch=import_batch)
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError):
         messages.error(request, _('XML datoteka nije ispravnog formata. Provjerite datoteku.'))
         return render(request, 'konto/bank_import_xml.html', {'banks': banks})
 
@@ -365,11 +377,13 @@ def bank_pain001_suppliers(request):
     POST: download XML datoteke
     """
     from django.http import HttpResponse
-    from konto.models import BankAccount
+
     from core.company_utils import get_user_company
-    from .bank_parsers import Pain001Generator
     from invoicing.models import Invoice
+    from konto.models import BankAccount
     from partners.models import Partner
+
+    from .bank_parsers import Pain001Generator
 
     company = get_user_company(request)
     if not company:
@@ -417,7 +431,7 @@ def bank_pain001_suppliers(request):
     except ValueError as e:
         messages.error(request, str(e))
         return redirect(request.path)
-    except ObjectDoesNotExist as e:
+    except ObjectDoesNotExist:
         messages.error(request, _('Generiranje XML datoteke nije uspjelo. Pokušajte ponovo.'))
         return redirect(request.path)
 
@@ -433,10 +447,13 @@ def bank_pain001_salaries(request):
     """
     Generira pain.001 XML za isplatu plaća za odabrani obračunski period.
     """
-    from django.http import HttpResponse
     import datetime
-    from konto.models import BankAccount
+
+    from django.http import HttpResponse
+
     from core.company_utils import get_user_company
+    from konto.models import BankAccount
+
     from .bank_parsers import Pain001Generator
 
     company = get_user_company(request)
@@ -471,7 +488,7 @@ def bank_pain001_salaries(request):
     except ValueError as e:
         messages.error(request, str(e))
         return redirect(request.path)
-    except ObjectDoesNotExist as e:
+    except ObjectDoesNotExist:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect(request.path)
 
@@ -488,6 +505,7 @@ def bank_discrepancies(request):
     Destinacija klika s Kontrolnog Tornja — widget 'Financijska odstupanja'.
     """
     from core.company_utils import get_user_company
+
     from .bank_parsers import get_partial_payment_discrepancies
 
     company = get_user_company(request)
@@ -515,6 +533,7 @@ def bank_discrepancies_legacy(request):
     Uses get_partial_payment_discrepancies() from bank_parsers.
     """
     from core.company_utils import get_user_company
+
     from .bank_parsers import get_partial_payment_discrepancies
 
     company = get_user_company(request)

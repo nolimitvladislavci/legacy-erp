@@ -1,12 +1,14 @@
 import logging
+
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 logger = logging.getLogger(__name__)
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from rest_framework import permissions, viewsets
 
 from .models import Company
@@ -332,8 +334,9 @@ def employee_create(request):
 
     if attr_worker or attr_manager:
         try:
-            from worktime.models import EmployeeProfile
             from decimal import Decimal
+
+            from worktime.models import EmployeeProfile
             ep, ep_created = EmployeeProfile.objects.get_or_create(
                 user=user,
                 defaults={
@@ -578,8 +581,9 @@ def employee_toggle_redirect(request, pk):
 
 @login_required
 def tax_rate_list(request):
-    from .models import TaxRate
     from core.company_utils import get_user_company
+
+    from .models import TaxRate
     company = get_user_company(request)
     if not company:
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
@@ -617,7 +621,6 @@ def tax_rate_list(request):
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
 @login_required
@@ -670,8 +673,9 @@ def subscription_cancel(request):
 @login_required
 def tc_consent_view(request):
     """GDPR T&C consent – firma mora prihvatiti prije korištenja FINA/KG usluga."""
-    from core.company_utils import get_user_company
     from django.utils import timezone
+
+    from core.company_utils import get_user_company
 
     company = get_user_company(request)
     if not company:
@@ -815,9 +819,10 @@ def workspace_home(request):
     HOME SCREEN radnika — lista klijenata iz njegovog workspace-a.
     Klik na klijenta → switch_company → rad u kontekstu.
     """
+    from django.db.models import Count, Q
+
     from companies.models import Workspace
     from documents.models import ArhivaEntry
-    from django.db.models import Count, Q
 
     # Pronađi aktivne workspace-e korisnika
     workspaces = Workspace.get_for_user(request.user)
@@ -907,8 +912,8 @@ def workspace_switch(request, ws_id):
 def workspace_enter_client(request, client_id):
     from core.models import BookingSignature
     """Uđi u kontekst klijenta iz workspace-a → switch_company."""
-    from companies.models import Workspace, Company
     from accounts.models import CompanyMembership
+    from companies.models import Company, Workspace
 
     # Provjeri da je klijent u nekom od korisnikovih workspace-a
     user_client_ids = set()
@@ -953,9 +958,11 @@ def workspace_admin(request):
     Samo za admin/superadmin.
     """
     import json
-    from companies.models import Workspace, Company, CompanyPartnership
-    from accounts.models import CompanyMembership
+
     from django.http import JsonResponse
+
+    from accounts.models import CompanyMembership
+    from companies.models import Company, CompanyPartnership, Workspace
 
     # Pronađi maticu
     if request.user.is_superuser:
@@ -1081,8 +1088,8 @@ def employee_onboard(request, pk=None):
     3. PIN (6 znamenki)
     4. Potpis (ugovor)
     """
-    from worktime.models import EmployeeProfile
     from core.company_utils import get_user_company
+    from worktime.models import EmployeeProfile
 
     company = get_user_company(request)
     if not company:
@@ -1180,10 +1187,13 @@ def employee_onboard(request, pk=None):
 
         # ── KORAK 4: Potvrda + kreiranje ──
         elif step == '4':
+            import secrets
+            import string
+
             from django.contrib.auth.models import User
-            from accounts.models import UserProfile, CompanyMembership
             from django.db import transaction
-            import secrets, string
+
+            from accounts.models import CompanyMembership, UserProfile
 
             fn = request.session.get('onb_first_name', '')
             ln = request.session.get('onb_last_name', '')
@@ -1231,8 +1241,8 @@ def employee_onboard(request, pk=None):
                 )
 
                 # EmployeeProfile
-                from decimal import Decimal
                 import datetime
+                from decimal import Decimal
                 ep_defaults = {
                     'company': company,
                     'hourly_rate': Decimal(hourly_rate or '20'),
@@ -1304,8 +1314,9 @@ def employee_onboard(request, pk=None):
 @require_POST
 def employee_offboard(request, pk):
     """Offboarding process — deaktivira radnika, čuva pravne podatke."""
-    from worktime.models import EmployeeProfile
     from django.http import JsonResponse
+
+    from worktime.models import EmployeeProfile
 
     profile, company = _require_strict_admin(request)
     if not company:
@@ -1368,11 +1379,13 @@ def employee_offboard(request, pk):
 @login_required
 def compliance_monitor(request):
     """Real-time compliance dashboard za radnike tvrtke."""
+    from datetime import timedelta
+
+    from django.db.models import Sum
+    from django.utils import timezone
+
     from core.company_utils import get_user_company
     from worktime.models import EmployeeProfile
-    from django.utils import timezone
-    from datetime import timedelta
-    from django.db.models import Sum
 
     company = get_user_company(request)
     if not company:

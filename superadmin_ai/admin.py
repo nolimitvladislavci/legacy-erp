@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import AIModulePermission, PendingAIAction, AIActionLog
+
+from .models import AIActionLog, AIModulePermission, PendingAIAction
 
 
 @admin.register(AIModulePermission)

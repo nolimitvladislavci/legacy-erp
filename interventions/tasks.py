@@ -3,6 +3,7 @@ Celery periodic tasks for interventions.
 Wraps the existing check_ttl management command.
 """
 import logging
+
 from celery import shared_task
 from django.core.management import call_command
 

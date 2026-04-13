@@ -83,8 +83,8 @@ class Command(BaseCommand):
         return tr
 
     def _setup_company(self, oib, name, city, address, username, label):
-        from companies.models import Company
         from accounts.models import UserProfile
+        from companies.models import Company
 
         self.stdout.write(f"\n{label}: {name}")
         company, created = Company.objects.get_or_create(
@@ -136,11 +136,11 @@ class Command(BaseCommand):
     # ─── SCENARIJ 1: Auto servis ──────────────────────────────────────────────
 
     def _seed_autoservis(self, company, user):
-        from partners.models import Partner
-        from inventory.models import InventoryItem
-        from work_orders.models import WorkOrder, WorkOrderItem
-        from invoicing.models import Invoice
         from calculator.models import BOM, BOMItem
+        from inventory.models import InventoryItem
+        from invoicing.models import Invoice
+        from partners.models import Partner
+        from work_orders.models import WorkOrder, WorkOrderItem
 
         # Partneri — klijenti servisa
         klijenti_data = [
@@ -358,10 +358,10 @@ class Command(BaseCommand):
     # ─── SCENARIJ 2: Frizerski salon ──────────────────────────────────────────
 
     def _seed_salon(self, company, user):
-        from partners.models import Partner
         from appointments.models import Appointment, BookingResource, BookingService
-        from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem
         from inventory.models import InventoryItem
+        from partners.models import Partner
+        from pos.models import POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
         # Partneri — klijentice
         klijenti_data = [
@@ -498,9 +498,8 @@ class Command(BaseCommand):
     # ─── SCENARIJ 3: Restoran ─────────────────────────────────────────────────
 
     def _seed_restoran(self, company, user):
-        from pos.models import (POSTerminal, POSSession, POSReceipt,
-                                POSReceiptItem, Table, GastroOrder, GastroOrderItem)
         from inventory.models import InventoryItem
+        from pos.models import GastroOrder, GastroOrderItem, POSReceipt, POSReceiptItem, POSSession, POSTerminal, Table
 
         # Tax rates
         tax13 = self._get_tax_rate(13, "PDV 13% - ugostiteljstvo")

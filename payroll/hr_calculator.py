@@ -2,7 +2,7 @@
 Hrvatski bruto-neto kalkulator za obracun placa.
 Zakon o porezu na dohodak + Zakon o doprinosima (2025/2026).
 """
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 # Doprinosi iz bruto place (employee contributions) - UVIJEK 20% ukupno
 DOPRINOS_MIO_1 = Decimal('0.20')        # I stup MIO - 20% (bez II stupa)

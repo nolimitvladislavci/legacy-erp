@@ -1,7 +1,6 @@
 """Seed KnowledgeArticle s inicijalnim compliance/help artiklima."""
 from django.core.management.base import BaseCommand
 
-
 ARTICLES = [
     # ── COMPLIANCE ──
     {

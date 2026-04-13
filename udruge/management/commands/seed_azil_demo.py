@@ -12,9 +12,10 @@ Pokretanje:
   venv/bin/python manage.py seed_azil_demo --samo-ljubeta
 """
 
+from datetime import date, timedelta
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from datetime import date, timedelta
 
 
 class Command(BaseCommand):
@@ -40,9 +41,7 @@ class Command(BaseCommand):
     # ═══════════════════════════════════════════════════════════════
     def _seed_azil(self, wipe):
         from companies.models import Company
-        from udruge.models import (
-            Zivotinja, KartonZdravlja, Udomljavanje, AzilIntervencija
-        )
+        from udruge.models import AzilIntervencija, KartonZdravlja, Udomljavanje, Zivotinja
 
         # Pronađi ili kreiraj demo azil firmu
         azil_co, created = Company.objects.get_or_create(
@@ -193,7 +192,7 @@ class Command(BaseCommand):
     # ═══════════════════════════════════════════════════════════════
     def _seed_ljubeta(self, wipe):
         from companies.models import Company
-        from udruge.models import Zivotinja, KartonZdravlja
+        from udruge.models import KartonZdravlja, Zivotinja
 
         # Uzgajivačnica — registriramo kao Company, udruge_type=uzgajivacnica
         ljubeta_co, created = Company.objects.get_or_create(

@@ -10,6 +10,7 @@ Usage:
 """
 import logging
 from decimal import Decimal
+
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -75,7 +76,7 @@ class VolunteerTaxGuard:
         if not profile or not profile.is_volunteer:
             return None
 
-        from worktime.models import TravelOrder, TimeEntry
+        from worktime.models import TimeEntry, TravelOrder
 
         paid = TravelOrder.objects.filter(
             employee=user, status='completed',

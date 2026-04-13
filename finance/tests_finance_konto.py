@@ -5,21 +5,20 @@ Tests for Finance→Konto features:
 - Cashflow API
 - Appointment reminder views
 """
+import datetime
 import io
 import uuid
-import datetime
 from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
-from django.test import TestCase, Client, override_settings
+from django.test import Client, TestCase, override_settings
 
 from accounts.models import UserProfile
 from companies.models import Company
-from partners.models import Partner
-from konto.models import BankAccount, BankTransaction
 from finance.models import Transaction
-
+from konto.models import BankAccount, BankTransaction
+from partners.models import Partner
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 

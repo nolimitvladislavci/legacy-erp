@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Asset, MaintenanceSchedule, MaintenanceLog
+
+from .models import Asset, MaintenanceLog, MaintenanceSchedule
+
 
 class ScheduleInline(admin.TabularInline):
     model = MaintenanceSchedule

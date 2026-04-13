@@ -1,9 +1,9 @@
 import uuid
 
-from django.db import models
+from django.db import DatabaseError, models
 from django.utils.translation import gettext_lazy as _
+
 from core.managers import CompanyManager
-from django.db import DatabaseError
 
 
 class CompanyRegistration(models.Model):
@@ -375,6 +375,7 @@ class PropterTenant(models.Model):
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 @receiver(post_save, sender=PropterTenant, dispatch_uid='propter_config_sync')
 def sync_propter_config(sender, instance, created, **kwargs):
     try:
@@ -462,7 +463,8 @@ class UmbrellaInviteCode(models.Model):
 
     @staticmethod
     def generate_code():
-        import random, string
+        import random
+        import string
         return 'UC-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 
@@ -620,7 +622,8 @@ class CompanyClaimRequest(models.Model):
         from django.contrib.auth.models import User
         from django.db import transaction
         from django.utils import timezone
-        from accounts.models import UserProfile, CompanyMembership
+
+        from accounts.models import CompanyMembership, UserProfile
 
         with transaction.atomic():
             # Username iz emaila

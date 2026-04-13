@@ -1,11 +1,13 @@
-import requests
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 from urllib.parse import urlparse
+
+import requests
 from django.conf import settings
-from boxgram.models import SocialImport, PetProfile
+
+from boxgram.models import PetProfile, SocialImport
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +160,7 @@ def fetch_oembed(url: str) -> ImportPreview:
             source_url=url,
             error='Timeout pri dohvatanom sadržaja. Platforma ne odgovara.'
         )
-    except requests.HTTPError as e:
+    except requests.HTTPError:
         if response.status_code == 404:
             error_msg = 'Objava nije pronađena. Provjerite URL.'
         elif response.status_code == 403:

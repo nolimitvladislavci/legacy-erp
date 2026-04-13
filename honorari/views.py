@@ -3,20 +3,22 @@ Honorari Views — ugovori o djelu, autorski honorari, obračuni.
 """
 from decimal import Decimal
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Q
-from django.db import transaction
-from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
+from django.db.models import Q, Sum
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from partners.models import Partner
+
 from .models import (
-    HonorarContract, HonorarCalculation,
+    HonorarCalculation,
+    HonorarContract,
     HonorarJOPPD,
 )
-from partners.models import Partner
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def _get_company(request):
@@ -249,7 +251,7 @@ def calculation_create(request, pk):
         )
 
         messages.success(request, f'Obračun kreiran. Neto: {calc.net_amount} EUR')
-    except Exception as e:
+    except Exception:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return redirect('honorari:contract_detail', pk=pk)
@@ -277,8 +279,8 @@ def calculation_post(request, calc_id):
         return redirect('honorari:contract_detail', pk=contract.pk)
 
     try:
-        from konto.models import JournalEntry, LedgerLine, KontoAccount
         from konto import services
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
 
         with transaction.atomic():
             je = JournalEntry.objects.create(
@@ -388,7 +390,7 @@ def calculation_post(request, calc_id):
             calc.save(update_fields=['journal_entry', 'is_posted'])
 
         messages.success(request, f'Obračun proknjižen — temeljnica {je.entry_number}')
-    except Exception as e:
+    except Exception:
         messages.error(request, _('Knjiženje nije uspjelo. Provjerite konto i iznos.'))
 
     return redirect('honorari:contract_detail', pk=contract.pk)

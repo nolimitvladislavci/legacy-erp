@@ -2,9 +2,10 @@
 marketplace/tasks.py — Celery taskovi za Ghost Inventory i notifikacije.
 """
 import logging
+
 from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('marketplace')
 
@@ -33,8 +34,8 @@ def send_expiry_reminders(self):
     for product in expiring:
         try:
             # Pokušaj WhatsApp notif
-            from core.whatsapp import send_text
             from accounts.models import UserProfile
+            from core.whatsapp import send_text
 
             # Nađi admina seller company
             admin_profile = UserProfile.objects.filter(
@@ -69,10 +70,12 @@ def expiry_gastro_bridge_check(self):
     Za kvarljive proizvode (jaja, voce), nudi prebacivanje na gastro meni s popustom.
     Salje WhatsApp s deep-linkom za 1-click akciju.
     """
+    from datetime import timedelta
+
+    from django.utils import timezone
+
     from marketplace.models import MarketplaceProduct
     from marketplace.services.marketplace_bridge import PERISHABLE_MODELS
-    from django.utils import timezone
-    from datetime import timedelta
 
     now = timezone.now()
     threshold = now + timedelta(hours=4)
@@ -90,8 +93,8 @@ def expiry_gastro_bridge_check(self):
     bridged = 0
     for product in expiring_perishable:
         try:
-            from core.whatsapp import send_text
             from accounts.models import UserProfile
+            from core.whatsapp import send_text
 
             admin_profile = UserProfile.objects.filter(
                 company=product.seller_company
@@ -124,8 +127,9 @@ def finalize_ended_auctions(self):
       3. Posalji WhatsApp kupcu + prodavacu
       4. Update golub status = "Prodano - Ceka transport"
     """
-    from marketplace.models import MarketplaceProduct
     from django.utils import timezone
+
+    from marketplace.models import MarketplaceProduct
 
     now = timezone.now()
     ended = MarketplaceProduct.objects.filter(
@@ -195,8 +199,8 @@ def finalize_ended_auctions(self):
 
                 # WhatsApp notifications
                 try:
-                    from core.whatsapp import send_text
                     from accounts.models import UserProfile
+                    from core.whatsapp import send_text
 
                     # Notify seller
                     seller_profile = UserProfile.objects.filter(

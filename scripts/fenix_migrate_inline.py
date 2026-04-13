@@ -8,11 +8,11 @@ with fenix utility classes. Theme-aware, safe, reversible.
 Usage: python scripts/fenix_migrate_inline.py [--dry-run] [--verbose] [--path templates/invoicing/]
 """
 
+import argparse
 import re
 import sys
-import argparse
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════════
 # COLOR MAPPINGS: hardcoded hex → CSS variable class

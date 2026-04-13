@@ -1,9 +1,6 @@
 from django.urls import path
 
-from . import views
-from . import pickup_views
-from . import field_sales_views
-from . import views_v2
+from . import field_sales_views, pickup_views, views, views_v2
 
 app_name = 'pos'
 

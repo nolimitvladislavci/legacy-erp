@@ -2,8 +2,9 @@
 Virtualni Ured — Klijentski dashboard za skeniranu postu i dokumente.
 App: virtual_office/
 """
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 from core.managers import CompanyManager
 
 

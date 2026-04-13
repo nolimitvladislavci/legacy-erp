@@ -10,8 +10,9 @@ Doktrina "boje u vreći":
 Ako Hrvoje uzme DB dump: dobiva AES-128-CBC šifrat.
 Bez ključa → neupotrebljivi bajt niz.
 """
-import os
 import logging
+import os
+
 from cryptography.fernet import Fernet, InvalidToken
 from django.db import models
 

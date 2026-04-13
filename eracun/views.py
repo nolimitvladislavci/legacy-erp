@@ -1,18 +1,21 @@
 """e-Racun views — dashboard, settings, API endpoints."""
 import json
 import logging
-from django.shortcuts import render, redirect, get_object_or_404
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.db import DatabaseError, IntegrityError
+from django.db.models import Count, Q, Sum
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.utils import timezone
-from django.db.models import Count, Q, Sum
+
 from core.company_utils import get_user_company
-from .models import ERacun, ERacunConfig, ERacunLog, ERacunItem, ERacunTaxSummary
-from django.db import IntegrityError, DatabaseError
+
+from .models import ERacun, ERacunConfig, ERacunItem, ERacunLog, ERacunTaxSummary
 
 logger = logging.getLogger('eracun.views')
 
@@ -110,7 +113,7 @@ def send_eracun(request, pk):
     # ── XSD-First validacija ─────────────────────────────────────────
     if eracun.xml_request:
         try:
-            from eracun.services.validator import validate_xml_against_xsd, XSDValidationError
+            from eracun.services.validator import XSDValidationError, validate_xml_against_xsd
             validate_xml_against_xsd(eracun.xml_request.encode('utf-8'))
         except XSDValidationError as xsd_err:
             eracun.status = 'invalid'
@@ -141,7 +144,7 @@ def send_eracun(request, pk):
                 'status': 'queued',
                 'message': 'Uspješno poslano u red čekanja (FINA). Obrada u tijeku...',
             })
-        except ImportError as e:
+        except ImportError:
             # Fallback na sync ako Celery nije dostupan
             pass
 
@@ -391,8 +394,10 @@ def api_list(request):
 def download_zugferd(request, pk):
     """Download ZUGFeRD 2.2 PDF (hybrid: PDF + embedded factur-x.xml)."""
     from django.http import HttpResponse
-    from .models import ERacun
+
     from core.company_utils import get_user_company
+
+    from .models import ERacun
     company = get_user_company(request)
     eracun = get_object_or_404(ERacun, pk=pk, company=company)
 
@@ -409,8 +414,10 @@ def download_zugferd(request, pk):
 def download_xrechnung(request, pk):
     """Download XRechnung CII XML."""
     from django.http import HttpResponse
-    from .models import ERacun
+
     from core.company_utils import get_user_company
+
+    from .models import ERacun
     company = get_user_company(request)
     eracun = get_object_or_404(ERacun, pk=pk, company=company)
 
@@ -470,8 +477,9 @@ def sukladnost_dashboard(request):
 @require_POST
 def sukladnost_run(request):
     """Pokreni svih 5 testnih scenarija."""
-    from .models import SukladnostTestRun, ERacunConfig
     from django.utils import timezone
+
+    from .models import ERacunConfig, SukladnostTestRun
 
     company = get_user_company(request)
     if not company:
@@ -515,9 +523,9 @@ def sukladnost_run(request):
         eracun = ERacun.objects.filter(company=company).select_related("company", "invoice", "source_receipt").order_by('-created_at').first()
         if not eracun:
             # Kreiraj test eRačun
+            import uuid
             from datetime import date, timedelta
             from decimal import Decimal
-            import uuid
             eracun = ERacun.objects.create(
                 company=company, doc_type='380',
                 invoice_number=f'SUKLAD-{uuid.uuid4().hex[:6].upper()}',

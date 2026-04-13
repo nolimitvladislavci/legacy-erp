@@ -5,19 +5,19 @@ Tasks:
   1. ai_watchdog       — Svakih 30 min: health check + process pending actions + token monitor
   2. ai_token_monitor  — Provjera budžeta, notifikacija kad je 80%+ potrošeno
 """
+import logging
 import os
 import socket
-import logging
 from datetime import timedelta
 from decimal import Decimal
 
 from celery import shared_task
-from django.utils import timezone
-from django.db.models import Sum
 from django.contrib.auth.models import User
+from django.db import DatabaseError
+from django.db.models import Sum
+from django.utils import timezone
 
 from superadmin_ai.models import PendingAIAction
-from django.db import DatabaseError
 
 logger = logging.getLogger('superadmin_ai')
 
@@ -129,7 +129,7 @@ def _port_open(port, host='127.0.0.1'):
 
 def _process_autonomous_pending():
     """Automatski obradi pending akcije za AUTONOMOUS module."""
-    from .models import PendingAIAction, AIModulePermission, AIActionLog
+    from .models import AIActionLog, AIModulePermission, PendingAIAction
 
     pending = PendingAIAction.objects.filter(status='pending')
     processed = 0
@@ -279,9 +279,10 @@ def ai_council_executor(self):
     Svakih 10 min: skenira PendingAIAction s status='approved'
     i sprovodi ih kroz AIOperativeExecutor.
     """
-    from .models import PendingAIAction
-    from .executor import AIOperativeExecutor, AIExecutionError
     from django.contrib.auth.models import User
+
+    from .executor import AIExecutionError, AIOperativeExecutor
+    from .models import PendingAIAction
 
     # AI system user — kreira se ako ne postoji
     system_user, _ = User.objects.get_or_create(

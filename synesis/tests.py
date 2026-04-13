@@ -1,6 +1,7 @@
 """Tests for Synesis integration module."""
-from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
+from django.test import RequestFactory, TestCase
+
 from companies.models import Company
 from synesis.models import SynesisConfig, SynesisLog
 
@@ -74,8 +75,8 @@ class SynesisAPITest(TestCase):
 
 # ═══ JSON Import Tests ═══════════════════════════════════════════════
 
-import os
 import json as _json
+import os
 import tempfile
 
 

@@ -8,8 +8,10 @@ Germany requires:
 3. DSFinV-K export format for tax audits
 """
 import logging
+
+from django.db import DatabaseError, IntegrityError
+
 from .entry_point import BaseFiscalHandler, FiscalResult
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 

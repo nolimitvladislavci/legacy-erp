@@ -11,10 +11,11 @@ Usage:
 import io
 from datetime import date
 from decimal import Decimal
-from django.db.models import Sum, Count
+
+from django.db.models import Count, Sum
 from django.utils import timezone
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 
 def generate_volunteer_timesheet(company, user, month, year, project_code='', skip_audit=False):
@@ -304,7 +305,7 @@ def generate_annual_volunteer_report(company, year):
     Rok: 31. ozujka za prethodnu godinu.
     Sadrzaj: broj volontera, sati, dobne skupine, aktivnosti.
     """
-    from worktime.models import TimeEntry, EmployeeProfile
+    from worktime.models import EmployeeProfile, TimeEntry
 
     # Svi volonteri ove firme koji su radili ove godine
     volunteer_profiles = EmployeeProfile.objects.filter(

@@ -1,6 +1,8 @@
-from core.models import BookingSignature
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import DatabaseError
+
+from core.models import BookingSignature
+
 """Arhiva Views — Centralizirana arhiva svih dokumenata."""
 import csv
 import io
@@ -13,16 +15,15 @@ from datetime import date
 from decimal import Decimal
 
 import fitz  # PyMuPDF
-
 from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
@@ -305,7 +306,8 @@ def arhiva_list(request):
     if hide_zero == "1" or (hide_zero == "" and not is_superadmin and "hide_zero" not in request.GET):
         qs = qs.exclude(amount=0)
 
-    from django.db.models import Sum, Count, Q as _Q
+    from django.db.models import Count, Sum
+    from django.db.models import Q as _Q
     stats = qs.aggregate(
         total_count=Count('id'),
         total_amount=Sum('amount'),
@@ -934,9 +936,10 @@ def arhiva_thumbnail(request, pk):
     # Za invoice_out bez file_path — generiraj PDF on-the-fly i uzmi thumbnail
     if entry.source_type == 'invoice_out' and entry.source_id:
         try:
+            import tempfile
+
             from invoicing.models import Invoice
             from invoicing.services.pdf_service import generate_invoice_pdf
-            import tempfile
 
             inv = None
             sid = entry.source_id or ''
@@ -1114,8 +1117,8 @@ def arhiva_download_pdf(request, pk):
 @login_required
 def arhiva_download_xml(request, pk):
     """Generiraj i preuzmi XML za ArhivaEntry."""
-    from xml.etree.ElementTree import Element, SubElement, tostring
     from xml.dom.minidom import parseString
+    from xml.etree.ElementTree import Element, SubElement, tostring
 
     company = get_user_company(request)
     entry = get_object_or_404(ArhivaEntry.objects.unscoped(), pk=pk)
@@ -1347,7 +1350,7 @@ def arhiva_proknjizi(request, pk):
 
     if result.get('status') == 'auto_booked':
         # Log audit
-        from documents.models import log_arhiva_action, ArhivaAuditLog
+        from documents.models import ArhivaAuditLog, log_arhiva_action
         log_arhiva_action(entry, ArhivaAuditLog.Action.BOOKED, user=request.user, request=request)
 
         return JsonResponse({
@@ -1522,10 +1525,11 @@ def arhiva_upute_koristenje(request):
 @login_required
 def moji_komitenti(request):
     """Radnica vidi listu svojih komitenata iz Workspace-a."""
-    from companies.models import Company, Workspace
-    from accounts.models import CompanyMembership
-    from documents.models import ArhivaEntry
     from django.db.models import Count, Q
+
+    from accounts.models import CompanyMembership
+    from companies.models import Company, Workspace
+    from documents.models import ArhivaEntry
 
     company = get_user_company(request)
 

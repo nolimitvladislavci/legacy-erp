@@ -1,6 +1,6 @@
 from django.urls import path
-from einvoice import views
-from einvoice import views_mandate
+
+from einvoice import views, views_mandate
 
 app_name = "einvoice"
 

@@ -16,13 +16,13 @@ Kategorije upozorenja:
 LIMIT Connect ERP — 2026-03-25
 """
 import logging
-from datetime import timedelta
 from collections import defaultdict
+from datetime import timedelta
 
 from celery import shared_task
 from django.conf import settings
-from django.utils import timezone
 from django.db import DatabaseError
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 

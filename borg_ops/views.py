@@ -10,15 +10,14 @@ import logging
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.http import JsonResponse, HttpResponse
+from django.db import DatabaseError, models
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.db import models
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 from .models import CardActivity, StatusTimestamp
-from django.db import DatabaseError
 
 logger = logging.getLogger('borg.ops')
 
@@ -178,9 +177,10 @@ def operations_dashboard(request):
     SLA alerts: bulk query eliminira N+1.
     """
     from django.core.cache import cache
+
+    from burza.models import ProjectLead
     from interventions.models import HitnaIntervencija
     from work_orders.models import WorkOrder
-    from burza.models import ProjectLead
 
     now = timezone.now()
     CACHE_TTL = 45  # Sekundi — HTMX refresh je 60s, cache istekne prije
@@ -272,13 +272,13 @@ def operations_dashboard(request):
     if exp_today is None:
         exp_today = {'schedules': 0, 'bookings': 0, 'no_shows': 0, 'revenue': 0}
         try:
-            from experiences.models import ExperienceSchedule, ExperienceBooking
+            from experiences.models import ExperienceBooking, ExperienceSchedule
             today = now.date()
             today_scheds = ExperienceSchedule.objects.filter(date=today)
             exp_today['schedules'] = today_scheds.count()
             today_bookings = ExperienceBooking.objects.filter(schedule__date=today)
             # Jedna agregacija umjesto 3 upita
-            from django.db.models import Count, Sum, Q
+            from django.db.models import Count, Q, Sum
             agg = today_bookings.aggregate(
                 total=Count('id'),
                 no_shows=Count('id', filter=Q(status='no_show')),
@@ -389,7 +389,8 @@ def dispatch_suggest(request, pk):
     Returns: JSON s rangiranim kandidatima.
     """
     from interventions.models import HitnaIntervencija
-    from .dispatch import suggest_workers, estimate_budget
+
+    from .dispatch import estimate_budget, suggest_workers
 
     try:
         interv = HitnaIntervencija.objects.select_related('company').get(pk=pk)
@@ -493,10 +494,12 @@ def borg_hub(request):
     BORG Hub — Cross-module command center.
     Jedan prikaz za sve module u real-time.
     """
-    from core.company_utils import get_user_company
-    from django.core.cache import cache
     from datetime import timedelta
+
+    from django.core.cache import cache
     from django.db.models import Sum
+
+    from core.company_utils import get_user_company
 
     company = get_user_company(request)
     now = timezone.now()

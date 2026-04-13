@@ -10,9 +10,9 @@ Rules:
 Uses KontoAccount FK lookup, not hardcoded account codes.
 """
 import logging
-from django.db import transaction
+
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +183,7 @@ def auto_knjizi_clanarina(clanarina):
     D: 112 (blagajna/gotovina) ili 111 (žiro) / C: 3211 (Članarine)
     """
     import logging
+
     from konto.models import JournalEntry, LedgerLine
     logger = logging.getLogger('konto.booking')
 
@@ -256,6 +257,7 @@ def auto_knjizi_donacija(donacija):
     D: 111 (žiro) ili 029 (oprema za materijalnu) / C: 353 (pravna) ili 3633 (fizička) ili 351 (proračun)
     """
     import logging
+
     from konto.models import JournalEntry, LedgerLine
     logger = logging.getLogger('konto.booking')
 

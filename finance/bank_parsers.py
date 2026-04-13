@@ -12,13 +12,13 @@ Podržava:
 Integracija: poziva se iz finance/views.py → bank_import_xml view
 """
 
+import datetime
 import hashlib
 import uuid
-import datetime
 from decimal import Decimal, InvalidOperation
 from typing import Optional
-from lxml import etree
 
+from lxml import etree
 
 # ─── Namespace konstante ────────────────────────────────────────────────────
 
@@ -393,8 +393,9 @@ class Pain001Generator:
 
         Vraća: XML bytes.
         """
-        from worktime.models import TimeEntry, EmployeeProfile
         from django.db.models import Sum
+
+        from worktime.models import EmployeeProfile, TimeEntry
 
         # Agregiraj odobrene sate po radniku za period
         entries = TimeEntry.objects.filter(
@@ -575,8 +576,9 @@ def get_partial_payment_discrepancies(company):
     """
     from django.db.models import Sum
     from django.utils import timezone
-    from konto.models import BankTransaction
+
     from invoicing.models import Invoice
+    from konto.models import BankTransaction
 
     today = timezone.now().date()
 

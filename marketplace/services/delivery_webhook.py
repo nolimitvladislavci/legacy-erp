@@ -16,9 +16,9 @@ Flow:
 Trigger: Signal na MarketplaceOrder.save() ili poziv iz checkout viewa.
 """
 import logging
-from django.db import transaction
+
+from django.db import DatabaseError, transaction
 from django.utils import timezone
-from django.db import DatabaseError
 
 logger = logging.getLogger('delivery')
 
@@ -39,8 +39,8 @@ def create_delivery_stops(order_id, driver_user=None):
     Returns:
         dict s route_id, stops_count, pickup_count, delivery_count
     """
-    from marketplace.models import MarketplaceOrder, SellerSubOrder
     from delivery.models import DeliveryRoute, DeliveryStop, Vehicle
+    from marketplace.models import MarketplaceOrder, SellerSubOrder
 
     order = MarketplaceOrder.objects.select_related(
         'buyer_company'
@@ -130,8 +130,8 @@ def create_delivery_stops(order_id, driver_user=None):
     driver = route.driver
     if driver:
         try:
-            from core.whatsapp import send_text
             from accounts.models import UserProfile
+            from core.whatsapp import send_text
             profile = UserProfile.objects.filter(user=driver).first()
             phone = getattr(profile, 'phone', '') if profile else ''
             if phone:

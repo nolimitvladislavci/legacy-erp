@@ -3,14 +3,19 @@ CART-TO-TABLE TEST SUITE — ispravljeno za stvarne modele fina-connect
 Pokretanje: python manage.py test delivery.test_cart_to_table -v 2
 """
 from decimal import Decimal
-from django.test import TestCase
+
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from rest_framework.test import APIClient
 
 from companies.models import Company
 from delivery.models import (
-    ConsolidatedDelivery, DeliveryStop, DeliveryRoute,
-    Vehicle, ColdChainZone, PackagingExchange,
+    ColdChainZone,
+    ConsolidatedDelivery,
+    DeliveryRoute,
+    DeliveryStop,
+    PackagingExchange,
+    Vehicle,
 )
 
 User = get_user_model()
@@ -65,6 +70,7 @@ class CartToTableTests(TestCase):
 
         # Ruta (DeliveryRoute) — potrebna za DeliveryStop
         import datetime
+
         from django.utils import timezone
         cls.route = DeliveryRoute.objects.create(
             date=timezone.now().date() + datetime.timedelta(days=1),

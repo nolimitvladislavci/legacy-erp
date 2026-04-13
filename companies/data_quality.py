@@ -5,6 +5,7 @@ companies/data_quality.py — Data Quality Guard
 2. Nightly patrol task: provjeri sve firme, popuni rupe, alertira
 """
 import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -43,8 +44,9 @@ def check_data_quality_report():
     Nightly patrol — vraća dict s rupama u podacima.
     Poziva se iz Celery beat taska.
     """
-    from companies.models import Company
     from django.db.models import Q
+
+    from companies.models import Company
 
     active = Company.objects.filter(is_vaulted=False).exclude(
         Q(oib='') | Q(oib__isnull=True) |

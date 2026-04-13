@@ -12,18 +12,25 @@ Pokretanje:
 Rezultati: test_posrednik_results.json + ispis u konzolu
 """
 
-import os, sys, json, time, uuid, threading, random
+import json
+import os
+import random
+import sys
+import threading
+import time
+import uuid
+from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
-from dataclasses import dataclass
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 import django
+
 django.setup()
 
 from companies.models import Company
-from eracun.models import ERacun, ERacunConfig, ERacunItem, ERacunTaxSummary, ERacunLog
+from eracun.models import ERacun, ERacunConfig, ERacunItem, ERacunLog, ERacunTaxSummary
 from eracun.services.engine import validate_eracun
 from eracun.services.ubl_generator import generate_ubl_xml
 
@@ -311,6 +318,7 @@ def agent_a(company, config):
     # ── A13: API auth — invalid key ────────────────────────────────────────────
     def test_a13():
         from django.test import RequestFactory
+
         from eracun.views import _api_auth
         rf = RequestFactory()
         req = rf.post('/eracun/api/create/', HTTP_AUTHORIZATION='Bearer invalid-key-xyz')
@@ -323,6 +331,7 @@ def agent_a(company, config):
     # ── A14: API auth — bez Authorization headera ────────────────────────────
     def test_a14():
         from django.test import RequestFactory
+
         from eracun.views import _api_auth
         rf = RequestFactory()
         req = rf.post('/eracun/api/create/')
@@ -424,9 +433,11 @@ def agent_b(company, config):
 
     # ── B1: Inbox — primanje e-računa API ─────────────────────────────────────
     def test_b1():
-        from django.test import RequestFactory
-        from eracun.views_inbox import api_receive
         import json as _json
+
+        from django.test import RequestFactory
+
+        from eracun.views_inbox import api_receive
         rf = RequestFactory()
         payload = _json.dumps({
             'invoice_number': f'IN-{uuid.uuid4().hex[:8]}',
@@ -718,6 +729,7 @@ def agent_b(company, config):
     # ── B19: API list — filtriranje po statusu ────────────────────────────────
     def test_b19():
         from django.test import RequestFactory
+
         from eracun.views import api_list
         pks = []
         for s in ['draft', 'sent', 'accepted']:

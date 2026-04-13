@@ -3,15 +3,15 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from tax_wizard.models import (
-    TaxFormTemplate,
-    TaxWizardSession,
-    TaxDeadline,
-    TaxSimulation,
-    PotpomognutoPodručje,
-    PausalTier,
     OsobniOdbitakKoeficijent,
-    TaxAuditLog,
     PartnerTaxAccount,
+    PausalTier,
+    PotpomognutoPodručje,
+    TaxAuditLog,
+    TaxDeadline,
+    TaxFormTemplate,
+    TaxSimulation,
+    TaxWizardSession,
 )
 
 

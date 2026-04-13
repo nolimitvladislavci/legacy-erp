@@ -9,8 +9,8 @@ import logging
 import traceback
 
 from celery import shared_task
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -251,6 +251,7 @@ def post_migration_fenix_hook(project_pk):
 def _get_company_admin_phone(company):
     try:
         from django.contrib.auth.models import User
+
         from permissions.manager import PermissionManager
         for user in User.objects.filter(is_active=True):
             try:
@@ -281,6 +282,7 @@ def generate_full_export(self, manifest_id):
     """
     import json
     import os
+
     from django.utils import timezone as tz
 
     logger = logging.getLogger('borg.export')

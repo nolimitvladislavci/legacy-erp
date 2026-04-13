@@ -6,8 +6,9 @@ Koristi se iz bilo kojeg modula:
     log_borg_audit(company, 'FISCAL', 'Fiskalizacija uspjesna', document=receipt)
 """
 import logging
+
 from django.contrib.contenttypes.models import ContentType
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('borg.audit')
 

@@ -1,14 +1,15 @@
 """Smoke tests for POS views — correct URLs from pos/urls.py."""
 import datetime
 import json
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_pos_user(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'POS {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -204,7 +205,7 @@ class POSReceiptTest(TestCase):
         self.client.login(username='pos_v3', password='pass123')
 
     def _make_receipt(self):
-        from pos.models import POSTerminal, POSSession, POSReceipt
+        from pos.models import POSReceipt, POSSession, POSTerminal
         t = POSTerminal.objects.create(
             company=self.company, name='Test Blagajna 3', is_active=True
         )

@@ -1,10 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-
-
 # ── Sekcije + Dokumenti + Rezultati ──
-from udruge.models import Sekcija, ClanSekcija, ClanskiDokument, NatjecanjeRezultat
+from udruge.models import ClanSekcija, ClanskiDokument, NatjecanjeRezultat, Sekcija
+
 
 class ClanSekcijaInline(admin.TabularInline):
     model = ClanSekcija
@@ -34,8 +33,13 @@ class NatjecanjeRezultatAdmin(admin.ModelAdmin):
 
 # ── Golubar modul ──
 from udruge.models import (
-    Golubinjak, Golub, ParGolubova, Leglo,
-    ZdravstveniZapisGolub, Utrka, RezultatUtrke,
+    Golub,
+    Golubinjak,
+    Leglo,
+    ParGolubova,
+    RezultatUtrke,
+    Utrka,
+    ZdravstveniZapisGolub,
 )
 
 
@@ -89,7 +93,7 @@ class RezultatUtrkeAdmin(admin.ModelAdmin):
 
 
 # ── Perad (Flock) modul ──
-from udruge.models import Flock, EggRecord, FlockHealthRecord, FlockMortality
+from udruge.models import EggRecord, Flock, FlockHealthRecord, FlockMortality
 
 
 class EggRecordInline(admin.TabularInline):

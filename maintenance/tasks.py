@@ -1,9 +1,11 @@
 from celery import shared_task
 from django.utils import timezone
 
+
 @shared_task
 def monthly_depreciation_task():
     from companies.models import Company
+
     from .services import run_monthly_depreciation
     today = timezone.now().date()
     results = []

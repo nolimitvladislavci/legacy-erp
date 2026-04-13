@@ -1,9 +1,11 @@
-import os
 import csv
+import os
+
 from django.core.management.base import BaseCommand
+
 from companies.models import Company
-from synesis.models import SynesisConfig
 from partners.models import Partner
+from synesis.models import SynesisConfig
 
 
 class Command(BaseCommand):

@@ -1,8 +1,6 @@
 from rest_framework import serializers
-from .models import (
-    PetProfile, LifeEvent, EventMedia, SocialImport,
-    Competition, CompetitionEntry
-)
+
+from .models import Competition, CompetitionEntry, EventMedia, LifeEvent, PetProfile, SocialImport
 
 
 class EventMediaSerializer(serializers.ModelSerializer):

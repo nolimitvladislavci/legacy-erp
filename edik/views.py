@@ -1,9 +1,10 @@
 """EDIK — e-Porezna views."""
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils import timezone
 from datetime import date, timedelta
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from core.company_utils import get_user_company
 
@@ -12,7 +13,7 @@ from core.company_utils import get_user_company
 def edik_dashboard(request):
     """Dashboard — pregled predaja i rokovi."""
     company = get_user_company(request)
-    from edik.models import TaxSubmission, TaxCalendar
+    from edik.models import TaxCalendar, TaxSubmission
 
     today = date.today()
 
@@ -73,7 +74,7 @@ def edik_submission_detail(request, pk):
 def edik_submission_create(request):
     """Kreiranje nove predaje."""
     company = get_user_company(request)
-    from edik.models import TaxSubmission, TaxFormType
+    from edik.models import TaxFormType, TaxSubmission
 
     if request.method == 'POST':
         form_type = get_object_or_404(TaxFormType, pk=request.POST.get('form_type'))
@@ -201,7 +202,7 @@ def edik_calendar(request):
 def edik_generate_calendar(request):
     """Auto-generiranje kalendarskih unosa za godinu."""
     company = get_user_company(request)
-    from edik.models import TaxFormType, TaxCalendar
+    from edik.models import TaxCalendar, TaxFormType
 
     year = int(request.POST.get('year', date.today().year))
     created_count = 0

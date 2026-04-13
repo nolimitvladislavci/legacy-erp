@@ -1,9 +1,11 @@
 import logging
+
+from django.db import DatabaseError, IntegrityError
+
 from .models import FiscalConfiguration, FiscalLog, FiscalProvider
-from .providers.hr_fina import HRFinaProvider
-from .providers.de_tse import DETseProvider
 from .providers.at_rksv import ATRksvProvider
-from django.db import IntegrityError, DatabaseError
+from .providers.de_tse import DETseProvider
+from .providers.hr_fina import HRFinaProvider
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +107,7 @@ def fiscalize_pos_receipt(receipt):
 
 def _log_pos_fiscal(receipt, success=True, jir='', error=''):
     """Log POS fiscalization to FiscalLog."""
-    from .models import FiscalLog, FiscalConfiguration
+    from .models import FiscalConfiguration, FiscalLog
     try:
         company = receipt.session.terminal.company
         config = FiscalConfiguration.objects.filter(
@@ -134,7 +136,7 @@ def fiscalize_invoice(invoice, cert_path=None, cert_password=None, production=Fa
 
     Returns the same dict as send_to_cis: {'success': bool, 'jir': str, 'zki': str, ...}
     """
-    from .models import FiscalLog, FiscalConfiguration
+    from .models import FiscalConfiguration, FiscalLog
 
     try:
         from invoicing.fiscalization import send_to_cis

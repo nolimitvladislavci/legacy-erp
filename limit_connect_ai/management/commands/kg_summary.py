@@ -2,8 +2,9 @@
 Knowledge Graph Summary — pregled stanja za Mariju.
 """
 from decimal import Decimal
+
 from django.core.management.base import BaseCommand
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 
@@ -13,7 +14,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from companies.models import Company
         from limit_connect_ai.models_knowledge_graph import (
-            LegalOpportunity, ClientOpportunityMatch, SupplierRiskAlert,
+            ClientOpportunityMatch,
+            LegalOpportunity,
+            SupplierRiskAlert,
         )
 
         now = timezone.now().date()

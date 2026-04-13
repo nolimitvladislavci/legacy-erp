@@ -1,11 +1,12 @@
-from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from rest_framework import permissions, viewsets
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import render
+from django.views.decorators.http import require_POST
+from rest_framework import permissions, viewsets
 
 from .models import *
 from .serializers import *
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
 @extend_schema_view(list=extend_schema(tags=["Worktime"]))
@@ -94,7 +95,9 @@ def worker_camera_upload(request):
 def api_quick_create_project(request):
     """Create project via AJAX from quick-add modal."""
     import json
+
     from django.http import JsonResponse
+
     from core.company_utils import get_user_company
 
     if request.method != 'POST':
@@ -133,12 +136,11 @@ def api_quick_create_project(request):
 # HYBRID TIME TRACKING API — Clock In/Out, Geofence, Auditor
 # ══════════════════════════════════════════════════════════════════════════════
 import math
+
+from rest_framework import status as drf_status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status as drf_status
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
 
 
 def _haversine(lat1, lon1, lat2, lon2):
@@ -255,9 +257,10 @@ def api_clock_out(request):
     POST /api/hr/clock-out/
     Body: {lat: float, lon: float, start_time: iso (optional), end_time: iso (optional)}
     """
-    from worktime.models import TimeLog
-    from django.utils import timezone
     import dateutil.parser
+    from django.utils import timezone
+
+    from worktime.models import TimeLog
 
     lat = request.data.get('lat')
     lon = request.data.get('lon')
@@ -336,9 +339,11 @@ def api_auditor_flags(request):
     GET /api/hr/auditor/flags/
     Returns shifts where first physical activity is >30 min after clock-in.
     """
-    from worktime.models import TimeLog, ActivityEvent
-    from django.utils import timezone
     import datetime
+
+    from django.utils import timezone
+
+    from worktime.models import ActivityEvent, TimeLog
 
     company = _get_worker_company(request.user)
     date_from = request.query_params.get('date_from')
@@ -414,9 +419,12 @@ def api_auditor_flags(request):
 def offline_sync(request):
     """Sync offline worktime entries from IndexedDB."""
     import json
+
     from django.http import JsonResponse
-    from .models import TimeLog
+
     from core.company_utils import get_user_company
+
+    from .models import TimeLog
 
     data = json.loads(request.body)
     entries = data.get('entries', [])
@@ -462,8 +470,8 @@ def offline_sync(request):
 @login_required
 def my_hours(request):
     """Radnik vidi SVOJE sate — ne može vidjeti tuđe."""
-    from django.utils import timezone
     from django.db.models import Sum
+    from django.utils import timezone
 
     company = getattr(getattr(request.user, 'profile', None), 'company', None)
     today = timezone.now().date()

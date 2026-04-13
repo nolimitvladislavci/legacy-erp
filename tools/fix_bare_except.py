@@ -13,8 +13,8 @@ Pokretanje:
 BORG pravilo: 1803 tihe greske = 1803 potencijalnih katastrofa.
 """
 import ast
-import sys
 import re
+import sys
 from pathlib import Path
 
 # Direktoriji za preskociti

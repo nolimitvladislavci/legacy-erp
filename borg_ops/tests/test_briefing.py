@@ -3,6 +3,7 @@ Tests for BORG Morning Briefing — aggregation, ranking, formatting.
 """
 from datetime import timedelta
 from decimal import Decimal
+
 from django.test import TestCase
 from django.utils import timezone
 
@@ -11,8 +12,8 @@ class BriefingCollectorTest(TestCase):
     """Test briefing item collection and ranking."""
 
     def setUp(self):
-        from companies.models import Company
         from borg_ops.models import BorgBriefingConfig
+        from companies.models import Company
         self.company = Company.objects.create(name='Briefing Test d.o.o.', oib='12345678901')
         self.config = BorgBriefingConfig.objects.create(
             company=self.company,

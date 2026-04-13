@@ -15,6 +15,7 @@ EU 852/2004, HR NN 81/13
 """
 import logging
 from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
 from django.utils import timezone as tz
 
@@ -53,7 +54,7 @@ class ColdChainService:
         Returns:
             dict: {reading_id, is_alert, incidents: [...]}
         """
-        from delivery.models import SmartBox, SensorReading, analyze_readings
+        from delivery.models import SensorReading, SmartBox, analyze_readings
 
         # Nađi box po box_id ili sensor_device_id
         box = SmartBox.objects.filter(box_id=box_id).first()
@@ -131,7 +132,7 @@ class ColdChainService:
         Returns:
             dict: {ingested: int, alerts: int, incidents: int}
         """
-        from delivery.models import SmartBox, SensorReading, analyze_readings
+        from delivery.models import SensorReading, SmartBox, analyze_readings
 
         box = SmartBox.objects.filter(box_id=box_id).first()
         if not box:
@@ -285,8 +286,9 @@ class ColdChainService:
         Pregled svih SmartBoxeva za kompaniju — za dashboard.
         Vraća grupirane po statusu.
         """
-        from delivery.models import SmartBox
         from django.db.models import Count
+
+        from delivery.models import SmartBox
 
         boxes = SmartBox.objects.filter(owner_company_id=company_id)
 

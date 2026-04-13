@@ -17,10 +17,10 @@ Konfiguracija u .env:
   REVOLUT_WEBHOOK_SECRET=whsec_xxxxx
   REVOLUT_MODE=sandbox  (ili: production)
 """
-import os
-import logging
 import hashlib
 import hmac
+import logging
+import os
 
 import requests
 

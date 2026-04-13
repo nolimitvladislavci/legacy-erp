@@ -7,6 +7,7 @@ Skip: training, nulti iznos, bez inventarnih artikala, duplikati.
 NIKAD ne blokira POS — sve u try/except na pozivnoj strani.
 """
 import logging
+
 from django.db import models
 
 logger = logging.getLogger('pos.otpremnica')
@@ -35,7 +36,7 @@ def pos_receipt_to_otpremnica(receipt):
     if not items_with_inv:
         return None  # Usluge/radovi ne trebaju otpremnicu
 
-    from propter.models import Otpremnica, OtpremnicaItem, BillingPeriod
+    from propter.models import BillingPeriod, Otpremnica, OtpremnicaItem
 
     # Provjeri duplikat
     if Otpremnica.objects.filter(pos_receipt_id=str(receipt.pk)).exists():

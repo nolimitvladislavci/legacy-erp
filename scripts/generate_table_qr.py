@@ -3,14 +3,19 @@
 Generira QR kod PNG za svaki TableQR Široki Šor.
 Output: media/gastro/table_qr/
 """
-import os, sys, django
+import os
+import sys
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
-from gastro_menu.models import TableQR, DigitalMenu
+
+from gastro_menu.models import DigitalMenu, TableQR
 
 DOMAIN = 'https://limit-connect.com'
 OUTPUT_DIR = '/var/www/fina-connect/media/gastro/table_qr'

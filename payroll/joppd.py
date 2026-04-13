@@ -19,8 +19,8 @@ HR stope (2026):
 XML format: JOPPD-v2, šalje se na ePorezna.hr
 """
 import logging
-from decimal import Decimal, ROUND_HALF_UP
 from datetime import date
+from decimal import ROUND_HALF_UP, Decimal
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 logger = logging.getLogger(__name__)
@@ -114,7 +114,7 @@ def calculate_payroll_run(payroll_run, prirez_rate=Decimal('0')):
     Koristi worktime.TimeEntry za sate, EmployeeProfile za satnice.
     """
     from payroll.models import Payslip
-    from worktime.models import TimeEntry, EmployeeProfile
+    from worktime.models import EmployeeProfile, TimeEntry
 
     company = payroll_run.company
     year = payroll_run.year

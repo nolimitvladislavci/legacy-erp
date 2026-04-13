@@ -1,15 +1,21 @@
 
 import datetime
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+
 from accounts.models import UserProfile
 from companies.models import Company
 from documents.models import (
-    Otpremnica, OtpremnicaItem,
-    Primka, PrimkaItem,
-    OtkupniBlok, OtkupniBlokItem,
-    CMR, CMRItem,
+    CMR,
+    CMRItem,
+    OtkupniBlok,
+    OtkupniBlokItem,
+    Otpremnica,
+    OtpremnicaItem,
+    Primka,
+    PrimkaItem,
 )
 
 User = get_user_model()

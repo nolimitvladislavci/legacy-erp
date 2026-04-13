@@ -8,6 +8,7 @@ Anomalies:
 3. Same OIB, different names (data quality)
 """
 import logging
+
 from celery import shared_task
 from django.db import connection
 from django.utils import timezone

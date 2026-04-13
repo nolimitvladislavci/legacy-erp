@@ -5,6 +5,7 @@ Identična logika kao fiskalizacija računa, ali univerzalna.
 import hashlib
 import logging
 import time
+
 from django.utils import timezone
 
 logger = logging.getLogger('gov_export.pipeline')
@@ -87,8 +88,8 @@ def run_pipeline(export, user=None, dry_run=False):
             from fiskalizacija.models import FiscalConfig
             config = FiscalConfig.objects.filter(company=export.company, is_active=True).first()
             if config and config.cert_path:
+                from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
                 from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
-                from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
 
                 pw = config.get_password()
                 if isinstance(pw, str): pw = pw.encode()
@@ -123,7 +124,7 @@ def run_pipeline(export, user=None, dry_run=False):
     t0 = time.time()
     if export.is_signed:
         try:
-            from .tsa import get_timestamp_token, embed_timestamp_in_xades
+            from .tsa import embed_timestamp_in_xades, get_timestamp_token
             xml_bytes = export.xml_content.encode('utf-8') if isinstance(export.xml_content, str) else export.xml_content
             ts_token = get_timestamp_token(xml_bytes)
             if ts_token:

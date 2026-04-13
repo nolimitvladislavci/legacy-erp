@@ -16,9 +16,8 @@ Sigurnost:
 import logging
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('b2b_bridge')
 
@@ -81,6 +80,7 @@ class B2BBridgeService:
         Poziva se opcionalno — transmit_purchase_order koristi product.price po defaultu.
         """
         from django.db.models import Q
+
         from marketplace.models import PartnerDiscount
         from procurement.models import SupplierPriceList
 
@@ -123,10 +123,12 @@ class B2BBridgeService:
         Raises:
             B2BBridgeError: s kodom i porukom za UI
         """
-        from procurement.models import PurchaseOrder
         from marketplace.models import (
-            MarketplaceOrder, MarketplaceOrderItem, SellerSubOrder,
+            MarketplaceOrder,
+            MarketplaceOrderItem,
+            SellerSubOrder,
         )
+        from procurement.models import PurchaseOrder
 
         # 1. Učitaj PO s relacijama
         po = (

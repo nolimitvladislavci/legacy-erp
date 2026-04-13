@@ -443,6 +443,7 @@ class StorageConfig(models.Model):
 
 from django.conf import settings as _settings
 
+
 class ArhivaBookmark(models.Model):
     user = models.ForeignKey(_settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     entry = models.ForeignKey('ArhivaEntry', on_delete=models.CASCADE, related_name='bookmarks')

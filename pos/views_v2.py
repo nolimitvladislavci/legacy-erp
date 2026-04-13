@@ -17,16 +17,21 @@ import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
-from django.db import transaction, DatabaseError
+from django.db import DatabaseError, transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone as tz
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 from core.company_utils import get_user_company
+
 from .models import (
-    POSPaymentLine, POSReceipt, POSReceiptItem, POSSession,
-    POSTerminal, POSPulseEvent,
+    POSPaymentLine,
+    POSPulseEvent,
+    POSReceipt,
+    POSReceiptItem,
+    POSSession,
+    POSTerminal,
 )
 
 logger = logging.getLogger(__name__)
@@ -1291,7 +1296,7 @@ def chain_verify(request):
     if not company:
         return JsonResponse({'error': 'No company'}, status=400)
 
-    from pos.hashchain import verify_chain, daily_anchor_hash, ChainLink
+    from pos.hashchain import ChainLink, daily_anchor_hash, verify_chain
 
     is_valid, break_point, total = verify_chain(company, verbose=True)
     anchor = daily_anchor_hash(company)
@@ -1352,8 +1357,9 @@ def offline_catalog(request):
     Frontend poziva ovo pri svakom otvaranju POS-a i sprema u IndexedDB.
     Kad internet padne, POS crta grid iz IndexedDB.
     """
-    from inventory.models import InventoryItem
     from django.utils import timezone as tz
+
+    from inventory.models import InventoryItem
 
     terminal_id = request.GET.get('terminal_id')
     if not terminal_id:

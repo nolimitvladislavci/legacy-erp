@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import CardActivity, StatusTimestamp
 
 
@@ -38,6 +39,7 @@ class StatusTimestampAdmin(admin.ModelAdmin):
 
 
 from .models import DomainRegistry
+
 
 @admin.register(DomainRegistry)
 class DomainRegistryAdmin(admin.ModelAdmin):

@@ -1,7 +1,6 @@
 from django.urls import path
-from . import views
-from . import views_bank
-from . import views_ai_review
+
+from . import views, views_ai_review, views_bank
 
 app_name = 'konto'
 

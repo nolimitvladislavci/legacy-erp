@@ -14,11 +14,11 @@ Scenariji:
 10. Concurrent sessions (isti user, dva tokena)
 """
 import hashlib
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.utils import timezone as tz
 
 User = get_user_model()
@@ -93,8 +93,8 @@ class UnifiedLoginTest(SmartLoginSetup):
         self.assertIn('DeviceToken', log.notes)
 
     def test_05_login_starts_waiter_shift(self):
-        from pos.worktime_bridge import device_login_start_all
         from pos.models import WaiterShift
+        from pos.worktime_bridge import device_login_start_all
         dt = self._make_token()
         result = device_login_start_all(dt, ip_address='127.0.0.1')
         self.assertIn('waiter_shift', result.get('started', []))
@@ -122,9 +122,9 @@ class UnifiedLoginTest(SmartLoginSetup):
 
     def test_08_logout_closes_all(self):
         """Logout zatvara TimeLog + WaiterShift + Cashier."""
+        from pos.models import WaiterShift
         from pos.worktime_bridge import device_login_start_all, device_logout_stop_all
         from worktime.models import TimeLog
-        from pos.models import WaiterShift
         cashier = self._make_cashier()
         dt = self._make_token(cashier=cashier)
         device_login_start_all(dt, ip_address='127.0.0.1')
@@ -269,8 +269,8 @@ class ForgottenPhoneScenarioTest(SmartLoginSetup):
 class CashierSafeguardTest(SmartLoginSetup):
     def test_18_cashier_16h_guard(self):
         """Cashier clock_out sa >16h trajanjem → limitira na 16h."""
-        from pos.worktime_bridge import cashier_clock_out
         from pos.models import POSCashier
+        from pos.worktime_bridge import cashier_clock_out
         cashier = POSCashier.objects.create(
             company=self.company, name='Long Shift',
             user=self.user, is_active=True,
@@ -284,8 +284,8 @@ class CashierSafeguardTest(SmartLoginSetup):
 
     def test_19_cashier_very_short_shift_ignored(self):
         """Smjena < 1 min se ne broji (slučajni scan)."""
-        from pos.worktime_bridge import cashier_clock_out
         from pos.models import POSCashier
+        from pos.worktime_bridge import cashier_clock_out
         from worktime.models import TimeEntry
         cashier = POSCashier.objects.create(
             company=self.company, name='Quick Scan',

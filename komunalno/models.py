@@ -1,10 +1,11 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 from decimal import Decimal
-from core.managers import CompanyManager
-from borg_ops.mixins import FSMMixin
 
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from borg_ops.mixins import FSMMixin
+from core.managers import CompanyManager
 
 # ═══════════════════════════════════════════════════════
 # ZELENI OTOK / RECIKLAŽNO DVORIŠTE
@@ -377,6 +378,7 @@ class ScaleReading(models.Model):
     def verify_integrity(self):
         """Provjeri je li hash još valjan."""
         import hashlib
+
         from django.conf import settings
         secret = getattr(settings, 'SCALE_INTEGRITY_SECRET', settings.SECRET_KEY[:16])
         payload = f'{self.raw_data}|{self.read_at.isoformat()}|{self.station_id}|{secret}'
@@ -387,6 +389,7 @@ class ScaleReading(models.Model):
     def compute_hash(raw_data, timestamp, station_id):
         """Izračunaj integrity hash za novo očitanje."""
         import hashlib
+
         from django.conf import settings
         secret = getattr(settings, 'SCALE_INTEGRITY_SECRET', settings.SECRET_KEY[:16])
         payload = f'{raw_data}|{timestamp.isoformat()}|{station_id}|{secret}'

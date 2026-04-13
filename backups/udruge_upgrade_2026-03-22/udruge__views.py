@@ -1,13 +1,15 @@
 import json
 import logging
-from django.contrib.auth.decorators import login_required
+
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+
 from core.company_utils import get_user_company
 
 logger = logging.getLogger('udruge')
@@ -131,7 +133,9 @@ def ai_analyze(request, pk):
     clan = get_object_or_404(Clan, pk=pk, company=company)
 
     try:
-        import os, anthropic
+        import os
+
+        import anthropic
         client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
 
         context = json.dumps({
@@ -309,8 +313,9 @@ def donacija_list(request):
     if not company:
         return redirect('dashboard')
 
-    from .models import Donacija
     from django.db.models import Sum
+
+    from .models import Donacija
     qs = Donacija.objects.filter(company=company)
 
     year = request.GET.get('year', str(timezone.now().year))
@@ -388,8 +393,9 @@ def knjiga_primitaka(request):
     if not company:
         return redirect('dashboard')
 
-    from .models import KnjigaPrimitaka
     from django.db.models import Sum
+
+    from .models import KnjigaPrimitaka
 
     year = request.GET.get('year', str(timezone.now().year))
     qs = KnjigaPrimitaka.objects.filter(company=company, datum__year=year)
@@ -604,8 +610,8 @@ def eu_reports(request):
 
 @login_required
 def download_volunteer_timesheet(request):
-    from django.http import HttpResponse
     from django.contrib.auth.models import User
+    from django.http import HttpResponse
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
@@ -755,7 +761,7 @@ def dogadjaj_create(request):
 @login_required
 def dogadjaj_detail(request, pk):
     company = get_user_company(request)
-    from .models import Dogadjaj, Clan
+    from .models import Clan, Dogadjaj
 
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
     prijave = dogadjaj.prijave.select_related("clan").all()
@@ -777,7 +783,7 @@ def dogadjaj_detail(request, pk):
 @require_POST
 def dogadjaj_register(request, pk):
     company = get_user_company(request)
-    from .models import Dogadjaj, EventPrijava, Clan
+    from .models import Clan, Dogadjaj, EventPrijava
 
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
 
@@ -850,8 +856,9 @@ def kampanja_create(request):
         messages.error(request, "Nema aktivne udruge.")
         return redirect("udruge:kampanja_list")
 
-    from .models import Kampanja
     from decimal import Decimal
+
+    from .models import Kampanja
 
     if request.method == "POST":
         kampanja = Kampanja(
@@ -882,7 +889,7 @@ def kampanja_create(request):
 @login_required
 def kampanja_detail(request, pk):
     company = get_user_company(request)
-    from .models import Kampanja, Donacija
+    from .models import Donacija, Kampanja
 
     kampanja = get_object_or_404(Kampanja, pk=pk, company=company)
     events = kampanja.dogadjaji.all()
@@ -929,7 +936,7 @@ def email_kampanja_create(request):
         messages.error(request, "Nema aktivne udruge.")
         return redirect("udruge:email_kampanja_list")
 
-    from .models import EmailKampanja, Kampanja, Dogadjaj, Clan
+    from .models import Clan, Dogadjaj, EmailKampanja, Kampanja
 
     if request.method == "POST":
         ek = EmailKampanja(
@@ -946,7 +953,9 @@ def email_kampanja_create(request):
 
         if "ai_generate" in request.POST:
             try:
-                import os, anthropic
+                import os
+
+                import anthropic
                 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
                 ai_prompt = "Napisi email za udrugu '%s'. Tip: %s. Predmet: %s. Jezik: hrvatski. Vrati samo HTML body." % (
                     company.name,

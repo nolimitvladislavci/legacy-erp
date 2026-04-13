@@ -1,11 +1,13 @@
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from decimal import Decimal
 import datetime
+from decimal import Decimal
 from unittest.mock import patch
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.utils import timezone
+
 from companies.models import Company
-from worktime.models import TimeEntry, EmployeeProfile, Project, ActiveTimer
+from worktime.models import ActiveTimer, EmployeeProfile, Project, TimeEntry
 
 User = get_user_model()
 

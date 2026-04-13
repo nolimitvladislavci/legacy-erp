@@ -347,6 +347,7 @@ class PropterTenant(models.Model):
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 @receiver(post_save, sender=PropterTenant, dispatch_uid='propter_config_sync')
 def sync_propter_config(sender, instance, created, **kwargs):
     try:
@@ -433,7 +434,8 @@ class UmbrellaInviteCode(models.Model):
 
     @staticmethod
     def generate_code():
-        import random, string
+        import random
+        import string
         return 'UC-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 

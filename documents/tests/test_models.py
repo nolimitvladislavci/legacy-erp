@@ -1,11 +1,13 @@
 """Tests for Document model."""
 from datetime import date
-from django.test import TestCase
+
 from django.contrib.auth.models import User
-from companies.models import Company
-from partners.models import Partner
-from documents.models import Document
+from django.test import TestCase
+
 from accounts.models import UserProfile
+from companies.models import Company
+from documents.models import Document
+from partners.models import Partner
 
 
 def _make_company(name, oib):

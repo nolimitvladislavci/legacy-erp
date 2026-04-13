@@ -1,6 +1,8 @@
 """Gemini Agent Celery Tasks — autonomno izvršavanje zadataka."""
 import logging
+
 from celery import shared_task
+
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('gemini_agent')

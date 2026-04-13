@@ -2,24 +2,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from partners.models import Partner
 
 from .models import Project, ProjectPhoto, ProjectUpdate
 from .serializers import ProjectPhotoSerializer, ProjectSerializer
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
 
 
 @login_required

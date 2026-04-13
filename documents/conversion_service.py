@@ -186,6 +186,7 @@ def _extract_invoice_data_claude(file_bytes, filename):
         raise RuntimeError('No AI API configured (GEMINI_API_KEY or ANTHROPIC_API_KEY)')
 
     import base64
+
     import anthropic
 
     client = anthropic.Anthropic(api_key=api_key)
@@ -521,7 +522,7 @@ def convert_image_to_xml(file_bytes, filename, company, user=None):
 
     Returns: ConversionRecord instance
     """
-    from documents.models import ConversionRecord, ArhivaEntry
+    from documents.models import ArhivaEntry, ConversionRecord
     from documents.storage_backends import store_document
 
     original_hash = hashlib.sha256(file_bytes).hexdigest()

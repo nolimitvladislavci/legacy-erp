@@ -7,17 +7,26 @@ Pokretanje:
   ./venv/bin/python scripts/borg0_haiku_classify.py --dry-run
   ./venv/bin/python scripts/borg0_haiku_classify.py --execute
 """
-import django, os, sys, json, time
+import json
+import os
+import sys
+import time
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-import anthropic
-from inventory.models import InventoryItem
-from django.db import DatabaseError
 from collections import Counter
+
+import anthropic
+from django.db import DatabaseError
 
 # Učitaj API key iz .env
 from dotenv import load_dotenv
+
+from inventory.models import InventoryItem
+
 load_dotenv('/var/www/fina-connect/.env')
 
 client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))

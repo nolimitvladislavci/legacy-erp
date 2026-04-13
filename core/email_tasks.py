@@ -4,8 +4,9 @@ All email sending goes through these tasks for async processing.
 """
 import base64
 import logging
+
 from celery import shared_task
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import EmailMessage, send_mail
 
 logger = logging.getLogger(__name__)
 

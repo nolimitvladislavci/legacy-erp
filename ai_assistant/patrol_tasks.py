@@ -1,7 +1,8 @@
 """Celery tasks for AI Midnight Patrol."""
 import logging
+
 from celery import shared_task
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('ai_assistant.patrol')
 
@@ -13,10 +14,10 @@ def ai_midnight_patrol(self):
     Sends summary via notifications (dashboard + WhatsApp if critical).
     Runs at 02:00 via Celery Beat.
     """
+    from ai_assistant.models import PatrolReport
+    from ai_assistant.patrol import run_patrol
     from companies.models import Company
     from notifications.services import notify
-    from ai_assistant.patrol import run_patrol
-    from ai_assistant.models import PatrolReport
 
     companies = Company.objects.all()
     total_findings = 0

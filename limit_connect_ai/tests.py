@@ -12,7 +12,7 @@ Pokriva:
 """
 from datetime import date, timedelta
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -24,8 +24,8 @@ class BORGTestBase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from companies.models import Company, TaxRate
         from accounts.models import UserProfile
+        from companies.models import Company, TaxRate
 
         cls.company = Company.objects.create(
             name='Test Firma d.o.o.',
@@ -128,7 +128,10 @@ class OpportunityMatcherTest(BORGTestBase):
     def test_domain_country_filter(self):
         """DE olakšica se NE matchira s HR firmom."""
         from limit_connect_ai.models_knowledge_graph import (
-            LegalOpportunity, ImpactDomain, RegulatoryUpdate, RegulatorySource,
+            ImpactDomain,
+            LegalOpportunity,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         from limit_connect_ai.services.opportunity_scanner import match_opportunities_for_company
 
@@ -183,11 +186,13 @@ class AdaptationEngineTest(BORGTestBase):
 
     def test_tax_rate_change_creates_new_deactivates_old(self):
         """Promjena 25% → 26% kreira novu stopu i deaktivira staru."""
+        from companies.models import TaxRate
         from limit_connect_ai.models_knowledge_graph import (
-            AdaptationRule, RegulatoryUpdate, RegulatorySource,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         from limit_connect_ai.services.adaptation_engine import AdaptationEngine
-        from companies.models import TaxRate
 
         source = RegulatorySource.objects.create(name='Test NN', source_type='nn')
         update = RegulatoryUpdate.objects.create(
@@ -227,7 +232,9 @@ class AdaptationEngineTest(BORGTestBase):
     def test_same_rate_change_rejected(self):
         """Promjena 25% → 25% se odbija (nema smisla)."""
         from limit_connect_ai.models_knowledge_graph import (
-            AdaptationRule, RegulatoryUpdate, RegulatorySource,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         from limit_connect_ai.services.adaptation_engine import AdaptationEngine
 
@@ -251,7 +258,9 @@ class AdaptationEngineTest(BORGTestBase):
     def test_nonexistent_old_rate_rejected(self):
         """Promjena nepostojeće stope (99%) se odbija."""
         from limit_connect_ai.models_knowledge_graph import (
-            AdaptationRule, RegulatoryUpdate, RegulatorySource,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         from limit_connect_ai.services.adaptation_engine import AdaptationEngine
 
@@ -275,7 +284,9 @@ class AdaptationEngineTest(BORGTestBase):
         """Artikli na staroj stopi se prebace na novu."""
         from inventory.models import InventoryItem
         from limit_connect_ai.models_knowledge_graph import (
-            AdaptationRule, RegulatoryUpdate, RegulatorySource,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         from limit_connect_ai.services.adaptation_engine import AdaptationEngine
 
@@ -460,6 +471,7 @@ class PostImportHookTest(BORGTestBase):
     def test_hook_contains_fenix_scan_call(self):
         """Source code hooka sadrži poziv na fenix_post_import_scan."""
         import inspect
+
         from data_migration.tasks import post_migration_fenix_hook
         source = inspect.getsource(post_migration_fenix_hook)
         self.assertIn('fenix_post_import_scan', source)
@@ -467,6 +479,7 @@ class PostImportHookTest(BORGTestBase):
     def test_dashboard_view_injects_ai_insights(self):
         """company_dashboard view injektira ai_insights u context."""
         import inspect
+
         from core.views import company_dashboard
         source = inspect.getsource(company_dashboard)
         self.assertIn('get_dashboard_insights', source)
@@ -491,7 +504,9 @@ class KnowledgeGraphTest(BORGTestBase):
 
     def test_regulatory_update_with_impact(self):
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, ImpactDomain,
+            ImpactDomain,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         src = RegulatorySource.objects.create(name='Test', source_type='nn')
         update = RegulatoryUpdate.objects.create(
@@ -512,7 +527,8 @@ class KnowledgeGraphTest(BORGTestBase):
     def test_client_opportunity_match_idempotent(self):
         """get_or_create ne kreira duplikate."""
         from limit_connect_ai.models_knowledge_graph import (
-            LegalOpportunity, ClientOpportunityMatch,
+            ClientOpportunityMatch,
+            LegalOpportunity,
         )
         opp = LegalOpportunity.objects.create(
             opportunity_type='eu_fund', name='EU Test',
@@ -596,8 +612,9 @@ class NNFeedServiceTest(BORGTestBase):
         mock_client.messages.create.return_value = mock_response
         mock_anthropic.return_value = mock_client
 
-        from limit_connect_ai.services.nn_feed_service import NNFeedScraperService
         import os
+
+        from limit_connect_ai.services.nn_feed_service import NNFeedScraperService
         with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'}):
             service = NNFeedScraperService()
             result = service._extract_via_llm('Tekst zakona o PDV-u', 'Test naslov')
@@ -616,8 +633,8 @@ class ProactiveWidgetKGTest(BORGTestBase):
 
     def test_empty_knowledge_graph_graceful(self):
         """Prazan KG ne ruši widget — opportunities i legal_alerts su prazne liste."""
-        from limit_connect_ai.proactive_widget import get_dashboard_insights
         from companies.models import Company
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
 
         empty = Company.objects.create(name='KG Prazna', oib='99999999999')
         result = get_dashboard_insights(empty)
@@ -632,7 +649,8 @@ class ProactiveWidgetKGTest(BORGTestBase):
     def test_opportunity_match_appears_in_widget(self):
         """ClientOpportunityMatch za firmu pojavljuje se u opportunities sekciji."""
         from limit_connect_ai.models_knowledge_graph import (
-            LegalOpportunity, ClientOpportunityMatch,
+            ClientOpportunityMatch,
+            LegalOpportunity,
         )
         from limit_connect_ai.proactive_widget import get_dashboard_insights
 
@@ -661,7 +679,8 @@ class ProactiveWidgetKGTest(BORGTestBase):
     def test_utilized_match_not_shown(self):
         """Iskorištena prilika (status=utilized) se NE prikazuje."""
         from limit_connect_ai.models_knowledge_graph import (
-            LegalOpportunity, ClientOpportunityMatch,
+            ClientOpportunityMatch,
+            LegalOpportunity,
         )
         from limit_connect_ai.proactive_widget import get_dashboard_insights
 

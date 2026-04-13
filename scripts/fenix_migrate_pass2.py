@@ -2,7 +2,9 @@
 """
 FENIX Pass 2 — Migrate var(--*) colors and remaining patterns
 """
-import re, glob, sys
+import glob
+import re
+import sys
 
 # var() color → utility class
 VAR_COLOR_MAP = {

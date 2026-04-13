@@ -3,11 +3,16 @@ sales/admin.py — Admin za cjenike, narudžbe, saldakonti.
 """
 
 from django.contrib import admin
-from .models import (
-    RabatGroup, CustomerPriceList, PriceListLine,
-    SalesOrder, SalesOrderLine, OpenItem, IOSReport,
-)
 
+from .models import (
+    CustomerPriceList,
+    IOSReport,
+    OpenItem,
+    PriceListLine,
+    RabatGroup,
+    SalesOrder,
+    SalesOrderLine,
+)
 
 # ═══════════════════════════════════════════════════════════════
 #  CJENICI

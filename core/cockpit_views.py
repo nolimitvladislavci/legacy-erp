@@ -6,18 +6,19 @@ Izvučeno iz core/views.py radi čistoće i održavanja.
 Jedina točka istine za cockpit access kontrolu.
 """
 import json
+import logging
 import os
 import subprocess
 import uuid
 
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.db import IntegrityError, DatabaseError
-import logging
+
 logger = logging.getLogger(__name__)
 
 # ─── ACCESS CONTROL ────────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ def ivan_cockpit(request):
         return guard
 
     from datetime import timedelta
+
     from django.contrib.auth.models import User
     from django.db.models import Count, Sum
 
@@ -385,6 +387,7 @@ def system_improvement_api(request):
     Ako je korisnik ulogiran, koristi session auth kao fallback.
     """
     import hashlib
+
     from django.conf import settings
 
     # Auth: ulogiran korisnik ILI validan system token

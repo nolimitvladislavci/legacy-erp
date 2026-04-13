@@ -9,6 +9,7 @@ Pravila:
 """
 import logging
 from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
 from django.utils import timezone as tz
 
@@ -224,8 +225,8 @@ class CheckoutService:
             session_id, items[], payment_method, amount_paid,
             cashier_id, tip_amount, note, voucher_code, voucher_amount
         """
-        from pos.models import POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
         from inventory.models import InventoryItem
+        from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession
 
         # ── 1. PARSE ──
         session_id = payload.get('session_id')
@@ -549,9 +550,10 @@ class CheckoutService:
         # Od 01.01.2026. B2B transakcije MORAJU imati e-Racun
         if receipt.buyer_oib and receipt.buyer_oib.strip():
             try:
-                from eracun.models import ERacun
                 # Kreiraj e-Racun u pozadini (Celery)
                 from django.db import transaction as db_tx
+
+                from eracun.models import ERacun
                 def _create_eracun():
                     try:
                         eracun = ERacun.objects.create(

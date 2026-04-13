@@ -33,8 +33,8 @@ def vies_batch_lookup(self, limit=0, dry_run=False):
     """
     Batch VIES provjera za sve b2b_novat i udruga_novat partnere.
     """
-    from partners.models import Partner
     from partners.hr_registry import VIESLookup
+    from partners.models import Partner
 
     vies = VIESLookup(timeout=15)
     now = timezone.now()

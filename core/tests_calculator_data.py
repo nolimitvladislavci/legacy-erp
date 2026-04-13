@@ -1,14 +1,15 @@
 """Calculator views tests with real Calculation/BOM data."""
 import datetime
 import uuid
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user(oib, username, modules=None):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'CAL {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')

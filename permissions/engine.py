@@ -103,8 +103,9 @@ class PermissionEngine:
         ).exists()
 
     def _check_rbac(self, user, permission: str, company) -> Optional[bool]:
-        from permissions.models import UserRole
         from django.db.models import Q
+
+        from permissions.models import UserRole
         qs = UserRole.objects.filter(
             user=user, role__is_active=True
         ).select_related('role')
@@ -119,9 +120,10 @@ class PermissionEngine:
         return False
 
     def _check_override(self, user, permission: str, company) -> Optional[bool]:
-        from permissions.models import PermissionOverride
         from django.db.models import Q
         from django.utils import timezone
+
+        from permissions.models import PermissionOverride
         qs = PermissionOverride.objects.filter(
             user=user,
             permission__codename=permission,

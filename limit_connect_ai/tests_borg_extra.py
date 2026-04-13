@@ -5,8 +5,8 @@ KG models, opportunity scanner, self-heal edge cases.
 
 Run: python manage.py test limit_connect_ai.tests_borg_extra --verbosity=2
 """
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -16,8 +16,8 @@ from django.utils import timezone
 class ExtraTestBase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        from companies.models import Company, TaxRate
         from accounts.models import UserProfile
+        from companies.models import Company, TaxRate
         cls.company = Company.objects.create(
             name='Extra Test Co', oib='11122233344', country='HR',
             business_type='doo', city='Osijek', has_signed_tc_consent=True,
@@ -194,8 +194,8 @@ class SignalTriageEdgeCaseTest(ExtraTestBase):
         self.assertIn('{message}', TRIAGE_PROMPT)
 
     def test_apply_triage_none_safe(self):
-        from limit_connect_ai.signal_triage import apply_triage
         from limit_connect_ai.models_signal import FenixSignal
+        from limit_connect_ai.signal_triage import apply_triage
         sig = FenixSignal.objects.create(
             signal_type='bug', message='test', status='new',
         )
@@ -279,7 +279,9 @@ class KGModelExtraTest(ExtraTestBase):
 
     def test_adaptation_rule_execute_not_auto(self):
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, AdaptationRule,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         src = RegulatorySource.objects.create(
             name='X', source_type='custom', url_endpoint='http://x.hr',
@@ -298,7 +300,9 @@ class KGModelExtraTest(ExtraTestBase):
 
     def test_impact_domain_matches_company(self):
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, ImpactDomain,
+            ImpactDomain,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         src = RegulatorySource.objects.create(
             name='Y', source_type='custom', url_endpoint='http://y.hr',
@@ -315,7 +319,9 @@ class KGModelExtraTest(ExtraTestBase):
 
     def test_impact_domain_wrong_country(self):
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, ImpactDomain,
+            ImpactDomain,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         src = RegulatorySource.objects.first()
         update = RegulatoryUpdate.objects.create(

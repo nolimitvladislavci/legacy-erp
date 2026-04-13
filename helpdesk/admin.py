@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import Ticket, TicketMessage, TicketTemplate
+
 
 class MsgInline(admin.TabularInline):
     model = TicketMessage
@@ -18,6 +20,7 @@ class TicketTemplateAdmin(admin.ModelAdmin):
 
 
 from .models import VIPContact
+
 
 @admin.register(VIPContact)
 class VIPContactAdmin(admin.ModelAdmin):

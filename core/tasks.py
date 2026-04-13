@@ -1,5 +1,6 @@
 """core/tasks.py — Centralni Celery taskovi."""
 import logging
+
 from celery import shared_task
 
 logger = logging.getLogger(__name__)
@@ -20,8 +21,9 @@ def notify_error_to_team(self, user, path, method, exc_class,
       - Dev kanal — dobije puni log
     """
     import logging
-    from django.conf import settings
     from datetime import datetime
+
+    from django.conf import settings
 
     logger = logging.getLogger(__name__)
 
@@ -98,8 +100,9 @@ def run_system_test_task(self, phone='+491723006985', quick=False):
     logger = logging.getLogger('system_test')
     logger.info(f'🤖 run_system_test_task pokrenut — phone={phone}')
 
-    from django.core.management import call_command
     from io import StringIO
+
+    from django.core.management import call_command
     out = StringIO()
     try:
         call_command('run_system_test',
@@ -166,9 +169,9 @@ def database_backup(self):
     Auth: /root/.pgpass (600 permissions)
     Format: custom (-F c) — najbrži restore, kompresija ~10:1
     """
-    import subprocess
-    import os
     import glob
+    import os
+    import subprocess
     from datetime import datetime
 
     log = logging.getLogger('core.backup')
@@ -273,6 +276,7 @@ def check_subscriptions(self):
     Pokreće se svaki dan u 09:00 preko Celery beat-a.
     """
     from datetime import date
+
     from core.notify import notify
 
     SUBSCRIPTIONS = [

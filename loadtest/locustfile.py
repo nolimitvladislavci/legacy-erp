@@ -4,7 +4,8 @@ Usage: locust -f locustfile.py --headless -u 150 -r 10 -t 5m --host http://127.0
 """
 import random
 import re
-from locust import HttpUser, task, between
+
+from locust import HttpUser, between, task
 
 
 class DashboardUser(HttpUser):

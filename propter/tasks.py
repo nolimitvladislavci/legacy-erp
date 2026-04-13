@@ -1,8 +1,9 @@
 """Propter Celery taskovi."""
-from celery import shared_task
 import logging
+
+from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger("propter.tasks")
 
@@ -29,9 +30,9 @@ def auto_close_billing_periods(self):
 def send_zbirni_eracun(billing_period_id, user_pk=None):
     """Posalji zbirni e-Racun na FINA CIS async."""
     try:
-        from propter.models import BillingPeriod
         from eracun.models import ERacun
         from eracun.services.engine import process_eracun
+        from propter.models import BillingPeriod
 
         period = BillingPeriod.objects.get(pk=billing_period_id)
         if not period.zbirni_eracun_id:
@@ -74,11 +75,13 @@ def generate_monthly_sammelrechnung(self):
     3. Stavke: popis svih OTP-a s datumima
     4. Zatvara BillingPeriod
     """
-    from django.utils import timezone
-    from propter.models import BillingPeriod, Otpremnica
-    from invoicing.models import Invoice
-    from django.db.models import Sum, Count
     import datetime
+
+    from django.db.models import Count, Sum
+    from django.utils import timezone
+
+    from invoicing.models import Invoice
+    from propter.models import BillingPeriod, Otpremnica
 
     # Prošli mjesec
     today = timezone.now().date()

@@ -1,14 +1,18 @@
-import os, sys
+import os
+import sys
+
 sys.path.insert(0, '/var/www/fina-connect')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 
 import django
+
 django.setup()
 
-from pos.models import *
-from django.db.models import Sum, Count, Avg
-from django.utils import timezone
 from django.db import DatabaseError
+from django.db.models import Avg, Count, Sum
+from django.utils import timezone
+
+from pos.models import *
 
 SEP = "=" * 55
 

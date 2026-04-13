@@ -2,7 +2,7 @@
 Permission Manager - Core permission checking logic
 """
 from django.core.cache import cache
-from django.db import models, DatabaseError
+from django.db import DatabaseError, models
 
 from .models import Permission, PermissionOverride, Role, UserRole
 

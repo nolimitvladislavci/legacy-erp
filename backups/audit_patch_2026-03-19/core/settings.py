@@ -482,8 +482,8 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 209715200  # 200MB
 SENTRY_DSN = _os.environ.get('SENTRY_DSN', '')
 if SENTRY_DSN and not DEBUG:
     import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
     from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.django import DjangoIntegration
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(), CeleryIntegration()],

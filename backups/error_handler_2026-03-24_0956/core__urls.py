@@ -1,19 +1,20 @@
-from django.contrib import admin
-from django.shortcuts import redirect
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from django.conf.urls.i18n import i18n_patterns
-from django.views.i18n import set_language
-from django.views.generic import RedirectView
-from django.http import FileResponse, Http404
 import os as _os
+
+from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
+from django.conf.urls.static import static
+from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.http import FileResponse, Http404
+from django.shortcuts import redirect
+from django.urls import include, path
+from django.views.generic import RedirectView
+from django.views.i18n import set_language
+
+from core import intelligence_views, oib_finalizer_views, onboarding_views, steuerberater_views
+
 from . import views
-from core import steuerberater_views
-from core import intelligence_views
-from core import oib_finalizer_views
-from core import onboarding_views
+
 
 def _serve_offline(request):
     of_path = _os.path.join(settings.BASE_DIR, 'static', 'offline.html')
@@ -294,8 +295,9 @@ urlpatterns += [
 # Backup: backups/audit_patch_2026-03-19/core/remote_api.py
 
 # Synesis integration
-from synesis import views as synesis_views
 from synesis import export as synesis_export
+from synesis import views as synesis_views
+
 urlpatterns += [
     # synesis + smart-import moved to i18n_patterns
     path('helpdesk/portal/', include('helpdesk.portal_urls')),

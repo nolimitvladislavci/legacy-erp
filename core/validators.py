@@ -2,6 +2,7 @@
 Grossmarkt shared validators - OIB, phone, price, quantity.
 """
 import re
+
 from django.core.exceptions import ValidationError
 
 

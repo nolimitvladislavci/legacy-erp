@@ -6,8 +6,9 @@ Registriraj u celery-beat:
   cleanup_old_readings   — daily 03:00
 """
 import logging
-from celery import shared_task
 from datetime import timedelta
+
+from celery import shared_task
 from django.utils import timezone as tz
 
 logger = logging.getLogger('cold_chain_patrol')
@@ -19,7 +20,7 @@ def scan_active_boxes(self):
     Svakih 5 min: traži SmartBoxeve u tranzitu čiji senzori šute > 15 min.
     Podiže HACCPIncident za signal_lost i blokira box.
     """
-    from delivery.models import SmartBox, HACCPIncident
+    from delivery.models import HACCPIncident, SmartBox
 
     timeout = tz.now() - timedelta(minutes=15)
 
@@ -152,7 +153,7 @@ def cleanup_old_readings():
     Dnevno: briši SensorReading starije od 90 dana.
     Zadržava samo reading_ids referenciran u HACCPIncident.
     """
-    from delivery.models import SensorReading, HACCPIncident
+    from delivery.models import HACCPIncident, SensorReading
 
     cutoff = tz.now() - timedelta(days=90)
 

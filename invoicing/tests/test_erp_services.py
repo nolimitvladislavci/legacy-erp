@@ -16,12 +16,12 @@ Pokriva poslovnu logiku u invoicing/services/invoice_service.py:
 """
 
 import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
+from django.contrib.auth import get_user_model
+from django.db import DatabaseError, IntegrityError
 from django.test import TestCase
 from django.utils import timezone
-from django.contrib.auth import get_user_model
-from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -76,8 +76,9 @@ def make_invoice(company, user, doctype='R', status='DRAFT', **kwargs):
 
 
 def add_item(invoice, desc='Testna stavka', qty=1, price=100, pdv=25, disc=0):
-    from invoicing.models import InvoiceItem
     from decimal import Decimal
+
+    from invoicing.models import InvoiceItem
     q = Decimal(str(qty))
     p = Decimal(str(price))
     d = Decimal(str(disc))
@@ -92,8 +93,8 @@ def add_item(invoice, desc='Testna stavka', qty=1, price=100, pdv=25, disc=0):
 
 
 def make_inventory_item(company, qty=10, price=Decimal('50.00')):
-    from inventory.models import InventoryItem
     from companies.models import TaxRate
+    from inventory.models import InventoryItem
     tax, _ = TaxRate.objects.get_or_create(
         country='HR', rate=Decimal('25.00'),
         defaults={'name': 'PDV 25%', 'is_default': True, 'is_active': True}
@@ -199,8 +200,8 @@ class TestEnsurePartner(TestCase):
         self.user    = make_user('epartner_user1', self.company)
 
     def test_kreira_partnera_iz_racuna(self):
-        from partners.models import Partner
         from invoicing.services.invoice_service import ensure_partner
+        from partners.models import Partner
 
         inv = make_invoice(self.company, self.user,
             client_name='Novi Partner d.o.o.',
@@ -216,8 +217,8 @@ class TestEnsurePartner(TestCase):
         self.assertEqual(after, 1, "ensure_partner mora kreirati 1 partnera")
 
     def test_nema_duplikata(self):
-        from partners.models import Partner
         from invoicing.services.invoice_service import ensure_partner
+        from partners.models import Partner
 
         inv = make_invoice(self.company, self.user,
             client_name='Postojeći Partner', client_oib='66666666666',
@@ -230,8 +231,8 @@ class TestEnsurePartner(TestCase):
         self.assertEqual(count, 1, f"Mora biti 1 partner, a ima {count}")
 
     def test_bez_oib_koristi_ime(self):
-        from partners.models import Partner
         from invoicing.services.invoice_service import ensure_partner
+        from partners.models import Partner
 
         inv = make_invoice(self.company, self.user,
             client_name='Firma Bez OIB-a', client_oib='',
@@ -241,8 +242,8 @@ class TestEnsurePartner(TestCase):
         self.assertGreaterEqual(count, 1, "Mora kreirati partnera i bez OIB-a")
 
     def test_prazno_ime_nista_ne_kreira(self):
-        from partners.models import Partner
         from invoicing.services.invoice_service import ensure_partner
+        from partners.models import Partner
 
         inv = make_invoice(self.company, self.user, client_name='', client_oib='')
         before = Partner.objects.filter(company=self.company).count()
@@ -251,8 +252,8 @@ class TestEnsurePartner(TestCase):
         self.assertEqual(before, after, "Prazan client_name ne smije kreirati partnera")
 
     def test_partner_ima_email_s_racuna(self):
-        from partners.models import Partner
         from invoicing.services.invoice_service import ensure_partner
+        from partners.models import Partner
 
         inv = make_invoice(self.company, self.user,
             client_name='Email Partner', client_oib='77777777777',
@@ -666,7 +667,7 @@ class TestMarkWorktimeBilled(TestCase):
         self.user    = make_user('worktime_user1', self.company)
 
     def _make_time_entry(self):
-        from worktime.models import TimeEntry, Project
+        from worktime.models import Project, TimeEntry
         project, _ = Project.objects.get_or_create(
             code='TEST-PRJ',
             defaults={
@@ -814,8 +815,8 @@ class TestGenerateInvoiceNumber(TestCase):
         self.user    = make_user('gennr_user1', self.company)
 
     def test_broj_nije_prazan(self):
-        from invoicing.services.invoice_service import generate_invoice_number
         from invoicing.models import Invoice
+        from invoicing.services.invoice_service import generate_invoice_number
         inv = Invoice(company=self.company, doctype='R')
         generate_invoice_number(inv, None, 'R')
         self.assertTrue(inv.number, "Generirani broj ne smije biti prazan")
@@ -823,8 +824,8 @@ class TestGenerateInvoiceNumber(TestCase):
 
     def test_razliciti_doctypes_razliciti_prefiksi(self):
         """Ponuda i račun ne bi trebali imati isti broj."""
-        from invoicing.services.invoice_service import generate_invoice_number
         from invoicing.models import Invoice
+        from invoicing.services.invoice_service import generate_invoice_number
 
         inv_r  = Invoice(company=self.company, doctype='R')
         inv_po = Invoice(company=self.company, doctype='PO')
@@ -836,8 +837,8 @@ class TestGenerateInvoiceNumber(TestCase):
 
     def test_broj_sadrzi_godinu(self):
         """Broj računa mora sadržavati tekuću godinu."""
-        from invoicing.services.invoice_service import generate_invoice_number
         from invoicing.models import Invoice
+        from invoicing.services.invoice_service import generate_invoice_number
 
         inv = Invoice(company=self.company, doctype='R')
         generate_invoice_number(inv, None, 'R')
@@ -847,8 +848,8 @@ class TestGenerateInvoiceNumber(TestCase):
 
     def test_visestruki_pozivi_razliciti_brojevi(self):
         """Svaki poziv mora generirati drugačiji broj."""
-        from invoicing.services.invoice_service import generate_invoice_number
         from invoicing.models import Invoice
+        from invoicing.services.invoice_service import generate_invoice_number
 
         brojevi = set()
         for _ in range(5):

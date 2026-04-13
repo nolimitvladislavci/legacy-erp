@@ -1,5 +1,6 @@
 """Django signals — auto-send on invoice finalize."""
 import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 

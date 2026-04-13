@@ -7,14 +7,20 @@ ActiveTimer lifecycle, TimeLog ArbZG break, EmployeeProfile, Project budget.
 import datetime
 from decimal import Decimal
 
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 from django.utils import timezone
 
 from companies.models import Company
 from worktime.models import (
-    Project, TimeEntry, EmployeeProfile, ActiveTimer,
-    WorkGroup, TimeLog, DailyNote, TimeEntryTemplate,
+    ActiveTimer,
+    DailyNote,
+    EmployeeProfile,
+    Project,
+    TimeEntry,
+    TimeEntryTemplate,
+    TimeLog,
+    WorkGroup,
 )
 
 

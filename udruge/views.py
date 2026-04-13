@@ -1,16 +1,18 @@
 import json
 import logging
-from django.contrib.auth.decorators import login_required
+
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_POST, require_GET
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET, require_POST
+
 from core.company_utils import get_user_company
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('udruge')
 
@@ -51,8 +53,9 @@ def clan_list(request):
     page = paginator.get_page(request.GET.get('page'))
 
     # ── KPI Widget (Sprint Udruge-Konto) ──
+    from django.db.models import Count, Sum
+
     from .models import Clanarina, Donacija
-    from django.db.models import Sum, Count
     month_start = today.replace(day=1)
     year_start = today.replace(month=1, day=1)
 
@@ -173,7 +176,9 @@ def ai_analyze(request, pk):
     clan = get_object_or_404(Clan, pk=pk, company=company)
 
     try:
-        import os, anthropic
+        import os
+
+        import anthropic
         client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
 
         context = json.dumps({
@@ -351,8 +356,9 @@ def donacija_list(request):
     if not company:
         return redirect('dashboard')
 
-    from .models import Donacija
     from django.db.models import Sum
+
+    from .models import Donacija
     qs = Donacija.objects.filter(company=company).select_related("company")
 
     year = request.GET.get('year', str(timezone.now().year))
@@ -442,8 +448,9 @@ def knjiga_primitaka(request):
     if not company:
         return redirect('dashboard')
 
-    from .models import KnjigaPrimitaka
     from django.db.models import Sum
+
+    from .models import KnjigaPrimitaka
 
     year = request.GET.get('year', str(timezone.now().year))
     qs = KnjigaPrimitaka.objects.filter(company=company, datum__year=year).select_related("company", "clanarina", "donacija")
@@ -672,8 +679,8 @@ def eu_reports(request):
 
 @login_required
 def download_volunteer_timesheet(request):
-    from django.http import HttpResponse
     from django.contrib.auth.models import User
+    from django.http import HttpResponse
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
@@ -823,7 +830,7 @@ def dogadjaj_create(request):
 @login_required
 def dogadjaj_detail(request, pk):
     company = get_user_company(request)
-    from .models import Dogadjaj, Clan
+    from .models import Clan, Dogadjaj
 
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
     prijave = dogadjaj.prijave.select_related("clan").all()
@@ -845,7 +852,7 @@ def dogadjaj_detail(request, pk):
 @require_POST
 def dogadjaj_register(request, pk):
     company = get_user_company(request)
-    from .models import Dogadjaj, EventPrijava, Clan
+    from .models import Clan, Dogadjaj, EventPrijava
 
     dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
 
@@ -918,8 +925,9 @@ def kampanja_create(request):
         messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("udruge:kampanja_list")
 
-    from .models import Kampanja
     from decimal import Decimal
+
+    from .models import Kampanja
 
     if request.method == "POST":
         kampanja = Kampanja(
@@ -950,7 +958,7 @@ def kampanja_create(request):
 @login_required
 def kampanja_detail(request, pk):
     company = get_user_company(request)
-    from .models import Kampanja, Donacija
+    from .models import Donacija, Kampanja
 
     kampanja = get_object_or_404(Kampanja, pk=pk, company=company)
     events = kampanja.dogadjaji.all()
@@ -997,7 +1005,7 @@ def email_kampanja_create(request):
         messages.error(request, _('Niste povezani s udrugom. Odaberite udrugu iz izbornika.'))
         return redirect("udruge:email_kampanja_list")
 
-    from .models import EmailKampanja, Kampanja, Dogadjaj, Clan
+    from .models import Clan, Dogadjaj, EmailKampanja, Kampanja
 
     if request.method == "POST":
         ek = EmailKampanja(
@@ -1014,7 +1022,9 @@ def email_kampanja_create(request):
 
         if "ai_generate" in request.POST:
             try:
-                import os, anthropic
+                import os
+
+                import anthropic
                 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
                 ai_prompt = "Napisi email za udrugu '%s'. Tip: %s. Predmet: %s. Jezik: hrvatski. Vrati samo HTML body." % (
                     company.name,
@@ -1123,8 +1133,9 @@ def volunteer_list(request):
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
-    from .models import VolunteerActivity
     from django.db.models import Sum
+
+    from .models import VolunteerActivity
     year = request.GET.get('year', str(timezone.now().year))
     clan_id = request.GET.get('clan')
     category = request.GET.get('category')
@@ -1152,8 +1163,9 @@ def volunteer_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('udruge:volunteer_list')
-    from .models import VolunteerActivity, Clan, Dogadjaj, Kampanja
     from decimal import Decimal
+
+    from .models import Clan, Dogadjaj, Kampanja, VolunteerActivity
     if request.method == 'POST':
         VolunteerActivity.objects.create(
             company=company, clan_id=int(request.POST.get('clan')),
@@ -1200,6 +1212,7 @@ def eu_fund_search(request):
 def api_member_lookup(request):
     """Traži člana po broju iskaznice, OIB-u ili imenu."""
     from django.http import JsonResponse
+
     from udruge.models import Clan
 
     code = request.GET.get('code', '').strip()
@@ -1295,7 +1308,7 @@ def sekcija_create(request):
 @require_POST
 def sekcija_add_member(request, pk):
     company = get_user_company(request)
-    from .models import Sekcija, ClanSekcija, Clan
+    from .models import Clan, ClanSekcija, Sekcija
     sekcija = get_object_or_404(Sekcija, pk=pk, company=company)
     clan_id = request.POST.get('clan_id')
     role = request.POST.get('role', '')
@@ -1343,8 +1356,9 @@ def dozvole_pregled(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import ClanskiDokument
     from datetime import timedelta
+
+    from .models import ClanskiDokument
 
     today = timezone.now().date()
     threshold = today + timedelta(days=30)
@@ -1370,9 +1384,11 @@ def dvd_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import VatrogasnaOprema, VatrogasnoVozilo, Intervencija, Vjezba, VatrogasnoZvanje
-    from django.db.models import Sum
     from datetime import timedelta
+
+    from django.db.models import Sum
+
+    from .models import Intervencija, VatrogasnaOprema, VatrogasnoVozilo, VatrogasnoZvanje, Vjezba
 
     today = timezone.now().date()
     oprema = VatrogasnaOprema.objects.filter(company=company).select_related("company")
@@ -1425,8 +1441,9 @@ def vatrogasna_oprema_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import VatrogasnaOprema
     from decimal import Decimal
+
+    from .models import VatrogasnaOprema
     if request.method == 'POST':
         VatrogasnaOprema.objects.create(
             company=company, naziv=request.POST.get('naziv', ''),
@@ -1530,7 +1547,7 @@ def intervencija_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Intervencija, Clan
+    from .models import Clan, Intervencija
     if request.method == 'POST':
         voditelj_id = request.POST.get('voditelj') or None
         Intervencija.objects.create(
@@ -1586,8 +1603,9 @@ def vjezba_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Vjezba, Clan
     from decimal import Decimal
+
+    from .models import Clan, Vjezba
     if request.method == 'POST':
         Vjezba.objects.create(
             company=company, naziv=request.POST.get('naziv', ''),
@@ -1633,7 +1651,7 @@ def vatrogasno_zvanje_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import VatrogasnoZvanje, Clan
+    from .models import Clan, VatrogasnoZvanje
     if request.method == 'POST':
         VatrogasnoZvanje.objects.create(
             company=company,
@@ -1668,8 +1686,9 @@ def kud_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Repertoar, ProbaLog, Kostim, NastupPlan
     from django.db.models import Sum
+
+    from .models import Kostim, NastupPlan, ProbaLog, Repertoar
 
     today = timezone.now().date()
     repertoar = Repertoar.objects.filter(company=company).select_related("company", "sekcija")
@@ -1764,7 +1783,7 @@ def proba_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import ProbaLog, Sekcija, Clan
+    from .models import Clan, ProbaLog, Sekcija
     if request.method == 'POST':
         ProbaLog.objects.create(
             company=company,
@@ -1813,8 +1832,9 @@ def kostim_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Kostim, Sekcija, Clan
     from decimal import Decimal
+
+    from .models import Clan, Kostim, Sekcija
     if request.method == 'POST':
         Kostim.objects.create(
             company=company, naziv=request.POST.get('naziv', ''),
@@ -1865,8 +1885,9 @@ def nastup_plan_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import NastupPlan, Dogadjaj
     from decimal import Decimal
+
+    from .models import Dogadjaj, NastupPlan
     if request.method == 'POST':
         NastupPlan.objects.create(
             dogadjaj_id=request.POST.get('dogadjaj'),
@@ -1901,8 +1922,9 @@ def ribari_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Revir, RibolovnaDozvola, UlovEvidencija, Poribljavanje, CuvarskaStraza
     from django.db.models import Sum
+
+    from .models import CuvarskaStraza, Poribljavanje, Revir, RibolovnaDozvola, UlovEvidencija
 
     today = timezone.now().date()
     reviri = Revir.objects.filter(company=company).select_related("company")
@@ -1946,8 +1968,9 @@ def revir_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Revir
     from decimal import Decimal
+
+    from .models import Revir
     if request.method == 'POST':
         Revir.objects.create(
             company=company, naziv=request.POST.get('naziv', ''),
@@ -1993,8 +2016,9 @@ def ribolovna_dozvola_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import RibolovnaDozvola, Clan, Revir
     from decimal import Decimal
+
+    from .models import Clan, Revir, RibolovnaDozvola
     if request.method == 'POST':
         doz = RibolovnaDozvola.objects.create(
             company=company,
@@ -2040,8 +2064,9 @@ def ulov_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import UlovEvidencija, Revir, Clan
     from decimal import Decimal
+
+    from .models import Clan, Revir, UlovEvidencija
     if request.method == 'POST':
         UlovEvidencija.objects.create(
             company=company,
@@ -2086,8 +2111,9 @@ def poribljavanje_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Poribljavanje, Revir
     from decimal import Decimal
+
+    from .models import Poribljavanje, Revir
     if request.method == 'POST':
         Poribljavanje.objects.create(
             company=company,
@@ -2131,7 +2157,7 @@ def cuvarska_straza_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import CuvarskaStraza, Clan, Revir
+    from .models import Clan, CuvarskaStraza, Revir
     if request.method == 'POST':
         CuvarskaStraza.objects.create(
             company=company,
@@ -2167,8 +2193,9 @@ def pcelari_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Pcelinjak, Kosnica, TretmanKosnice, MedProizvodnja, SelidbaLog
     from django.db.models import Sum
+
+    from .models import Kosnica, MedProizvodnja, Pcelinjak, SelidbaLog, TretmanKosnice
 
     today = timezone.now().date()
     pcelinjaci = Pcelinjak.objects.filter(company=company).select_related("company", "vlasnik")
@@ -2210,7 +2237,7 @@ def pcelinjak_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Pcelinjak, Clan
+    from .models import Clan, Pcelinjak
     if request.method == 'POST':
         Pcelinjak.objects.create(
             company=company,
@@ -2305,7 +2332,7 @@ def tretman_kosnice_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import TretmanKosnice, Kosnica
+    from .models import Kosnica, TretmanKosnice
     if request.method == 'POST':
         TretmanKosnice.objects.create(
             kosnica_id=request.POST.get('kosnica'),
@@ -2351,8 +2378,9 @@ def med_proizvodnja_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import MedProizvodnja, Pcelinjak
     from decimal import Decimal
+
+    from .models import MedProizvodnja, Pcelinjak
     if request.method == 'POST':
         MedProizvodnja.objects.create(
             pcelinjak_id=request.POST.get('pcelinjak'),
@@ -2399,7 +2427,7 @@ def selidba_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import SelidbaLog, Pcelinjak
+    from .models import Pcelinjak, SelidbaLog
     if request.method == 'POST':
         SelidbaLog.objects.create(
             pcelinjak_id=request.POST.get('pcelinjak'),
@@ -2434,8 +2462,9 @@ def rakija_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import DestilacijaKotao, DestilacijaLog, RakijaProizvodnja, TrosarinaPrijava
     from django.db.models import Sum
+
+    from .models import DestilacijaKotao, DestilacijaLog, RakijaProizvodnja, TrosarinaPrijava
 
     today = timezone.now().date()
     kotlovi = DestilacijaKotao.objects.filter(company=company).select_related("company", "vlasnik")
@@ -2475,7 +2504,7 @@ def destilacija_kotao_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import DestilacijaKotao, Clan
+    from .models import Clan, DestilacijaKotao
     if request.method == 'POST':
         DestilacijaKotao.objects.create(
             company=company,
@@ -2520,8 +2549,9 @@ def destilacija_log_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import DestilacijaLog, DestilacijaKotao
     from decimal import Decimal
+
+    from .models import DestilacijaKotao, DestilacijaLog
     if request.method == 'POST':
         DestilacijaLog.objects.create(
             kotao_id=request.POST.get('kotao'),
@@ -2567,8 +2597,9 @@ def rakija_proizvodnja_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import RakijaProizvodnja, DestilacijaLog
     from decimal import Decimal
+
+    from .models import DestilacijaLog, RakijaProizvodnja
     if request.method == 'POST':
         RakijaProizvodnja.objects.create(
             company=company,
@@ -2615,8 +2646,9 @@ def trosarina_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import TrosarinaPrijava
     from decimal import Decimal
+
+    from .models import TrosarinaPrijava
     if request.method == 'POST':
         TrosarinaPrijava.objects.create(
             company=company,
@@ -2653,8 +2685,9 @@ def vocari_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Vocnjak, BerbaLog, TretmanVocnjaka
-    from django.db.models import Sum, Count
+    from django.db.models import Count, Sum
+
+    from .models import BerbaLog, TretmanVocnjaka, Vocnjak
 
     today = timezone.now().date()
     vocnjaci = Vocnjak.objects.filter(company=company).select_related("company", "vlasnik", "field")
@@ -2700,8 +2733,9 @@ def vocnjak_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Vocnjak, Clan
     from decimal import Decimal
+
+    from .models import Clan, Vocnjak
     if request.method == 'POST':
         Vocnjak.objects.create(
             company=company,
@@ -2754,8 +2788,9 @@ def berba_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import BerbaLog, Vocnjak
     from decimal import Decimal
+
+    from .models import BerbaLog, Vocnjak
     if request.method == 'POST':
         BerbaLog.objects.create(
             vocnjak_id=request.POST.get('vocnjak'),
@@ -2838,8 +2873,9 @@ def tretman_vocnjaka_detail(request, pk):
 @login_required
 def vatrogasna_oprema_edit(request, pk):
     company = get_user_company(request)
-    from .models import VatrogasnaOprema
     from decimal import Decimal
+
+    from .models import VatrogasnaOprema
     obj = get_object_or_404(VatrogasnaOprema, pk=pk, company=company)
     if request.method == 'POST':
         obj.naziv = request.POST.get('naziv', obj.naziv)
@@ -2870,7 +2906,7 @@ def vatrogasna_oprema_edit(request, pk):
 @login_required
 def intervencija_edit(request, pk):
     company = get_user_company(request)
-    from .models import Intervencija, Clan
+    from .models import Clan, Intervencija
     obj = get_object_or_404(Intervencija, pk=pk, company=company)
     if request.method == 'POST':
         obj.evidencijski_broj = request.POST.get('evidencijski_broj', obj.evidencijski_broj)
@@ -2904,8 +2940,9 @@ def intervencija_edit(request, pk):
 @login_required
 def kostim_edit(request, pk):
     company = get_user_company(request)
-    from .models import Kostim, Sekcija, Clan
     from decimal import Decimal
+
+    from .models import Clan, Kostim, Sekcija
     obj = get_object_or_404(Kostim, pk=pk, company=company)
     if request.method == 'POST':
         obj.naziv = request.POST.get('naziv', obj.naziv)
@@ -3005,7 +3042,7 @@ def lov_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import LovackaIskaznica, ZapisnikLova, Trofej, Loviste
+    from .models import LovackaIskaznica, Loviste, Trofej, ZapisnikLova
     iskaznice = LovackaIskaznica.objects.filter(company=company).select_related("company", "clan")
     stats = {
         'lovaca': iskaznice.count(),
@@ -3048,7 +3085,7 @@ def lov_dopustenje_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import DopustenjeLova, Loviste, Clan
+    from .models import Clan, DopustenjeLova, Loviste
     if request.method == 'POST':
         DopustenjeLova.objects.create(
             company=company,
@@ -3085,7 +3122,7 @@ def lov_zapisnik_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import ZapisnikLova, Loviste, Clan
+    from .models import Clan, Loviste, ZapisnikLova
     if request.method == 'POST':
         ZapisnikLova.objects.create(
             company=company,
@@ -3161,7 +3198,7 @@ def branitelj_status_edit(request, pk):
 @login_required
 def lov_dopustenje_edit(request, pk):
     company = get_user_company(request)
-    from .models import DopustenjeLova, Loviste, Clan
+    from .models import Clan, DopustenjeLova, Loviste
     obj = get_object_or_404(DopustenjeLova, pk=pk, company=company)
     if request.method == 'POST':
         obj.loviste_id = request.POST.get('loviste', obj.loviste_id)
@@ -3185,7 +3222,7 @@ def lov_dopustenje_edit(request, pk):
 @login_required
 def lov_zapisnik_edit(request, pk):
     company = get_user_company(request)
-    from .models import ZapisnikLova, Loviste, Clan, DopustenjeLova
+    from .models import Clan, DopustenjeLova, Loviste, ZapisnikLova
     obj = get_object_or_404(ZapisnikLova, pk=pk, company=company)
     if request.method == 'POST':
         obj.loviste_id = request.POST.get('loviste', obj.loviste_id)
@@ -3226,8 +3263,9 @@ def loviste_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Loviste
     from decimal import Decimal
+
+    from .models import Loviste
     if request.method == 'POST':
         Loviste.objects.create(
             company=company,
@@ -3251,8 +3289,9 @@ def loviste_create(request):
 @login_required
 def loviste_edit(request, pk):
     company = get_user_company(request)
-    from .models import Loviste
     from decimal import Decimal
+
+    from .models import Loviste
     obj = get_object_or_404(Loviste, pk=pk, company=company)
     if request.method == 'POST':
         obj.naziv = request.POST.get('naziv', obj.naziv)
@@ -3278,8 +3317,9 @@ def trofej_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Trofej, Clan, ZapisnikLova
     from decimal import Decimal
+
+    from .models import Clan, Trofej, ZapisnikLova
     if request.method == 'POST':
         Trofej.objects.create(
             company=company,
@@ -3313,8 +3353,9 @@ def zadruge_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Zadrugar, ZadruznRevizija
     from django.db.models import Sum
+
+    from .models import Zadrugar, ZadruznRevizija
     zadrugari = Zadrugar.objects.filter(company=company, status='aktivan').select_related("company")
     ukupni_ulozi = zadrugari.aggregate(s=Sum('clanski_ulog_eur'))['s'] or 0
     zadnja_revizija = ZadruznRevizija.objects.filter(company=company).select_related("company").first()
@@ -3335,8 +3376,9 @@ def zadrugar_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Zadrugar
     from decimal import Decimal
+
+    from .models import Zadrugar
     if request.method == 'POST':
         Zadrugar.objects.create(
             company=company,
@@ -3392,7 +3434,7 @@ def golubar_dashboard(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Golubinjak, Golub, ParGolubova, Utrka, ZdravstveniZapisGolub
+    from .models import Golub, Golubinjak, ParGolubova, Utrka, ZdravstveniZapisGolub
     stats = {
         'golubinjaka': Golubinjak.objects.filter(company=company).select_related("company").count(),
         'golubova': Golub.objects.filter(company=company).select_related("company", "golubinjak", "otac").count(),
@@ -3422,8 +3464,9 @@ def golubinjak_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Golubinjak
     from decimal import Decimal
+
+    from .models import Golubinjak
     if request.method == 'POST':
         g = Golubinjak.objects.create(
             company=company,
@@ -3572,8 +3615,9 @@ def par_list(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import ParGolubova
     from django.db.models import Count
+
+    from .models import ParGolubova
     qs = ParGolubova.objects.filter(company=company).select_related('muzjak', 'zenka').annotate(
         legla_count=Count('legla'),
     )
@@ -3587,7 +3631,7 @@ def par_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import ParGolubova, Golub
+    from .models import Golub, ParGolubova
     if request.method == 'POST':
         par = ParGolubova.objects.create(
             company=company,
@@ -3615,7 +3659,7 @@ def leglo_create(request, par_pk):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import ParGolubova, Leglo, Golub
+    from .models import Golub, Leglo, ParGolubova
     par = get_object_or_404(ParGolubova, pk=par_pk, company=company)
     if request.method == 'POST':
         Leglo.objects.create(
@@ -3678,8 +3722,9 @@ def utrka_create(request):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Utrka
     from decimal import Decimal
+
+    from .models import Utrka
     if request.method == 'POST':
         utrka = Utrka.objects.create(
             company=company,
@@ -3717,8 +3762,9 @@ def rezultat_create(request, utrka_pk):
     company = get_user_company(request)
     if not company:
         return redirect('/')
-    from .models import Utrka, RezultatUtrke, Golub
     from decimal import Decimal
+
+    from .models import Golub, RezultatUtrke, Utrka
     utrka = get_object_or_404(Utrka, pk=utrka_pk, company=company)
     if request.method == 'POST':
         RezultatUtrke.objects.create(
@@ -3885,7 +3931,7 @@ def flock_edit(request, pk):
 
 @login_required
 def egg_record_create(request, flock_pk):
-    from .models import Flock, EggRecord
+    from .models import EggRecord, Flock
     company = get_user_company(request)
     flock = get_object_or_404(Flock, pk=flock_pk, company=company)
 
@@ -4055,8 +4101,9 @@ def bridge_publish(request):
             # Auto-link: kreira/ažurira StockBatch s source_flock za LOT slijedivost
             if source_model == 'EggRecord':
                 try:
-                    from .models import EggRecord as ER
                     from inventory.models import InventoryItem, StockBatch
+
+                    from .models import EggRecord as ER
                     egg = ER.objects.select_related('flock').get(pk=int(source_id))
                     flock = egg.flock
                     # Nađi InventoryItem za jaja u istoj firmi (source_flock linked)
@@ -4083,7 +4130,7 @@ def bridge_publish(request):
                             )
                 except (ValueError, TypeError):
                     pass
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             messages.error(request, _('Objavljivanje nije uspjelo. Pokušajte ponovo.'))
 
         return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
@@ -4099,7 +4146,9 @@ def golubar_ai_ime(request):
     Body JSON: { "image_b64": "<base64 jpeg>" }
     Returns:   { "ime": "Vihor", "opis_boje": "siv s bijelim krilima", "confidence": 0.9 }
     """
-    import json, os, logging
+    import json
+    import logging
+    import os
     logger = logging.getLogger("borg.golubar")
 
     if not request.user.is_authenticated:
@@ -4167,7 +4216,10 @@ def golubar_ai_prsten(request):
     Body JSON: { "images": ["<b64>", "<b64>", ...] }  # 1-3 slike prstena
     Returns:   { "prsten_broj": "HR-2026-12345", "godina": "2026", "confidence": 0.92 }
     """
-    import json, os, re, logging
+    import json
+    import logging
+    import os
+    import re
     logger = logging.getLogger("borg.golubar")
 
     if not request.user.is_authenticated:
@@ -4258,8 +4310,9 @@ def golubar_ai_prsten(request):
 @login_required
 def glazbena_skola_dashboard(request):
     company = get_user_company(request)
-    from .models import GlazbenaSkola, GlazbeniUcenik, SatGlazbene
     from django.db.models import Count
+
+    from .models import GlazbenaSkola, GlazbeniUcenik, SatGlazbene
     today = timezone.now().date()
 
     try:
@@ -4298,9 +4351,11 @@ def glazbena_skola_dashboard(request):
 def glazbena_skola_fakturiraj(request):
     """Bulk fakturiranje nefakturiranih sati."""
     company = get_user_company(request)
-    from .models import GlazbeniUcenik, SatGlazbene
-    from invoicing.models import Invoice, InvoiceItem
     from decimal import Decimal
+
+    from invoicing.models import Invoice, InvoiceItem
+
+    from .models import GlazbeniUcenik, SatGlazbene
 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -4407,8 +4462,10 @@ def glazbena_dodaj_ucenika(request):
 def glazbena_dodaj_sat(request):
     """HTMX POST: inline forma za unos sata (mobile-friendly)."""
     company = get_user_company(request)
+    from datetime import date
+    from datetime import time as dt_time
+
     from .models import GlazbeniUcenik, SatGlazbene
-    from datetime import date, time as dt_time
 
     ucenik_id = request.POST.get('ucenik_id')
     datum_str = request.POST.get('datum', '')
@@ -4457,7 +4514,7 @@ def glazbena_dodaj_sat(request):
 
 @login_required
 def azil_dashboard(request):
-    from .models import Zivotinja, AzilIntervencija
+    from .models import AzilIntervencija, Zivotinja
     company = get_user_company(request)
     if not company:
         return redirect('company_setup')
@@ -4517,7 +4574,7 @@ def azil_zivotinja_nova(request):
 
 @login_required
 def azil_zivotinja_detalj(request, pk):
-    from .models import Zivotinja, KartonZdravlja
+    from .models import KartonZdravlja, Zivotinja
     company = get_user_company(request)
     z = get_object_or_404(Zivotinja, pk=pk, company=company)
 
@@ -4595,7 +4652,7 @@ def azil_intervencija_nova(request):
 
 @login_required
 def azil_udomljavanje_nova(request, pk):
-    from .models import Zivotinja, Udomljavanje
+    from .models import Udomljavanje, Zivotinja
     company = get_user_company(request)
     z = get_object_or_404(Zivotinja, pk=pk, company=company)
 
@@ -4640,6 +4697,7 @@ def azil_izvjestaj(request):
 def azil_chip_lookup(request):
     """Lookup čipa u HROK + lokalnoj bazi."""
     from django.http import JsonResponse
+
     from .models import Zivotinja
     chip = request.GET.get('chip', '').strip()
     if not chip or len(chip) != 15 or not chip.isdigit():

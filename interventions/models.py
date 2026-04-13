@@ -2,13 +2,13 @@ import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.managers import CompanyManager
 from borg_ops.mixins import FSMMixin
-from django.contrib.contenttypes.fields import GenericRelation
+from core.managers import CompanyManager
 
 
 class HitnaIntervencija(FSMMixin, models.Model):

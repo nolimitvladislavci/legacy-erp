@@ -13,6 +13,7 @@ import logging
 import os
 import subprocess
 from datetime import datetime
+
 from django.conf import settings
 
 logger = logging.getLogger('ai_health')
@@ -43,6 +44,7 @@ def check_gunicorn():
     Ako port blokiran zombie procesom → kill + restart automatski.
     """
     import socket
+
     import requests as req
 
     # 1. systemd status

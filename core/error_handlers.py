@@ -2,10 +2,12 @@
 core/error_handlers.py — Custom error handlers (404, 500)
 Izdvojeno iz urls.py da se izbjegne circular import pri test DB kreaciji.
 """
-from django.shortcuts import render
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
 import logging
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
+from django.shortcuts import render
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,8 +46,8 @@ def custom_500_handler(request):
         logger.exception("Unexpected error in: capture_error_for_borg(request)")
 
     # Redirect na početnu s error porukom
-    from django.shortcuts import redirect
     from django.contrib import messages
+    from django.shortcuts import redirect
     try:
         messages.error(
             request,
@@ -62,8 +64,9 @@ def custom_500_handler(request):
 #  BORG AUTO-REMEDIATION — Error Ingestion Pipeline
 # ═══════════════════════════════════════════════════
 
-import traceback
 import logging
+import traceback
+
 from django.utils import timezone
 
 logger = logging.getLogger('borg.remediation')
@@ -147,8 +150,8 @@ def capture_error_for_borg(request, exc_info=None):
             source_line = tb.tb_lineno
 
         # Kreira PendingAIAction
-        from superadmin_ai.models import PendingAIAction
         from companies.models import Company
+        from superadmin_ai.models import PendingAIAction
 
         company_obj = None
         if company_id:

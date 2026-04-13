@@ -27,9 +27,10 @@ Korištenje iz bilo kojeg modula:
     return response.build()
 """
 import os
+
 import zipstream
-from django.http import StreamingHttpResponse
 from django.db import DatabaseError
+from django.http import StreamingHttpResponse
 
 
 class StreamingZipResponse:
@@ -121,8 +122,10 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 1. Artikli CSV
     try:
+        import csv
+        import io
+
         from inventory.models import InventoryItem
-        import csv, io
         buf = io.StringIO()
         buf.write('\ufeff')  # BOM
         w = csv.writer(buf, delimiter=';')
@@ -136,8 +139,10 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 2. POS Dnevni izvještaji CSV
     try:
+        import csv
+        import io
+
         from pos.models import POSDailyReport
-        import csv, io
         buf = io.StringIO()
         buf.write('\ufeff')
         w = csv.writer(buf, delimiter=';')
@@ -153,8 +158,10 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 3. Knjiga prigovora CSV
     try:
+        import csv
+        import io
+
         from pos.models import KnjigaPrigovora
-        import csv, io
         buf = io.StringIO()
         buf.write('\ufeff')
         w = csv.writer(buf, delimiter=';')
@@ -168,8 +175,10 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 4. Inventure CSV
     try:
+        import csv
+        import io
+
         from inventory.models import Inventura
-        import csv, io
         for inv in Inventura.objects.filter(company=company):
             buf = io.StringIO()
             buf.write('\ufeff')
@@ -186,8 +195,10 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 5. Fiskalni logovi CSV
     try:
+        import csv
+        import io
+
         from invoicing.fiscal_models import FiscalLog
-        import csv, io
         buf = io.StringIO()
         buf.write('\ufeff')
         w = csv.writer(buf, delimiter=';')
@@ -200,8 +211,10 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 6. Receipts CSV (svi POS bonovi)
     try:
+        import csv
+        import io
+
         from pos.models import POSReceipt
-        import csv, io
         buf = io.StringIO()
         buf.write('\ufeff')
         w = csv.writer(buf, delimiter=';')
@@ -217,8 +230,10 @@ def build_audit_package(company, date_from=None, date_to=None):
 
     # 7. StockMovements CSV
     try:
+        import csv
+        import io
+
         from inventory.models import StockMovement
-        import csv, io
         buf = io.StringIO()
         buf.write('\ufeff')
         w = csv.writer(buf, delimiter=';')

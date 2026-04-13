@@ -2,17 +2,17 @@
 POS 10/10 Test Suite — BOM, Mock TSE, Storno, Quantize, Tenant Isolation.
 Covers edge cases that bring POS quality from 8.5 to 10.
 """
-from decimal import Decimal, ROUND_HALF_UP
-from unittest.mock import patch, MagicMock
+from decimal import ROUND_HALF_UP, Decimal
+from unittest.mock import MagicMock, patch
 
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
-from companies.models import Company
 from accounts.models import UserProfile
+from companies.models import Company
 from inventory.models import InventoryItem, StockMovement
-from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
+from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
 User = get_user_model()
 _Q = Decimal('0.01')

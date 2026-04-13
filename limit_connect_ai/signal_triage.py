@@ -13,6 +13,7 @@ Kad se Ivan vrati s bauštele, ima kategoriziran backlog.
 """
 import json
 import logging
+
 from django.conf import settings
 
 logger = logging.getLogger("borg.signal.triage")
@@ -169,9 +170,10 @@ def dedup_signals(hours=24):
     Dedupliciraj identicne signale u zadnjih N sati.
     Grupira po (message, page_url) i ostavlja samo najnoviji.
     """
-    from limit_connect_ai.models_signal import FenixSignal
     from django.db.models import Count, Max
     from django.utils import timezone
+
+    from limit_connect_ai.models_signal import FenixSignal
 
     since = timezone.now() - timezone.timedelta(hours=hours)
     signals = FenixSignal.objects.filter(created_at__gte=since)

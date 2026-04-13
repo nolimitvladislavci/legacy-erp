@@ -1,10 +1,13 @@
 """Claude Doktor -- Views."""
 from datetime import date, timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET
+
 from companies.models import Company
+
 from .models_doktor import DiagnosisReport
 from .tasks_doktor import run_clinic_diagnostics_single
 

@@ -3,14 +3,15 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
+
 from .discounts import get_discount_for_item
-from .models import FuturesListing, FuturesReservation, FuturesDeliverySlot
+from .models import FuturesDeliverySlot, FuturesListing, FuturesReservation
 
 
 @login_required

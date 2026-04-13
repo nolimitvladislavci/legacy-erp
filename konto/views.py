@@ -8,23 +8,28 @@ Konto (Accounting) Views
 - Reports (P&L, Balance Sheet)
 - API endpoints for AJAX
 """
-import json
 import datetime
+import json
 from decimal import Decimal, InvalidOperation
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Q
-from django.utils.translation import gettext_lazy as _
-from django.db import IntegrityError, transaction, DatabaseError
-from django.utils import timezone
 
-from .models import (
-    KontoAccount, BankAccount, BankTransaction,
-    JournalEntry, LedgerLine, AccountType,
-)
-from . import services
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError, transaction
+from django.db.models import Q, Sum
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from . import services
+from .models import (
+    AccountType,
+    BankAccount,
+    BankTransaction,
+    JournalEntry,
+    KontoAccount,
+    LedgerLine,
+)
 
 
 def _get_company(request):
@@ -738,9 +743,10 @@ def api_unmatched_invoices(request):
 @login_required
 def tax_dashboard(request):
     """Batch tax dashboard — all companies at a glance (Marijin kokpit)."""
-    from .models import TaxPeriod
     from companies.models import Company
     from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+
+    from .models import TaxPeriod
 
     # Filters
     pdv_filter = request.GET.get('pdv_status', '')
@@ -798,6 +804,7 @@ def tax_dashboard(request):
 def report_vat(request):
     """VAT/PDV period report — USt-Voranmeldung / PDV obrazac."""
     import calendar
+
     from .models import TaxPeriod
     company = _get_company(request)
     today = timezone.now().date()
@@ -962,10 +969,12 @@ def datev_export(request):
     GET /konto/datev-export/?start=YYYY-MM-DD&end=YYYY-MM-DD
     Returns DATEV EXTF/700 CSV file for download.
     """
+    import datetime
+
     from django.http import HttpResponse
+
     from core.company_utils import get_user_company
     from konto.german_accounting import generate_datev_export
-    import datetime
 
     company = get_user_company(request)
     if not company:
@@ -1007,6 +1016,7 @@ def skr03_seed(request):
     Seeds SKR 03 accounts for the current company.
     """
     from django.http import JsonResponse
+
     from core.company_utils import get_user_company
     from konto.german_accounting import seed_skr03
 
@@ -1041,9 +1051,10 @@ def audit_verify(request):
     if not company:
         return redirect('dashboard')
 
+    import time
+
     from konto.integrity import verify_chain
     from konto.models import LedgerLine
-    import time
 
     start = time.time()
     valid, broken_at = verify_chain(company)
@@ -1082,11 +1093,13 @@ def audit_certificate_pdf(request):
     if not company:
         return redirect('dashboard')
 
+    import time
+
+    from django.template.loader import render_to_string
+    from weasyprint import HTML
+
     from konto.integrity import verify_chain
     from konto.models import LedgerLine
-    from weasyprint import HTML
-    from django.template.loader import render_to_string
-    import time
 
     start = time.time()
     valid, broken_at = verify_chain(company)
@@ -1266,8 +1279,9 @@ def period_management(request):
     if not company:
         return redirect('dashboard')
 
-    from .models import AccountingPeriod
     import datetime
+
+    from .models import AccountingPeriod
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -1332,6 +1346,7 @@ def report_opz_stat(request):
         return redirect('dashboard')
 
     import datetime
+
     from invoicing.models import Invoice
 
     year = int(request.GET.get('year', datetime.date.today().year))
@@ -1541,9 +1556,11 @@ def report_koerperschaftsteuer(request):
 @login_required
 def saft_export_view(request):
     """SAF-T HR export — form za period selection + trigger generacije."""
-    from konto.saft_generator import SAFTGenerator
-    from django.http import HttpResponse
     from datetime import date
+
+    from django.http import HttpResponse
+
+    from konto.saft_generator import SAFTGenerator
 
     if request.method == 'POST':
         period_from = request.POST.get('period_from', '')

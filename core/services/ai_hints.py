@@ -3,11 +3,12 @@ core/services/ai_hints.py
 AI Process Hints — inteligentni savjeti na Control Tower dashboardu.
 Analizira stanje sustava i daje konkretne preporuke za akciju.
 """
-from decimal import Decimal
-from django.utils import timezone
-from datetime import timedelta
 import logging
+from datetime import timedelta
+from decimal import Decimal
+
 from django.db import DatabaseError
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -135,8 +136,9 @@ def _check_eracun_status(company, hints):
 
 
 def _check_konto_health(company, hints, today):
-    from konto.models import JournalEntry
     from django.db.models import Sum
+
+    from konto.models import JournalEntry
 
     je_count = JournalEntry.objects.filter(company=company).count()
     if je_count == 0:
@@ -221,7 +223,7 @@ def _check_employees(company, hints):
 
 
 def _check_bank_reconciliation(company, hints):
-    from konto.models import BankTransaction, BankAccount
+    from konto.models import BankAccount, BankTransaction
 
     accounts = BankAccount.objects.filter(company=company).count()
     if accounts == 0:

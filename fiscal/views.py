@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+
 from .models import FiscalConfiguration, FiscalLog, FiscalProvider
-from .providers.hr_fina import HRFinaProvider
 from .providers.de_tse import DETseProvider
+from .providers.hr_fina import HRFinaProvider
 
 
 @login_required

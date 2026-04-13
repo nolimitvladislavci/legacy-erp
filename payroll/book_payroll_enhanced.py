@@ -11,7 +11,7 @@ Konta:
   2421 - Obveza za prirez (Surtax liability)
   2430 - Obveza za doprinose na plaće (Employer contribution liability)
 """
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 
 def book_payroll_to_ledger_hr(payroll_run, breakdowns, create_entry_fn):
@@ -30,8 +30,8 @@ def book_payroll_to_ledger_hr(payroll_run, breakdowns, create_entry_fn):
     Returns:
         The created JournalEntry instance.
     """
-    from datetime import date
     import calendar
+    from datetime import date
 
     last_day = calendar.monthrange(payroll_run.year, payroll_run.month)[1]
     entry_date = date(payroll_run.year, payroll_run.month, last_day)

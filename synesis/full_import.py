@@ -57,7 +57,7 @@ def _parse_date(val):
     try:
         serial = float(val)
         if 30000 < serial < 60000:
-            from datetime import timedelta, date
+            from datetime import date, timedelta
             return date(1899, 12, 30) + timedelta(days=int(serial))
     except (ValueError, TypeError):
         pass
@@ -147,8 +147,9 @@ def import_knjizenja(company, mdb_path, wipe_existing=False):
     TACCOUNTING.DIN = FK to ACCOUNTING
     TACCOUNTING has: ACC_NUMBER (konto), ACC_DEBIT, ACC_CREDIT, ACC_TITLE, ACC_TEXT
     """
-    from konto.models import KontoAccount, JournalEntry, LedgerLine
     from django.db import transaction
+
+    from konto.models import JournalEntry, KontoAccount, LedgerLine
 
     if wipe_existing:
         deleted = LedgerLine.objects.filter(journal_entry__company=company).delete()

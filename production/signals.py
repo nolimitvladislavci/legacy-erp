@@ -7,7 +7,7 @@ import logging
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from .models import ProductionOrder, ProductionLog
+from .models import ProductionLog, ProductionOrder
 
 logger = logging.getLogger(__name__)
 

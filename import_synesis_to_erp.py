@@ -1,14 +1,20 @@
 # Import Synesis JSON export into ERP database
 # Partners -> partners_partner, Items -> inventory_inventoryitem
-import os, sys, json, django
+import json
+import os
+import sys
+
+import django
+
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
-from companies.models import Company
-from partners.models import Partner
-from inventory.models import InventoryItem
 from decimal import Decimal, InvalidOperation
+
+from companies.models import Company
+from inventory.models import InventoryItem
+from partners.models import Partner
 
 # Load JSON
 print("Loading synesis_export.json...")

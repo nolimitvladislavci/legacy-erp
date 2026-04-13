@@ -1,13 +1,14 @@
 """Smoke tests for registration views + more core view tests."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_superuser(username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     company = Company.objects.create(name=f'SAdmin {username}', oib=f'{hash(username) % 10**11:011d}')
     user = User.objects.create_superuser(username, password='pass123', email=f'{username}@test.hr')
     try:
@@ -18,8 +19,8 @@ def _setup_superuser(username):
 
 
 def _setup_user(oib, username, modules=None):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'Reg {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """FENIX Pass 4 — High-frequency remaining patterns"""
-import re, glob, sys
+import glob
+import re
+import sys
 
 PROP_MAP = {
     # Padding

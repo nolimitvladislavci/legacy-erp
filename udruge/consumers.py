@@ -10,11 +10,11 @@ Flow:
   5. Timer hits 0 → auction_end: auto-invoice + golub status "Prodano"
 """
 import logging
-from decimal import Decimal, InvalidOperation
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.utils import timezone
 
 logger = logging.getLogger('auction')
@@ -128,9 +128,10 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def process_bid(self, user, amount):
-        from marketplace.models import MarketplaceProduct, AuctionBid
-        from core.company_utils import get_user_company_from_user
         from django.db import transaction
+
+        from core.company_utils import get_user_company_from_user
+        from marketplace.models import AuctionBid, MarketplaceProduct
 
         try:
             with transaction.atomic():

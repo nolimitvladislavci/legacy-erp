@@ -7,8 +7,8 @@ Pattern: Invoice model → InvoiceAdapter (ERacun-like) → generate_ubl_xml()
 """
 import logging
 from dataclasses import dataclass, field
-from decimal import Decimal
 from datetime import date
+from decimal import Decimal
 from typing import Optional
 
 logger = logging.getLogger("propter.einvoice.ubl_generator")

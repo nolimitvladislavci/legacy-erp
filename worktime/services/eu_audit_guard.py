@@ -78,9 +78,10 @@ class EUAuditGuard:
     @classmethod
     def check_monthly_cap(cls, user, year, month, max_hours=None):
         """Provjeri mjesečni fond sati (default: radni dani × 8h)."""
-        from worktime.models import TimeEntry
         import calendar
         from datetime import date
+
+        from worktime.models import TimeEntry
 
         if not max_hours:
             _, days_in_month = calendar.monthrange(year, month)

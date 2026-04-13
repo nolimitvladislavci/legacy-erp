@@ -10,12 +10,13 @@ Provjerava:
 6. Management command fix_account_types idempotentnost
 """
 from decimal import Decimal
-from django.test import TestCase
-from django.core.management import call_command
 from io import StringIO
 
+from django.core.management import call_command
+from django.test import TestCase
+
 from companies.models import Company
-from konto.models import KontoAccount, JournalEntry, LedgerLine
+from konto.models import JournalEntry, KontoAccount, LedgerLine
 
 
 class TestHRAccountTypeMapping(TestCase):

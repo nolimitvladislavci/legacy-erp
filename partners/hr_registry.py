@@ -3,8 +3,8 @@ HR poslovni registar lookup putem EU VIES sustava.
 Besplatan, sluzbeni EU sustav za provjeru VAT/OIB brojeva.
 """
 
-import re
 import logging
+import re
 from xml.etree import ElementTree as ET
 
 try:

@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from . import views, wizard_views, portal_views
+from . import portal_views, views, wizard_views
 
 router = DefaultRouter()
 router.register(r"api", views.PartnerViewSet, basename="partner")

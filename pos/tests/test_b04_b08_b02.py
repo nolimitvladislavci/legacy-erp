@@ -1,10 +1,11 @@
 """
 B-04, B-08, B-02 — Fiskalizacija offline, stock race, otvoreni bonovi na logout.
 """
-from decimal import Decimal
 from datetime import timedelta
-from django.test import TestCase
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.utils import timezone as tz
 
 User = get_user_model()
@@ -22,7 +23,7 @@ class B04FiscalRetryTest(B04Setup):
     """B-04: Fiskalizacija offline bonova — retry logika."""
 
     def _create_receipt(self, paid_hours_ago=1, zki='ABC123', jir='', retry_count=0):
-        from pos.models import POSTerminal, POSSession, POSReceipt
+        from pos.models import POSReceipt, POSSession, POSTerminal
         terminal, _ = POSTerminal.objects.get_or_create(
             company=self.company, name='T1',
             defaults={'terminal_code': 'T1'},
@@ -140,15 +141,16 @@ class B02OpenReceiptsLogoutTest(B04Setup):
 
     def test_10_smart_logout_checks_open_receipts(self):
         """smart_logout view postoji i ima B-02 provjeru."""
-        from accounts.auth_views import smart_logout
         import inspect
+
+        from accounts.auth_views import smart_logout
         source = inspect.getsource(smart_logout)
         self.assertIn('open_receipts', source)
         self.assertIn('B-02', source)
 
     def test_11_open_receipt_detection(self):
         """Otkrivamo otvorene bonove za usera."""
-        from pos.models import POSTerminal, POSSession, POSReceipt, POSCashier
+        from pos.models import POSCashier, POSReceipt, POSSession, POSTerminal
         terminal = POSTerminal.objects.create(
             company=self.company, name='B02T', terminal_code='B02',
         )
@@ -173,8 +175,8 @@ class B02OpenReceiptsLogoutTest(B04Setup):
 
     def test_12_task_imports_clean(self):
         """Svi relevantni importi rade."""
-        from pos.tasks import retry_fiscalization
         from accounts.auth_views import smart_logout
+        from pos.tasks import retry_fiscalization
         self.assertTrue(callable(retry_fiscalization))
         self.assertTrue(callable(smart_logout))
 
@@ -188,7 +190,7 @@ class DualRoutingFiscalBypassTest(B04Setup):
 
     def test_14_exempt_company_skips_retry(self):
         """Retry task preskače fiscal_exempt tvrtke."""
-        from pos.models import POSTerminal, POSSession, POSReceipt
+        from pos.models import POSReceipt, POSSession, POSTerminal
         self.company.fiscal_exempt = True
         self.company.save()
         terminal = POSTerminal.objects.create(
@@ -236,7 +238,7 @@ class MixedNonprofitBlockTest(B04Setup):
         return commercial, nonprofit
 
     def _make_session(self):
-        from pos.models import POSTerminal, POSSession
+        from pos.models import POSSession, POSTerminal
         terminal = POSTerminal.objects.create(
             company=self.company, name='MixT', terminal_code='MX',
         )

@@ -1,8 +1,8 @@
 """
 partners/tests.py - OIB validator + VIES + partner lookup tests.
 """
+from django.db import DatabaseError, IntegrityError
 from django.test import TestCase
-from django.db import IntegrityError, DatabaseError
 
 
 class OIBFormatTests(TestCase):
@@ -30,9 +30,11 @@ class OIBFormatTests(TestCase):
 class PartnerOIBLookupViewTests(TestCase):
     def setUp(self):
         import datetime
+
         from django.contrib.auth.models import User
-        from companies.models import Company
+
         from accounts.models import UserProfile
+        from companies.models import Company
         from registration.models import CompanySubscription
 
         self.user = User.objects.create_superuser('testuser_oib', password='pass', email='')

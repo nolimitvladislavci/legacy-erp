@@ -5,6 +5,7 @@ Connects NN feed results + external sources into unified IntelligenceResult/Fund
 Runs as Celery task: intelligence_unified_scan
 """
 import logging
+
 from celery import shared_task
 from django.utils import timezone
 
@@ -44,8 +45,8 @@ def intelligence_unified_scan():
 
 def _convert_regulatory_to_funds():
     """Convert unprocessed EU_FUND/TAX regulatory updates to FundOpportunity."""
-    from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate
     from intelligence.models import FundOpportunity
+    from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate
 
     updates = RegulatoryUpdate.objects.filter(
         category__in=['EU_FUND', 'TAX', 'LABOUR'],
@@ -86,7 +87,7 @@ def _convert_regulatory_to_funds():
 
 def _match_funds_to_companies():
     """Match active FundOpportunities with company IntelligenceJobs."""
-    from intelligence.models import IntelligenceJob, IntelligenceResult, FundOpportunity
+    from intelligence.models import FundOpportunity, IntelligenceJob, IntelligenceResult
 
     active_funds = FundOpportunity.objects.filter(
         status='aktivan',

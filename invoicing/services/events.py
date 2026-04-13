@@ -3,7 +3,8 @@ invoicing/services/events.py
 Audit trail za Invoice lifecycle — InvoiceEvent kreiranje.
 """
 import logging
-from django.db import IntegrityError, DatabaseError
+
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 

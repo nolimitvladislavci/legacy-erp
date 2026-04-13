@@ -8,6 +8,7 @@ class UdrugeConfig(AppConfig):
 
     def ready(self):
         from django.db.models.signals import post_save
+
         from companies.models import Company
 
         def auto_setup_nonprofit(sender, instance, created, **kwargs):

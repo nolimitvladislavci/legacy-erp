@@ -1,10 +1,11 @@
 """PDV-S views."""
 import io
 import zipfile
-from django.db import models
-from django.shortcuts import render, get_object_or_404
+
 from django.contrib.auth.decorators import login_required
+from django.db import models
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -21,7 +22,7 @@ def pdv_s_report(request):
         month = int(request.POST.get('month', timezone.now().month))
 
         from invoicing.models import Invoice
-        from pdv_s.service import generate_pdv_s, format_pdv_s_text
+        from pdv_s.service import format_pdv_s_text, generate_pdv_s
 
         # Ulazni racuni (purchases) za period
         invoices_in = Invoice.objects.filter(

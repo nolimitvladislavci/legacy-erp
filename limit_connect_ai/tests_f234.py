@@ -7,9 +7,9 @@ Run: python manage.py test limit_connect_ai.tests_f234 --verbosity=2
 """
 from decimal import Decimal
 
+import django.db
 from django.contrib.auth.models import User
 from django.test import TestCase
-import django.db
 from django.utils import timezone
 
 
@@ -18,8 +18,8 @@ class F234TestBase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from companies.models import Company, TaxRate
         from accounts.models import UserProfile
+        from companies.models import Company, TaxRate
 
         cls.company = Company.objects.create(
             name='Test BORG F234',
@@ -69,7 +69,7 @@ class KGSeederTest(F234TestBase):
         self.assertEqual(second, 0)
 
     def test_scan_all_companies(self):
-        from limit_connect_ai.services.kg_seeder import seed_legal_opportunities, scan_all_companies
+        from limit_connect_ai.services.kg_seeder import scan_all_companies, seed_legal_opportunities
         seed_legal_opportunities()
         result = scan_all_companies()
         self.assertIn('companies', result)
@@ -84,7 +84,7 @@ class KGSeederTest(F234TestBase):
 class OpportunityLifecycleTest(F234TestBase):
 
     def test_notify_new_matches(self):
-        from limit_connect_ai.services.kg_seeder import seed_legal_opportunities, scan_all_companies
+        from limit_connect_ai.services.kg_seeder import scan_all_companies, seed_legal_opportunities
         seed_legal_opportunities()
         scan_all_companies()
         from limit_connect_ai.tasks_opportunity import notify_new_matches
@@ -112,7 +112,9 @@ class AdaptationSignalTest(F234TestBase):
 
     def test_signal_creates_rule_on_processed_update(self):
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, AdaptationRule,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         src, _ = RegulatorySource.objects.get_or_create(
             source_type='nn',
@@ -132,7 +134,9 @@ class AdaptationSignalTest(F234TestBase):
 
     def test_signal_skips_unprocessed(self):
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, AdaptationRule,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         src = RegulatorySource.objects.first() or RegulatorySource.objects.create(
             name='T', source_type='nn', url_endpoint='http://t.hr', is_active=True,
@@ -146,7 +150,9 @@ class AdaptationSignalTest(F234TestBase):
 
     def test_signal_no_duplicate_rules(self):
         from limit_connect_ai.models_knowledge_graph import (
-            RegulatorySource, RegulatoryUpdate, AdaptationRule,
+            AdaptationRule,
+            RegulatorySource,
+            RegulatoryUpdate,
         )
         src = RegulatorySource.objects.first() or RegulatorySource.objects.create(
             name='T', source_type='nn', url_endpoint='http://t.hr', is_active=True,

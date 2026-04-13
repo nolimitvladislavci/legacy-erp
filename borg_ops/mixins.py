@@ -22,9 +22,9 @@ KONVENCIJA — OBVEZNO:
     zbog overhead-a — konvencija je dovoljna za mali tim.
 """
 import logging
-from django.db import transaction
+
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.fsm')
 
@@ -160,8 +160,9 @@ class FSMMixin:
     # ── Audit trail ──────────────────────────────────────────────────
     def _log_transition(self, old_status, new_status, user, note):
         try:
-            from borg_ops.models import CardActivity
             from django.contrib.contenttypes.models import ContentType
+
+            from borg_ops.models import CardActivity
             return CardActivity.objects.create(
                 content_type=ContentType.objects.get_for_model(self),
                 object_id=str(self.pk),
@@ -185,8 +186,9 @@ class FSMMixin:
         Koristi za: "Berba završena", "QC: Prošao", "Pakiranje završeno"
         """
         try:
-            from borg_ops.models import CardActivity
             from django.contrib.contenttypes.models import ContentType
+
+            from borg_ops.models import CardActivity
             return CardActivity.objects.create(
                 content_type=ContentType.objects.get_for_model(self),
                 object_id=str(self.pk),
@@ -205,8 +207,9 @@ class FSMMixin:
         # ── SLA timestamps ───────────────────────────────────────────────
     def _update_sla_timestamp(self, old_status, new_status, user):
         try:
-            from borg_ops.models import StatusTimestamp
             from django.contrib.contenttypes.models import ContentType
+
+            from borg_ops.models import StatusTimestamp
             ct     = ContentType.objects.get_for_model(self)
             obj_id = str(self.pk)
             now    = timezone.now()
@@ -236,8 +239,9 @@ class FSMMixin:
     @property
     def sla_seconds_in_current_status(self):
         try:
-            from borg_ops.models import StatusTimestamp
             from django.contrib.contenttypes.models import ContentType
+
+            from borg_ops.models import StatusTimestamp
             ts = StatusTimestamp.objects.filter(
                 content_type=ContentType.objects.get_for_model(self),
                 object_id=str(self.pk),

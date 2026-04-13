@@ -1,12 +1,13 @@
 """Invoice PDF, QR and eRačun generation."""
+import base64
 import hashlib
 import hmac
-import base64
 import os as _os
 from decimal import Decimal
+
 from django.template.loader import render_to_string
-from django.utils.translation import activate, get_language
 from django.utils import timezone
+from django.utils.translation import activate, get_language
 
 RATE_NAMES = {
     '0':  'Oslobođeno',
@@ -139,7 +140,9 @@ def build_sections(invoice):
 
 def generate_qr(invoice):
     try:
-        import qrcode, io
+        import io
+
+        import qrcode
         iban = (invoice.issuer_iban or '').replace(' ', '')
         payment_data = (
             f"BCD\n002\n1\nSCT\n{invoice.swift or ''}\n"
@@ -213,7 +216,9 @@ def _get_company_logo_b64(invoice):
 
 def _get_lc_brand_qr_b64():
     try:
-        import qrcode, io
+        import io
+
+        import qrcode
         qr = qrcode.QRCode(version=1, box_size=4, border=1,
             error_correction=qrcode.constants.ERROR_CORRECT_M)
         qr.add_data('https://limit-connect.com')
@@ -227,8 +232,8 @@ def _get_lc_brand_qr_b64():
 
 
 def _pick_template(invoice, lang):
-    from django.template.loader import get_template
     from django.template.exceptions import TemplateDoesNotExist
+    from django.template.loader import get_template
 
     pdf_tmpl = 'viskovic'
     try:

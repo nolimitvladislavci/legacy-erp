@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import VaultMember, VaultEntry, VaultAccessLog
+
+from .models import VaultAccessLog, VaultEntry, VaultMember
 
 
 @admin.register(VaultMember)

@@ -7,7 +7,7 @@ from datetime import date
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count
+from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import render
 

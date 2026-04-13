@@ -14,8 +14,8 @@ Korisnik NIKAD ne mora znati pravila napamet.
 8. Synesis filter (ne validirati historijske)
 """
 from dataclasses import dataclass
-from typing import List
 from enum import Enum
+from typing import List
 
 
 class Severity(Enum):

@@ -1,28 +1,27 @@
-from core.models import BookingSignature
 import json
 import logging
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from io import BytesIO
 
-from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.contrib.auth.decorators import login_required
-from django.db import transaction, DatabaseError, IntegrityError
-from django.http import HttpResponse, JsonResponse, Http404
 from django.conf import settings
-from django.db import models
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError, models, transaction
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.utils.timezone import now
+from django.utils.translation import gettext as _
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
+from core.models import BookingSignature
 from core.tenant import get_current_company
 from inventory.models import InventoryItem
 
 from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -129,9 +128,11 @@ def open_session(request, terminal_id):
 
     # ZOR upozorenje — >50h/tjedan
     try:
+        from datetime import timedelta as _td
+
         from django.db.models import Sum as _Sum
         from django.utils import timezone as _tz
-        from datetime import timedelta as _td
+
         from worktime.models import TimeEntry
         _ws = _tz.now().date() - _td(days=_tz.now().weekday())
         _wh = TimeEntry.objects.filter(
@@ -234,8 +235,9 @@ def close_session(request, session_id):
 
     # Auto Otpremnica per bon → Propter
     try:
-        from propter.models import Otpremnica, BillingPeriod
         from django.utils import timezone as _tz
+
+        from propter.models import BillingPeriod, Otpremnica
 
         period = BillingPeriod.get_or_create_current(company)
         paid_receipts = session.receipts.filter(status=POSReceipt.Status.PAID)
@@ -669,7 +671,8 @@ def receipt_update_buyer(request, receipt_id):
 
 def ai_barcode_lookup(request):
     """AI Vision za prepoznavanje barkoda i proizvoda sa slike."""
-    import json, os
+    import json
+    import os
 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -1063,7 +1066,6 @@ def receipt_pdf(request, receipt_id):
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-
 
 # ── QUICK POS ─────────────────────────────────────────────────────────────────
 
@@ -2304,9 +2306,18 @@ def table_checkout(request, table_id):
     GET: prikaži stavke za podjelu
     POST: kreiraj račune i naplati
     """
-    from .models import Table, GastroOrder, GastroOrderItem, POSSession, POSTerminal
-    from .models import POSReceipt, POSReceiptItem, POSPaymentLine
     from decimal import Decimal
+
+    from .models import (
+        GastroOrder,
+        GastroOrderItem,
+        POSPaymentLine,
+        POSReceipt,
+        POSReceiptItem,
+        POSSession,
+        POSTerminal,
+        Table,
+    )
 
     company = get_user_company(request)
     table = get_object_or_404(Table, pk=table_id, company=company)
@@ -2499,7 +2510,7 @@ def gastro_order_public(request, token):
 
 def gastro_qr(request, qr_code):
     """QR code menu + ordering (no login required)."""
-    from .models import Table, GastroOrder, GastroOrderItem
+    from .models import GastroOrder, GastroOrderItem, Table
     table = get_object_or_404(Table.objects.unscoped(), qr_code=qr_code, is_active=True)
     items = InventoryItem.objects.unscoped().filter(
         company=table.company, is_active=True, category__in=["food","drink","dessert","special"]
@@ -2571,8 +2582,9 @@ def gastro_qr(request, qr_code):
             payment_url = None
             if payment_method in ('stripe', 'btcpay'):
                 try:
-                    from payments.services import create_payment
                     from decimal import Decimal
+
+                    from payments.services import create_payment
                     total = sum(
                         (i.inventory_item.unit_price or 0) * i.quantity
                         for i in order.items.select_related('inventory_item').all()
@@ -2599,7 +2611,7 @@ def gastro_qr(request, qr_code):
             # Loyalty: increment stamps
             if guest_email:
                 try:
-                    from .models import LoyaltyProgram, GuestLoyalty
+                    from .models import GuestLoyalty, LoyaltyProgram
                     programs = LoyaltyProgram.objects.filter(company=table.company, is_active=True, category__in=["food","drink","dessert","special"]).select_related("company")
                     for prog in programs:
                         loyalty, _ = GuestLoyalty.objects.get_or_create(
@@ -2794,7 +2806,7 @@ def article_search(request):
             logger.warning("Suppressed error", exc_info=True)
     if not company:
         return JsonResponse({'articles': []})
-    qs = InventoryItem.objects.filter(company=company, is_active=True)
+    qs = InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate")
     if q:
         qs = qs.filter(
             Q(name__icontains=q) | Q(sku__icontains=q) | Q(barcode__icontains=q)
@@ -2936,7 +2948,7 @@ def cash_deposit(request, session_id):
                 )
                 label = 'Polog' if dtype == 'deposit' else 'Isplata'
                 messages.success(request, f'{label} {amount:.2f} EUR evidentiran.')
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             logger.exception("Unexpected error", exc_info=True)
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('pos:session_detail', session_id=session_id)
@@ -2961,7 +2973,7 @@ def cashier_full_report(request, session_id):
     Sva logika u ReportingService, view je tanka ljuska za HTTP.
     Dostupan kao: HTML, PDF, JSON
     """
-    from pos.services.reporting import ReportingService, ReportingError
+    from pos.services.reporting import ReportingError, ReportingService
 
     company = get_user_company(request)
     session = get_object_or_404(POSSession, pk=session_id)
@@ -2980,8 +2992,9 @@ def cashier_full_report(request, session_id):
         from django.template.loader import render_to_string
         html = render_to_string('pos/cashier_full_report_pdf.html', context)
         try:
-            from xhtml2pdf import pisa
             from io import BytesIO
+
+            from xhtml2pdf import pisa
             buf = BytesIO()
             pisa.CreatePDF(html, dest=buf)
             buf.seek(0)
@@ -3322,9 +3335,10 @@ def pfand_items_api(request):
 @login_required
 def voucher_list(request):
     """List and create vouchers."""
-    from .models import Voucher
     import uuid as _uuid
     from datetime import date
+
+    from .models import Voucher
 
     company = get_user_company(request)
     if not company:
@@ -3399,9 +3413,11 @@ def voucher_check_api(request):
 @login_required
 def fiscal_room(request):
     """Pregled i ručna sinkronizacija nefiskaliziranih računa."""
+    from datetime import timedelta
+
     from django.db.models import Q
     from django.utils.timezone import now
-    from datetime import timedelta
+
     from fiscal.models import FiscalLog
 
     company = get_user_company(request)
@@ -3426,6 +3442,7 @@ def fiscal_room(request):
 def fiscal_room_sync(request):
     """AJAX: pokušaj fiskalizacije svih nefiskaliziranih PAID računa."""
     from django.db.models import Q
+
     from pos.services import _attempt_fiscalization
 
     company = get_user_company(request)
@@ -3508,6 +3525,7 @@ def waiter_app(request):
 def waiter_shift_toggle(request):
     """Start or end a waiter shift."""
     from django.utils import timezone
+
     from .models import WaiterShift
     company = get_user_company(request)
     if not company:
@@ -3529,6 +3547,7 @@ def waiter_shift_toggle(request):
 def waiter_heartbeat(request):
     """Heartbeat ping every 5 min from waiter phone."""
     from django.utils import timezone
+
     from .models import WaiterShift
     company = get_user_company(request)
     if not company:
@@ -3548,6 +3567,7 @@ def waiter_heartbeat(request):
 def waiter_claim_order(request, order_id):
     """Waiter claims a ready order for delivery."""
     from django.utils import timezone
+
     from .models import GastroOrder, WaiterShift
     order = get_object_or_404(GastroOrder, pk=order_id)
 
@@ -3573,6 +3593,7 @@ def waiter_claim_order(request, order_id):
 def waiter_deliver_order(request, order_id):
     """Waiter marks order as delivered."""
     from django.utils import timezone
+
     from .models import GastroOrder, WaiterShift
     order = get_object_or_404(GastroOrder, pk=order_id)
 
@@ -3618,7 +3639,9 @@ def kitchen_tablet(request, token):
 def kitchen_tablet_api(request, token):
     """JSON API for kitchen tablet — no login."""
     from django.utils import timezone as tz
+
     from companies.models import Company
+
     from .models import GastroOrder
     company = Company.objects.filter(id=token).first()
     if not company:
@@ -3659,6 +3682,7 @@ def kitchen_tablet_action(request, token, order_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
     from companies.models import Company
+
     from .models import GastroOrder
     company = Company.objects.filter(id=token).first()
     if not company:
@@ -3698,9 +3722,10 @@ def kitchen_cook_scan(request, token):
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
-    from companies.models import Company
-    from accounts.models import DeviceToken
     import json as _json
+
+    from accounts.models import DeviceToken
+    from companies.models import Company
 
     company = Company.objects.filter(id=token).first()
     if not company:
@@ -3776,9 +3801,11 @@ def gastro_order_review(request, tracking_token):
 
 def gastro_reviews_public(request, company_id):
     """Public reviews page for a company — embeddable on website."""
-    from companies.models import Company
-    from .models import GastroReview
     from django.db.models import Avg
+
+    from companies.models import Company
+
+    from .models import GastroReview
 
     company = get_object_or_404(Company, pk=company_id)
     reviews = GastroReview.objects.filter(company=company, is_published=True).select_related("company", "order")
@@ -3803,9 +3830,11 @@ def gastro_reviews_public(request, company_id):
 @require_POST
 def cashier_pin_verify(request):
     """Verificiraj blagajnikov PIN — vraca cashier_id i ime za frontend tracking."""
-    from pos.models import POSCashier
     import json
+
     from django.core.cache import cache
+
+    from pos.models import POSCashier
 
     body = json.loads(request.body) if request.content_type == 'application/json' else request.POST
     pin = body.get('pin', '')
@@ -3914,10 +3943,12 @@ def webshop_public(request, slug):
 @login_required
 def yesterday_manage(request):
     """Upravljanje robom od jučer — dodaj/makni artikle."""
+    from datetime import date, timedelta
+
+    from django.db import connection as _conn
+
     from core.company_utils import get_user_company
     from inventory.models import InventoryItem
-    from datetime import date, timedelta
-    from django.db import connection as _conn
 
     company = get_user_company(request)
     if not company:
@@ -4116,7 +4147,9 @@ def cashier_report_html(request, session_id):
 def api_quick_add_item(request):
     """Brzo dodavanje novog artikla iz POS skenera."""
     import json
+
     from django.http import JsonResponse
+
     from core.company_utils import get_user_company
     from inventory.models import InventoryItem
 
@@ -4210,8 +4243,9 @@ def pos_item_api(request, item_id):
 # ═══ POSDailyReport — lista + mjesecni summary ═══
 @login_required
 def daily_reports_list(request):
-    from pos.models import POSDailyReport
     from django.db.models import Sum
+
+    from pos.models import POSDailyReport
 
     company = get_user_company(request)
     qs = POSDailyReport.objects.filter(company=company).select_related('terminal', 'session')
@@ -4251,9 +4285,10 @@ def daily_reports_list(request):
 def kitchen_cook_logout(request, token):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
-    from companies.models import Company
-    from accounts.models import DeviceToken
     import json as _json
+
+    from accounts.models import DeviceToken
+    from companies.models import Company
 
     company = Company.objects.filter(id=token).first()
     if not company:
@@ -4327,8 +4362,9 @@ def device_token_panic(request, token_id):
 # ═══ DeviceToken: Lista s expiry ═══
 @login_required
 def device_token_list(request):
-    from accounts.models import DeviceToken
     from django.utils import timezone
+
+    from accounts.models import DeviceToken
 
     company = get_user_company(request)
     tokens = DeviceToken.objects.filter(company=company).select_related('user', 'cashier')
@@ -4383,7 +4419,7 @@ def _zlatno_dugme_notify_ivan(suggestion):
 def _zlatno_dugme_notify_user(suggestion):
     """Notificira korisnika WhatsApp-om kad Ivan promijeni status prijedloga."""
     try:
-        from core.whatsapp import send_text, normalize_phone
+        from core.whatsapp import normalize_phone, send_text
         author = suggestion.author
         if not author:
             return
@@ -4531,7 +4567,7 @@ def onboarding_wizard(request):
         return redirect('core:dashboard')
 
     from inventory.models import InventoryItem
-    from pos.models import POSTerminal, POSCashier, POSSettings
+    from pos.models import POSCashier, POSSettings, POSTerminal
 
     steps = [
         {
@@ -4706,6 +4742,7 @@ def prigovori_api(request):
             audio_b64 = data.get('audio_recording', '')
             if audio_b64:
                 import base64
+
                 from django.core.files.base import ContentFile
                 try:
                     audio_data = base64.b64decode(audio_b64.split(',')[-1])
@@ -4768,8 +4805,9 @@ def knjiga_prigovora_pdf(request):
         'lang': lang,
     })
     try:
-        from xhtml2pdf import pisa
         from io import BytesIO
+
+        from xhtml2pdf import pisa
         buf = BytesIO()
         pisa.CreatePDF(html, dest=buf)
         buf.seek(0)
@@ -4990,7 +5028,9 @@ def receipt_public(request, receipt_id, token=None):
     Mobile-friendly, BEZ PAPIRA. Bez logina.
     Token moze biti u path-u ili query stringu.
     """
-    import hashlib, hmac
+    import hashlib
+    import hmac
+
     from django.conf import settings as _s
     expected = hmac.new(_s.SECRET_KEY[:32].encode(), str(receipt_id).encode(), hashlib.sha256).hexdigest()[:12]
     token = (token or request.GET.get('t', '')).strip().rstrip('/').strip()
@@ -5017,7 +5057,9 @@ def receipt_public(request, receipt_id, token=None):
 
 def receipt_public_token(receipt_id):
     """Generiraj HMAC token za public receipt URL."""
-    import hashlib, hmac
+    import hashlib
+    import hmac
+
     from django.conf import settings as _s
     return hmac.new(_s.SECRET_KEY[:32].encode(), str(receipt_id).encode(), hashlib.sha256).hexdigest()[:12]
 
@@ -5211,8 +5253,10 @@ def revolut_qr(request, receipt_id):
 
     checkout_url = 'https://checkout.revolut.com/pay/%s' % payment_id
 
-    import qrcode, base64
+    import base64
     from io import BytesIO
+
+    import qrcode
     qr = qrcode.make(checkout_url, box_size=6, border=2)
     buf = BytesIO()
     qr.save(buf, format='PNG')
@@ -5292,6 +5336,7 @@ def session_report_json(request, session_id):
 def dsfinvk_export(request):
     """DSFinV-K Export Download — ZIP fuer Finanzamt."""
     from datetime import date, timedelta
+
     from django.http import HttpResponse
     company = get_user_company(request)
     if not company:
@@ -5329,8 +5374,9 @@ def dsfinvk_export(request):
 @login_required
 def kassenbuch_download(request):
     """Blagajnicki dnevnik / Kassenbuch XLSX download."""
-    from django.http import HttpResponse
     from datetime import date
+
+    from django.http import HttpResponse
     company = get_user_company(request)
     if not company:
         return JsonResponse({'error': 'Nema firme'}, status=400)
@@ -5639,9 +5685,10 @@ def update_cashier_oib(request):
 @login_required
 def pp_mi_po_report(request):
     """Mjesečni obrazac PP-MI-PO za porez na potrošnju."""
-    from decimal import Decimal
-    from django.db.models import Sum, Count
     import calendar
+    from decimal import Decimal
+
+    from django.db.models import Count, Sum
 
     company = get_user_company(request)
 
@@ -5743,6 +5790,7 @@ def api_item_search(request):
     Pretraži inventory u bazi — vraća JSON za POS tražilicu.
     """
     from django.http import JsonResponse
+
     from inventory.models import InventoryItem
 
     q = request.GET.get('q', '').strip()
@@ -5753,7 +5801,7 @@ def api_item_search(request):
     if not company:
         return JsonResponse({'items': []})
 
-    qs = InventoryItem.objects.filter(company=company, is_active=True)
+    qs = InventoryItem.objects.filter(company=company, is_active=True).select_related("tax_rate")
 
     # Filtriraj po kategoriji terminala ako postoji
     if terminal_id:
@@ -5816,6 +5864,7 @@ def api_ai_upsell(request):
 def api_fenix_camera(request):
     """FenixCamera OCR — photo → Haiku Vision → barcode/product name → SKU lookup."""
     import base64
+
     from django.conf import settings as _settings
 
     company = get_user_company(request)

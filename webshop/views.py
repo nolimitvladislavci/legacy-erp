@@ -2,17 +2,18 @@ import uuid
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import permissions, viewsets
 
 from partners.models import Partner
-from django.db import DatabaseError, IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Order, OrderItem, Product
 from .serializers import OrderItemSerializer, OrderSerializer, ProductSerializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 # ── PRODUCTS ─────────────────────────────────────────────────
 
@@ -244,8 +245,6 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 # ══════════════════════════════════════════════════════════════════════════════
 
 from django.http import JsonResponse
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
 
 
 def api_cart_add(request):
@@ -257,7 +256,8 @@ def api_cart_add(request):
         return JsonResponse({'error': 'POST required'}, status=405)
 
     import json
-    from webshop.cart_engine import add_to_cart, CartError
+
+    from webshop.cart_engine import CartError, add_to_cart
 
     try:
         data = json.loads(request.body)
@@ -300,8 +300,9 @@ def api_cart_add(request):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def public_shop(request, company_slug):
-    from companies.models import Company
     from django.db.models import Q
+
+    from companies.models import Company
     company = get_object_or_404(Company, booking_slug=company_slug)
 
     cat   = request.GET.get('cat', '')
@@ -384,6 +385,7 @@ def public_cart(request, company_slug):
 
 def public_cart_add(request, company_slug):
     from django.http import JsonResponse
+
     from companies.models import Company
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -471,9 +473,11 @@ def public_checkout(request, company_slug):
 
 
 def public_checkout_submit(request, company_slug):
-    from django.http import JsonResponse
-    from companies.models import Company
     import json as _json
+
+    from django.http import JsonResponse
+
+    from companies.models import Company
 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST only'}, status=405)
@@ -518,6 +522,7 @@ def public_checkout_submit(request, company_slug):
 
     # Nadi ili kreiraj Partner (kupac)
     import uuid as _uuid
+
     from partners.models import Partner
     partner = Partner.objects.filter(email=email).first()
     if not partner:

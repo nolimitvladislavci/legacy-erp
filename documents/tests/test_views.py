@@ -1,10 +1,12 @@
 """Tests for Document views."""
 from datetime import date
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
+from django.test import Client, TestCase
+
+from accounts.models import UserProfile
 from companies.models import Company
 from documents.models import Document
-from accounts.models import UserProfile
 
 
 def _make_company(name, oib):

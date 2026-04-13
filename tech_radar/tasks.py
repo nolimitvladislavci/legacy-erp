@@ -5,16 +5,16 @@ Tech Radar Celery Tasks.
   capacity_check    — svakih 1h: provjera pragova + alarmiranje
   cleanup_signals   — dnevno: briši signale starije od 90 dana
 """
-import os
 import logging
+import os
 import shutil
 import subprocess
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 
 from celery import shared_task
-from django.utils import timezone as tz
 from django.db import DatabaseError
+from django.utils import timezone as tz
 
 logger = logging.getLogger('tech_radar')
 
@@ -82,9 +82,9 @@ def tech_radar_scan(self):
 
     # ── Celery ──
     try:
-        from django.core.cache import cache
         # Queue size via Redis
         import redis
+        from django.core.cache import cache
         r = redis.from_url(os.environ.get('CELERY_BROKER_URL', 'redis://127.0.0.1:6379/2'))
         signal.celery_queue_size = r.llen('celery') or 0
 
@@ -119,8 +119,9 @@ def tech_radar_scan(self):
 
     # ── Business Metrics ──
     try:
-        from companies.models import Company
         from django.contrib.auth.models import User
+
+        from companies.models import Company
         signal.total_companies = Company.objects.count()
         signal.total_users = User.objects.filter(is_active=True).count()
     except DatabaseError:
@@ -175,7 +176,7 @@ def capacity_check(self):
     Svaki sat: provjeri pragove kapaciteta i alarmira ako treba.
     Čita zadnji TechSignal i uspoređuje s CapacityThreshold.
     """
-    from tech_radar.models import TechSignal, CapacityThreshold
+    from tech_radar.models import CapacityThreshold, TechSignal
 
     signal = TechSignal.objects.order_by('-timestamp').first()
     if not signal:

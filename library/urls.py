@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import views
 
 app_name = "library"
@@ -37,7 +38,8 @@ urlpatterns = [
 ]
 
     # Agregator izvora
-from .sources import source_hub, search_gutenberg, search_openlibrary, import_from_source
+from .sources import import_from_source, search_gutenberg, search_openlibrary, source_hub
+
 urlpatterns += [
     path('izvori/', source_hub, name='source_hub'),
     path('api/gutenberg/', search_gutenberg, name='search_gutenberg'),

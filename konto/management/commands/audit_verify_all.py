@@ -5,9 +5,9 @@ Run via cron: 0 3 1 * * /var/www/fina-connect/venv/bin/python manage.py audit_ve
 Verifies SHA-256 hash chain integrity for every company and sends
 email alert to admins if any chain is broken.
 """
-from django.core.management.base import BaseCommand
-from django.core.mail import send_mail
 from django.conf import settings
+from django.core.mail import send_mail
+from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 
@@ -15,9 +15,9 @@ class Command(BaseCommand):
     help = 'Verify audit hash chains for all companies and alert on failure.'
 
     def handle(self, *args, **options):
-        from konto.models import LedgerLine
-        from konto.integrity import verify_chain
         from companies.models import Company
+        from konto.integrity import verify_chain
+        from konto.models import LedgerLine
 
         company_ids = (
             LedgerLine.objects

@@ -9,8 +9,8 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('stolarija')
 
@@ -21,8 +21,8 @@ def check_service_reminders(self):
     Daily: find upcoming ServiceVisits and send WhatsApp reminders.
     30 days before, 7 days before, on the day.
     """
-    from stolarija.models import ServiceVisit
     from core.whatsapp_tasks import send_whatsapp_text_task
+    from stolarija.models import ServiceVisit
 
     today = timezone.now().date()
     reminder_days = [30, 7, 0]
@@ -74,7 +74,7 @@ def check_expired_warranties(self):
     """
     Weekly: ensure annual service visits exist for active warranties.
     """
-    from stolarija.models import WindowWarranty, ServiceVisit
+    from stolarija.models import ServiceVisit, WindowWarranty
 
     today = timezone.now().date()
     created = 0
@@ -120,8 +120,8 @@ def process_pending_messages(self):
     """
     Every 5 min: process inbound ServiceMessages that haven't been analyzed.
     """
-    from stolarija.models import ServiceMessage
     from stolarija.ai_service_agent import process_inbound_message
+    from stolarija.models import ServiceMessage
 
     pending = ServiceMessage.objects.filter(
         direction='inbound',
@@ -146,9 +146,10 @@ def send_approved_messages(self):
     """
     Every 5 min: send messages that have been approved by humans.
     """
-    from stolarija.models import ServiceMessage
-    from core.whatsapp_tasks import send_whatsapp_text_task
     from django.core.mail import send_mail
+
+    from core.whatsapp_tasks import send_whatsapp_text_task
+    from stolarija.models import ServiceMessage
 
     approved = ServiceMessage.objects.filter(
         direction='outbound',

@@ -12,8 +12,8 @@ import uuid as uuid_mod
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 
 class Command(BaseCommand):
@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from companies.models import Company
-        from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
+        from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
         TEST_OIB = 'DE_TSE_TEST_99'
 

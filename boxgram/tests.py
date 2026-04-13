@@ -1,14 +1,14 @@
-from django.test import TestCase
-from django.contrib.auth.models import User
-from django.utils import timezone
-from datetime import date, timedelta
-from companies.models import Company
-from .models import (
-    PetProfile, LifeEvent, Competition, CompetitionEntry, 
-    CompetitionVote, EventHeart
-)
-from .tasks import close_competition
 import logging
+from datetime import date, timedelta
+
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils import timezone
+
+from companies.models import Company
+
+from .models import Competition, CompetitionEntry, CompetitionVote, EventHeart, LifeEvent, PetProfile
+from .tasks import close_competition
 
 logger = logging.getLogger(__name__)
 
@@ -290,9 +290,15 @@ class BoxgramCoverageTest(TestCase):
     
     def test_boxgram_models_exist(self):
         from boxgram.models import (
-            PetProfile, LifeEvent, EventMedia, SocialImport,
-            Competition, CompetitionEntry, CompetitionVote,
-            PetFollower, EventHeart
+            Competition,
+            CompetitionEntry,
+            CompetitionVote,
+            EventHeart,
+            EventMedia,
+            LifeEvent,
+            PetFollower,
+            PetProfile,
+            SocialImport,
         )
         self.assertIsNotNone(PetProfile)
         self.assertIsNotNone(LifeEvent)
@@ -305,10 +311,7 @@ class BoxgramCoverageTest(TestCase):
         self.assertIsNotNone(EventHeart)
     
     def test_boxgram_tasks_exist(self):
-        from boxgram.tasks import (
-            close_competition, fetch_social_import,
-            generate_pet_qr, bulk_sync_company_to_boxgram
-        )
+        from boxgram.tasks import bulk_sync_company_to_boxgram, close_competition, fetch_social_import, generate_pet_qr
         self.assertIsNotNone(close_competition)
         self.assertIsNotNone(fetch_social_import)
         self.assertIsNotNone(generate_pet_qr)

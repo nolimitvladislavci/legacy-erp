@@ -1,7 +1,9 @@
-from django.utils import timezone
-from django.db import models
-from decimal import Decimal
 from datetime import date, timedelta
+from decimal import Decimal
+
+from django.db import models
+from django.utils import timezone
+
 from core.managers import CompanyManager
 
 

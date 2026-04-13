@@ -5,11 +5,11 @@ Svaka ruta se renderira kroz Django view i provjerava:
 2. View ne baca exception
 3. Response je 200 ili 302 (redirect na login je OK za anon)
 """
-from django.test import TestCase, RequestFactory
 from django.contrib.auth.models import User
-from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.contrib.sessions.backends.db import SessionStore
 from django.template.loader import get_template
+from django.test import RequestFactory, TestCase
 
 
 class TemplateLoadTest(TestCase):

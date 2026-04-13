@@ -1,6 +1,5 @@
 import re
 
-
 WORD_TO_NUM = {
     'tisuću': 1000, 'tisuća': 1000, 'tisuc': 1000,
     'devetsto': 900, 'osamsto': 800, 'sedamsto': 700,

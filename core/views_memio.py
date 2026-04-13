@@ -8,10 +8,12 @@ Endpointi (bez autentifikacije, javni):
 """
 import json
 import logging
+
 from django.contrib.auth.decorators import login_required
-from memio_pet.security import rate_limit, require_memio_key
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+
+from memio_pet.security import rate_limit, require_memio_key
 
 logger = logging.getLogger(__name__)
 
@@ -246,8 +248,8 @@ def memio_push(request):
         if not livestock_id:
             return JsonResponse({'error': 'livestock_id obavezan.'}, status=400)
 
-        from livestock.models import Livestock
         from core.company_utils import get_user_company
+        from livestock.models import Livestock
         from memio_pet.bridge import push_animal_profile, push_health_record
 
         company = get_user_company(request)

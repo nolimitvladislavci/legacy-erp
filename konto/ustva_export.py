@@ -17,8 +17,8 @@ Kennzahlen (KZ) Mapping:
   KZ 83: Verbleibende USt-Vorauszahlung (+) / Überschuss (-)
 """
 import xml.etree.ElementTree as ET
+from decimal import ROUND_HALF_UP, Decimal
 from xml.dom import minidom
-from decimal import Decimal, ROUND_HALF_UP
 
 
 def _q(val):
@@ -41,7 +41,7 @@ def generate_ustva(company, year, month, tax_period=None):
 
     Returns dict with all KZ fields.
     """
-    from konto.models import TaxPeriod, TaxLineDetail
+    from konto.models import TaxLineDetail, TaxPeriod
 
     if not tax_period:
         try:
@@ -239,8 +239,10 @@ def is_kleinunternehmer(company):
                Umsatz im laufenden Jahr voraussichtlich <= 50.000 EUR.
     """
     import datetime
-    from invoicing.models import Invoice
+
     from django.db.models import Sum
+
+    from invoicing.models import Invoice
 
     last_year = datetime.date.today().year - 1
     revenue_last_year = (
@@ -264,6 +266,7 @@ def generate_zm(company, year, quarter):
     Returns list of {vat_id, country, amount} for EU B2B deliveries.
     """
     import datetime
+
     from invoicing.models import Invoice
 
     q_start_month = (quarter - 1) * 3 + 1

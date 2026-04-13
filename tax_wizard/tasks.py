@@ -11,8 +11,8 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -112,8 +112,8 @@ def _send_deadline_notification(deadline, urgency_level):
 
     # Email
     try:
-        from django.core.mail import send_mail
         from django.conf import settings as django_settings
+        from django.core.mail import send_mail
 
         admin_emails = []
         from django.contrib.auth.models import User
@@ -216,8 +216,8 @@ def generate_annual_deadlines(self):
     Za svaki TaxFormTemplate × Company → TaxDeadline.
     Preskače firme koje nemaju odgovarajući business_type.
     """
-    from tax_wizard.models import TaxFormTemplate, TaxDeadline
     from companies.models import Company
+    from tax_wizard.models import TaxDeadline, TaxFormTemplate
 
     year = timezone.now().year
     templates = TaxFormTemplate.objects.filter(is_active=True)

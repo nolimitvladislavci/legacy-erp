@@ -71,8 +71,9 @@ def downgrade_expired_subscriptions(self):
     Korisnici OSTAJU aktivni, ali vide samo arhivu i konto (read-only).
     Zakonska obaveza: pristup arhivi 11 godina (ZOR čl. 10).
     """
-    from registration.models import CompanySubscription, PricingPlan
     from django.utils import timezone
+
+    from registration.models import CompanySubscription, PricingPlan
 
     archive_plan = PricingPlan.objects.filter(slug='archive_readonly').first()
     if not archive_plan:

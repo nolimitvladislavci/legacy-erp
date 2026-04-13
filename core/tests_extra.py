@@ -1,9 +1,10 @@
 """Tests for notifications, partners, documents, invoicing views."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 
 def _make_company(oib):
@@ -42,8 +43,8 @@ class NotificationServiceTest(TestCase):
         self.recipient = User.objects.create_user('notif_recipient', password='pass')
 
     def test_notify_creates_notification(self):
-        from notifications.services import notify
         from notifications.models import Notification
+        from notifications.services import notify
         notify(
             recipient=self.recipient,
             notification_type='invoice_paid',
@@ -57,8 +58,8 @@ class NotificationServiceTest(TestCase):
         self.assertEqual(n.title, 'Test notifikacija')
 
     def test_notify_without_sender(self):
-        from notifications.services import notify
         from notifications.models import Notification
+        from notifications.services import notify
         notify(
             recipient=self.recipient,
             notification_type='info',

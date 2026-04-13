@@ -70,7 +70,7 @@ def add_to_cart(user, product_id, qty, attributes=None, company=None):
     2. Stock lock via select_for_update (race-safe)
     3. Atomic quantity reservation
     """
-    from webshop.models import Product, CartItem
+    from webshop.models import CartItem, Product
 
     attributes = attributes or {}
 

@@ -1,13 +1,14 @@
 """Extra accounts views tests — user_edit, reset_password, toggle_status, translations, change_password."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user(oib, username, modules=None, is_superuser=False):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'AV {oib}', oib=oib)
     if is_superuser:

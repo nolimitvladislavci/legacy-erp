@@ -22,9 +22,11 @@ pozivaju iste funkcije.
 """
 import logging
 import re
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_save
-from django.core.exceptions import ValidationError
+
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('validation_engine')
@@ -114,7 +116,10 @@ def _global_validation_guard(sender, instance, **kwargs):
         return
 
     from core.oib_validator import (
-        validate_oib_hr, validate_vat_id, validate_iban, validate_mbs,
+        validate_iban,
+        validate_mbs,
+        validate_oib_hr,
+        validate_vat_id,
     )
 
     is_new = instance.pk is None

@@ -1,8 +1,6 @@
 from django.urls import path
-from . import views
-from . import views_inbox
-from . import views_posrednik
-from . import views_mandate
+
+from . import views, views_inbox, views_mandate, views_posrednik
 
 app_name = 'eracun'
 

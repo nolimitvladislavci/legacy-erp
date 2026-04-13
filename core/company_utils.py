@@ -1,6 +1,9 @@
-from core.tenant import get_current_company
-from django.core.exceptions import ObjectDoesNotExist
 import logging
+
+from django.core.exceptions import ObjectDoesNotExist
+
+from core.tenant import get_current_company
+
 logger = logging.getLogger(__name__)
 
 

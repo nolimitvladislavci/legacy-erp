@@ -1,11 +1,15 @@
 """Tests for marketplace models."""
 from decimal import Decimal
-from django.test import TestCase
+
 from django.contrib.auth.models import User
+from django.test import TestCase
+
 from companies.models import Company
 from marketplace.models import (
-    MarketplaceCategory, MarketplaceProduct,
-    MarketplaceOrder, MarketplaceOrderItem,
+    MarketplaceCategory,
+    MarketplaceOrder,
+    MarketplaceOrderItem,
+    MarketplaceProduct,
 )
 
 

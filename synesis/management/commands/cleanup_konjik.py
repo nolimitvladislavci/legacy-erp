@@ -13,10 +13,10 @@ import os
 import time
 from collections import defaultdict
 from decimal import Decimal
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.db.models import Sum, Count, Q
-
+from django.db.models import Count, Q, Sum
 
 KONJIK_OIB = '37590751921'
 KONJIK_SOURCES = {'KONJIK D.O.O. 2025', 'KONJIK D.O.O. 2025(Popravljeno 1)'}
@@ -67,10 +67,10 @@ class Command(BaseCommand):
             return
 
         # Step 2: Count what needs to be deleted
-        from konto.models import JournalEntry, LedgerLine
-        from partners.models import Partner
         from inventory.models import InventoryItem
         from invoicing.models import Invoice
+        from konto.models import JournalEntry, LedgerLine
+        from partners.models import Partner
 
         # JournalEntries from foreign imports have entry_numbers like SYN-2025-*
         # But we can't distinguish by entry_number alone.

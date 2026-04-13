@@ -10,15 +10,15 @@ import logging
 from decimal import Decimal
 from typing import Optional
 
-from django.db import transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils.timezone import now
 
 from core.exceptions import PaymentError, SessionError
-from django.db import IntegrityError, DatabaseError
 
 if False:  # TYPE_CHECKING
-    from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem
     from django.contrib.auth.models import User
+
+    from pos.models import POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
 logger = logging.getLogger(__name__)
 

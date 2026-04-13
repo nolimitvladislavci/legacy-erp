@@ -17,9 +17,8 @@ Konta se mogu prilagoditi per company putem ProductionKontoConfig.
 import logging
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import DatabaseError, transaction
 from django.utils import timezone
-from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +70,7 @@ def book_production_order(order, user=None):
     Proknjiži završeni radni nalog u konto.
     Kreira JournalEntry s 4 para knjiženja (8 LedgerLine-ova).
     """
-    from konto.models import JournalEntry, LedgerLine, KontoAccount
+    from konto.models import JournalEntry, KontoAccount, LedgerLine
 
     company = order.company
     accounts = get_accounts(company)

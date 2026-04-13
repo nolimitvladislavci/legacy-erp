@@ -33,10 +33,12 @@ def mrp_run(company, horizon_days=30, user=None):
     horizon_days: koliko dana unaprijed gledati
     Returns: dict with results summary + list of planned orders
     """
-    from production.models import (
-        BillOfMaterials, ProductionOrder, MRPPlannedOrder,
-    )
     from inventory.models import InventoryItem
+    from production.models import (
+        BillOfMaterials,
+        MRPPlannedOrder,
+        ProductionOrder,
+    )
 
     run_id = f'MRP-{timezone.now().strftime("%Y%m%d-%H%M%S")}'
     horizon_end = date.today() + timedelta(days=horizon_days)
@@ -203,7 +205,7 @@ def calculate_workstation_load(company, days_ahead=14):
     """
     Kapacitet planiranje — koliko je svaka radna stanica opterećena.
     """
-    from production.models import Workstation, ProductionStep
+    from production.models import ProductionStep, Workstation
 
     horizon = date.today() + timedelta(days=days_ahead)
     workstations = Workstation.objects.filter(company=company, status='active')

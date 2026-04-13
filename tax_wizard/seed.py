@@ -4,6 +4,7 @@ Pokreni: python manage.py shell < tax_wizard/seed.py
 """
 import os
 import sys
+
 import django
 
 # Setup
@@ -13,12 +14,12 @@ django.setup()
 
 from datetime import date
 from decimal import Decimal
-from tax_wizard.models import (
-    TaxFormTemplate,
-    PausalTier,
-    OsobniOdbitakKoeficijent,
-)
 
+from tax_wizard.models import (
+    OsobniOdbitakKoeficijent,
+    PausalTier,
+    TaxFormTemplate,
+)
 
 # ═══════════════════════════════════════════════════════════════
 #  PO-SD TEMPLATE — JSON Wizard Schema (2026)

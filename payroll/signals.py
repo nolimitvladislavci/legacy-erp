@@ -6,10 +6,11 @@ Flow:
   2. For each Payslip → generate PDF via WeasyPrint
   3. Email PDF to worker (if worker has email)
 """
+import logging
+
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-import logging
 
 logger = logging.getLogger('payroll.signals')
 
@@ -53,8 +54,8 @@ def _process_payslips(payroll_run_id):
 def _send_payslip_email(payslip, run):
     """Generate PDF and send via email."""
     import weasyprint
-    from django.template.loader import render_to_string
     from django.core.mail import EmailMessage
+    from django.template.loader import render_to_string
 
     user = payslip.user
     if not user.email:

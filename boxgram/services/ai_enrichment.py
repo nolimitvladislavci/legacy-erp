@@ -3,6 +3,7 @@ Boxgram AI Enrichment — Haiku auto-opisi za LifeEvent
 Model: claude-haiku-4-5-20251001
 """
 import logging
+
 from django.conf import settings
 
 logger = logging.getLogger(__name__)

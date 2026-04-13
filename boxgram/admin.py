@@ -1,7 +1,15 @@
 from django.contrib import admin
+
 from .models import (
-    PetProfile, LifeEvent, EventMedia, SocialImport,
-    Competition, CompetitionEntry, CompetitionVote, PetFollower, EventHeart
+    Competition,
+    CompetitionEntry,
+    CompetitionVote,
+    EventHeart,
+    EventMedia,
+    LifeEvent,
+    PetFollower,
+    PetProfile,
+    SocialImport,
 )
 
 

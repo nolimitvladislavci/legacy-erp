@@ -1,8 +1,10 @@
 import logging
+
 logger = logging.getLogger(__name__)
 from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Q
 from django.views.decorators.http import require_POST
+
 
 def _post_or_json(request, key, default=''):
     """Read from POST data or JSON body (for offline queue replay)."""
@@ -16,16 +18,20 @@ def _post_or_json(request, key, default=''):
     return request.POST.get(key, default)
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.utils import timezone
 from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from core.company_utils import get_user_company
+
 from .models import (
-    ConsolidatedDelivery, ColdChainZone, SensorReading,
-    Vehicle, DeliveryRoute,
+    ColdChainZone,
+    ConsolidatedDelivery,
+    DeliveryRoute,
+    SensorReading,
+    Vehicle,
 )
 
 
@@ -167,8 +173,9 @@ def consolidated_create(request):
             cd.marketplace_orders.set(order_ids)
 
         # Auto-create TrackedItem
-        from tracking.models import TrackedItem
         from django.contrib.contenttypes.models import ContentType
+
+        from tracking.models import TrackedItem
         ct = ContentType.objects.get_for_model(ConsolidatedDelivery)
         tracked = TrackedItem.objects.create(
             content_type=ct,
@@ -297,6 +304,7 @@ def driver_packaging_save(request, stop_pk):
 def driver_rollwagen_scan(request, stop_pk):
     """Vozac skenira QR kod rollwagena."""
     from django.utils import timezone as tz
+
     from .models import Rollwagen
 
     qr = _post_or_json(request, 'qr_code', '').strip()
@@ -316,11 +324,15 @@ def driver_rollwagen_scan(request, stop_pk):
 @login_required
 def dispatcher_board(request):
     """Control Tower — exception-based dispatcher dashboard."""
-    from .models import (
-        DispatchOffer, ConsolidatedDelivery, HACCPIncident,
-        SmartBox, PackagingExchange,
-    )
     from django.db.models import Sum
+
+    from .models import (
+        ConsolidatedDelivery,
+        DispatchOffer,
+        HACCPIncident,
+        PackagingExchange,
+        SmartBox,
+    )
 
     company = request.user.profile.company
 
@@ -384,7 +396,10 @@ def dispatcher_board(request):
 def dispatcher_board_data(request):
     """AJAX endpoint for 15s auto-refresh."""
     from .models import (
-        DispatchOffer, ConsolidatedDelivery, HACCPIncident, SmartBox,
+        ConsolidatedDelivery,
+        DispatchOffer,
+        HACCPIncident,
+        SmartBox,
     )
 
     company = request.user.profile.company
@@ -486,7 +501,7 @@ def driver_accept_offer(request, pk):
 @require_POST
 def driver_handoff(request, stop_pk):
     """HACCP primopredaja — vozač bilježi temperaturu, foto, checklist."""
-    from .models import TransportHandoff, SmartBox
+    from .models import SmartBox, TransportHandoff
 
     stop = get_object_or_404(DeliveryStop, pk=stop_pk)
 
@@ -783,10 +798,13 @@ def transport_order_detail(request, pk):
 
 @login_required
 def fleet_dashboard(request):
-    from core.company_utils import get_user_company
-    from .models import TransportOrder, Vehicle, VehicleDocument
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from core.company_utils import get_user_company
+
+    from .models import TransportOrder, Vehicle, VehicleDocument
     company = get_user_company(request)
     if not company:
         return redirect('dashboard')
@@ -812,6 +830,7 @@ def fleet_dashboard(request):
 def transport_order_create(request):
     """Kreiranje novog transportnog naloga."""
     from core.company_utils import get_user_company
+
     from .models import TransportOrder, Vehicle
     company = get_user_company(request)
     if not company:

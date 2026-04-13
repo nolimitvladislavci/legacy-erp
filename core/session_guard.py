@@ -16,8 +16,8 @@ API:
     warnings = SessionGuard.check(request)
     # [{'type': 'pos_open', 'msg': 'Smjena #3 je otvorena...', 'action_url': '/pos/...'}]
 """
-from django.utils.translation import gettext as _
 from django.db import DatabaseError
+from django.utils.translation import gettext as _
 
 
 class SessionGuard:

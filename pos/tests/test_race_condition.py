@@ -7,13 +7,12 @@ pytest pos/tests/test_race_condition.py -v
 import threading
 from decimal import Decimal
 
-from django.db import IntegrityError
-from django.test import TransactionTestCase
 from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
+from django.test import TransactionTestCase
 
 from companies.models import Company
-from pos.models import POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
-from django.db import DatabaseError
+from pos.models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POSTerminal
 
 
 class POSRaceConditionTest(TransactionTestCase):

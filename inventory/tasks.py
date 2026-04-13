@@ -4,8 +4,9 @@ Runs daily at 05:00, checks all companies, generates reorder predictions,
 and auto-creates DRAFT PurchaseOrders grouped by supplier.
 """
 import logging
-from celery import shared_task
 from decimal import Decimal
+
+from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('inventory.predictive')
@@ -14,16 +15,18 @@ logger = logging.getLogger('inventory.predictive')
 @shared_task(bind=True, max_retries=2, retry_backoff=True)
 def predictive_reorder_check(self):
     """Daily check: predict stock needs and auto-generate draft POs."""
-    from companies.models import Company
-    from inventory.reorder import predict_reorder
-    from inventory.models import InventoryItem
-    from procurement.models import PurchaseOrder, PurchaseOrderItem, SupplierPriceList
-    from partners.models import Partner
-    from notifications.services import notify
-    from django.contrib.auth import get_user_model
-    from django.utils import timezone
-    from django.db.models import Q
     from datetime import timedelta
+
+    from django.contrib.auth import get_user_model
+    from django.db.models import Q
+    from django.utils import timezone
+
+    from companies.models import Company
+    from inventory.models import InventoryItem
+    from inventory.reorder import predict_reorder
+    from notifications.services import notify
+    from partners.models import Partner
+    from procurement.models import PurchaseOrder, PurchaseOrderItem, SupplierPriceList
 
     User = get_user_model()
     results = []

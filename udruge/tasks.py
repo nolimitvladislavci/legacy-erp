@@ -1,8 +1,9 @@
 import logging
-from celery import shared_task
-from django.utils import timezone
 from datetime import timedelta
-from django.db import IntegrityError, DatabaseError
+
+from celery import shared_task
+from django.db import DatabaseError, IntegrityError
+from django.utils import timezone
 
 logger = logging.getLogger('udruge')
 
@@ -10,8 +11,9 @@ logger = logging.getLogger('udruge')
 @shared_task(bind=True, soft_time_limit=120)
 def send_expiry_reminders(self):
     """Pon 09:00 — WhatsApp podsjetnici za istjecanje clanstva."""
-    from .models import Clan
     from core.whatsapp import send_text
+
+    from .models import Clan
 
     today = timezone.now().date()
     expiring = Clan.objects.filter(
@@ -47,7 +49,7 @@ def evaluate_subscriptions(self):
     + auto-renew za aktivne planove
     + dunning email za grace period
     """
-    from .models import MemberSubscription, Clanarina
+    from .models import Clanarina, MemberSubscription
 
     today = timezone.now().date()
     processed = {'active': 0, 'grace': 0, 'suspended': 0, 'renewed': 0, 'reminded': 0}
@@ -202,9 +204,11 @@ def send_email_campaign(self, campaign_id):
     Prevents SMTP blacklisting and spam flags.
     """
     import time
-    from .models import EmailKampanja, EmailLog
+
     from django.core.mail import send_mail
     from django.utils import timezone as tz
+
+    from .models import EmailKampanja, EmailLog
 
     BATCH_SIZE = 50
     BATCH_DELAY = 2  # seconds between batches
@@ -285,10 +289,14 @@ def send_email_campaign(self, campaign_id):
 @shared_task(bind=True, soft_time_limit=120)
 def ai_search_eu_funds(self, company_id):
     """AI pretraga EU fondova — pronalazi relevantne natjecaje za udrugu."""
-    import os, json
+    import json
+    import os
+
     from django.db.models import Sum
+
     from companies.models import Company
-    from .models import Clan, Kampanja, Donacija
+
+    from .models import Clan, Donacija, Kampanja
 
     try:
         company = Company.objects.get(pk=company_id)
@@ -373,9 +381,11 @@ def ai_search_eu_funds(self, company_id):
 @shared_task(bind=True, soft_time_limit=60)
 def generate_volunteer_summary(self, company_id, year=None):
     """Sumarni izvjestaj volonterskih aktivnosti za godinu."""
-    from .models import VolunteerActivity
-    from django.db.models import Sum, Count
+    from django.db.models import Count, Sum
+
     from companies.models import Company
+
+    from .models import VolunteerActivity
     if not year:
         year = timezone.now().year
     try:
@@ -400,7 +410,9 @@ def check_expiring_documents():
     Ribolovna dozvola, lovačka dozvola, oružni list, zdravstvena.
     """
     from datetime import timedelta
+
     from django.utils import timezone
+
     from udruge.models import ClanskiDokument
 
     today = timezone.now().date()
@@ -436,7 +448,9 @@ def check_vatrogasna_oprema_atesti():
     Aparati, cijevi, pumpe — sve s atest_vrijedi_do poljem.
     """
     from datetime import timedelta
+
     from django.utils import timezone as tz
+
     from udruge.models import VatrogasnaOprema
 
     today = tz.now().date()
@@ -474,7 +488,9 @@ def check_ribolovne_dozvole():
     Šalje WhatsApp/email podsjetnik članu.
     """
     from datetime import timedelta
+
     from django.utils import timezone as tz
+
     from udruge.models import RibolovnaDozvola
 
     today = tz.now().date()
@@ -522,8 +538,10 @@ def check_tretman_kosnica_reminders():
     Upozori pčelare čije košnice nemaju tretman u zadnjih 90 dana.
     """
     from datetime import timedelta
-    from django.utils import timezone as tz
+
     from django.db.models import Max
+    from django.utils import timezone as tz
+
     from udruge.models import Kosnica, TretmanKosnice
 
     today = tz.now().date()
@@ -568,10 +586,11 @@ def generate_trosarina_report(company_id, godina=None):
     Generira godišnji trošarinski obračun iz DestilacijaLog zapisa.
     Računa ukupne litre čistog alkohola i trošarinu za mali/veliki proizvođač.
     """
+    from django.db.models import Avg, Sum
     from django.utils import timezone as tz
-    from django.db.models import Sum, Avg
+
     from companies.models import Company
-    from udruge.models import DestilacijaLog, DestilacijaKotao, TrosarinaPrijava
+    from udruge.models import DestilacijaKotao, DestilacijaLog, TrosarinaPrijava
 
     if not godina:
         godina = tz.now().year
@@ -644,8 +663,10 @@ def generate_azil_monthly_report(self, company_id=None, year=None, month=None):
     Ako company_id=None, generira za sve firme s azil zivotinjama.
     """
     from django.db.models import Sum
+
     from companies.models import Company
-    from .models import Zivotinja, MjesecniIzvjestajAzil, KartonZdravlja
+
+    from .models import KartonZdravlja, MjesecniIzvjestajAzil, Zivotinja
 
     now = timezone.now()
     if not year:

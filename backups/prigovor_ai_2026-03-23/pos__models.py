@@ -545,7 +545,8 @@ class POSCashier(models.Model):
         return self.name
 
     def set_pin(self, pin_str):
-        import hashlib, secrets
+        import hashlib
+        import secrets
         salt = secrets.token_hex(4)  # 8 hex chars
         dk = hashlib.pbkdf2_hmac('sha256', pin_str.strip().encode(), salt.encode(), 150_000)
         # Format: p$8salt$24hash = ~36 chars (fits varchar 64)
@@ -1091,6 +1092,7 @@ class POSDailyReport(models.Model):
     def generate_from_session(cls, session):
         """Generiraj dnevni izvještaj iz zatvorene sesije."""
         from decimal import Decimal
+
         from django.db.models import Sum
 
         receipts = session.receipts.filter(status='paid')

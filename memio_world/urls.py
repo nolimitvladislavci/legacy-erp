@@ -1,4 +1,5 @@
 from django.urls import path
+
 from memio_world import views
 
 app_name = 'memio_world'

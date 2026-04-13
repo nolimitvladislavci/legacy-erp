@@ -13,7 +13,7 @@ Run:
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client, override_settings
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
 User = get_user_model()
@@ -163,8 +163,9 @@ class InvoiceFlowTest(TestCase):
 
     def test_invoice_recalculate(self):
         """Invoice with 2 InvoiceItems → recalculate() computes correct sums."""
-        from invoicing.models import Invoice, InvoiceItem
         from django.utils import timezone as tz
+
+        from invoicing.models import Invoice, InvoiceItem
         inv = Invoice.objects.create(
             company=self.company,
             number="TST-RECALC-001",
@@ -228,7 +229,7 @@ class POSFlowTest(TestCase):
         self.company = make_company(oib="33322211192")
         self.user = make_user(self.company, username="pos_operator")
         self.tax = make_tax_rate()
-        from pos.models import POSTerminal, POSSession
+        from pos.models import POSSession, POSTerminal
         self.terminal = POSTerminal.objects.create(
             company=self.company,
             name="Test Kasa",

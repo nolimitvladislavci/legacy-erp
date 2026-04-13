@@ -1,14 +1,15 @@
 """Extra tests for core/views.py — role-based dashboards, superadmin actions."""
 import datetime
 import uuid
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user_with_role(oib, username, role, modules=None, is_superuser=False):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'CoreX {oib}', oib=oib)
     if is_superuser:

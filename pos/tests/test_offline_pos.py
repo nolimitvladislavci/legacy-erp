@@ -3,9 +3,9 @@ Offline POS testovi — zakonska obveza 48h fiskalizacije (čl. 11).
 """
 import json
 
-from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 User = get_user_model()
 
@@ -15,7 +15,7 @@ class OfflineSyncEndpointTest(TestCase):
 
     def setUp(self):
         from companies.models import Company
-        from pos.models import POSTerminal, POSSession, POSCashier
+        from pos.models import POSCashier, POSSession, POSTerminal
 
         self.company = Company.objects.create(name='Test Offline', oib='11111111111')
         self.user = User.objects.create_user(username='offline_test', password='test123')

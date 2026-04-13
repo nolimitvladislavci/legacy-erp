@@ -11,20 +11,20 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
 
 from .models import ArhivaEntry, ArhivaLabel
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -118,8 +118,8 @@ def knjiga_ura_ira(request):
     all_companies = []
     if request.user.is_superuser or request.user.is_staff:
         from companies.models import Company
-        from invoicing.models import Invoice as _Inv
         from documents.models import ArhivaEntry as _AE
+        from invoicing.models import Invoice as _Inv
         has_ira = set(_Inv.objects.values_list('company_id', flat=True).distinct())
         has_ura = set(_AE.objects.filter(source_type__in=['invoice_in','eracun','fiscal_cert']).values_list('company_id', flat=True).distinct())
         active_ids = has_ira | has_ura
@@ -707,8 +707,8 @@ def revizija_page(request):
 @require_POST
 def revizija_export(request):
     """Generiraj ZIP s kompletnim revizorskim paketom."""
-    from invoicing.models import Invoice
     from companies.models import Company
+    from invoicing.models import Invoice
 
     company_id = request.POST.get('company_id', '')
     date_from = request.POST.get('date_from', '')
@@ -926,8 +926,8 @@ def verfahrensdokumentation(request):
 @require_POST
 def verfahren_sign(request):
     """Accept digital signature for Verfahrensdokumentation."""
-    import hashlib
     import base64
+    import hashlib
     import json as json_lib
 
     company = get_user_company(request)

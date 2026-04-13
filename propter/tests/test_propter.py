@@ -3,16 +3,18 @@ Propter -- test suite
 Testira: BillingPeriod, Otpremnica, aggregate pipeline, EkoStats, signal
 """
 from decimal import Decimal
-from django.test import TestCase, override_settings
+
 from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 User = get_user_model()
 
 
 def make_company():
-    from companies.models import Company
     import uuid
+
+    from companies.models import Company
     oib = str(uuid.uuid4().int)[:11]
     return Company.objects.create(
         name="Propter Test d.o.o.",
@@ -139,8 +141,8 @@ class TestAggregatePipeline(TestCase):
             make_otpremnica(self.company, self.period, "100.00")
 
     def test_close_period(self):
-        from propter.services.aggregate import close_period
         from propter.models import BillingPeriod
+        from propter.services.aggregate import close_period
         close_period(self.period)
         self.period.refresh_from_db()
         self.assertEqual(self.period.status, BillingPeriod.Status.CLOSED)
@@ -161,9 +163,9 @@ class TestAggregatePipeline(TestCase):
             close_period(self.period)
 
     def test_aggregate_creates_eracun(self):
-        from propter.services.aggregate import close_period, aggregate_to_eracun
         # Treba ERacunConfig za company
         from eracun.models import ERacunConfig
+        from propter.services.aggregate import aggregate_to_eracun, close_period
         ERacunConfig.objects.create(
             company=self.company, is_active=True, use_test_env=True
         )
@@ -174,9 +176,9 @@ class TestAggregatePipeline(TestCase):
         self.assertIn("ZBIRNI", eracun.invoice_number)
 
     def test_aggregate_marks_otpremnice(self):
-        from propter.services.aggregate import close_period, aggregate_to_eracun
-        from propter.models import Otpremnica
         from eracun.models import ERacunConfig
+        from propter.models import Otpremnica
+        from propter.services.aggregate import aggregate_to_eracun, close_period
         ERacunConfig.objects.create(
             company=self.company, is_active=True, use_test_env=True
         )
@@ -194,8 +196,8 @@ class TestAggregatePipeline(TestCase):
 
     def test_aggregate_idempotent(self):
         """Drugi poziv aggregate_to_eracun treba vratiti isti e-Racun."""
-        from propter.services.aggregate import close_period, aggregate_to_eracun
         from eracun.models import ERacunConfig
+        from propter.services.aggregate import aggregate_to_eracun, close_period
         ERacunConfig.objects.create(
             company=self.company, is_active=True, use_test_env=True
         )
@@ -216,8 +218,8 @@ class TestEkoStats(TestCase):
             make_otpremnica(self.company, self.period, "10.00")
 
     def test_calculate_eko_stats(self):
-        from propter.services.aggregate import close_period
         from propter.models import EkoStats
+        from propter.services.aggregate import close_period
         close_period(self.period)
         eko = EkoStats.calculate(self.period)
         self.assertEqual(eko.otpremnice_count, 60)
@@ -263,8 +265,9 @@ class TestPropterConfig(TestCase):
         self.assertFalse(cfg.cert_is_valid)  # cert_status = NONE
 
     def test_is_trial(self):
-        from propter.models import PropterConfig
         from datetime import timedelta
+
+        from propter.models import PropterConfig
         cfg = PropterConfig.objects.create(
             company=self.company,
             tier=PropterConfig.Tier.CLIENT,
@@ -281,8 +284,9 @@ class TestCreateFromInvoice(TestCase):
         self.company = make_company()
 
     def _make_invoice(self):
-        from invoicing.models import Invoice
         import uuid
+
+        from invoicing.models import Invoice
         inv = Invoice.objects.create(
             company=self.company,
             number="FC-{}-001".format(uuid.uuid4().hex[:6]),

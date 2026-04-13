@@ -4,9 +4,10 @@ Invoicing Signals — auto-knjiženje faktura u Konto modul.
 Trigger: Invoice status promjena na CONFIRMED/FISCALIZED/SENT/PAID
 """
 import logging
-from django.db.models.signals import pre_save, post_save
+
+from django.db import DatabaseError, IntegrityError
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +119,7 @@ def auto_create_otpremnica(sender, instance, created, **kwargs):
         if not items_with_inv.exists():
             return
 
-        from propter.models import Otpremnica, OtpremnicaItem, BillingPeriod
+        from propter.models import BillingPeriod, Otpremnica, OtpremnicaItem
 
         # Duplikat check
         if Otpremnica.objects.filter(invoice_id=str(instance.pk)).exists():

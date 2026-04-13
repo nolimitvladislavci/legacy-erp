@@ -15,8 +15,8 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
+from django.db import DatabaseError, IntegrityError
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('komunalno')
 
@@ -24,7 +24,8 @@ logger = logging.getLogger('komunalno')
 @shared_task(bind=True, max_retries=3, default_retry_delay=300)
 def export_onto_batch(self, company_id, station_id, date_str=None):
     from companies.models import Company
-    from .models import WasteStation, WasteDelivery, OntoExportBatch
+
+    from .models import OntoExportBatch, WasteDelivery, WasteStation
 
     company = Company.objects.get(pk=company_id)
     station = WasteStation.objects.get(pk=station_id, company=company)
@@ -102,7 +103,7 @@ def export_onto_batch(self, company_id, station_id, date_str=None):
 
 @shared_task
 def nightly_onto_export():
-    from .models import WasteStation, WasteDelivery
+    from .models import WasteDelivery, WasteStation
     yesterday = timezone.localdate() - timedelta(days=1)
 
     company_ids = WasteDelivery.objects.filter(
@@ -152,6 +153,7 @@ def create_onto_batch(company_id, station_id, date_str=None):
 
 def _send_to_onto(batch):
     import os
+
     from django.conf import settings
     onto_dir = os.path.join(settings.BASE_DIR, 'logs', 'onto_exports')
     os.makedirs(onto_dir, exist_ok=True)

@@ -10,6 +10,7 @@ Business rules: EN 16931 core (najvažnijih 40 pravila)
 import logging
 import os
 from decimal import Decimal
+
 from lxml import etree
 
 logger = logging.getLogger('eracun.validator')

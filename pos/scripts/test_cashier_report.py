@@ -1,9 +1,11 @@
 """Test: Blagajnički izvještaj"""
-from django.test import RequestFactory
-from django.contrib.auth.models import User
-from unittest.mock import patch
-from companies.models import Company
 import json
+from unittest.mock import patch
+
+from django.contrib.auth.models import User
+from django.test import RequestFactory
+
+from companies.models import Company
 
 su = User.objects.get(username="superadmin")
 konjik = Company.objects.get(name__icontains="Konjik")
@@ -13,6 +15,7 @@ req = factory.get("/pos/session/9/cashier-report/?format=json")
 req.user = su
 
 from pos.views import cashier_full_report
+
 with patch("pos.views.get_user_company", return_value=konjik):
     resp = cashier_full_report(req, 9)
 

@@ -9,23 +9,27 @@ import tempfile
 from datetime import timedelta
 from decimal import Decimal
 from io import BytesIO
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, TransactionTestCase, RequestFactory, override_settings
+from django.test import RequestFactory, TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from companies.models import Company, TaxRate
-from inventory.models import InventoryItem, GoodsReceipt, GoodsReceiptItem
+from inventory.models import GoodsReceipt, GoodsReceiptItem, InventoryItem
 from partners.models import Partner
 from smart_import.models import (
-    ImportBatch, ImportBatchItem, VendorItemMapping,
-    GeminiUsageLog, CompanyMailbox, FailedImport, ProblemReport,
+    CompanyMailbox,
+    FailedImport,
+    GeminiUsageLog,
+    ImportBatch,
+    ImportBatchItem,
+    ProblemReport,
+    VendorItemMapping,
 )
-
 
 # ============================================================================
 # HELPERS
@@ -633,8 +637,9 @@ class ImageEncodingTest(TestCase):
     """Test image encoding helpers."""
 
     def test_encode_image_jpeg(self):
-        from smart_import.services import _encode_image
         from PIL import Image as PILImage
+
+        from smart_import.services import _encode_image
         # Create a small test image
         img = PILImage.new("RGB", (100, 100), color="red")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
@@ -650,8 +655,9 @@ class ImageEncodingTest(TestCase):
         self.assertGreater(len(decoded), 0)
 
     def test_encode_image_png(self):
-        from smart_import.services import _encode_image
         from PIL import Image as PILImage
+
+        from smart_import.services import _encode_image
         img = PILImage.new("RGB", (100, 100), color="blue")
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             img.save(f, format="PNG")
@@ -662,8 +668,9 @@ class ImageEncodingTest(TestCase):
         self.assertEqual(media_type, "image/png")
 
     def test_encode_image_rgba_converts_to_rgb(self):
-        from smart_import.services import _encode_image
         from PIL import Image as PILImage
+
+        from smart_import.services import _encode_image
         img = PILImage.new("RGBA", (100, 100), color=(255, 0, 0, 128))
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             img.save(f, format="PNG")
@@ -673,8 +680,9 @@ class ImageEncodingTest(TestCase):
         self.assertIsNotNone(b64)
 
     def test_encode_image_enhanced_grayscale(self):
-        from smart_import.services import _encode_image_enhanced
         from PIL import Image as PILImage
+
+        from smart_import.services import _encode_image_enhanced
         img = PILImage.new("RGB", (200, 200), color="white")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
             img.save(f, format="JPEG")
@@ -692,8 +700,9 @@ class ImageEncodingTest(TestCase):
 
     def test_encode_large_image_resized(self):
         """Images larger than 2048px should be thumbnailed."""
-        from smart_import.services import _encode_image
         from PIL import Image as PILImage
+
+        from smart_import.services import _encode_image
         img = PILImage.new("RGB", (4000, 3000), color="green")
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
             img.save(f, format="JPEG")
@@ -994,8 +1003,9 @@ class MultipageProcessTest(TestCase):
     @patch("smart_import.services.parse_image")
     def test_multipage_deduplication(self, mock_parse_image):
         """Multipage processing should deduplicate by vendor name."""
-        from smart_import.tasks import _process_multipage
         from PIL import Image as PILImage
+
+        from smart_import.tasks import _process_multipage
 
         # Create temp images
         paths = []
@@ -1051,8 +1061,9 @@ class UploadViewTest(TestCase):
         self.company = _make_company()
         self.user = _make_user()
         # Link user to company
-        from core.company_utils import get_user_company
         from django.contrib.auth.models import User
+
+        from core.company_utils import get_user_company
         # Create UserProfile or UserRole linking user to company
         try:
             from core.models import UserProfile
@@ -1592,7 +1603,7 @@ class EndToEndXmlFlowTest(TestCase):
 
     def test_xml_end_to_end(self):
         """Parse UBL XML, create batch items, match, confirm to GoodsReceipt."""
-        from smart_import.services import parse_xml, match_items
+        from smart_import.services import match_items, parse_xml
 
         # 1. Parse XML
         xml_content = _make_xml_ubl()

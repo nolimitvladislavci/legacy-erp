@@ -3,13 +3,14 @@ companies/views_modules.py
 Module picker — visual grid for enabling/disabling ERP modules.
 Also: specialized module config (udruge, DVD, KUD, etc.)
 """
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.contrib import messages
-from django.utils.translation import gettext as _
-from core.company_utils import get_user_company
+from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
+
+from core.company_utils import get_user_company
 
 
 @login_required
@@ -21,7 +22,7 @@ def module_picker(request):
         return redirect('dashboard')
 
     from .models import CompanyModuleConfig
-    from .module_registry import get_modules_by_category, MODULES
+    from .module_registry import MODULES, get_modules_by_category
 
     config, created = CompanyModuleConfig.objects.get_or_create(
         company=company,
@@ -111,14 +112,15 @@ def company_modules(request):
         messages.error(request, _('Niste povezani s tvrtkom. Odaberite tvrtku iz izbornika.'))
         return redirect('dashboard')
 
-    from .models import CompanyModuleConfig
     from core.module_registry import (
+        MODULE_REGISTRY,
+        activate_module,
+        auto_detect_modules,
         get_active_modules,
         get_all_modules_grouped,
-        auto_detect_modules,
-        activate_module,
-        MODULE_REGISTRY,
     )
+
+    from .models import CompanyModuleConfig
 
     config, _ = CompanyModuleConfig.objects.get_or_create(
         company=company,
@@ -221,6 +223,7 @@ def spec_module_toggle_api(request):
 def _get_module_counters(company):
     """Get record counts for modules that have counter_model."""
     from django.apps import apps
+
     from .module_registry import MODULES
     counters = {}
     for m in MODULES:

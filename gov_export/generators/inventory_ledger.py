@@ -3,8 +3,9 @@ Forenzika Zaliha — InventoryLedger.xml generator.
 Mjesečni snapshot cijelog inventara — potpisan dokaz za Poreznu.
 """
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
 from decimal import Decimal
+from xml.dom import minidom
+
 from django.utils import timezone
 
 
@@ -14,7 +15,7 @@ class InventoryLedgerGenerator:
     NS = 'urn:limit-connect:inventory-ledger:v1.0'
 
     def generate(self, export):
-        from inventory.models import InventoryItem, StockMovement, StockBatch
+        from inventory.models import InventoryItem, StockBatch, StockMovement
 
         company = export.company
         root = ET.Element('InventoryLedger', xmlns=self.NS)

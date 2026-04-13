@@ -3,15 +3,20 @@
 Generira A4 PDF sa QR kodovima za stolove (4 po stranici).
 Output: media/gastro/siroki_sor_qr_print.pdf
 """
-import os, sys, django
+import os
+import sys
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas as rc
 from reportlab.lib.units import cm
-from gastro_menu.models import TableQR, DigitalMenu
+from reportlab.pdfgen import canvas as rc
+
+from gastro_menu.models import DigitalMenu, TableQR
 
 menu = DigitalMenu.objects.get(slug='korpas-doo-siroki-sor')
 tables = list(TableQR.objects.filter(menu=menu).order_by('table_zone', 'table_number'))

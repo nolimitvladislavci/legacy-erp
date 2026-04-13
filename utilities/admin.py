@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import UtilityContract, MeterReading, UtilityBill
+
+from .models import MeterReading, UtilityBill, UtilityContract
 
 
 @admin.register(UtilityContract)

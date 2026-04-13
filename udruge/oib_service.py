@@ -1,5 +1,6 @@
 """OIB validacija i lookup."""
 import logging
+
 from django.core.cache import cache
 
 logger = logging.getLogger('udruge')

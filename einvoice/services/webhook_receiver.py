@@ -3,12 +3,14 @@
 Instead of polling every 60s, the posrednik can push status updates to us.
 Security: HMAC signature verification on every payload.
 """
-import hmac
 import hashlib
+import hmac
 import logging
+
 from django.conf import settings
+
 from einvoice.models import AS4Message, MessageStatus
-from einvoice.services.metrics import record_sent, record_delivery_latency
+from einvoice.services.metrics import record_delivery_latency, record_sent
 
 logger = logging.getLogger("propter.einvoice.webhook")
 

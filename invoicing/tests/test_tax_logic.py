@@ -1,16 +1,17 @@
 """Tests for invoicing/tax_logic.py — pure logic, no DB needed."""
 from decimal import Decimal
+
 from django.test import SimpleTestCase
 
 from invoicing.tax_logic import (
-    calculate_tax,
     calculate_items,
-    is_reverse_charge,
+    calculate_tax,
     check_kleinunternehmer_eligibility,
-    get_tax_rates,
-    get_tax_statuses,
     get_applicable_rate,
     get_pdv_footer_note,
+    get_tax_rates,
+    get_tax_statuses,
+    is_reverse_charge,
 )
 
 

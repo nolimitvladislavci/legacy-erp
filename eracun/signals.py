@@ -7,10 +7,11 @@ Knjizenje:
   Potrazuje: 2400 (Obveze za PDV) — PDV iznos
 """
 from decimal import Decimal
+
+from django.db import DatabaseError
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.db import DatabaseError
 
 
 @receiver(pre_save, sender='eracun.ERacun')
@@ -48,7 +49,7 @@ def eracun_accepted_to_journal(sender, instance, **kwargs):
 
 def _create_journal_entry(eracun):
     """Create a balanced JournalEntry for an accepted e-Racun."""
-    from konto.models import KontoAccount, JournalEntry, LedgerLine
+    from konto.models import JournalEntry, KontoAccount, LedgerLine
 
     company = eracun.company
     now = timezone.now()

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import PravniPredmet, DimnjacarskaInspekcija, NotariatPredlozak
+
+from .models import DimnjacarskaInspekcija, NotariatPredlozak, PravniPredmet
 
 
 @admin.register(NotariatPredlozak)

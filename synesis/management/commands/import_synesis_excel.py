@@ -10,12 +10,13 @@ Usage:
     python manage.py import_synesis_excel path.xls --company OIB --dry-run
     python manage.py import_synesis_excel path.xls --company OIB --validate-only
 """
-import os, time
+import os
+import time
 from collections import defaultdict
 from decimal import Decimal
+
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError, transaction
 
 
 def safe_dec(v):
@@ -36,7 +37,9 @@ class Command(BaseCommand):
         parser.add_argument('--clear-first', action='store_true', help='Delete existing JE before import')
 
     def handle(self, *args, **options):
-        import xlrd, warnings
+        import warnings
+
+        import xlrd
         warnings.filterwarnings('ignore')
 
         # Find company
@@ -171,8 +174,9 @@ class Command(BaseCommand):
         self.stdout.write('Partneri: %d new, %d existing' % (created, skipped))
 
     def _clear_existing(self, company):
-        from konto.models import JournalEntry, LedgerLine
         from django.db import connection
+
+        from konto.models import JournalEntry, LedgerLine
 
         with connection.cursor() as c:
             c.execute('ALTER TABLE konto_ledgerline DISABLE TRIGGER USER')
@@ -197,7 +201,7 @@ class Command(BaseCommand):
         Group entries by (datum, doc_name, doc_number) → one JournalEntry per group.
         Each entry within the group → one LedgerLine.
         """
-        from konto.models import JournalEntry, LedgerLine, KontoAccount
+        from konto.models import JournalEntry, KontoAccount, LedgerLine
 
         # Build account cache
         account_cache = {acc.code.strip(): acc for acc in KontoAccount.objects.filter(company=company)}
@@ -310,8 +314,9 @@ class Command(BaseCommand):
 
     def _validate(self, company, excel_entries):
         """Compare LC konto with Excel data per konto."""
+        from django.db.models import Q, Sum
+
         from konto.models import LedgerLine
-        from django.db.models import Sum, Q
 
         # Excel per konto
         xls_d = defaultdict(lambda: Decimal('0'))

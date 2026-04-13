@@ -2,17 +2,21 @@
 LIMIT-CONNECT POS — KOMPLETNI TEST SUITE v2
 Pokreni: cd /var/www/fina-connect && venv/bin/python pos_test_suite.py
 """
-import os, sys, time, json, uuid as _uuid
-from decimal import Decimal
+import json
+import os
+import sys
+import time
+import uuid as _uuid
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 sys.path.insert(0, '/var/www/fina-connect')
 import django; django.setup()
 
-from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.utils import timezone
 
 G='\033[92m'; R='\033[91m'; Y='\033[93m'; B='\033[94m'
 C='\033[96m'; DIM='\033[2m'; RESET='\033[0m'; BOLD='\033[1m'
@@ -53,12 +57,25 @@ print('║  LIMIT-CONNECT POS TEST SUITE v2        ║')
 print(f'║  {datetime.now().strftime("%d.%m.%Y %H:%M")}                       ║')
 print(f'╚══════════════════════════════════════════╝{RESET}')
 
-from pos.models import (POSTerminal, POSSession, POSReceipt, POSReceiptItem,
-    POSPaymentLine, POSCashier, POSDailyReport,
-    Table, GastroOrder, GastroOrderItem, WaiterShift,
-    Voucher, CashDeposit, ExpiryBatch, ImprovementSuggestion)
 from companies.models import Company
 from inventory.models import InventoryItem
+from pos.models import (
+    CashDeposit,
+    ExpiryBatch,
+    GastroOrder,
+    GastroOrderItem,
+    ImprovementSuggestion,
+    POSCashier,
+    POSDailyReport,
+    POSPaymentLine,
+    POSReceipt,
+    POSReceiptItem,
+    POSSession,
+    POSTerminal,
+    Table,
+    Voucher,
+    WaiterShift,
+)
 
 _session = None; _terminal = None; _receipt = None
 _table = None; _order = None; _shift = None

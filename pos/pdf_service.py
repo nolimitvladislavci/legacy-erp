@@ -5,6 +5,7 @@ Koristi xhtml2pdf (već u projektu) umjesto reportlab.
 """
 import logging
 from io import BytesIO
+
 from django.template.loader import render_to_string
 
 logger = logging.getLogger('pos.pdf')

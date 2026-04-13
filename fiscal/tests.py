@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from .base import FiscalResult
 from .models import FiscalProvider
 

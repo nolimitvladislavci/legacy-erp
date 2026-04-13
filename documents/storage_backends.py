@@ -7,14 +7,15 @@ Document Storage Backends — 3 opcije za spremanje datoteka.
 Svaka firma moze imati svoju konfiguraciju.
 Auto-kompresija slika prije spremanja.
 """
+import hashlib
 import io
+import logging
 import os
 import uuid
-import hashlib
-import logging
 from datetime import datetime
+
 from django.conf import settings
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -386,9 +387,10 @@ def migrate_existing_files():
     import os
     from datetime import datetime
 
+    from companies.models import Company
+
     # Lazy imports to avoid circular
     from documents.models import ArhivaEntry
-    from companies.models import Company
 
     media_root = settings.MEDIA_ROOT
     migrated = 0

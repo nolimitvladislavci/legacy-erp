@@ -3,10 +3,11 @@ BORG FENIX - Ops Connector v2 (F4 - uses BorgTask model)
 Auto-creates BorgTasks from overdue invoices, anomalies, signals, adaptations.
 """
 import logging
+
 from celery import shared_task
-from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
 from django.db.models import Count
-from django.db import IntegrityError, DatabaseError
+from django.utils import timezone
 
 logger = logging.getLogger('borg.ops')
 
@@ -103,8 +104,9 @@ def sync_ops_tasks():
 
     # 4. New opportunity matches (notified but not acted on)
     try:
-        from limit_connect_ai.models import ClientOpportunityMatch
         from django.db.models import Sum
+
+        from limit_connect_ai.models import ClientOpportunityMatch
         # Group by company, count matches
         companies_with_opps = (
             ClientOpportunityMatch.objects
@@ -142,8 +144,9 @@ def sync_ops_tasks():
 @shared_task
 def ops_dashboard_stats():
     """Return BORG Ops dashboard statistics."""
-    from borg_ops.models import BorgTask
     from django.db.models import Count
+
+    from borg_ops.models import BorgTask
 
     total = BorgTask.objects.count()
     by_status = dict(

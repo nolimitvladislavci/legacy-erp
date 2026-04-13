@@ -12,13 +12,12 @@ Korištenje:
     python manage.py ai_ops exec <module> <action> [--desc "opis"]  # Izvrši akciju kroz gate
     python manage.py ai_ops sites           # Provjeri sve domene/sajtove
 """
-import subprocess
 import socket
+import subprocess
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import DatabaseError, connection
 from django.utils import timezone
-from django.db import connection
-from django.db import DatabaseError
 
 
 class Command(BaseCommand):
@@ -106,8 +105,9 @@ class Command(BaseCommand):
 
         # Pending migrations
         try:
-            from django.core.management import call_command
             from io import StringIO
+
+            from django.core.management import call_command
             out = StringIO()
             call_command('showmigrations', '--plan', stdout=out)
             content = out.getvalue()
@@ -245,8 +245,8 @@ class Command(BaseCommand):
     # ── SITES ───────────────────────────────────────────────────
     def _do_sites(self, options):
         """Provjeri sve domene — HTTP status + SSL."""
-        import urllib.request
         import ssl
+        import urllib.request
 
         sites = [
             ('https://limit-connect.com', 'ERP Primary'),

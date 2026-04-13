@@ -12,21 +12,19 @@ Rute:
   /payroll/<pk>/pdf/<uid>/ → listić za radnika (legacy, bez JS)
 """
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db import DatabaseError
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
-from .models import PayrollRun, Payslip
 from core.company_utils import get_user_company
+
 from . import services
-
-
-
+from .models import PayrollRun, Payslip
 
 
 @login_required
@@ -60,7 +58,7 @@ def payroll_new(request):
             else:
                 messages.success(request, f'Kreiran obračun za {month:02d}/{year}.')
             return redirect('payroll:detail', pk=run.pk)
-        except DatabaseError as e:
+        except DatabaseError:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     import datetime
@@ -107,7 +105,7 @@ def payroll_run_action(request, pk):
             f'Obračun završen: {len(payslips)} radnika | '
             f'Bruto: {run.total_gross}€ | Neto: {run.total_net}€'
         )
-    except TypeError as e:
+    except TypeError:
         messages.error(request, _('Obračun nije uspio. Provjerite podatke i pokušajte ponovo.'))
     return redirect('payroll:detail', pk=pk)
 
@@ -124,7 +122,7 @@ def payroll_book_action(request, pk):
         messages.success(request,
             f'Proknjiženo: {entry.entry_number} | '
             f'Konto 4000 ← {run.total_gross}€')
-    except Exception as e:
+    except Exception:
         messages.error(request, _('Knjiženje nije uspjelo. Provjerite konto i iznos.'))
     return redirect('payroll:detail', pk=pk)
 
@@ -145,7 +143,7 @@ def payroll_pain001(request, pk):
     except ValueError as e:
         messages.error(request, str(e))
         return redirect('payroll:detail', pk=pk)
-    except ObjectDoesNotExist as e:
+    except ObjectDoesNotExist:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('payroll:detail', pk=pk)
 

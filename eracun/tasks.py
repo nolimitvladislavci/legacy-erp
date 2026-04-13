@@ -1,8 +1,9 @@
 
 
-from celery import shared_task
 import logging
-from django.db import IntegrityError, DatabaseError
+
+from celery import shared_task
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('eracun.tasks')
 
@@ -15,12 +16,14 @@ def fetch_posrednik_inbox(self):
     Step 2: GET /incoming-invoices/{id}/xml -> puni UBL 2.1 XML
     receive_eracun() kreira ERacun + Items + TaxSummary + okida FENIX Interceptor.
     """
-    from companies.models import Company
-    from eracun.services.posrednik_service import PosrednikService
-    from eracun.services.inbox import receive_eracun
-    from eracun.models import ERacun
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
+    from companies.models import Company
+    from eracun.models import ERacun
+    from eracun.services.inbox import receive_eracun
+    from eracun.services.posrednik_service import PosrednikService
 
     fetched = 0
     skipped = 0
@@ -120,10 +123,12 @@ def fetch_posrednik_inbox(self):
 @shared_task(bind=True, soft_time_limit=60)
 def retry_unsent_eracuni(self):
     """Retry slanja e-racuna koji su ostali u statusu error/draft."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
     from eracun.models import ERacun
     from eracun.services.posrednik_service import PosrednikService
-    from django.utils import timezone
-    from datetime import timedelta
 
     cutoff = timezone.now() - timedelta(hours=48)
     unsent = ERacun.objects.filter(
@@ -145,6 +150,7 @@ def retry_unsent_eracuni(self):
 # ── Cert Expiry Monitor — dnevna provjera ──────────────────────────────────
 
 from celery import shared_task
+
 
 @shared_task(name='eracun.check_cert_expiry')
 def check_cert_expiry():
@@ -175,10 +181,11 @@ def send_eracun_to_fina_async(self, eracun_id):
     4. Ako FINA timeout/error -> retry s exponential backoff
     5. Ako FINA reject (poslovni razlog) -> nema retryja, rejected
     """
+    import requests
+
     from eracun.models import ERacun, ERacunLog
     from eracun.services.engine import process_eracun
-    from eracun.services.validator import validate_xml_against_xsd, XSDValidationError
-    import requests
+    from eracun.services.validator import XSDValidationError, validate_xml_against_xsd
 
     try:
         eracun = ERacun.objects.select_related('company').get(pk=eracun_id)

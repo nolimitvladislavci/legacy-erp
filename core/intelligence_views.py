@@ -7,10 +7,10 @@ Read-only aggregation — never mutates data across tenants.
 import logging
 
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
 
 from core.services_intelligence import get_intelligence_stats, search_partner_global
 

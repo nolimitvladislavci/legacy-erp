@@ -4,8 +4,10 @@ Adaptirano na stvarni ArhivaEntry model.
 """
 import os
 from decimal import Decimal
-from django.test import TestCase
+
 from django.conf import settings
+from django.test import TestCase
+
 from companies.models import Company
 from documents.models import ArhivaEntry
 
@@ -16,9 +18,11 @@ class ArhivaIntegrityTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.company = Company.objects.create(name="Test Integrity d.o.o.", oib="99999999901")
-        from invoicing.models import Invoice
-        from django.utils import timezone
         from datetime import date
+
+        from django.utils import timezone
+
+        from invoicing.models import Invoice
         cls.invoice = Invoice.objects.create(
             company=cls.company, number="INT-001", total=Decimal('125.00'), status='PAID',
             date_issued=timezone.now(),

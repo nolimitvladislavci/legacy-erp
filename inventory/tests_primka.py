@@ -1,8 +1,10 @@
 """DIO 7: Inventory tests — article search, GoodsReceiptItem calc, confirm stock, StockMovement type=in"""
 from decimal import Decimal
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from inventory.models import InventoryItem, StockMovement, GoodsReceipt, GoodsReceiptItem
+from django.test import Client, TestCase
+
+from inventory.models import GoodsReceipt, GoodsReceiptItem, InventoryItem, StockMovement
 
 
 def _make_company(oib='12345678901'):

@@ -1,10 +1,12 @@
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.utils import timezone
+
 from companies.models import Company
-from delivery.models import SmartBox, SensorReading, HACCPIncident, analyze_readings
+from delivery.models import HACCPIncident, SensorReading, SmartBox, analyze_readings
 
 User = get_user_model()
 

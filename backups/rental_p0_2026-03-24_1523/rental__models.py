@@ -1,9 +1,11 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from core.managers import CompanyManager
-import uuid
 import random
 import string
+import uuid
+
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from core.managers import CompanyManager
 
 
 class Property(models.Model):

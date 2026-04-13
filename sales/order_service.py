@@ -17,8 +17,8 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 
-from .models import SalesOrder
 from .ai_services import resolve_price
+from .models import SalesOrder
 
 logger = logging.getLogger(__name__)
 

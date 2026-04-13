@@ -4,18 +4,23 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, Q
-from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
-from django.views.decorators.http import require_POST, require_GET
 from django.db import DatabaseError, IntegrityError
+from django.db.models import Count, Q, Sum
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_GET, require_POST
 
 from .models import (
-    WasteStation, WasteCategory, CitizenCard, AnnualQuota,
-    WasteDelivery, ScaleReading, OntoExportBatch, WasteQuickButton,
+    AnnualQuota,
+    CitizenCard,
+    OntoExportBatch,
+    ScaleReading,
+    WasteCategory,
+    WasteDelivery,
+    WasteQuickButton,
+    WasteStation,
 )
-
 
 # ─── DASHBOARD ──────────────────────────────────────────────────────
 

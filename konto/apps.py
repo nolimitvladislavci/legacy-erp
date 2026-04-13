@@ -8,5 +8,5 @@ class KontoConfig(AppConfig):
     verbose_name = _('Knjigovodstvo')
 
     def ready(self):
-        import konto.signals  # noqa: F401
         import konto.integrity  # noqa: F401
+        import konto.signals  # noqa: F401

@@ -3,15 +3,15 @@ invoicing/tests.py
 
 Faza 10B test suite: OIB validacija, VAT validacija, FiscalLog, FiscalBatch, PDV izracun.
 """
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 
 
 class OIBValidationTests(TestCase):
     """ISO 7064 MOD 11,10 OIB validacija."""
 
     def setUp(self):
-        from core.oib_validator import validate_oib_hr, validate_vat_id, format_oib_display
+        from core.oib_validator import format_oib_display, validate_oib_hr, validate_vat_id
         self.validate_hr = validate_oib_hr
         self.validate_vat = validate_vat_id
         self.fmt = format_oib_display
@@ -146,8 +146,9 @@ class FiscalLogTests(TestCase):
         from companies.models import Company
         self.user = User.objects.create_user('testuser_fl', password='pass')
         self.company = Company.objects.create(name='Test Firma')
-        from invoicing.models import Invoice
         from django.utils import timezone
+
+        from invoicing.models import Invoice
         self.invoice = Invoice.objects.create(
             number='TEST-001',
             doctype='R',
@@ -275,8 +276,9 @@ class NKDSearchTests(TestCase):
         NKDCode.objects.create(code='56.10', level='class', section='I', name_hr='Restorani i ostali objekti za pripremu i usluzivanjepolja', is_active=True)
 
     def test_search_by_name(self):
-        from companies.models import NKDCode
         from django.db.models import Q
+
+        from companies.models import NKDCode
         qs = NKDCode.objects.filter(is_active=True).filter(
             Q(name_hr__icontains='programiranje') | Q(code__icontains='programiranje')
         )
@@ -284,16 +286,18 @@ class NKDSearchTests(TestCase):
         self.assertEqual(qs.first().code, '62.01')
 
     def test_search_by_code(self):
-        from companies.models import NKDCode
         from django.db.models import Q
+
+        from companies.models import NKDCode
         qs = NKDCode.objects.filter(is_active=True).filter(
             Q(name_hr__icontains='62.01') | Q(code__icontains='62.01')
         )
         self.assertEqual(qs.count(), 1)
 
     def test_search_no_results(self):
-        from companies.models import NKDCode
         from django.db.models import Q
+
+        from companies.models import NKDCode
         qs = NKDCode.objects.filter(is_active=True).filter(
             Q(name_hr__icontains='nepostojeci_xyzxyz')
         )

@@ -5,10 +5,12 @@ Filozofija: svaki export je "dokument" koji prolazi kroz iste faze
 kao fiskalizirani račun — generate → validate → sign → send → confirm.
 """
 import uuid
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.managers import CompanyManager
+
 
 class GovInstitution(models.Model):
     """Registar državnih institucija kojima šaljemo podatke."""

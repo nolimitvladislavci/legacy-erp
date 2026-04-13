@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Conversation, Message, AIUsageLog
+
+from .models import AIUsageLog, Conversation, Message
 
 
 @admin.register(Conversation)
@@ -22,6 +23,7 @@ class AIUsageLogAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
 
 from .models import KnowledgeArticle
+
 
 @admin.register(KnowledgeArticle)
 class KnowledgeArticleAdmin(admin.ModelAdmin):

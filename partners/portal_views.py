@@ -1,9 +1,10 @@
 """
 Client/Partner Portal — Token-based, no login required.
 """
-from django.shortcuts import render, get_object_or_404
-from django.utils.translation import gettext as _
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404, render
+from django.utils.translation import gettext as _
+
 from .models import Partner
 
 
@@ -13,9 +14,9 @@ def _get_partner(token):
 
 def portal_home(request, token):
     partner = _get_partner(token)
+    from documents.models import Document
     from invoicing.models import Invoice
     from projects.models import Project
-    from documents.models import Document
 
     invoices = Invoice.objects.filter(partner=partner).order_by('-date_issued')
     projects = Project.objects.filter(client=partner)
@@ -131,10 +132,10 @@ def portal_documents(request, token):
 
 def send_portal_link(request, partner_id):
     from django.contrib import messages
-    from django.utils.translation import gettext as _
-    from django.shortcuts import redirect
     from django.core.mail import send_mail
+    from django.shortcuts import redirect
     from django.template.loader import render_to_string
+    from django.utils.translation import gettext as _
     if not request.user.is_authenticated:
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden()
@@ -153,7 +154,7 @@ def send_portal_link(request, partner_id):
                   from_email="viskovic.bau@gmail.com",
                   recipient_list=[partner.email], html_message=html_msg, fail_silently=False)
         messages.success(request, f"Portal link poslan na {partner.email}")
-    except Exception as e:
+    except Exception:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect(request.META.get("HTTP_REFERER", "/partners/"))
 
@@ -161,7 +162,8 @@ def send_portal_link(request, partner_id):
 def send_portal_whatsapp(request, partner_id):
     from django.contrib import messages
     from django.shortcuts import redirect
-    from core.whatsapp import send_text, normalize_phone, is_gateway_healthy
+
+    from core.whatsapp import is_gateway_healthy, normalize_phone, send_text
     if not request.user.is_authenticated:
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden()
@@ -195,8 +197,9 @@ def send_portal_whatsapp(request, partner_id):
 def portal_upload(request, token):
     """Drag&drop document upload for clients."""
     partner = _get_partner(token)
-    from documents.models import Document
     from django.utils import timezone
+
+    from documents.models import Document
 
     if request.method == 'POST':
         files = request.FILES.getlist('files')

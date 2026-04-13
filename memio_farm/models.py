@@ -7,6 +7,7 @@ Most prema livestock/ modulu i prema memio_pet.AnimalProfile.
 Baza: memio_farm (odvojena od memio_pets)
 """
 import uuid
+
 from django.db import models
 
 

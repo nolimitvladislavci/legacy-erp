@@ -1,3 +1,3 @@
-from django.db import DatabaseError, IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
 # Stub app — kompatibilnost

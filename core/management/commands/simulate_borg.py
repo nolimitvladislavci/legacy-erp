@@ -14,17 +14,17 @@ Output: JSON report + terminal ispis s prolaznošću/greškom po modulu.
 Ovo NIJE load test — to je functional smoke test s realnim podacima.
 """
 
-from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from django.db import transaction
-from decimal import Decimal
 import json
 import sys
 import time
 from datetime import date, timedelta
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.core.management.base import BaseCommand
+from django.db import DatabaseError, IntegrityError, transaction
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -269,8 +269,9 @@ class Command(BaseCommand):
             from invoicing.models import Invoice, InvoiceItem
             info("Kreiranje test fakture")
 
-            from invoicing.services.invoice_service import create_invoice
             from django.utils import timezone
+
+            from invoicing.services.invoice_service import create_invoice
             inv = create_invoice(
                 company=company,
                 doctype='R',
@@ -334,8 +335,9 @@ class Command(BaseCommand):
             r.error("POSTerminal greška", e)
 
         try:
-            from django.test import RequestFactory
             from django.contrib.auth.middleware import AuthenticationMiddleware
+            from django.test import RequestFactory
+
             from pos import views as pos_views
             info("URL resolve check za POS")
             from django.urls import reverse
@@ -686,7 +688,7 @@ class Command(BaseCommand):
             from django.urls import reverse
             url = reverse('borg_ops:borg_hub')
             r.success(f"BORG Hub URL: {url}")
-        except ImportError as e:
+        except ImportError:
             r.warning("BORG Hub URL ne postoji još — CC_TASK_BORG_HUB.md potreban")
 
         return r
@@ -706,7 +708,7 @@ class Command(BaseCommand):
             r.error("Golubar modeli greška", e)
 
         try:
-            from udruge.models import Leglo, ZdravstveniZapisGolub, RezultatUtrke
+            from udruge.models import Leglo, RezultatUtrke, ZdravstveniZapisGolub
             legla = Leglo.objects.count()
             zdravstveni = ZdravstveniZapisGolub.objects.count()
             rezultati = RezultatUtrke.objects.count()
@@ -742,7 +744,7 @@ class Command(BaseCommand):
         head("RENTAL — Smještaj / Iznajmljivanje")
 
         try:
-            from rental.models import Property, Booking
+            from rental.models import Booking, Property
             props = Property.objects.filter(company=company).count()
             bookings = Booking.objects.filter(rental_property__company=company).count()
             r.success(f"Properties: {props}, Bookings: {bookings}")
@@ -876,7 +878,7 @@ class Command(BaseCommand):
         r = SimResult('tax_wizard')
         head("TAX WIZARD — Porezni obrasci")
         try:
-            from tax_wizard.models import TaxFormTemplate, TaxDeadline
+            from tax_wizard.models import TaxDeadline, TaxFormTemplate
             templates = TaxFormTemplate.objects.count()
             deadlines = TaxDeadline.objects.count()
             r.success(f"TaxFormTemplate: {templates}, TaxDeadline: {deadlines}")
@@ -923,7 +925,7 @@ class Command(BaseCommand):
         r = SimResult('konto')
         head("KONTO — Knjigovodstvo")
         try:
-            from konto.models import KontoAccount, JournalEntry
+            from konto.models import JournalEntry, KontoAccount
             kp_count = KontoAccount.objects.filter(company=company).count()
             tj_count = JournalEntry.objects.filter(company=company).count()
             r.success(f"KontoAccount: {kp_count}, JournalEntry: {tj_count}")
@@ -1230,7 +1232,7 @@ class Command(BaseCommand):
             ('borg_ops:operations_dashboard', []),
         ]
 
-        from django.urls import reverse, NoReverseMatch
+        from django.urls import NoReverseMatch, reverse
         for name, args in sidebar_url_names:
             try:
                 url = reverse(name, args=args)

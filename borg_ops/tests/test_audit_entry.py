@@ -2,10 +2,11 @@
 Tests for BorgAuditEntry — immutability, creation, hooks.
 Target: 13 tests
 """
-from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
-from borg_ops.models import BorgAuditEntry, BorgBriefingConfig, BorgTask
+from django.test import TestCase
+
 from borg_ops.audit_helpers import log_borg_audit
+from borg_ops.models import BorgAuditEntry, BorgBriefingConfig, BorgTask
 
 
 class BorgAuditEntryModelTest(TestCase):

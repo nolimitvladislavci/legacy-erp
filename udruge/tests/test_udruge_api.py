@@ -8,12 +8,12 @@ G. Email (T38-T41), H. Volonteri (T42-T46), I. QR+Viral (T47-T49),
 J. EU AI (T50)
 ═══════════════════════════════════════════════════════════════
 """
-from decimal import Decimal
 from datetime import date, timedelta
-from unittest.mock import patch, MagicMock
+from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
-from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -377,8 +377,8 @@ class UdrugeAPITestSuite(TestCase):
 
     def test_t20_aml_flag_large_donation(self):
         """T20: AML flags donation >= 10000 EUR."""
-        from udruge.models import Donacija
         from udruge.aml_guard import AMLGuard
+        from udruge.models import Donacija
         d = Donacija(company=self.company, donor_name='Veliki',
                      donor_oib='99988877766', amount=Decimal('15000.00'),
                      date=date.today())
@@ -752,8 +752,9 @@ class UdrugeAPITestSuite(TestCase):
 
     def test_t50_ai_eu_fund_search(self):
         """T50: AI EU fund search creates Kampanja records."""
-        from udruge.tasks import ai_search_eu_funds
         import json
+
+        from udruge.tasks import ai_search_eu_funds
 
         mock_resp = MagicMock()
         mock_resp.content = [MagicMock(text=json.dumps([

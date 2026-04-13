@@ -57,7 +57,7 @@ def publish_to_marketplace(source_model, source_id, price, qty, expiry_hours=Non
     Returns:
         MarketplaceProduct instance
     """
-    from marketplace.models import MarketplaceProduct, MarketplaceCategory
+    from marketplace.models import MarketplaceCategory, MarketplaceProduct
 
     source_obj, company, name, unit, description = _resolve_source(source_model, source_id)
 

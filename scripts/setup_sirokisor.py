@@ -13,13 +13,16 @@ Koristi se: cd /var/www/fina-connect && python manage.py shell < scripts/setup_s
 6. Kreira 20 Table + 20 TableQR (Lokal 1-8, Šank 1-4, Terasa 1-8)
 """
 import os
+
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from decimal import Decimal
+
 from django.utils.text import slugify
+
 from companies.models import Company, CompanyBranch
 from gastro_menu.models import DigitalMenu, MenuCategory, MenuItem, MenuItemIngredient, TableQR
 from inventory.models import InventoryItem

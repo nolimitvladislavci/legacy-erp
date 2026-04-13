@@ -1,7 +1,8 @@
 """Notification Celery Tasks — automatsko čišćenje."""
 import logging
-from celery import shared_task
 from datetime import timedelta
+
+from celery import shared_task
 from django.utils import timezone as tz
 
 logger = logging.getLogger('notifications')

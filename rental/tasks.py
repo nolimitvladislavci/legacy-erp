@@ -7,9 +7,10 @@ rental/tasks.py — Celery taskovi za Rental modul
 4. gdpr_cleanup_guest_docs — dnevno, briši dokumente 24h nakon check-outa
 """
 import logging
+
 from celery import shared_task
-from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,9 @@ logger = logging.getLogger(__name__)
 @shared_task(bind=True, max_retries=1, soft_time_limit=120)
 def daily_landlord_brief(self):
     """Svako jutro 08:00 — AI sažetak za sve iznajmljivače."""
+    from companies.models import Company
     from rental.ai_assistant import generate_landlord_daily_brief
     from rental.models import Property
-    from companies.models import Company
 
     company_ids = Property.objects.filter(
         is_active=True,
@@ -49,8 +50,9 @@ def daily_landlord_brief(self):
 @shared_task(bind=True, soft_time_limit=60)
 def check_evisitor_pending(self):
     """Svakih 6h — upozorenje za bookinge bez eVisitor prijave (24h rok)."""
-    from rental.models import Booking
     from datetime import timedelta
+
+    from rental.models import Booking
 
     cutoff = timezone.now() - timedelta(hours=20)
 
@@ -75,9 +77,9 @@ def check_evisitor_pending(self):
 @shared_task(bind=True, soft_time_limit=60)
 def annual_limit_check(self):
     """Tjedno — provjeri blizinu 40k paušalnog praga."""
+    from companies.models import Company
     from rental.ai_assistant import check_annual_limit_warning
     from rental.models import Property
-    from companies.models import Company
 
     company_ids = Property.objects.filter(
         is_active=True,

@@ -9,15 +9,15 @@ Usage:
 import secrets
 import string
 
-from django.core.management.base import BaseCommand, CommandError
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
-from companies.models import Company
-from accounts.models import UserProfile
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+from django.core.management.base import BaseCommand, CommandError
+from django.template.loader import render_to_string
+
+from accounts.models import UserProfile
+from companies.models import Company
 
 User = get_user_model()
 

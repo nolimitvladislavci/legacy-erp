@@ -2,9 +2,10 @@
 companies/management/commands/set_pdv_status.py
 PDV status auto-classification for all companies.
 """
+from decimal import Decimal
+
 from django.core.management.base import BaseCommand
 from django.db.models import Sum
-from decimal import Decimal
 
 
 class Command(BaseCommand):
@@ -16,10 +17,11 @@ class Command(BaseCommand):
         parser.add_argument('--dry-run', action='store_true', help='Show changes without saving')
 
     def handle(self, *args, **options):
+        from django.utils import timezone
+
         from companies.models import Company
         from invoicing.models import Invoice
         from konto.models import JournalEntry
-        from django.utils import timezone
 
         if options['company_id']:
             companies = Company.objects.filter(id=options['company_id'])

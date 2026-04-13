@@ -8,11 +8,11 @@ Fix: secure=True ili follow=True.
 import datetime
 from decimal import Decimal
 
-from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.test import Client, TestCase
 
-from companies.models import Company
 from accounts.models import UserProfile
+from companies.models import Company
 from registration.models import CompanySubscription
 from worktime.models import EmployeeProfile
 

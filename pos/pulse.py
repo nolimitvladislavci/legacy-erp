@@ -14,8 +14,9 @@ Svaki event se sprema + opcija WhatsApp alert vlasniku.
 """
 import logging
 from decimal import Decimal
-from django.utils import timezone as tz
+
 from django.db.models import Sum
+from django.utils import timezone as tz
 
 logger = logging.getLogger('pos_pulse')
 
@@ -57,8 +58,9 @@ def analyze_receipt(receipt):
 
     # ── 1. STORNO PATTERN ──
     # >3 storna u zadnjih 30min = sumnjivo
-    from pos.models import POSReceipt
     from datetime import timedelta
+
+    from pos.models import POSReceipt
     recent_cancels = POSReceipt.objects.filter(
         session__terminal__company=company,
         status='cancelled',
@@ -181,8 +183,9 @@ def get_dashboard_data(company):
     """Pulse dashboard podaci za frontend."""
     now = tz.now()
     today = now.date()
-    from pos.models import POSReceipt, POSPulseEvent, POSSession
     from datetime import timedelta
+
+    from pos.models import POSPulseEvent, POSReceipt, POSSession
 
     # Active terminals (smjena otvorena)
     active_sessions = POSSession.objects.filter(

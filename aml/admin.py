@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import AMLRiskCategory, AMLClientProfile, AMLTransaction, AMLDocument
+
+from .models import AMLClientProfile, AMLDocument, AMLRiskCategory, AMLTransaction
+
 
 @admin.register(AMLRiskCategory)
 class AMLRiskCategoryAdmin(admin.ModelAdmin):

@@ -1,8 +1,10 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 from datetime import date, timedelta
+
+from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
-from .models import PravniPredmet, DimnjacarskaInspekcija
+from django.shortcuts import render
+
+from .models import DimnjacarskaInspekcija, PravniPredmet
 
 
 @login_required
@@ -39,9 +41,10 @@ def dimnjacari_dashboard(request):
 # PDF Generation (WeasyPrint) + Tarifa API
 # ════════════════════════════════════════════════════════════
 
+import hashlib
+
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
-import hashlib
 
 
 def _generate_notariat_pdf(request, template_name, context, filename):
@@ -68,8 +71,9 @@ def _generate_notariat_pdf(request, template_name, context, filename):
 @login_required
 def potvrda_dimnjaka_pdf(request, pk):
     """Generira PDF: Potvrda o ispravnosti dimnjaka (NN 103/15)."""
-    from .models import DimnjacarskaInspekcija
     from django.shortcuts import get_object_or_404
+
+    from .models import DimnjacarskaInspekcija
     insp = get_object_or_404(DimnjacarskaInspekcija, pk=pk, company=request.user.userprofile.company)
 
     ctx = {'insp': insp, 'company': insp.company}

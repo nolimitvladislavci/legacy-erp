@@ -4,10 +4,11 @@ Monthly VAT calculation Celery task.
 Runs 1st of each month, calculates output/input VAT for all active companies.
 Enhanced: also generates PDV-S reports and sends WhatsApp summary to Marija.
 """
-import logging
 import datetime
-from celery import shared_task
+import logging
 from decimal import Decimal
+
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 

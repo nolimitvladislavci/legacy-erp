@@ -2,6 +2,7 @@
 memio_pet/urls.py -- URL routing za memio.pet public views
 """
 from django.urls import path
+
 from memio_pet import views
 
 app_name = "memio_pet"

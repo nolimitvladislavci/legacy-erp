@@ -6,6 +6,7 @@ Usage:
     notify_password_change(user, new_password, changed_by=request.user)
 """
 import logging
+
 from django.conf import settings
 
 logger = logging.getLogger('accounts')

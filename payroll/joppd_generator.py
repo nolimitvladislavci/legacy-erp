@@ -3,12 +3,12 @@ JOPPD XML Generator - Izvjesce o primicima, porezu na dohodak i prirezu
 te doprinosima za obvezna osiguranja.
 Format: JOPPD v4.0 (2024+)
 """
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
-from datetime import datetime, date
 import calendar
-from django.core.exceptions import ObjectDoesNotExist
+import xml.etree.ElementTree as ET
+from datetime import date, datetime
+from xml.dom import minidom
 
+from django.core.exceptions import ObjectDoesNotExist
 
 JOPPD_NS = 'http://e-porezna.porezna-uprava.hr/sheme/zahtjevi/ObscePorezanDohodak/v4-0'
 META_NS = 'http://e-porezna.porezna-uprava.hr/sheme/Metapodaci/v2-0'

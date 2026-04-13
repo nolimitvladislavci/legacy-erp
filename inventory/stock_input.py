@@ -13,8 +13,9 @@ Dron #4 fix: LLM matematika — crveni ekran ako AI račun ne štima.
 """
 import logging
 from dataclasses import dataclass, field
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from typing import List
+
 from django.db import transaction
 
 logger = logging.getLogger('inventory.stock_input')

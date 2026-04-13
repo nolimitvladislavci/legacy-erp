@@ -4,7 +4,7 @@ delivery/api.py - Cold Chain API za primanje temp podataka iz vanjskog sustava.
 Veletrznica Osijek (ili bilo koji hub) salje POST s temperaturnim ocitanjima.
 Token-based auth — svaki hub ima svoj API token.
 """
-from django.db.models import Avg, Min, Max
+from django.db.models import Avg, Max, Min
 from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.authentication import TokenAuthentication
@@ -84,7 +84,8 @@ def sensor_reading_ingest(request):
         })
 
     # HACCP Analysis — run for each affected SmartBox
-    from .models import SmartBox, analyze_readings as haccp_analyze
+    from .models import SmartBox
+    from .models import analyze_readings as haccp_analyze
     box_ids = set()
     for rd in readings_data:
         if rd.get('smart_box_id'):

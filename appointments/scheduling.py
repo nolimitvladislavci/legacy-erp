@@ -4,8 +4,10 @@ Polymorphic Resource Scheduling Engine - Double-Lock + Race Protection.
 v2 - Koristi Appointment.actor_resource FK (mig 0009) za precizno pracenje aktora.
 """
 from datetime import timedelta
+
 from django.db import transaction
 from django.utils import timezone
+
 from appointments.models import Appointment, BookingResource, WorkingHours
 
 

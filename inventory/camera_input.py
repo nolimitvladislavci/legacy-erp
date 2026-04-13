@@ -4,9 +4,10 @@ Korisnik slika artikl (barcode, etiketa, račun) →
 Haiku/Vision analizira → vraća strukturirane podatke
 Math sanity check: price*qty > 50.000 EUR → odbaci
 """
-import logging
 import base64
+import logging
 from decimal import Decimal
+
 from django.conf import settings
 
 logger = logging.getLogger('inventory.camera')
@@ -103,7 +104,8 @@ def _call_haiku_vision(image_b64: str, image_bytes: bytes) -> dict:
             }]
         )
 
-        import json, re
+        import json
+        import re
         text = response.content[0].text.strip()
         json_match = re.search(r'\{.*\}', text, re.DOTALL)
         if json_match:

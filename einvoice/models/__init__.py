@@ -1,5 +1,6 @@
-from django.db import DatabaseError, IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import DatabaseError, IntegrityError
+
 from .as4_message import (
     AS4Message,
     AS4MessageEvent,
@@ -7,11 +8,11 @@ from .as4_message import (
     MessageStatus,
     TransportType,
 )
+from .document_archive import DocumentArchive
+from .inbound_invoice import InboundInvoice
+from .mandate import Mandate, MandateStatus, MandateType
 from .peppol_participant import PeppolParticipant
 from .transport_config import TransportConfiguration
-from .inbound_invoice import InboundInvoice
-from .document_archive import DocumentArchive
-from .mandate import Mandate, MandateStatus, MandateType
 
 __all__ = [
     "AS4Message",

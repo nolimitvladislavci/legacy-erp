@@ -1,6 +1,7 @@
 import json
-import os
 import logging
+import os
+
 from django.db import DatabaseError
 
 logger = logging.getLogger('ai_assistant.patrol')
@@ -8,8 +9,9 @@ logger = logging.getLogger('ai_assistant.patrol')
 
 def _gather_patrol_data(company):
     """Collect data points from all modules."""
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
     now = timezone.now()
     data = {}
 
@@ -31,8 +33,9 @@ def _gather_patrol_data(company):
 
     # 2. Inventory - low stock & expiring
     try:
-        from inventory.models import InventoryItem, StockBatch
         from django.db.models import F
+
+        from inventory.models import InventoryItem, StockBatch
         low = InventoryItem.objects.filter(
             company=company, is_active=True,
             quantity__lte=F('min_quantity'), min_quantity__gt=0
@@ -72,8 +75,9 @@ def _gather_patrol_data(company):
 
     # 4. Propter - unbilled otpremnice
     try:
-        from propter.models import Otpremnica
         from django.db.models import Sum
+
+        from propter.models import Otpremnica
         unbilled = Otpremnica.objects.filter(company=company, status='issued')
         agg = unbilled.aggregate(total=Sum('total'))
         data['propter'] = {
@@ -113,8 +117,9 @@ def _gather_patrol_data(company):
 
     # 6. Invoicing - overdue invoices
     try:
-        from invoicing.models import Invoice
         from django.db.models import Sum
+
+        from invoicing.models import Invoice
         overdue = Invoice.objects.filter(company=company, status='OVERDUE')
         agg = overdue.aggregate(total=Sum('total'))
         data['invoicing'] = {
@@ -152,8 +157,9 @@ def _gather_patrol_data(company):
 
     # 9. POS - yesterday's revenue
     try:
-        from pos.models import POSReceipt
         from django.db.models import Sum
+
+        from pos.models import POSReceipt
         yesterday = (now - timedelta(days=1)).date()
         receipts = POSReceipt.objects.filter(
             session__terminal__company=company,
@@ -169,8 +175,9 @@ def _gather_patrol_data(company):
 
     # 10. Payments - pending
     try:
-        from payments.models import Payment
         from django.db.models import Sum
+
+        from payments.models import Payment
         pending = Payment.objects.filter(company=company, status__in=['pending', 'processing'])
         agg = pending.aggregate(total=Sum('amount'))
         data['payments'] = {
@@ -181,8 +188,8 @@ def _gather_patrol_data(company):
         data['payments'] = {'error': 'Module not available'}
 
     def _sanitize_data(obj):
-        from decimal import Decimal
         import datetime
+        from decimal import Decimal
         if isinstance(obj, Decimal): return float(obj)
         if isinstance(obj, (datetime.date, datetime.datetime)): return str(obj)
         if isinstance(obj, dict): return {k: _sanitize_data(v) for k, v in obj.items()}

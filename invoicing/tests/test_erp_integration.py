@@ -8,20 +8,19 @@ Fixes:
 """
 
 import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
-from django.test import TestCase, Client
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def setup_company(oib, username):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
 
     company = Company.objects.create(
@@ -535,8 +534,8 @@ class TestPartnerBalance(TestCase):
 
     def test_vise_partnera_ne_mijesaju_se(self):
         """Balance partnera A ne smije uključivati račune partnera B."""
-        from partners.models import Partner
         from invoicing.models import Invoice
+        from partners.models import Partner
 
         partner_b = Partner.objects.create(
             company=self.company, name='Partner B', oib='98765432101',
@@ -619,8 +618,9 @@ class TestModelIntegritet(TestCase):
 
     def test_tax_rate_unique_together(self):
         """TaxRate ima unique_together (country, rate) — duplikat mora failati."""
-        from companies.models import TaxRate
         from django.db import IntegrityError
+
+        from companies.models import TaxRate
         make_tax_rate(Decimal('7.00'), 'DE')
         with self.assertRaises(IntegrityError,
                 msg="Dupli TaxRate (DE, 7%) mora podignuti IntegrityError"):

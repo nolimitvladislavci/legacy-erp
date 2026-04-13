@@ -1,19 +1,18 @@
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions, viewsets
 
 from partners.models import Partner
 
 from .models import InsurancePolicy
 from .serializers import InsurancePolicySerializer
-from django.core.exceptions import ObjectDoesNotExist
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
 
 
 @extend_schema_view(list=extend_schema(tags=["Insurance"]))

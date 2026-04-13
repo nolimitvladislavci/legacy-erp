@@ -11,9 +11,10 @@ Trojstvo pristupa:
   Trojstvo 3 (Ops):     Ivan/Marija, Kruljac, neutral — ravnopravni, samostalni
 """
 import os
-from django.db import models
-from django.contrib.auth.models import User
+
 from cryptography.fernet import Fernet
+from django.contrib.auth.models import User
+from django.db import models
 
 
 def _get_fernet():

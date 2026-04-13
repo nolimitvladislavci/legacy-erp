@@ -1,13 +1,14 @@
 """Smoke tests for assessment, outreach, calculator, burza, inventory, documents views."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user(oib, username, modules):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'Misc {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -341,6 +342,7 @@ class ProjectsExtraTest(TestCase):
 
     def test_project_detail(self):
         import uuid
+
         from projects.models import Project
         proj = Project.objects.create(
             company=self.company,

@@ -18,9 +18,9 @@ Sigurnost:
 """
 import logging
 from decimal import Decimal, InvalidOperation
-from django.db import transaction
+
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone as tz
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('ai_executor')
 
@@ -52,7 +52,7 @@ class AIOperativeExecutor:
         Raises:
             AIExecutionError: jasna poruka za log
         """
-        from superadmin_ai.models import PendingAIAction, AIActionLog
+        from superadmin_ai.models import AIActionLog, PendingAIAction
 
         # Lock redak — sprječava duplo izvršavanje
         action = PendingAIAction.objects.select_for_update().get(
@@ -119,9 +119,9 @@ class AIOperativeExecutor:
         AI kreira PurchaseOrder na temelju analize zaliha.
         Payload: {"supplier_id": 12, "items": [{"sku": "ABC", "qty": 50}]}
         """
-        from procurement.models import PurchaseOrder, PurchaseOrderItem
-        from partners.models import Partner
         from inventory.models import InventoryItem
+        from partners.models import Partner
+        from procurement.models import PurchaseOrder, PurchaseOrderItem
 
         supplier_id = payload.get('supplier_id')
         items_data = payload.get('items', [])

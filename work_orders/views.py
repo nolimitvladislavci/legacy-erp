@@ -1,15 +1,16 @@
 import logging
+
 logger = logging.getLogger(__name__)
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError, transaction
 from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
-from django.db import transaction, DatabaseError, IntegrityError
 
 from core.tenant import get_current_company
-from .models import WorkOrder, WorkOrderItem, VehicleCard, ClientCard
 
+from .models import ClientCard, VehicleCard, WorkOrder, WorkOrderItem
 
 # ─── Helper ──────────────────────────────────────────────────────────────────
 
@@ -126,8 +127,9 @@ def work_order_create(request):
         messages.success(request, f"Radni nalog {wo.order_number} kreiran.")
         return redirect('work_orders:detail', pk=wo.pk)
 
-    from partners.models import Partner
     from django.contrib.auth.models import User
+
+    from partners.models import Partner
     clients = Partner.objects.filter(company=company, is_active=True).order_by('name')
     employees = User.objects.filter(
         profile__company=company, is_active=True
@@ -152,8 +154,9 @@ def work_order_detail(request, pk):
     items = wo.items.select_related('article').all()
 
     # Card activity timeline (BORG audit trail)
-    from borg_ops.models import CardActivity
     from django.contrib.contenttypes.models import ContentType
+
+    from borg_ops.models import CardActivity
     card_activities = CardActivity.objects.filter(
         content_type=ContentType.objects.get_for_model(wo),
         object_id=str(wo.pk),
@@ -231,8 +234,9 @@ def work_order_edit(request, pk):
         messages.success(request, _("Radni nalog ažuriran."))
         return redirect('work_orders:detail', pk=pk)
 
-    from partners.models import Partner
     from django.contrib.auth.models import User
+
+    from partners.models import Partner
     clients = Partner.objects.filter(company=company, is_active=True).order_by('name')
     employees = User.objects.filter(
         profile__company=company, is_active=True
@@ -292,8 +296,9 @@ def work_order_to_invoice(request, pk):
 
     if request.method == 'POST':
         with transaction.atomic():
-            from invoicing.models import Invoice, InvoiceItem
             import datetime
+
+            from invoicing.models import Invoice, InvoiceItem
 
             # Generate invoice number same way as invoicing app
             last = Invoice.objects.order_by('-id').first()
@@ -484,7 +489,7 @@ def client_card_create(request):
             cc.save()
             messages.success(request, f"Karton klijenta {cc} kreiran.")
             return redirect('work_orders:client_card_list')
-        except (IntegrityError, DatabaseError) as e:
+        except (IntegrityError, DatabaseError):
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     from partners.models import Partner
@@ -614,9 +619,10 @@ def work_order_board(request):
     Jedan SQL za sve kartice + jedan Prefetch za SLA timestamps.
     Total: 2 SQL umjesto 1 + N*2.
     """
-    from django.db.models import Prefetch
-    from borg_ops.models import StatusTimestamp
     from django.contrib.contenttypes.models import ContentType
+    from django.db.models import Prefetch
+
+    from borg_ops.models import StatusTimestamp
 
     company = _get_company(request)
     if not company:

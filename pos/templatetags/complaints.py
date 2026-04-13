@@ -71,9 +71,10 @@ def complaints_stats(context):
     if not request:
         return {}
     try:
+        from django.db.models import Avg
+
         from core.company_utils import get_user_company
         from pos.models import KnjigaPrigovora
-        from django.db.models import Avg
         company = get_user_company(request)
         if not company:
             return {}

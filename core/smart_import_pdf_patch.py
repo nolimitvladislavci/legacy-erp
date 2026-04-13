@@ -4,6 +4,7 @@ Vision fallback za skenirane PDF-ove u smart_import.
 """
 import base64
 import logging
+
 logger = logging.getLogger(__name__)
 
 

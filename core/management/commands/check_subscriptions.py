@@ -5,9 +5,10 @@ Provjera pretplata i računa — šalje WhatsApp podsjetnike.
 Pokreće se jednom dnevno preko Celery beat-a.
 """
 from datetime import date
-from django.core.management.base import BaseCommand
-from core.notify import notify
 
+from django.core.management.base import BaseCommand
+
+from core.notify import notify
 
 # ── Pretplate za praćenje ──
 SUBSCRIPTIONS = [

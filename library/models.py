@@ -6,12 +6,13 @@ Fizicka posudba + digitalni katalog + ISBN auto-fill + QR clanarine
 
 "Jedan covjek na enteru — AI radi ostalo."
 """
-from django.db import models
+import uuid
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
+from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from decimal import Decimal
-import uuid
 
 from core.managers import CompanyManager
 

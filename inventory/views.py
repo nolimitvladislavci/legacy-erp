@@ -1,17 +1,18 @@
-from django.http import JsonResponse
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from rest_framework import viewsets
 
 from partners.models import Partner
 
 from .models import InventoryItem, StockMovement
 from .serializers import InventoryItemSerializer, StockMovementSerializer
-from django.core.exceptions import ObjectDoesNotExist
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
 @login_required
@@ -168,8 +169,6 @@ from core.company_utils import get_user_company
 from core.tenant import get_current_company
 
 from .models import GoodsReceipt, GoodsReceiptItem
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
 
 # ── PRIMKA VIEWS ───────────────────────────────────────────────────────────────
 
@@ -290,8 +289,9 @@ def goods_receipt_detail(request, pk):
 def goods_receipt_pdf(request, pk):
     """Generira PDF primke s logom, generalijama i stavkama."""
     import io
-    from django.template.loader import render_to_string
+
     from django.http import HttpResponse
+    from django.template.loader import render_to_string
     company = get_current_company()
     receipt = get_object_or_404(GoodsReceipt, pk=pk, company=company)
     items = receipt.items.select_related('inventory_item').all()
@@ -330,7 +330,7 @@ def goods_receipt_confirm(request, pk):
     try:
         receipt.confirm()
         messages.success(request, f'Primka {receipt.receipt_number} potvrđena. Zalihe i cijene ažurirane.')
-    except Exception as e:
+    except Exception:
         messages.error(request, _('Potvrda primke nije uspjela. Provjerite stavke i pokušajte ponovo.'))
     return redirect('inventory:receipt_detail', pk=pk)
 
@@ -357,7 +357,9 @@ def stock_overview(request):
 def api_quick_create_article(request):
     """Create inventory item via AJAX from quick-add modal."""
     import json
+
     from django.http import JsonResponse
+
     from core.company_utils import get_user_company
 
     if request.method != 'POST':
@@ -581,8 +583,9 @@ def api_smart_create(request):
 @login_required
 def kalo_view(request):
     """View and write off natural shrinkage (kalo) for inventory items."""
-    from core.company_utils import get_user_company
     from django.utils.timezone import now
+
+    from core.company_utils import get_user_company
 
     company = get_user_company(request)
     if not company:
@@ -665,7 +668,8 @@ def api_submit_count(request):
 
     import json as _json
     from decimal import Decimal
-    from inventory.models import StockBatch, InventoryCountLog
+
+    from inventory.models import InventoryCountLog, StockBatch
 
     try:
         data = _json.loads(request.body)
@@ -820,8 +824,8 @@ def blind_count_view(request):
 @login_required
 def reorder_predictions(request):
     """Predictive reorder dashboard — shows items needing restock."""
-    from inventory.reorder import reorder_report
     from core.company_utils import get_user_company
+    from inventory.reorder import reorder_report
     from procurement.models import PurchaseOrder
     company = get_user_company(request)
     report = reorder_report(company)
@@ -848,7 +852,7 @@ def reorder_predictions(request):
 def predictive_dashboard(request):
     """Enhanced predictive analytics dashboard with weekly demand + auto-PO."""
     from core.company_utils import get_user_company
-    from inventory.reorder import reorder_report, predict_weekly_demand
+    from inventory.reorder import predict_weekly_demand, reorder_report
 
     company = get_user_company(request)
     report = reorder_report(company, top_n=30)
@@ -942,8 +946,8 @@ def trigger_reorder(request):
 @login_required
 def stock_card(request, item_id):
     """Skladisna kartica — kronoloski pregled svih kretanja artikla (KEUB zahtjev)."""
-    from inventory.models import InventoryItem, StockMovement
     from core.company_utils import get_user_company
+    from inventory.models import InventoryItem, StockMovement
 
     company = get_user_company(request)
     item = get_object_or_404(InventoryItem, pk=item_id, company=company)
@@ -1039,8 +1043,9 @@ def transfer_list(request):
 def transfer_create(request):
     """Kreiraj novu medjuskladisnicu / izdatnicu."""
     company = get_current_company()
-    from inventory.models import Warehouse, WarehouseTransfer, WarehouseTransferItem
     from datetime import date as _date
+
+    from inventory.models import Warehouse, WarehouseTransfer, WarehouseTransferItem
 
     warehouses = Warehouse.objects.filter(company=company, is_active=True).select_related("company")
 
@@ -1157,7 +1162,7 @@ def inventura_list(request):
 def inventura_create(request):
     """Kreiraj novu inventuru i pokreni brojanje."""
     company = get_user_company(request)
-    from .models import Inventura, Warehouse, InventuraCommission
+    from .models import Inventura, InventuraCommission, Warehouse
     if request.method == 'POST':
         from datetime import date, datetime
         ref_date_str = request.POST.get('reference_date', '')
@@ -1271,7 +1276,8 @@ def _ai_identify_item(barcode, inventura):
     AI pokušava identificirati artikl po barkodu.
     Šalje barcode + listu artikala AI-u, AI vraća best match.
     """
-    import os, logging
+    import logging
+    import os
     logger = logging.getLogger('inventory')
 
     api_key = os.environ.get('GEMINI_API_KEY', '')
@@ -1367,9 +1373,11 @@ def inventura_api_scan(request, pk):
     POST {item_id: N, counted_qty: X} → spremi brojanje
     """
     company = get_user_company(request)
-    from .models import Inventura, InventuraItem
-    from django.utils import timezone
     import json
+
+    from django.utils import timezone
+
+    from .models import Inventura, InventuraItem
 
     inv = get_object_or_404(Inventura, pk=pk, company=company)
     if inv.status not in ('counting', 'in_progress'):
@@ -1518,8 +1526,8 @@ def inventura_pdf(request, pk):
     else:
         items = items.filter(counted_at__isnull=False)
 
-    from django.template.loader import render_to_string
     from django.http import HttpResponse
+    from django.template.loader import render_to_string
     html = render_to_string('inventory/inventura_pdf.html', {
         'inv': inv,
         'items': items,
@@ -1528,8 +1536,9 @@ def inventura_pdf(request, pk):
         'show': show,
     })
     try:
-        from xhtml2pdf import pisa
         from io import BytesIO
+
+        from xhtml2pdf import pisa
         buf = BytesIO()
         pisa.CreatePDF(html, dest=buf)
         buf.seek(0)
@@ -1558,8 +1567,8 @@ def inventura_difference_pdf(request, pk):
     total_shortage = sum(abs(i.difference_value) for i in shortages)
     total_surplus = sum(abs(i.difference_value) for i in surpluses)
 
-    from django.template.loader import render_to_string
     from django.http import HttpResponse
+    from django.template.loader import render_to_string
     html = render_to_string('inventory/inventura_difference_pdf.html', {
         'inv': inv,
         'shortages': shortages,
@@ -1570,8 +1579,9 @@ def inventura_difference_pdf(request, pk):
         'company': company,
     })
     try:
-        from xhtml2pdf import pisa
         from io import BytesIO
+
+        from xhtml2pdf import pisa
         buf = BytesIO()
         pisa.CreatePDF(html, dest=buf)
         buf.seek(0)
@@ -1586,8 +1596,9 @@ def inventura_difference_pdf(request, pk):
 def inventura_export_csv(request, pk):
     """CSV export inventure — za revizore i računovodstvo."""
     company = get_user_company(request)
-    from .models import Inventura
     import csv
+
+    from .models import Inventura
     inv = get_object_or_404(Inventura, pk=pk, company=company)
     items = inv.items.select_related('inventory_item').all()
 
@@ -1640,7 +1651,9 @@ def transfer_receive(request, pk):
 def ai_menu_scan(request):
     """AI Menu Scanner — fotografiraj cjenik, AI parsira i puni InventoryItem."""
     import json
+
     from django.http import JsonResponse
+
     from core.company_utils import get_user_company
 
     company = get_user_company(request)
@@ -1654,7 +1667,9 @@ def ai_menu_scan(request):
 
     # AI parsira sliku cjenika
     try:
-        import anthropic, os
+        import os
+
+        import anthropic
         client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
 
         response = client.messages.create(
@@ -1688,8 +1703,9 @@ def ai_menu_scan(request):
         return JsonResponse({'error': str(e)}, status=500)
 
     # Kreiraj InventoryItem za svaki parsirani artikl
-    from inventory.models import InventoryItem
     from decimal import Decimal
+
+    from inventory.models import InventoryItem
     created = 0
     skipped = 0
     results = []

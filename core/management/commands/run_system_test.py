@@ -10,7 +10,6 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.db import DatabaseError
 
-
 IVAN_DE_PHONE = '+4915771998747'
 
 MODULI = [
@@ -80,8 +79,9 @@ class Command(BaseCommand):
     def _run_django_check(self, results):
         self.stdout.write('→ Django system check...')
         try:
-            from django.core.management import call_command
             from io import StringIO
+
+            from django.core.management import call_command
             out = StringIO()
             call_command('check', stdout=out, stderr=out)
             output = out.getvalue()
@@ -172,7 +172,7 @@ class Command(BaseCommand):
                 results['warning'].append(f'Udruge: {e}')
 
         try:
-            from tax_wizard.models import TaxFormTemplate, TaxDeadline
+            from tax_wizard.models import TaxDeadline, TaxFormTemplate
             forms = TaxFormTemplate.objects.count()
             deadlines = TaxDeadline.objects.count()
             results['ok'].append(f'Tax Wizard: {forms} obrazaca, {deadlines} deadlineova')

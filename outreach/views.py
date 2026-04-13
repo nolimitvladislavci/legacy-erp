@@ -4,15 +4,15 @@ import io
 
 from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .models import Campaign, CampaignContact, Contact
-from django.db import IntegrityError, DatabaseError
 
 
 # ── AI personalization ────────────────────────────────────────────────────────
@@ -260,7 +260,7 @@ def campaign_send(request, pk):
     error = None
 
     if channel == 'whatsapp':
-        from core.whatsapp import send_text, normalize_phone, is_gateway_healthy
+        from core.whatsapp import is_gateway_healthy, normalize_phone, send_text
         phone = cc.contact.phone or ''
         if not phone or not normalize_phone(phone):
             return JsonResponse({'ok': False, 'error': f'Nema WhatsApp broja za {cc.contact.display_name}'})
@@ -352,7 +352,7 @@ def campaign_bulk_send(request, pk):
         cc.personalized_body    = result['body']
 
         if channel == 'whatsapp':
-            from core.whatsapp import send_text, normalize_phone
+            from core.whatsapp import normalize_phone, send_text
             phone = cc.contact.phone or ''
             if not phone or not normalize_phone(phone):
                 failed += 1
@@ -421,7 +421,7 @@ def contact_whatsapp(request, pk):
     """Send a quick WhatsApp message to a single contact."""
     c = get_object_or_404(Contact, pk=pk)
     if request.method == 'POST':
-        from core.whatsapp import send_text, normalize_phone, is_gateway_healthy
+        from core.whatsapp import is_gateway_healthy, normalize_phone, send_text
         msg = request.POST.get('message', '').strip()
         phone = c.phone or ''
         if not phone or not normalize_phone(phone):

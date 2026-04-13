@@ -2,6 +2,7 @@
 """Quick test script za social import modul"""
 import os
 import sys
+
 import django
 
 # Setup Django
@@ -9,7 +10,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 sys.path.insert(0, '/var/www/fina-connect')
 django.setup()
 
-from boxgram.services.social_import import detect_platform, fetch_oembed, _extract_youtube_id
+from boxgram.services.social_import import _extract_youtube_id, detect_platform, fetch_oembed
+
 
 def test_detect_platform():
     """Test detektovanja platforme"""
@@ -72,10 +74,12 @@ def test_fetch_oembed():
 
 def test_social_import_model():
     """Test SocialImport modela"""
-    from django.contrib.auth.models import User
-    from companies.models import Company
-    from boxgram.models import PetProfile, SocialImport
     import uuid
+
+    from django.contrib.auth.models import User
+
+    from boxgram.models import PetProfile, SocialImport
+    from companies.models import Company
 
     # Setup
     company = Company.objects.create(

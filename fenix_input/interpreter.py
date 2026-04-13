@@ -8,6 +8,7 @@ AI vraća: {intent: "bee_log", target_module: "livestock",
 """
 import json
 import logging
+
 from django.conf import settings
 
 logger = logging.getLogger('fenix_input')

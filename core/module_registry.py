@@ -8,6 +8,7 @@ This registry handles domain-specific modules that depend on business_type,
 NKD code, or company name keywords.
 """
 import logging
+
 from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)

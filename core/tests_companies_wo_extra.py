@@ -1,13 +1,14 @@
 """Extra tests for companies/views.py and work_orders/views.py."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user(oib, username, modules=None, is_superuser=False):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'CW {oib}', oib=oib)
     if is_superuser:

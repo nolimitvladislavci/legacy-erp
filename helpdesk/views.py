@@ -1,12 +1,14 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.db.models import Q, Count, Avg
+from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, IntegrityError
+from django.db.models import Avg, Count, Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
+
 from core.company_utils import get_user_company
+
 from .models import Ticket, TicketMessage, TicketTemplate
-from django.db import IntegrityError, DatabaseError
 
 
 def _get_company(request):
@@ -113,8 +115,9 @@ def ticket_create(request):
             )
         messages.success(request, f'Tiket {ticket.ticket_number} kreiran.')
         return redirect('helpdesk:detail', pk=ticket.pk)
-    from partners.models import Partner
     from django.contrib.auth.models import User
+
+    from partners.models import Partner
     clients = Partner.objects.filter(company=company)
     from accounts.models import UserProfile
     company_user_ids = UserProfile.objects.filter(company=company).values_list('user_id', flat=True)
@@ -223,8 +226,9 @@ def ticket_close(request, pk):
 @login_required
 def vip_list(request):
     """VIP kontakt lista — dodaj, uredi, obriši."""
-    from .models import VIPContact
     from django.contrib.auth.models import User
+
+    from .models import VIPContact
 
     if request.method == 'POST':
         action = request.POST.get('action')

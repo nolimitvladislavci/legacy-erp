@@ -1,13 +1,14 @@
 """Partners and inventory views tests with real data objects."""
 import datetime
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 def _setup_user(oib, username, modules=None):
-    from companies.models import Company
     from accounts.models import UserProfile
+    from companies.models import Company
     from registration.models import CompanySubscription
     company = Company.objects.create(name=f'PID {oib}', oib=oib)
     user = User.objects.create_user(username, password='pass123')
@@ -44,8 +45,9 @@ def _make_partner(company, name='Test Partner', partner_type='client', oib=''):
 
 
 def _make_inventory_item(company, name='Test Item', sku=None):
-    from inventory.models import InventoryItem
     import uuid
+
+    from inventory.models import InventoryItem
     return InventoryItem.objects.create(
         company=company,
         name=name,
@@ -288,8 +290,9 @@ class InventoryWithDataTest(TestCase):
 
     def test_item_list_low_stock(self):
         try:
-            from inventory.models import InventoryItem
             import uuid
+
+            from inventory.models import InventoryItem
             # item with quantity < min_quantity (low stock)
             InventoryItem.objects.create(
                 company=self.company,

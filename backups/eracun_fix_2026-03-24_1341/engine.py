@@ -4,15 +4,16 @@ e-Racun processing engine.
 Handles: validation, XML generation, signing, FINA CIS submission, archiving.
 Integrates Propter FiskalEngine logic into LIMIT Connect.
 """
+import datetime
+import logging
 import os
 import uuid
-import logging
-import datetime
 from decimal import Decimal
+
+from django.conf import settings
+from django.utils import timezone
 from lxml import etree
 from signxml import XMLSigner, methods
-from django.utils import timezone
-from django.conf import settings
 
 logger = logging.getLogger('eracun.engine')
 
@@ -261,7 +262,7 @@ def get_cert_pem(config):
     Extract PEM cert and key from P12 file.
     Returns (cert_pem_bytes, key_pem_bytes) or raises.
     """
-    from cryptography.hazmat.primitives.serialization import pkcs12, Encoding, PrivateFormat, NoEncryption
+    from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, pkcs12
 
     # 1. Direktni cert_path (CharField, sigurna lokacija)
     if getattr(config, 'cert_path', None) and os.path.exists(config.cert_path):

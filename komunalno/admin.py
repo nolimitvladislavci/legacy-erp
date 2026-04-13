@@ -1,8 +1,17 @@
 from django.contrib import admin
+
 from .models import (
-    WasteStation, WasteCategory, CitizenCard, AnnualQuota,
-    WasteDelivery, ScaleReading, OntoExportBatch, WasteQuickButton,
-    IllegalDumpReport, StreetLight, LightFaultReport,
+    AnnualQuota,
+    CitizenCard,
+    IllegalDumpReport,
+    LightFaultReport,
+    OntoExportBatch,
+    ScaleReading,
+    StreetLight,
+    WasteCategory,
+    WasteDelivery,
+    WasteQuickButton,
+    WasteStation,
 )
 
 

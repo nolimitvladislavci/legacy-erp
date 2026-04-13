@@ -1,7 +1,8 @@
-import os
 import logging
+import os
+
 from django.conf import settings
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +113,7 @@ def _build_contextual_system_prompt(user, company):
     # OPG context
     if biz_type == 'opg':
         try:
-            from livestock.models import Livestock, CropPlan
+            from livestock.models import CropPlan, Livestock
             grla = Livestock.objects.filter(company=company).count()
             planovi = CropPlan.objects.filter(company=company, godina__gte=2026).count()
             ctx += f"- Farma: {grla} grla goveda, {planovi} aktivnih planova sjetve\n"
@@ -121,8 +122,9 @@ def _build_contextual_system_prompt(user, company):
 
     # Intelligence context
     try:
-        from intelligence.models import IntelligenceResult, FundOpportunity
         from django.utils import timezone
+
+        from intelligence.models import FundOpportunity, IntelligenceResult
         novi = IntelligenceResult.objects.filter(
             job__company=company, status='novo'
         ).count()
@@ -203,8 +205,9 @@ def retrieve_knowledge(module_context='', query='', limit=5):
     RAG retrieval — dohvati relevantne članke iz KnowledgeArticle.
     Koristi keyword matching + module filter.
     """
-    from .models import KnowledgeArticle
     from django.db.models import Q
+
+    from .models import KnowledgeArticle
 
     qs = KnowledgeArticle.objects.filter(is_active=True)
 

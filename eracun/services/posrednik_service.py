@@ -12,8 +12,9 @@ Usage:
     inbox = PosrednikService.fetch_inbox(company)
 """
 import logging
+
 import requests
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger('eracun.posrednik')
 

@@ -15,7 +15,7 @@ def push_item_to_synesis(item, user=None, price_only=False):
     If SKU starts with 'SYN-', it's an update (we know the Synesis ID).
     Otherwise it's an insert (new article).
     """
-    from .models import SynesisExportQueue, SynesisConfig
+    from .models import SynesisConfig, SynesisExportQueue
 
     company = item.company
     if not company:
@@ -74,7 +74,7 @@ def push_partner_to_synesis(partner, user=None):
     """
     Queue a Partner for export to Synesis Storage.mdb PARTNERS table.
     """
-    from .models import SynesisExportQueue, SynesisConfig
+    from .models import SynesisConfig, SynesisExportQueue
 
     company = partner.company
     if not company:
@@ -151,7 +151,7 @@ def push_price_change_to_synesis(item, new_price, new_purchase_price=None, user=
     """
     Quick price recalculation push — only updates prices in Synesis.
     """
-    from .models import SynesisExportQueue, SynesisConfig
+    from .models import SynesisConfig, SynesisExportQueue
 
     company = item.company
     if not company:

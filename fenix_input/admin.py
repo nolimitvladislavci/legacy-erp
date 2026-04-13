@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from fenix_input.models import InputMessage, SMSDevice
 
 

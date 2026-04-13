@@ -13,8 +13,8 @@ import logging
 from datetime import date, timedelta
 from decimal import Decimal
 
-from django.db.models import Sum
 from django.db import DatabaseError
+from django.db.models import Sum
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +58,9 @@ def get_dashboard_insights(company):
 
     # 2. NIZAK STOCK
     try:
-        from inventory.models import InventoryItem
         from django.db.models import F
+
+        from inventory.models import InventoryItem
         low_stock = InventoryItem.objects.filter(
             company=company,
             quantity__lte=F('reorder_level'),

@@ -8,15 +8,14 @@ import secrets
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.db import DatabaseError, IntegrityError
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
 from partners.models import WizardDraft
-from django.db import IntegrityError, DatabaseError
-
 
 # ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -226,6 +225,7 @@ def wizard_nkd_semantic(request):
     Semantički NKD search — keyword + Haiku AI fallback.
     """
     from django.db.models import Q
+
     from companies.models import NKDCode
 
     q = request.GET.get('q', '').strip()
@@ -297,8 +297,9 @@ def _create_pending_company(name: str, accounting_firm, created_by) -> 'Company'
     OIB se ne zna još — koristimo placeholder koji treba biti ažuriran.
     business_type = 'jdoo' default.
     """
-    from companies.models import Company, CompanyPartnership
     import uuid
+
+    from companies.models import Company, CompanyPartnership
 
     placeholder_oib = f'DRAFT{uuid.uuid4().hex[:6].upper()}'
     company = Company.objects.create(
@@ -372,6 +373,7 @@ def _finalize_draft(draft: WizardDraft, user):
 
 def _haiku_nkd_suggest(user_description: str) -> list:
     import os
+
     import requests as req
 
     api_key = os.environ.get('ANTHROPIC_API_KEY', '')

@@ -5,9 +5,9 @@ Usage:
     track(user, 'POS', 'CHECKOUT', ref='Bon #42', detail='3 stavke, 25.50 EUR')
 """
 import logging
-from django.db import transaction
+
+from django.db import DatabaseError, IntegrityError, transaction
 from django.utils import timezone
-from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('worktime')
 

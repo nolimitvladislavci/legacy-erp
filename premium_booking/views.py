@@ -2,6 +2,7 @@ import json
 import time
 from datetime import datetime, timedelta
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -15,7 +16,6 @@ from invoicing.models import Invoice, InvoiceItem
 from partners.models import Partner
 
 from .models import Addon, Booking, Resource
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def index(request):

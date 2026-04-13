@@ -3,10 +3,10 @@ DE Fiskalisierung - fiskaly Cloud TSE Provider
 KassenSichV: REST API via fiskaly Middleware
 Base URL: https://kassensichv-middleware.fiskaly.com/api/v2
 """
-import uuid
-import json
 import hashlib
+import json
 import logging
+import uuid
 from datetime import datetime
 
 from ..base import BaseFiscalProvider, FiscalResult

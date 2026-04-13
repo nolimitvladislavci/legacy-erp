@@ -1,10 +1,12 @@
 import logging
-from django.utils.deprecation import MiddlewareMixin
+
 from django.conf import settings
-from core.tenant import set_current_company
-from core.company_utils import get_user_company
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
+from django.utils.deprecation import MiddlewareMixin
+
+from core.company_utils import get_user_company
+from core.tenant import set_current_company
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +193,7 @@ class ForceTCMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        from permissions.route_registry import RouteRegistry, AccessLevel
+        from permissions.route_registry import AccessLevel, RouteRegistry
 
         # Nelogirani → propusti
         if not getattr(request, 'user', None) or not request.user.is_authenticated:
@@ -554,8 +556,11 @@ class GracefulErrorMiddleware:
     def process_exception(self, request, exception):
         """Hvata SVE unhandled exceptions prije nego Django renderira 500."""
         import traceback as tb_module
+
         from django.core.exceptions import (
-            DisallowedHost, SuspiciousOperation, PermissionDenied,
+            DisallowedHost,
+            PermissionDenied,
+            SuspiciousOperation,
         )
         from django.http import Http404
 
@@ -656,8 +661,9 @@ class WhiteLabelMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        from companies.models import WhiteLabelConfig
         from django.core.cache import cache
+
+        from companies.models import WhiteLabelConfig
 
         host = request.META.get('HTTP_HOST', '').split(':')[0].lower()
         cache_key = f'wl_config:{host}'

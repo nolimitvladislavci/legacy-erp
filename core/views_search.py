@@ -6,12 +6,13 @@ AJAX endpoint za header search bar.
 Koristi PostgreSQL trigram similarity za fuzzy matching.
 """
 import logging
+
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.db import DatabaseError
 from django.db.models import Q
+from django.http import JsonResponse
 
 from core.company_utils import get_user_company
-from django.db import DatabaseError
 
 # Enable pg_trgm similarity search
 try:
@@ -211,6 +212,7 @@ def global_search(request):
 def synesis_report(request):
     """Serve the Synesis migration proof report."""
     import os
+
     from django.http import HttpResponse
     report_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),

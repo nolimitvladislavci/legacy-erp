@@ -12,10 +12,10 @@ Cookies format: Netscape cookies.txt
 Putanja: /var/www/fina-connect/media/boxgram/cookies/{platform}.txt
 Kako eksportirati: Chrome addon "Get cookies.txt LOCALLY"
 """
-import uuid
 import logging
-from pathlib import Path
+import uuid
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)

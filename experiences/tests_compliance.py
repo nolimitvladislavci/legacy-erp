@@ -6,11 +6,12 @@ Testira 3 kritična compliance flow-a koji štite od:
 2. Netočnog skidanja zaliha (inspekcija Carine)
 3. Dvostrukog oporezivanja depozita (čl.79 ZPDV)
 """
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
+
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
-from django.contrib.auth.models import User
 
 
 class SplitAllocationTest(TestCase):
@@ -152,7 +153,7 @@ class NoShowStornoTest(TestCase):
         from companies.models import Company
         self.company = Company.objects.create(name='Test OPG', oib='12345678904')
         self.user = User.objects.create_user('testuser2', password='test')
-        from experiences.models import Experience, ExperienceSchedule, ExperienceBooking
+        from experiences.models import Experience, ExperienceBooking, ExperienceSchedule
         self.exp = Experience.objects.create(
             company=self.company, name='Tura', slug='test-tura',
             experience_type='tura', duration_minutes=120,

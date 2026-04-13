@@ -8,9 +8,10 @@ Tasks:
 3. opportunity_digest — weekly summary for umbrella admin
 """
 import logging
+
 from celery import shared_task
+from django.db.models import Count, Sum
 from django.utils import timezone
-from django.db.models import Sum, Count
 
 logger = logging.getLogger('borg.opportunity')
 

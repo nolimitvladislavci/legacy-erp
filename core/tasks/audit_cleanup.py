@@ -10,9 +10,11 @@ Strategija:
 - Pokreće se svaki dan u 03:00 (Celery beat)
 """
 import logging
+from datetime import timedelta
+
 from celery import shared_task
 from django.utils import timezone
-from datetime import timedelta
+
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger('core.audit_cleanup')

@@ -1,8 +1,10 @@
 """Tests for Payments module."""
 from decimal import Decimal
+
 from django.test import TestCase
+
 from companies.models import Company
-from payments.models import PaymentConfig, Payment
+from payments.models import Payment, PaymentConfig
 
 
 class PaymentConfigTest(TestCase):

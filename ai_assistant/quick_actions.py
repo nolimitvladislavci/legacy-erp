@@ -3,6 +3,7 @@ BORG FENIX — AI Assistant Quick Actions + Auto Knowledge (F3.2)
 Pre-built prompts for common actions + auto-generate KnowledgeArticles from patrol data.
 """
 import logging
+
 from celery import shared_task
 from django.utils import timezone
 
@@ -66,7 +67,7 @@ def generate_knowledge_from_patrols():
     Auto-generate KnowledgeArticles from patrol reports.
     Groups patrol findings into actionable articles.
     """
-    from ai_assistant.models import PatrolReport, KnowledgeArticle
+    from ai_assistant.models import KnowledgeArticle, PatrolReport
 
     # Get patrols from last 7 days that haven't been processed
     week_ago = timezone.now() - timezone.timedelta(days=7)
@@ -112,6 +113,7 @@ def generate_knowledge_from_patrols():
 def ai_health_check():
     """Check AI assistant health — API keys, model availability, usage stats."""
     import os
+
     from ai_assistant.models import AIUsageLog, Conversation
 
     health = {

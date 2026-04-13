@@ -2,6 +2,7 @@
 Fiskalizacija async tasks — supplier risk checks.
 """
 import logging
+
 from celery import shared_task
 
 logger = logging.getLogger('fiskalizacija.tasks')

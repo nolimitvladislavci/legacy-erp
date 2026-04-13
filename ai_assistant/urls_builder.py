@@ -1,5 +1,6 @@
 from django.urls import path
-from .builder import builder_page, builder_api, builder_generate, builder_queue
+
+from .builder import builder_api, builder_generate, builder_page, builder_queue
 
 urlpatterns = [
     path('', builder_page, name='ai_builder'),

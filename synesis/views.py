@@ -1,16 +1,17 @@
 import json
 import time
-from django.shortcuts import render, redirect
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse, HttpResponse
-from django.contrib import messages
-from django.utils.translation import gettext as _
-from django.utils import timezone
-from core.company_utils import get_user_company
-from django.core.exceptions import ObjectDoesNotExist
 
+from core.company_utils import get_user_company
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -656,6 +657,7 @@ def synesis_import_api(request):
 def _import_pos(company, data):
     """Process POS receipts data - updates summary stats in SynesisConfig."""
     import datetime
+
     from django.utils import timezone
 
     receipts = data.get("receipts", [])
@@ -774,8 +776,8 @@ def _import_partners(company, data):
 
 
 def _import_items(company, data):
-    from inventory.models import InventoryItem
     from companies.models import TaxRate
+    from inventory.models import InventoryItem
 
     vat_map = {int(tr.rate): tr for tr in TaxRate.objects.all()}
 
@@ -1032,7 +1034,9 @@ def _import_invoices(request, company, data_list):
     """Import faktura iz Synesis MDB (Storage.mdb INVOICES/INVOICEPO tablice)."""
     import hashlib
     from decimal import Decimal, InvalidOperation
+
     from django.utils import timezone
+
     from invoicing.models import Invoice, InvoiceItem
     from partners.models import Partner
 
@@ -1062,7 +1066,7 @@ def _import_invoices(request, company, data_list):
             # Parse datuma
             date_str = str(row.get('TRANDATE', '')).strip()
             if date_str and date_str != 'None':
-                from django.utils.dateparse import parse_datetime, parse_date
+                from django.utils.dateparse import parse_date, parse_datetime
                 date_issued = parse_datetime(date_str) or parse_date(date_str)
                 if not date_issued:
                     # Fallback: Synesis US format MM/DD/YY HH:MM:SS
@@ -1192,7 +1196,7 @@ def _import_invoices(request, company, data_list):
 
             created += 1
 
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             errors += 1
             import traceback
             traceback.print_exc()
@@ -1217,8 +1221,9 @@ def _import_invoices(request, company, data_list):
 
 def _import_employees(company, rows):
     """Import employees from Synesis EMPLOYEES table into EmployeeProfile."""
-    from worktime.models import EmployeeProfile
     from django.contrib.auth import get_user_model
+
+    from worktime.models import EmployeeProfile
     User = get_user_model()
 
     created = updated = errors = 0
@@ -1290,7 +1295,7 @@ def _import_employees(company, rows):
                 )
                 created += 1
 
-        except (ValueError, TypeError) as exc:
+        except (ValueError, TypeError):
             errors += 1
 
     return {'created': created, 'updated': updated, 'errors': errors}
@@ -1300,7 +1305,9 @@ def _import_retail(company, retail_rows, tretail_rows):
     """Import primke (goods receipts) from Synesis RETAIL/TRETAIL tables."""
     from datetime import datetime as _dt
     from decimal import Decimal, InvalidOperation
+
     from django.utils import timezone
+
     from inventory.models import GoodsReceipt, GoodsReceiptItem, InventoryItem
     from partners.models import Partner
 
@@ -1429,7 +1436,7 @@ def _import_retail(company, retail_rows, tretail_rows):
 
             created += 1
 
-        except (ValueError, TypeError) as exc:
+        except (ValueError, TypeError):
             errors += 1
             import traceback
             traceback.print_exc()
@@ -1442,8 +1449,10 @@ def _import_retail(company, retail_rows, tretail_rows):
 # ═══════════════════════════════════════════════════
 import os
 import tempfile
+
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+
 
 @login_required
 def mdb_upload(request):
@@ -1482,6 +1491,7 @@ def mdb_upload(request):
 def mdb_preview(request):
     """Preview MDB contents before import."""
     from core.company_utils import get_user_company
+
     from . import mdb_service
 
     company = get_user_company(request)
@@ -1524,6 +1534,7 @@ def mdb_import_execute(request):
         return JsonResponse({'error': 'POST required'}, status=405)
 
     from core.company_utils import get_user_company
+
     from . import mdb_service
 
     company = get_user_company(request)
@@ -1555,8 +1566,8 @@ def mdb_import_execute(request):
         return JsonResponse({'error': str(e)}, status=500)
 
     # Verification summary
-    from partners.models import Partner
     from inventory.models import InventoryItem
+    from partners.models import Partner
     results['verification'] = {
         'total_partners': Partner.objects.filter(company=company).count(),
         'total_items': InventoryItem.objects.filter(company=company).count(),
@@ -1569,7 +1580,11 @@ SYNESIS_ARHIVA_BASE = '/var/www/fina-connect/synesis/KONJIK_ARHIVA/Synesis'
 SYNESIS_ACTIVE_BASE = '/var/www/fina-connect/synesis/KONJIK'
 
 def _scan_synesis_knjige():
-    import os, subprocess, csv, io, re
+    import csv
+    import io
+    import os
+    import re
+    import subprocess
     def _get_s(mdb):
         try:
             r = subprocess.run(['mdb-export', mdb, 'Settings'], capture_output=True, text=True, timeout=10)
@@ -1610,6 +1625,7 @@ def _scan_synesis_knjige():
 
 
 from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def synesis_knjige(request):

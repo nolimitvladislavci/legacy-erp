@@ -4,11 +4,12 @@ Catches 500 errors, import errors, template errors, missing context, DB errors.
 
 Run: python manage.py test eracun.tests.test_smoke --verbosity=2
 """
-from django.test import TestCase, Client
-from django.contrib.auth.models import User
-from decimal import Decimal
 import datetime
-from django.db import IntegrityError, DatabaseError
+from decimal import Decimal
+
+from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 
 class DataFactory:
@@ -142,7 +143,7 @@ class DataFactory:
 
     @classmethod
     def create_eracun_data(cls, company, user):
-        from eracun.models import ERacunConfig, ERacun, ERacunItem, ERacunTaxSummary
+        from eracun.models import ERacun, ERacunConfig, ERacunItem, ERacunTaxSummary
         config, _ = ERacunConfig.objects.get_or_create(
             company=company,
             defaults={'is_active': True, 'cert_oib': '12345678903', 'use_test_env': True}
@@ -208,7 +209,7 @@ class DataFactory:
     @classmethod
     def create_rental_data(cls, company):
         try:
-            from rental.models import Property, Booking
+            from rental.models import Booking, Property
             prop = Property.objects.create(
                 company=company, name='Soba 101',
                 property_type='room', price_per_night=Decimal('50.00'),

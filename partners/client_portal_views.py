@@ -2,13 +2,13 @@
 Unified Client Portal — single URL for tracking, invoices, helpdesk, payments.
 Token-based auth (no login required).
 """
-from django.shortcuts import render, get_object_or_404, redirect
+from django.db import DatabaseError, IntegrityError
+from django.db.models import Count, Sum
 from django.http import JsonResponse
-from django.db.models import Sum, Count
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from partners.models import Partner
-from django.db import IntegrityError, DatabaseError
 
 
 def _get_partner(token):
@@ -142,7 +142,7 @@ def client_delivery_track(request, token, delivery_id):
     partner = _get_partner(token)
 
     try:
-        from delivery.models import ConsolidatedDelivery, SmartBox, SensorReading
+        from delivery.models import ConsolidatedDelivery, SensorReading, SmartBox
         delivery = get_object_or_404(ConsolidatedDelivery, id=delivery_id)
 
         boxes = SmartBox.objects.filter(current_delivery=delivery)

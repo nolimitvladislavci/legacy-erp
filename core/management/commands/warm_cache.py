@@ -5,8 +5,8 @@ Pokreće se automatski nakon gunicorn restart-a (ExecStartPost).
 Korištenje:
   python manage.py warm_cache
 """
-from django.core.management.base import BaseCommand
 from django.core.cache import cache
+from django.core.management.base import BaseCommand
 from django.db import DatabaseError
 
 

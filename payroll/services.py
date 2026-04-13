@@ -29,13 +29,13 @@ Tri funkcije koje pokrivaju cijeli payroll tok:
    jer su iznosi već finalizirani i proknjiženi.
 """
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
+
 from django.db import transaction
-from django.utils import timezone
 from django.db.models import Sum
+from django.utils import timezone
 
 from payroll.hr_calculator import OSOBNI_ODBITAK_BASE
-
 
 # ── HR Porezni Engine ─────────────────────────────────────────────────────────
 
@@ -108,11 +108,12 @@ def calculate_payslip(payroll_run, user):
     Za HR kompanije: primjenjuje hr_calculate_net().
     Za DE kompanije: neto = bruto (DATEV odrađuje poreze).
     """
-    from worktime.models import TimeEntry, EmployeeProfile
-    from .models import Payslip
-
     import calendar
     import datetime
+
+    from worktime.models import EmployeeProfile, TimeEntry
+
+    from .models import Payslip
 
         # PAYROLL GILJOTINA: Volonteri se NE obracunavaju!
     if hasattr(user, 'employeeprofile') and user.employeeprofile.is_volunteer:
@@ -273,7 +274,7 @@ def book_payroll_to_ledger(payroll_run, user=None):
 
     Idempotentno: ako entry već postoji za ovaj run, preskače.
     """
-    from konto.models import KontoAccount, JournalEntry, LedgerLine, AccountType
+    from konto.models import AccountType, JournalEntry, KontoAccount, LedgerLine
     from konto.services import _next_entry_number
 
     company = payroll_run.company
@@ -290,8 +291,9 @@ def book_payroll_to_ledger(payroll_run, user=None):
         return existing
 
     # Agregiraj doprinose iz payslipova
-    from .models import Payslip
     from django.db.models import Sum
+
+    from .models import Payslip
     agg = Payslip.objects.filter(payroll_run=payroll_run).aggregate(
         tc=Sum('contributions_amount'))
     total_contributions = agg['tc'] or Decimal('0')
@@ -357,8 +359,10 @@ def generate_datev_bewegungsdaten(payroll_run):
 
     Vraća: CSV string (UTF-8-sig za Windows kompatibilnost).
     """
+    import csv
+    import io
+
     from .models import Payslip
-    import csv, io
 
     output = io.StringIO()
     writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
@@ -402,9 +406,11 @@ def generate_pain001_from_run(payroll_run, bank_account):
     Koristi Payslip.net_amount (finalizirani iznos),
     ne TimeEntry agregat (koji je samo bruto).
     """
-    from finance.bank_parsers import Pain001Generator
-    from .models import Payslip
     import datetime
+
+    from finance.bank_parsers import Pain001Generator
+
+    from .models import Payslip
 
     if payroll_run.status not in ('FINALIZED', 'PAID'):
         raise ValueError("Obračun mora biti finaliziran.")

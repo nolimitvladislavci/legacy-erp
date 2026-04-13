@@ -302,6 +302,7 @@ class Invoice(models.Model):
 
     def clean(self):
         from django.core.exceptions import ValidationError
+
         from konto.models import AccountingPeriod
         is_draft = (self.status == 'DRAFT')
 

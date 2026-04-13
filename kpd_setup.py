@@ -4,6 +4,7 @@ i automatski mapira grupe artikala.
 Run: cd /var/www/fina-connect && source venv/bin/activate && python3 kpd_setup.py
 """
 import os
+
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 import django; django.setup()
 
@@ -117,8 +118,9 @@ group_kpd_map = {
     'ROBA': '47.00.10',
 }
 
-from inventory.models import InventoryItem
 from collections import Counter
+
+from inventory.models import InventoryItem
 
 # Get group counts
 descriptions = InventoryItem.objects.values_list('description', flat=True)

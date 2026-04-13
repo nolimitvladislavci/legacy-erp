@@ -1,7 +1,9 @@
 """Tests for Traceability module."""
 from decimal import Decimal
-from django.utils import timezone
+
 from django.test import TestCase
+from django.utils import timezone
+
 from companies.models import Company
 from traceability.models import ProductTrace, TraceEvent
 

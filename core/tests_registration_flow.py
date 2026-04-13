@@ -1,9 +1,9 @@
 """Tests for registration multi-step flow — exercises POST handlers."""
 import uuid
-from django.test import TestCase, Client
-from django.contrib.auth.models import User
-from django.db import IntegrityError, DatabaseError
 
+from django.contrib.auth.models import User
+from django.db import DatabaseError, IntegrityError
+from django.test import Client, TestCase
 
 ALLOWED = [200, 301, 302, 400, 403, 404, 405, 500]
 
@@ -172,8 +172,8 @@ class RegistrationAdminActionsTest(TestCase):
     """Test registration admin actions with real registration objects."""
 
     def setUp(self):
-        from companies.models import Company
         from accounts.models import UserProfile
+        from companies.models import Company
         self.admin_company = Company.objects.create(name='Admin Co', oib='55555555550')
         self.admin = User.objects.create_superuser('rf_super1', password='pass123', email='rf_super@test.hr')
         try:

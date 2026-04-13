@@ -1,8 +1,17 @@
 from django.contrib import admin
+
 from .models import (
-    Author, Category, Book, BookCopy, MembershipType,
-    LibraryMember, Loan, Reservation, ImportBatch,
-    DigitalAsset, DigitalLoan,
+    Author,
+    Book,
+    BookCopy,
+    Category,
+    DigitalAsset,
+    DigitalLoan,
+    ImportBatch,
+    LibraryMember,
+    Loan,
+    MembershipType,
+    Reservation,
 )
 
 
@@ -80,6 +89,7 @@ class DigitalLoanAdmin(admin.ModelAdmin):
 
 
 from .models import ReaderProfile
+
 
 @admin.register(ReaderProfile)
 class ReaderProfileAdmin(admin.ModelAdmin):
