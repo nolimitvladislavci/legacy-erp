@@ -93,10 +93,13 @@ def trikey_login(request):
         from django.contrib.auth.models import User
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email__iexact=email)
         except User.DoesNotExist:
-            messages.error(request, _("Neispravan email ili PIN."))
-            return render(request, "accounts/trikey_login.html")
+            try:
+                user = User.objects.get(username__iexact=email)
+            except User.DoesNotExist:
+                messages.error(request, _("Neispravan email ili PIN."))
+                return render(request, "accounts/trikey_login.html")
 
         # Get or create TriKey profile
         trikey, _created = TriKeyProfile.objects.get_or_create(user=user)

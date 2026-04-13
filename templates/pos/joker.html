@@ -1038,7 +1038,7 @@ window.addItemToBasket = function(data) {
 };
 </script>
 {% include "inventory/includes/_smart_create_modal.html" %}
-{% include "includes/_share_modal.html" %}
+{# _share_modal removed from POS — receipt sharing uses own flow #}
 <script>
 function shareLastReceipt() {
   var rid = window.lastReceiptId;
@@ -1643,7 +1643,7 @@ function togglePayExpand() {
 
 </script>
 
-{% include "pos/includes/compliance_monitor.html" %}
+{# compliance_monitor removed — accessible via hamburger only #}
 {% endif %}{# end session check #}
 
 </script>
