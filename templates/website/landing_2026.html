@@ -188,5 +188,14 @@
 </footer>
 
 </main>
+
+<div id="cb" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:#1a1a2e;border-top:2px solid #c9a84c;color:#f8f6f0;padding:14px 24px;font-size:.82rem;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<span>{% trans "Koristimo kolačiće za funkcioniranje stranice." %} <a href="/privacy/" style="color:#c9a84c;text-decoration:underline">{% trans "Pravila privatnosti" %}</a></span>
+<div style="display:flex;gap:8px">
+<button onclick="document.getElementById('cb').style.display='none';localStorage.setItem('lc-ck',JSON.stringify({l:'all',t:Date.now()}))" style="background:#c9a84c;color:#000;border:none;padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer">{% trans "Prihvati sve" %}</button>
+<button onclick="document.getElementById('cb').style.display='none';localStorage.setItem('lc-ck',JSON.stringify({l:'nec',t:Date.now()}))" style="background:transparent;color:#f8f6f0;border:1px solid #444;padding:8px 16px;border-radius:6px;cursor:pointer">{% trans "Samo nužni" %}</button>
+</div></div>
+<script>if(!localStorage.getItem('lc-ck'))document.getElementById('cb').style.display='flex'</script>
+
 </body>
 </html>

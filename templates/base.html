@@ -632,5 +632,47 @@ function closeShellRight()  { FenixShell.closeRight(); }
 function toggleShellRight() { FenixShell.toggleRight(); }
 </script>
 
+
+<!-- ═══ GDPR Cookie Consent Banner ═══ -->
+<div id="cookie-consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:var(--card-bg,#1a1a2e);border-top:2px solid var(--gold,#c9a84c);padding:1rem 1.5rem;font-size:.9rem;color:var(--text,#e0e0e0);box-shadow:0 -4px 20px rgba(0,0,0,.3)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:1rem">
+    <div style="flex:1;min-width:280px">
+      <strong>{% trans "Kolačići" %}</strong>
+      <p style="margin:.3rem 0 0;opacity:.85;font-size:.85rem">
+        {% trans "Koristimo kolačiće za funkcioniranje stranice i analitiku. Marketinške kolačiće koristimo samo uz vaš pristanak." %}
+        <a href="/privacy/" style="color:var(--gold,#c9a84c);text-decoration:underline">{% trans "Pravila privatnosti" %}</a>
+      </p>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button onclick="cookieConsent('all')" style="padding:.5rem 1.2rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.85rem">{% trans "Prihvati sve" %}</button>
+      <button onclick="cookieConsent('necessary')" style="padding:.5rem 1.2rem;background:transparent;color:var(--text,#e0e0e0);border:1px solid var(--border,#333);border-radius:6px;cursor:pointer;font-size:.85rem">{% trans "Samo nužni" %}</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var CONSENT_KEY = 'lc_cookie_consent';
+  var stored = localStorage.getItem(CONSENT_KEY);
+  if (!stored) {
+    document.getElementById('cookie-consent').style.display = 'block';
+  }
+  window.cookieConsent = function(level) {
+    var consent = {level: level, ts: new Date().toISOString(), v: 1};
+    localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+    document.getElementById('cookie-consent').style.display = 'none';
+    if (level === 'necessary') {
+      // Disable analytics cookies
+      window['ga-disable-GA_MEASUREMENT_ID'] = true;
+      document.cookie.split(';').forEach(function(c) {
+        var name = c.split('=')[0].trim();
+        if (name.startsWith('_ga') || name.startsWith('_gid')) {
+          document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+        }
+      });
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
