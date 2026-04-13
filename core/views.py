@@ -1238,7 +1238,7 @@ def company_dashboard(request):
     try:
         from pos.models import POSReceipt
 
-        pos_qs = POSReceipt.objects.unscoped()
+        pos_qs = POSReceipt.objects.all()
         pos_qs.filter(created_at__date=today).aggregate(s=Sum("total_amount"))["s"] or 0
         pos_qs.filter(created_at__date=today).count()
     except DatabaseError:

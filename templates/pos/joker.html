@@ -396,7 +396,7 @@
         {% if cashiers %}
           {% for c in cashiers %}
           <button class="cashier-btn" id="cb-{{ c.id }}"
-                  data-id="{{ c.id }}" data-name="{{ c.name|escapejs }}"
+                  data-id="{{ c.id }}" data-name="{{ c.name|escapejs }}" data-oib="{{ c.oib }}"
                   data-has-pin="{% if c.pin_hash %}1{% else %}0{% endif %}"
                   onclick="onCashierClick(this)"
                   title="{% if c.pin_hash %}PIN zaštićen{% else %}Bez PIN-a{% endif %}">
