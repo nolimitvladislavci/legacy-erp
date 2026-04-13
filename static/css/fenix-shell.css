@@ -877,3 +877,28 @@ body.joker-active .shell-right { display: none !important; }
         transition: margin-right 0.3s ease;
     }
 }
+
+/* ── Mobile: sidebar hidden by default, opens via hamburger ────── */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed !important;
+        left: -280px !important;
+        top: 0; bottom: 0;
+        z-index: 10000;
+        width: 260px !important;
+        transition: left 0.3s ease;
+    }
+    .sidebar.open {
+        left: 0 !important;
+    }
+    .sidebar-overlay.show {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+    }
+    .main {
+        margin-left: 0 !important;
+    }
+}
