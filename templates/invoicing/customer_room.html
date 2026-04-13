@@ -1,0 +1,701 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponuda {{ inv.number }} — {{ inv.company.name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root {
+    --navy: #1a1a2e;
+    --navy-light: #252547;
+    --gold: #c9a84c;
+    --gold-light: #e8d48b;
+    --gold-border: rgba(201,168,76,.25);
+    --bg: #0f0f1a;
+    --card-bg: rgba(30,30,50,.85);
+    --text: #f0ede6;
+    --text-muted: #8a8a9a;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Header s logom firme */
+  .header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .company-logo {
+    width: 60px; height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+  }
+  .company-name { font-size: 1.4rem; font-weight: 800; color: var(--gold); }
+  .company-info { font-size: .78rem; color: var(--text-muted); }
+  .quote-badge {
+    background: var(--navy-light);
+    border: 1px solid var(--gold-border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    text-align: right;
+  }
+  .quote-number { font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+  .quote-date { font-size: .78rem; color: var(--text-muted); }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
+
+  /* Status bar */
+  .status-bar {
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .status-draft { background: rgba(107,114,128,.2); border: 1px solid rgba(107,114,128,.3); }
+  .status-sent, .status-viewed { background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3); color: #60a5fa; }
+  .status-accepted { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); color: var(--success); }
+  .status-rejected { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: var(--danger); }
+  .status-expired { background: rgba(156,163,175,.15); border: 1px solid rgba(156,163,175,.3); color: #9ca3af; }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: rgba(201,168,76,.08);
+    border-bottom: 1px solid var(--gold-border);
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-body { padding: 16px 18px; }
+
+  /* Parties */
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 600px) { .parties { grid-template-columns: 1fr; } }
+  .party-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+  }
+  .party-label { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); font-weight: 700; margin-bottom: 6px; }
+  .party-name { font-weight: 700; font-size: 1rem; }
+  .party-detail { font-size: .82rem; color: var(--text-muted); line-height: 1.7; }
+
+  /* Tables */
+  .tbl { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .tbl th {
+    background: rgba(201,168,76,.12);
+    color: var(--gold);
+    font-weight: 600;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 8px 10px;
+    text-align: left;
+  }
+  .tbl td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.04); }
+  .tbl tr:hover { background: rgba(201,168,76,.04); }
+  .tbl .right { text-align: right; }
+  .tbl .section-row td {
+    background: rgba(201,168,76,.08);
+    font-weight: 700;
+    color: var(--gold);
+    font-size: .82rem;
+    padding: 6px 10px;
+  }
+  .tbl .subtotal td {
+    background: rgba(201,168,76,.12);
+    font-weight: 700;
+    border-top: 2px solid var(--gold-border);
+  }
+  .tbl .grand-total td {
+    background: var(--gold) !important;
+    color: #000;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 12px 10px;
+  }
+
+  /* Financial summary */
+  .fin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .fin-grid { grid-template-columns: 1fr; } }
+  .fin-card {
+    background: rgba(201,168,76,.06);
+    border: 1px solid var(--gold-border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .fin-label { font-size: .72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+  .fin-value { font-size: 1.3rem; font-weight: 800; color: var(--gold); margin-top: 2px; }
+  .fin-card.total {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--gold), #dbb960);
+    border-color: var(--gold);
+  }
+  .fin-card.total .fin-label { color: rgba(0,0,0,.6); }
+  .fin-card.total .fin-value { color: #000; font-size: 1.6rem; }
+
+  /* Warranty */
+  .warranty {
+    background: rgba(34,197,94,.08);
+    border: 1px solid rgba(34,197,94,.2);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    white-space: pre-line;
+    font-size: .88rem;
+    line-height: 1.8;
+  }
+  .warranty strong { color: var(--success); }
+
+  /* Payment terms */
+  .terms { font-size: .88rem; line-height: 1.8; white-space: pre-line; }
+
+  /* Signature area */
+  .sig-section { margin-top: 24px; }
+  .sig-canvas-wrap {
+    border: 2px dashed var(--gold-border);
+    border-radius: var(--radius);
+    background: rgba(255,255,255,.02);
+    cursor: crosshair;
+    margin: 10px 0;
+  }
+  .sig-canvas { display: block; width: 100%; height: 150px; touch-action: none; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: .9rem;
+    border: none;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-danger { background: rgba(239,68,68,.2); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+  .btn-danger:hover { background: rgba(239,68,68,.3); }
+  .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid rgba(255,255,255,.1); }
+  .btn-outline:hover { border-color: var(--gold-border); color: var(--gold); }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  .input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: .9rem;
+    font-family: inherit;
+  }
+  .input:focus { outline: none; border-color: var(--gold); }
+  .label { font-size: .82rem; color: var(--text-muted); margin-bottom: 4px; display: block; }
+  .mb-2 { margin-bottom: 10px; }
+  .mb-3 { margin-bottom: 16px; }
+
+  /* Accepted signature display */
+  .signed-banner {
+    background: rgba(34,197,94,.1);
+    border: 2px solid var(--success);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .signed-banner img { max-height: 60px; margin: 10px 0; }
+  .signed-banner .badge { display: inline-block; background: var(--success); color: #fff; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: .85rem; }
+
+  /* Rejected banner */
+  .rejected-banner {
+    background: rgba(239,68,68,.1);
+    border: 2px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  /* Rejection modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--navy);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+  }
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--danger); margin-bottom: 12px; }
+
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: .75rem;
+    color: var(--text-muted);
+    border-top: 1px solid rgba(255,255,255,.04);
+    margin-top: 30px;
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    .card { border: 1px solid #ddd; background: #fff; }
+    .card-header { background: #f0f0f0; color: #333; }
+    .tbl th { background: #f0f0f0; color: #333; }
+    .sig-section, .btn, .footer { display: none; }
+    .header { background: #fff; border-color: #c9a84c; }
+    .company-name { color: #333; }
+    .fin-card.total { background: #f0f0f0; }
+    .fin-card.total .fin-value { color: #333; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<div class="header">
+  <div class="header-left">
+    {% if quote.company.logo %}
+    <img src="/media/{{ inv.company.logo }}" alt="{{ inv.company.name }}" class="company-logo">
+    {% endif %}
+    <div>
+      <div class="company-name">{{ inv.company.name }}</div>
+      <div class="company-info">
+        {{ inv.company.address }}{% if quote.company.city %}, {{ inv.company.city }}{% endif %}<br>
+        {% if quote.company.oib %}OIB/St.Nr.: {{ inv.company.oib }}{% endif %}
+        {% if quote.company.phone %} &bull; {{ inv.company.phone }}{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="quote-badge">
+    <div class="quote-number">{{ inv.number }}</div>
+    <div class="quote-date">{{ inv.created_at|date:"d.m.Y." }}</div>
+    <div class="quote-date">Vrijedi do: {{ inv.created_at|date:"d.m.Y." }}</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ─── STATUS ─── -->
+  <div class="status-bar status-{{ inv.status }}">
+    {% if inv.status == 'draft' %}<i class="fas fa-pen"></i> Nacrt ponude
+    {% elif inv.status == 'sent' %}<i class="fas fa-paper-plane"></i> Ponuda poslana — čeka vaš odgovor
+    {% elif inv.status == 'viewed' %}<i class="fas fa-eye"></i> Ponuda pregledana — čeka vaš odgovor
+    {% elif inv.status == 'accepted' %}<i class="fas fa-check-circle"></i> Ponuda prihvaćena
+    {% elif inv.status == 'rejected' %}<i class="fas fa-times-circle"></i> Ponuda odbijena
+    {% elif inv.status == 'expired' %}<i class="fas fa-clock"></i> Ponuda istekla
+    {% endif %}
+  </div>
+
+  <!-- ─── ACCEPTED BANNER ─── -->
+  {% if inv.status == 'accepted' and quote.client_signature %}
+  <div class="signed-banner">
+    <span class="badge"><i class="fas fa-check"></i> PRIHVAĆENA</span>
+    <div style="margin-top:10px">
+      <strong>{{ inv.signed_by_name }}</strong><br>
+      <span style="font-size:.82rem;color:var(--text-muted)">{{ inv.signed_at|date:"d.m.Y. H:i" }}</span>
+    </div>
+    <img src="{{ inv.client_signature }}" alt="Potpis">
+  </div>
+  {% endif %}
+
+  <!-- ─── REJECTED BANNER ─── -->
+  {% if inv.status == 'rejected' %}
+  <div class="rejected-banner">
+    <i class="fas fa-times-circle" style="font-size:2rem;color:var(--danger)"></i>
+    <div style="margin-top:8px;font-weight:700;color:var(--danger)">PONUDA ODBIJENA</div>
+    {% if quote.rejection_reason %}
+    <div style="margin-top:6px;font-size:.88rem;color:var(--text-muted)">Razlog: {{ inv.rejection_reason }}</div>
+    {% endif %}
+    <div style="font-size:.82rem;color:var(--text-muted);margin-top:4px">{{ inv.rejected_at|date:"d.m.Y. H:i" }}</div>
+  </div>
+  {% endif %}
+
+  <!-- ─── STRANKE ─── -->
+  <div class="parties">
+    <div class="party-card">
+      <div class="party-label"><i class="fas fa-building"></i> Izvođač</div>
+      <div class="party-name">{{ inv.company.name }}</div>
+      <div class="party-detail">
+        {{ inv.company.address }}{% if quote.company.city %}, {{ inv.company.city }}{% endif %}<br>
+        {% if quote.company.oib %}OIB/St.Nr.: {{ inv.company.oib }}<br>{% endif %}
+        {% if quote.company.iban %}IBAN: {{ inv.company.iban }}<br>{% endif %}
+        {% if quote.company.email %}{{ inv.company.email }}{% endif %}
+      </div>
+    </div>
+    <div class="party-card">
+      <div class="party-label"><i class="fas fa-user"></i> Naručitelj</div>
+      <div class="party-name">{{ inv.client_name }}</div>
+      <div class="party-detail">
+        {% if quote.client_address %}{{ inv.client_address }}<br>{% endif %}
+        {% if quote.client_oib %}OIB: {{ inv.client_oib }}<br>{% endif %}
+        {% if quote.client_contact %}Kontakt: {{ inv.client_contact }}<br>{% endif %}
+        {% if quote.client_phone %}Tel: {{ inv.client_phone }}{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROJEKT ─── -->
+  {% if quote.project_name or quote.project_address %}
+  <div class="card mb-3">
+    <div class="card-header"><i class="fas fa-map-marker-alt"></i> Objekt</div>
+    <div class="card-body">
+      {% if quote.project_name %}<strong>{{ inv.project_name }}</strong><br>{% endif %}
+      {% if quote.project_address %}{{ inv.project_address }}{% endif %}
+      {% if quote.execution_days %}<br>Rok izvedbe: <strong>{{ inv.execution_days }}</strong>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ─── RADOVI ─── -->
+  <div class="card mb-3">
+    <div class="card-header"><i class="fas fa-hard-hat"></i> Specifikacija radova</div>
+    <div class="card-body" style="padding:0">
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width:5%">Rb.</th>
+              <th style="width:40%">Opis</th>
+              <th style="width:10%">Jed.</th>
+              <th class="right" style="width:10%">Kol.</th>
+              <th class="right" style="width:15%">Cijena/jed.</th>
+              <th class="right" style="width:15%">Ukupno</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ws in work_sections %}
+            <tr class="section-row"><td colspan="6">{{ ws.section }}</td></tr>
+            {% for item in ws.items %}
+            <tr>
+              <td>{{ item.position }}.</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.get_unit_display }}</td>
+              <td class="right">{{ item.quantity|floatformat:0 }}</td>
+              <td class="right">{{ item.unit_price|floatformat:2 }} {{ inv.currency }}</td>
+              <td class="right" style="font-weight:600">{{ item.total_price|floatformat:2 }} {{ inv.currency }}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            {% for item in work_nosection %}
+            <tr>
+              <td>{{ item.position }}.</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.get_unit_display }}</td>
+              <td class="right">{{ item.quantity|floatformat:0 }}</td>
+              <td class="right">{{ item.unit_price|floatformat:2 }} {{ inv.currency }}</td>
+              <td class="right" style="font-weight:600">{{ item.total_price|floatformat:2 }} {{ inv.currency }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="subtotal">
+              <td colspan="5" class="right">UKUPNO RADOVI:</td>
+              <td class="right">{{ work_total|floatformat:2 }} {{ inv.currency }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MATERIJAL ─── -->
+  {% if material_sections or material_nosection %}
+  <div class="card mb-3">
+    <div class="card-header"><i class="fas fa-boxes"></i> Popis materijala</div>
+    <div class="card-body" style="padding:0">
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width:5%">Rb.</th>
+              <th style="width:40%">Materijal</th>
+              <th style="width:10%">Jed.</th>
+              <th class="right" style="width:10%">Kol.</th>
+              <th class="right" style="width:15%">Cijena/jed.</th>
+              <th class="right" style="width:15%">Ukupno</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ms in material_sections %}
+            <tr class="section-row"><td colspan="6">{{ ms.section }}</td></tr>
+            {% for item in ms.items %}
+            <tr>
+              <td>{{ item.position }}.</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.get_unit_display }}</td>
+              <td class="right">{{ item.quantity|floatformat:0 }}</td>
+              <td class="right">{{ item.unit_price|floatformat:2 }} {{ inv.currency }}</td>
+              <td class="right" style="font-weight:600">{{ item.total_price|floatformat:2 }} {{ inv.currency }}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            {% for item in material_nosection %}
+            <tr>
+              <td>{{ item.position }}.</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.get_unit_display }}</td>
+              <td class="right">{{ item.quantity|floatformat:0 }}</td>
+              <td class="right">{{ item.unit_price|floatformat:2 }} {{ inv.currency }}</td>
+              <td class="right" style="font-weight:600">{{ item.total_price|floatformat:2 }} {{ inv.currency }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="subtotal">
+              <td colspan="5" class="right">UKUPNO MATERIJAL:</td>
+              <td class="right">{{ material_total|floatformat:2 }} {{ inv.currency }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ─── FINANCIJE ─── -->
+  <div class="fin-grid mb-3">
+    <div class="fin-card">
+      <div class="fin-label">Radovi (neto)</div>
+      <div class="fin-value">{{ work_total|floatformat:2 }} {{ inv.currency }}</div>
+    </div>
+    <div class="fin-card">
+      <div class="fin-label">Materijal (neto)</div>
+      <div class="fin-value">{{ material_total|floatformat:2 }} {{ inv.currency }}</div>
+    </div>
+    <div class="fin-card">
+      <div class="fin-label">Osnovica (neto)</div>
+      <div class="fin-value">{{ inv.total_net|floatformat:2 }} {{ inv.currency }}</div>
+    </div>
+    <div class="fin-card">
+      <div class="fin-label">PDV ({{ inv.vat_rate }}%)</div>
+      <div class="fin-value">{{ inv.total_vat|floatformat:2 }} {{ inv.currency }}</div>
+    </div>
+    <div class="fin-card total">
+      <div class="fin-label">SVEUKUPNO S PDV-om</div>
+      <div class="fin-value">{{ inv.total_gross|floatformat:2 }} {{ inv.currency }}</div>
+    </div>
+  </div>
+
+  <!-- ─── GARANCIJA ─── -->
+  {% if quote.warranty_text %}
+  <div class="card mb-3">
+    <div class="card-header"><i class="fas fa-shield-alt" style="color:var(--success)"></i> Garancija</div>
+    <div class="card-body">
+      <div class="warranty">{{ inv.warranty_text }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ─── UVJETI PLAĆANJA ─── -->
+  {% if quote.payment_terms %}
+  <div class="card mb-3">
+    <div class="card-header"><i class="fas fa-credit-card"></i> Uvjeti plaćanja</div>
+    <div class="card-body">
+      <div class="terms">{{ inv.payment_terms }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ─── NAPOMENE ─── -->
+  {% if quote.notes %}
+  <div class="card mb-3">
+    <div class="card-header"><i class="fas fa-info-circle"></i> Napomene</div>
+    <div class="card-body" style="font-size:.88rem;white-space:pre-line">{{ inv.note }}</div>
+  </div>
+  {% endif %}
+
+  <!-- ─── POTPIS / AKCIJE ─── -->
+  {% if is_signable and not is_expired %}
+  <div class="card sig-section">
+    <div class="card-header"><i class="fas fa-signature"></i> Vaša odluka</div>
+    <div class="card-body">
+      <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:16px">
+        Pregledajte ponudu i donesete odluku. Potpisom prihvaćate uvjete navedene u ponudi.
+      </p>
+
+      <div class="mb-2">
+        <label class="label">Ime i prezime potpisnika</label>
+        <input type="text" id="sigName" class="input" placeholder="npr. Ivan Kolarić">
+      </div>
+
+      <div class="mb-2">
+        <label class="label">Potpis (nacrtajte prstom ili mišem)</label>
+        <div class="sig-canvas-wrap">
+          <canvas id="sigCanvas" class="sig-canvas"></canvas>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-gold" onclick="submitAccept()">
+          <i class="fas fa-check"></i> Prihvaćam ponudu
+        </button>
+        <button class="btn btn-outline" onclick="clearSig()">
+          <i class="fas fa-eraser"></i> Obriši potpis
+        </button>
+        <button class="btn btn-danger" onclick="showRejectModal()">
+          <i class="fas fa-times"></i> Odbij ponudu
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Rejection modal -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal-box">
+    <div class="modal-title"><i class="fas fa-exclamation-triangle"></i> Odbijanje ponude</div>
+    <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:12px">
+      Jeste li sigurni? Možete navesti razlog odbijanja (opcionalno).
+    </p>
+    <div class="mb-3">
+      <label class="label">Razlog odbijanja</label>
+      <textarea id="rejectReason" class="input" rows="3" placeholder="npr. Previsoka cijena, pronašli smo drugu ponudu..."></textarea>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-danger" onclick="submitReject()">
+        <i class="fas fa-times"></i> Potvrdi odbijanje
+      </button>
+      <button class="btn btn-outline" onclick="hideRejectModal()">
+        Odustani
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Ponuda {{ inv.number }} &bull; {{ inv.company.name }} &bull;
+  Generirano putem <strong>LIMIT Connect</strong><br>
+  Pregledano {{ inv.view_count }}× &bull; Dokument je pravno valjan nakon digitalnog potpisa.
+</div>
+
+<script>
+// ─── SIGNATURE CANVAS ───
+var canvas = document.getElementById('sigCanvas');
+if (canvas) {
+  var ctx = canvas.getContext('2d');
+  var drawing = false;
+
+  function resizeCanvas() {
+    var wrap = canvas.parentElement;
+    canvas.width = wrap.clientWidth;
+    canvas.height = 150;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var x, y;
+    if (e.touches) { x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; }
+    else { x = e.clientX - rect.left; y = e.clientY - rect.top; }
+    x = x * canvas.width / rect.width;
+    y = y * canvas.height / rect.height;
+    return {x: x, y: y};
+  }
+
+  canvas.addEventListener('mousedown', function(e) { drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2; ctx.stroke(); });
+  canvas.addEventListener('mouseup', function() { drawing = false; });
+  canvas.addEventListener('mouseleave', function() { drawing = false; });
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; ctx.beginPath(); var p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive:false});
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2; ctx.stroke(); }, {passive:false});
+  canvas.addEventListener('touchend', function() { drawing = false; });
+}
+
+function clearSig() {
+  if (canvas) { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+}
+
+function isCanvasBlank() {
+  var blank = document.createElement('canvas');
+  blank.width = canvas.width;
+  blank.height = canvas.height;
+  return canvas.toDataURL() === blank.toDataURL();
+}
+
+// ─── SUBMIT ACCEPT ───
+function submitAccept() {
+  var name = document.getElementById('sigName').value.trim();
+  if (!name) { alert('Molimo unesite ime i prezime potpisnika.'); return; }
+  if (isCanvasBlank()) { alert('Molimo nacrtajte potpis.'); return; }
+
+  var dataUrl = canvas.toDataURL('image/png');
+
+  fetch('/ponuda/{{ inv.public_token }}/prihvati/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name: name, signature: dataUrl})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) { location.reload(); }
+    else { alert(d.error || 'Greška prilikom prihvaćanja.'); }
+  })
+  .catch(function() { alert('Greška u komunikaciji.'); });
+}
+
+// ─── REJECT ───
+function showRejectModal() { document.getElementById('rejectModal').classList.add('show'); }
+function hideRejectModal() { document.getElementById('rejectModal').classList.remove('show'); }
+
+function submitReject() {
+  var reason = document.getElementById('rejectReason').value.trim();
+
+  fetch('/ponuda/{{ inv.public_token }}/odbij/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({reason: reason})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) { location.reload(); }
+    else { alert(d.error || 'Greška prilikom odbijanja.'); }
+  })
+  .catch(function() { alert('Greška u komunikaciji.'); });
+}
+</script>
+
+</body>
+</html>

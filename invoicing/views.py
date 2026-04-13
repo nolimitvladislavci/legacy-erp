@@ -1211,6 +1211,16 @@ def _notify_quote_action(invoice, action: str):
 # ── CLIENT PORTAL (no login) ──────────────────────────────────────────────────
 def client_portal(request, token):
     invoice = get_object_or_404(Invoice, client_token=token)
+
+    # Track views
+    invoice.view_count += 1
+    if not invoice.first_viewed_at:
+        invoice.first_viewed_at = timezone.now()
+    update_fields = ["view_count", "first_viewed_at"]
+    if invoice.status == "SENT" and not invoice.first_viewed_at:
+        pass  # Keep SENT — already viewed tracking via first_viewed_at
+    invoice.save(update_fields=update_fields)
+
     if request.method == "POST" and invoice.status in ("DRAFT", "SENT", "ACCEPTED", "REJECTED"):
         action = request.POST.get("action")
         if action == "accept":

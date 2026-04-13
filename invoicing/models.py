@@ -314,6 +314,29 @@ class Invoice(models.Model):
     # PDF datoteka
     pdf_file = models.FileField(upload_to="invoices/pdf/%Y/%m/", blank=True, verbose_name=_("PDF datoteka"))
 
+    # ── Ponuda: kupčeva soba (QR pristup, potpis, garancija) ─────────
+    client_signature = models.TextField(
+        blank=True,
+        verbose_name=_("Potpis klijenta"),
+        help_text="Base64 PNG potpis iz canvas-a",
+    )
+    signed_by_name = models.CharField(max_length=100, blank=True, verbose_name=_("Potpisao"))
+    signed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Datum potpisa"))
+    rejection_reason = models.TextField(blank=True, verbose_name=_("Razlog odbijanja"))
+    rejected_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Datum odbijanja"))
+    view_count = models.PositiveIntegerField(default=0, verbose_name=_("Broj pregleda"))
+    first_viewed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Prvo pogledano"))
+    project_address = models.CharField(max_length=300, blank=True, verbose_name=_("Adresa objekta"))
+    execution_days = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name=_("Rok izvedbe"),
+        help_text="npr. '2 kalendarska mjeseca'",
+    )
+    advance_pct = models.SmallIntegerField(default=30, verbose_name=_("Avans (%)"))
+    warranty_text = models.TextField(blank=True, verbose_name=_("Garancija"))
+    payment_terms_text = models.TextField(blank=True, verbose_name=_("Uvjeti plaćanja (tekst)"))
+
     # Meta
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="created_invoices"
@@ -403,6 +426,15 @@ class Invoice(models.Model):
                 "fiscal_datetime",
                 "operator_oib",
                 "issuer_phone",
+                # Ponuda polja — kupac ih mijenja kroz customer room
+                "client_signature",
+                "signed_by_name",
+                "signed_at",
+                "rejection_reason",
+                "rejected_at",
+                "view_count",
+                "first_viewed_at",
+                "status",
             }
             if self.is_locked and _uf is not None and not set(_uf).issubset(_safe_fields):
                 raise PermissionDenied(
@@ -479,6 +511,15 @@ class Invoice(models.Model):
         """Uvijek vrati SWIFT izdavatelja (issuer_swift > swift > prazan string)."""
         return self.issuer_swift or self.swift or ""
 
+    @property
+    def advance_amount(self):
+        from decimal import Decimal
+
+        return round(self.total * Decimal(self.advance_pct) / Decimal("100"), 2)
+
+    def get_customer_room_url(self):
+        return f"/ponuda/{self.client_token}/"
+
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name="items", verbose_name=_("Račun"))
@@ -510,6 +551,18 @@ class InvoiceItem(models.Model):
         help_text=_("Opcionalano grupiranje stavki na računu"),
     )
     sort_order = models.PositiveIntegerField(default=0, verbose_name=_("Redoslijed"))
+
+    # Tip stavke (rad / materijal) — za ponude s odvojenim popisom
+    ITEM_TYPE_CHOICES = [
+        ("work", _("Rad")),
+        ("material", _("Materijal")),
+    ]
+    item_type = models.CharField(
+        max_length=10,
+        choices=ITEM_TYPE_CHOICES,
+        default="work",
+        verbose_name=_("Tip stavke"),
+    )
 
     # Veza na InventoryItem (opcionalno - za praćenje zaliha)
     inventory_item = models.ForeignKey(
@@ -566,6 +619,9 @@ class InvoiceEvent(models.Model):
         ("status_change", "Promjena statusa"),
         ("edited", "Izmjena podataka"),
         ("note", "Biljeska"),
+        ("client_viewed", "Kupac pregledao ponudu"),
+        ("client_accepted", "Kupac prihvatio ponudu"),
+        ("client_rejected", "Kupac odbio ponudu"),
     ]
     invoice = models.ForeignKey(
         "Invoice",
