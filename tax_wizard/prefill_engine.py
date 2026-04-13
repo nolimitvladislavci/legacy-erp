@@ -32,6 +32,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from django.db.models import Sum, Q, F
 from django.db.models.functions import ExtractQuarter, ExtractYear
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -337,7 +338,7 @@ class PrefillEngine:
         prev_engine = PrefillEngine(self.company, self.year - 1)
         try:
             prev_breakdown = prev_engine.aggregate()
-        except Exception:
+        except DatabaseError:
             return {'available': False, 'reason': 'Nema podataka za prošlu godinu.'}
 
         if prev_breakdown.total == ZERO:
@@ -399,7 +400,7 @@ class PrefillEngine:
                 Q(employee_profile__company=company)
                 | Q(created_invoices__company=company)
             ).first()
-        except Exception:
+        except DatabaseError:
             pass
 
         return {

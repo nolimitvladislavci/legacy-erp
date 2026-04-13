@@ -25,6 +25,7 @@ from core.company_utils import get_user_company
 
 from .adapters.base import detect_adapter, get_adapter, get_all_adapters
 from .models import MigrationFile, MigrationLog, MigrationProject
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +216,7 @@ def upload_view(request):
                 "error": str(e),
                 "disclaimer_text": DISCLAIMER_TEXT,
             })
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.exception("Greska pri parsiranju datoteke: %s", e)
             project.delete()
             return render(request, "data_migration/upload.html", {

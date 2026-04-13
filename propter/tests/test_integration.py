@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.test import TestCase, override_settings, Client
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -93,7 +94,7 @@ class TestPropterViews(TestCase):
             profile = self.user.profile
             profile.company = self.company
             profile.save()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         self.client = Client()

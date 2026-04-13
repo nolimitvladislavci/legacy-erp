@@ -24,6 +24,8 @@ import traceback
 import sys
 import time
 from datetime import date, timedelta
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 User = get_user_model()
 
@@ -158,7 +160,7 @@ class Command(BaseCommand):
                         r.done()
                         results.append(r.to_dict())
                         raise Exception("__ROLLBACK__")  # Uvijek rollback
-                except Exception as e:
+                except (IntegrityError, DatabaseError) as e:
                     if "__ROLLBACK__" not in str(e):
                         r = SimResult(module)
                         r.error(f"Neočekivana greška u modulu", e)
@@ -190,12 +192,12 @@ class Command(BaseCommand):
 
         try:
             company = Company.objects.get(pk=company_id) if company_id else Company.objects.first()
-        except Exception:
+        except ObjectDoesNotExist:
             company = None
 
         try:
             user = User.objects.get(pk=user_id) if user_id else User.objects.filter(is_superuser=True).first()
-        except Exception:
+        except ObjectDoesNotExist:
             user = None
 
         return company, user
@@ -256,7 +258,7 @@ class Command(BaseCommand):
             c = Company.objects.filter(pk=company.pk).first()
             assert c is not None
             r.success(f"Company dohvat OK: {c.name}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Company dohvat greška", e)
 
         return r
@@ -282,7 +284,7 @@ class Command(BaseCommand):
                 partner = Partner.objects.filter(company=company).first()
                 if partner:
                     inv.partner = partner
-            except Exception:
+            except DatabaseError:
                 pass
             inv.save()
             r.success(f"Faktura kreirana: pk={inv.pk}")
@@ -307,14 +309,14 @@ class Command(BaseCommand):
             assert inv.status == 'draft'
             r.success("Status: draft OK")
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             r.error("Invoicing kreiranje greška", e)
 
         try:
             from invoicing.models import Invoice
             count = Invoice.objects.filter(company=company).count()
             r.success(f"Invoice queryset: {count} faktura u bazi")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Invoice queryset greška", e)
 
         return r
@@ -328,7 +330,7 @@ class Command(BaseCommand):
             info("Provjera POS modela")
             count = POSReceipt.objects.filter(company=company).count()
             r.success(f"POSReceipt queryset OK: {count} računa")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("POSReceipt model greška", e)
 
         try:
@@ -338,7 +340,7 @@ class Command(BaseCommand):
             r.success(f"POS terminala: {terminals.count()}")
         except ImportError:
             r.warning("POSTerminal model ne postoji — preskačem")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("POSTerminal greška", e)
 
         try:
@@ -378,7 +380,7 @@ class Command(BaseCommand):
             r.success(f"Experience kreiran: {exp.name} (pk={exp.pk})")
             assert exp.deposit_amount == Decimal('13.50')
             r.success(f"Deposit amount property: {exp.deposit_amount} EUR")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             r.error("Experience kreiranje greška", e)
             return r
 
@@ -398,7 +400,7 @@ class Command(BaseCommand):
             assert sched.available_spots == 12
             assert sched.is_bookable == True
             r.success(f"Available spots: {sched.available_spots}, Bookable: {sched.is_bookable}")
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             r.error("Schedule kreiranje greška", e)
             return r
 
@@ -421,7 +423,7 @@ class Command(BaseCommand):
             assert booking.status == 'pending'
             assert booking.price_total > 0, "price_total mora biti > 0"
             r.success(f"Price total: {booking.price_total} EUR")
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             r.error("Booking kreiranje greška", e)
 
         try:
@@ -429,7 +431,7 @@ class Command(BaseCommand):
             info("AgroPackage model provjera")
             AgroPackage.objects.filter(company=company).count()
             r.success("AgroPackage queryset OK")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("AgroPackage greška", e)
 
         try:
@@ -451,7 +453,7 @@ class Command(BaseCommand):
                 )
                 recall.save()
                 r.success("RecallEvent kreiran (bez company FK)")
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             r.error("RecallEvent greška", e)
 
         try:
@@ -525,7 +527,7 @@ class Command(BaseCommand):
                 wo.save()
                 r.success("Status update: in_progress OK")
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             r.error("WorkOrder greška", e)
 
         try:
@@ -540,7 +542,7 @@ class Command(BaseCommand):
                 )
                 item.save()
                 r.success(f"WorkOrderItem kreiran: {item.description}")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             r.error("WorkOrderItem greška", e)
 
         try:
@@ -561,7 +563,7 @@ class Command(BaseCommand):
             from inventory.models import Item
             count = Item.objects.filter(company=company).count()
             r.success(f"Inventory Items: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Inventory Item greška", e)
 
         try:
@@ -570,7 +572,7 @@ class Command(BaseCommand):
             r.success(f"StockMovement records: {count}")
         except ImportError:
             r.warning("StockMovement model ne postoji")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("StockMovement greška", e)
 
         try:
@@ -590,7 +592,7 @@ class Command(BaseCommand):
             from worktime.models import TimeEntry
             count = TimeEntry.objects.filter(company=company).count() if hasattr(TimeEntry, 'company') else TimeEntry.objects.filter(worker__company=company).count()
             r.success(f"TimeEntry records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("TimeEntry greška", e)
 
         try:
@@ -625,7 +627,7 @@ class Command(BaseCommand):
             lead.save()
             r.success(f"ProjectLead kreiran: pk={lead.pk}")
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             r.error("ProjectLead greška", e)
 
         try:
@@ -654,7 +656,7 @@ class Command(BaseCommand):
             partner.save()
             r.success(f"Partner kreiran: {partner.name}")
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             r.error("Partner greška", e)
 
         return r
@@ -679,7 +681,7 @@ class Command(BaseCommand):
             r.success(f"CardActivity.is_system_generated: OK")
         except AssertionError as e:
             r.error(str(e))
-        except Exception as e:
+        except DatabaseError as e:
             r.error("CardActivity sigurnosna provjera greška", e)
 
         try:
@@ -716,7 +718,7 @@ class Command(BaseCommand):
             parovi = ParGolubova.objects.filter(company=company).count()
             utrke = Utrka.objects.filter(company=company).count()
             r.success(f"Golubi: {golubi}, Golubinjaci: {golubinjaci}, Parovi: {parovi}, Utrke: {utrke}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Golubar modeli greška", e)
 
         try:
@@ -760,7 +762,7 @@ class Command(BaseCommand):
             props = Property.objects.filter(company=company).count()
             bookings = Booking.objects.filter(property__company=company).count()
             r.success(f"Properties: {props}, Bookings: {bookings}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Rental greška", e)
 
         try:
@@ -784,7 +786,7 @@ class Command(BaseCommand):
                 synesis_id__isnull=True,
             )
             r.success(f"New (non-synesis) invoices: {new_invoices.count()}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Compliance Invoice filter greška", e)
 
         try:
@@ -833,7 +835,7 @@ class Command(BaseCommand):
             from interventions.models import HitnaIntervencija
             count = HitnaIntervencija.objects.filter(company=company).count()
             r.success(f"HitnaIntervencija records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("HitnaIntervencija greška", e)
         try:
             from django.urls import reverse
@@ -852,7 +854,7 @@ class Command(BaseCommand):
             r.success(f"ERacunConfig: {'aktivan' if config and config.is_active else 'neaktivan'}")
             count = ERacun.objects.filter(company=company).count()
             r.success(f"ERacun dokumenata: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("ERacun greška", e)
         try:
             from eracun.services.validator import validate_full
@@ -941,7 +943,7 @@ class Command(BaseCommand):
             kp_count = KontoAccount.objects.filter(company=company).count()
             tj_count = JournalEntry.objects.filter(company=company).count()
             r.success(f"KontoAccount: {kp_count}, JournalEntry: {tj_count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Konto greška", e)
         try:
             from django.urls import reverse
@@ -958,7 +960,7 @@ class Command(BaseCommand):
             from payroll.models import PayrollRun
             count = PayrollRun.objects.filter(company=company).count()
             r.success(f"PayrollRun records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Payroll greška", e)
         return r
 
@@ -969,7 +971,7 @@ class Command(BaseCommand):
             from documents.models import Document
             count = Document.objects.filter(company=company).count()
             r.success(f"Document records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Documents greška", e)
         try:
             from django.urls import reverse
@@ -987,7 +989,7 @@ class Command(BaseCommand):
             services = BookingService.objects.filter(company=company).count()
             appts = Appointment.objects.filter(company=company).count()
             r.success(f"Services: {services}, Appointments: {appts}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Appointments greška", e)
         return r
 
@@ -1009,7 +1011,7 @@ class Command(BaseCommand):
             from gov_export.models import GovExport
             count = GovExport.objects.filter(company=company).count()
             r.success(f"GovExport records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("GovExport greška", e)
         try:
             from django.urls import reverse
@@ -1026,7 +1028,7 @@ class Command(BaseCommand):
             from livestock.models import Livestock
             count = Livestock.objects.filter(company=company).count()
             r.success(f"Livestock records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Livestock greška", e)
         return r
 
@@ -1070,7 +1072,7 @@ class Command(BaseCommand):
             from aml.models import AMLClientProfile
             count = AMLClientProfile.objects.filter(company=company).count()
             r.success(f"AMLClientProfile records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("AML greška", e)
         return r
 
@@ -1081,7 +1083,7 @@ class Command(BaseCommand):
             from smart_import.models import ImportBatch
             count = ImportBatch.objects.filter(company=company).count()
             r.success(f"ImportBatch records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("SmartImport greška", e)
         return r
 
@@ -1103,7 +1105,7 @@ class Command(BaseCommand):
             from propter.models import PropterConfig
             count = PropterConfig.objects.filter(company=company).count()
             r.success(f"PropterConfig records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Propter greška", e)
         return r
 
@@ -1114,7 +1116,7 @@ class Command(BaseCommand):
             from webshop.models import Product
             count = Product.objects.filter(company=company).count()
             r.success(f"Webshop Product records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Webshop greška", e)
         return r
 
@@ -1125,7 +1127,7 @@ class Command(BaseCommand):
             from procurement.models import PurchaseOrder
             count = PurchaseOrder.objects.filter(company=company).count()
             r.success(f"PurchaseOrder records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Procurement greška", e)
         return r
 
@@ -1136,7 +1138,7 @@ class Command(BaseCommand):
             from maintenance.models import Asset
             count = Asset.objects.filter(company=company).count()
             r.success(f"Asset records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Maintenance greška", e)
         return r
 
@@ -1147,7 +1149,7 @@ class Command(BaseCommand):
             from payments.models import Payment as PaymentModel
             count = PaymentModel.objects.filter(company=company).count()
             r.success(f"Payment records: {count}")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("Payments greška", e)
         return r
 
@@ -1192,7 +1194,7 @@ class Command(BaseCommand):
             total = FenixSignal.objects.count()
             new = FenixSignal.objects.filter(status='new').count()
             r.success(f"FenixSignal: {total} total, {new} new")
-        except Exception as e:
+        except DatabaseError as e:
             r.error("FenixSignal greška", e)
         try:
             from limit_connect_ai.models import AIConversation

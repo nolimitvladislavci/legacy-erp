@@ -73,7 +73,7 @@ def lookup_oib_fina(oib: str, api_token: str) -> dict:
                 continue  # Pokušaj sljedeći endpoint
         except requests.Timeout:
             return {"found": False, "error": "FINA API nije odgovorio (timeout). Pokušajte ponovo."}
-        except Exception as ex:
+        except requests.RequestException as ex:
             logger.warning("FINA Info.BIZ lookup error for OIB %s: %s", oib, ex)
             continue
 

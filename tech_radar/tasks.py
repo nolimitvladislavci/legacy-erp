@@ -14,6 +14,7 @@ from datetime import timedelta
 
 from celery import shared_task
 from django.utils import timezone as tz
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('tech_radar')
 
@@ -42,7 +43,7 @@ def tech_radar_scan(self):
 
             cur.execute("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public'")
             signal.db_table_count = cur.fetchone()[0]
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         alerts.append('DB metrics failed: %s' % str(e)[:80])
         logger.warning('Tech radar DB check failed: %s', e)
 
@@ -51,7 +52,7 @@ def tech_radar_scan(self):
         usage = shutil.disk_usage('/')
         signal.disk_used_pct = Decimal(str(round(usage.used / usage.total * 100, 1)))
         signal.disk_free_gb = Decimal(str(round(usage.free / 1024 / 1024 / 1024, 2)))
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         alerts.append('Disk check failed: %s' % str(e)[:80])
 
     # ── Memory ──
@@ -69,14 +70,14 @@ def tech_radar_scan(self):
         available = mem.get('MemAvailable', 0)
         signal.memory_used_pct = Decimal(str(round((1 - available / total) * 100, 1)))
         signal.memory_available_mb = available // 1024
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         alerts.append('Memory check failed: %s' % str(e)[:80])
 
     # ── CPU Load ──
     try:
         load1, _, _ = os.getloadavg()
         signal.cpu_load_1m = Decimal(str(round(load1, 2)))
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # ── Celery ──
@@ -102,7 +103,7 @@ def tech_radar_scan(self):
         r = redis.from_url(os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1'))
         info = r.info('memory')
         signal.redis_memory_mb = Decimal(str(round(info.get('used_memory', 0) / 1024 / 1024, 2)))
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # ── Media Size ──
@@ -113,7 +114,7 @@ def tech_radar_scan(self):
         )
         if result.returncode == 0:
             signal.media_size_mb = Decimal(result.stdout.split()[0])
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # ── Business Metrics ──
@@ -122,7 +123,7 @@ def tech_radar_scan(self):
         from django.contrib.auth.models import User
         signal.total_companies = Company.objects.count()
         signal.total_users = User.objects.filter(is_active=True).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     try:
@@ -130,7 +131,7 @@ def tech_radar_scan(self):
         signal.receipts_today = POSReceipt.objects.filter(
             paid_at__date=tz.now().date()
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     try:
@@ -138,7 +139,7 @@ def tech_radar_scan(self):
         signal.api_calls_today = AIActionLog.objects.filter(
             timestamp__date=tz.now().date()
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── Active Sessions ──
@@ -147,7 +148,7 @@ def tech_radar_scan(self):
         signal.active_sessions = Session.objects.filter(
             expire_date__gt=tz.now()
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     signal.alerts = alerts

@@ -111,7 +111,7 @@ class ArchiveService:
                 },
                 "message": "Dokument verificiran." if integrity_ok else "UPOZORENJE: Dokument modificiran!",
             }
-        except Exception as e:
+        except IOError as e:
             return {"verified": False, "integrity_check": "ERROR", "message": f"Greska: {e}"}
 
     def download_archived_document(self, archive_id, company_id):
@@ -121,5 +121,5 @@ class ArchiveService:
         try:
             response = self.s3.get_object(Bucket=self.bucket, Key=archive.s3_key)
             return response["Body"].read()
-        except Exception:
+        except IOError:
             return None

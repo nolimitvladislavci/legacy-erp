@@ -12,6 +12,7 @@ from django.db.models import Sum, Count, Q
 
 from partners.models import Partner
 from invoicing.models import Invoice
+from django.db import IntegrityError, DatabaseError
 
 
 def _partner(token):
@@ -30,7 +31,7 @@ def _log_event(invoice, event_type, title, detail='', metadata=None):
             detail=detail,
             metadata=metadata or {},
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
 
 
@@ -101,7 +102,7 @@ def b2b_invoice_detail(request, token, pk):
         events = list(
             InvoiceEvent.objects.filter(invoice=invoice).order_by('created_at')
         )
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'portal/invoice_detail.html', {

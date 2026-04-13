@@ -117,7 +117,7 @@ class VIESLookup:
             return {'valid': False, 'error': 'VIES ne odgovara (timeout)'}
         except _requests.exceptions.ConnectionError:
             return {'valid': False, 'error': 'Nema veze s VIES servisom'}
-        except Exception as exc:
+        except requests.RequestException as exc:
             logger.exception('VIES error %s%s', country_code, vat_number)
             return {'valid': False, 'error': str(exc)}
 

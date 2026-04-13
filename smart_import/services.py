@@ -126,7 +126,7 @@ def _pdf_image_fallback(file_path):
             rows = _gemini_vision_extract(b64, "image/png")
             all_rows.extend(rows)
         doc.close()
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("PDF image fallback failed: %s", e)
 
     # If Gemini failed on all pages, try Claude on the original PDF rendered as image
@@ -283,7 +283,7 @@ def _gemini_vision_extract(image_b64, media_type):
         else:
             logger.warning("Gemini Vision returned no parseable items. Raw: %s", text[:200])
         return rows
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("Gemini Vision parse failed: %s", e)
         return []
 
@@ -323,7 +323,7 @@ def _gemini_vision_extract_enhanced(image_b64, media_type):
         rows = _parse_json_rows(text)
         logger.info("Enhanced Gemini Vision extracted %d items", len(rows))
         return rows
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("Enhanced Gemini Vision failed: %s", e)
         return []
 
@@ -346,7 +346,7 @@ def _log_gemini_usage(response, caller):
                 cost_eur=Decimal(str(round(cost, 8))),
                 success=True,
             )
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.debug("Failed to log Gemini usage: %s", e)
 
 
@@ -389,7 +389,7 @@ def _encode_image(file_path):
         img.save(buf, **save_kwargs)
         b64 = base64.standard_b64encode(buf.getvalue()).decode()
         return b64, "image/{}".format(fmt.lower())
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("Image encode failed: %s", e)
         return None, None
 
@@ -435,7 +435,7 @@ def _encode_image_enhanced(file_path):
         img.save(buf, format="JPEG", quality=95)
         b64 = base64.standard_b64encode(buf.getvalue()).decode()
         return b64, "image/jpeg"
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("Enhanced image encode failed: %s", e)
         return None, None
 
@@ -479,7 +479,7 @@ def _parse_json_rows(raw):
         if m:
             try:
                 data = json.loads(m.group())
-            except Exception:
+            except (json.JSONDecodeError, ValueError):
                 return []
         else:
             return []
@@ -622,7 +622,7 @@ def extract_invoice_header(file_path):
             header.get("supplier_name", "?"), header.get("supplier_oib", "?"), header.get("total_amount")
         )
         return header
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("extract_invoice_header failed: %s", e)
         return {}
 
@@ -694,6 +694,6 @@ def extract_unified(file_path):
 
         logger.info("Unified OCR: header=%s items=%d", header.get('supplier_name', '?'), len(rows))
         return {'header': header, 'items': rows}
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("Unified OCR failed: %s", e)
         return {'header': {}, 'items': []}

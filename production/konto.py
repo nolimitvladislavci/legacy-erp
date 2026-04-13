@@ -19,6 +19,7 @@ from decimal import Decimal
 
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def get_accounts(company):
         # Future: ProductionKontoConfig model per company
         # config = ProductionKontoConfig.objects.filter(company=company).first()
         # if config: return config.as_dict()
-    except Exception:
+    except DatabaseError:
         pass
 
     return defaults

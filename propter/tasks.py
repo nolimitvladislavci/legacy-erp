@@ -1,6 +1,8 @@
 """Propter Celery taskovi."""
 from celery import shared_task
 import logging
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger("propter.tasks")
 
@@ -44,7 +46,7 @@ def send_zbirni_eracun(billing_period_id, user_pk=None):
         success, message = process_eracun(eracun, user=user)
         return {"success": success, "message": message,
                 "eracun": eracun.invoice_number}
-    except Exception as exc:
+    except ObjectDoesNotExist as exc:
         logger.error("send_zbirni_eracun: %s", exc)
         return {"success": False, "message": str(exc)}
 
@@ -57,7 +59,7 @@ def recalculate_eko_stats(billing_period_id):
         period = BillingPeriod.objects.get(pk=billing_period_id)
         eko = EkoStats.calculate(period)
         return {"badge": eko.badge_level, "co2_saved": float(eko.co2_saved_grams)}
-    except Exception as exc:
+    except ObjectDoesNotExist as exc:
         logger.error("recalculate_eko_stats: %s", exc)
         return {"error": str(exc)}
 
@@ -193,7 +195,7 @@ def generate_monthly_sammelrechnung(self):
             period.invoiced_at = timezone.now()
             period.save(update_fields=['status', 'invoiced_at'])
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error('Sammelrechnung failed for period %s: %s', period.pk, e)
             continue
 

@@ -10,6 +10,7 @@ import logging
 from datetime import timedelta
 from decimal import Decimal
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.briefing')
 
@@ -85,7 +86,7 @@ def _collect_overdue_invoices(company, today):
                 'title': f'Racun {inv.number} kasni {days} dana ({inv.total} EUR)',
                 'detail': f'Klijent: {inv.client_name}',
             })
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.debug('Overdue invoices skip: %s', e)
 
     return items
@@ -112,7 +113,7 @@ def _collect_compliance_deadlines(company, today):
                 'title': f'{deadline.name} — rok: {deadline.deadline_date.strftime("%d.%m.")}',
                 'detail': f'Preostalo {days_left} dana',
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Tax deadlines skip: %s', e)
 
     return items
@@ -137,7 +138,7 @@ def _collect_nn_alerts(company):
                 'title': f'NN: {update.title[:60]}',
                 'detail': update.ai_summary[:100] if update.ai_summary else '',
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('NN alerts skip: %s', e)
 
     return items
@@ -162,7 +163,7 @@ def _collect_pending_tasks(company):
                 'title': task.title[:60],
                 'detail': f'[P{task.priority}] {task.get_task_type_display()}',
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Pending tasks skip: %s', e)
 
     return items
@@ -190,7 +191,7 @@ def _collect_inventory_alerts(company, today):
                 'title': f'{batch.item.name} LOT istjece za {days_left} dana',
                 'detail': f'{batch.quantity} kom na stanju',
             })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Inventory alerts skip: %s', e)
 
     return items

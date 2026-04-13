@@ -278,6 +278,6 @@ def _create_invoice_from_billing(billing):
 
         return invoice
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.warning('Invoice creation from billing failed: %s', e)
         return None

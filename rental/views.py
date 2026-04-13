@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Sum, Count
 from core.company_utils import get_user_company
 from .models import Property, Booking, HousekeepingLog
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -576,7 +577,7 @@ def rental_accountant_dashboard(request):
                 'warning_level': limit.get('warning_level'),
                 'message': limit.get('message'),
             })
-        except Exception:
+        except ObjectDoesNotExist:
             pass
 
     # Sortiraj po % praga (najhitniji gore)

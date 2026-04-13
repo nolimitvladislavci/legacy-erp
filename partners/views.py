@@ -106,7 +106,7 @@ def partner_create(request):
             p.save()
             messages.success(request, f"Partner {p.name} kreiran.")
             return redirect("partners:detail", pk=p.pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, str(e))
     return render(request, "partners/partner_form.html", {
         "companies": companies, "type_choices": Partner.TYPE_CHOICES,
@@ -150,7 +150,7 @@ def partner_edit(request, pk):
             partner.save()
             messages.success(request, f"Partner {partner.name} azuriran.")
             return redirect("partners:detail", pk=partner.pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, str(e))
     return render(request, "partners/partner_form.html", {
         "partner": partner, "companies": companies,
@@ -176,7 +176,7 @@ def partner_quick_create(request):
     import json
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         data = request.POST
 
     name = (data.get('name') or '').strip()
@@ -293,7 +293,7 @@ def api_quick_create(request):
             'name': partner.name,
             'message': f'Partner "{partner.name}" dodan!'
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': str(e)}, status=400)
 
 

@@ -3,6 +3,7 @@ from django.utils import timezone
 from helpdesk.models import Ticket
 from superadmin_ai.models import PendingAIAction, AIModulePermission
 from companies.models import Company
+from django.core.exceptions import ObjectDoesNotExist
 
 @shared_task
 def analyze_ticket_and_propose_action(ticket_id):
@@ -47,5 +48,5 @@ def analyze_ticket_and_propose_action(ticket_id):
 
     except Ticket.DoesNotExist:
         pass
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         print(f"Greška u AI tasku: {str(e)}")

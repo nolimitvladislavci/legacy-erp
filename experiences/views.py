@@ -11,7 +11,8 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db import models
+from django.db import models, DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -88,7 +89,7 @@ def experience_create(request):
             from django.contrib.auth import get_user_model
             try:
                 exp.guide = get_user_model().objects.get(pk=request.POST['guide'])
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
         exp.save()
         messages.success(request, f'Iskustvo "{exp.name}" kreirano.')

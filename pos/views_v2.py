@@ -18,7 +18,7 @@ from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import transaction, DatabaseError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone as tz
@@ -928,7 +928,7 @@ def offline_sync(request):
             try:
                 token = Token.objects.select_related('user').get(key=auth_header[7:])
                 request.user = token.user
-            except Exception:
+            except DatabaseError:
                 pass
         if not request.user.is_authenticated:
             return JsonResponse({'ok': False, 'error': 'Auth required'}, status=401)
@@ -1037,7 +1037,7 @@ def offline_sync(request):
                                 reason=f'POS offline bon #{next_rn} [SW-SYNC]',
                                 performed_by=request.user,
                             )
-                        except Exception:
+                        except (IntegrityError, DatabaseError):
                             pass
 
                 # Tip

@@ -10,6 +10,7 @@ from datetime import timedelta
 
 from celery import shared_task
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('stolarija')
 
@@ -196,10 +197,10 @@ def send_approved_messages(self):
                     user=msg.approved_by,
                     changes={'channel': msg.channel, 'sentiment': msg.ai_sentiment},
                 )
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error('Failed to send message %s: %s', msg.pk, e)
 
     if sent:

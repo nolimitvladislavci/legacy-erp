@@ -1,6 +1,7 @@
 """Celery tasks for inbound invoice processing."""
 import logging
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger("propter.einvoice.tasks.inbound")
 
@@ -68,7 +69,7 @@ def poll_inbox():
                     message.transition_to(MessageStatus.VALIDATION_FAILED, detail=str(e))
 
                 posrednik.acknowledge(ext_id)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error(f"Inbox poll failed for {config.company.name}: {e}")
 
     if total_received:

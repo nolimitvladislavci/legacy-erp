@@ -136,7 +136,7 @@ def _validate_propter_rules(xml_bytes):
         t = _text(xpath)
         try:
             return Decimal(t) if t else None
-        except Exception:
+        except (ValueError, TypeError):
             return None
 
     # ── PROP-01: Invoice number required ──

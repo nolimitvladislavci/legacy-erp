@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from fenix_input.models import InputMessage, SMSDevice
 from fenix_input.interpreter import interpret_message, parse_sms_by_pattern
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('fenix_input')
 
@@ -263,7 +264,7 @@ def _apply_to_module(msg):
         else:
             return {'skipped': True, 'reason': f'Unknown module/action: {module}/{action}'}
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         import logging
         logging.getLogger('fenix_input').warning('apply_to_module failed: %s', e)
         return {'error': str(e)[:100]}

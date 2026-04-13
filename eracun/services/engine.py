@@ -13,6 +13,7 @@ from lxml import etree
 from signxml import XMLSigner, methods
 from django.utils import timezone
 from django.conf import settings
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('eracun.engine')
 
@@ -446,7 +447,7 @@ def process_eracun(eracun, config=None, user=None):
             return False, eracun.error_message
         if v_warnings:
             logger.info('e-Racun %s validation warnings: %s', eracun.invoice_number, v_warnings[:3])
-    except Exception as val_err:
+    except (IntegrityError, DatabaseError) as val_err:
         logger.warning('Pre-flight validation skipped: %s', val_err)
 
     # 4. Send to FINA

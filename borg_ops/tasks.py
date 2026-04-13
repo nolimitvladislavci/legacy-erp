@@ -8,6 +8,7 @@ import logging
 from celery import shared_task
 from borg_ops.business_hours import sla_breached, is_business_hour
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.sla')
 
@@ -268,7 +269,7 @@ def orphan_data_check(self):
                     'target': target_path,
                     'count': count,
                 })
-        except Exception as e:
+        except DatabaseError as e:
             logger.debug('Orphan check skip %s.%s: %s', model_path, fk_field, e)
 
     if orphans:
@@ -455,7 +456,7 @@ def aggregate_signals():
                         alert.save(update_fields=['companies_notified'])
                         alerts_created += 1
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.debug('Signal aggregation error for %s: %s', company.name, e)
 
     logger.info('Signal aggregation: %d signals, %d alerts', signals_emitted, alerts_created)

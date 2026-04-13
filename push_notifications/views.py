@@ -22,7 +22,7 @@ def subscribe(request):
         request.user.profile.push_subscription = sub_json
         request.user.profile.save(update_fields=['push_subscription'])
         return JsonResponse({'ok': True})
-    except Exception as exc:
+    except (json.JSONDecodeError, ValueError) as exc:
         return JsonResponse({'error': str(exc)}, status=400)
 
 

@@ -18,6 +18,7 @@ from decimal import Decimal
 
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('b2b_bridge')
 
@@ -238,7 +239,7 @@ class B2BBridgeService:
                     'total': str(total),
                 },
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             logger.warning('B2B audit log failed for PO %s', po.pk, exc_info=True)
 
         logger.info(

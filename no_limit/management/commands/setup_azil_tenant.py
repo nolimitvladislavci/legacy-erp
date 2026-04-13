@@ -13,6 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from accounts.models import UserProfile
 from companies.models import Company
+from django.db import IntegrityError, DatabaseError
 
 
 class Command(BaseCommand):
@@ -95,7 +96,7 @@ class Command(BaseCommand):
             count = prijave.update(contacted=True)
             if count:
                 self.stdout.write(f"Označeno {count} prijava kao contacted.")
-        except Exception:
+        except DatabaseError:
             pass
 
         self.stdout.write("")

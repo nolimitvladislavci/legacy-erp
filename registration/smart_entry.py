@@ -49,7 +49,7 @@ def api_detect_email(request):
     try:
         data = json.loads(request.body)
         email = data.get('email', '').strip().lower()
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'status': 'error', 'msg': 'Neispravan zahtjev'}, status=400)
 
     if not email or '@' not in email:

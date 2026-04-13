@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.db.models import Count, Q, Sum
 from core.company_utils import get_user_company
 from .models import ERacun, ERacunConfig, ERacunLog, ERacunItem, ERacunTaxSummary
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('eracun.views')
 
@@ -329,7 +330,7 @@ def api_create(request):
 
     except KeyError as e:
         return JsonResponse({'error': f'Missing field: {e}'}, status=400)
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error(f'API create error: {e}', exc_info=True)
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -504,7 +505,7 @@ def sukladnost_run(request):
         else:
             run.ts01_cert = False
             details['ts01'] = {'status': 'FAIL', 'error': 'Nema ERacunConfig ili cert_path'}
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         run.ts01_cert = False
         details['ts01'] = {'status': 'FAIL', 'error': str(e)[:200]}
 
@@ -547,7 +548,7 @@ def sukladnost_run(request):
         else:
             run.ts02_ubl = False
             details['ts02'] = {'status': 'FAIL', 'cius': has_cius, 'supplier': has_supplier}
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         run.ts02_ubl = False
         details['ts02'] = {'status': 'FAIL', 'error': str(e)[:200]}
 
@@ -571,7 +572,7 @@ def sukladnost_run(request):
         try:
             from fiskalizacija.models import FiscalConfig
             fisk_config = FiscalConfig.objects.filter(company=company, is_active=True).first()
-        except Exception:
+        except DatabaseError:
             pass
 
         if fisk_config and fisk_config.cert_filename:
@@ -596,7 +597,7 @@ def sukladnost_run(request):
             run.ts04_fiscal = True
             passes += 1
             details['ts04'] = {'status': 'PASS', 'note': 'Modul spreman, fisk config pending'}
-    except Exception as e:
+    except DatabaseError as e:
         run.ts04_fiscal = False
         details['ts04'] = {'status': 'FAIL', 'error': str(e)[:200]}
 

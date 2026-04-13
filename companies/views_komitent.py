@@ -17,6 +17,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
 from companies.models import Company, KomitentProfile, KomitentEvent, KomitentStatus
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,7 @@ def komitent_dashboard(request):
         try:
             from registration.models import CompanySubscription
             sub = CompanySubscription.objects.filter(company=p.company).first()
-        except Exception:
+        except DatabaseError:
             pass
 
         enriched.append({
@@ -217,7 +218,7 @@ def komitent_detail(request, pk):
             status__in=['CANCELLED', 'STORNO', 'DRAFT']
         ).aggregate(total=Sum('total'))
         stats['revenue'] = float(inv_agg['total'] or 0)
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     return render(request, 'companies/komitent_detail.html', {
@@ -270,7 +271,7 @@ def komitent_create(request):
 
             messages.success(request, f'Komitent {c.name} kreiran.')
             return redirect('companies:komitent_detail', pk=p.pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'companies/komitent_form.html', {

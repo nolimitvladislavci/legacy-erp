@@ -15,6 +15,7 @@ import logging
 import requests
 from django.conf import settings
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('eracun.posrednik')
 
@@ -69,7 +70,7 @@ class PosrednikService:
                 agent_cfg['mandate_id'] = mandate.fina_mandate_id
                 agent_cfg['via_mandate'] = True
                 return agent_cfg
-        except Exception:
+        except DatabaseError:
             pass
 
         # Primarno: ERacunConfig model (settings page)
@@ -90,7 +91,7 @@ class PosrednikService:
                     'via_mandate': False,
                     'on_behalf_of_oib': None,
                 }
-        except Exception:
+        except DatabaseError:
             pass
 
         # Fallback: company.settings JSON
@@ -194,7 +195,7 @@ class PosrednikService:
 
             return result
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             eracun.status = 'error'
             eracun.error_message = str(e)[:500]
             eracun.save(update_fields=['status', 'error_message'])
@@ -235,7 +236,7 @@ class PosrednikService:
 
         except requests.Timeout:
             return {'ok': False, 'error': 'Moj-eRacun timeout (30s)'}
-        except Exception as e:
+        except requests.RequestException as e:
             return {'ok': False, 'error': str(e)}
 
     @classmethod
@@ -267,7 +268,7 @@ class PosrednikService:
                 return {'ok': True, 'posrednik_id': '', 'message': 'Poslano na custom posrednik'}
             else:
                 return {'ok': False, 'error': 'HTTP %d: %s' % (resp.status_code, resp.text[:200])}
-        except Exception as e:
+        except requests.RequestException as e:
             return {'ok': False, 'error': str(e)}
 
     @classmethod
@@ -310,7 +311,7 @@ class PosrednikService:
             else:
                 return {'ok': False, 'error': 'HTTP %d' % resp.status_code}
 
-        except Exception as e:
+        except requests.RequestException as e:
             return {'ok': False, 'error': str(e)}
 
     @classmethod
@@ -365,7 +366,7 @@ class PosrednikService:
             # Čisti XML response
             return resp.text
 
-        except Exception as e:
+        except requests.RequestException as e:
             logger.error('get_incoming_xml error for %s: %s', invoice_id, e)
             return None
 
@@ -398,7 +399,7 @@ class PosrednikService:
                     eracun.error_message = data.get('rejectReason', '')
                 eracun.save(update_fields=['status', 'error_message'])
                 return {'status': eracun.status, 'data': data}
-        except Exception as e:
+        except requests.RequestException as e:
             return {'status': 'error', 'error': str(e)}
 
         return {'status': eracun.status}

@@ -17,6 +17,7 @@ from decimal import Decimal
 
 from celery import shared_task
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('komunalno')
 
@@ -84,7 +85,7 @@ def export_onto_batch(self, company_id, station_id, date_str=None):
         else:
             raise Exception(f'e-ONTO rejected: {response_data}')
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         batch.retry_count += 1
         batch.last_error = str(e)[:500]
         if batch.can_retry():

@@ -82,7 +82,7 @@ def scan_all_companies():
             result = match_opportunities_for_company(company)
             total_matches += result.get('count', 0)
             total_savings += float(result.get('total_savings', 0))
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.warning('Scan failed for %s: %s', company.name, e)
 
     logger.info('Scanned %d companies: %d matches, %.0f EUR savings',

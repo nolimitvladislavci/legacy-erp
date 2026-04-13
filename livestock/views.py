@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from core.company_utils import get_user_company
 from .models import Livestock, Field, CropPlan
+from django.db import IntegrityError, DatabaseError
 
 
 @login_required
@@ -71,7 +72,7 @@ def livestock_create(request):
             animal.save()
             messages.success(request, f'Grlo {animal.ear_tag} uspjesno dodano.')
             return redirect('livestock:detail', pk=animal.pk)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/livestock_create.html', {
@@ -165,7 +166,7 @@ def vet_quick_entry(request, farm_token):
                     karencija_do or 'Nema',
                 )
                 send_text(owner_phone, msg)
-        except Exception:
+        except DatabaseError:
             pass
 
         messages.success(request, _('Tretman zabilje\u017een za %s') % ear_tag)
@@ -233,7 +234,7 @@ def robot_identify(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         data = {}
 
     ear_tag = data.get('ear_tag', request.GET.get('ear_tag', ''))

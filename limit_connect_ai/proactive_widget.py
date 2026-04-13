@@ -14,6 +14,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.db.models import Sum
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ def get_dashboard_insights(company):
                 'action_url': '/hr/konto/#receivables',
                 'action_text': 'Pogledaj saldakonti',
             })
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # 2. NIZAK STOCK
@@ -73,7 +74,7 @@ def get_dashboard_insights(company):
                 'action_url': '/hr/inventory/',
                 'action_text': 'Pregledaj zalihe',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 3. NEUPAREN BANK IZVOD
@@ -91,7 +92,7 @@ def get_dashboard_insights(company):
                 'action_url': '/hr/konto/bank/',
                 'action_text': 'Pariraj transakcije',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 4. OTVORENI HELPDESK TICKETI
@@ -110,7 +111,7 @@ def get_dashboard_insights(company):
                 'action_url': '/hr/helpdesk/',
                 'action_text': 'Pogledaj tickete',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 5. DANAS IZDANE FAKTURE
@@ -129,7 +130,7 @@ def get_dashboard_insights(company):
                 'title': f'Danas: {today_invoices} faktura ({today_total:,.2f} EUR)',
                 'detail': '',
             })
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # 6. POS PROMET DANAS
@@ -147,7 +148,7 @@ def get_dashboard_insights(company):
                 'title': f'POS danas: {float(pos_today["total"]):,.2f} EUR',
                 'detail': '',
             })
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     # 7. PREDLOZI
@@ -165,7 +166,7 @@ def get_dashboard_insights(company):
                 'action_url': '/hr/konto/entries/',
                 'action_text': 'Otvori',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 8. LICENCE / PRETPLATE KOJE ISTICU
@@ -186,7 +187,7 @@ def get_dashboard_insights(company):
                 'action_url': '/hr/companies/subscription/',
                 'action_text': 'Obnovi',
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # ══════════════════════════════════════════════════════════════
@@ -237,7 +238,7 @@ def get_dashboard_insights(company):
                     'action_url': opp.url or '/hr/intelligence/',
                     'action_text': 'Detalji',
                 })
-    except Exception:
+    except (ValueError, TypeError):
         logger.debug('proactive_widget: opportunity match error', exc_info=True)
 
     # 10. NOVE ZAKONSKE PROMJENE (RegulatoryUpdate — zadnjih 7 dana)
@@ -282,7 +283,7 @@ def get_dashboard_insights(company):
                     'action_url': update.url or '/hr/intelligence/',
                     'action_text': 'Procitaj',
                 })
-    except Exception:
+    except DatabaseError:
         logger.debug('proactive_widget: regulatory update error', exc_info=True)
 
     # 11. RIZICI U LANCU OPSKRBE (SupplierRiskAlert)
@@ -303,7 +304,7 @@ def get_dashboard_insights(company):
                 'action_url': '/hr/intelligence/',
                 'action_text': 'Detalji',
             })
-    except Exception:
+    except DatabaseError:
         logger.debug('proactive_widget: supplier risk error', exc_info=True)
 
     return {

@@ -1,3 +1,4 @@
+import logging
 import json
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
@@ -9,6 +10,7 @@ from django.db import models
 from django.utils import timezone
 
 from .models import AIModulePermission, PendingAIAction, AIActionLog
+from django.core.exceptions import ObjectDoesNotExist
 
 def is_superadmin(user):
     return user.is_superuser or user.is_staff
@@ -123,7 +125,7 @@ def update_permission(request):
         })
     except AIModulePermission.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Modul ne postoji'}, status=404)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
@@ -173,7 +175,7 @@ def bulk_permission(request):
             'message': '%s: %d modula %s' % (group_name, updated, 'aktivirano' if value else 'deaktivirano'),
             'updated': updated,
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -208,7 +210,7 @@ def bulk_all(request):
             'ok': True,
             'message': 'Svi moduli (%d) %s' % (updated, 'aktivirani' if value else 'deaktivirani'),
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -437,7 +439,7 @@ def _execute_agent_action(action, module, payload, company, ip):
             return {'ok': False, 'error': 'File not found'}
         except PermissionError:
             return {'ok': False, 'error': 'Permission denied'}
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             import logging
             logging.getLogger('superadmin_ai').error(f'agent read error: {e}', exc_info=True)
             return {'ok': False, 'error': 'Read failed — check server logs'}
@@ -461,7 +463,7 @@ def _execute_agent_action(action, module, payload, company, ip):
                     elif isinstance(v, (datetime.datetime, datetime.date)): row[k] = str(v)
                     elif isinstance(v, uuid.UUID): row[k] = str(v)
             return {'ok': True, 'count': len(data), 'data': data}
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             import logging
             logging.getLogger('superadmin_ai').error(f'agent query error: {e}', exc_info=True)
             return {'ok': False, 'error': 'Query failed — check server logs'}
@@ -504,7 +506,7 @@ def _execute_agent_action(action, module, payload, company, ip):
             with open(full, 'w') as f:
                 f.write(content)
             return {'ok': True, 'path': path, 'bytes': len(content)}
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             import logging
             logging.getLogger('superadmin_ai').error(f'agent write error: {e}', exc_info=True)
             return {'ok': False, 'error': 'Write failed — check server logs'}

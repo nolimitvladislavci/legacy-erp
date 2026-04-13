@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
 from partners.models import WizardDraft
+from django.db import IntegrityError, DatabaseError
 
 
 # ─── helpers ────────────────────────────────────────────────────────────────
@@ -347,7 +348,7 @@ def _sync_pending_company(draft: WizardDraft):
             company.city = draft.sjediste_grad
             company.zip_code = draft.sjediste_zip
         company.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass  # Nikad ne blokiraj wizard zbog sync greške
 
 
@@ -427,7 +428,7 @@ def _haiku_nkd_suggest(user_description: str) -> list:
                     'ai_reason': s.get('reason', ''),
                 })
         return results
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return []
 
 

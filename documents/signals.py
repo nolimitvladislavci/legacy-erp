@@ -7,6 +7,7 @@ Koristi get+save umjesto update_or_create da prolazi kroz ArhivaEntry.save()
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('documents.signals')
 
@@ -75,7 +76,7 @@ def _archive_invoice_inner(instance):
                 entry.has_pdf = True
                 entry.save(update_fields=['file_path', 'has_pdf'])
                 logger.debug('PDF archived for Invoice %s -> %s', instance.number, rel_path)
-        except Exception as pdf_err:
+        except (FileNotFoundError, PermissionError, IOError) as pdf_err:
             logger.warning('PDF arhiva greska za Invoice %s: %s', instance.pk, pdf_err)
 
 
@@ -95,13 +96,13 @@ def _archive_invoice_inner(instance):
                 ai_tip_confidence=1.0,
                 ai_summary=f'Auto: {instance.number}',
             )
-        except Exception as _fie:
+        except (IntegrityError, DatabaseError) as _fie:
             logger.warning('FenixInbox invoice signal: %s', _fie)
 
         _trigger_ai_proposal(entry)
         invalidate_arhiva_cache(instance.company_id)
 
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error('ArhivaEntry signal failed for Invoice %s: %s', instance.pk, e)
 
 
@@ -140,7 +141,7 @@ def _archive_eracun_inner(instance):
             entry.save()
         _trigger_ai_proposal(entry)
         invalidate_arhiva_cache(instance.company_id)
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error('ArhivaEntry signal failed for ERacun %s: %s', instance.pk, e)
 
 
@@ -206,10 +207,10 @@ def _archive_pos_receipt_inner(instance):
                     ai_tip_confidence=1.0,
                     ai_summary=f'POS bon #{instance.receipt_number}',
                 )
-        except Exception as _fpe:
+        except (IntegrityError, DatabaseError) as _fpe:
             logger.warning('FenixInbox pos signal: %s', _fpe)
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error('ArhivaEntry signal failed for POSReceipt %s: %s', instance.pk, e)
 
 

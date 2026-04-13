@@ -228,7 +228,7 @@ def isbn_lookup(request):
                     "cover_url": vol.get("imageLinks", {}).get("thumbnail", ""),
                     "language": vol.get("language", ""),
                 })
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             pass
         return JsonResponse({"found": False, "error": "Knjiga nije pronadjena"})
 

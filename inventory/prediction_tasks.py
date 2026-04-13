@@ -80,5 +80,5 @@ def check_predictive_stockouts(self):
 
             logger.info(f'Predictive check for {company.name}: {len(critical_items)} items, {len(po_ids)} POs generated')
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error(f'Predictive check failed for {company.id}: {e}')

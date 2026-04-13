@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 import uuid
 import datetime
+from django.db import IntegrityError, DatabaseError
 
 
 class DataFactory:
@@ -190,7 +191,7 @@ class DataFactory:
                 status='PENDING', description='Test rad',
             )
             return {'time_entry': entry}
-        except Exception:
+        except (ValueError, TypeError):
             return {}
 
     @classmethod
@@ -202,7 +203,7 @@ class DataFactory:
                 opening_cash=Decimal('100.00'),
             )
             return {'pos_session': session}
-        except Exception:
+        except (ValueError, TypeError):
             return {}
 
     @classmethod
@@ -221,7 +222,7 @@ class DataFactory:
                 total_price=Decimal('100.00'), status='confirmed',
             )
             return {'rental_property': prop, 'booking': booking}
-        except Exception:
+        except (ValueError, TypeError):
             return {}
 
     @classmethod
@@ -243,7 +244,7 @@ class DataFactory:
                 date=datetime.date.today(),
             )
             return {'transaction': tx}
-        except Exception:
+        except (ValueError, TypeError):
             return {}
 
     @classmethod
@@ -256,7 +257,7 @@ class DataFactory:
                 created_by=user,
             )
             return {'document': doc}
-        except Exception:
+        except (IntegrityError, DatabaseError):
             return {}
 
     @classmethod
@@ -268,7 +269,7 @@ class DataFactory:
                 created_by=user, status='draft',
             )
             return {'assessment': a}
-        except Exception:
+        except (IntegrityError, DatabaseError):
             return {}
 
     @classmethod
@@ -280,7 +281,7 @@ class DataFactory:
                 created_by=user, status='open',
             )
             return {'work_order': wo}
-        except Exception:
+        except (IntegrityError, DatabaseError):
             return {}
 
     @classmethod
@@ -295,7 +296,7 @@ class DataFactory:
                 premium=Decimal('1000.00'),
             )
             return {'insurance_policy': pol}
-        except Exception:
+        except (ValueError, TypeError):
             return {}
 
     @classmethod
@@ -309,7 +310,7 @@ class DataFactory:
                 status='draft',
             )
             return {'payroll_run': pr}
-        except Exception:
+        except (IntegrityError, DatabaseError):
             return {}
 
 

@@ -12,6 +12,7 @@ from permissions.decorators import require_permission
 
 from .models import Transaction
 from .serializers import TransactionSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @login_required
@@ -65,7 +66,7 @@ def transaction_create(request):
             partner.update_balance()
             messages.success(request, _("Transakcija kreirana."))
             return redirect("finance:list")
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     return render(request, "finance/transaction_form.html", {
         "companies": [get_user_company(request)] if get_user_company(request) else [],
@@ -416,7 +417,7 @@ def bank_pain001_suppliers(request):
     except ValueError as e:
         messages.error(request, str(e))
         return redirect(request.path)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         messages.error(request, _('Generiranje XML datoteke nije uspjelo. Pokušajte ponovo.'))
         return redirect(request.path)
 
@@ -470,7 +471,7 @@ def bank_pain001_salaries(request):
     except ValueError as e:
         messages.error(request, str(e))
         return redirect(request.path)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect(request.path)
 

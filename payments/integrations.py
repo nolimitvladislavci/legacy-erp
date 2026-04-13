@@ -5,6 +5,7 @@ Usage: from payments.integrations import pay_webshop_order, pay_rental_booking, 
 """
 import logging
 from decimal import Decimal
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -133,5 +134,5 @@ def handle_payment_completed(payment):
             order.save(update_fields=['payment_status'])
             logger.info('Marketplace order %s paid', order.pk)
 
-    except Exception:
+    except ObjectDoesNotExist:
         logger.warning('Payment completion handler failed: source=%s id=%s', source, source_id, exc_info=True)

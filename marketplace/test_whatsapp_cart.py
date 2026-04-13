@@ -11,6 +11,8 @@ from unittest.mock import patch, MagicMock
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.utils import timezone
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from companies.models import Company
 from marketplace.models import (
@@ -34,7 +36,7 @@ class CartSnapshotSecurityTests(TestCase):
             profile = self.user.profile
             profile.company = self.company
             profile.save()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             UserProfile.objects.create(user=self.user, company=self.company)
 
         # Subscription
@@ -44,7 +46,7 @@ class CartSnapshotSecurityTests(TestCase):
                 company=self.company, plan='professional', is_active=True,
                 modules_override=['marketplace'],
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
         # Product

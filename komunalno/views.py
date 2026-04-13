@@ -1,3 +1,4 @@
+import logging
 import hashlib
 import json
 from datetime import date, timedelta
@@ -176,7 +177,7 @@ def kiosk_deliver(request, station_id):
 
     try:
         qty = Decimal(quantity)
-    except Exception:
+    except (ValueError, TypeError):
         qty = Decimal('0')
 
     if qty <= 0:
@@ -277,7 +278,7 @@ def api_scale_reading(request, station_id):
 
     try:
         weight_kg = Decimal(str(weight_str))
-    except Exception:
+    except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid weight'}, status=400)
 
     if weight_kg <= 0:

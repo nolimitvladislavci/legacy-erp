@@ -83,7 +83,7 @@ def triage_signal(signal):
     except json.JSONDecodeError:
         logger.warning("Haiku returned non-JSON for signal %s: %s", signal.id, text[:200])
         return None
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("Triage failed for signal %s: %s", signal.id, e)
         return None
 

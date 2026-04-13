@@ -5,6 +5,7 @@ import io
 from django.core.files.base import ContentFile
 from .models import Competition, SocialImport, PetProfile, CompetitionEntry
 import logging
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def close_competition(competition_id):
         logger.info(f"Competition {competition_id} closed successfully")
     except Competition.DoesNotExist:
         logger.error(f"Competition {competition_id} not found")
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error(f"Error closing competition {competition_id}: {str(e)}")
 
 
@@ -49,7 +50,7 @@ def fetch_social_import(import_id):
         logger.info(f"Social import {import_id} processed")
     except SocialImport.DoesNotExist:
         logger.error(f"Social import {import_id} not found")
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error(f"Error fetching social import {import_id}: {str(e)}")
 
 
@@ -71,7 +72,7 @@ def generate_pet_qr(pet_id):
         logger.info(f"QR code generated for pet {pet_id}")
     except PetProfile.DoesNotExist:
         logger.error(f"Pet {pet_id} not found")
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error(f"Error generating QR for pet {pet_id}: {str(e)}")
 
 
@@ -88,7 +89,7 @@ def bulk_sync_company_to_boxgram(company_id):
             logger.info(f"Bulk sync for company {company_id}: {pets.count()} pets")
         else:
             logger.info(f"No pets found for company {company_id}")
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error(f"Error in bulk_sync_company_to_boxgram: {str(e)}")
 
 
@@ -113,7 +114,7 @@ def retry_fetch_social_import(self, import_id):
                 logger.error(f"Max retries reached for social import {import_id}: {preview.error}")
     except SocialImport.DoesNotExist:
         logger.error(f"Social import {import_id} not found")
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error(f"Error in retry_fetch_social_import: {str(e)}")
         raise
 
@@ -147,5 +148,5 @@ def enrich_life_event_ai(event_id):
 
     except LifeEvent.DoesNotExist:
         logger.error(f"enrich_life_event_ai: Event {event_id} nije pronađen")
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error(f"enrich_life_event_ai {event_id}: {type(e).__name__}: {str(e)}")

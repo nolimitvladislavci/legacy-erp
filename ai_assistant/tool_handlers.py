@@ -7,6 +7,8 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.db.models import Sum, Count
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -386,7 +388,7 @@ def _run_system_health_check(params, user, company):
             }
         else:
             results["celery"] = {"status": "WARNING", "note": "Nema izvrsenih taskova"}
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         results["celery"] = {"status": "UNKNOWN", "error": str(e)}
 
     # 4. Disk
@@ -416,7 +418,7 @@ def _run_system_health_check(params, user, company):
                 results["last_log_error"] = "Nema ERROR zapisa u logu"
         else:
             results["last_log_error"] = "Log datoteka nije pronadjena"
-    except Exception:
+    except (FileNotFoundError, PermissionError, IOError):
         results["last_log_error"] = "Nije moguce procitati log"
 
     # 6. Migration status
@@ -593,7 +595,7 @@ def _audit_data_integrity(params, user, company):
         orphan_receipts = POSReceipt.objects.filter(session__isnull=True).count()
         if orphan_receipts:
             issues.append({"type": "orphan", "model": "POSReceipt", "count": orphan_receipts, "desc": "Racuni bez POS sesije"})
-    except Exception:
+    except DatabaseError:
         pass
 
     # 2. POS: Open sessions older than 24h
@@ -606,7 +608,7 @@ def _audit_data_integrity(params, user, company):
         ).count()
         if old_sessions:
             issues.append({"type": "stale", "model": "POSSession", "count": old_sessions, "desc": "Otvorene sesije starije od 24h"})
-    except Exception:
+    except DatabaseError:
         pass
 
     # 3. Propter: Otpremnice without billing period
@@ -615,7 +617,7 @@ def _audit_data_integrity(params, user, company):
         orphan_otp = Otpremnica.objects.filter(billing_period__isnull=True).count()
         if orphan_otp:
             issues.append({"type": "orphan", "model": "Otpremnica", "count": orphan_otp, "desc": "Otpremnice bez obracunskog perioda"})
-    except Exception:
+    except DatabaseError:
         pass
 
     # 4. Propter: OPEN periods from previous months
@@ -628,7 +630,7 @@ def _audit_data_integrity(params, user, company):
         ).exclude(year=now.year, month=now.month).count()
         if stale_periods:
             issues.append({"type": "stale", "model": "BillingPeriod", "count": stale_periods, "desc": "Otvoreni periodi iz proslih mjeseci (trebali bi biti zatvoreni)"})
-    except Exception:
+    except DatabaseError:
         pass
 
     # 5. Invoices with zero total
@@ -637,7 +639,7 @@ def _audit_data_integrity(params, user, company):
         zero_inv = Invoice.objects.filter(company=company, total=0).exclude(status='DRAFT').count()
         if zero_inv:
             issues.append({"type": "suspicious", "model": "Invoice", "count": zero_inv, "desc": "Fakture s iznosom 0 (ne-draft)"})
-    except Exception:
+    except DatabaseError:
         pass
 
     # 6. Inventory: Negative stock
@@ -646,7 +648,7 @@ def _audit_data_integrity(params, user, company):
         neg = InventoryItem.objects.filter(company=company, quantity__lt=0).count()
         if neg:
             issues.append({"type": "negative_stock", "model": "InventoryItem", "count": neg, "desc": "Artikli s negativnom zalihom"})
-    except Exception:
+    except DatabaseError:
         pass
 
     # 7. Duplicate partners (same OIB)
@@ -658,7 +660,7 @@ def _audit_data_integrity(params, user, company):
         ).filter(cnt__gt=1, oib__gt="")
         if dupes.exists():
             issues.append({"type": "duplicate", "model": "Partner", "count": dupes.count(), "desc": "Partneri s duplikatnim OIB-om"})
-    except Exception:
+    except DatabaseError:
         pass
 
     # 8. e-Racun without items
@@ -667,7 +669,7 @@ def _audit_data_integrity(params, user, company):
         empty_er = ERacun.objects.filter(company=company, items__isnull=True).count()
         if empty_er:
             issues.append({"type": "empty", "model": "ERacun", "count": empty_er, "desc": "e-Racuni bez stavki"})
-    except Exception:
+    except DatabaseError:
         pass
 
     return {
@@ -1309,7 +1311,7 @@ def _create_futures_listing(params, user, company):
                 'kultura': plan.get_kultura_display(),
                 'visak_t': float(plan.procijenjeni_visak_t) if plan.procijenjeni_visak_t else None,
             }
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             return {'error': str(e)}
     except ImportError:
         return {'error': 'SuperadminAI ili Intelligence modul nije instaliran.'}
@@ -1338,7 +1340,7 @@ def _get_compliance_warnings(params, user, company):
                         'poruka': f'Promet {promet:.0f} EUR -- granica za PDV obveznika je 30.000 EUR',
                         'akcija': 'Konzultirajte poreznog savjetnika',
                     })
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     if kategorija in ('sve', 'dokumenti'):
@@ -1355,7 +1357,7 @@ def _get_compliance_warnings(params, user, company):
                     'poruka': f'{d.vehicle.plate_number}: {d.get_doc_type_display()} istice {d.valid_until}',
                     'preostalo_dana': d.days_until_expiry,
                 })
-        except Exception:
+        except DatabaseError:
             pass
 
     if kategorija in ('sve', 'clanarine'):
@@ -1373,7 +1375,7 @@ def _get_compliance_warnings(params, user, company):
                     'poruka': f'{uskoro} clanova ima clanstvo koje istice za 14 dana',
                     'akcija': 'Posalji WhatsApp podsjetnik (send_expiry_reminders)',
                 })
-        except Exception:
+        except DatabaseError:
             pass
 
     if kategorija in ('sve', 'livestock'):
@@ -1390,7 +1392,7 @@ def _get_compliance_warnings(params, user, company):
                     'poruka': f'{karencija} grla u karenciji -- mlijeko i meso NE smiju u prodaju!',
                     'akcija': 'Provjeri ear tagove u livestock modulu',
                 })
-        except Exception:
+        except DatabaseError:
             pass
 
     if kategorija in ('sve', 'fondovi'):
@@ -1408,7 +1410,7 @@ def _get_compliance_warnings(params, user, company):
                     'poruka': f'{hitni} natjecaj/a istice za 14 dana',
                     'akcija': 'Provjeri get_fund_opportunities za detalje',
                 })
-        except Exception:
+        except DatabaseError:
             pass
 
     return {

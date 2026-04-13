@@ -8,6 +8,7 @@ from django.utils import timezone
 from decimal import Decimal
 from core.company_utils import get_user_company
 from .models import PurchaseOrder, PurchaseOrderItem, SupplierPriceList
+from django.db import IntegrityError, DatabaseError
 
 
 def _get_company(request):
@@ -196,7 +197,7 @@ def po_receive(request, pk):
                         unit_price=item.unit_price,
                     )
             messages.success(request, f'Primka {gr.pk} automatski kreirana.')
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.warning(request, f'Prijem evidentiran, ali automatska primka nije kreirana: {e}')
         messages.success(request, _('Prijem robe evidentiran.'))
         return redirect('procurement:detail', pk=po.pk)

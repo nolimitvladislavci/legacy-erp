@@ -14,6 +14,8 @@ from django.utils import timezone
 
 from core.company_utils import get_user_company
 from .models import DigitalMenu, MenuCategory, MenuItem, MenuItemIngredient, TableQR, TableOrder
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('gastro_menu')
 
@@ -167,7 +169,7 @@ def kitchen_update_status(request):
         return JsonResponse({'ok': True, 'status': new_status})
     except TableOrder.DoesNotExist:
         return JsonResponse({'ok': False, 'error': 'Narudzba ne postoji'}, status=404)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=400)
 
 
@@ -200,7 +202,7 @@ def admin_dashboard(request):
             company=company, category__in=['food', 'drink'], is_active=True,
         ).extra(where=['quantity <= min_quantity AND min_quantity > 0'])
         low_stock = list(low.values('name', 'quantity', 'min_quantity', 'unit')[:10])
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'gastro_menu/admin_dashboard.html', {
@@ -252,7 +254,7 @@ def update_price(request):
             InventoryItem.objects.filter(
                 company=company, sku=slugify(item.name)[:40]
             ).update(unit_price=price)
-        except Exception:
+        except DatabaseError:
             pass
         return JsonResponse({'ok': True, 'price': str(price)})
     except MenuItem.DoesNotExist:

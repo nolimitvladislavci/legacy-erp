@@ -14,6 +14,7 @@ import hashlib
 import logging
 from datetime import datetime
 from django.conf import settings
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,7 @@ def compress_image(file_bytes, filename, max_bytes=IMAGE_TARGET_SIZE):
     except ImportError:
         logger.warning('Pillow not installed, skipping image compression')
         return file_bytes, 'application/octet-stream'
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.warning('Image compression failed: %s', e)
         return file_bytes, 'application/octet-stream'
 
@@ -193,7 +194,7 @@ class CloudStorageBackend:
         try:
             resp = self.client.get_object(Bucket=self.bucket_name, Key=path)
             return resp['Body'].read()
-        except Exception as e:
+        except IOError as e:
             logger.error('Cloud retrieve error: %s', e)
             return None
 
@@ -276,7 +277,7 @@ class DatabaseStorageBackend:
         try:
             DocumentBlob.objects.filter(id=blob_id).delete()
             return True
-        except Exception:
+        except (IntegrityError, DatabaseError):
             return False
 
     def exists(self, path):

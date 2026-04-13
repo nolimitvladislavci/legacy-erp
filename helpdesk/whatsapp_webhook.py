@@ -8,6 +8,7 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('helpdesk.whatsapp')
 
@@ -177,7 +178,7 @@ def whatsapp_webhook(request):
                     url=f'/helpdesk/{ticket.id}/',
                     company=company,
                 )
-        except Exception:
+        except DatabaseError:
             pass
 
     logger.info(f'WA new ticket {ticket.ticket_number} from {phone} (VIP={bool(vip)})')

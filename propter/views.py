@@ -13,6 +13,7 @@ from django.utils.translation import gettext as _
 from django.db import models as db_models
 from .models import BillingPeriod, Otpremnica, OtpremnicaItem, PropterConfig, EkoStats
 from .services.aggregate import close_period, aggregate_to_eracun
+from django.db import IntegrityError, DatabaseError
 
 
 def _company(request):
@@ -53,7 +54,7 @@ def dashboard(request):
         eko = EkoStats.objects.filter(
             company=company, year=now.year
         ).order_by("-month").first()
-    except Exception:
+    except DatabaseError:
         eko = None
 
     ctx = {
@@ -121,7 +122,7 @@ def period_aggregate(request, pk):
             _("Zbirni e-Racun kreiran: {}. Ukupno: {:.2f} EUR.").format(
                 eracun.invoice_number, float(eracun.total)
             ))
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         messages.error(request, str(e))
     return redirect("propter:period_detail", pk=pk)
 
@@ -167,7 +168,7 @@ def otpremnica_create(request):
             )
             messages.success(request, _("Otpremnica {} kreirana.").format(otp.number))
             return redirect("propter:otpremnica_detail", pk=otp.pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, str(e))
 
     return render(request, "propter/otpremnica_form.html", {
@@ -270,7 +271,7 @@ def api_create_otpremnica(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Nevaljan JSON"}, status=400)
 
     try:
@@ -285,7 +286,7 @@ def api_create_otpremnica(request):
             total = Decimal(str(data.get("total", "0")))
             if any(v < 0 or v > Decimal("99999999.99") for v in [subtotal, tax_amount, total]):
                 return JsonResponse({"error": "Iznos izvan dozvoljenog raspona"}, status=400)
-        except Exception:
+        except (ValueError, TypeError):
             return JsonResponse({"error": "Neispravan format iznosa"}, status=400)
 
         otp = Otpremnica.objects.create(
@@ -306,7 +307,7 @@ def api_create_otpremnica(request):
             "billing_period": str(otp.billing_period),
             "status": "created",
         }, status=201)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return JsonResponse({"error": str(e)}, status=400)
 
 
@@ -497,7 +498,7 @@ def propter_soba(request):
 
     try:
         eko = EkoStats.objects.filter(company=company, year=now.year).order_by("-month").first()
-    except Exception:
+    except DatabaseError:
         eko = None
 
     return render(request, "propter/soba.html", {

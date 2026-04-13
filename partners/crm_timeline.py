@@ -14,6 +14,7 @@ Rezultat je kronoloski timeline svih dogadjaja.
 import logging
 from datetime import date
 from decimal import Decimal
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ def get_partner_timeline(partner, limit=50):
                 'icon': 'file-text',
                 'color': '#3498db',
             })
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.debug('Timeline invoice error: %s', e)
 
     # 2. BANKOVNE TRANSAKCIJE
@@ -73,7 +74,7 @@ def get_partner_timeline(partner, limit=50):
                 'icon': 'credit-card',
                 'color': '#27ae60' if tx.transaction_type == 'inflow' else '#e74c3c',
             })
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.debug('Timeline bank error: %s', e)
 
     # 3. POS BONOVI (R1 racuni s OIB-om)
@@ -95,7 +96,7 @@ def get_partner_timeline(partner, limit=50):
                     'icon': 'shopping-cart',
                     'color': '#9b59b6',
                 })
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.debug('Timeline POS error: %s', e)
 
     # 4. HELPDESK TICKETI
@@ -117,7 +118,7 @@ def get_partner_timeline(partner, limit=50):
                     'icon': 'help-circle',
                     'color': '#f39c12',
                 })
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Timeline helpdesk error: %s', e)
 
     # 5. MARKETPLACE NARUDZBE
@@ -138,7 +139,7 @@ def get_partner_timeline(partner, limit=50):
                 'icon': 'globe',
                 'color': '#1abc9c',
             })
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.debug('Timeline marketplace error: %s', e)
 
     # Sort by date descending

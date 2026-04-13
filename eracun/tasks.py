@@ -2,6 +2,7 @@
 
 from celery import shared_task
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('eracun.tasks')
 
@@ -108,7 +109,7 @@ def fetch_posrednik_inbox(self):
                     errors += 1
                     logger.warning('Nevaljan XML za %s: %s...', inv_number, (xml_string or '')[:50])
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             errors += 1
             logger.warning('Inbox fetch error za %s: %s', company.name, e)
 

@@ -97,7 +97,7 @@ def _sync_to_konto(instance, delete=False):
             )
         )
         ba.recalculate_balance()
-    except Exception:
+    except (ValueError, TypeError):
         pass  # Never break finance saves due to konto sync
 
 @receiver(post_save, sender=Transaction)

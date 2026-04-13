@@ -5,6 +5,7 @@ from datetime import date, timedelta
 
 from celery import shared_task
 from django.conf import settings
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger("claude_doktor")
 HAIKU_MODEL = "claude-haiku-4-5-20251001"
@@ -66,7 +67,7 @@ def run_clinic_diagnostics_single(self, company_id):
         _send_notification_if_needed(company, report, yesterday)
         logger.info("Doktor OK: %s -- %d/100", company, report.overall_score)
         return f"{company}: {report.overall_score}/100"
-    except Exception as exc:
+    except (ValueError, TypeError) as exc:
         report.status = "error"
         report.error_message = str(exc)[:500]
         report.save()
@@ -102,14 +103,14 @@ def _collect_data(company):
                     break
         else:
             raw["cert_days_left"] = -1
-    except Exception:
+    except DatabaseError:
         raw["cert_days_left"] = 365
     raw["is_vat_registered"] = getattr(company, "is_vat_registered", True)
     try:
         from seasonal.models import SeasonalContract
         raw["pending_hzmo_count"] = SeasonalContract.objects.filter(
             worker__company=company, hzmo_prijava_sent=False).count()
-    except Exception:
+    except DatabaseError:
         raw["pending_hzmo_count"] = 0
     raw["missing_company_fields"] = [
         f for f in ["email", "phone", "oib"] if not getattr(company, f, None)]
@@ -216,7 +217,7 @@ def _call_haiku(company, raw, scores, overall_score):
             parts = text.split("```")
             text = parts[1].lstrip("json").strip() if len(parts) > 1 else text
         return json.loads(text)
-    except Exception as exc:
+    except (json.JSONDecodeError, ValueError) as exc:
         logger.warning("Doktor AI greska: %s", exc)
         return _fallback(raw, scores, overall_score)
 

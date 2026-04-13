@@ -20,6 +20,7 @@ import logging
 from decimal import Decimal, InvalidOperation
 from django.db import transaction
 from django.utils import timezone as tz
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('ai_executor')
 
@@ -103,7 +104,7 @@ class AIOperativeExecutor:
             action.save(update_fields=['status', 'review_note'])
             raise
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             action.status = 'expired'
             action.review_note = 'Execution error: %s' % str(e)[:200]
             action.save(update_fields=['status', 'review_note'])
@@ -313,5 +314,5 @@ class AIOperativeExecutor:
                 object_repr=description[:300],
                 changes={'ai_executor': True, 'description': description},
             )
-        except Exception:
+        except (IntegrityError, DatabaseError):
             logger.warning('AI executor audit failed', exc_info=True)

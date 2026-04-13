@@ -12,6 +12,7 @@ from datetime import timedelta
 
 from celery import shared_task
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +132,7 @@ def _send_deadline_notification(deadline, urgency_level):
                 fail_silently=True,
             )
             logger.info('Tax deadline email sent to %s for %s', admin_emails[:5], company.name)
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('Failed to send tax deadline email for %s: %s', company.name, e)
 
     # WhatsApp za 14d, 3d, overdue
@@ -179,7 +180,7 @@ def prefill_quarterly_data(self):
 
             session.save()
             updated += 1
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.warning('Prefill refresh failed for session %s: %s', session.id, e)
 
     logger.info('prefill_quarterly_data: %d DRAFT sessions refreshed', updated)

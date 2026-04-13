@@ -1,3 +1,4 @@
+import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -260,7 +261,7 @@ def grosmarkt_anfrage(request):
         if request.content_type and "application/json" in request.content_type:
             try:
                 body = _json.loads(request.body)
-            except Exception:
+            except (json.JSONDecodeError, ValueError):
                 body = {}
         else:
             body = request.POST
@@ -371,7 +372,7 @@ def grosmarkt_anfrage(request):
             "id": anfrage.pk,
         })
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         import logging
         logging.getLogger(__name__).exception("grosmarkt_anfrage error")
         return JsonResponse({"success": False, "error": "Serverfehler. Bitte später erneut versuchen."}, status=500)
@@ -425,7 +426,7 @@ def pricing_ai_advisor(request):
     import json
     try:
         body = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         body = {}
 
     industry = body.get('industry', '')
@@ -598,7 +599,7 @@ def korpas_termini(request):
                 f"{t.datum} u {t.vrijeme}"
             )
             return JsonResponse({'ok': True})
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             return JsonResponse({'ok': False, 'error': str(e)}, status=400)
     from django.shortcuts import render
     return render(request, 'website/korpas_termini.html', {})
@@ -623,7 +624,7 @@ def sirokisor(request):
                 f"{r.napomena or ''}"
             )
             return JsonResponse({'ok': True})
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             return JsonResponse({'ok': False, 'error': str(e)}, status=400)
     from django.shortcuts import render
     return render(request, 'website/sirokisor.html', {})
@@ -639,7 +640,7 @@ def opg_kruljac(request):
                 f"Dostava: {d.get('datum','')}"
             )
             return JsonResponse({'ok': True})
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             return JsonResponse({'ok': False, 'error': str(e)}, status=400)
     from django.shortcuts import render
     return render(request, 'website/opg_kruljac.html', {})
@@ -662,7 +663,7 @@ def nolimit_partner(request):
                 f"{p.kontakt_osoba} | {p.telefon}\n{p.adresa}"
             )
             return JsonResponse({'ok': True})
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             return JsonResponse({'ok': False, 'error': str(e)}, status=400)
     from django.shortcuts import render
     return render(request, 'website/no_limit.html', {})

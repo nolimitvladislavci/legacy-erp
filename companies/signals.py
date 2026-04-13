@@ -1,5 +1,7 @@
+import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import IntegrityError, DatabaseError
 
 
 @receiver(post_save, sender='partners.Partner')
@@ -112,7 +114,7 @@ def bootstrap_new_company(sender, instance, created, **kwargs):
                 pos_type='quick',
                 is_active=True,
             )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('[BOOTSTRAP] POSTerminal za %s: %s', instance.name, e)
 
     # 3. Default Tax Rates (HR)

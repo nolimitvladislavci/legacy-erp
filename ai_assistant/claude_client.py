@@ -1,6 +1,7 @@
 import os
 import logging
 from django.conf import settings
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +116,7 @@ def _build_contextual_system_prompt(user, company):
             grla = Livestock.objects.filter(company=company).count()
             planovi = CropPlan.objects.filter(company=company, godina__gte=2026).count()
             ctx += f"- Farma: {grla} grla goveda, {planovi} aktivnih planova sjetve\n"
-        except Exception:
+        except DatabaseError:
             pass
 
     # Intelligence context
@@ -131,7 +132,7 @@ def _build_contextual_system_prompt(user, company):
         ).count()
         if novi or fondovi:
             ctx += f"- Intelligence: {novi} novih pronalazaka, {fondovi} aktivnih natjecaja\n"
-    except Exception:
+    except DatabaseError:
         pass
 
     # RAG: dohvati relevantne članke iz baze znanja

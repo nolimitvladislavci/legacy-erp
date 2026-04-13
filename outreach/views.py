@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import Campaign, CampaignContact, Contact
+from django.db import IntegrityError, DatabaseError
 
 
 # ── AI personalization ────────────────────────────────────────────────────────
@@ -42,7 +43,7 @@ def _personalize(subject_tpl, body_tpl, contact):
         )
         import json as _json
         return _json.loads(resp.content[0].text)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return {
             'subject': subject_tpl.format(**ctx),
             'body':    body_tpl.format(**ctx),
@@ -286,7 +287,7 @@ def campaign_send(request, pk):
             cc.status  = 'sent'
             cc.sent_at = timezone.now()
             cc.save()
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             return JsonResponse({'ok': False, 'error': str(e)})
 
     if cc.contact.status == 'neu':
@@ -377,7 +378,7 @@ def campaign_bulk_send(request, pk):
                 cc.sent_at = timezone.now()
                 cc.save()
                 sent += 1
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 failed += 1
 
         if cc.contact.status == 'neu':

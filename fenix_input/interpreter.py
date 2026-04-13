@@ -86,7 +86,7 @@ def interpret_message(raw_text, channel='voice', user=None, company=None):
     except json.JSONDecodeError as e:
         logger.warning(f'AI returned invalid JSON: {e}')
         return {'intent': 'parse_error', 'confidence': 0, 'error': str(e)}
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error(f'AI interpretation failed: {e}')
         return {'intent': 'error', 'confidence': 0, 'error': str(e)}
 

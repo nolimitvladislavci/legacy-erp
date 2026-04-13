@@ -411,7 +411,7 @@ def _to_decimal(val):
         if isinstance(val, str):
             val = val.replace(',', '.')
         return Decimal(str(val))
-    except Exception:
+    except (ValueError, TypeError):
         return Decimal('0')
 
 
@@ -509,7 +509,7 @@ def _validate_oib(oib):
         if control == 10:
             control = 0
         return control == int(oib[10])
-    except Exception:
+    except (ValueError, TypeError):
         return False
 
 
@@ -657,7 +657,7 @@ def convert_image_to_xml(file_bytes, filename, company, user=None):
 
         return record
 
-    except Exception as e:
+    except ValueError as e:
         record.status = 'failed'
         record.validation_errors = [str(e)]
         record.save()
@@ -674,6 +674,6 @@ def _parse_date_obj(date_str):
             if len(parts[0]) == 4:
                 return date(int(parts[0]), int(parts[1]), int(parts[2]))
             return date(int(parts[2]), int(parts[1]), int(parts[0]))
-    except Exception:
+    except (ValueError, TypeError):
         pass
     return date.today()

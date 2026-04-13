@@ -1,4 +1,5 @@
 import logging
+from django.db import IntegrityError, DatabaseError
 logger = logging.getLogger(__name__)
 import json
 
@@ -96,7 +97,7 @@ def lead_move(request, pk):
     try:
         data = json.loads(request.body)
         new_status = data.get('status')
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'ok': False, 'error': 'Neispravan zahtjev.'}, status=400)
     valid = [s[0] for s in ProjectLead.Status.choices]
     if new_status not in valid:
@@ -147,7 +148,7 @@ def lead_preuzmi(request, pk):
             super(type(lead), lead).save()
     except ProjectLead.DoesNotExist:
         return JsonResponse({'ok': False, 'error': 'Kartica ne postoji.'}, status=404)
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         return JsonResponse({'ok': False, 'error': f'Greška: {str(e)}'}, status=500)
     return JsonResponse({'ok': True, 'message': f'Uspješno preuzeto: {lead.title}'})
 
@@ -171,7 +172,7 @@ def public_upit(request):
             if bt: lead.budget_to = float(bt)
             lead.save()
             return redirect('burza:upit_hvala')
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             return render(request, 'burza/public_upit.html', {
                 'error': str(e), 'categories': ProjectLead.Category.choices,
             })
@@ -224,7 +225,7 @@ def lead_new(request):
             lead.save()
             messages.success(request, _('Kartica kreirana uspješno.'))
             return redirect('burza:kanban')
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'burza/lead_form.html', {
         'categories': ProjectLead.Category.choices, 'is_superadmin': sa,

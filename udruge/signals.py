@@ -1,6 +1,7 @@
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('udruge')
 
@@ -26,7 +27,7 @@ def archive_knjiga_primitaka(sender, instance, created, **kwargs):
             doc_date=instance.datum,
             ai_summary=f'Knjiga primitaka #{instance.redni_broj}: {instance.get_vrsta_display()} — {instance.get_izvor_display()}',
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error('archive_knjiga_primitaka: %s', e)
 
 
@@ -51,5 +52,5 @@ def archive_donacija(sender, instance, created, **kwargs):
             doc_date=instance.date,
             ai_summary=f'Donacija: {instance.donor_name} {instance.amount} EUR — {instance.purpose or "opca"}',
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error('archive_donacija: %s', e)

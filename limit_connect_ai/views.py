@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.db.models import Sum, Count, F
 from django.contrib import messages
 from django.utils.translation import gettext as _
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from .models import (
@@ -33,7 +35,7 @@ def ai_cockpit(request):
         ).aggregate(total=Sum("total"), count=Count("id"))
         ctx["pos_revenue"] = agg["total"] or 0
         ctx["pos_count"] = agg["count"] or 0
-    except Exception:
+    except DatabaseError:
         ctx["pos_revenue"] = 0
         ctx["pos_count"] = 0
 
@@ -45,7 +47,7 @@ def ai_cockpit(request):
         ).aggregate(total=Sum("total"), count=Count("id"))
         ctx["inv_count"] = agg["count"] or 0
         ctx["inv_total"] = agg["total"] or 0
-    except Exception:
+    except DatabaseError:
         ctx["inv_count"] = 0
         ctx["inv_total"] = 0
 
@@ -55,14 +57,14 @@ def ai_cockpit(request):
         ctx["low_stock"] = InventoryItem.objects.filter(
             company=company, is_active=True, quantity__lte=F("min_quantity"),
         ).exclude(min_quantity=0).count()
-    except Exception:
+    except DatabaseError:
         ctx["low_stock"] = 0
 
     # Active funds
     try:
         from intelligence.models import FundOpportunity
         ctx["active_funds"] = FundOpportunity.objects.filter(status="aktivan").count()
-    except Exception:
+    except DatabaseError:
         ctx["active_funds"] = 0
 
     # Fund drafts for this company

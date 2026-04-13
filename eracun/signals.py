@@ -1,3 +1,4 @@
+import logging
 """
 Signal: ERacun status → 'accepted' → auto-create JournalEntry in konto.
 
@@ -10,6 +11,7 @@ from decimal import Decimal
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 
 @receiver(pre_save, sender='eracun.ERacun')
@@ -32,7 +34,7 @@ def eracun_accepted_to_journal(sender, instance, **kwargs):
         from konto.models import KontoAccount
         if not KontoAccount.objects.filter(company=instance.company).exists():
             return  # Nema kontnog plana — tiho preskoči
-    except Exception:
+    except DatabaseError:
         return
 
     try:

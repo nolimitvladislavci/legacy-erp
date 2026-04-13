@@ -67,7 +67,7 @@ class FiscalConfig(models.Model):
             self.cert_expires_at = cert.not_valid_after_utc
             self.cert_subject = cert.subject.rfc4514_string()[:200]
             self.save(update_fields=['cert_expires_at', 'cert_subject'])
-        except Exception:
+        except (FileNotFoundError, PermissionError, IOError):
             pass
 
     class Meta:

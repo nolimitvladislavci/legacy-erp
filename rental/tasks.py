@@ -9,6 +9,7 @@ rental/tasks.py — Celery taskovi za Rental modul
 import logging
 from celery import shared_task
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ def daily_landlord_brief(self):
             except Exception:
                 pass
             logger.info('Landlord brief sent for %s', company.name)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             logger.warning('Landlord brief failed for company %s: %s', cid, e)
 
     return {'companies': len(company_ids), 'sent': sent}
@@ -97,7 +98,7 @@ def annual_limit_check(self):
                         alerts += 1
                 except Exception:
                     pass
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             logger.warning('Limit check failed for %s: %s', cid, e)
 
     return {'checked': len(company_ids), 'alerts': alerts}

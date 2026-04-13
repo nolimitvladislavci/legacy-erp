@@ -99,7 +99,7 @@ def recommend_plan_ai(name: str, nkd: str = '') -> dict:
                 'confidence': 'ai',
                 'reason': data.get('reason', ''),
             }
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.warning('Borg Advisor AI fallback: %s', e)
 
     return fallback

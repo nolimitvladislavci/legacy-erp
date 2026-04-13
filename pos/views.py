@@ -4126,7 +4126,6 @@ def cashier_report_html(request, session_id):
 
 
 @login_required
-@csrf_exempt
 @login_required
 def api_quick_add_item(request):
     """Brzo dodavanje novog artikla iz POS skenera."""

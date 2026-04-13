@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import AssessmentPhoto, FieldAssessment
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def _get_company(request):
@@ -20,7 +21,7 @@ def _get_company(request):
     try:
         from accounts.models import UserProfile
         return UserProfile.objects.get(user=request.user).company
-    except Exception:
+    except ObjectDoesNotExist:
         return None
 
 
@@ -72,7 +73,7 @@ def assessment_new(request):
 def assessment_save(request):
     try:
         payload = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         payload = {}
 
     assessment_id  = payload.get('assessment_id')
@@ -225,7 +226,7 @@ def assessment_pdf(request, pk):
             logo_mime = 'image/png' if ext == 'png' else 'image/jpeg'
             with open(company.logo.path, 'rb') as f:
                 logo_b64 = base64.b64encode(f.read()).decode()
-    except Exception:
+    except (FileNotFoundError, PermissionError, IOError):
         pass
 
     # Embed photos as base64
@@ -236,7 +237,7 @@ def assessment_pdf(request, pk):
             mime = 'image/png' if ext == 'png' else 'image/jpeg'
             with open(p.photo.path, 'rb') as f:
                 photos.append({'obj': p, 'b64': base64.b64encode(f.read()).decode(), 'mime': mime})
-        except Exception:
+        except (FileNotFoundError, PermissionError, IOError):
             pass
 
     from django.template.loader import get_template

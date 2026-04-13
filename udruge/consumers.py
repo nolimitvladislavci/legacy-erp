@@ -199,6 +199,6 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
 
         except MarketplaceProduct.DoesNotExist:
             return {'error': 'Proizvod ne postoji.'}
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error('Bid error product %s: %s', self.product_id, e, exc_info=True)
             return {'error': 'Greska pri obradi ponude.'}

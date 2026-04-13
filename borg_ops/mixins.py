@@ -24,6 +24,7 @@ KONVENCIJA — OBVEZNO:
 import logging
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.fsm')
 
@@ -172,7 +173,7 @@ class FSMMixin:
                 is_system_generated=True,
                 is_public_facing=False,  # Default: interni. Eksplicitno markirati javne.
             )
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error('CardActivity create failed: %s', e)
             return None
 
@@ -197,7 +198,7 @@ class FSMMixin:
                 is_system_generated=True,
                 is_public_facing=True,
             )
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error('Public CardActivity create failed: %s', e)
             return None
 
@@ -223,7 +224,7 @@ class FSMMixin:
                 content_type=ct, object_id=obj_id,
                 status=new_status, user=user
             )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error('SLA timestamp update failed: %s', e)
 
     # ── Custom hook za subclass ──────────────────────────────────────
@@ -245,7 +246,7 @@ class FSMMixin:
             ).first()
             if ts:
                 return int((timezone.now() - ts.entered_at).total_seconds())
-        except Exception:
+        except (ValueError, TypeError):
             pass
         return 0
 

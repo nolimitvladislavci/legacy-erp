@@ -1,6 +1,7 @@
 """Celery tasks for AI Midnight Patrol."""
 import logging
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('ai_assistant.patrol')
 
@@ -80,7 +81,7 @@ def ai_midnight_patrol(self):
 
             logger.info(f'Patrol for {company.name}: {len(findings)} findings')
 
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error(f'Patrol failed for company {company.id}: {e}')
 
     logger.info(f'Midnight patrol complete: {total_findings} total findings across {companies.count()} companies')

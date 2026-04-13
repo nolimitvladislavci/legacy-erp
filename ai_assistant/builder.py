@@ -45,7 +45,7 @@ def get_module_context(module_name):
                 if len(content) > 5000:
                     content = content[:5000] + f"\n\n# ... [skraćeno, ukupno {len(content)} znakova]"
                 context_parts.append(f"--- {module_name}/{filename} ---\n{content}")
-            except Exception:
+            except (FileNotFoundError, PermissionError, IOError):
                 pass
 
     # Template-i (lista naziva)
@@ -135,7 +135,7 @@ def builder_generate(request):
             'action_type': result.get('action_type', 'modify'),
         })
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("Builder generate error: %s", traceback.format_exc())
         return JsonResponse({
             'status': 'error',
@@ -194,7 +194,7 @@ Vrati ISKLJUČIVO čisti JSON (bez markdown backticks) sa ključevima:
 
     except ImportError:
         return None
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.warning("Gemini call failed: %s, falling back to Claude", e)
         return None
 
@@ -230,7 +230,7 @@ Bez markdown backticks. Odgovaraj na hrvatskom.""",
                 'raw_response': text,
                 'action_type': 'modify',
             }
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return {'error': f'Ni Gemini ni Claude nisu dostupni: {str(e)}'}
 
 
@@ -285,7 +285,7 @@ def builder_queue(request):
             'status': 'success',
             'message': f'Promjena poslana u Red čekanja (ID: {str(action.id)[:8]}...). Čeka odobrenje superadmina.',
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({
             'status': 'error',
             'message': str(e)

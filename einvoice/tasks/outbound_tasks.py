@@ -100,7 +100,7 @@ def send_via_pipeline_task(invoice_id, user_id=None, profile="HR"):
             "invoice_number": invoice.number,
             "duration_ms": int(duration * 1000),
         }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.error(f"Pipeline failed for Invoice {invoice_id}: {e}")
         return {"error": str(e)}
 

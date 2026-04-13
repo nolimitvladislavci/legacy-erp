@@ -8,6 +8,7 @@ import re
 import datetime
 
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('intelligence')
 
@@ -113,7 +114,7 @@ def run_intelligence_job(job):
             source.zadnja_provjera = timezone.now()
             source.save(update_fields=['zadnja_provjera'])
 
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             logger.error('Source %s failed: %s', source.naziv, e)
 
     job.zadnji_run = timezone.now()
@@ -151,7 +152,7 @@ def _posalji_obavijest(job, result):
 
         r = send_text(phone, msg)
         return r.get('success', False)
-    except Exception as e:
+    except DatabaseError as e:
         logger.error('Obavijest failed: %s', e)
         return False
 

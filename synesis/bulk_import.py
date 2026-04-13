@@ -120,7 +120,7 @@ for i, job in enumerate(jobs):
         print(f"[{i+1:2d}/{len(jobs)}] OK    {company.name:40s} JE={je:>5d} LL={ll:>6d} E={err:>3d} {bal:>12s} ({elapsed:.1f}s)")
         results.append({'company': company.name, 'je': je, 'll': ll, 'err': err, 'bal': bal})
         
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         print(f"[{i+1:2d}/{len(jobs)}] ERROR {company.name:40s} — {str(e)[:60]}")
         results.append({'company': company.name, 'je': 0, 'll': 0, 'err': -1, 'bal': 'ERR'})
 

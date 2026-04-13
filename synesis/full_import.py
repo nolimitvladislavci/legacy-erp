@@ -283,7 +283,7 @@ def import_knjizenja(company, mdb_path, wipe_existing=False):
 
                 created_je += 1
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             errors += 1
             if errors < 5:
                 logger.warning("Import error DIN %s: %s", din, e)

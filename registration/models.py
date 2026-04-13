@@ -1,8 +1,10 @@
+import logging
 import uuid
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.managers import CompanyManager
+from django.db import IntegrityError, DatabaseError
 
 
 class CompanyRegistration(models.Model):
@@ -663,7 +665,7 @@ class CompanyClaimRequest(models.Model):
                         user=user, role=role, company=self.company,
                         defaults={'is_primary': True},
                     )
-            except Exception:
+            except DatabaseError:
                 pass
 
             self.status = 'approved'

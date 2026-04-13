@@ -1,3 +1,4 @@
+from django.db import IntegrityError, DatabaseError
 """
 companies/context_processors.py
 Injects sidebar_modules into every template context.
@@ -77,7 +78,7 @@ def sidebar_modules(request):
             'sidebar_quick_actions': quick_actions,
         }
 
-    except Exception:
+    except DatabaseError:
         return {}
 
 

@@ -16,7 +16,7 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q
 from django.utils.translation import gettext_lazy as _
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, transaction, DatabaseError
 from django.utils import timezone
 
 from .models import (
@@ -25,6 +25,7 @@ from .models import (
 )
 from . import services
 from core.audit_access import audit_sensitive_access, audit_bulk_access
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def _get_company(request):
@@ -87,7 +88,7 @@ def dashboard(request):
     try:
         from invoicing.fiscal_models import FiscalCertificate
         cert = FiscalCertificate.objects.filter(company=company, is_active=True).first()
-    except Exception:
+    except DatabaseError:
         cert = None
 
     country = getattr(company, 'country', 'HR') or 'HR'
@@ -180,12 +181,12 @@ def account_detail(request, pk):
     if date_from:
         try:
             entries = entries.filter(journal_entry__date__gte=date_from)
-        except Exception:
+        except DatabaseError:
             pass
     if date_to:
         try:
             entries = entries.filter(journal_entry__date__lte=date_to)
-        except Exception:
+        except DatabaseError:
             pass
 
     ctx = {
@@ -315,12 +316,12 @@ def transactions(request):
     if date_from:
         try:
             qs = qs.filter(transaction_date__gte=date_from)
-        except Exception:
+        except DatabaseError:
             pass
     if date_to:
         try:
             qs = qs.filter(transaction_date__lte=date_to)
-        except Exception:
+        except DatabaseError:
             pass
     if q:
         qs = qs.filter(
@@ -368,12 +369,12 @@ def journal_entries(request):
     if date_from:
         try:
             qs = qs.filter(date__gte=date_from)
-        except Exception:
+        except DatabaseError:
             pass
     if date_to:
         try:
             qs = qs.filter(date__lte=date_to)
-        except Exception:
+        except DatabaseError:
             pass
 
     ctx = {
@@ -1241,7 +1242,7 @@ def api_reconcile_batch(request):
             errors.append('Transakcija ne postoji ili nije u vasoj firmi.')
         except IntegrityError as e:
             errors.append('DB error: ' + services.parse_integrity_error(e))
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             errors.append(str(e))
 
     msg = 'Sravnjeno ' + str(reconciled) + ' transakcija.'

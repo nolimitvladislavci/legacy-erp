@@ -2,6 +2,7 @@
 partners/tests.py - OIB validator + VIES + partner lookup tests.
 """
 from django.test import TestCase
+from django.db import IntegrityError, DatabaseError
 
 
 class OIBFormatTests(TestCase):
@@ -41,7 +42,7 @@ class PartnerOIBLookupViewTests(TestCase):
             profile = self.user.profile
             profile.company = self.company
             profile.save()
-        except Exception:
+        except (IntegrityError, DatabaseError):
             UserProfile.objects.create(user=self.user, company=self.company)
 
         CompanySubscription.objects.create(

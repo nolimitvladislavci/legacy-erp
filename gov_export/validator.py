@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import hashlib
+from django.db import IntegrityError, DatabaseError
 
 
 @csrf_exempt
@@ -71,10 +72,10 @@ def public_validator(request):
                     result['status'] = export.get_status_display()
                 else:
                     result['registered'] = False
-            except Exception:
+            except DatabaseError:
                 result['registered'] = False
 
-        except Exception as e:
+        except DatabaseError as e:
             result['parse_error'] = str(e)[:200]
 
     return render(request, 'gov_export/validator.html', {'result': result})

@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('udruge')
 
@@ -209,7 +210,7 @@ def ai_analyze(request, pk):
             tip='ai', created_by=request.user,
         )
         return JsonResponse({'ok': True, 'ai_profile': ai_data})
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error('AI analyze clan %s: %s', pk, e)
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -245,7 +246,7 @@ def send_whatsapp(request, pk):
         from .models import ClanBiljeska
         ClanBiljeska.objects.create(clan=clan, text='WhatsApp (%s): %s' % (msg_type, msg[:100]), tip='sistem', created_by=request.user)
         return JsonResponse({'ok': True, 'sent_to': phone})
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -3942,7 +3943,7 @@ def flock_health_create(request, flock_pk):
                         f'KARENCA: {pulled} oglas(a) jaja automatski povucen(o) s trznice. '
                         f'Karenca istice {record.datum + __import__("datetime").timedelta(days=record.karenca_dana):%d.%m.%Y}.'
                     )
-            except Exception:
+            except DatabaseError:
                 pass
 
         messages.success(request, f'Zdravstveni zapis dodan za {flock.naziv}.')
@@ -4082,9 +4083,9 @@ def bridge_publish(request):
                                 f'LOT {lot_num} kreiran za "{item.name}" — '
                                 f'{batch.quantity} kom, rok: {batch.expiry_date:%d.%m.%Y}.'
                             )
-                except Exception:
+                except (ValueError, TypeError):
                     pass
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, _('Objavljivanje nije uspjelo. Pokušajte ponovo.'))
 
         return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
@@ -4109,7 +4110,7 @@ def golubar_ai_ime(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Neispravan JSON"}, status=400)
 
     b64 = data.get("image_b64", "").strip()
@@ -4156,7 +4157,7 @@ def golubar_ai_ime(request):
             result = json.loads(m.group(0))
             return JsonResponse(result)
         return JsonResponse({"error": "AI nije vratio valjani JSON", "raw": raw[:200]}, status=500)
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("golubar_ai_ime error: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)[:200]}, status=500)
 
@@ -4178,7 +4179,7 @@ def golubar_ai_prsten(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Neispravan JSON"}, status=400)
 
     images = data.get("images", [])
@@ -4249,7 +4250,7 @@ def golubar_ai_prsten(request):
             return JsonResponse(result)
         return JsonResponse({"error": "AI nije vratio valjani JSON", "raw": raw[:100]}, status=500)
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("golubar_ai_prsten error: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)[:200]}, status=500)
 
@@ -4335,7 +4336,7 @@ def glazbena_skola_fakturiraj(request):
     try:
         if ucenik.company.glazbena_skola.pdv_na_nastavu:
             pdv = Decimal('25')
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     count = 0

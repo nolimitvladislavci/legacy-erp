@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 
 from .models import GalleryImage
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @login_required
@@ -33,7 +34,7 @@ def toggle_img(request, id):
             img.is_active = not img.is_active
             img.save()
             return JsonResponse({'ok': True, 'is_active': img.is_active})
-        except Exception:
+        except ObjectDoesNotExist:
             pass
     return JsonResponse({'ok': False})
 

@@ -1,3 +1,4 @@
+import logging
 """
 Udruge QR kod i Viral code generatori.
 QR za clanske iskaznice, donatorske potvrde, event ulaznice.
@@ -22,7 +23,7 @@ def generate_qr_base64(data, box_size=4, border=1):
         img.save(buf, format='PNG')
         buf.seek(0)
         return base64.b64encode(buf.read()).decode()
-    except Exception as e:
+    except IOError as e:
         logger.error('QR generiranje: %s', e)
         return None
 
@@ -78,6 +79,6 @@ def generate_payment_qr(company, amount, purpose='Clanarina', reference=''):
                  '%s %s' % (getattr(company, 'zip_code', ''), getattr(company, 'city', '')),
                  getattr(company, 'iban', ''), 'HR00', reference or 'HR99', 'OTHR', purpose[:35]]
         return generate_qr_base64('\n'.join(lines), box_size=3)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.error('HUB-3 QR: %s', e)
         return None

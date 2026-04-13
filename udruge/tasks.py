@@ -2,6 +2,8 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
+from django.db import IntegrityError, DatabaseError
+import json
 
 logger = logging.getLogger('udruge')
 
@@ -95,7 +97,7 @@ def evaluate_subscriptions(self):
                         clanarina=clanarina,
                     )
                     processed['renewed'] += 1
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 logger.warning('Auto-renew %s: %s', sub, e)
 
         # Dunning: ako je grace i reminder nije poslan danas
@@ -253,7 +255,7 @@ def send_email_campaign(self, campaign_id):
                 status='sent', sent_at=tz.now(),
             )
             sent += 1
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             err_msg = str(e)[:255]
             status = 'bounced' if 'bounce' in err_msg.lower() or '550' in err_msg else 'error'
             EmailLog.objects.create(
@@ -364,7 +366,7 @@ def ai_search_eu_funds(self, company_id):
             created += 1
         logger.info('AI EU fund search %s: %d suggestions, %d created', company.name, len(suggestions), created)
         return {'suggestions': len(suggestions), 'created': created}
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error('AI EU fund search %s: %s', company.name, e)
         return {'error': str(e)}
 
@@ -714,7 +716,7 @@ def generate_azil_monthly_report(self, company_id=None, year=None, month=None):
             report.pdf_generiran = True
             report.save()
             logger.info('Azil report %s %d/%02d: PDF generated', company.name, year, month)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.error('Azil PDF %s: %s', company.name, e)
             report.save()
 

@@ -179,7 +179,7 @@ def fetch_oembed(url: str) -> ImportPreview:
             source_url=url,
             error='Greška pri parsiranju odgovora platforme.'
         )
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error(f"Error fetching oEmbed for {url}: {e}")
         return ImportPreview(
             success=False,

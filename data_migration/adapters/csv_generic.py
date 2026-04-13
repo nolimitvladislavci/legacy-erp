@@ -21,6 +21,7 @@ from typing import Any
 import chardet
 
 from .base import AdapterResult, BaseAdapter, MappingField, register_adapter
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -577,7 +578,7 @@ class CsvGenericAdapter(BaseAdapter):
                 for tr in TaxRate.objects.filter(country="HR", is_active=True):
                     rates[tr.rate] = tr
             return rates
-        except Exception:
+        except DatabaseError:
             return {}
 
     def _resolve_tax_rate(self, raw_value, tax_rate_map, row_idx, logs):

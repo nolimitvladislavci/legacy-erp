@@ -8,6 +8,7 @@ import logging
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import date, timedelta
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('inventory.depreciation')
 
@@ -91,7 +92,7 @@ class DepreciationCalculator:
                 'napomena': 'DRAFT — nije proknjiženo. Potrebna potvrda računovođe.',
             }
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error(f'Depreciation kalkulacija greška: {e}')
             return {'error': str(e)}
 
@@ -144,6 +145,6 @@ def check_depreciation_reminders():
 
         return count
 
-    except Exception as e:
+    except DatabaseError as e:
         logger.error(f'check_depreciation_reminders greška: {e}')
         return 0

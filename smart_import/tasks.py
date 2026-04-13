@@ -5,6 +5,7 @@ import logging
 import re
 
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +118,7 @@ def process_import_batch(self, batch_id):
         batch.save(update_fields=["status", "raw_json", "status_message"])
         logger.info("Batch #%d processed successfully: %d items", batch_id, batch.items.count())
 
-    except Exception as exc:
+    except OSError as exc:
         logger.exception("process_import_batch failed for batch %s", batch_id)
         retry_count = getattr(batch, "retry_count", 0) or 0
 
@@ -379,7 +380,7 @@ def fetch_invoices_from_email(self):
                                 safe_name = filename.replace(" ", "_")
                                 batch.file.save(safe_name, ContentFile(file_data), save=True)
                             process_import_batch.delay(batch.pk)
-                        except Exception as db_exc:
+                        except (IntegrityError, DatabaseError) as db_exc:
                             logger.error(
                                 "Email Rampa [%s]: DB greska za privitak '%s': %s",
                                 mb_user, filename, db_exc
@@ -393,7 +394,7 @@ def fetch_invoices_from_email(self):
                                     error_message=str(db_exc),
                                     mailbox_user=mb_user[:255],
                                 )
-                            except Exception:
+                            except (IntegrityError, DatabaseError):
                                 pass
                             continue
                         attachments_found += 1
@@ -429,7 +430,7 @@ def fetch_invoices_from_email(self):
                 login["default_db_obj"].last_check = timezone.now()
                 login["default_db_obj"].last_error = str(e)
                 login["default_db_obj"].save(update_fields=["last_check", "last_error"])
-        except Exception as e:
+        except OSError as e:
             logger.exception("Email Rampa kriticna greska za %s", mb_user)
             results.append("{}: GRESKA - {}".format(mb_user, e))
             if login["default_db_obj"]:
@@ -590,7 +591,7 @@ def process_staging_batch(self, staging_batch_id):
                                 sf.ai_message += ' | DUPLIKAT?'
                                 logger.warning('Mogući duplikat: OIB=%s inv=%s total=%s',
                                     hdr.supplier_oib, hdr.invoice_number, hdr.total_amount)
-                except Exception as _hdr_err:
+                except (ValueError, TypeError) as _hdr_err:
                     logger.warning('Header extraction failed for %s: %s', sf.original_filename, _hdr_err)
                 # ── END HEADER ──
 
@@ -616,7 +617,7 @@ def process_staging_batch(self, staging_batch_id):
                 staging.failed_files += 1
                 consecutive_errors += 1
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             sf.status = 'error'
             sf.error_msg = str(e)[:300]
             sf.ai_message = 'Greska: {}'.format(str(e)[:100])

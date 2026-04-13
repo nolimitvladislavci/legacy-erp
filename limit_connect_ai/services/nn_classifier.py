@@ -6,6 +6,7 @@ a za kompleksnije slucajeve LLM analizu.
 """
 import logging
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.nn_classifier')
 
@@ -85,7 +86,7 @@ class NNTenantClassifier:
             from invoicing.models import Invoice
             if Invoice.objects.filter(company=company).exists():
                 modules.append('invoicing')
-        except Exception:
+        except DatabaseError:
             pass
 
         try:
@@ -93,7 +94,7 @@ class NNTenantClassifier:
             from pos.models import POSTerminal
             if POSTerminal.objects.filter(company=company).exists():
                 modules.append('pos')
-        except Exception:
+        except DatabaseError:
             pass
 
         try:
@@ -101,7 +102,7 @@ class NNTenantClassifier:
             from payroll.models import Employee
             if Employee.objects.filter(company=company).exists():
                 modules.append('payroll')
-        except Exception:
+        except DatabaseError:
             pass
 
         try:
@@ -109,7 +110,7 @@ class NNTenantClassifier:
             from eracun.models import ERacunConfig
             if ERacunConfig.objects.filter(company=company).exists():
                 modules.append('eracun')
-        except Exception:
+        except DatabaseError:
             pass
 
         try:
@@ -117,7 +118,7 @@ class NNTenantClassifier:
             from inventory.models import InventoryItem
             if InventoryItem.objects.filter(company=company).exists():
                 modules.append('inventory')
-        except Exception:
+        except DatabaseError:
             pass
 
         return modules

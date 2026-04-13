@@ -1,4 +1,5 @@
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 """Grossmarkt Online - marketplace views with discount system."""
@@ -321,7 +322,7 @@ def checkout(request):
                         requires_cold_chain=has_cold,
                         expires_at=timezone.now() + timedelta(minutes=15),
                     )
-                except Exception as e:
+                except (ValueError, TypeError) as e:
                     logger.warning(f'DispatchOffer creation failed: {e}')
 
             # Draft Invoice (deferred fiscalization)
@@ -337,7 +338,7 @@ def checkout(request):
                 )
                 order.invoice = draft_invoice
                 order.save(update_fields=['invoice'])
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 logger.warning(f'Draft invoice creation failed: {e}')
 
         # Payment gateway integration
@@ -422,7 +423,7 @@ def checkout(request):
             .filter(delivery_stop__company=company, balance__gt=0)
             .aggregate(total=Sum('balance'))['total'] or 0
         )
-    except Exception:
+    except DatabaseError:
         pass
 
     # Cut-off warning
@@ -680,15 +681,15 @@ Datum: {inv.created_at.strftime('%d.%m.%Y') if hasattr(inv, 'created_at') else '
                     try:
                         zf.write(stop.signature_image.path,
                                  f'potpis_stop_{stop.pk}{os.path.splitext(stop.signature_image.name)[1]}')
-                    except Exception:
+                    except OSError:
                         pass
                 if stop.delivery_photo:
                     try:
                         zf.write(stop.delivery_photo.path,
                                  f'foto_stop_{stop.pk}{os.path.splitext(stop.delivery_photo.name)[1]}')
-                    except Exception:
+                    except OSError:
                         pass
-        except Exception:
+        except OSError:
             pass
 
         # 4. HACCP incidents (if cold chain)
@@ -711,7 +712,7 @@ Resolved: {'DA' if inc.is_resolved else 'NE'}
                         if inc.is_resolved:
                             inc_text += f"Resolved by: {inc.resolved_by}\nNote: {inc.resolution_note}\n"
                         zf.writestr(f'haccp_incident_{inc.pk}.txt', inc_text)
-            except Exception:
+            except DatabaseError:
                 pass
 
         # 5. Complaints
@@ -729,9 +730,9 @@ Datum: {comp.created_at.strftime('%d.%m.%Y %H:%M')}
                     try:
                         zf.write(comp.photo.path,
                                  f'reklamacija_foto_{comp.pk}{os.path.splitext(comp.photo.name)[1]}')
-                    except Exception:
+                    except OSError:
                         pass
-        except Exception:
+        except OSError:
             pass
 
     buf.seek(0)
@@ -909,7 +910,7 @@ def cart_shared_checkout(request, token):
                 )
                 order.invoice = draft
                 order.save(update_fields=['invoice'])
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
 
             snap.is_used = True
@@ -950,7 +951,7 @@ def traceability_view(request, pk):
         img.save(buf, format='PNG')
         buf.seek(0)
         qr_base64 = base64.b64encode(buf.read()).decode()
-    except Exception:
+    except IOError:
         pass
 
     # Check karenca status for egg products

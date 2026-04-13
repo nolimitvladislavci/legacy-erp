@@ -18,6 +18,7 @@ Trigger: Signal na MarketplaceOrder.save() ili poziv iz checkout viewa.
 import logging
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('delivery')
 
@@ -149,7 +150,7 @@ def create_delivery_stops(order_id, driver_user=None):
                     ),
                     company_id=str(buyer.pk),
                 )
-        except Exception as e:
+        except DatabaseError as e:
             logger.warning('Driver WhatsApp notification failed: %s', e)
 
     logger.info(
@@ -208,7 +209,7 @@ def notify_cold_chain_breach(stop_id, temp_reading, threshold=8.0):
             for phone in phones:
                 send_text(phone=phone, message=msg, company_id=str(stop.company.pk))
 
-        except Exception as e:
+        except DatabaseError as e:
             logger.error('Cold chain alert failed: %s', e)
 
         return True

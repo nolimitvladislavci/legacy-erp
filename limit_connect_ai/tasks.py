@@ -8,6 +8,8 @@ from datetime import timedelta
 
 from celery import shared_task
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger("limit_connect_ai")
 
@@ -125,7 +127,7 @@ def _gather_company_context(company):
         )
         ctx["pos_revenue"] = float(agg["total"] or 0)
         ctx["pos_count"] = agg["count"] or 0
-    except Exception:
+    except (ValueError, TypeError):
         ctx["pos_revenue"] = 0
         ctx["pos_count"] = 0
 
@@ -141,7 +143,7 @@ def _gather_company_context(company):
         )
         ctx["open_invoices_count"] = open_inv["count"] or 0
         ctx["open_invoices_total"] = float(open_inv["total"] or 0)
-    except Exception:
+    except (ValueError, TypeError):
         ctx["open_invoices_count"] = 0
         ctx["open_invoices_total"] = 0
 
@@ -153,14 +155,14 @@ def _gather_company_context(company):
             quantity__lte=F("reorder_level"),
         ).count()
         ctx["low_stock_count"] = low
-    except Exception:
+    except DatabaseError:
         ctx["low_stock_count"] = 0
 
     # Active funds
     try:
         from intelligence.models import FundOpportunity
         ctx["active_funds"] = FundOpportunity.objects.filter(status="aktivan").count()
-    except Exception:
+    except DatabaseError:
         ctx["active_funds"] = 0
 
     # Overdue invoices (dospjele fakture)
@@ -181,7 +183,7 @@ def _gather_company_context(company):
             company=company, status__in=['SENT', 'UNPAID', 'OVERDUE'],
             date_due__lt=today,
         ).count()
-    except Exception:
+    except (ValueError, TypeError):
         ctx["overdue_invoices"] = []
         ctx["overdue_count"] = 0
 
@@ -193,7 +195,7 @@ def _gather_company_context(company):
             status__in=['open', 'in_progress'],
         ).count()
         ctx["open_tickets"] = open_tickets
-    except Exception:
+    except DatabaseError:
         ctx["open_tickets"] = 0
 
     # Bank unmatched transactions
@@ -202,7 +204,7 @@ def _gather_company_context(company):
         ctx["unmatched_transactions"] = BankTransaction.objects.filter(
             company=company, status='unmatched'
         ).count()
-    except Exception:
+    except DatabaseError:
         ctx["unmatched_transactions"] = 0
 
     # Worktime anomalies (today)
@@ -212,7 +214,7 @@ def _gather_company_context(company):
             company=company,
             created_at__date=today,
         ).count()
-    except Exception:
+    except DatabaseError:
         ctx["worktime_anomalies"] = 0
 
     return ctx
@@ -370,7 +372,7 @@ def compliance_check_all(self):
                 if mission.notify_target:
                     send_text(mission.notify_target, msg, company_id=str(company.id))
             count += 1
-        except Exception as exc:
+        except DatabaseError as exc:
             logger.error("Compliance check failed for mission %s: %s", mission.id, exc)
 
     logger.info("compliance_check_all: processed %d missions", count)
@@ -405,7 +407,7 @@ def campaign_suggestions_all(self):
                 created_by=mission.created_by,
             )
             count += 1
-        except Exception as exc:
+        except (IntegrityError, DatabaseError) as exc:
             logger.error("Campaign suggestion failed for mission %s: %s", mission.id, exc)
 
     logger.info("campaign_suggestions_all: processed %d missions", count)
@@ -520,7 +522,7 @@ def fenix_post_import_scan(self, company_id, project_id=None):
                 f'{project.records_created} kreirano, '
                 f'{project.records_updated} ažurirano._'
             )
-        except Exception:
+        except ObjectDoesNotExist:
             pass
 
     # ── 4. Troslojne notifikacije ────────────────────────────────────
@@ -549,7 +551,7 @@ def fenix_post_import_scan(self, company_id, project_id=None):
                 from core.whatsapp import send_text
                 send_text(phone, report, company_id=str(company.pk))
                 logger.info('[FENIX] WhatsApp poslan klijentu %s', phone)
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('[FENIX] Klijent WhatsApp failed: %s', e)
 
     # 4b. Klijent — In-App notifikacija
@@ -649,7 +651,7 @@ def request_adaptation_approval(rule_id):
                 message=f'{payload.get("country")} {payload.get("old_rate")}% → {payload.get("new_rate")}%. Stupa na snagu: {effective}',
                 url='/admin/limit_connect_ai/adaptationrule/',
             )
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('[ADAPT] In-app notify failed: %s', e)
 
     logger.info('[ADAPT] Approval request sent for rule %s', rule_id)
@@ -806,7 +808,7 @@ def fenix_intercept_incoming(self, eracun_id):
                     elif alert['type'] == 'opportunity':
                         msg_parts.append(f'💡 PRILIKA: {alert["message"]}')
                 send_text(phone, '\n'.join(msg_parts), company_id=str(company.pk))
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('[FENIX B2B] WhatsApp failed: %s', e)
 
     # In-App notifikacija
@@ -935,7 +937,7 @@ def growth_patrol(self):
                     'category': 'workflow',
                     'priority': 2,
                 })
-    except Exception:
+    except (FileNotFoundError, PermissionError, IOError):
         pass
     
     # 2. Compliance gaps
@@ -951,7 +953,7 @@ def growth_patrol(self):
                 'category': 'workflow',
                 'priority': 1,
             })
-    except Exception:
+    except DatabaseError:
         pass
     
     # 3. Nefiskalizirani računi
@@ -968,7 +970,7 @@ def growth_patrol(self):
                 'category': 'fiscal',
                 'priority': 1,
             })
-    except Exception:
+    except DatabaseError:
         pass
     
     # 4. Certifikati koji istječu
@@ -987,7 +989,7 @@ def growth_patrol(self):
                 'category': 'other',
                 'priority': 3,
             })
-    except Exception:
+    except DatabaseError:
         pass
     
     # Kreiraj sugestije za svaki finding

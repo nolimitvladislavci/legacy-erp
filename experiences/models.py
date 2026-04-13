@@ -1,3 +1,4 @@
+import logging
 """
 experiences/models.py — Agro-Turizam 360
 
@@ -376,7 +377,7 @@ class ExperienceBooking(models.Model):
                 'Konačni no-show račun %s kreiran za booking #%d — %s EUR',
                 invoice.number or invoice.pk, self.pk, self.deposit_amount,
             )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             transaction.savepoint_rollback(sid2)
             logger.error(
                 'Konačni no-show račun FAILED za booking #%d: %s — '
@@ -447,7 +448,7 @@ class ExperienceBooking(models.Model):
                 'Deposit invoice A-%s kreiran za booking #%d — %s EUR',
                 invoice.number or invoice.pk, self.pk, self.deposit_amount,
             )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             transaction.savepoint_rollback(sid)
             logger.error('Deposit invoice FAILED za booking #%d: %s', self.pk, e)
 

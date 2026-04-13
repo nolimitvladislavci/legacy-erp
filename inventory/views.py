@@ -1,3 +1,4 @@
+import logging
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils.translation import gettext as _
@@ -11,6 +12,7 @@ from partners.models import Partner
 
 from .models import InventoryItem, StockMovement
 from .serializers import InventoryItemSerializer, StockMovementSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @login_required
@@ -79,7 +81,7 @@ def item_create(request):
             item.save()
             messages.success(request, f"Artikl {item.name} kreiran.")
             return redirect("inventory:detail", pk=item.pk)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     return render(request, "inventory/item_form.html", {
         "suppliers": Partner.objects.filter(partner_type__in=["supplier","both"], is_active=True).order_by("name"),
@@ -110,7 +112,7 @@ def item_edit(request, pk):
             item.save()
             messages.success(request, f"Artikl {item.name} ažuriran.")
             return redirect("inventory:detail", pk=item.pk)
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     return render(request, "inventory/item_form.html", {
         "item": item,
@@ -142,7 +144,7 @@ def stock_movement(request, pk):
                 item.quantity = qty
             item.save(update_fields=["quantity"])
             messages.success(request, f"Kretanje zalihe zabilježeno. Nova kol: {item.quantity} {item.unit}")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, str(e))
     return redirect("inventory:detail", pk=pk)
 
@@ -232,7 +234,7 @@ def goods_receipt_create(request):
         def _d(v):
             try:
                 return Decimal(str(v).replace(',', '.'))
-            except Exception:
+            except (ValueError, TypeError):
                 return Decimal('0')
 
         item_ids  = request.POST.getlist('item_id[]')
@@ -384,7 +386,7 @@ def api_quick_create_article(request):
             'name': item.name,
             'message': f'Artikl "{item.name}" dodan!'
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': str(e)}, status=400)
 
 
@@ -511,7 +513,7 @@ def api_smart_create(request):
 
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     name = data.get('name', '').strip()
@@ -640,7 +642,6 @@ def kalo_view(request):
 # PHASE 10: Continuous Blind Inventory API
 # ══════════════════════════════════════════════════════════════════════════════
 
-@csrf_exempt
 @login_required
 def api_submit_count(request):
     """
@@ -770,7 +771,6 @@ def api_submit_count(request):
     })
 
 
-@csrf_exempt
 @login_required
 def api_check_batch_for_dispatch(request, batch_id):
     """
@@ -913,7 +913,7 @@ def auto_generate_po(request):
                         'reorder_point': float(pred.get('reorder_point', 10)),
                         'urgency': pred.get('urgency', 'warning'),
                     })
-            except Exception:
+            except ObjectDoesNotExist:
                 continue
         po_ids = generate_draft_po(company, items=items)
     else:
@@ -1688,7 +1688,7 @@ def ai_menu_scan(request):
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'AI nije mogao parsirati cjenik. Pokusajte jasniju sliku.'}, status=400)
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': str(e)}, status=500)
 
     # Kreiraj InventoryItem za svaki parsirani artikl

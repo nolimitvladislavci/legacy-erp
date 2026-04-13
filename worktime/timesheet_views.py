@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 from core.tenant import get_current_company
 
 from .models import ActiveTimer, DailyNote, EmployeeProfile, Project, TimeEntry, TimeEntryTemplate
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def _user_company(user):
@@ -210,7 +211,7 @@ def timer_start(request):
         try:
             from burza.models import ProjectLead as _TPL
             _timer_pl = _TPL.objects.get(pk=_timer_lead_id)
-        except Exception:
+        except ObjectDoesNotExist:
             pass
     timer = ActiveTimer.objects.create(
         company=_user_company(user),
@@ -438,7 +439,7 @@ def time_entry_add(request):
                 try:
                     from burza.models import ProjectLead as _PL
                     _pl = _PL.objects.get(pk=_lead_id)
-                except Exception:
+                except ObjectDoesNotExist:
                     pass
             TimeEntry.objects.create(
                 company=_user_company(request.user),
@@ -530,13 +531,13 @@ def time_entry_edit(request, pk):
                 try:
                     from burza.models import ProjectLead as _PL2
                     te.project_lead = _PL2.objects.get(pk=_lead_id2)
-                except Exception:
+                except ObjectDoesNotExist:
                     te.project_lead = None
             elif 'project_lead' in request.POST:
                 te.project_lead = None
             te.save()
             messages.success(request, f'✓ Unos ažuriran ({te.duration}h)')
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('worktime:ts_worker')
     projects = Project.objects.filter(
@@ -775,7 +776,7 @@ def template_save(request):
             }
         )
         messages.success(request, f'✓ Predložak {"kreiran" if created else "ažuriran"}: {name}')
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return redirect('worktime:ts_worker')
 
@@ -936,7 +937,7 @@ def worker_profile(request):
                 if new_weekly: emp.weekly_hours = Decimal(str(new_weekly).replace(',','.'))
                 emp.save()
                 messages.success(request, f'✓ Satnica ažurirana: €{emp.hourly_rate}/h (prekovremeno: €{emp.overtime_rate}/h)')
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
             return redirect('worktime:ts_profile')
         # change_password action removed — use /accounts/password/

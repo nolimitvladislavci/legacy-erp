@@ -4,6 +4,7 @@ Autonomni nocni patrol -- pokrece se svako jutro u 03:30.
 """
 import logging
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('intelligence')
 
@@ -78,7 +79,7 @@ def check_auto_listings(self):
                 if phone:
                     days = (grlo.expected_calving - today).days
                     send_text(phone, f'Krava {grlo.ear_tag} ({grlo.name or "bez imena"}) teli za {days} dana!')
-        except Exception as e:
+        except DatabaseError as e:
             logger.error('Calving alert failed: %s', e)
 
     logger.info('Auto-listings: %d novih listinga, %d upozorenja za teljenje', listed, grla.count())

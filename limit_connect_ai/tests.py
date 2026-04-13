@@ -435,7 +435,7 @@ class ProactiveWidgetTest(BORGTestBase):
             alert_titles = [a['title'] for a in result['alerts']]
             has_overdue = any('dospjel' in t.lower() for t in alert_titles)
             self.assertTrue(has_overdue, f'Expected overdue alert, got: {alert_titles}')
-        except Exception:
+        except (ValueError, TypeError):
             # Invoice model može imati required polja — preskačemo
             self.skipTest('Invoice model requires additional fields')
 

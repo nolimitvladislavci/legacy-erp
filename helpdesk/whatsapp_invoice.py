@@ -39,7 +39,7 @@ def download_waha_media(media_url):
         if resp.status_code == 200:
             content_type = resp.headers.get('Content-Type', 'application/octet-stream')
             return resp.content, content_type
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error('WAHA media download failed: %s', e)
 
     return None, None

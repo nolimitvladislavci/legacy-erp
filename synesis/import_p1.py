@@ -31,7 +31,7 @@ def _mdb(mdb_path, table):
 def _dec(val):
     if not val: return Decimal('0')
     try: return Decimal(str(val).strip().replace(',','.').replace('"','')).quantize(Decimal('0.01'))
-    except Exception as e:  # BORG: was bare except
+    except (ValueError, TypeError) as e:
         return Decimal('0')
 
 def _date(val):
@@ -40,12 +40,12 @@ def _date(val):
     from datetime import datetime, timedelta, date
     for fmt in ('%m/%d/%y %H:%M:%S','%m/%d/%Y %H:%M:%S','%m/%d/%y','%Y-%m-%d'):
         try: return datetime.strptime(val, fmt).date()
-        except Exception as e:  # BORG: was bare except
+        except (ValueError, TypeError) as e:
             continue
     try:
         s = float(val)
         if 30000 < s < 60000: return date(1899,12,30) + timedelta(days=int(s))
-    except Exception as e:  # BORG: was bare except
+    except (ValueError, TypeError) as e:
         pass
     return None
 
@@ -313,7 +313,7 @@ if __name__ == '__main__':
             
             elapsed = time.time() - t0
             print(f"[{i+1:2d}/{len(jobs)}] OK    {company.name:40s} Items={items:>5d} IRA={ira:>5d} URA={ura:>5d} ({elapsed:.1f}s)")
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             print(f"[{i+1:2d}/{len(jobs)}] ERROR {job['name']:40s} — {str(e)[:60]}")
 
     print(f"\n{'='*75}")

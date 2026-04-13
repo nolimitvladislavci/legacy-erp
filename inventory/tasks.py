@@ -6,6 +6,7 @@ and auto-creates DRAFT PurchaseOrders grouped by supplier.
 import logging
 from celery import shared_task
 from decimal import Decimal
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger('inventory.predictive')
 
@@ -167,7 +168,7 @@ def predictive_reorder_check(self):
 
             logger.info(f'Predictive reorder for {company.name}: {pos_created} POs created')
 
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             logger.error(f'Predictive reorder failed for {company.name}: {e}', exc_info=True)
             results.append({'company': company.name, 'status': 'error', 'error': str(e)})
 

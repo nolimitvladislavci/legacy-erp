@@ -365,7 +365,7 @@ def ping_fina(cert_path: str, password: str, demo: bool = True) -> bool:
             return r.status_code in (200, 500) and b"Envelope" in r.content
         finally:
             os.unlink(ct); os.unlink(kt)
-    except Exception as exc:
+    except requests.RequestException as exc:
         logger.warning(f'FINA ping greška: {exc}')
         return False
 

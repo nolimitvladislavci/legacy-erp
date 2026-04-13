@@ -170,7 +170,7 @@ def validate_business_rules(xml_bytes):
         t = _text(xpath)
         try:
             return Decimal(t) if t else None
-        except Exception:
+        except (ValueError, TypeError):
             return None
 
     # ── BR-01: Invoice number required ──
@@ -226,7 +226,7 @@ def validate_business_rules(xml_bytes):
             if amt_el is not None and amt_el.text:
                 try:
                     line_sum += Decimal(amt_el.text)
-                except Exception:
+                except (ValueError, TypeError):
                     pass
         if line_extension and abs(line_sum - line_extension) > Decimal('0.02'):
             errors.append(f'BR-12: Zbroj stavki ({line_sum}) != LineExtensionAmount ({line_extension})')
@@ -260,7 +260,7 @@ def validate_business_rules(xml_bytes):
             if ta_el is not None and ta_el.text:
                 try:
                     subtotal_sum += Decimal(ta_el.text)
-                except Exception:
+                except (ValueError, TypeError):
                     pass
         if abs(subtotal_sum - tax_amount) > Decimal('0.02'):
             errors.append(f'BR-CO-10: Zbroj PDV stavki ({subtotal_sum}) != ukupni PDV ({tax_amount})')

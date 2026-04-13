@@ -1,4 +1,6 @@
 import logging
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 from django.contrib import messages
@@ -35,7 +37,7 @@ def company_create(request):
             c.save()
             messages.success(request, f"Tvrtka {c.name} kreirana.")
             return redirect("companies:list")
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, str(e))
     return render(request, "companies/company_form.html", {"action": "Nova tvrtka"})
 
@@ -57,7 +59,7 @@ def company_edit(request, pk):
             company.save()
             messages.success(request, f"Tvrtka {company.name} ažurirana.")
             return redirect("companies:list")
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, str(e))
     return render(request, "companies/company_form.html", {"company": company, "action": "Uredi tvrtku"})
 
@@ -138,7 +140,7 @@ def company_settings(request):
             try:
                 from .models import NKDCode
                 company.nkd_code = NKDCode.objects.get(pk=nkd_id)
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
         elif "nkd_code_id" in request.POST:
             company.nkd_code = None
@@ -193,7 +195,7 @@ def company_settings(request):
     try:
         from invoicing.models import Invoice
         usage["invoices"] = Invoice.objects.filter(company=company).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     # Fiscal certificates for fiscal tab
@@ -208,7 +210,7 @@ def company_settings(request):
         _now = _tz.now()
         for c in fiscal_certs:
             c.is_expired = c.valid_until and c.valid_until < _now
-    except Exception:
+    except DatabaseError:
         pass
 
 
@@ -356,7 +358,7 @@ def employee_create(request):
                 ep.bank_account = request.POST.get("bank_account", "").strip() or ep.bank_account
                 ep.is_manager = is_manager
                 ep.save(update_fields=["company","tax_id","bank_account","is_manager"])
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             import logging
             logging.getLogger("companies").warning("EmployeeProfile create failed: %s", e)
 
@@ -532,7 +534,7 @@ def branch_save_redirect(request, pk=None):
             from django.http import JsonResponse
             return JsonResponse({'ok': True, 'name': branch.name, 'pk': branch.pk})
         messages.success(request, f'Podružnica {branch.name} spremljena.')
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         if is_ajax:
             from django.http import JsonResponse
             return JsonResponse({'ok': False, 'error': str(e)}, status=400)
@@ -868,7 +870,7 @@ def workspace_home(request):
                 doc_count=Count('id'),
                 pending_count=Count('id', filter=Q(is_booked=False))
             )
-        except Exception:
+        except DatabaseError:
             stats = {'doc_count': 0, 'pending_count': 0}
         c.doc_count = stats['doc_count'] or 0
         c.pending_count = stats['pending_count'] or 0
@@ -1263,7 +1265,7 @@ def employee_onboard(request, pk=None):
                     try:
                         ws = Workspace.objects.get(pk=workspace_id, company=company)
                         ws.workers.add(user)
-                    except Exception:
+                    except ObjectDoesNotExist:
                         pass
 
                 # Audit
@@ -1327,7 +1329,7 @@ def employee_offboard(request, pk):
         open_sessions = POSSession.objects.filter(
             operator=ep.user, status='open'
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     # Audit
@@ -1393,7 +1395,7 @@ def compliance_monitor(request):
                 is_cashier = POSCashier.objects.filter(
                     user=ep.user, is_active=True
                 ).exists()
-            except Exception:
+            except DatabaseError:
                 is_cashier = False
             
             level = 'critical' if is_cashier else 'warning'
@@ -1446,7 +1448,7 @@ def compliance_monitor(request):
                     'action_url': None,
                     'action_label': None,
                 })
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     # Disputed revisions
@@ -1465,7 +1467,7 @@ def compliance_monitor(request):
                 'action_url': '/hr/worktime/ts/manager/',
                 'action_label': _('Pregledaj prigovore'),
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     critical = [a for a in alerts if a['level'] == 'critical']

@@ -1,3 +1,4 @@
+import logging
 import json
 import time
 from django.shortcuts import render, redirect
@@ -9,6 +10,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from core.company_utils import get_user_company
+from django.core.exceptions import ObjectDoesNotExist
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -597,7 +599,7 @@ def synesis_import_api(request):
 
     try:
         body = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     sync_type = body.get("type")
@@ -681,7 +683,7 @@ def _import_pos(company, data):
                     revenue_week += amt
                 if receipt_date >= month_ago:
                     revenue_month += amt
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     from .models import SynesisConfig
@@ -698,7 +700,7 @@ def _import_pos(company, data):
             "pos_revenue_today", "pos_revenue_week", "pos_revenue_month",
             "last_sync_pos", "updated_at",
         ])
-    except Exception as exc:
+    except ObjectDoesNotExist as exc:
         return {"error": str(exc), "received": len(receipts)}
 
     return {
@@ -763,7 +765,7 @@ def _import_partners(company, data):
                 created += 1
             else:
                 updated += 1
-        except Exception as exc:
+        except ObjectDoesNotExist as exc:
             errors += 1
             error_msgs.append(str(exc)[:200])
 
@@ -817,7 +819,7 @@ def _import_items(company, data):
                 created += 1
             else:
                 updated += 1
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             errors += 1
             error_msgs.append(str(exc)[:200])
 
@@ -1192,7 +1194,7 @@ def _import_invoices(request, company, data_list):
 
             created += 1
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             errors += 1
             import traceback
             traceback.print_exc()
@@ -1290,7 +1292,7 @@ def _import_employees(company, rows):
                 )
                 created += 1
 
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             errors += 1
 
     return {'created': created, 'updated': updated, 'errors': errors}
@@ -1429,7 +1431,7 @@ def _import_retail(company, retail_rows, tretail_rows):
 
             created += 1
 
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             errors += 1
             import traceback
             traceback.print_exc()

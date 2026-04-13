@@ -201,7 +201,7 @@ def check_btcpay_status(payment, config=None):
             payment.gateway_data.update({'btcpay_status': btc_status})
             payment.save(update_fields=['status', 'gateway_data'])
         return btc_status
-    except Exception as e:
+    except requests.RequestException as e:
         logger.warning("BTCPay status check failed: %s", e)
         return payment.status
 
@@ -287,7 +287,7 @@ def check_revolut_status(payment, config=None):
                 payment.gateway_data.update({'revolut_status': rev_status})
                 payment.save(update_fields=['status', 'gateway_data'])
             return rev_status
-    except Exception as e:
+    except requests.RequestException as e:
         logger.warning('Revolut status check failed: %s', e)
     return payment.status
 

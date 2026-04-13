@@ -5,6 +5,7 @@ Izdvojeno iz urls.py da se izbjegne circular import pri test DB kreaciji.
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, DatabaseError
+import logging
 logger = logging.getLogger(__name__)
 
 

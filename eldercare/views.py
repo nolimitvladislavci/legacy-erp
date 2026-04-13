@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
 from .models import Room, Resident, Relative, MonthlyCharge, StaffShift, Activity
+from django.db import IntegrityError, DatabaseError
 
 
 def _company(request):
@@ -106,7 +107,7 @@ def resident_create(request):
             )
             messages.success(request, f"Korisnik {resident} primljen.")
             return redirect("eldercare:resident_detail", pk=resident.pk)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, str(e))
 
     return render(request, "eldercare/resident_form.html", {

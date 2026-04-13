@@ -148,7 +148,7 @@ class Command(BaseCommand):
                 "days_left": days_left, "subject": cert.subject.rfc4514_string(),
             }
 
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             self._error(f"Certificate load error: {e}")
             return {"ok": False}
 
@@ -318,13 +318,13 @@ class Command(BaseCommand):
                 self._warn("  FINA CIS test: connection refused (expected for GET)")
             except httpx.ReadTimeout:
                 self._warn("  FINA CIS test: timeout (expected, server doesn't respond to GET)")
-            except Exception as e:
+            except httpx.HTTPError as e:
                 self._warn(f"  FINA CIS test: {type(e).__name__}: {e}")
 
             client.close()
             return {"ok": True}
 
-        except Exception as e:
+        except httpx.HTTPError as e:
             self._error(f"mTLS setup failed: {e}")
             return {"ok": False}
 

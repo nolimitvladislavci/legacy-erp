@@ -10,6 +10,7 @@ from decimal import Decimal
 
 from django.core.cache import cache
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('fiskalizacija.bonitet')
 
@@ -168,7 +169,7 @@ def _save_alert(oib, company_id, result):
             source_data=result.get('details'),
         )
         logger.info('[BONITET ALERT] Kreiran SupplierRiskAlert: OIB=%s rizik=%s company=%s', oib, result['risk_level'], company_id)
-    except Exception:
+    except (IntegrityError, DatabaseError):
         logger.warning('[BONITET ALERT] Greška pri spremanju alerta OIB=%s', oib, exc_info=True)
 
 

@@ -6,6 +6,7 @@ dodaje u ArhivaEntry za 11-godišnju zaštitu.
 """
 import logging
 from decimal import Decimal
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +120,7 @@ def create_rental_invoice(booking) -> 'RentalInvoice':
             amount=total,
             currency='EUR',
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('ArhivaEntry creation failed for rental invoice: %s', e)
 
     logger.info(

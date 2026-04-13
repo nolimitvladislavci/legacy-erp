@@ -90,7 +90,7 @@ def extract_mrz_with_haiku(image_path: str) -> dict:
 
     except ImportError:
         logger.warning('anthropic SDK not installed — OCR disabled')
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error('OCR MRZ extraction failed: %s', e)
 
     return {'confidence': 0.0, 'document_type': 'unknown'}

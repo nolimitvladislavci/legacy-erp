@@ -18,6 +18,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_POST, require_GET
 
 from .models import CardActivity, StatusTimestamp
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.ops')
 
@@ -262,7 +263,7 @@ def operations_dashboard(request):
                 'new': signals_24h.filter(status='new').count(),
                 'critical': signals_24h.filter(priority__lte=2).count(),
             }
-        except Exception:
+        except DatabaseError:
             pass
         cache.set('borg_hub_signals', signal_stats, CACHE_TTL)
 
@@ -286,7 +287,7 @@ def operations_dashboard(request):
             exp_today['bookings'] = agg['total'] or 0
             exp_today['no_shows'] = agg['no_shows'] or 0
             exp_today['revenue'] = agg['revenue'] or 0
-        except Exception:
+        except DatabaseError:
             pass
         cache.set('borg_hub_exp_today', exp_today, CACHE_TTL)
 
@@ -318,7 +319,7 @@ def operations_dashboard(request):
             expiry_date__lte=week, expiry_date__gte=today,
             quarantine_status='active',
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── Financijski pulse ──
@@ -333,7 +334,7 @@ def operations_dashboard(request):
         fin_pulse['unpaid'] = Invoice.objects.filter(
             status__in=['CONFIRMED', 'FISCALIZED', 'SENT'],
         ).exclude(total=0).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'borg_ops/operations_dashboard.html', {
@@ -518,7 +519,7 @@ def borg_hub(request):
                 'open': wo_qs.filter(status__in=['draft', 'in_progress']).count(),
                 'completed_today': wo_qs.filter(status='completed', date=today).count(),
             }
-        except Exception:
+        except DatabaseError:
             work_orders = {}
             wo_stats = {}
         cache.set(f'borg_hub_wo_{company.pk}', work_orders, CACHE_TTL)
@@ -550,7 +551,7 @@ def borg_hub(request):
             'upcoming': len(upcoming_schedules),
             'pending_payment': len(pending_bookings),
         }
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── BURZA ──
@@ -561,7 +562,7 @@ def borg_hub(request):
             company=company,
             status__in=['NOVI_UPIT', 'INTERNA_PROCJENA', 'NA_BURZI'],
         ).order_by('-created_at')[:5])
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── FENIX SIGNALS ──
@@ -571,7 +572,7 @@ def borg_hub(request):
         alerts = list(FenixSignal.objects.filter(
             status__in=['new', 'acknowledged'],
         ).order_by('priority', '-created_at')[:5])
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── INVOICING ──
@@ -586,7 +587,7 @@ def borg_hub(request):
         overdue_count = Invoice.objects.filter(
             company=company, status='OVERDUE',
         ).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── POS DANAS ──
@@ -599,7 +600,7 @@ def borg_hub(request):
         )
         pos_today_count = pos_qs.count()
         pos_today_revenue = pos_qs.aggregate(s=Sum('total'))['s'] or 0
-    except Exception:
+    except DatabaseError:
         pass
 
     # ── INTERVENTIONS ──
@@ -611,7 +612,7 @@ def borg_hub(request):
         ).exclude(
             status__in=['RIJESENO', 'FAKTURIRANO'],
         ).select_related('assigned_to').order_by('created_at')[:5])
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'borg_ops/hub.html', {

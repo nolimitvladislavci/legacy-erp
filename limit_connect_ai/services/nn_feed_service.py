@@ -244,7 +244,7 @@ class NNFeedScraperService:
             return json.loads(text)
         except json.JSONDecodeError as e:
             logger.warning('[NN] LLM neispravan JSON: %s', e)
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             logger.error('[NN] LLM error: %s', e)
         return None
 

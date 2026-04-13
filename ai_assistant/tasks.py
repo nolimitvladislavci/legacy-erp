@@ -1,5 +1,6 @@
 import logging
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('ai_assistant.patrol')
 
@@ -58,13 +59,13 @@ def ai_midnight_patrol_company(self, company_id):
                     phone = getattr(admin_profiles[0], 'phone', '') or ''
                     if phone:
                         send_text(phone, "LIMIT Connect Patrol:\n{}".format(report['summary'][:500]))
-        except Exception as ne:
+        except DatabaseError as ne:
             logger.warning("Patrol notify failed for %s: %s", company.name, ne)
 
         logger.info("Patrol OK: %s — %s", company.name, 'ISSUES' if report['has_issues'] else 'OK')
         return {'company': company.name, 'status': 'ok', 'has_issues': report['has_issues']}
 
-    except Exception as exc:
+    except (IntegrityError, DatabaseError) as exc:
         logger.error("Patrol failed for %s: %s", company.name, exc)
         return {'company': company.name, 'status': 'error', 'error': str(exc)}
 

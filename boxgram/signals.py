@@ -11,6 +11,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ def on_honey_harvest_saved(sender, instance, created, **kwargs):
                 }
             )
             logger.info(f'Boxgram sync: HoneyHarvest {instance.pk} → PetProfile {pet.id}')
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning(f'Boxgram sync skip (HoneyHarvest {getattr(instance, "pk", "?")}): {e}')
 
 
@@ -99,7 +100,7 @@ def on_hive_inspection_saved(sender, instance, created, **kwargs):
                     'is_public': False,
                 }
             )
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning(f'Boxgram sync skip (HiveInspection {getattr(instance, "pk", "?")}): {e}')
 
 
@@ -134,7 +135,7 @@ def on_epp_dojava_saved(sender, instance, created, **kwargs):
                     'is_public': True,
                 }
             )
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning(f'Boxgram sync skip (EPPDojava {getattr(instance, "pk", "?")}): {e}')
 
 
@@ -218,7 +219,7 @@ def on_animal_saved(sender, instance, created, **kwargs):
                 is_public=True,
             )
             logger.info(f'Boxgram: Auto-kreiran PetProfile za {ime} (Animal {instance.pk})')
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning(f'Boxgram sync skip (Animal {getattr(instance, "pk", "?")}): {e}')
 
 
@@ -244,7 +245,7 @@ def on_invoice_saved(sender, instance, created, **kwargs):
             ).update(is_verified=True)
             if updated:
                 logger.info(f'Boxgram: LifeEvent verified via Invoice {instance.pk}')
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning(f'Boxgram sync skip (Invoice {getattr(instance, "pk", "?")}): {e}')
 
 

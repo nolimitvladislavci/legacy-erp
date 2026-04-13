@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('ai_assistant.patrol')
 
@@ -25,7 +26,7 @@ def _gather_patrol_data(company):
             'late_deliveries': late.count(),
             'late_details': list(late.values('delivery_number', 'eta', 'buyer_company__name')[:5])
         }
-    except Exception:
+    except DatabaseError:
         data['tracking'] = {'error': 'Module not available'}
 
     # 2. Inventory - low stock & expiring
@@ -46,7 +47,7 @@ def _gather_patrol_data(company):
             'expiring_batches_7d': expiring.count(),
             'expiring_details': list(expiring.values('item__name', 'batch_number', 'expiry_date', 'quantity')[:5])
         }
-    except Exception:
+    except DatabaseError:
         data['inventory'] = {'error': 'Module not available'}
 
     # 3. SmartBox - temperature alerts
@@ -66,7 +67,7 @@ def _gather_patrol_data(company):
             'total_boxes': boxes.count(),
             'temp_alerts': alerts
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['smartbox'] = {'error': 'Module not available'}
 
     # 4. Propter - unbilled otpremnice
@@ -79,7 +80,7 @@ def _gather_patrol_data(company):
             'unbilled_count': unbilled.count(),
             'unbilled_total_eur': float(agg['total'] or 0),
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['propter'] = {'error': 'Module not available'}
 
     # 5. Maintenance - expiring documents
@@ -107,7 +108,7 @@ def _gather_patrol_data(company):
             'expiring_documents': exp_items[:10],
             'expiring_count': len(exp_items)
         }
-    except Exception:
+    except DatabaseError:
         data['maintenance'] = {'error': 'Module not available'}
 
     # 6. Invoicing - overdue invoices
@@ -121,7 +122,7 @@ def _gather_patrol_data(company):
             'overdue_total_eur': float(agg['total'] or 0),
             'overdue_details': list(overdue.values('number', 'partner__name', 'total', 'date_due')[:5])
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['invoicing'] = {'error': 'Module not available'}
 
     # 7. Helpdesk - open/overdue tickets
@@ -133,7 +134,7 @@ def _gather_patrol_data(company):
             'open_tickets': open_tickets.count(),
             'overdue_tickets': len(overdue_tickets),
         }
-    except Exception:
+    except DatabaseError:
         data['helpdesk'] = {'error': 'Module not available'}
 
     # 8. Procurement - pending POs
@@ -146,7 +147,7 @@ def _gather_patrol_data(company):
             'pending_pos': pending.count(),
             'pending_details': list(pending.values('po_number', 'supplier__name', 'total', 'status')[:5])
         }
-    except Exception:
+    except DatabaseError:
         data['procurement'] = {'error': 'Module not available'}
 
     # 9. POS - yesterday's revenue
@@ -163,7 +164,7 @@ def _gather_patrol_data(company):
             'yesterday_receipts': receipts.count(),
             'yesterday_revenue_eur': float(rev['total'] or 0)
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['pos'] = {'error': 'Module not available'}
 
     # 10. Payments - pending
@@ -176,7 +177,7 @@ def _gather_patrol_data(company):
             'pending_count': pending.count(),
             'pending_total_eur': float(agg['total'] or 0)
         }
-    except Exception:
+    except (ValueError, TypeError):
         data['payments'] = {'error': 'Module not available'}
 
     def _sanitize_data(obj):

@@ -1,3 +1,4 @@
+import logging
 import json
 import time
 from datetime import datetime, timedelta
@@ -15,6 +16,7 @@ from invoicing.models import Invoice, InvoiceItem
 from partners.models import Partner
 
 from .models import Addon, Booking, Resource
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def index(request):
@@ -180,7 +182,7 @@ def api_submit(request):
 
         return JsonResponse({'status': 'success', 'booking_number': booking.booking_number})
 
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         import logging
         logging.getLogger(__name__).error(f"Booking error: {e}", exc_info=True)
         return JsonResponse({'status': 'error', 'error': 'Interna greska servera.'}, status=500)

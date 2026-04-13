@@ -145,7 +145,7 @@ def analyze_image(image_bytes: bytes, context: str = '') -> dict:
                 result['model_used'] = 'claude-haiku'
                 return result
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.warning('Image analysis (Anthropic) failed: %s', e)
 
     # Fallback: no analysis available
@@ -322,7 +322,7 @@ def process_inbound_message(message) -> None:
                     context=f"Warranty: {message.warranty}, Message: {message.body[:200]}"
                 )
                 message.ai_image_analysis = img_result
-        except Exception as e:
+        except IOError as e:
             logger.warning('Image analysis failed for message %s: %s', message.pk, e)
 
     # Auto-escalate

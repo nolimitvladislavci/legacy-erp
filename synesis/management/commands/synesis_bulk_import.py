@@ -6,6 +6,7 @@ import csv, io, os, subprocess, time, re
 from collections import defaultdict
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 
 class Command(BaseCommand):
@@ -211,7 +212,7 @@ class Command(BaseCommand):
                         records_received=len(inv_rows), records_created=c,
                         records_updated=u, errors=e,
                         error_detail=f'Archive: {fi["folder_name"]}', duration_seconds=dur)
-                except Exception as exc:
+                except (IntegrityError, DatabaseError) as exc:
                     dur = round(time.time() - t0, 2)
                     self.stderr.write(self.style.ERROR(f'    Invoice import error: {exc}'))
                     stats['invoices_errors'] += 1
@@ -232,7 +233,7 @@ class Command(BaseCommand):
                         records_received=len(retail_rows), records_created=res.get('created', 0),
                         records_updated=res.get('updated', 0), errors=res.get('errors', 0),
                         error_detail=f'Archive: {fi["folder_name"]}', duration_seconds=dur)
-                except Exception as exc:
+                except (IntegrityError, DatabaseError) as exc:
                     self.stderr.write(self.style.ERROR(f'    Retail import error: {exc}'))
                     stats['retail_errors'] += 1
         if sync_type in ('all', 'employees'):
@@ -251,7 +252,7 @@ class Command(BaseCommand):
                         records_received=len(rows), records_created=res.get('created', 0),
                         records_updated=res.get('updated', 0), errors=res.get('errors', 0),
                         error_detail=f'Archive: {fi["folder_name"]}', duration_seconds=dur)
-                except Exception as exc:
+                except (IntegrityError, DatabaseError) as exc:
                     self.stderr.write(self.style.ERROR(f'    Employee import error: {exc}'))
                     stats['employees_errors'] += 1
         return stats

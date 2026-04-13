@@ -22,6 +22,7 @@ from .models import (
     SalesOrder, SalesOrderLine, OpenItem, IOSReport,
 )
 from .ai_services import smart_pricing_suggest, order_predictor, payment_predictor, resolve_price
+from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +178,7 @@ def ai_price_suggest(request):
         for k, v in result.items():
             serialized[k] = float(v) if isinstance(v, Decimal) else v
         return JsonResponse({'ok': True, 'data': serialized})
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.exception('AI price suggest error')
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -210,7 +211,7 @@ def resolve_price_api(request):
             else:
                 serialized[k] = v
         return JsonResponse({'ok': True, 'data': serialized})
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.exception('Resolve price error')
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -354,7 +355,7 @@ def order_create(request):
     try:
         from inventory.models import Warehouse
         warehouses = Warehouse.objects.filter(company=company)
-    except Exception:
+    except DatabaseError:
         warehouses = []
 
     return render(request, 'sales/order_form.html', {
@@ -854,7 +855,7 @@ def ai_payment_risk(request):
                 'risk_level': p['risk_level'],
             })
         return JsonResponse({'ok': True, 'data': data})
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.exception('AI payment risk error')
         return JsonResponse({'error': str(e)}, status=500)
 

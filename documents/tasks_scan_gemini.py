@@ -11,6 +11,7 @@ Umjesto time.sleep(62) koji blokira workera:
 import logging
 
 from celery import shared_task
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ def finalize_scan_batch(self, batch_id, total_ok=0, total_err=0):
             batch.status = 'error'
             batch.error_message = 'Grupiranje neuspjelo: %s' % str(e)[:200]
             batch.save(update_fields=['status', 'error_message'])
-        except Exception:
+        except ObjectDoesNotExist:
             pass
         return {'error': str(e)}
 
@@ -120,6 +121,6 @@ def archive_scan_batch(self, batch_id, user_id=None):
             batch.status = 'error'
             batch.error_message = 'Arhiviranje neuspjelo: %s' % str(e)[:200]
             batch.save(update_fields=['status', 'error_message'])
-        except Exception:
+        except ObjectDoesNotExist:
             pass
         return {'error': str(e)}

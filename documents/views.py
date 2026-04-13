@@ -19,6 +19,7 @@ from partners.models import Partner
 
 from .models import Document
 from .serializers import DocumentSerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 logger = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ def document_create(request):
             doc.save()
             messages.success(request, f"Dokument {doc.doc_number} kreiran.")
             return redirect("documents:list")
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             logger.error('arhiva_upload FAILED: %s', e, exc_info=True)
             messages.error(request, str(e))
     company = get_user_company(request)

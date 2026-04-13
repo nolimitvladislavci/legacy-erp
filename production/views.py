@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import transaction, DatabaseError
 from django.db.models import Count, Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -495,7 +495,7 @@ def order_produce(request, pk):
                 user=request.user,
             )
         messages.success(request, f"Evidentirano: {qty} {order.bom.output_unit} proizvedeno.")
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return redirect('production:order_detail', pk=pk)

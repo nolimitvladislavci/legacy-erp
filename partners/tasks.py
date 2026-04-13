@@ -3,6 +3,7 @@ import logging
 from decimal import Decimal
 from celery import shared_task
 from django.utils import timezone as tz
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('agents')
 
@@ -193,7 +194,7 @@ def _infer_nkd_from_context(company) -> 'NKDCode | None':
                 ).first()
                 if nkd:
                     return nkd
-    except Exception:
+    except DatabaseError:
         pass
 
     # Strategija 2: Invoice descriptions keyword match
@@ -217,7 +218,7 @@ def _infer_nkd_from_context(company) -> 'NKDCode | None':
                 ).first()
                 if nkd:
                     return nkd
-    except Exception:
+    except DatabaseError:
         pass
 
     # Strategija 3: POS kategorije
@@ -229,7 +230,7 @@ def _infer_nkd_from_context(company) -> 'NKDCode | None':
             retail_nkd = NKDCode.objects.filter(code='47.99', is_active=True).first()
             if retail_nkd:
                 return retail_nkd
-    except Exception:
+    except DatabaseError:
         pass
 
     return None
@@ -290,7 +291,7 @@ def _haiku_infer_nkd(company_name: str):
 
         if code and confidence >= 0.7:
             return NKDCode.objects.filter(code=code, is_active=True).first()
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         pass
     return None
 
@@ -463,7 +464,7 @@ def vies_batch_validate(self, batch_size=500):
         except requests.exceptions.Timeout:
             errors += 1
             continue
-        except Exception as e:
+        except requests.RequestException as e:
             logger.warning("VIES error for %s: %s", partner.oib, e)
             errors += 1
             continue

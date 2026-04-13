@@ -176,7 +176,7 @@ def import_items_to_erp(mdb_path, company):
             continue
         try:
             price = Decimal(str(item['net_price'] or '0'))
-        except Exception:
+        except (ValueError, TypeError):
             price = Decimal('0')
         InventoryItem.objects.create(
             company=company,

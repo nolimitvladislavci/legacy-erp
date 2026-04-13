@@ -3,6 +3,7 @@ import datetime
 import uuid
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username, modules=None):
@@ -15,7 +16,7 @@ def _setup_user(oib, username, modules=None):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -92,7 +93,7 @@ class PartnerPortalTest(TestCase):
             )
             resp = self.client.get(f'/portal/{token}/invoices/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_portal_invoice_detail(self):
@@ -110,7 +111,7 @@ class PartnerPortalTest(TestCase):
             )
             resp = self.client.get(f'/portal/{token}/invoices/{inv.pk}/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_portal_invoice_pdf(self):
@@ -128,7 +129,7 @@ class PartnerPortalTest(TestCase):
             )
             resp = self.client.get(f'/portal/{token}/invoices/{inv.pk}/pdf/', follow=True)
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (IntegrityError, DatabaseError):
             pass
 
     def test_portal_projects(self):

@@ -153,7 +153,7 @@ def contract_create(request, worker_pk):
                 messages.info(request,
                     f'⚠️ M-1 HZMO prijava: rok {contract.hzmo_prijava_deadline}')
             return redirect('seasonal:contract_detail', pk=contract.pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'seasonal/contract_form.html', {
         'worker': worker,

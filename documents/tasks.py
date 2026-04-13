@@ -2,6 +2,7 @@ import json
 import logging
 
 from celery import shared_task
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,7 @@ def arhiva_ai_monitor(self):
             }],
         )
         ai_summary = response.content[0].text
-    except Exception as e:
+    except (TypeError, ValueError) as e:
         ai_summary = f'AI analiza nedostupna: {e}'
         logger.warning('arhiva_ai_monitor: AI analiza failed: %s', e)
 
@@ -147,7 +148,7 @@ def arhiva_ai_monitor(self):
                     company=m.company,
                 )
 
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('arhiva_ai_monitor: notifikacija failed: %s', e)
 
     # ── 6. AIActionLog ──
@@ -161,7 +162,7 @@ def arhiva_ai_monitor(self):
             outcome='executed',
             details={'alerts': alerts, 'ai_summary': ai_summary},
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('arhiva_ai_monitor: AIActionLog failed: %s', e)
 
     return {'alerts_count': len(alerts), 'timestamp': now.isoformat()}
@@ -228,7 +229,7 @@ def arhiva_morning_brief(self):
         if admins:
             notify_bulk(admins, 'info', 'Jutarnji arhiva brief', brief_text, '/hr/documents/ai-inbox/')
             logger.info('Morning brief sent to %d admins', len(admins))
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning('Morning brief notification failed: %s', e)
 
     return {'pending': pending, 'new_24h': new_24h, 'brief_sent': True}
@@ -338,7 +339,7 @@ def generate_revizija_zip(self, company_id, date_from, date_to, user_email):
                 to=[user_email],
             )
             em.send()
-    except Exception as mail_err:
+    except (FileNotFoundError, PermissionError, IOError) as mail_err:
         logger.warning('Revizija email: %s', mail_err)
 
     return {'zip': zip_filepath, 'entries': entries.count(), 'pdfs': pdf_count}
@@ -462,12 +463,12 @@ def generate_ai_proposal(self, entry_id):
                     url='/hr/documents/ai-inbox/',
                     company=entry.company,
                 )
-        except Exception as notif_err:
+        except DatabaseError as notif_err:
             logger.warning('generate_ai_proposal: notify failed: %s', notif_err)
 
         return {'entry_id': entry_id, 'confidence': proposal.get('confidence', 'unknown')}
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error('generate_ai_proposal failed for entry %s: %s', entry_id, e)
         try:
             entry.ai_status = 'error'
@@ -621,7 +622,7 @@ def send_ai_inbox_summary_email(self, company_id=None):
             msg.send()
             sent += 1
             logger.info('AI Inbox email poslan za %s na %s', company.name, recipients)
-        except Exception as mail_err:
+        except (ValueError, TypeError) as mail_err:
             logger.warning('send_ai_inbox_summary_email za %s: %s', company.name, mail_err)
 
     return {'companies_mailed': sent}
@@ -669,7 +670,7 @@ def process_scan_batch(self, batch_id):
             # Fallback: označi da OCR nije dostupan
             img.extracted_text = '[OCR nedostupan — pytesseract nije instaliran]'
             img.save(update_fields=['extracted_text'])
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             logger.warning('OCR failed za sliku %s: %s', img.pk, e)
             img.extracted_text = f'[OCR greška: {str(e)[:100]}]'
             img.save(update_fields=['extracted_text'])
@@ -760,7 +761,7 @@ def verify_arhiva_integrity(self):
                     'details': violation_details[:20],  # Max 20 details
                 },
             )
-        except Exception as sig_err:
+        except (IntegrityError, DatabaseError) as sig_err:
             logger.error('verify_arhiva_integrity: FenixSignal creation failed: %s', sig_err)
 
         # Notify superadmins
@@ -776,7 +777,7 @@ def verify_arhiva_integrity(self):
                     message=f'{violations} zapisa ima nepodudarnost. Moguca neovlastena izmjena.',
                     url='/hr/documents/arhiva/',
                 )
-        except Exception as notif_err:
+        except DatabaseError as notif_err:
             logger.warning('verify_arhiva_integrity: notification failed: %s', notif_err)
 
     return {

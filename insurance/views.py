@@ -11,6 +11,7 @@ from partners.models import Partner
 
 from .models import InsurancePolicy
 from .serializers import InsurancePolicySerializer
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class InsurancePolicyViewSet(viewsets.ModelViewSet):
@@ -78,7 +79,7 @@ def policy_create(request):
             )
             messages.success(request, _("Polica kreirana."))
             return redirect("insurance:list")
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     return render(request, "insurance/policy_form.html", {
         "partners": Partner.objects.filter(is_active=True).order_by("name"),
@@ -107,7 +108,7 @@ def policy_edit(request, pk):
             policy.save()
             messages.success(request, _("Polica ažurirana."))
             return redirect("insurance:list")
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             messages.error(request, str(e))
     return render(request, "insurance/policy_form.html", {
         "policy": policy,

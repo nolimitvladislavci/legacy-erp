@@ -18,6 +18,7 @@ from django.db.models import Sum, Count
 from django.contrib.auth.models import User
 
 from superadmin_ai.models import PendingAIAction
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('superadmin_ai')
 
@@ -225,7 +226,7 @@ def _check_token_budgets():
                 f'⚠ Gemini dnevni tokeni: {daily_tokens:,}/{GEMINI_TOKEN_DAILY_LIMIT:,} ({pct}%)'
             )
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.warning(f'Gemini budget check failed: {e}')
 
     # ── Claude budget ──
@@ -263,7 +264,7 @@ def _check_token_budgets():
                 f'⚠ Claude dnevni pozivi: {daily_claude_calls} (visoka aktivnost)'
             )
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.warning(f'Claude budget check failed: {e}')
 
     return alerts
@@ -352,7 +353,7 @@ def _ai_analyze_anomalies(health_results, pending_count):
             }]
         )
         return response.content[0].text
-    except Exception as e:
+    except (TypeError, ValueError) as e:
         logger.warning('AI watchdog analysis failed: %s', e)
         return None
 
@@ -423,5 +424,5 @@ def _notify_superadmins(title, message, notification_type='system'):
                 message=message,
                 url='/superadmin/ai/',
             )
-    except Exception as e:
+    except DatabaseError as e:
         logger.error(f'Failed to notify superadmins: {e}')

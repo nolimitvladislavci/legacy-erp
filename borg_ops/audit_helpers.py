@@ -7,6 +7,7 @@ Koristi se iz bilo kojeg modula:
 """
 import logging
 from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.audit')
 
@@ -62,6 +63,6 @@ def log_borg_audit(company, entry_type, summary, severity='INFO',
         entry.save()
         logger.debug('BorgAuditEntry created: [%s] %s', entry_type, summary[:80])
         return entry
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error('BorgAuditEntry creation failed: %s', e)
         return None

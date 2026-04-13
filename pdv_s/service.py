@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
+from django.db import IntegrityError, DatabaseError
 
 
 PDV_NS = 'http://e-porezna.porezna-uprava.hr/sheme/zahtjevi/PDV-S/v2-0'
@@ -66,7 +67,7 @@ def generate_pdv_s(company, year, month, invoices_in, invoices_out):
         pos_subtotal = sum(r.subtotal or 0 for r in pos_receipts)
         pos_tax = sum(r.tax_amount or 0 for r in pos_receipts)
         pos_consumption_tax = sum(r.consumption_tax_amount or 0 for r in pos_receipts)
-    except Exception:
+    except DatabaseError:
         pos_subtotal = pos_tax = pos_consumption_tax = 0
 
     """
@@ -219,7 +220,7 @@ def batch_generate_pdv_s(year, month, user=None):
             report = generate_pdv_s_from_tax_period(c, year, month, user)
             results.append({'company': c.name, 'oib': c.oib, 'status': 'ok',
                             'razlika': float(report.iv_razlika)})
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             results.append({'company': c.name, 'oib': c.oib, 'status': 'error',
                             'error': str(e)})
     return results

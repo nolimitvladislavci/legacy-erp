@@ -69,7 +69,7 @@ class ATRksvProvider(BaseFiscalProvider):
                 raw_response=json.dumps(signed),
             )
 
-        except Exception as e:
+        except (TypeError, ValueError) as e:
             logger.error("RKSV error: %s", e)
             return FiscalResult(success=False, error_message=str(e))
 
@@ -92,7 +92,7 @@ class ATRksvProvider(BaseFiscalProvider):
                 return self._token
             logger.error("RKSV auth failed: %d %s", r.status_code, r.text[:200])
             return None
-        except Exception as e:
+        except requests.RequestException as e:
             logger.error("RKSV auth error: %s", e)
             return None
 
@@ -141,7 +141,7 @@ class ATRksvProvider(BaseFiscalProvider):
                 return r.json()
             logger.error("RKSV sign failed: %d %s", r.status_code, r.text[:200])
             return None
-        except Exception as e:
+        except requests.RequestException as e:
             logger.error("RKSV sign error: %s", e)
             return None
 

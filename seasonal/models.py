@@ -189,7 +189,7 @@ class SeasonalContract(models.Model):
             from payroll.hr_calculator import izracunaj_placu
             result = izracunaj_placu(self.gross_amount)
             return result.get('neto', self.gross_amount * Decimal('0.70'))
-        except Exception:
+        except (ValueError, TypeError):
             if self.contract_type in ('djelo', 'privremeni', 'autorski'):
                 return self.gross_amount * Decimal('0.80')  # 20% porez
             elif self.contract_type == 'studentski':
@@ -265,7 +265,7 @@ class SeasonalPayment(models.Model):
                 r = izracunaj_placu(self.gross_amount)
                 self.tax_amount = r.get('porez', Decimal('0')) + r.get('prirez', Decimal('0'))
                 self.net_amount = r.get('neto', self.gross_amount * Decimal('0.70'))
-            except Exception:
+            except (ValueError, TypeError):
                 self.tax_amount = (self.gross_amount * Decimal('0.30')).quantize(Decimal('0.01'))
                 self.net_amount = self.gross_amount - self.tax_amount
         else:

@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.core.cache import cache
 from core.company_utils import get_user_company
 from .models import Livestock, HealthRecord
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ def pet_detail(request, pk):
                 created_by=request.user,
             )
             messages.success(request, _('Zapis dodan.'))
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
         return redirect('livestock:pet_detail', pk=pk)
 
@@ -121,7 +122,7 @@ def pet_create(request):
             pet.save()
             messages.success(request, f'{pet.get_vrsta_display()} {name} uspješno dodan/a.')
             return redirect('livestock:pet_detail', pk=pet.pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/pets_create.html', {
@@ -164,7 +165,7 @@ def pet_edit(request, pk):
             pet.save()
             messages.success(request, _('Podaci ažurirani.'))
             return redirect('livestock:pet_detail', pk=pk)
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'livestock/pets_edit.html', {
@@ -209,7 +210,7 @@ def pet_pedigree_pdf(request, pk):
         resp = HttpResponse(pdf_data, content_type='application/pdf')
         resp['Content-Disposition'] = f'inline; filename="{filename}"'
         return resp
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("pedigree PDF error: %s", e)
         # Fallback — HTML
         return HttpResponse(html, content_type='text/html')
@@ -249,7 +250,7 @@ def pet_scan_photo(request):
             'confidence': float(fields.get('confidence', 0.5)),
             'warning': warn,
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("pet_scan_photo: %s", e)
         return JsonResponse({'error': str(e)[:150]}, status=500)
 
@@ -307,7 +308,7 @@ def pet_qr_code(request, pk):
             resp = HttpResponse(pdf_data, content_type='application/pdf')
             resp['Content-Disposition'] = f'inline; filename="qr_{pet.name or identifier}.pdf"'
             return resp
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             logger.error("QR PDF error: %s", e)
             # Fallback: PNG
             buf.seek(0)
@@ -412,6 +413,6 @@ def pet_adoption_contract(request, pk):
         resp = HttpResponse(pdf_data, content_type='application/pdf')
         resp['Content-Disposition'] = f'inline; filename="{fname}"'
         return resp
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.error("adoption contract PDF: %s", e)
         return HttpResponse(html, content_type='text/html')

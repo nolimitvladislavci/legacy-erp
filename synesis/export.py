@@ -82,7 +82,7 @@ def synesis_export_confirm(request, token):
     try:
         body = json.loads(request.body)
         confirmed = body.get("confirmed_ids", [])
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     count = SynesisExportQueue.objects.filter(

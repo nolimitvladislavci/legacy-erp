@@ -10,6 +10,8 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.company_utils import get_user_company
 from partners.models import Partner
@@ -70,7 +72,7 @@ def _doc_detail(request, pk, model_cls, template, title):
         ct = ContentType.objects.get_for_model(doc)
         ctx['tracked_item'] = TrackedItem.objects.filter(content_type=ct, object_id=str(doc.pk)).first()
         ctx['shipment_statuses'] = TrackingStatus.objects.filter(tracking_type='shipment').order_by('order')
-    except Exception:
+    except DatabaseError:
         pass
     return render(request, template, ctx)
 
@@ -145,7 +147,7 @@ def otpremnica_create(request):
                         if not item.batch_number:
                             eb = ExpiryBatch.objects.get(pk=int(eb_id))
                             item.batch_number = eb.batch_number or f'LOT-{eb.expiry_date}'
-                    except Exception:
+                    except ObjectDoesNotExist:
                         pass
                 item.save()
         messages.success(request, f"Otpremnica {doc.doc_number} kreirana.")
@@ -157,7 +159,7 @@ def otpremnica_create(request):
         available_lots = ExpiryBatch.objects.filter(
             company=company, is_removed=False, quantity__gt=0
         ).select_related('inventory_item').order_by('expiry_date')
-    except Exception:
+    except DatabaseError:
         available_lots = []
     return render(request, 'documents/otpremnica_form.html', {
         'partners': partners, 'title': 'Nova otpremnica',

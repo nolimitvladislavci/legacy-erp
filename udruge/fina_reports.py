@@ -202,7 +202,7 @@ def _get_konto_balance(company, konto_prefix, year, period_end_month=12):
             return credits - debits
         else:
             return debits - credits
-    except Exception:
+    except (ValueError, TypeError):
         return Decimal('0')
 
 
@@ -570,7 +570,7 @@ def _get_konto_balance_at_date(company, konto_prefix, year, month, day):
             return credits - debits
         else:
             return debits - credits
-    except Exception:
+    except (ValueError, TypeError):
         return Decimal("0")
 
 

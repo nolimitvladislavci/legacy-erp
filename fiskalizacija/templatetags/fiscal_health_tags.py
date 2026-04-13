@@ -7,6 +7,7 @@ Fiscal Health template tag v2 — 3 drona neutralizirana:
 from django import template
 from django.core.cache import cache
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 register = template.Library()
 
@@ -87,7 +88,7 @@ def fiscal_health_status(context):
                 hours_old = (now - oldest.fiscal_datetime).total_seconds() / 3600
             else:
                 hours_old = 0
-        except Exception:
+        except DatabaseError:
             pending_count = 0
             hours_old = 0
 
@@ -101,7 +102,7 @@ def fiscal_health_status(context):
                 company=company, zki__isnull=False,
             ).exclude(zki='').filter(jir='').count()
             pending_count += pending_inv
-        except Exception:
+        except DatabaseError:
             pass
 
         result['pending_count'] = pending_count
@@ -116,7 +117,7 @@ def fiscal_health_status(context):
             if last:
                 result['last_jir'] = last.jir[:12]
                 result['last_jir_date'] = last.fiscal_datetime.strftime('%d.%m. %H:%M') if last.fiscal_datetime else ''
-        except Exception:
+        except DatabaseError:
             pass
 
         # ── DRON #1: Status logika (ne garantiramo FINA CIS!) ──
@@ -143,7 +144,7 @@ def fiscal_health_status(context):
             if result['last_jir']:
                 result['detail'] += f' | Zadnji JIR: {result["last_jir_date"]}'
 
-    except Exception:
+    except (ValueError, TypeError):
         pass
 
     cache.set(cache_key, result, 60)

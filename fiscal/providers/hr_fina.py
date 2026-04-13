@@ -69,7 +69,7 @@ class HRFinaProvider(BaseFiscalProvider):
                               headers={'Content-Type': 'text/xml; charset=utf-8'},
                               timeout=(1.5, 2), verify=_v)
             return r.status_code == 200
-        except Exception as e:
+        except requests.RequestException as e:
             logger.error("CIS echo failed: %s", e)
             return False
 
@@ -122,7 +122,7 @@ class HRFinaProvider(BaseFiscalProvider):
         except ImportError:
             logger.warning("cryptography not installed - using demo ZKI")
             return self._demo_zki(data)
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             logger.error("ZKI error: %s", e)
             return self._demo_zki(data)
 
@@ -243,7 +243,7 @@ class HRFinaProvider(BaseFiscalProvider):
                 raw_request=soap_body, raw_response=response.text
             )
 
-        except Exception as e:
+        except OSError as e:
             logger.error("CIS error: %s", e)
             if self.config.is_test_mode:
                 mock_jir = str(uuid.uuid4())
@@ -295,7 +295,7 @@ class HRFinaProvider(BaseFiscalProvider):
             signer = XMLSigner(method=XMLSigner.transform_enveloped)
             signed = signer.sign(root, key=private_key, cert=certificate)
             return etree.tostring(signed, encoding='unicode')
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             logger.warning("XML signing failed: %s", e)
             return xml_string
 
@@ -320,6 +320,6 @@ class HRFinaProvider(BaseFiscalProvider):
             key_file.close()
             cert_file.close()
             return (cert_file.name, key_file.name)
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             logger.warning("PEM extraction failed: %s", e)
             return None

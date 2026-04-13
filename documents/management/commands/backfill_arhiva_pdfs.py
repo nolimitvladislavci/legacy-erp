@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from documents.models import ArhivaEntry
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ class Command(BaseCommand):
                     skip += 1
             except Invoice.DoesNotExist:
                 skip += 1
-            except Exception as e:
+            except ObjectDoesNotExist as e:
                 err += 1
                 if err <= 5:
                     self.stderr.write(f'  Error #{entry.pk}: {e}')

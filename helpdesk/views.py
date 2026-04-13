@@ -7,6 +7,7 @@ from django.db.models import Q, Count, Avg
 from django.utils import timezone
 from core.company_utils import get_user_company
 from .models import Ticket, TicketMessage, TicketTemplate
+from django.db import IntegrityError, DatabaseError
 
 
 def _get_company(request):
@@ -100,7 +101,7 @@ def ticket_create(request):
             try:
                 ticket.save()
                 break
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 if _attempt >= 4:
                     raise
                 continue

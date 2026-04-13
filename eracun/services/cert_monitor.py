@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timedelta
 
 from django.utils import timezone as tz
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('eracun.cert_monitor')
 
@@ -32,7 +33,7 @@ def check_all_certs():
                     info['company'] = fc.company.name
                     info['cert_type'] = 'FINA Fiskalizacija'
                     results.append(info)
-    except Exception as e:
+    except OSError as e:
         logger.warning('Fiscal cert check error: %s', e)
 
     # 2. eRačun certifikati
@@ -45,7 +46,7 @@ def check_all_certs():
                     info['company'] = ec.company.name
                     info['cert_type'] = 'eRačun'
                     results.append(info)
-    except Exception as e:
+    except OSError as e:
         logger.warning('eRacun cert check error: %s', e)
 
     # 3. Shared certs in /certs/ directory
@@ -101,7 +102,7 @@ def _check_p12(cert_path, password):
             'days_left': days_left,
             'status': status,
         }
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.warning('Cannot read cert %s: %s', cert_path, e)
         return {
             'path': cert_path,
@@ -148,7 +149,7 @@ def run_daily_check():
                             'path': r['path'],
                         },
                     )
-            except Exception as e:
+            except DatabaseError as e:
                 logger.warning('Pulse cert alert failed: %s', e)
 
     if alerts:

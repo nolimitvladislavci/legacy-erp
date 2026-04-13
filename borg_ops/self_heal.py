@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 
 from celery import shared_task
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.self_heal')
 
@@ -91,7 +92,7 @@ def check_disk():
             'warning': pct > 80,
             'critical': pct > 90,
         }
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         return {'error': str(e)}
 
 
@@ -130,7 +131,7 @@ def check_celery_queue():
             'failures_last_hour': failed,
             'healthy': failed < recent * 0.2 if recent > 0 else True,
         }
-    except Exception:
+    except DatabaseError:
         return {'healthy': True, 'note': 'django_celery_results not available'}
 
 
@@ -165,7 +166,7 @@ def check_ssl_expiry():
                 'warning': days_left < 30,
                 'critical': days_left < 7,
             }
-    except Exception as e:
+    except ValueError as e:
         return {'error': str(e)}
 
     return {'status': 'unknown'}
@@ -190,7 +191,7 @@ def _cleanup_old_logs():
                     with open(fp, 'w') as fh:
                         fh.write(f'# Truncated by BORG self-heal at {datetime.now()}\n')
                     cleaned += 1
-                except Exception:
+                except (FileNotFoundError, PermissionError, IOError):
                     pass
 
     return cleaned

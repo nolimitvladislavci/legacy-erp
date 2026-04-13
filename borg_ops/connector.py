@@ -6,6 +6,7 @@ import logging
 from celery import shared_task
 from django.utils import timezone
 from django.db.models import Count, Q
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.ops')
 
@@ -49,7 +50,7 @@ def sync_ops_tasks():
                 due_date=inv.date_due,
             )
             stats['invoices'] += 1
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.warning('Invoice sync: %s', e)
 
     # 2. Unresolved signals (triaged, not resolved)
@@ -73,7 +74,7 @@ def sync_ops_tasks():
                 reference_id=ref,
             )
             stats['signals'] += 1
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('Signal sync: %s', e)
 
     # 3. Pending adaptation rules
@@ -97,7 +98,7 @@ def sync_ops_tasks():
                 reference_id=ref,
             )
             stats['adaptations'] += 1
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning('Adaptation sync: %s', e)
 
     # 4. New opportunity matches (notified but not acted on)
@@ -131,7 +132,7 @@ def sync_ops_tasks():
                 reference_id=ref,
             )
             stats['opportunities'] += 1
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.warning('Opportunity sync: %s', e)
 
     logger.info('Ops sync: %s', stats)

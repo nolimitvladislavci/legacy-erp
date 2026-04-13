@@ -39,7 +39,7 @@ def run_pipeline(export, user=None, dry_run=False):
             message=f'XML generated: {export.xml_size} bytes, SHA-256: {export.xml_hash[:16]}',
             duration_ms=int((time.time() - t0) * 1000), actor=user,
         )
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         results['generate'] = f'error: {e}'
         export.status = 'error'
         export.save(update_fields=['status'])
@@ -67,7 +67,7 @@ def run_pipeline(export, user=None, dry_run=False):
             export=export, step='validate', status='ok',
             message='XSD validation passed', duration_ms=int((time.time() - t0) * 1000), actor=user,
         )
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         export.is_valid = False
         export.validation_errors = [str(e)[:500]]
         export.save(update_fields=['is_valid', 'validation_errors'])
@@ -111,7 +111,7 @@ def run_pipeline(export, user=None, dry_run=False):
                 results['sign'] = 'ok'
             else:
                 results['sign'] = 'skip: no cert'
-        except Exception as e:
+        except (FileNotFoundError, PermissionError, IOError) as e:
             results['sign'] = f'error: {e}'
         GovExportLog.objects.create(
             export=export, step='sign', status=results.get('sign', 'skip')[:5],
@@ -144,7 +144,7 @@ def run_pipeline(export, user=None, dry_run=False):
                     message='TSA server nedostupan — ostaje XAdES-BES',
                     duration_ms=int((time.time() - t0) * 1000), actor=user,
                 )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             results['timestamp'] = f'error: {e}'
             GovExportLog.objects.create(
                 export=export, step='timestamp', status='error',

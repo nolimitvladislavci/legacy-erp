@@ -74,7 +74,7 @@ class DETseProvider(BaseFiscalProvider):
                 raw_response=json.dumps(finish_res or {})
             )
 
-        except Exception as e:
+        except (TypeError, ValueError) as e:
             logger.error("TSE error: %s", e)
             return FiscalResult(success=False, error_message=str(e))
 
@@ -96,7 +96,7 @@ class DETseProvider(BaseFiscalProvider):
                 return self._token
             logger.error("fiskaly auth failed: %d %s", r.status_code, r.text[:200])
             return None
-        except Exception as e:
+        except requests.RequestException as e:
             logger.error("fiskaly auth error: %s", e)
             return None
 

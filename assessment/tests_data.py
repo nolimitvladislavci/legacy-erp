@@ -3,6 +3,7 @@ import json
 import datetime
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.db import IntegrityError, DatabaseError
 
 
 def _setup_user(oib, username):
@@ -15,7 +16,7 @@ def _setup_user(oib, username):
         p = user.profile
         p.company = company
         p.save()
-    except Exception:
+    except (IntegrityError, DatabaseError):
         UserProfile.objects.create(user=user, company=company)
     CompanySubscription.objects.create(
         company=company,
@@ -203,7 +204,7 @@ class AssessmentSaveTest(TestCase):
                 content_type='application/json',
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_save_new_final_submit(self):
@@ -228,7 +229,7 @@ class AssessmentSaveTest(TestCase):
                 content_type='application/json',
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_save_existing_assessment(self):
@@ -247,7 +248,7 @@ class AssessmentSaveTest(TestCase):
                 content_type='application/json',
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_save_invalid_json_body(self):
@@ -276,7 +277,7 @@ class AssessmentSaveTest(TestCase):
                 content_type='application/json',
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_save_step5_price_data(self):
@@ -297,7 +298,7 @@ class AssessmentSaveTest(TestCase):
                 content_type='application/json',
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
     def test_save_with_multiple_steps(self):
@@ -319,7 +320,7 @@ class AssessmentSaveTest(TestCase):
                 content_type='application/json',
             )
             self.assertIn(resp.status_code, ALLOWED)
-        except Exception:
+        except (TypeError, ValueError):
             pass
 
 

@@ -61,7 +61,7 @@ def parse_camera_input(image_b64: str, company_id=None) -> dict:
         result['total_calculated'] = float(total)
         return result
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.error(f'camera_input greška: {e}')
         return _error(str(e))
 
@@ -121,7 +121,7 @@ def _call_haiku_vision(image_b64: str, image_bytes: bytes) -> dict:
             }
         return _error(f'Haiku nije vratio JSON: {text[:100]}')
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return _error(f'Haiku Vision greška: {e}')
 
 

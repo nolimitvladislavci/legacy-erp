@@ -28,7 +28,7 @@ def send_push(subscription_json: str, title: str, body: str,
         return False
     try:
         sub = json.loads(subscription_json)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return False
 
     payload = json.dumps({

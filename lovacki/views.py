@@ -5,6 +5,7 @@ from django.utils.translation import gettext as _
 from django.utils import timezone
 
 from core.company_utils import get_user_company
+from django.db import IntegrityError, DatabaseError
 
 
 @login_required
@@ -69,7 +70,7 @@ def hunt_record_create(request):
             )
             messages.success(request, f'Odstrjel evidentiran: {record}')
             return redirect('lovacki:dashboard')
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'lovacki/record_create.html', {

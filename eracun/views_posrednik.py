@@ -161,12 +161,12 @@ def _test_posrednik(config):
                         'message': f'HTTP {r.status_code} od {url}{endpoint}',
                         'response': r.text[:200],
                     }
-            except Exception:
+            except requests.RequestException:
                 continue
 
         return {'success': False, 'message': f'Ne mogu se spojiti na {url}'}
 
     except ImportError:
         return {'success': False, 'message': 'requests modul nije instaliran'}
-    except Exception as e:
+    except requests.RequestException as e:
         return {'success': False, 'message': str(e)}

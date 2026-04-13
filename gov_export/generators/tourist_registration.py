@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import hashlib
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 
 class TouristRegistrationGenerator:
@@ -65,7 +66,7 @@ class TouristRegistrationGenerator:
                     ET.SubElement(t_el, 'EVisitorSynced').text = str(tr.evisitor_synced).lower()
                     if tr.evisitor_synced_at:
                         ET.SubElement(t_el, 'EVisitorSyncedAt').text = tr.evisitor_synced_at.isoformat()
-        except Exception:
+        except DatabaseError:
             ET.SubElement(root, 'Guests', count='0')
 
         # Experiences bookings
@@ -85,7 +86,7 @@ class TouristRegistrationGenerator:
                 ET.SubElement(eg, 'PaxCount').text = str(eb.pax_count)
                 ET.SubElement(eg, 'Experience').text = eb.schedule.experience.name
                 ET.SubElement(eg, 'Date').text = eb.schedule.date.isoformat()
-        except Exception:
+        except DatabaseError:
             ET.SubElement(root, 'ExperienceGuests', count='0')
 
         xml_str = minidom.parseString(ET.tostring(root, encoding='unicode')).toprettyxml(indent='  ')

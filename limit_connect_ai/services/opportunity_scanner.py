@@ -320,7 +320,7 @@ def _calculate_savings(company, opportunity):
             calculated = Decimal(str(result)).quantize(Decimal('0.01'))
             if calculated > 0:
                 return calculated
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.debug('Formula eval failed za %s: %s', opportunity.name, e)
 
     # Fallback na typical

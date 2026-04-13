@@ -1,3 +1,4 @@
+import logging
 """
 memio_pet/views.py -- Public-facing views za memio.pet domenu
 
@@ -20,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.cache import cache_page, never_cache
 from memio_pet.models import AnimalProfile, BreederProfile, PetHealthRecord, PetOwnership, BreederReview
+from django.db import IntegrityError, DatabaseError
 
 
 def _find_animal(chip_or_tag):
@@ -231,7 +233,7 @@ def pet_hotel_booking(request):
                 return redirect('memio_pet:pet_hotel_booking')
             else:
                 messages.error(request, _('Unesite ime ljubimca ili broj mikrocipa.'))
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
     return render(request, 'memio_pet/pet_hotel_booking.html', {
         'hotels': hotels, 'room_types': PetBoardingReservation.ROOM_TYPES, 'page_title': 'Pet Hotel — Rezervacija',
@@ -1181,7 +1183,7 @@ def analytics_hit(request):
     db = 'memio_pets'
     try:
         data = json.loads(request.body)
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         data = {}
     path = (data.get('p') or request.META.get('HTTP_REFERER', ''))[:200]
     # Spremi u jednostavan log

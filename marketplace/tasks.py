@@ -3,6 +3,8 @@ marketplace/tasks.py — Celery taskovi za Ghost Inventory i notifikacije.
 """
 import logging
 from celery import shared_task
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('marketplace')
 
@@ -53,7 +55,7 @@ def send_expiry_reminders(self):
                         company_id=str(product.seller_company.pk),
                     )
                     notified += 1
-        except Exception as e:
+        except DatabaseError as e:
             logger.warning('Expiry reminder %s: %s', product.pk, e)
 
     logger.info('Expiry reminders: %d notified of %d expiring', notified, expiring.count())
@@ -106,7 +108,7 @@ def expiry_gastro_bridge_check(self):
                     )
                     send_text(phone=phone, message=msg, company_id=str(product.seller_company.pk))
                     bridged += 1
-        except Exception as e:
+        except DatabaseError as e:
             logger.warning("Gastro bridge notify %s: %s", product.pk, e)
 
     logger.info("Gastro bridge check: %d perishable expiring, %d notified", expiring_perishable.count(), bridged)
@@ -172,7 +174,7 @@ def finalize_ended_auctions(self):
                     )
                     invoice.recalculate()
                     logger.info('Auction invoice #%s for product %s', invoice.pk, product.pk)
-                except Exception as e:
+                except (IntegrityError, DatabaseError) as e:
                     logger.warning('Auction invoice failed for %s: %s', product.pk, e)
 
                 # Update golub status if source is Golub
@@ -189,7 +191,7 @@ def finalize_ended_auctions(self):
                             )
                         )
                         golub.save(update_fields=['aktivan', 'napomena'])
-                    except Exception:
+                    except ObjectDoesNotExist:
                         pass
 
                 # WhatsApp notifications
@@ -225,7 +227,7 @@ def finalize_ended_auctions(self):
                             ) % (product.name, winning_bid.amount),
                             company_id=str(winning_bid.bidder_company.pk),
                         )
-                except Exception as e:
+                except DatabaseError as e:
                     logger.warning('Auction notification failed: %s', e)
 
                 results['finalized'] += 1
@@ -237,7 +239,7 @@ def finalize_ended_auctions(self):
                 product.save(update_fields=['auction_status', 'is_available'])
                 results['no_bids'] += 1
 
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             logger.error('Auction finalize error for product %s: %s', product.pk, e, exc_info=True)
             results['errors'] += 1
 

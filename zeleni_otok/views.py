@@ -6,6 +6,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+from django.db import DatabaseError, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     CompetitorProfile, ComparisonFeature, CompetitorFeatureStatus,
@@ -481,5 +483,5 @@ def _track_tool_usage(request, tool_name, input_data=None):
             utm_medium=request.GET.get('utm_medium', ''),
             utm_campaign=request.GET.get('utm_campaign', ''),
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass  # Analytics failure should never break the tool

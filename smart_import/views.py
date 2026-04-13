@@ -96,7 +96,7 @@ def upload_view(request):
         if control_amount:
             try:
                 meta["control_amount"] = str(Decimal(control_amount.replace(",", ".")))
-            except Exception:
+            except (ValueError, TypeError):
                 pass
 
         if meta:
@@ -128,7 +128,7 @@ def stage_view(request, pk):
                 (bi.purchase_price * bi.quantity) for bi in batch.items.all()
             )
             control_diff = items_total - control_amount
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     return render(request, "smart_import/stage.html", {
@@ -456,13 +456,13 @@ def manual_entry_view(request, pk):
         try:
             from decimal import Decimal
             amount = Decimal(amount_str)
-        except Exception:
+        except (ValueError, TypeError):
             amount = Decimal("0")
 
         try:
             from datetime import datetime
             doc_date = datetime.strptime(doc_date_str, "%Y-%m-%d").date()
-        except Exception:
+        except ValueError:
             doc_date = _date.today()
 
         # Build file_path relative to MEDIA_ROOT if batch has a file

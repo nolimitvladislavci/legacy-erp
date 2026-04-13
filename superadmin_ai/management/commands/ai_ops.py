@@ -22,6 +22,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.db import connection
 from django.apps import apps
+from django.db import IntegrityError, DatabaseError
 
 
 class Command(BaseCommand):
@@ -135,7 +136,7 @@ class Command(BaseCommand):
                 pct = int(usage.replace('%', '')) if '%' in usage else 0
                 style = self.style.SUCCESS if pct < 80 else self.style.WARNING if pct < 90 else self.style.ERROR
                 self.stdout.write(f'  Disk:        {style(f"{usage} used, {avail} free")}')
-        except Exception:
+        except (ValueError, TypeError):
             pass
 
     # ── PERMISSIONS ─────────────────────────────────────────────
@@ -208,7 +209,7 @@ class Command(BaseCommand):
                 except Exception as e:
                     self.stdout.write(f'    → {self.style.ERROR(str(e)[:100])}')
             self.stdout.write(self.style.SUCCESS('  Patrol završen.'))
-        except Exception as e:
+        except DatabaseError as e:
             self.stdout.write(self.style.ERROR(f'  Greška: {e}'))
 
     # ── PENDING ─────────────────────────────────────────────────
@@ -270,7 +271,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'  {url:<40s} {style(str(code))} {label}')
             except urllib.error.HTTPError as e:
                 self.stdout.write(f'  {url:<40s} {self.style.WARNING(str(e.code))} {label}')
-            except Exception as e:
+            except (FileNotFoundError, PermissionError, IOError) as e:
                 err = str(e)[:50]
                 self.stdout.write(f'  {url:<40s} {self.style.ERROR("FAIL")} {label} ({err})')
 

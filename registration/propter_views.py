@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import PropterTenant, CompanySubscription
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('propter.security')
 
@@ -50,7 +51,7 @@ def _audit_log(request, action, tenant, details=''):
             is_public_facing=False,
             ip_address=request.META.get('REMOTE_ADDR'),
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
 
 
@@ -152,7 +153,7 @@ def propter_tenant_detail(request, pk):
             'errors': qs.filter(status='error').count(),
             'draft': qs.filter(status='draft').count(),
         }
-    except Exception:
+    except DatabaseError:
         pass
 
     # Managed clients (for bookkeepers)

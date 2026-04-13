@@ -130,7 +130,7 @@ class DocumentProcessor:
             text = re.sub(r'^```(?:json)?\s*', '', text)
             text = re.sub(r'\s*```$', '', text)
             return json.loads(text)
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             logger.warning('Gemini failed: %s', e)
             return None
 
@@ -152,7 +152,7 @@ class DocumentProcessor:
             text = re.sub(r'^```(?:json)?\s*', '', text)
             text = re.sub(r'\s*```$', '', text)
             return json.loads(text)
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError) as e:
             logger.warning('Claude failed: %s', e)
             return None
 
@@ -212,7 +212,7 @@ class DocumentProcessor:
                 img.save(update_fields=[
                     'extracted_data', 'extracted_text', 'ai_confidence'])
                 ok += 1
-            except Exception as e:
+            except (TypeError, ValueError) as e:
                 logger.error('Img %s: %s', img.pk, e)
                 cls._fail_image(img, str(e)[:200])
                 err += 1

@@ -18,6 +18,7 @@ from .models import (
     HonorarJOPPD, HonorarPayment,
 )
 from partners.models import Partner
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def _get_company(request):
@@ -142,7 +143,7 @@ def contract_create(request):
         contract.save()
         messages.success(request, f'Ugovor {contract.contract_number} kreiran.')
         return redirect('honorari:contract_detail', pk=contract.pk)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         partners = Partner.objects.filter(company=company).order_by('name')
         ctx = {
             'partners': partners,
@@ -188,7 +189,7 @@ def contract_edit(request, pk):
         contract.save()
         messages.success(request, f'Ugovor {contract.contract_number} ažuriran.')
         return redirect('honorari:contract_detail', pk=contract.pk)
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         partners = Partner.objects.filter(company=company).order_by('name')
         ctx = {
             'contract': contract,

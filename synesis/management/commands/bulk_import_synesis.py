@@ -37,6 +37,7 @@ from decimal import Decimal, InvalidOperation
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 ARCHIVE_PATH = "/var/www/fina-connect/synesis/KONJIK_ARHIVA/Synesis/"
 
@@ -611,7 +612,7 @@ class Command(BaseCommand):
 
                 je_created += 1
 
-            except Exception:
+            except (ValueError, TypeError):
                 errors += 1
 
         dur = time.time() - t0
@@ -823,7 +824,7 @@ class Command(BaseCommand):
                     je.save(update_fields=['is_posted'])
                     created += 1
 
-            except Exception:
+            except (ValueError, TypeError):
                 errors += 1
 
         dur = time.time() - t0
@@ -992,7 +993,7 @@ class Command(BaseCommand):
                     je.save(update_fields=['is_posted'])
                     je_created += 1
 
-            except Exception:
+            except (ValueError, TypeError):
                 errors += 1
 
         dur = time.time() - t0
@@ -1045,7 +1046,7 @@ class Command(BaseCommand):
                     created += 1
                 else:
                     updated += 1
-            except Exception:
+            except DatabaseError:
                 errors += 1
 
         for row in bank_rows:

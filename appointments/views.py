@@ -207,7 +207,6 @@ def appointment_status(request, pk):
     return redirect("appointments:list")
 
 
-@csrf_exempt
 @login_required
 def api_appointments(request, pk=None):
     if request.method in ["POST", "PUT"]:
@@ -1556,7 +1555,6 @@ def booking_calendar_view(request):
 
 @csrf_exempt
 @require_POST
-@csrf_exempt
 def api_booking_guest_register(request):
     """Korak 1: Gost unese ime+email+telefon → šalje email verify link + WA PIN."""
     import secrets, hashlib
@@ -1686,7 +1684,6 @@ def api_booking_guest_register(request):
 
 
 @csrf_exempt
-@csrf_exempt
 def api_booking_verify_email(request):
     """Korak 2a: Gost klikne email link → verificiran → redirect na booking."""
     from django.core.cache import cache
@@ -1739,7 +1736,6 @@ def api_booking_verify_email(request):
 
 @csrf_exempt
 @require_POST
-@csrf_exempt
 def api_booking_verify_wa_pin(request):
     """Korak 2b: Gost unese WA PIN → verificiran."""
     from django.core.cache import cache
@@ -1779,7 +1775,6 @@ def api_booking_verify_wa_pin(request):
     return JsonResponse({'status': 'verified', 'qr_token': qr_token, 'name': guest_name})
 
 
-@csrf_exempt
 @csrf_exempt
 def api_booking_qr_login(request):
     """QR skeniranje — automatska prijava gosta po qr_token."""

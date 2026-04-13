@@ -3,6 +3,7 @@ from .models import FiscalConfiguration, FiscalLog, FiscalProvider
 from .providers.hr_fina import HRFinaProvider
 from .providers.de_tse import DETseProvider
 from .providers.at_rksv import ATRksvProvider
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ def fiscalize_receipt(receipt_data, company, branch=None):
             error_message=result.error_message,
             qr_code_data=result.qr_code_data,
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error(f"FiscalLog creation failed: {e}")
     return result
 
@@ -122,7 +123,7 @@ def _log_pos_fiscal(receipt, success=True, jir='', error=''):
             jir=jir,
             error_message=error,
         )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.debug("POS fiscal log skipped: %s", e)
 
 
@@ -164,7 +165,7 @@ def fiscalize_invoice(invoice, cert_path=None, cert_password=None, production=Fa
                 response_xml='',
                 error_message=result.get('error', ''),
             )
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.debug("Invoice fiscal log skipped: %s", e)
 
     return result

@@ -23,6 +23,8 @@ from django.views.decorators.http import require_POST
 from core.company_utils import get_user_company
 
 from .models import ArhivaEntry, ArhivaLabel
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ def label_manage(request):
     elif request.method == 'POST':
         try:
             data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             data = request.POST
 
         label_id = data.get('id', '')
@@ -83,7 +85,7 @@ def label_manage(request):
     elif request.method == 'DELETE':
         try:
             data = json.loads(request.body)
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
         label_id = data.get('id', '')
@@ -468,7 +470,7 @@ def pdv_obrazac(request):
         if company_id:
             try:
                 company = Company.objects.get(pk=company_id)
-            except Exception as e:  # BORG: was bare except
+            except ObjectDoesNotExist as e:
                 logger.debug("Handled exception in documents.views:%d: %s", 1815, e)  # BORG
 
     if not company:
@@ -773,7 +775,7 @@ def revizija_export(request):
                         else:
                             pdv5 += line_pdv
                     base = total - pdv25 - pdv13 - pdv5
-                except Exception:
+                except ObjectDoesNotExist:
                     # Fallback: 25% standard
                     pdv25 = total - total / 1.25
                     base = total - pdv25
@@ -803,7 +805,7 @@ def revizija_export(request):
                         else:
                             pdv5 += line_pdv
                     base = total - pdv25 - pdv13 - pdv5
-                except Exception:
+                except ObjectDoesNotExist:
                     pdv25 = total - total / 1.25
                     base = total - pdv25
                 w.writerow([i, e.doc_date, e.doc_number, e.partner_name,
@@ -943,7 +945,7 @@ def verfahren_sign(request):
     try:
         with open(doc_path, 'rb') as df:
             doc_hash = hashlib.sha256(df.read()).hexdigest()
-    except Exception:
+    except (FileNotFoundError, PermissionError, IOError):
         doc_hash = 'FILE_NOT_FOUND'
 
     client_ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
@@ -990,7 +992,7 @@ def verfahren_sign(request):
             },
             status='completed',
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
 
     # Save signature image
@@ -1013,7 +1015,7 @@ def verfahren_sign(request):
             signer_name, str(timezone.now()), client_ip, doc_hash)
         html_content += '</body></html>'
         WeasyprintHTML(string=html_content).write_pdf(pdf_path)
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.warning('Immutable PDF failed: %s', e)
 
     return JsonResponse({

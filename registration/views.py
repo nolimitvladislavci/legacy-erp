@@ -17,6 +17,8 @@ from .constants import PLAN_FEATURES
 
 # forms no longer needed for self-service flow
 from .models import CompanyRegistration, CompanySubscription
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ def _auto_create_website(company):
         )
         logger.info("Auto-created website /site/%s/ for %s", slug, company.name)
         return website
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error("Auto website creation failed for %s: %s", company.name, e)
         return None
 
@@ -130,7 +132,7 @@ def _seed_demo_data(company, user):
             logger.warning("POSCashier seed failed: %s", _ce)
 
         logger.info("Seeded demo data for %s", company.name)
-    except Exception as e:
+    except DatabaseError as e:
         logger.warning("Demo data seeding failed for %s: %s", company.name, e)
 
 
@@ -490,7 +492,7 @@ def register_step4(request):
                     user=user, role=admin_role, company=company,
                     defaults={"is_primary": True}
                 )
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
 
             # Link to umbrella if invite code was used
@@ -505,7 +507,7 @@ def register_step4(request):
                     company.save(update_fields=['umbrella_parent_id', 'umbrella_relation'])
                     invite.times_used += 1
                     invite.save(update_fields=['times_used'])
-                except Exception:
+                except ObjectDoesNotExist:
                     pass
 
             # Create subscription
@@ -560,7 +562,7 @@ def register_step4(request):
                         if success:
                             subscription.promo_code = promo
                             subscription.save(update_fields=['promo_code'])
-                except Exception:
+                except ObjectDoesNotExist:
                     pass
 
             # Auto-assign grosmarkt modules if source=grosmarkt
@@ -618,7 +620,7 @@ def register_step4(request):
 
             return redirect("registration:register_success")
 
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             logger.exception("Self-service registration error")
             messages.error(request, _('Registracija nije uspjela. Provjerite podatke i pokušajte ponovo.'))
             return redirect("registration:register_step4")
@@ -724,7 +726,7 @@ def admin_approve_registration(request, pk):
                 user=user, role=admin_role, company=company,
                 defaults={'is_primary': True}
             )
-        except Exception:
+        except ObjectDoesNotExist:
             pass
         fees = {'starter': Decimal('29.00'), 'business': Decimal('59.00'), 'enterprise': Decimal('99.00')}
         CompanySubscription.objects.create(
@@ -742,7 +744,7 @@ def admin_approve_registration(request, pk):
         company_email = _generate_company_email(company)
 
         messages.success(request, _('Approved: {}. Account created for {}.').format(reg.name, reg.contact_email))
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.exception('Error approving registration %s', pk)
         messages.error(request, _('Error during approval: {}').format(e))
     return redirect('registration:admin_list')
@@ -1004,7 +1006,7 @@ def sales_wizard_submit(request):
             },
             status='pending',
         )
-    except Exception:
+    except (IntegrityError, DatabaseError):
         pass
 
     # Email to client
@@ -1158,7 +1160,7 @@ def api_oib_lookup(request):
                     'Ova firma je u sustavu. Možete zatražiti pristup vlastitim podacima.'
                 ),
             })
-    except Exception:
+    except DatabaseError:
         pass
 
     # 2. Try sudski registar (sudreg) for HR companies
@@ -1298,17 +1300,17 @@ def claim_company_form(request, company_id):
     try:
         from invoicing.models import Invoice
         stats['invoices'] = Invoice.objects.filter(company=company).count()
-    except Exception:
+    except DatabaseError:
         pass
     try:
         from partners.models import Partner
         stats['partners'] = Partner.objects.filter(company=company).count()
-    except Exception:
+    except DatabaseError:
         pass
     try:
         from konto.models import JournalEntry
         stats['journals'] = JournalEntry.objects.filter(company=company).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'registration/claim_company.html', {
@@ -1472,7 +1474,7 @@ def approve_claim(request, claim_id):
         stats['invoices'] = Invoice.objects.filter(company=claim.company).count()
         from partners.models import Partner
         stats['partners'] = Partner.objects.filter(company=claim.company).count()
-    except Exception:
+    except DatabaseError:
         pass
 
     return render(request, 'registration/approve_claim.html', {'claim': claim, 'stats': stats})
@@ -1490,7 +1492,7 @@ def pending_claims(request):
                 status='pending',
                 company__umbrella_parent=user_co,
             ).select_related('company')
-        except Exception:
+        except DatabaseError:
             claims = CompanyClaimRequest.objects.none()
     else:
         claims = CompanyClaimRequest.objects.filter(
@@ -1660,7 +1662,7 @@ def register_quick(request):
                         expires_at=_tz.now() + timedelta(days=plan.trial_days or 14),
                         is_active=True,
                     )
-            except Exception:
+            except (IntegrityError, DatabaseError):
                 pass
 
         login(request, user)
@@ -1715,7 +1717,7 @@ def distributor_apply(request):
             )
             messages.success(request, _('Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h.'))
             return redirect('distributor_apply')
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 
     return render(request, 'registration/distributor_apply.html', {
@@ -1851,7 +1853,7 @@ def register_trikey(request):
 
                 messages.success(request, f"Dobrodošli! Vaš PIN: {pin} — zapišite ga ili provjerite email.")
                 return redirect("dashboard")
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             logger.exception("TriKey registration error")
             messages.error(request, _('Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku.'))
 

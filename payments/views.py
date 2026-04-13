@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 from core.company_utils import get_user_company
 from .models import Payment, PaymentConfig
 from . import services
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +198,7 @@ def stripe_webhook(request):
 
     except Payment.DoesNotExist:
         logger.warning("Stripe webhook: payment not found")
-    except Exception as e:
+    except ObjectDoesNotExist as e:
         logger.error("Stripe webhook error: %s", e, exc_info=True)
 
     return HttpResponse(status=200)
@@ -228,7 +229,7 @@ def btcpay_webhook(request):
             payment.gateway_data.update({'webhook_event': event_type})
             payment.save(update_fields=['status', 'gateway_data'])
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error("BTCPay webhook error: %s", e, exc_info=True)
 
     return HttpResponse(status=200)
@@ -256,7 +257,7 @@ def _on_payment_completed(payment):
         from payments.integrations import handle_payment_completed
         handle_payment_completed(payment)
 
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         logger.warning("_on_payment_completed error: %s", e)
 
 
@@ -287,7 +288,7 @@ def paypal_return(request):
                 return render(request, 'payments/success.html', {'payment': payment})
         except Payment.DoesNotExist:
             pass
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             logger.error("PayPal capture failed: %s", e, exc_info=True)
 
     return redirect('payments:success')

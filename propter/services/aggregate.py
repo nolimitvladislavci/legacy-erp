@@ -281,7 +281,7 @@ def auto_close_previous():
                 "total": float(eracun.total),
                 "status": "OK",
             })
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error("Greska pri zatvaranju perioda %s: %s", period, e)
             results.append({
                 "company": period.company.name,

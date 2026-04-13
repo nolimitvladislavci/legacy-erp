@@ -198,7 +198,7 @@ def voice_parse_api(request):
                 'wing':   dict(Measurement.WING_CONFIGS).get(parsed['wing_config'], ''),
             }
         })
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
 
 

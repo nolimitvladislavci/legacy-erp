@@ -160,6 +160,6 @@ TEKST:
         result['_source'] = 'gemini_ai'
         return result
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.warning(f'AI config parser failed: {e}, falling back to regex')
         return parse_posrednik_config(text)

@@ -8,6 +8,7 @@ Nema hardkodiranih datuma — računa pomične praznike matematički zauvijek.
 from datetime import date, datetime, time, timedelta
 from django.utils import timezone
 import logging
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger('borg.sla')
 
@@ -70,7 +71,7 @@ def get_company_holidays(company=None, year=None):
         else:
             custom = custom.filter(company__isnull=True)
         holidays_set |= set(custom.values_list('date', flat=True))
-    except Exception:
+    except DatabaseError:
         pass  # Model ne postoji još — to je OK
 
     return holidays_set

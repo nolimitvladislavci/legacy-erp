@@ -101,7 +101,7 @@ def _fetch_json(url, timeout=10):
         req = urllib.request.Request(url, headers={"User-Agent": "LIMITConnect/1.0"})
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode())
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return None
 
 

@@ -15,12 +15,13 @@ from collections import defaultdict
 from decimal import Decimal, InvalidOperation
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.db import IntegrityError, DatabaseError
 
 
 def safe_dec(v):
     try:
         return Decimal(str(round(float(v or 0), 2)))
-    except Exception:
+    except (ValueError, TypeError):
         return Decimal('0')
 
 
@@ -300,7 +301,7 @@ class Command(BaseCommand):
                     je.is_posted = True
                     je.save(update_fields=['is_posted'])
                     je_created += 1
-            except Exception as e:
+            except (IntegrityError, DatabaseError) as e:
                 errors += 1
                 if errors <= 5:
                     self.stderr.write('Error on %s: %s' % (entry_number, e))

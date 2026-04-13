@@ -1,4 +1,6 @@
 from core.models import BookingSignature
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError, DatabaseError
 """Arhiva Views — Centralizirana arhiva svih dokumenata."""
 import csv
 import io
@@ -133,7 +135,7 @@ def _generate_thumbnail(entry, full_path, thumb_path):
         pix.save(thumb_path, output='jpeg', jpg_quality=75)
         return True
 
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         logger.warning(f'Thumbnail greska za entry {entry.pk}: {e}')
         return False
 
@@ -406,7 +408,7 @@ def arhiva_upload(request):
                 from .models import StorageConfig
                 cfg = StorageConfig.objects.get(company=company)
                 backend_name = cfg.backend
-            except Exception:
+            except ObjectDoesNotExist:
                 pass
 
         try:
@@ -503,7 +505,7 @@ def arhiva_upload(request):
             except Exception as ai_err:
                 logger.warning('arhiva_upload: AI trigger failed: %s', ai_err)
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error('arhiva_upload FAILED: %s', e, exc_info=True)
             messages.error(request, _('Upload nije uspio. Provjerite format datoteke i pokušajte ponovo.'))
 
@@ -756,7 +758,7 @@ def arhiva_detail_ajax(request, pk):
                             'vat': str(item.vat_rate) if hasattr(item, 'vat_rate') else '25',
                             'total': str(item.total_price) if hasattr(item, 'total_price') else '',
                         })
-    except Exception as e:
+    except DatabaseError as e:
         result['items_error'] = str(e)
 
     # Email tracking (Sprint 2A)
@@ -959,7 +961,7 @@ def arhiva_thumbnail(request, pk):
 
                 if success:
                     return FileResponse(open(thumb_path, 'rb'), content_type='image/jpeg')
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error('arhiva_upload FAILED: %s', e, exc_info=True)
             logger.warning(f'Invoice thumbnail greska: {e}')
 
@@ -1030,7 +1032,7 @@ def arhiva_preview(request, pk):
                 resp['Cache-Control'] = 'private, max-age=300'
                 return resp
 
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error('arhiva_upload FAILED: %s', e, exc_info=True)
             logger.error(f'Invoice preview greska: {e}')
 

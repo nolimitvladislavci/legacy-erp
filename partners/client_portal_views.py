@@ -8,6 +8,7 @@ from django.db.models import Sum, Count, Q
 from django.utils import timezone
 
 from partners.models import Partner
+from django.db import IntegrityError, DatabaseError
 
 
 def _get_partner(token):
@@ -48,7 +49,7 @@ def client_dashboard(request, token):
         context['deliveries'] = deliveries
         context['smart_boxes'] = active_boxes
         context['delivery_count'] = deliveries.count() if hasattr(deliveries, 'count') else len(deliveries)
-    except Exception:
+    except (ValueError, TypeError):
         context['deliveries'] = []
         context['smart_boxes'] = []
         context['delivery_count'] = 0
@@ -65,7 +66,7 @@ def client_dashboard(request, token):
         context['invoices_paid'] = invoices.filter(
             status='PAID'
         ).aggregate(count=Count('id'), total=Sum('total'))
-    except Exception:
+    except DatabaseError:
         context['invoices_recent'] = []
         context['invoices_unpaid'] = {'count': 0, 'total': 0}
         context['invoices_paid'] = {'count': 0, 'total': 0}
@@ -80,7 +81,7 @@ def client_dashboard(request, token):
         context['tickets_count'] = tickets.filter(
             status__in=['open', 'in_progress', 'waiting_client']
         ).count()
-    except Exception:
+    except DatabaseError:
         context['tickets_open'] = []
         context['tickets_count'] = 0
 
@@ -95,7 +96,7 @@ def client_dashboard(request, token):
         context['payments_pending'] = payments.filter(
             status__in=['pending', 'processing']
         ).aggregate(count=Count('id'), total=Sum('amount'))
-    except Exception:
+    except DatabaseError:
         context['payments_recent'] = []
         context['payments_pending'] = {'count': 0, 'total': 0}
 
@@ -106,7 +107,7 @@ def client_dashboard(request, token):
             company=company,
             recipient_oib=partner.oib
         ).order_by('-issue_date')[:5]
-    except Exception:
+    except DatabaseError:
         context['otpremnice'] = []
 
     return render(request, 'portal/client_dashboard.html', context)
@@ -126,7 +127,7 @@ def client_deliveries(request, token):
         status_filter = request.GET.get('status')
         if status_filter:
             deliveries = deliveries.filter(status=status_filter)
-    except Exception:
+    except DatabaseError:
         deliveries = []
 
     return render(request, 'portal/client_deliveries.html', {
@@ -163,7 +164,7 @@ def client_delivery_track(request, token, delivery_id):
             events = TrackingEvent.objects.filter(
                 tracked_item=delivery.tracked_item
             ).order_by('-created_at')
-    except Exception:
+    except (ValueError, TypeError):
         delivery = None
         boxes = []
         readings = []
@@ -191,7 +192,7 @@ def client_invoices(request, token):
         status_filter = request.GET.get('status')
         if status_filter:
             invoices = invoices.filter(status=status_filter)
-    except Exception:
+    except DatabaseError:
         invoices = []
 
     return render(request, 'portal/client_invoices.html', {
@@ -318,7 +319,7 @@ def client_upload(request, token):
         entry.notes += f'\nFile: {saved_path}'
         entry.save(update_fields=['notes'])
 
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         return JsonResponse({'ok': True, 'status': 'saved', 'message': f'Dokument spremljen (OCR nedostupan: {e})'})
 
     # Try OCR via smart_import if available
@@ -386,5 +387,5 @@ def client_eracun_timeline(request, token):
             })
 
         return JsonResponse({'ok': True, 'eracuni': data})
-    except Exception as e:
+    except DatabaseError as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)

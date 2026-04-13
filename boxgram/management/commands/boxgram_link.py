@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from boxgram.models import PetProfile
 from companies.models import Company
 import logging
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.ERROR(f'Pet {pet_slug} not found')
             )
-        except Exception as e:
+        except ObjectDoesNotExist as e:
             self.stdout.write(
                 self.style.ERROR(f'Error: {str(e)}')
             )

@@ -10,6 +10,7 @@ import traceback
 
 from celery import shared_task
 from django.utils import timezone
+from django.db import IntegrityError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +173,7 @@ def _create_permanent_audit(project, mf, result, started_at, audit_ctx, failed=F
             execution_started_at=started_at,
         )
         logger.info("PermanentMigrationAudit kreiran za projekt %s", project.pk)
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.error("KRITICNO: PermanentMigrationAudit kreiranje FAILED za projekt %s: %s", project.pk, e)
 
 
@@ -233,7 +234,7 @@ def post_migration_fenix_hook(project_pk):
         )
     except ImportError:
         pass
-    except Exception as e:
+    except (IntegrityError, DatabaseError) as e:
         logger.warning("FENIX hook: AI kontekst greska: %s", e)
 
     # ── FENIX Opportunity + Risk Scan ────────────────────────────
@@ -261,7 +262,7 @@ def _get_company_admin_phone(company):
                         return phone
             except Exception:
                 continue
-    except Exception:
+    except DatabaseError:
         pass
     return None
 
@@ -322,7 +323,7 @@ def generate_full_export(self, manifest_id):
             for p in partners
         ]
         counts['partners'] = len(export_data['partners'])
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Export partners error: %s', e)
 
     try:
@@ -338,7 +339,7 @@ def generate_full_export(self, manifest_id):
             for inv in invoices
         ]
         counts['invoices'] = len(export_data['invoices'])
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Export invoices error: %s', e)
 
     try:
@@ -355,7 +356,7 @@ def generate_full_export(self, manifest_id):
                 for e in entries
             ]
             counts['audit_entries'] = len(export_data['audit_entries'])
-    except Exception as e:
+    except DatabaseError as e:
         logger.debug('Export audit error: %s', e)
 
     # Write JSON file
@@ -390,7 +391,7 @@ def generate_full_export(self, manifest_id):
         logger.info('Export completed for %s: %s (%s MB)', company.name, filename, file_size)
         return {'status': 'completed', 'file': filepath, 'counts': counts}
 
-    except Exception as e:
+    except (FileNotFoundError, PermissionError, IOError) as e:
         manifest.status = 'failed'
         manifest.save(update_fields=['status'])
         logger.error('Export failed for %s: %s', company.name, e)

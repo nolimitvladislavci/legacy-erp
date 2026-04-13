@@ -1,3 +1,4 @@
+import logging
 """
 core/ai_service.py — Gemini AI adapter s troškovnom kontrolom.
 
@@ -60,7 +61,7 @@ class AICallBudget:
                 input_tokens=input_tokens, output_tokens=output_tokens,
                 cost_eur=cost, success=success, input_hash=input_hash,
             )
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.error("AICallBudget.log error: %s", e)
 
 
@@ -160,7 +161,7 @@ class CircuitBreakerAI:
         except json.JSONDecodeError as e:
             logger.error("AI JSON parse (image) caller=%s: %s", caller, e)
             return {"status": "error", "message": "AI vratio neispravan JSON. Rucni unos."}
-        except Exception as e:
+        except (FileNotFoundError, IOError) as e:
             logger.error("AI Circuit Breaker (image) caller=%s: %s", caller, e)
             return {"status": "error", "message": "AI greska pri citanju slike. Rucni unos."}
         finally:

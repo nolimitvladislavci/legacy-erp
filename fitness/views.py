@@ -10,6 +10,7 @@ from rest_framework import permissions, viewsets
 
 from .models import Member, MemberCheckIn
 from .serializers import MemberCheckInSerializer, MemberSerializer
+from django.db import IntegrityError, DatabaseError
 
 
 @login_required
@@ -84,7 +85,7 @@ def member_create(request):
             m.save()
             messages.success(request, f"Član {m.first_name} {m.last_name} dodan.")
             return redirect("fitness:member_detail", pk=m.pk)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, str(e))
     return render(request, "fitness/member_form.html", {
         "membership_choices": Member.MEMBERSHIP_CHOICES,
@@ -112,7 +113,7 @@ def member_edit(request, pk):
             member.save()
             messages.success(request, f"Podaci za {member.first_name} {member.last_name} ažurirani.")
             return redirect("fitness:member_detail", pk=member.pk)
-        except Exception as e:
+        except (IntegrityError, DatabaseError) as e:
             messages.error(request, str(e))
     return render(request, "fitness/member_form.html", {
         "member": member,
