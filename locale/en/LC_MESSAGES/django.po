@@ -131,7 +131,7 @@ msgstr ""
 msgid "Device token \"%s\" kreiran. Spremi barcode u mobitel."
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Korisnički račun nije aktivan."
 msgid "Token \"%s\" deaktiviran."
 msgstr "The user account is not active."
@@ -139,22 +139,19 @@ msgstr "The user account is not active."
 msgid "Token ne postoji."
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Deaktiviran"
 msgid "Token \"%s\" aktiviran."
 msgstr "Active"
 
-#, fuzzy
 #| msgid "Link nije valjan ili je istekao."
 msgid "Token nije valjan ili je deaktiviran."
 msgstr "The link is invalid or has expired."
 
-#, fuzzy
 #| msgid ", "
 msgid " "
 msgstr ", "
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Lozinka je netočna. Pokušajte ponovo."
 msgstr "Action failed. Please try again."
@@ -178,7 +175,6 @@ msgid ""
 "kontaktirajte: info@limit-connect.com"
 msgstr ""
 
-#, fuzzy
 #| msgid "Nije moguće označiti kao odbijeno."
 msgid "Nije moguće odrediti tvrtku."
 msgstr "Unable to mark as rejected."
@@ -186,17 +182,14 @@ msgstr "Unable to mark as rejected."
 msgid "Račun je već zapečaćen u arhivu."
 msgstr ""
 
-#, fuzzy
 #| msgid "Smjena zatvorena"
 msgid "Deaktivacija je već zatražena."
 msgstr "Replacement required!"
 
-#, fuzzy
 #| msgid "Zahtjev za deaktivacijom"
 msgid "Nema aktivnog zahtjeva za deaktivaciju."
 msgstr "Type of intervention"
 
-#, fuzzy
 #| msgid "Link je istekao"
 msgid "Grace period je istekao."
 msgstr "The link is invalid or has expired."
@@ -207,7 +200,6 @@ msgstr ""
 msgid "Samo superadmin može reaktivirati."
 msgstr ""
 
-#, fuzzy
 #| msgid "Tvrtka već postoji u sustavu."
 msgid "Tvrtka nije pronađena."
 msgstr "There are no companies in the system."
@@ -446,17 +438,14 @@ msgstr "Give up"
 msgid "Email i PIN su obavezni."
 msgstr ""
 
-#, fuzzy
 #| msgid "Neispravan PIN."
 msgid "Neispravan email ili PIN."
 msgstr "Incorrect PIN."
 
-#, fuzzy
 #| msgid "Lozinke se ne podudaraju."
 msgid "PIN-ovi se ne podudaraju."
 msgstr "Passwords do not match."
 
-#, fuzzy
 #| msgid "OIB mora imati točno 11 znamenki."
 msgid "PIN mora biti točno 6 znamenki."
 msgstr "OIB must have exactly 11 digits."
@@ -464,7 +453,6 @@ msgstr "OIB must have exactly 11 digits."
 msgid "PIN uspješno postavljen! 🔑"
 msgstr ""
 
-#, fuzzy
 #| msgid "Provjerite certifikat i internetsku vezu. Pokušajte ponovo."
 msgid "Problem s FINA certifikatom. Provjerite certifikat i pokušajte ponovo."
 msgstr "Check your certificate and internet connection. Try again."
@@ -472,7 +460,6 @@ msgstr "Check your certificate and internet connection. Try again."
 msgid "Niste unijeli niti certifikat niti API ključ."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nije pronađen OIB"
 msgid "Email nije pronađen."
 msgstr "Last applications"
@@ -480,7 +467,6 @@ msgstr "Last applications"
 msgid "TriKey profil ne postoji."
 msgstr ""
 
-#, fuzzy
 #| msgid "Neispravan PIN."
 msgid "Neispravan Business Key."
 msgstr "Incorrect PIN."
@@ -488,12 +474,10 @@ msgstr "Incorrect PIN."
 msgid "Novi PIN poslan na email. Provjerite inbox."
 msgstr ""
 
-#, fuzzy
 #| msgid "Odaberite tip i pritisnite gumb za otvaranje POS-a."
 msgid "Odaberite ime i unesite PIN."
 msgstr "Select type and press the button to open POS."
 
-#, fuzzy
 #| msgid "Korisnički račun"
 msgid "Korisnik nije pronađen."
 msgstr "User Account"
@@ -501,7 +485,6 @@ msgstr "User Account"
 msgid "Nešto je pošlo krivo. Pokušajte ponovo ili kontaktirajte podršku."
 msgstr "Something went wrong. Please try again or contact support."
 
-#, fuzzy
 #| msgid "Lozinka mora imati najmanje 10 znakova."
 msgid "Lozinka mora imati najmanje 8 znakova."
 msgstr "Password must have at least 8 characters."
@@ -509,12 +492,10 @@ msgstr "Password must have at least 8 characters."
 msgid "✓ Lozinka uspješno promijenjena."
 msgstr ""
 
-#, fuzzy
 #| msgid "Provjerite email za verifikacijski link."
 msgid "Račun kreiran! Provjerite email za verifikaciju."
 msgstr "Check your email for the verification link."
 
-#, fuzzy
 #| msgid "Odaberite datum za nastavak"
 msgid "Odaberite tvrtku iz izbornika prije nastavka."
 msgstr "Select a date"
@@ -528,12 +509,10 @@ msgstr ""
 msgid "Odabir spremljen: %d dodano, %d uklonjeno. Ukupno: %d firmi."
 msgstr ""
 
-#, fuzzy
 #| msgid "Tvrtka nije pronađena. Molimo skenirajte QR kod ponovno."
 msgid "Tvrtka nije pronađena u sustavu. Provjerite podatke."
 msgstr "Company not found. Please scan the QR code again."
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Prebacivanje nije uspjelo. Pokušajte ponovo."
 msgstr "Wrong code. Try again."
@@ -802,17 +781,14 @@ msgstr "There are currently no online booking services available."
 msgid "Kontaktirajte nas direktno."
 msgstr "We will contact you soon."
 
-#, fuzzy
 #| msgid "Termini + fakturiranje"
 msgid "Termin kreiran."
 msgstr "Appointments + invoicing"
 
-#, fuzzy
 #| msgid "Nema ažuriranja"
 msgid "Termin ažuriran."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Termin obrisan."
 msgstr "Documents"
@@ -821,47 +797,38 @@ msgstr "Documents"
 msgid "Zaprimljeno — limeni broj %d"
 msgstr ""
 
-#, fuzzy
 #| msgid "Unos radnog vremena"
 msgid "Unos u karton spremljen."
 msgstr "New entry of working hours"
 
-#, fuzzy
 #| msgid "Trošak ažuriran"
 msgid "Unos ažuriran."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Unos obrisan."
 msgstr "Documents"
 
-#, fuzzy
 #| msgid "Nalog kreiran"
 msgid "Usluga kreirana: "
 msgstr "Unmatched"
 
-#, fuzzy
 #| msgid "Nema ažuriranja"
 msgid "Usluga ažurirana: "
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "AI greška"
 msgid "WA greska: {}"
 msgstr "AI Error"
 
-#, fuzzy
 #| msgid "Email adresa"
 msgid "Email greska: {}"
 msgstr "Email Address"
 
-#, fuzzy
 #| msgid "Podsjetnik (dana prije)"
 msgid "Podsjetnik poslan: {}"
 msgstr "Warnings"
 
-#, fuzzy
 #| msgid "Nema zakazanih termina za danas."
 msgid "Nema telefona ni emaila za slanje."
 msgstr "There are no scheduled appointments for today."
@@ -1578,7 +1545,6 @@ msgstr "Save"
 msgid "Kartica kreirana uspješno."
 msgstr ""
 
-#, fuzzy
 #| msgid "Projekt"
 msgid "Project "
 msgstr "Project"
@@ -2511,27 +2477,22 @@ msgstr "Overview and management - companies"
 msgid "Companies Modul"
 msgstr "Companies Module"
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup postavkama tvrtke."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Podaci tvrtke"
 msgid "Podaci tvrtke su azurirani."
 msgstr "Company information"
 
-#, fuzzy
 #| msgid "Pocetak smjene"
 msgid "Postavke spremljene."
 msgstr "POS shifts"
 
-#, fuzzy
 #| msgid "Napredne postavke sustava"
 msgid "Fiskalne postavke su azurirane."
 msgstr "Advanced system settings"
 
-#, fuzzy
 #| msgid "Promjene cijena"
 msgid "✅ Integracije spremljene."
 msgstr "Sale price"
@@ -2540,12 +2501,10 @@ msgid "Nemate ovlasti za ovu radnju. Obratite se administratoru."
 msgstr ""
 "You do not have permission for this action. Contact your administrator."
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Stopa obrisana."
 msgstr "Documents"
 
-#, fuzzy
 #| msgid "Nema ažuriranja"
 msgid "Stopa ažurirana."
 msgstr "There are no updates"
@@ -2558,17 +2517,14 @@ msgid ""
 "Pretplata ce biti otkazana na kraju perioda (%s). Arhiva ostaje dostupna."
 msgstr ""
 
-#, fuzzy
 #| msgid "Niste povezani s tvrtkom."
 msgid "Niste povezani s firmom."
 msgstr "You are not connected to a company."
 
-#, fuzzy
 #| msgid "Djelomično prihvaćeno"
 msgid "Uvjeti su već prihvaćeni."
 msgstr "Offer accepted"
 
-#, fuzzy
 #| msgid "Uvjeti korištenja platforme"
 msgid "Uvjeti korištenja uspješno prihvaćeni. Hvala!"
 msgstr "Platform Terms of Use"
@@ -2576,27 +2532,22 @@ msgstr "Platform Terms of Use"
 msgid "Morate označiti polje za prihvaćanje uvjeta."
 msgstr ""
 
-#, fuzzy
 #| msgid "Podaci tvrtke"
 msgid "Podaci tvrtke spremljeni."
 msgstr "Company information"
 
-#, fuzzy
 #| msgid "Kontakt podaci"
 msgid "Kontakt podaci spremljeni."
 msgstr "Contact person"
 
-#, fuzzy
 #| msgid "Fiskalni tretman"
 msgid "Fiskalni podaci spremljeni."
 msgstr "Fiscal account"
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup upravljanju komitentima."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Bilješka za danas"
 msgid "Bilješka dodana."
 msgstr "Notes for today..."
@@ -2616,7 +2567,6 @@ msgstr "You are not connected to a company."
 msgid "Odaberite tvrtku iz izbornika ili se obratite administratoru."
 msgstr "Select a company from the menu or contact your administrator."
 
-#, fuzzy
 #| msgid "Nema polica osiguranja."
 msgid "Nemate ovlasti za ovu radnju."
 msgstr "There are no updates"
@@ -2624,22 +2574,18 @@ msgstr "There are no updates"
 msgid "Ako mislite da je greška, obratite se administratoru."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup ovoj tvrtki."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Provjerite unesene podatke prije kreiranja računa."
 msgid "Provjerite jeste li prijavljeni s ispravnim računom."
 msgstr "Check the entered data before creating an account."
 
-#, fuzzy
 #| msgid "Tvrtka već postoji u sustavu."
 msgid "Tvrtka nije pronađena u sustavu."
 msgstr "There are no companies in the system."
 
-#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Provjerite podatke i pokušajte ponovo."
 msgstr "Review the data and accept the terms."
@@ -2653,12 +2599,10 @@ msgstr ""
 msgid "Vaša sesija je istekla."
 msgstr ""
 
-#, fuzzy
 #| msgid "Prijavi se i nastavi"
 msgid "Prijavite se ponovo za nastavak rada."
 msgstr "Log in and continue"
 
-#, fuzzy
 #| msgid "Link je istekao ili je već iskorišten. Zatražite novi."
 msgid "Ovaj link je istekao ili je već iskorišten."
 msgstr "The link has expired or has already been used. Request a new one."
@@ -2666,12 +2610,10 @@ msgstr "The link has expired or has already been used. Request a new one."
 msgid "Zatražite novi link putem obrasca za resetiranje."
 msgstr ""
 
-#, fuzzy
 #| msgid "Korisnički račun nije aktivan."
 msgid "Vaš račun je deaktiviran."
 msgstr "The user account is not active."
 
-#, fuzzy
 #| msgid "Kontaktirajte dispecera za novi link."
 msgid "Kontaktirajte administratora za reaktivaciju."
 msgstr "We will contact you soon."
@@ -2691,7 +2633,6 @@ msgstr ""
 msgid "Nova lozinka je aktivna od sada."
 msgstr ""
 
-#, fuzzy
 #| msgid "Unesite novu lozinku (min. 10 znakova)"
 msgid "Unesite istu lozinku u oba polja."
 msgstr "Enter a new password (min. 8 characters)"
@@ -2699,7 +2640,6 @@ msgstr "Enter a new password (min. 8 characters)"
 msgid "Koristite kombinaciju slova, brojeva i znakova."
 msgstr ""
 
-#, fuzzy
 #| msgid "Račun režija"
 msgid "Račun kreiran!"
 msgstr "Accounts"
@@ -2719,7 +2659,6 @@ msgstr "Try again or select another company from the menu."
 msgid "Pošaljite emailom, ispišite ili fiskalizirajte."
 msgstr "Send by email, print or fiscalize."
 
-#, fuzzy
 #| msgid "Promjene cijena"
 msgid "Promjene su spremljene."
 msgstr "Sale price"
@@ -2730,12 +2669,10 @@ msgstr ""
 msgid "Originalni račun je poništen."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nije fiskalizirano"
 msgid "Račun uspješno fiskaliziran!"
 msgstr "Fiscalized"
 
-#, fuzzy
 #| msgid "Fiskalizacija fail"
 msgid "Fiskalizacija nije uspjela."
 msgstr "Fiscalization (HR)"
@@ -2752,7 +2689,6 @@ msgstr "Contact the administrator for changes."
 msgid "Spremanje dokumenta nije uspjelo."
 msgstr "Document saving failed."
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Provjerite sva obavezna polja i pokušajte ponovo."
 msgstr "Wrong code. Try again."
@@ -2772,12 +2708,10 @@ msgstr "Open Settings → POS or contact your administrator."
 msgid "Skenirajte artikle ili unesite ručno za kreiranje bona."
 msgstr ""
 
-#, fuzzy
 #| msgid "Z-izvješće generirano"
 msgid "Z-izvještaj je generiran."
 msgstr "Z-report generated"
 
-#, fuzzy
 #| msgid "Terminal nema aktivnu smjenu"
 msgid "Terminal već ima otvorenu smjenu."
 msgstr "Appointments + invoicing"
@@ -2785,12 +2719,10 @@ msgstr "Appointments + invoicing"
 msgid "Zatvorite postojeću smjenu prije otvaranja nove."
 msgstr ""
 
-#, fuzzy
 #| msgid "Smjena zatvorena"
 msgid "Ova smjena je već zatvorena."
 msgstr "Replacement required!"
 
-#, fuzzy
 #| msgid "Odaberite datum za nastavak"
 msgid "Otvorite novu smjenu za nastavak rada."
 msgstr "Select a date"
@@ -2804,12 +2736,10 @@ msgstr "Create a new receipt for a new sale."
 msgid "Bon je prazan — dodajte artikle prije naplate."
 msgstr ""
 
-#, fuzzy
 #| msgid "Skenirajte barcode kamerom za brzi unos ili pretragu artikla."
 msgid "Skenirajte barcode ili pretražite artikl."
 msgstr "Scan a barcode with the camera for quick entry or item search."
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Plaćanje evidentirano!"
 msgstr "Record logged"
@@ -2817,7 +2747,6 @@ msgstr "Record logged"
 msgid "Bon je spreman za ispis."
 msgstr ""
 
-#, fuzzy
 #| msgid "Početna količina"
 msgid "Naručite novu količinu."
 msgstr "Home"
@@ -2837,7 +2766,6 @@ msgstr ""
 msgid "Naplatite ili obrišite otvorene bonove prije zatvaranja."
 msgstr ""
 
-#, fuzzy
 #| msgid "Odaberite tip i pritisnite gumb za otvaranje POS-a."
 msgid "Odaberite blagajnika i unesite PIN za otvaranje smjene."
 msgstr "Select type and press the button to open POS."
@@ -2848,12 +2776,10 @@ msgstr ""
 msgid "Dokument je proknjižen u URA/IRA."
 msgstr ""
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Dokument obrisan."
 msgstr "Documents"
 
-#, fuzzy
 #| msgid "Dokument vozača"
 msgid "Dokument uspješno učitan!"
 msgstr "Document"
@@ -2864,7 +2790,6 @@ msgstr ""
 msgid "Svi moduli su sada u kontekstu ovog klijenta."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nema dodijeljenih klijenata"
 msgid "Nemate dodijeljenih klijenata."
 msgstr "No assigned clients"
@@ -2887,7 +2812,6 @@ msgstr ""
 msgid "Obrazac sadrži greške."
 msgstr ""
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Provjerite označena polja i pokušajte ponovo."
 msgstr "Wrong code. Try again."
@@ -2898,7 +2822,6 @@ msgstr ""
 msgid "Aktivirajte ga u Postavke → Moduli ili nadogradite plan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Sve rijeseno"
 msgid "Sve čisto!"
 msgstr "All resolved"
@@ -2933,12 +2856,10 @@ msgstr ""
 msgid "{} dodana kao podtvrtka."
 msgstr ""
 
-#, fuzzy
 #| msgid "Tvrtka već postoji u sustavu."
 msgid "Tvrtka nije pronadjena ili vec ima nadredjenu."
 msgstr "There are no companies in the system."
 
-#, fuzzy
 #| msgid "{n} uklonjen s bona."
 msgid "{} uklonjena iz umbrella."
 msgstr "{n} removed from receipt."
@@ -2952,7 +2873,6 @@ msgstr ""
 msgid "Tvrtka {} kreirana i dodana pod umbrella."
 msgstr ""
 
-#, fuzzy
 #| msgid "Vaš termin je uspješno rezerviran."
 msgid "Korisnik {} uspjesno azuriran."
 msgstr "Your appointment has been successfully booked."
@@ -2963,7 +2883,6 @@ msgstr ""
 msgid "{} staff status: {}"
 msgstr ""
 
-#, fuzzy
 #| msgid "Korisnički profil"
 msgid "Korisnik nije pronaden."
 msgstr "User profile"
@@ -2971,17 +2890,14 @@ msgstr "User profile"
 msgid "Impersonacija završena. Vraćeni ste u superadmin prikaz."
 msgstr ""
 
-#, fuzzy
 #| msgid "Promo kodovi"
 msgid "Promo kod kreiran."
 msgstr "Promo Codes"
 
-#, fuzzy
 #| msgid "Sve je postavljeno! Dobrodošli u LIMIT Connect."
 msgid "Uvjeti korištenja prihvaćeni. Dobrodošli u LIMIT Connect!"
 msgstr "All set! Welcome to LIMIT Connect."
 
-#, fuzzy
 #| msgid "Superadmin"
 msgid "Samo superadmin."
 msgstr "Super Administrator"
@@ -4428,22 +4344,18 @@ msgstr ""
 msgid "Datoteka spremljena (%s, %dKB, backend: %s%s)"
 msgstr ""
 
-#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Upload nije uspio. Provjerite format datoteke i pokušajte ponovo."
 msgstr "Upload failed. Check the file format and try again."
 
-#, fuzzy
 #| msgid "Nema nenaplaćenih odobrenih sati za odabrani period."
 msgid "Nema dokumenata za odabrani period."
 msgstr "There are no unpaid approved hours for the selected period."
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Dokument nije pronađen."
 msgstr "Documents"
 
-#, fuzzy
 #| msgid "Zamjena obavezna!"
 msgid "Sva polja su obavezna."
 msgstr "Replacement required!"
@@ -4709,12 +4621,10 @@ msgstr "Organizer"
 msgid "Aktivnost"
 msgstr "Actively"
 
-#, fuzzy
 #| msgid "Promjene cijena"
 msgid "Postavke e-Racuna spremljene."
 msgstr "Sale price"
 
-#, fuzzy
 #| msgid "Ovaj link je vec iskoristen."
 msgid "Ovaj e-Racun je vec poslan."
 msgstr "This link has already been used."
@@ -4722,27 +4632,22 @@ msgstr "This link has already been used."
 msgid "Ovaj racun vec ima e-Racun."
 msgstr ""
 
-#, fuzzy
 #| msgid "Spremna za preuzimanje"
 msgid "Nema XML-a za preuzimanje."
 msgstr "Payment line"
 
-#, fuzzy
 #| msgid "Odaberi CSV datoteku"
 msgid "Odaberite XML datoteku."
 msgstr "Name of the norm"
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Radnja nije uspjela. Pokušajte ponovo."
 msgstr "Action failed. Please try again."
 
-#, fuzzy
 #| msgid "Proknjiženo"
 msgid "Vec proknjizeno."
 msgstr "Posted"
 
-#, fuzzy
 #| msgid "Kontaktirajte dispecera za novi link."
 msgid "Mandat nije u statusu za aktivaciju."
 msgstr "We will contact you soon."
@@ -5014,12 +4919,10 @@ msgstr "Withdrawal notices"
 msgid "Termin je popunjen ili zatvoren."
 msgstr ""
 
-#, fuzzy
 #| msgid "Preskoči ako već postoji"
 msgid "Ocjena već postoji."
 msgstr "Skip if already exists"
 
-#, fuzzy
 #| msgid "Hvala na kupnji!"
 msgid "Hvala na ocjeni!"
 msgstr "Thank you for your purchase!"
@@ -5105,17 +5008,14 @@ msgstr "Overview and management - finance"
 msgid "Finance Modul"
 msgstr "Finances"
 
-#, fuzzy
 #| msgid "Transakcijski račun"
 msgid "Transakcija kreirana."
 msgstr "Transaction account"
 
-#, fuzzy
 #| msgid "Transakcija"
 msgid "Transakcija obrisana."
 msgstr "Transaction"
 
-#, fuzzy
 #| msgid "Odaberi CSV datoteku"
 msgid "Odaberi ziro racun i CSV datoteku."
 msgstr "Name of the norm"
@@ -5129,7 +5029,6 @@ msgstr ""
 msgid "PDF greska: {}"
 msgstr ""
 
-#, fuzzy
 #| msgid "Odaberi CSV datoteku"
 msgid "Odaberi XML datoteku."
 msgstr "Name of the norm"
@@ -5137,17 +5036,14 @@ msgstr "Name of the norm"
 msgid "Datoteka je prevelika (max 10 MB)."
 msgstr ""
 
-#, fuzzy
 #| msgid "Tvrtka nije pronađena. Molimo skenirajte QR kod ponovno."
 msgid "XML datoteka nije ispravnog formata. Provjerite datoteku."
 msgstr "Company not found. Please scan the QR code again."
 
-#, fuzzy
 #| msgid "Odaberi račun"
 msgid "Odaberi žiro račun."
 msgstr "Select a date"
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Generiranje XML datoteke nije uspjelo. Pokušajte ponovo."
 msgstr "Wrong code. Try again."
@@ -5328,7 +5224,6 @@ msgstr "State export"
 msgid "Državni exporti"
 msgstr "States of presence"
 
-#, fuzzy
 #| msgid "XML generiran"
 msgid "XML još nije generiran."
 msgstr "Ignored"
@@ -5384,12 +5279,10 @@ msgstr "Solved"
 msgid "Zatvoren"
 msgstr "Closed"
 
-#, fuzzy
 #| msgid "Odgovor poslan"
 msgid "Odgovor poslan."
 msgstr "Contracts, offers"
 
-#, fuzzy
 #| msgid "Nedodijeljeni"
 msgid "Tiket dodijeljen."
 msgstr "Unassigned"
@@ -5397,7 +5290,6 @@ msgstr "Unassigned"
 msgid "Telefon i ime su obavezni."
 msgstr ""
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "VIP kontakt obrisan."
 msgstr "Documents"
@@ -5516,7 +5408,6 @@ msgstr "Payment / Expense"
 msgid "Isplate honorara"
 msgstr "Payment / Expense"
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup ovom obračunu."
 msgstr "Company name"
@@ -5524,7 +5415,6 @@ msgstr "Company name"
 msgid "Obračun je već proknjižen."
 msgstr ""
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Knjiženje nije uspjelo. Provjerite konto i iznos."
 msgstr "Wrong code. Try again."
@@ -5538,17 +5428,14 @@ msgstr "Overview and management - insurance"
 msgid "Insurance Modul"
 msgstr "Insurance Module"
 
-#, fuzzy
 #| msgid "Police osiguranja"
 msgid "Polica kreirana."
 msgstr "VAT and configuration"
 
-#, fuzzy
 #| msgid "Nema ažuriranja"
 msgid "Polica ažurirana."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Police osiguranja"
 msgid "Polica obrisana."
 msgstr "VAT and configuration"
@@ -6311,12 +6198,10 @@ msgstr "Overview and management - inventory"
 msgid "Inventory Modul"
 msgstr "Inventory Module"
 
-#, fuzzy
 #| msgid "Dokument nije u statusu Nacrt."
 msgid "Primka nije u statusu Nacrt."
 msgstr "The document is not in Draft status."
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Potvrda primke nije uspjela. Provjerite stavke i pokušajte ponovo."
 msgstr "Wrong code. Try again."
@@ -6324,7 +6209,6 @@ msgstr "Wrong code. Try again."
 msgid "Nijedan artikl nije odabran."
 msgstr ""
 
-#, fuzzy
 #| msgid ""
 #| "Proces opomena pokrenut! Rezultati će biti vidljivi za nekoliko minuta."
 msgid "Prediktivna analiza pokrenuta. Rezultati će biti dostupni uskoro."
@@ -6341,12 +6225,12 @@ msgstr ""
 msgid "Izdatnica %s potvrdjena. Roba u prijenosu."
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Inventura je već pokrenuta."
 msgid "Inventura %s pokrenuta — %d artikala."
 msgstr "Inventory has already been started."
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Inventura je već pokrenuta."
 msgid "Inventura %s završena."
 msgstr "Inventory has already been started."
@@ -6355,7 +6239,7 @@ msgstr "Inventory has already been started."
 msgid "Inventura %s odobrena. Zalihe korigirane."
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Reklamacija zaprimljena"
 msgid "Roba zaprimljena u %s."
 msgstr "Request received!"
@@ -7336,12 +7220,10 @@ msgstr "WhatsApp: {result.get(\"error\", \"Error\")}. Copy link: {portal_url}"
 msgid "WhatsApp nije dostupan. Portal link: {portal_url}"
 msgstr "WhatsApp not available. Portal link: {portal_url}"
 
-#, fuzzy
 #| msgid "Nije fiskalizirano"
 msgid "Račun fiskaliziran (DEMO režim)!"
 msgstr "Fiscalized"
 
-#, fuzzy
 #| msgid "Fiskalizacija fail"
 msgid "Fiskalizacija nije uspjela. Provjerite certifikat i vezu."
 msgstr "Fiscalization (HR)"
@@ -7398,20 +7280,17 @@ msgid ""
 "administratora."
 msgstr ""
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid ""
 "Spremanje dokumenta nije uspjelo. Provjerite sva obavezna polja i pokušajte "
 "ponovo."
 msgstr "Wrong code. Try again."
 
-#, fuzzy
 #| msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
 msgid "Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro."
 msgstr ""
 "Your request has been received. We will contact you as soon as possible."
 
-#, fuzzy
 #| msgid "Pokušajte ponovo. Ako se nastavi, kontaktirajte podršku."
 msgid "Ponuda je odbijena. Slobodno nas kontaktirajte za prilagodbu."
 msgstr "Try again. If it continues, contact support."
@@ -7419,13 +7298,12 @@ msgstr "Try again. If it continues, contact support."
 msgid "Prihvaćanje je opozvano. Ponuda je aktivna — možete ponovo odlučiti."
 msgstr ""
 
-#, fuzzy
 #| msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
 msgid "Odlično! Ponuda je prihvaćena. Kontaktirat ćemo vas uskoro."
 msgstr ""
 "Your request has been received. We will contact you as soon as possible."
 
-#, fuzzy, python-brace-format
+#, python-brace-format
 #| msgid "Dokument se sprema kao nacrt. Možete ga kasnije uređivati i slati."
 msgid "Kopija kreirana: {n}. Možete je urediti i poslati."
 msgstr "Document is saved as draft. You can edit and send it later."
@@ -7653,12 +7531,10 @@ msgstr "There are no projects"
 msgid "Obavijesti"
 msgstr "Notifications"
 
-#, fuzzy
 #| msgid "Obavijest o povlačenju"
 msgid "Obavijest objavljena."
 msgstr "Withdrawal notice"
 
-#, fuzzy
 #| msgid "Tvrtka već postoji u sustavu."
 msgid "KUD nije pronađen u sustavu."
 msgstr "There are no companies in the system."
@@ -7921,7 +7797,6 @@ msgstr "Family house"
 msgid "Obiteljski izazovi"
 msgstr "Family house"
 
-#, fuzzy
 #| msgid "Referentna (ne posudjuje se)"
 msgid "Referentna građa se ne posuđuje."
 msgstr "Reference (non-circulating)"
@@ -8709,18 +8584,15 @@ msgstr "Matched"
 msgid "Nema transakcija"
 msgstr "Transaction"
 
-#, fuzzy
 #| msgid "Nemate ovlasti za ovu radnju. Obratite se administratoru."
 msgid "Nema aktivne tvrtke. Obratite se administratoru."
 msgstr ""
 "You do not have permission for this action. Contact your administrator."
 
-#, fuzzy
 #| msgid "Neispravan format telefona."
 msgid "Neispravan format datuma."
 msgstr "Invalid phone number format."
 
-#, fuzzy
 #| msgid "Nema stavki."
 msgid "Nema stavki za knjizenje."
 msgstr "No data"
@@ -8728,12 +8600,10 @@ msgstr "No data"
 msgid "IBAN i naziv su obavezni."
 msgstr ""
 
-#, fuzzy
 #| msgid "CSV Import bankovnog izvoda"
 msgid "Odaberite datoteku bankovnog izvoda."
 msgstr "CSV Import bank statement"
 
-#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Datoteka se ne može pročitati. Provjerite format i pokušajte ponovo."
 msgstr "Review the data and accept the terms."
@@ -8747,12 +8617,10 @@ msgstr ""
 msgid "Neispravan format datoteke. Provjerite strukturu podataka."
 msgstr ""
 
-#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Uvoz nije uspio. Provjerite format datoteke i pokušajte ponovo."
 msgstr "Review the data and accept the terms."
 
-#, fuzzy
 #| msgid "Transakcijski račun"
 msgid "Transakcija ignorirana."
 msgstr "Transaction account"
@@ -9012,12 +8880,10 @@ msgstr "Child reader profiles"
 msgid "Clan nije pronadjen."
 msgstr ""
 
-#, fuzzy
 #| msgid "Smjena zatvorena"
 msgid "Ova posudba je vec vracena."
 msgstr "Replacement required!"
 
-#, fuzzy
 #| msgid "Broj produljenja"
 msgid "Maksimalno 2 produljenja."
 msgstr "Voucher number"
@@ -9073,7 +8939,6 @@ msgstr "Action"
 msgid "AI akcije"
 msgstr "Actions"
 
-#, fuzzy
 #| msgid "Nalog kreiran"
 msgid "Misija kreirana."
 msgstr "Unmatched"
@@ -9081,7 +8946,6 @@ msgstr "Unmatched"
 msgid "Misija {}."
 msgstr ""
 
-#, fuzzy
 #| msgid "Fiskalizacija fail"
 msgid "Misija nije pronadjena."
 msgstr "Fiscalization (HR)"
@@ -9094,37 +8958,30 @@ msgstr ""
 msgid "Tretman zabilje\\u017een za %s"
 msgstr ""
 
-#, fuzzy
 #| msgid "Račun režija"
 msgid "Token kreiran!"
 msgstr "Accounts"
 
-#, fuzzy
 #| msgid "Tokeni odgovora"
 msgid "Token opozvan."
 msgstr "By arrangement"
 
-#, fuzzy
 #| msgid "Novi termin"
 msgid "Novi token generiran."
 msgstr "At the terminal"
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Ljubimac obrisan."
 msgstr "Documents"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Zapis dodan."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Dodaj ažuriranje"
 msgid "Podaci ažurirani."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Ime je obavezno"
 msgid "Ime udomljavača je obavezno."
 msgstr "Replacement required!"
@@ -9183,7 +9040,6 @@ msgstr "Fiscalization (HR)"
 msgid "Popravak"
 msgstr "Correction"
 
-#, fuzzy
 #| msgid "Nema ažuriranja"
 msgid "Imovina azurirana."
 msgstr "There are no updates"
@@ -9191,7 +9047,6 @@ msgstr "There are no updates"
 msgid "Servisni zapis dodan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Raspored dana"
 msgid "Raspored odrzavanja dodan."
 msgstr "Schedule of the day"
@@ -9199,27 +9054,22 @@ msgstr "Schedule of the day"
 msgid "Nema sredstava za amortizaciju ili vec provedena."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nema aktivne smjene."
 msgid "Nemate aktivnu firmu."
 msgstr "There is no active shift."
 
-#, fuzzy
 #| msgid "Trenutno nema dostupnih usluga za online rezervaciju."
 msgid "Ova ponuda vise nije dostupna za rezervaciju."
 msgstr "There are currently no online booking services available."
 
-#, fuzzy
 #| msgid "Nema polica osiguranja."
 msgid "Vec imate rezervaciju za ovu ponudu."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Roba spremna"
 msgid "Roba oznacena kao spremna."
 msgstr "Goods ready"
 
-#, fuzzy
 #| msgid "Rezervacija"
 msgid "Rezervacija otkazana."
 msgstr "Renovation"
@@ -9713,32 +9563,26 @@ msgstr "Auction offer"
 msgid "Aukcijske ponude"
 msgstr "Auction offers"
 
-#, fuzzy
 #| msgid "Stavka knjiženja"
 msgid "Stavka uklonjena."
 msgstr "Ledger Line"
 
-#, fuzzy
 #| msgid "Kartice pacijenata"
 msgid "Kosarica ispraznjena."
 msgstr "Patient cards"
 
-#, fuzzy
 #| msgid "Arhiva je prazna"
 msgid "Kosarica je prazna."
 msgstr "Archive is empty"
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup ovoj narudzbi."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Spremno za preuzimanje"
 msgid "Oznaceno kao spremno za preuzimanje."
 msgstr "Ready for pickup"
 
-#, fuzzy
 #| msgid "Nabavna cijena"
 msgid "Narudzba odbijena."
 msgstr "Purchase price"
@@ -9746,32 +9590,26 @@ msgstr "Purchase price"
 msgid "Unesite ime ljubimca ili broj mikrocipa."
 msgstr ""
 
-#, fuzzy
 #| msgid "GDPR pristanak roditelja"
 msgid "Pristanak roditelja je već potvrđen."
 msgstr "GDPR parental consent"
 
-#, fuzzy
 #| msgid "GDPR pristanak roditelja"
 msgid "Nema upisanog emaila roditelja."
 msgstr "GDPR parental consent"
 
-#, fuzzy
 #| msgid "Nema obračuna. Kreirajte prvi!"
 msgid "Nemate profil. Kreirajte ga."
 msgstr "No payroll records. Create the first one!"
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup za ovu akciju."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate pristup za uredjivanje ovog memorijala."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Memorijal"
 msgid "Memorijal azuriran."
 msgstr "Material"
@@ -9782,7 +9620,6 @@ msgstr ""
 msgid "Životinja ne postoji."
 msgstr ""
 
-#, fuzzy
 #| msgid "Preskoči ako već postoji"
 msgid "Profil ne postoji."
 msgstr "Skip if already exists"
@@ -9829,7 +9666,6 @@ msgstr "Overtime"
 msgid "Prekretnice"
 msgstr "Overtime"
 
-#, fuzzy
 #| msgid "Ime je obavezno"
 msgid "Email adresa je obavezna."
 msgstr "Replacement required!"
@@ -9837,7 +9673,6 @@ msgstr "Replacement required!"
 msgid "Uspješno ste se prijavili na listu čekanja!"
 msgstr ""
 
-#, fuzzy
 #| msgid "je uspjesno zaprimljena. Obavijestit cemo vas o statusu."
 msgid "Već ste prijavljeni. Obavijestit ćemo vas kad krenemo!"
 msgstr "has been successfully received. We will notify you of the status."
@@ -10187,7 +10022,6 @@ msgstr ""
 msgid "WhatsApp gateway nije dostupan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Cijena ne može biti negativna."
 msgid "Poruka ne može biti prazna."
 msgstr "Price cannot be negative."
@@ -10508,7 +10342,6 @@ msgstr "Payment"
 msgid "Placanja"
 msgstr "Payments"
 
-#, fuzzy
 #| msgid "Promjene cijena"
 msgid "Postavke placanja spremljene."
 msgstr "Sale price"
@@ -10540,7 +10373,6 @@ msgstr "Payroll"
 msgid "Obračunski listići"
 msgstr "Payroll"
 
-#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Obračun nije uspio. Provjerite podatke i pokušajte ponovo."
 msgstr "Review the data and accept the terms."
@@ -10548,7 +10380,6 @@ msgstr "Review the data and accept the terms."
 msgid "DATEV export samo za DE kompanije."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nema izdanih računa za ovaj period."
 msgid "Nema obracunatih placa za ovaj period."
 msgstr "There is no historical data for this project."
@@ -10595,17 +10426,14 @@ msgstr "Thank you for your purchase!"
 msgid "Zapis evidentiran"
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Račun mora imati barem jednu stavku."
 msgid "Morate utovariti barem jedan artikl."
 msgstr "Add a picture"
 
-#, fuzzy
 #| msgid "Terenska smjena"
 msgid "Terenska smjena otvorena! Ruta: "
 msgstr "Current shift"
 
-#, fuzzy
 #| msgid "Terenska smjena"
 msgid "Terenska smjena zatvorena. Povrat: "
 msgstr "Current shift"
@@ -11580,7 +11408,6 @@ msgstr "Terminal already has an open shift. Close it before opening a new one."
 msgid "Smjena #{n} otvorena! Skenirajte artikle za kreiranje bona."
 msgstr "Shift #{n} opened! Scan items to create a receipt."
 
-#, fuzzy
 #| msgid "Ova smjena je zatvorena. Otvorite novu smjenu za nastavak rada."
 msgid "Ova smjena je već zatvorena. Otvorite novu za nastavak rada."
 msgstr "This shift is closed. Open a new shift to continue."
@@ -11593,7 +11420,7 @@ msgstr ""
 msgid "Zatvarate smjenu bez ijednog bona. Kliknite ponovo za potvrdu."
 msgstr "Closing shift without any receipts. Click again to confirm."
 
-#, fuzzy, python-brace-format
+#, python-brace-format
 #| msgid "Z-izvješće generirano"
 msgid "Smjena #{n} zatvorena. Z-izvještaj je generiran."
 msgstr "Z-report generated"
@@ -11607,7 +11434,6 @@ msgstr "This receipt is closed. Create a new receipt for a new sale."
 msgid "Neispravan broj. Provjerite količinu i cijenu."
 msgstr "Invalid number. Check quantity and price."
 
-#, fuzzy
 #| msgid "Unesite naziv klijenta."
 msgid "Unesite naziv artikla."
 msgstr "Client email"
@@ -11624,7 +11450,7 @@ msgstr "{d} — stock is 0! Continue only if you physically have the goods."
 msgid "Niska zaliha: {d} — preostalo {s} {u}. Naručite novu količinu."
 msgstr "Low stock: {d} — {s} {u} remaining. Order a new batch."
 
-#, fuzzy, python-format, python-brace-format
+#, python-format, python-brace-format
 #| msgid "Provjerite je li cijena ispravna."
 msgid "Popust {p}%% na {d}. Provjerite je li ispravan."
 msgstr "Verify the price is correct."
@@ -11657,27 +11483,22 @@ msgstr ""
 msgid "PIN je obavezan za storno. Unesite PIN ovlaštenog blagajnika."
 msgstr ""
 
-#, fuzzy
 #| msgid "Neispravan PIN."
 msgid "Neispravan PIN. Storno odbijen."
 msgstr "Incorrect PIN."
 
-#, fuzzy
 #| msgid "Inventura mora biti završena prije odobrenja."
 msgid "Smjena mora biti zatvorena prije generiranja Z-reporta."
 msgstr "Inventory must be completed before approval."
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Generiranje PDF-a nije uspjelo. Pokušajte ponovo."
 msgstr "PDF generation failed. Please try again."
 
-#, fuzzy
 #| msgid "Unesite početnu gotovinu u blagajni (opcionalno) i pokrenite smjenu."
 msgid "Unesite početnu gotovinu prije otvaranja blagajne."
 msgstr "Enter initial cash in register (optional) and start shift."
 
-#, fuzzy
 #| msgid "Sarzni rok"
 msgid "Sarzni rok dodan."
 msgstr "Tax number"
@@ -11688,17 +11509,14 @@ msgstr ""
 msgid "Iznos mora biti pozitivan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Inventura mora biti završena prije odobrenja."
 msgid "Smjena mora biti zatvorena za generiranje izvještaja."
 msgstr "Inventory must be completed before approval."
 
-#, fuzzy
 #| msgid "Plaćeni iznos"
 msgid "Nevažeći iznos."
 msgstr "Paid vouchers"
 
-#, fuzzy
 #| msgid "Datum isteka"
 msgid "Nevažeći datum isteka."
 msgstr "File"
@@ -11707,7 +11525,6 @@ msgstr "File"
 msgid "%d artikala dodano u \"Roba od jučer\"."
 msgstr ""
 
-#, fuzzy
 #| msgid "Ugovori, ponude"
 msgid "Uklonjeno iz ponude."
 msgstr "Contracts, offers"
@@ -11715,17 +11532,14 @@ msgstr "Contracts, offers"
 msgid "Prijavljeno! Haiku i Gemini analiziraju..."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nema tvrtke."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Porez na potrošnju aktivan"
 msgid "Porez na potrošnju nije aktiviran za ovu tvrtku."
 msgstr "Consumption tax active"
 
-#, fuzzy
 #| msgid "Microsoft login nije konfiguriran."
 msgid "POS postavke nisu konfigurirane."
 msgstr "Microsoft login is not configured."
@@ -11853,12 +11667,10 @@ msgstr "Invoicing"
 msgid "Samo nacrt/poslane narudzbenice se mogu uredjivati."
 msgstr ""
 
-#, fuzzy
 #| msgid "Narudzba vec kreirana"
 msgid "Narudzbenica azurirana."
 msgstr "Order already created"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Prijem robe evidentiran."
 msgstr "Record logged"
@@ -11866,7 +11678,6 @@ msgstr "Record logged"
 msgid "Ne moze se otkazati vec isporucena/fakturirana narudzbenica."
 msgstr ""
 
-#, fuzzy
 #| msgid "Sve odobreno!"
 msgid "Uparivanje odobreno."
 msgstr "On approval"
@@ -12126,7 +11937,6 @@ msgstr "Work orders"
 msgid "Nalog nije u nacrtu."
 msgstr ""
 
-#, fuzzy
 #| msgid "Dokument nije u statusu Nacrt."
 msgid "Nalog nije u statusu za završetak."
 msgstr "The document is not in Draft status."
@@ -12137,7 +11947,6 @@ msgstr ""
 msgid "Nalog nije u statusu za evidentiranje proizvodnje."
 msgstr ""
 
-#, fuzzy
 #| msgid "Planirana količina"
 msgid "Nevaljana količina."
 msgstr "Minimum stock"
@@ -12181,12 +11990,10 @@ msgstr "There are no projects"
 msgid "Dodaj prvi projekt"
 msgstr "Add the first project"
 
-#, fuzzy
 #| msgid "Ažuriranje"
 msgid "Ažuriranje dodano."
 msgstr "Updates"
 
-#, fuzzy
 #| msgid "— Odaberi radnika —"
 msgid "Odaberi radnika iz liste."
 msgstr "Select a date"
@@ -12197,17 +12004,14 @@ msgstr ""
 msgid "Zbirni e-Racun kreiran: {}. Ukupno: {:.2f} EUR."
 msgstr ""
 
-#, fuzzy
 #| msgid "Otpremnica (Lieferschein)"
 msgid "Otpremnica {} kreirana."
 msgstr "Delivery note (Lieferschein)"
 
-#, fuzzy
 #| msgid "Nema podataka"
 msgid "Nema eko podataka za {}."
 msgstr "No data"
 
-#, fuzzy
 #| msgid "Niste povezani s tvrtkom."
 msgid "Nema povezane tvrtke."
 msgstr "You are not connected to a company."
@@ -12215,7 +12019,6 @@ msgstr "You are not connected to a company."
 msgid "Propter modul nije aktivan za vašu tvrtku."
 msgstr ""
 
-#, fuzzy
 #| msgid "Za izmjene kontaktirajte administratora."
 msgid "Propter nije konfiguriran. Kontaktirajte administratora."
 msgstr "Contact the administrator for changes."
@@ -12229,12 +12032,10 @@ msgstr "Approved"
 msgid "Rejected"
 msgstr "Rejected"
 
-#, fuzzy
 #| msgid "Odaberite datum"
 msgid "Odaberite tvrtku."
 msgstr "Choose a table"
 
-#, fuzzy
 #| msgid "Odabrani plan"
 msgid "Odabrani plan nije dostupan."
 msgstr "Your accounts and appointments"
@@ -12242,7 +12043,6 @@ msgstr "Your accounts and appointments"
 msgid "Morate prihvatiti uvjete korištenja."
 msgstr "You must accept the terms of use."
 
-#, fuzzy
 #| msgid "Dobrodošli u LIMIT Connect"
 msgid "Dobrodosli u LIMIT Connect! Vas trial traje do {}."
 msgstr "Welcome to LIMIT Connect"
@@ -12250,12 +12050,10 @@ msgstr "Welcome to LIMIT Connect"
 msgid "Dobrodosli u LIMIT Connect! Vas besplatni plan je aktiviran."
 msgstr ""
 
-#, fuzzy
 #| msgid "Provjerite podatke i prihvatite uvjete."
 msgid "Registracija nije uspjela. Provjerite podatke i pokušajte ponovo."
 msgstr "Registration failed. Check the data and try again."
 
-#, fuzzy
 #| msgid "Registration Details"
 msgid "Registration is already {}."
 msgstr "Final Details"
@@ -12266,12 +12064,10 @@ msgstr ""
 msgid "Error during approval: {}"
 msgstr ""
 
-#, fuzzy
 #| msgid "Registration Details"
 msgid "Registration for {} rejected."
 msgstr "Final Details"
 
-#, fuzzy
 #| msgid "Za izmjene kontaktirajte administratora."
 msgid "Ova firma već ima aktivnog administratora."
 msgstr "Contact the administrator for changes."
@@ -12282,17 +12078,14 @@ msgstr ""
 msgid "Vaš zahtjev je već poslan. Čekajte odobrenje."
 msgstr ""
 
-#, fuzzy
 #| msgid "Link je istekao ili je već iskorišten. Zatražite novi."
 msgid "Link je istekao ili nevažeći."
 msgstr "The link has expired or has already been used. Request a new one."
 
-#, fuzzy
 #| msgid "Zahtjev"
 msgid "Zahtjev odbijen."
 msgstr "Request"
 
-#, fuzzy
 #| msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
 msgid "Prijava zaprimljena! Kontaktirat ćemo vas u roku 48h."
 msgstr ""
@@ -12487,7 +12280,6 @@ msgstr "Overview and management - rental"
 msgid "Rental Modul"
 msgstr "Rental Module"
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Placanje nije uspjelo. Pokusajte ponovo."
 msgstr "Wrong code. Try again."
@@ -12636,7 +12428,6 @@ msgstr "IOS statement"
 msgid "IOS izvodi"
 msgstr "Finished product"
 
-#, fuzzy
 #| msgid "Dokument nije u statusu Nacrt."
 msgid "Narudžba nije u statusu Nacrt."
 msgstr "The document is not in Draft status."
@@ -12650,12 +12441,10 @@ msgstr ""
 msgid "Fakturirana ili zatvorena narudžba se ne može otkazati."
 msgstr ""
 
-#, fuzzy
 #| msgid "Provjerite certifikat i internetsku vezu. Pokušajte ponovo."
 msgid "Slanje nije uspjelo. Provjerite internetsku vezu i pokušajte ponovo."
 msgstr "Check your certificate and internet connection. Try again."
 
-#, fuzzy
 #| msgid "Iznos plaćanja mora biti veći od 0."
 msgid "Iznos mora biti veći od 0."
 msgstr "Payment amount must be greater than 0."
@@ -12741,7 +12530,6 @@ msgstr "Payment / Expense"
 msgid "Isplate sezonskim radnicima"
 msgstr "Payments to seasonal workers"
 
-#, fuzzy
 #| msgid "OIB mora imati točno 11 znamenki."
 msgid "OIB mora biti točno 11 znamenki."
 msgstr "OIB must have exactly 11 digits."
@@ -12749,7 +12537,6 @@ msgstr "OIB must have exactly 11 digits."
 msgid "Završna isplata automatski kreirana — provjeri i odobri."
 msgstr ""
 
-#, fuzzy
 #| msgid "Isplata honorara"
 msgid "Isplata kreirana."
 msgstr "Payment / Expense"
@@ -12763,7 +12550,6 @@ msgstr ""
 msgid "Mjerenje dodano ✓"
 msgstr ""
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Mjerenje obrisano."
 msgstr "Documents"
@@ -12771,7 +12557,6 @@ msgstr "Documents"
 msgid "Nema potvrđenih mjerenja za generiranje ponude."
 msgstr ""
 
-#, fuzzy
 #| msgid "Preskoči ako već postoji"
 msgid "Proizvodni nalog već postoji."
 msgstr "Skip if already exists"
@@ -12779,12 +12564,10 @@ msgstr "Skip if already exists"
 msgid "Unesite datum ugradnje."
 msgstr ""
 
-#, fuzzy
 #| msgid "Zadnja zamjena"
 msgid "Ugradnja završena!"
 msgstr "Shift number"
 
-#, fuzzy
 #| msgid "Detalji ažuriranja..."
 msgid "Checklist ažuriran."
 msgstr "There are no updates"
@@ -12792,7 +12575,6 @@ msgstr "There are no updates"
 msgid "Servisni pregled završen. Sljedeći zakazan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Unesite novu lozinku (min. 10 znakova)"
 msgid "Unesite telefonski broj."
 msgstr "Enter a new password (min. 8 characters)"
@@ -15048,7 +14830,7 @@ msgstr "Default rate"
 msgid "Dodaj novu stopu"
 msgstr "Add a picture"
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Stopa %%"
 msgid "Stopa %%"
 msgstr "Rate (%)"
@@ -20119,7 +19901,6 @@ msgstr "Event"
 msgid "Događaji traga"
 msgstr "Event"
 
-#, fuzzy
 #| msgid "Trošak ažuriran"
 msgid "Tracking ažuriran."
 msgstr "There are no updates"
@@ -20158,22 +19939,18 @@ msgstr ""
 msgid "Dogadjaj '%s' kreiran."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nema tvrtki."
 msgid "Nemate clan profil u ovoj udruzi."
 msgstr "Company name"
 
-#, fuzzy
 #| msgid "Nema obavijesti"
 msgid "Nema slobodnih mjesta."
 msgstr "There are no projects"
 
-#, fuzzy
 #| msgid "Prijava u"
 msgid "Prijava uspjesna!"
 msgstr "Login"
 
-#, fuzzy
 #| msgid "Nije prijavljen"
 msgid "Vec ste prijavljeni."
 msgstr "Last applications"
@@ -20182,7 +19959,7 @@ msgstr "Last applications"
 msgid "Kampanja '%s' kreirana."
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Prebacivanje nije uspjelo."
 msgid "AI generiranje nije uspjelo: %s"
 msgstr "Switching failed."
@@ -20199,7 +19976,7 @@ msgstr ""
 msgid "Email kampanja '%s' zakazana za slanje!"
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Zadnje azurirano"
 msgid "Clan %s azuriran."
 msgstr "Last applications"
@@ -20210,7 +19987,6 @@ msgstr ""
 msgid "AI pretraga EU fondova pokrenuta. Rezultati u Kampanjama."
 msgstr ""
 
-#, fuzzy
 #| msgid "Nema kretanja."
 msgid "Sekcija kreirana."
 msgstr "Type of movement"
@@ -20219,32 +19995,26 @@ msgstr "Type of movement"
 msgid "%s dodan u %s."
 msgstr ""
 
-#, fuzzy
 #| msgid "Dokument vozila"
 msgid "Dokument dodan."
 msgstr "Documents"
 
-#, fuzzy
 #| msgid "Nema ponuda."
 msgid "Oprema dodana."
 msgstr "No data"
 
-#, fuzzy
 #| msgid "Vozilo cisto"
 msgid "Vozilo dodano."
 msgstr "Vehicle clean"
 
-#, fuzzy
 #| msgid "Intervencija"
 msgid "Intervencija evidentirana."
 msgstr "Interventions"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Vježba evidentirana."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Zadnje brojao"
 msgid "Zvanje dodano."
 msgstr "Last applications"
@@ -20252,12 +20022,10 @@ msgstr "Last applications"
 msgid "Repertoar dodan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Proba evidentirana."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Gosti danas"
 msgid "Kostim dodan."
 msgstr "Applications today"
@@ -20268,17 +20036,14 @@ msgstr ""
 msgid "Revir dodan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Država izdavanja"
 msgid "Dozvola izdana."
 msgstr "Date of issue"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Ulov evidentiran."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Poribljavanje evidentirano."
 msgstr "Record logged"
@@ -20286,47 +20051,38 @@ msgstr "Record logged"
 msgid "Čuvarska straža evidentirana."
 msgstr ""
 
-#, fuzzy
 #| msgid "Pčelinja zajednica"
 msgid "Pčelinjak dodan."
 msgstr "Bee colony"
 
-#, fuzzy
 #| msgid "Kasni dana"
 msgid "Košnica dodana."
 msgstr "Work orders"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Tretman evidentiran."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Proizvodnja/centrala"
 msgid "Proizvodnja meda evidentirana."
 msgstr "Production/central"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Selidba evidentirana."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Potvrda registracije"
 msgid "Kotao registriran."
 msgstr "Last applications"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Destilacija evidentirana."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Rakija evidentirana."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Trošak prijevoza/dan"
 msgid "Trošarinska prijava kreirana."
 msgstr "Transportation cost/day"
@@ -20334,17 +20090,14 @@ msgstr "Transportation cost/day"
 msgid "Voćnjak dodan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Berba evidentirana."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Nema ažuriranja"
 msgid "Oprema azurirana."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Intervencija"
 msgid "Intervencija azurirana."
 msgstr "Interventions"
@@ -20359,37 +20112,30 @@ msgstr ""
 msgid "Status branitelja dodan za %s."
 msgstr ""
 
-#, fuzzy
 #| msgid "Dopušteno"
 msgid "Dopuštenje kreirano."
 msgstr "Allowed"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Zapisnik kreiran."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Detalji ažuriranja..."
 msgid "Status branitelja ažuriran."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Trošak ažuriran"
 msgid "Dopuštenje ažurirano."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Trošak ažuriran"
 msgid "Zapisnik ažuriran."
 msgstr "There are no updates"
 
-#, fuzzy
 #| msgid "Lovište"
 msgid "Lovište dodano."
 msgstr "Hunting ground"
 
-#, fuzzy
 #| msgid "Trošak ažuriran"
 msgid "Lovište ažurirano."
 msgstr "There are no updates"
@@ -20397,12 +20143,10 @@ msgstr "There are no updates"
 msgid "Trofej dodan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Zadruga"
 msgid "Zadrugar dodan."
 msgstr "Cooperative"
 
-#, fuzzy
 #| msgid "Nema evidentiranih pologa."
 msgid "Revizija evidentirana."
 msgstr "There are no registered workers."
@@ -20410,7 +20154,7 @@ msgstr "There are no registered workers."
 msgid "Golubinjak kreiran."
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "Nalog kreiran"
 msgid "Golub %s kreiran."
 msgstr "Unmatched"
@@ -20419,17 +20163,14 @@ msgstr "Unmatched"
 msgid "Golub %s azuriran."
 msgstr ""
 
-#, fuzzy
 #| msgid "Pariran"
 msgid "Par kreiran."
 msgstr "Matched"
 
-#, fuzzy
 #| msgid "Zapis evidentiran"
 msgid "Leglo evidentirano."
 msgstr "Record logged"
 
-#, fuzzy
 #| msgid "Zdravstvene napomene"
 msgid "Zdravstveni zapis kreiran."
 msgstr "Internal notes"
@@ -20438,7 +20179,6 @@ msgstr "Internal notes"
 msgid "Utrka \"%s\" kreirana."
 msgstr ""
 
-#, fuzzy
 #| msgid "Rezultat"
 msgid "Rezultat dodan."
 msgstr "There are no projects"
@@ -20447,12 +20187,10 @@ msgstr "There are no projects"
 msgid "Golub %s zapecacen. Hash: %s"
 msgstr ""
 
-#, fuzzy
 #| msgid "Obavezno za prehrambene proizvode — Zakon o OPG čl.12"
 msgid "OPG broj je obavezan za prehrambene proizvode (Zakon o OPG čl.12)."
 msgstr "Mandatory for food products — OPG Law Art. 12"
 
-#, fuzzy
 #| msgid "Pogrešan kod. Pokušajte ponovo."
 msgid "Objavljivanje nije uspjelo. Pokušajte ponovo."
 msgstr "Wrong code. Try again."
@@ -20463,7 +20201,6 @@ msgstr ""
 msgid "Status → Slobodan za udomljenje."
 msgstr ""
 
-#, fuzzy
 #| msgid "Rezervirano"
 msgid "Status → Rezerviran."
 msgstr "You book as:"
@@ -20591,7 +20328,6 @@ msgstr "Accounts"
 msgid "Računi režija"
 msgstr "Accounts"
 
-#, fuzzy
 #| msgid "Proknjiženo"
 msgid "Već proknjiženo."
 msgstr "Posted"
@@ -20599,7 +20335,6 @@ msgstr "Posted"
 msgid "Sken uploadan."
 msgstr ""
 
-#, fuzzy
 #| msgid "Datum arhiviranja"
 msgid "Posta arhivirana."
 msgstr "Date of issue"
@@ -20640,7 +20375,6 @@ msgstr "Classification"
 msgid "Preview"
 msgstr "Preview"
 
-#, fuzzy
 #| msgid "Dokument vozača"
 msgid "Slika uspješno dodana!"
 msgstr "Document"
@@ -21157,22 +20891,18 @@ msgstr "Client Records"
 msgid "Fakturirani/otkazani nalozi se ne mogu mijenjati."
 msgstr ""
 
-#, fuzzy
 #| msgid "Radni nalog"
 msgid "Radni nalog ažuriran."
 msgstr "Work orders"
 
-#, fuzzy
 #| msgid "Nalog kreiran"
 msgid "Nalog je već fakturiran."
 msgstr "Unmatched"
 
-#, fuzzy
 #| msgid "Karton vozila"
 msgid "Karton vozila ažuriran."
 msgstr "Client Records"
 
-#, fuzzy
 #| msgid "Karton klijenta"
 msgid "Karton klijenta ažuriran."
 msgstr "Client Records"
@@ -21297,22 +21027,18 @@ msgstr "Change password"
 msgid "Već imate aktivan timer! Zaustavite ga prvo."
 msgstr ""
 
-#, fuzzy
 #| msgid "Odaberi projekt"
 msgid "Odaberite projekt!"
 msgstr "Add the first project"
 
-#, fuzzy
 #| msgid "Projektni rad"
 msgid "Projekt nije pronađen!"
 msgstr "Project work"
 
-#, fuzzy
 #| msgid "Nema aktivne smjene."
 msgid "Nemate aktivan timer."
 msgstr "There is no active shift."
 
-#, fuzzy
 #| msgid "Štoperica, unos sati, evidencija"
 msgid "▶ Štoperica nastavljena"
 msgstr "Stopwatch, entry of hours, records"
@@ -21326,12 +21052,10 @@ msgstr ""
 msgid "Možete brisati samo unose na čekanju."
 msgstr ""
 
-#, fuzzy
 #| msgid "Neispravan PIN."
 msgid "Neispravan datum."
 msgstr "Incorrect PIN."
 
-#, fuzzy
 #| msgid "Predložak usluge"
 msgid "Predložak obrisan."
 msgstr "Service template"
@@ -21339,17 +21063,14 @@ msgstr "Service template"
 msgid "✓ Bilješka spremljena"
 msgstr ""
 
-#, fuzzy
 #| msgid "Bilješka za danas"
 msgid "Bilješka obrisana"
 msgstr "Notes for today..."
 
-#, fuzzy
 #| msgid "Profil fakturiranja"
 msgid "✓ Profil ažuriran!"
 msgstr "Invoicing only"
 
-#, fuzzy
 #| msgid "Nema registriranih blagajnika."
 msgid "Nema odobrenih nefakturiranih sati."
 msgstr "No registered cashiers."
