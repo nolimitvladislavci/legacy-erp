@@ -202,6 +202,7 @@ MIDDLEWARE = [
     "core.middleware.Force2FAMiddleware",
     "core.middleware.ForceTCMiddleware",
     "registration.middleware.SubscriptionMiddleware",
+    "core.middleware.archive_readonly.ArchiveReadonlyMiddleware",
     "core.image_compression.ImageQuotaMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "permissions.ip_filter.IPFilterMiddleware",

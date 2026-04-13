@@ -85,6 +85,12 @@
     </script>
 </head>
 <body>
+{% if user.is_authenticated %}{% load archive_tags %}{% is_archive_readonly user as is_readonly %}{% if is_readonly %}
+<div style="background:#b91c1c;color:#fff;text-align:center;padding:8px;font-size:.85rem;position:sticky;top:0;z-index:99999">
+  {% trans "Vaša pretplata je istekla — podaci su dostupni samo za čitanje." %}
+  <a href="/registracija/" style="color:#fbbf24;font-weight:600;margin-left:8px">{% trans "Obnovi pretplatu" %}</a>
+</div>
+{% endif %}{% endif %}
 <!-- WCAG 2.4.1: Skip navigation link -->
 <a href="#main-content" class="wcag-skip-link">Preskoči na sadržaj</a>
 
