@@ -6,6 +6,7 @@ from core.managers import CompanyManager
 class FiscalProvider(models.TextChoices):
     HR_FINA = 'hr_fina', 'Hrvatska - FINA CIS'
     DE_TSE = 'de_tse', 'Deutschland - KassenSichV/TSE'
+    AT_RKSV = 'at_rksv', 'Österreich - RKSV'
     NONE = 'none', 'Bez fiskalizacije'
 
 
@@ -32,11 +33,19 @@ class FiscalConfiguration(models.Model):
     business_premise_id = models.CharField(max_length=20, blank=True, verbose_name='Oznaka poslovnog prostora')
     device_id = models.CharField(max_length=20, blank=True, verbose_name='Oznaka naplatnog uredaja')
 
-    # DE TSE
+    # DE TSE (fiskaly)
     tse_api_key = models.CharField(max_length=255, blank=True, help_text='fiskaly API Key')
     tse_api_secret = models.CharField(max_length=255, blank=True, help_text='fiskaly API Secret')
     tse_tss_id = models.CharField(max_length=255, blank=True, help_text='TSS ID iz fiskaly dashboarda')
     tse_client_id = models.CharField(max_length=255, blank=True)
+
+    # AT RKSV (fiskaly AT / PrimeSign / A-Trust)
+    rksv_api_key = models.CharField(max_length=255, blank=True, help_text='RKSV signing API Key')
+    rksv_api_secret = models.CharField(max_length=255, blank=True, help_text='RKSV signing API Secret')
+    rksv_kassen_id = models.CharField(max_length=50, blank=True, help_text='Kassen-ID (FinanzOnline)')
+    rksv_cert_serial = models.CharField(max_length=100, blank=True, help_text='Zertifikat-Seriennummer')
+    rksv_aes_key = models.CharField(max_length=64, blank=True, help_text='AES-256 Schlüssel (hex) für Umsatzzähler')
+
     objects = CompanyManager()
 
     class Meta:

@@ -2,6 +2,7 @@ import logging
 from .models import FiscalConfiguration, FiscalLog, FiscalProvider
 from .providers.hr_fina import HRFinaProvider
 from .providers.de_tse import DETseProvider
+from .providers.at_rksv import ATRksvProvider
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ def get_provider(company, branch=None):
     providers = {
         FiscalProvider.HR_FINA: HRFinaProvider,
         FiscalProvider.DE_TSE: DETseProvider,
+        FiscalProvider.AT_RKSV: ATRksvProvider,
     }
     provider_class = providers.get(config.provider)
     return provider_class(config) if provider_class else None
