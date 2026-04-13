@@ -685,7 +685,6 @@ def add_animal_with_token(request, token):
     })
 
 
-@csrf_exempt
 @require_POST
 def memorial_candle_api(request, chip_or_tag):
     """API: upali svjećicu na memorijalu (javna anonimna akcija)."""

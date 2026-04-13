@@ -899,7 +899,6 @@ def pulse_mark_read(request):
 # ServiceWorker šalje batch kad se internet vrati (Background Sync API)
 # ══════════════════════════════════════════════════════════════════════════════
 
-@csrf_exempt
 @require_POST
 def offline_sync(request):
     """

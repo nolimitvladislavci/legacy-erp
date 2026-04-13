@@ -1363,7 +1363,6 @@ def _ai_identify_item(barcode, inventura):
 
 
 @login_required
-@csrf_exempt
 def inventura_api_scan(request, pk):
     """
     AJAX: Barcode scan → vrati stavku inventure.

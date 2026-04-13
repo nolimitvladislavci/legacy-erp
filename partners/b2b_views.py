@@ -117,7 +117,6 @@ def b2b_invoice_detail(request, token, pk):
 
 
 # ── Invoice Action (AJAX) ─────────────────────────────────────────────────
-@csrf_exempt
 @require_POST
 def b2b_invoice_action(request, token, pk):
     partner = _partner(token)

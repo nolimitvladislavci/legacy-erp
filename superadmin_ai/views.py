@@ -231,7 +231,6 @@ def _check_agent_auth(request):
     return None
 
 
-@csrf_exempt
 @require_POST
 def agent_gateway(request):
     """

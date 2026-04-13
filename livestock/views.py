@@ -210,7 +210,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 
-@csrf_exempt
 def robot_identify(request):
     """API for milking robot -- identify animal by ear tag, check karencija."""
     import json
@@ -302,7 +301,6 @@ def robot_identify(request):
 # INSTITUCIJSKI API (HAPIH, JRDZ, Sanitarna, VetIS)
 # ══════════════════════════════════════════════════════════════
 
-@csrf_exempt
 def institutional_api(request, scope):
     """API za institucije — token auth, rate limited, audited."""
     import json

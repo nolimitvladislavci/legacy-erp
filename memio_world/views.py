@@ -12,7 +12,6 @@ from .models import WaitlistEntry
 logger = logging.getLogger(__name__)
 
 
-@csrf_exempt
 @require_POST
 def waitlist_signup(request):
     """memio.world waitlist API — prima JSON {name, email, interest}."""

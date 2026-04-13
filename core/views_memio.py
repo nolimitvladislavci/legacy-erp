@@ -41,7 +41,6 @@ def _cors(response, origin=None):
 
 # ─── Waiting lista ───────────────────────────────────────────────────────────
 
-@csrf_exempt
 @rate_limit("memio_wl", max_requests=5, window_seconds=900)
 @require_http_methods(['POST', 'OPTIONS'])
 def memio_waitlist(request):

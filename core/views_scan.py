@@ -222,7 +222,6 @@ def _post_process(fields, doc_type):
     return fields
 
 
-@csrf_exempt
 @require_POST
 def fenix_scan(request):
     """

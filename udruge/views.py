@@ -4096,7 +4096,6 @@ def bridge_publish(request):
 
 # ── Golubar AI: generiraj ime goluba iz slike ─────────────────────────────
 @require_POST
-@csrf_exempt
 def golubar_ai_ime(request):
     """
     POST /udruge/golubar/ai-ime/
@@ -4165,7 +4164,6 @@ def golubar_ai_ime(request):
 
 # ── Golubar AI: čitanje broja prstena iz slike ───────────────────────────
 @require_POST
-@csrf_exempt
 def golubar_ai_prsten(request):
     """
     POST /udruge/golubar/ai-prsten/

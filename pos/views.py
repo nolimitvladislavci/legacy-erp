@@ -667,7 +667,6 @@ def receipt_update_buyer(request, receipt_id):
     return JsonResponse({'ok': True, 'buyer_oib': receipt.buyer_oib, 'is_r1': receipt.is_r1})
 
 
-@csrf_exempt
 def ai_barcode_lookup(request):
     """AI Vision za prepoznavanje barkoda i proizvoda sa slike."""
     import json, os
@@ -1432,7 +1431,6 @@ def pos_joker(request, terminal_id):
 
 
 
-@csrf_exempt
 @require_POST
 def quick_pay(request, session_id):
     """AJAX: quick checkout — Thin view, logika u CheckoutService."""
