@@ -699,7 +699,7 @@
       </div>
 
       <!-- Revolut QR modal -->
-      <div id="revolutModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9)">
+      <div id="revolutModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);align-items:center;justify-content:center">
         <div class="fx-bg-surface2 fx-rounded-lg text-center" style="border:2px solid #0075EB;padding:24px;max-width:350px;width:90%">
           <h3 class="mb-2" style="color:#0075EB">📱 Revolut plaćanje</h3>
           <p class="fx-text-muted fx-fs-base mb-3">Gost skenira QR ili otvori link</p>
@@ -879,7 +879,7 @@
 
 
 <!-- Barcode Scanner Overlay -->
-<div id="scannerOverlay" class="fx-hidden fx-scroll-y" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95)">
+<div id="scannerOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);overflow-y:auto">
   <div class="text-center fx-m-auto fx-p-20" style="max-width:500px">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <span class="fx-fw-800 fx-fs-xl fx-text-gold">Skeniraj barkod</span>
@@ -1707,7 +1707,7 @@ function togglePayExpand() {
 </div>
 
 <!-- ══ ZLATNO DUGME MODAL ══ -->
-<div id="zdModal" class="fx-hidden align-items-center justify-content-center" style="position:fixed;inset:0;z-index:19000;background:rgba(0,0,0,0.7)">
+<div id="zdModal" style="display:none;position:fixed;inset:0;z-index:19000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center">
   <div class="fx-rounded-lg fx-p-5 fx-scroll-y" style="background:var(--card,#111);border:2px solid var(--gold,#c9a84c);width:92%;max-width:420px;max-height:90vh">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <span class="fx-fw-bold fx-text-gold" style="font-size:1.05rem">⭐ Prijavi problem</span>
@@ -1736,7 +1736,7 @@ function togglePayExpand() {
       </div>
       <button type="submit" id="zdBtn" class="fx-w-full fx-border-none fx-rounded fx-fw-bold fx-fs-lg fx-text-dark fx-pointer" style="padding:.9rem;background:linear-gradient(135deg,var(--gold,#c9a84c),#b8973e);font-family:inherit">⭐ Pošalji Ivanu</button>
     </form>
-    <div id="zdOk" class="fx-hidden text-center" style="padding:1.5rem 0">
+    <div id="zdOk" class="text-center" style="display:none;padding:1.5rem 0">
       <div class="mb-2 fx-fs-7xl">✅</div>
       <div class="fx-fw-bold fx-text-green mb-2" style="font-size:1.05rem">Prijedlog poslan!</div>
       <div class="fx-fs-base fx-text-muted mb-3">Ivan prima WhatsApp odmah.</div>
