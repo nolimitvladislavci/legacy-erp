@@ -433,6 +433,24 @@ def switch_company(request):
         messages.error(request, _("Odaberite tvrtku iz izbornika prije nastavka."))
         return redirect("/")
 
+    # GDPR: capture from_company before switch
+    _from_company_id = None
+    _from_company_name = None
+    try:
+        _old_mid = request.session.get("active_membership_id")
+        if _old_mid:
+            from accounts.models import CompanyMembership as _CM
+
+            _old_mem = _CM.objects.select_related("company").filter(pk=_old_mid, user=request.user).first()
+            if _old_mem:
+                _from_company_id = str(_old_mem.company_id)
+                _from_company_name = _old_mem.company.name
+        if not _from_company_name and hasattr(request.user, "profile") and request.user.profile.company:
+            _from_company_id = str(request.user.profile.company_id)
+            _from_company_name = request.user.profile.company.name
+    except Exception:
+        pass
+
     try:
         if membership_id:
             mem = CompanyMembership.objects.select_related("company").get(
@@ -501,6 +519,33 @@ def switch_company(request):
                 target_repr=f"Switch na {company.name}",
             )
         except (ValueError, TypeError):
+            pass
+        # GDPR: SystemAuditLog s from/to podacima i IP-om
+        try:
+            from django.db import DatabaseError, IntegrityError
+
+            from core.models import SystemAuditLog
+
+            _ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip() or request.META.get(
+                "REMOTE_ADDR", ""
+            )
+            SystemAuditLog.objects.create(
+                user=request.user,
+                company=company,
+                action="company_switch",
+                model_name="auth.User",
+                object_id=str(request.user.pk),
+                object_repr=f"GDPR: {request.user.username} switch {_from_company_name} → {company.name}",
+                changes={
+                    "from_company_id": _from_company_id,
+                    "from_company_name": _from_company_name,
+                    "to_company_id": str(company.pk),
+                    "to_company_name": company.name,
+                    "role": role_display,
+                },
+                ip_address=_ip,
+            )
+        except (IntegrityError, DatabaseError, Exception):
             pass
     except (CompanyMembership.DoesNotExist, Company.DoesNotExist):
         messages.error(request, _("Nemate pristup ovoj tvrtki. Provjerite jeste li prijavljeni s ispravnim računom."))
@@ -665,6 +710,26 @@ def switch_company_get(request, company_id):
     request.session["active_membership_id"] = mem.id
     request.session["superadmin_as_company"] = str(company.pk)
     messages.success(request, _("Prebaceno na: %s") % company.name)
+    # GDPR: SystemAuditLog za GET-based switch
+    try:
+        from django.db import DatabaseError as _DBE
+        from django.db import IntegrityError as _IE
+
+        from core.models import SystemAuditLog
+
+        _ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip() or request.META.get("REMOTE_ADDR", "")
+        SystemAuditLog.objects.create(
+            user=request.user,
+            company=company,
+            action="company_switch",
+            model_name="auth.User",
+            object_id=str(request.user.pk),
+            object_repr=f"GDPR: {request.user.username} GET-switch → {company.name}",
+            changes={"to_company_id": str(company.pk), "to_company_name": company.name, "method": "GET"},
+            ip_address=_ip,
+        )
+    except (_IE, _DBE, Exception):
+        pass
     return redirect("/")
 
 

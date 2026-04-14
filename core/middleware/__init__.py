@@ -429,8 +429,41 @@ class RateLimitMiddleware:
         ip = request.META.get("HTTP_X_REAL_IP") or request.META.get("REMOTE_ADDR", "unknown")
         is_authenticated = getattr(request, "user", None) and getattr(request.user, "is_authenticated", False)
 
-        # Autenticirani korisnici — bez limita
+        # Autenticirani korisnici — rate limit samo za AI, PDF i API endpoint
         if is_authenticated:
+            user_id = getattr(request.user, "pk", None)
+            ai_prefixes = ("/hr/ai/", "/hr/ai-cockpit/", "/api/advisor/", "/api/deepseek/")
+            pdf_patterns = ("/pdf/", "/export-pdf/", "/generate-pdf/", "/bon/", "/racun/pdf/")
+            is_ai = any(path.startswith(p) for p in ai_prefixes)
+            is_pdf = any(s in path for s in pdf_patterns)
+            is_api = path.startswith("/api/") and not is_ai
+
+            if is_ai:
+                rl_limit, rl_window, rl_key = 10, 60, f"rl:u:{user_id}:ai"
+            elif is_pdf:
+                rl_limit, rl_window, rl_key = 20, 60, f"rl:u:{user_id}:pdf"
+            elif is_api:
+                rl_limit, rl_window, rl_key = 60, 60, f"rl:u:{user_id}:api"
+            else:
+                return self.get_response(request)
+
+            try:
+                import redis as _redis
+
+                _r = _redis.Redis.from_url(getattr(settings, "CELERY_BROKER_URL", "redis://localhost:6379/0"))
+                _pipe = _r.pipeline()
+                _pipe.incr(rl_key)
+                _pipe.expire(rl_key, rl_window)
+                _count, _ = _pipe.execute()
+                if _count > rl_limit:
+                    from django.http import JsonResponse
+
+                    return JsonResponse(
+                        {"error": "Previše zahtjeva. Pričekajte minutu.", "retry_after": rl_window},
+                        status=429,
+                    )
+            except Exception:
+                pass
             return self.get_response(request)
 
         # Whitelist IP-ova (admin, office) — bez limita
