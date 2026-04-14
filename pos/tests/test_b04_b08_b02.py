@@ -17,7 +17,7 @@ class B04Setup(TestCase):
     def setUpTestData(cls):
         from companies.models import Company
 
-        cls.company = Company.objects.create(name="B04 Test", oib="55555555501")
+        cls.company = Company.objects.create(name="B04 Test", oib="55555555551")
         cls.user = User.objects.create_user("b04user", "b04@t.com", "T123!")
 
 
@@ -272,7 +272,7 @@ class DualRoutingFiscalBypassTest(B04Setup):
         """Nove tvrtke su po defaultu NE-exempt."""
         from companies.models import Company
 
-        c = Company.objects.create(name="Nova Firma", oib="11122233301")
+        c = Company.objects.create(name="Nova Firma", oib="11122233343")
         self.assertFalse(c.fiscal_exempt)
 
 

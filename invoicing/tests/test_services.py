@@ -81,7 +81,7 @@ class TestCopyInvoice(TestCase):
 
         self.company = Company.objects.first()
         if not self.company:
-            self.company = Company.objects.create(name="Test Co", oib="12345678901")
+            self.company = Company.objects.create(name="Test Co", oib="12345678903")
         self.source = Invoice.objects.create(
             doctype="P",
             number="P-2026-0001",
@@ -94,7 +94,7 @@ class TestCopyInvoice(TestCase):
             status="ACCEPTED",
             country="HR",
             issuer_name="Test Firma",
-            issuer_oib="12345678901",
+            issuer_oib="12345678903",
             date_issued=timezone.now(),
         )
 
@@ -116,7 +116,7 @@ class TestGenerateInvoiceNumber(TestCase):
 
         self.company = Company.objects.first()
         if not self.company:
-            self.company = Company.objects.create(name="Test Co", oib="99999999999")
+            self.company = Company.objects.create(name="Test Co", oib="99999999994")
 
     def test_generates_number(self):
         from invoicing.models import Invoice

@@ -47,7 +47,7 @@ def _make_invoice(company, user, doctype="invoice"):
         doctype=doctype,
         status="draft",
         client_name="Test Client",
-        client_oib="11111111111",
+        client_oib="11111111119",
         date=datetime.date.today(),
         due_date=datetime.date.today() + datetime.timedelta(days=30),
         payment_method="transakcijski",
@@ -59,7 +59,7 @@ class InvoicingWorkflowTest(TestCase):
     """Test invoice workflow actions: mark_sent, mark_accepted, mark_rejected, storno, clone."""
 
     def setUp(self):
-        self.company, self.user = _setup_invoicing_user("64000000001", "inv_wf1")
+        self.company, self.user = _setup_invoicing_user("64000000011", "inv_wf1")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="inv_wf1", password="pass123")
 
@@ -144,7 +144,7 @@ class InvoicingAPITest(TestCase):
     """Test invoicing API endpoints."""
 
     def setUp(self):
-        self.company, self.user = _setup_invoicing_user("64000000002", "inv_api1")
+        self.company, self.user = _setup_invoicing_user("64000000020", "inv_api1")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="inv_api1", password="pass123")
 
@@ -316,7 +316,7 @@ class InvoicingFiscalTest(TestCase):
     """Test fiscal-related views."""
 
     def setUp(self):
-        self.company, self.user = _setup_invoicing_user("64000000003", "inv_fisc1")
+        self.company, self.user = _setup_invoicing_user("64000000038", "inv_fisc1")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="inv_fisc1", password="pass123")
 
@@ -363,7 +363,7 @@ class InvoicingFormsTest(TestCase):
     """Test invoice form wizard views."""
 
     def setUp(self):
-        self.company, self.user = _setup_invoicing_user("64000000004", "inv_frm1")
+        self.company, self.user = _setup_invoicing_user("64000000046", "inv_frm1")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="inv_frm1", password="pass123")
 
@@ -409,7 +409,7 @@ class InvoicingFormsTest(TestCase):
             "/invoicing/save/",
             {
                 "client_name": "Test Client",
-                "client_oib": "11111111112",
+                "client_oib": "11111111119",
                 "date": "2026-01-01",
                 "due_date": "2026-01-31",
                 "payment_method": "transakcijski",
@@ -426,7 +426,7 @@ class InvoicingFormsTest(TestCase):
                 f"/invoicing/{inv.pk}/edit/",
                 {
                     "client_name": "Updated Client",
-                    "client_oib": "11111111111",
+                    "client_oib": "11111111119",
                     "date": "2026-01-01",
                     "due_date": "2026-01-31",
                     "payment_method": "gotovina",

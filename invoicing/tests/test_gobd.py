@@ -86,7 +86,7 @@ class TestCheckFortlaufendeNummer(TestCase):
     def setUp(self):
         from companies.models import Company
 
-        self.company = Company.objects.create(name="GoBD Test GmbH", oib="77777777777")
+        self.company = Company.objects.create(name="GoBD Test GmbH", oib="77777777778")
 
     def test_no_invoices(self):
         from invoicing.gobd_compliance import check_fortlaufende_nummer
@@ -107,7 +107,7 @@ class TestCheckFortlaufendeNummer(TestCase):
                 date_issued=timezone.now(),
                 status="PAID",
                 issuer_name="Test",
-                issuer_oib="77777777777",
+                issuer_oib="77777777778",
             )
         result = check_fortlaufende_nummer(self.company, year=timezone.now().year)
         self.assertTrue(result["ok"])
@@ -125,7 +125,7 @@ class TestCheckFortlaufendeNummer(TestCase):
                 date_issued=timezone.now(),
                 status="PAID",
                 issuer_name="Test",
-                issuer_oib="77777777777",
+                issuer_oib="77777777778",
             )
         result = check_fortlaufende_nummer(self.company, year=timezone.now().year)
         self.assertFalse(result["ok"])
@@ -136,7 +136,7 @@ class TestGetGobdReport(TestCase):
     def setUp(self):
         from companies.models import Company
 
-        self.company = Company.objects.create(name="GoBD Report GmbH", oib="88888888888")
+        self.company = Company.objects.create(name="GoBD Report GmbH", oib="88888888880")
 
     def test_empty_report(self):
         from invoicing.gobd_compliance import get_gobd_report
@@ -159,7 +159,7 @@ class TestGetGobdReport(TestCase):
             client_name="Test Kunde",
             client_address="Str. 1",
             issuer_name="Test",
-            issuer_oib="88888888888",
+            issuer_oib="88888888880",
         )
         report = get_gobd_report(self.company, year=timezone.now().year)
         self.assertEqual(report["total_invoices"], 1)

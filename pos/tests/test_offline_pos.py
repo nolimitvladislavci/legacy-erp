@@ -18,7 +18,7 @@ class OfflineSyncEndpointTest(TestCase):
         from companies.models import Company
         from pos.models import POSCashier, POSSession, POSTerminal
 
-        self.company = Company.objects.create(name="Test Offline", oib="11111111111")
+        self.company = Company.objects.create(name="Test Offline", oib="11111111119")
         self.user = User.objects.create_user(username="offline_test", password="test123")
 
         # Assign company

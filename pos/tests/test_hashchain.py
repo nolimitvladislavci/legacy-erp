@@ -10,6 +10,21 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
 
+
+def _make_valid_oib():
+    """Generate a valid 11-digit OIB (ISO 7064 Luhn-10)."""
+    base = str(uuid.uuid4().int)[:10].zfill(10)
+    digits = [int(c) for c in base]
+    product = 10
+    for d in digits:
+        s = (product + d) % 10
+        if s == 0:
+            s = 10
+        product = (s * 2) % 11
+    check = (11 - product) % 10
+    return base + str(check)
+
+
 from pos.hashchain import (
     ChainLink,
     _sha256,
@@ -27,7 +42,7 @@ def _make_company():
 
     return Company.objects.create(
         name="HashChain Test Co " + str(uuid.uuid4())[:8],
-        oib="HC" + str(uuid.uuid4().int)[:9],
+        oib=_make_valid_oib(),
     )
 
 

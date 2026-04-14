@@ -491,6 +491,9 @@ class CheckoutService:
             except (InvalidOperation, ValueError):
                 qty = Decimal("1")
 
+            if qty < 0:
+                qty = Decimal("0")
+
             if is_tip:
                 try:
                     price = Decimal(str(item_data.get("unit_price") or item_data.get("price") or 0))

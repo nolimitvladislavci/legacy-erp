@@ -69,7 +69,7 @@ def make_invoice(company, user, doctype="R", status="DRAFT", **kwargs):
         doctype=doctype,
         status=status,
         client_name="Test Klijent d.o.o.",
-        client_oib="22222222222",
+        client_oib="22222222226",
         client_address="Testna 1",
         client_city="10000 Zagreb",
         client_country="Hrvatska",
@@ -82,7 +82,7 @@ def make_invoice(company, user, doctype="R", status="DRAFT", **kwargs):
         tax_amount=Decimal("0"),
         total=Decimal("0"),
         issuer_name="Test Firma",
-        issuer_oib="33333333333",
+        issuer_oib="33333333335",
         country="HR",
     )
     defaults.update(kwargs)
@@ -148,7 +148,7 @@ class TestRecalculate(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000001")
+        self.company = make_company("21000000011")
         self.user = make_user("recalc_user1", self.company)
 
     def test_recalculate_prazno(self):
@@ -224,7 +224,7 @@ class TestEnsurePartner(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000002")
+        self.company = make_company("21000000020")
         self.user = make_user("epartner_user1", self.company)
 
     def test_kreira_partnera_iz_racuna(self):
@@ -235,15 +235,15 @@ class TestEnsurePartner(TestCase):
             self.company,
             self.user,
             client_name="Novi Partner d.o.o.",
-            client_oib="55555555555",
+            client_oib="55555555551",
             client_email="novi@test.hr",
         )
-        before = Partner.objects.filter(company=self.company, oib="55555555555").count()
+        before = Partner.objects.filter(company=self.company, oib="55555555551").count()
         self.assertEqual(before, 0, "Partner ne smije postojati prije poziva")
 
         ensure_partner(self.company, inv)
 
-        after = Partner.objects.filter(company=self.company, oib="55555555555").count()
+        after = Partner.objects.filter(company=self.company, oib="55555555551").count()
         self.assertEqual(after, 1, "ensure_partner mora kreirati 1 partnera")
 
     def test_nema_duplikata(self):
@@ -254,13 +254,13 @@ class TestEnsurePartner(TestCase):
             self.company,
             self.user,
             client_name="Postojeći Partner",
-            client_oib="66666666666",
+            client_oib="66666666664",
         )
         ensure_partner(self.company, inv)
         ensure_partner(self.company, inv)  # drugi poziv
         ensure_partner(self.company, inv)  # treći poziv
 
-        count = Partner.objects.filter(company=self.company, oib="66666666666").count()
+        count = Partner.objects.filter(company=self.company, oib="66666666664").count()
         self.assertEqual(count, 1, f"Mora biti 1 partner, a ima {count}")
 
     def test_bez_oib_koristi_ime(self):
@@ -295,11 +295,11 @@ class TestEnsurePartner(TestCase):
             self.company,
             self.user,
             client_name="Email Partner",
-            client_oib="77777777777",
+            client_oib="77777777778",
             client_email="email@firma.hr",
         )
         ensure_partner(self.company, inv)
-        partner = Partner.objects.filter(company=self.company, oib="77777777777").first()
+        partner = Partner.objects.filter(company=self.company, oib="77777777778").first()
         self.assertIsNotNone(partner)
         self.assertEqual(partner.email, "email@firma.hr")
 
@@ -316,7 +316,7 @@ class TestSaveItems(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000003")
+        self.company = make_company("21000000038")
         self.user = make_user("saveitems_user1", self.company)
 
     def _post(self, data):
@@ -468,7 +468,7 @@ class TestDeductInventory(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000004")
+        self.company = make_company("21000000046")
         self.user = make_user("deduct_user1", self.company)
 
     def test_paid_kreira_stock_movement(self):
@@ -567,7 +567,7 @@ class TestCopyInvoice(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000005")
+        self.company = make_company("21000000054")
         self.user = make_user("copy_user1", self.company)
 
     def test_kopija_je_draft(self):
@@ -674,7 +674,7 @@ class TestCopyInvoiceItems(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000006")
+        self.company = make_company("21000000062")
         self.user = make_user("copyitems_user1", self.company)
 
     def test_kopiranje_stavki(self):
@@ -717,7 +717,7 @@ class TestMarkWorktimeBilled(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000007")
+        self.company = make_company("21000000079")
         self.user = make_user("worktime_user1", self.company)
 
     def _make_time_entry(self):
@@ -819,7 +819,7 @@ class TestEffectiveIbanSwift(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000008")
+        self.company = make_company("21000000087")
         self.user = make_user("iban_user1", self.company)
 
     def test_issuer_iban_ima_prednost(self):
@@ -876,7 +876,7 @@ class TestGenerateInvoiceNumber(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000009")
+        self.company = make_company("21000000095")
         self.user = make_user("gennr_user1", self.company)
 
     def test_broj_nije_prazan(self):
@@ -927,7 +927,7 @@ class TestGenerateInvoiceNumber(TestCase):
             inv.client_name = "Test"
             inv.country = "HR"
             inv.issuer_name = "Firma"
-            inv.issuer_oib = "33333333333"
+            inv.issuer_oib = "33333333335"
             inv.save()
             brojevi.add(inv.number)
 
@@ -946,7 +946,7 @@ class TestRecalculateIntegracija(TestCase):
     """
 
     def setUp(self):
-        self.company = make_company("21000000010")
+        self.company = make_company("21000000100")
         self.user = make_user("rcalc_int_user1", self.company)
 
     def test_recalculate_save_refresh(self):

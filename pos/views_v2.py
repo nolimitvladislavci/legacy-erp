@@ -1202,7 +1202,7 @@ def offline_sync(request):
                 try:
                     from fiskalizacija.fisk import fiscalize_receipt
 
-                    jir = fiscalize_receipt(receipt, naknadna_dostava=True)
+                    jir = fiscalize_receipt(receipt)
                     if jir:
                         fiscal_result = {"jir": jir, "zki": receipt.zki}
                 except ImportError as e:

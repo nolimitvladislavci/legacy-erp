@@ -25,7 +25,7 @@ class POSTestBase(TestCase):
         from companies.models import Company
         from pos.models import POSTerminal
 
-        self.company = Company.objects.create(name="Test POS Co", oib="55555555555")
+        self.company = Company.objects.create(name="Test POS Co", oib="55555555551")
         self.user = User.objects.create_user("postest", password="test123")
         self.terminal = POSTerminal.objects.create(name="Terminal 1", company=self.company)
 

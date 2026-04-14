@@ -26,7 +26,7 @@ class POSRaceConditionTest(TransactionTestCase):
         self.user = User.objects.create_user("race_tester", password="test1234")
         self.company = Company.objects.create(
             name="Race Test d.o.o.",
-            oib="12345678901",
+            oib="12345678903",
             owner=self.user,
         )
         self.terminal = POSTerminal.objects.create(
@@ -198,7 +198,7 @@ class POSSimulationS4Test(TransactionTestCase):
         self.user2 = User.objects.create_user("blagajnik_b", password="test")
         self.company = Company.objects.create(
             name="S4 Test d.o.o.",
-            oib="99988877766",
+            oib="99988877762",
             owner=self.user1,
         )
         self.terminal = POSTerminal.objects.create(

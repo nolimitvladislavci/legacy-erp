@@ -40,7 +40,7 @@ class POSViewSmokeTest(TestCase):
     """Test correct POS URL patterns."""
 
     def setUp(self):
-        self.company, self.user = _setup_pos_user("11111111110", "pos_v1")
+        self.company, self.user = _setup_pos_user("11111111119", "pos_v1")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="pos_v1", password="pass123")
 
@@ -91,7 +91,7 @@ class POSWithTerminalTest(TestCase):
     """Test POS views that require a terminal."""
 
     def setUp(self):
-        self.company, self.user = _setup_pos_user("11111111120", "pos_v2")
+        self.company, self.user = _setup_pos_user("11111111127", "pos_v2")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="pos_v2", password="pass123")
 
@@ -204,7 +204,7 @@ class POSReceiptTest(TestCase):
     """Test POS receipt views."""
 
     def setUp(self):
-        self.company, self.user = _setup_pos_user("11111111130", "pos_v3")
+        self.company, self.user = _setup_pos_user("11111111135", "pos_v3")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="pos_v3", password="pass123")
 
@@ -252,7 +252,7 @@ class POSSettingsTest(TestCase):
     """Test POS settings views."""
 
     def setUp(self):
-        self.company, self.user = _setup_pos_user("11111111140", "pos_v4")
+        self.company, self.user = _setup_pos_user("11111111143", "pos_v4")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="pos_v4", password="pass123")
 

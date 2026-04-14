@@ -24,7 +24,7 @@ class POSEndToEndTests(TestCase):
 
         self.company = Company.objects.create(
             name="Test POS d.o.o.",
-            oib="12345678901",
+            oib="12345678903",
             address="Testna 1",
         )
         # Profile

@@ -54,7 +54,7 @@ ALLOWED = [200, 301, 302, 400, 403, 404, 405, 500, 501]
 
 class InvoicingFilterTest(TestCase):
     def setUp(self):
-        self.company, self.user = _setup_inv_user("01010101010", "inv_flt")
+        self.company, self.user = _setup_inv_user("01010101012", "inv_flt")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="inv_flt", password="pass123")
 
@@ -129,7 +129,7 @@ class InvoicingFilterTest(TestCase):
 
 class InvoiceWizardTest(TestCase):
     def setUp(self):
-        self.company, self.user = _setup_inv_user("02020202020", "inv_wiz")
+        self.company, self.user = _setup_inv_user("02020202026", "inv_wiz")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="inv_wiz", password="pass123")
 
@@ -243,7 +243,7 @@ class InvoiceSaveTest(TestCase):
     """Test invoice_save POST endpoint."""
 
     def setUp(self):
-        self.company, self.user = _setup_inv_user("04040404040", "inv_save")
+        self.company, self.user = _setup_inv_user("04040404045", "inv_save")
         self.client = Client(raise_request_exception=False)
         self.client.login(username="inv_save", password="pass123")
 
@@ -251,7 +251,7 @@ class InvoiceSaveTest(TestCase):
         data = {
             "doctype": "R",
             "issuer_name": "Test",
-            "issuer_oib": "04040404040",
+            "issuer_oib": "04040404045",
         }
         resp = self.client.post("/invoicing/save/", data, follow=True)
         self.assertIn(resp.status_code, ALLOWED)
@@ -260,7 +260,7 @@ class InvoiceSaveTest(TestCase):
         data = {
             "doctype": "R",
             "issuer_name": "Test Firma",
-            "issuer_oib": "04040404040",
+            "issuer_oib": "04040404045",
             "client_name": "Klijent",
             "items": json.dumps(
                 [

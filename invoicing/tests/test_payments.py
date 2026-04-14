@@ -22,7 +22,7 @@ from payments.services import (
 )
 
 
-def _company(oib="98765432100", name="Pay Test d.o.o."):
+def _company(oib="98765432106", name="Pay Test d.o.o."):
     return Company.objects.create(name=name, oib=oib)
 
 
@@ -80,7 +80,7 @@ class TestPaymentConfig(TestCase):
 # ─────────────────────────────────────────────────────────────
 class TestPaymentModel(TestCase):
     def setUp(self):
-        self.company = _company("11223344556", "Model Co")
+        self.company = _company("11223344553", "Model Co")
 
     def _payment(self, status="pending", method="cash", amount=Decimal("50.00")):
         return Payment.objects.create(
@@ -137,7 +137,7 @@ class TestPaymentModel(TestCase):
 # ─────────────────────────────────────────────────────────────
 class TestCreatePaymentCash(TestCase):
     def setUp(self):
-        self.company = _company("22334455667", "Cash Co")
+        self.company = _company("22334455668", "Cash Co")
 
     def test_cash_payment_created(self):
         p = create_payment(
@@ -245,7 +245,7 @@ class TestCreatePaymentCash(TestCase):
 # ─────────────────────────────────────────────────────────────
 class TestCreatePaymentStripe(TestCase):
     def setUp(self):
-        self.company = _company("33445566778", "Stripe Co")
+        self.company = _company("33445566771", "Stripe Co")
         config = get_config(self.company)
         config.stripe_enabled = True
         config.stripe_secret_key = "sk_test_fake"
@@ -458,7 +458,7 @@ class TestCheckBtcpayStatus(TestCase):
 # ─────────────────────────────────────────────────────────────
 class TestPaymentLifecycle(TestCase):
     def setUp(self):
-        self.company = _company("66778899001", "Lifecycle Co")
+        self.company = _company("66778899007", "Lifecycle Co")
 
     def test_full_cash_lifecycle(self):
         """Kreiraj → dovrši → provjeri."""

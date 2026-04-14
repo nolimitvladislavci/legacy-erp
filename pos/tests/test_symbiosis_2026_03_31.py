@@ -137,7 +137,7 @@ class SymbiosisBaseTestCase(TestCase):
             can_void=True,
             can_discount=True,
             max_discount_percent=Decimal("20.00"),
-            oib="12345678901",
+            oib="12345678903",
         )
         cls.cashier.set_pin("1234")
         cls.cashier.save()

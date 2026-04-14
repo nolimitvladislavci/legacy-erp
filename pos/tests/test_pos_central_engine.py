@@ -50,7 +50,7 @@ class POSCentralEngineTest(TestCase):
         # ─── A. Rental tvrtka (HR paušalac) ───
         cls.company_rental = Company.objects.create(
             name="Apartmani Horvat Test",
-            oib="11111111111",
+            oib="11111111119",
             business_type="iznajmljivac",
             country="HR",
             fiscal_system="hr_fiscal",
@@ -96,7 +96,7 @@ class POSCentralEngineTest(TestCase):
         # ─── B. Udruga (nefiskalizirano) ───
         cls.company_udruga = Company.objects.create(
             name="Veslački Klub Test",
-            oib="22222222222",
+            oib="22222222226",
             business_type="udruga",
             country="HR",
             fiscal_system="none",
@@ -121,7 +121,7 @@ class POSCentralEngineTest(TestCase):
             company=cls.company_udruga,
             first_name="Ivan",
             last_name="Ivić",
-            oib="33333333333",
+            oib="33333333335",
             membership_type="redovni",
             status="aktivan",
             membership_expires=date(2026, 3, 31),
@@ -141,7 +141,7 @@ class POSCentralEngineTest(TestCase):
         # ─── C. Terenska tvrtka (d.o.o. s PDV-om) ───
         cls.company_field = Company.objects.create(
             name="Viskovic Instalacije Test",
-            oib="44444444444",
+            oib="44444444446",
             business_type="doo",
             country="HR",
             fiscal_system="hr_fiscal",
@@ -543,7 +543,7 @@ class POSCentralEngineTest(TestCase):
             ],
             "payment_method": "CARD",
             "amount_paid": "1250.00",  # 1000 + 25% PDV
-            "buyer_oib": "55555555555",
+            "buyer_oib": "55555555551",
             "buyer_name": "Kupac d.o.o.",
             "buyer_address": "Vukovarska 1, Osijek",
         }
@@ -556,7 +556,7 @@ class POSCentralEngineTest(TestCase):
 
         receipt = POSReceipt.objects.get(pk=result["receipt_id"])
         self.assertTrue(receipt.is_r1, "R1 flag mora biti True kad ima buyer_oib")
-        self.assertEqual(receipt.buyer_oib, "55555555555")
+        self.assertEqual(receipt.buyer_oib, "55555555551")
         self.assertEqual(receipt.buyer_name, "Kupac d.o.o.")
         mock_fiscal.assert_called_once()
 

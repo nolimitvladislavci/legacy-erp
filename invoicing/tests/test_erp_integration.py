@@ -56,7 +56,7 @@ def make_partner(company):
     return Partner.objects.create(
         company=company,
         name="Testni Partner d.o.o.",
-        oib="12345678901",
+        oib="12345678903",
         email="partner@test.hr",
         country="HR",
     )
@@ -171,7 +171,7 @@ def cents(d):
 
 class TestPDVRekapitulacija(TestCase):
     def setUp(self):
-        self.company, self.user = setup_company("11000000001", "pdv_user1")
+        self.company, self.user = setup_company("11000000012", "pdv_user1")
         self.partner = make_partner(self.company)
 
     def test_mixed_pdv_iznosi(self):
@@ -247,7 +247,7 @@ class TestPDVRekapitulacija(TestCase):
 
 class TestMorphTok(TestCase):
     def setUp(self):
-        self.company, self.user = setup_company("11000000002", "morph_user1")
+        self.company, self.user = setup_company("11000000029", "morph_user1")
         self.partner = make_partner(self.company)
         self.http = Client(raise_request_exception=False)
         self.http.login(username="morph_user1", password="test1234")
@@ -335,7 +335,7 @@ class TestMorphTok(TestCase):
 
 class TestStornoLogika(TestCase):
     def setUp(self):
-        self.company, self.user = setup_company("11000000003", "storno_user1")
+        self.company, self.user = setup_company("11000000037", "storno_user1")
         self.partner = make_partner(self.company)
 
     def _make_storno(self, original):
@@ -436,7 +436,7 @@ class TestStornoLogika(TestCase):
 
 class TestInventoryRollback(TestCase):
     def setUp(self):
-        self.company, self.user = setup_company("11000000004", "inv_roll_user1")
+        self.company, self.user = setup_company("11000000045", "inv_roll_user1")
         self.partner = make_partner(self.company)
 
     def test_inventory_model_postoji(self):
@@ -488,7 +488,7 @@ class TestInventoryRollback(TestCase):
 
 class TestPartnerBalance(TestCase):
     def setUp(self):
-        self.company, self.user = setup_company("11000000005", "balance_user1")
+        self.company, self.user = setup_company("11000000053", "balance_user1")
         self.partner = make_partner(self.company)
 
     def _quick_invoice(self, number, total_amount, doctype="R", status="SENT"):
@@ -578,7 +578,7 @@ class TestPartnerBalance(TestCase):
         partner_b = Partner.objects.create(
             company=self.company,
             name="Partner B",
-            oib="98765432101",
+            oib="98765432106",
             email="b@test.hr",
             country="HR",
         )
@@ -611,7 +611,7 @@ class TestPartnerBalance(TestCase):
 
 class TestModelIntegritet(TestCase):
     def setUp(self):
-        self.company, self.user = setup_company("11000000006", "integrity_user1")
+        self.company, self.user = setup_company("11000000061", "integrity_user1")
         self.partner = make_partner(self.company)
 
     def test_invoice_obavezna_polja(self):

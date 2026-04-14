@@ -32,7 +32,7 @@ class _FakeInvoice:
         self.is_hr = kwargs.get("is_hr", True)
         self.client_name = kwargs.get("client_name", "Test Client")
         self.client_address = kwargs.get("client_address", "Testna 1")
-        self.client_oib = kwargs.get("client_oib", "12345678901")
+        self.client_oib = kwargs.get("client_oib", "12345678903")
         self.issuer_name = kwargs.get("issuer_name", "Test Firma")
         self.issuer_address = kwargs.get("issuer_address", "Poslovna 5")
         self.issuer_oib = kwargs.get("issuer_oib", "98765432109")
@@ -169,12 +169,12 @@ class TestGenerateEracunXml(TestCase):
         inv = _FakeInvoice(client_oib="")
         xml = generate_eracun_xml(inv)
         # issuer always has PartyTaxScheme; verify client OIB absent
-        self.assertNotIn("12345678901", xml)
+        self.assertNotIn("12345678903", xml)
 
     def test_with_oib_block(self):
         from invoicing.services.pdf_service import generate_eracun_xml
 
-        inv = _FakeInvoice(client_oib="12345678901")
+        inv = _FakeInvoice(client_oib="12345678903")
         xml = generate_eracun_xml(inv)
         self.assertIn("PartyTaxScheme", xml)
-        self.assertIn("12345678901", xml)
+        self.assertIn("12345678903", xml)
