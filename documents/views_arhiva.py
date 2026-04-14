@@ -260,10 +260,19 @@ def arhiva_list(request):
         override_id = request.GET.get("company", "")
         if override_id:
             from accounts.models import CompanyMembership
+            from companies.models import Workspace
 
+            # Provjera 1: direktna membership na klijentskoj firmi
             has_access = CompanyMembership.objects.filter(
                 user=request.user, company_id=override_id, is_active=True
             ).exists()
+
+            # Provjera 2: korisnik je Workspace worker, a klijentska firma je u ws.clients
+            if not has_access:
+                has_access = Workspace.objects.filter(
+                    workers=request.user, is_active=True, clients__id=override_id
+                ).exists()
+
             if has_access:
                 company = Company.objects.filter(pk=override_id).first() or company
         qs = (

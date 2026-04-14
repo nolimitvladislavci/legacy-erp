@@ -1,5 +1,27 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-14 (Dan 48), commit f46bd567 — KORAK 8 Load Test ✅
+> Zadnji update: 2026-04-14 (Dan 48), commit a5e021e2 — Umbrella patch + DeepSeek aktivan
+
+---
+
+## SESIJA LOG — Za praćenje bez dupliciranja
+> Svaki agent (Sonnet/CC/Gemini) upisuje na početku i kraju sesije.
+> Format: `DATUM | AGENT | KORAK | STATUS | COMMIT`
+
+| Datum | Agent | Fokus | Rezultat | Commit |
+|-------|-------|-------|----------|--------|
+| 2026-04-14 | Sonnet+CC | Korak 1-7 | Inventura, audit, standardi, test coverage | 5ea4e6f1 |
+| 2026-04-14 | Sonnet+CC | Korak 8 | Load test: 50VU, P95=850ms, 0 failures | f46bd567 |
+| 2026-04-14 | Sonnet+CC | Umbrella patch | CompanyMiddleware — 30+ modula popravljeno | a5e021e2 |
+| 2026-04-14 | Sonnet | Sesija init | DeepSeek uplata $5.30 potvrđena + aktivan. Arhiva×komitent flow analiza. Korak 9 aktivan. | — |
+
+### Kako upisati
+```
+Početak sesije: pročitaj zadnji red tablice — to je tvoj kontekst
+Kraj sesije:    dodaj red + git log --oneline -1 za commit hash
+Nije bitno biti opširan — samo datum, agent, fokus, rezultat, commit
+```
+
+---
 
 ## OCJENE
 
@@ -196,12 +218,6 @@ Commits: 7 bug fix + 1 test commit
 
 ## KORAK 8 — LOAD TEST ✅
 **Cilj:** 50 konkurentnih korisnika bez pada.
-```
-[ ] k6 ili locust scenarij: login → dashboard → invoice → switch company
-[ ] 50 VU, 10 minuta
-[ ] P95 < 3s, 0 x 5xx
-[ ] Ako pada: profile → fix → ponovi
-```
 ✅ GOTOVO — 2026-04-14
 
 ### Rezultat:
@@ -212,7 +228,7 @@ Commits: 7 bug fix + 1 test commit
 
 ---
 
-## KORAK 9 — SECURITY HARDENING
+## KORAK 9 — SECURITY HARDENING ⬅ TRENUTNO AKTIVAN
 **Cilj:** Nema poznatih ranjivosti pri ulasku klijenata.
 ```
 [ ] python manage.py check --deploy → 0 upozorenja
@@ -220,6 +236,7 @@ Commits: 7 bug fix + 1 test commit
 [ ] GDPR audit log za company switch
 [ ] OWASP Top 10 checklist
 ```
+Task file: CC_TASK_KORAK9_SECURITY_HARDENING.md
 ✅ Gotovo kad: Security checklist = sve zeleno.
 
 ---
@@ -281,221 +298,42 @@ Commits: 7 bug fix + 1 test commit
 
 ---
 
-## AWS BEDROCK STATUS — 14.04.2026.
+## AI SERVISI STATUS
 
-### Što je gotovo
-- AWS account: 659220242591 (Limit-connect)
-- Credentials u .env: ✅
-- Modeli AUTHORIZED: ✅
-  - mistral.devstral-2-123b (Trojstvo 3. glasač)
-  - eu.mistral.pixtral-large-2502-v1:0 (Invoice OCR)
-- Bedrock client kod: ✅ core/deepseek_client.py
+### DeepSeek
+- Direktni API: **AKTIVAN** ✅ (uplata $5.30 — 2026-04-14, PayPal 1B3286619K296815M)
+- Model: deepseek-chat (DeepSeek-V3)
+- Fallback: Haiku (automatski ako DeepSeek pada)
 
-### Privremeni blokator
-Novi AWS account ima hardkodirani dnevni token limit.
-**Resetira se sutra (15.04.2026. ponoć UTC).**
-Nema potrebe za ručnom akcijom.
-
-### Od sutra
-- Trojstvo dobiva 3. glasača (Devstral 123B)
-- Pixtral čita skeniranejakture iz slike → JSON
-- Sve ostaje GDPR compliant (eu-central-1)
+### AWS Bedrock
+- Account: 659220242591 (eu-central-1, GDPR compliant)
+- Devstral 123B: authorized, token limit reset 15.04.2026. ponoć UTC
+- Pixtral invoice OCR: authorized, isti reset
+- Kod: core/deepseek_client.py
 
 ---
 
-# VIZIJA 2027 — TRI SMJERA
-**Datum: 14.04.2026. | Izvor: DeepSeek analiza + Sonnet procjena**
+## VIZIJA 2027 — TRI SMJERA
+**Datum: 14.04.2026.**
+
+### 1. INVISIBLE UI — WhatsApp kao primarno sučelje
+Pilot: Zdenko Šoš — slika prozora → nalog → WhatsApp potvrda. 3 tjedna do MVP.
+
+### 2. PREDICTIVE ARCHIVING — Q3 2026.
+Cross-job pattern detection. ML projekt. Ne žuriti.
+
+### 3. AUTONOMOUS DEVOPS — Najbliži cilj
+"Stisni 1 za deploy" — infrastruktura postoji, treba 1 sprint.
 
 ---
 
-## 1. INVISIBLE UI — WhatsApp kao primarno sučelje
+## OPERACIJA: UMBRELLA COMPANY RESOLUTION — Dan 48
+**GOTOVO.** CompanyMiddleware patch — 30+ modula popravljeno jednim commitom (a5e021e2).
 
-**Koncept:** Korisnik šalje sliku/poruku WhatsApp → sustav reagira, bez dashboarda.
-
-**Što već imamo:**
-- WhatsApp WAHA integration ✅
-- Pixtral vision model (sutra) ✅
-- Stolarija model (prozori, vrata) ✅
-- Celery async ✅
-
-**Što nedostaje (2-3 sprinta):**
-- Intent parser: WhatsApp poruka → tip akcije (nalog/upit/slika)
-- WhatsApp → Pixtral → Stolarija workflow
-- "Stisni 1 za potvrdu" approval flow
-
-**Pilot:** Zdenko Šoš — slika prozora → nalog kreiran → WhatsApp potvrda.
-**Procjena:** 3 tjedna do MVP.
-
----
-
-## 2. PREDICTIVE ARCHIVING — Arhiva koja sprječava sporove
-
-**Koncept:** AI detektira vizualne uzorke grešaka PRIJE reklamacije.
-
-**Što već imamo:**
-- ArhivaEntry s GPS + SHA-256 + timestamp ✅
-- Pixtral vision (sutra) ✅
-
-**Što nedostaje (kompleksno):**
-- Cross-job pattern detection (usporedba slika s više gradilišta)
-- Risk scoring model (85% reklamacija = što točno?)
-- Nije sprint — to je ML projekt
-
-**Realna procjena:** Faza 3, Q3 2026. Pilot na Viskovic Bau.
-**Upozorenje:** Ne podcijeniti kompleksnost. Pixtral čita jednu sliku dobro.
-Usporedba 50 slika s 5 gradilišta = drugačiji problem.
-
----
-
-## 3. AUTONOMOUS DEVOPS — Portal koji se sam popravlja
-
-**Koncept:** Agent nađe bug → popravi u branchu → WhatsApp "stisni 1 za deploy".
-
-**Što već imamo:**
-- Trojstvo Beat ✅
-- CC Code autonomni executor ✅
-- Git workflow ✅
-- WhatsApp approval ✅
-
-**Što nedostaje (1 sprint):**
-- "Approval flow" task u Celeryju
-- Git branch kreiranje iz agenta
-- WhatsApp "1=deploy, 2=odbaci" parser
-- Staging environment provjera
-
-**Ovo je NAJBLIŽI cilj od tri.** Infrastruktura postoji.
-
----
-
-## LATENCIJSKI ŠOK — Upozorenje (kritično)
-
-Sve AI pozive staviti u Celery. NIKAD sync AI call u web requestu.
-
-```python
-# ZABRANJENO (blokira user):
-def my_view(request):
-    result = deepseek_direct(...)  # ← blokira 2-5 sekundi
-    return JsonResponse(result)
-
-# ISPRAVNO:
-def my_view(request):
-    task = deepseek_analyze_task.delay(data)
-    return JsonResponse({"task_id": task.id, "status": "processing"})
-# Frontend polira /task-status/{id}/ svakih 2s
+### Stanje baze (2026-04-14)
 ```
-
-**Provjera:** Koliko direktnih AI poziva ima u views.py?
-→ CC Code KORAK 8 mora auditirati ovo.
-
----
-
-## PRIORITETI (redoslijed nije slučajan)
-
-1. **KORAK 7** — Test coverage 40%+ (imunološki sustav)
-   Bez toga autonomni agenti ruše sustav.
-
-2. **Invisible UI MVP** — WhatsApp → Pixtral → Stolarija
-   Zdenko kao pilot. 3 tjedna.
-
-3. **Autonomous DevOps** — "Stisni 1 za deploy"
-   Infrastruktura postoji, treba 1 sprint.
-
-4. **Predictive Archiving** — Q3 2026.
-   Kompleksno, ne žuriti.
-
-
----
-
-# OPERACIJA: UMBRELLA COMPANY RESOLUTION — Dan 48 (Sesija 2)
-> "Kod je GLAVNI problem. Mora funkcionirati 100%." — Seki
-
-## DIJAGNOZA: 30+ modula NE poštuje umbrella kontekst
-
-### Root cause
-`request.user.profile.company` uvijek vraća umbrella RODITELJA (Konjik),
-čak i kad je bookkeeper switchao na dijete (Agrovladislavci).
-
-30+ view fajlova čita `profile.company` direktno umjesto `get_user_company(request)`:
-- `konto/views.py` — _get_company() → Konjik (treba Agrovladislavci)
-- `delivery/views.py` → Konjik
-- `calculator/views.py` → Konjik
-- `stolarija/views.py` → Konjik
-- `eracun/views_mandate.py` → Konjik
-- `work_orders/views.py` → Konjik
-- `propter/views.py` → Konjik
-- `burza/views.py` → Konjik
-- `honorari/views.py` → Konjik
-- `ai_assistant/views.py` → Konjik
-- `documents/views_gallery.py` → Konjik
-- ... i 20+ drugih
-
-### FIX: CompanyMiddleware umbrella context patch
-**JEDAN patch u `core/middleware/__init__.py`** koji popravlja SVE module odjednom.
-
-```python
-# Kad je umbrella_as_company aktivan, patchaj profile.company IN MEMORY
-if company and request.session.get("umbrella_as_company"):
-    profile = request.user.profile
-    if profile.company_id != company.pk:
-        profile._umbrella_original_company_id = profile.company_id
-        profile.company = company  # IN-MEMORY ONLY, ne save()
-
-# Na kraju requesta — restore original
-def process_response(self, request, response):
-    if hasattr(profile, "_umbrella_original_company_id"):
-        profile.company_id = original_id
-        del profile._umbrella_original_company_id
+Aktivnih firmi:     101  |  Umbrella djece:  81
+Aktivnih korisnika:  56  |  Faktura:     15,330
+Arhiva dokumenata: 20,373 |  Commits:    1,041+
+Journal entries:  10,732  |  Workspaces:     36
 ```
-
-### Verifikacija
-```
-User: marija.brtan (Konjik company_admin)
-Original: Konjik d.o.o. (52e2e048)
-After patch: Agrovladislavci (5c4cd3be)
-konto _get_company(): Agrovladislavci ✅
-After restore: Konjik d.o.o. ✅
-
-Agrovladislavci: 12 journal entries (iz Synesis importa)
-Glazbeni Centar Mai: 437 journal entries
-Sa-Ni Mont: 90 journal entries
-```
-
-### Što je DANAS (Dan 48, Sesija 2) napravljeno
-
-| # | Stavka | Status |
-|---|--------|--------|
-| 1 | Multi-level umbrella switch (3 razine) | ✅ |
-| 2 | Module inheritance (dijete nasljeđuje module roditelja) | ✅ |
-| 3 | Data integrity (9 partnerstava, 6 workspace-a, max_children 100) | ✅ |
-| 4 | Breadcrumb banner + Quick Switch dropdown | ✅ |
-| 5 | Smart Desk (AI workload analiza po radnom stolu) | ✅ |
-| 6 | Client Pulse (zdravlje klijenata zeleno/žuto/crveno) | ✅ |
-| 7 | AI Priority Queue (hitnost, ne abeceda) | ✅ |
-| 8 | Deadline Radar (inline badge "PDV za 3d") | ✅ |
-| 9 | "Pokreni Dan" gumb (najhitniji klijent) | ✅ |
-| 10 | Client list v3 (clickable names, inline actions, search) | ✅ |
-| 11 | PIN Setup v2.0 (bez ljubimca, dismissible, security meter) | ✅ |
-| 12 | Arhiva × Komitent breadcrumb + empty state | ✅ |
-| 13 | Instant Scan (1-click kamera → arhiva) | ✅ |
-| 14 | iOS camera fix | ✅ |
-| 15 | **CompanyMiddleware umbrella patch — 30+ modula popravljeno ODJEDNOM** | ✅ |
-
-### Stanje baze
-```
-Aktivnih firmi:     101
-Umbrella djece:     81
-Aktivnih korisnika: 56
-Faktura:            15,330
-Arhiva dokumenata:  20,373
-Konto računi:       5,064
-Journal entries:    10,732 (59 firmi)
-Ledger lines:       56,858
-Workspaces:         36
-Health scores:      75
-Commits:            1,041+
-```
-
-### Moduli koji SAD rade u umbrella kontekstu (svi zahvaljujući jednom patchu):
-konto, delivery, calculator, stolarija, eracun, work_orders, propter,
-burza, honorari, ai_assistant, documents/gallery, appointments, pos,
-outreach, registration — SVE čita profile.company koji je sad ISPRAVAN.
