@@ -3,6 +3,16 @@
 {% block title %}Partneri{% endblock %}
 {% block page_title %}Partneri{% endblock %}
 {% block content %}
+<style>
+.partner-name-link {
+  color: var(--gold, #c9a84c);
+  text-decoration: none;
+}
+.partner-name-link:hover {
+  color: var(--amber, #f59e0b);
+  text-decoration: underline;
+}
+</style>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
@@ -75,7 +85,7 @@
           </td>
           {# NAZIV + OIB #}
           <td>
-            <a href="{% url 'partners:detail' p.pk %}" class="fw-bold text-decoration-none">{{ p.name }}</a>
+            <a href="{% url 'partners:detail' p.pk %}" class="fw-bold partner-name-link">{{ p.name }}</a>
             {% if not p.is_complete %}<span class="badge bg-warning text-dark ms-1 fx-fs-2xs">Nepotpun</span>{% endif %}
             {% if p.oib %}<br><small class="text-muted">OIB: {{ p.oib }}</small>{% endif %}
           </td>
