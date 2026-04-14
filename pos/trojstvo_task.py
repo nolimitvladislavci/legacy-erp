@@ -106,7 +106,14 @@ def trojstvo_rijesi(self, suggestion_id):
         s.gemini_proposal = gemini_result
         _safe_save(["gemini_proposal"])
 
-        agreed, postotak, resolution = _konsenzus(problem, haiku_result, gemini_result)
+        # DeepSeek kao 3. glasač (ako je Bedrock konfiguriran)
+        deepseek_result = _deepseek_analiza(problem)
+
+        # Konsenzus: 3 glasača ako DeepSeek dostupan, inače 2
+        if deepseek_result:
+            agreed, postotak, resolution = _konsenzus_trio(problem, haiku_result, gemini_result, deepseek_result)
+        else:
+            agreed, postotak, resolution = _konsenzus(problem, haiku_result, gemini_result)
 
         s.ai_resolution = resolution
         s.trojstvo_status = "agreed" if agreed else "conflict"
@@ -134,6 +141,24 @@ def trojstvo_rijesi(self, suggestion_id):
 
 
 # ── Haiku analiza ─────────────────────────────────────────────────────────────
+
+
+def _deepseek_analiza(problem: str) -> str:
+    """
+    DeepSeek-V3.2 via AWS Bedrock kao 3. glasač u Trojstvu.
+    Fallback na Haiku ako Bedrock nije konfiguriran.
+    """
+    from core.deepseek_client import deepseek_available, deepseek_chat
+
+    if not deepseek_available():
+        logger.info("DeepSeek Bedrock nije konfiguriran — preskačem")
+        return ""
+    return deepseek_chat(
+        prompt=problem,
+        system="Ti si senior Django inženjer. Analiziraj problem i predloži konkretno rješenje u 3-5 rečenica.",
+        max_tokens=600,
+        temperature=0.2,
+    )
 
 
 def _haiku_analiza(problem: str) -> str:
@@ -328,3 +353,50 @@ def _whatsapp_ivan_agreed(s, postotak, resolution):
 
     msg = f"✅ #{s.id} RIJEŠENO ({postotak}% konsenzus)\n📋 {s.title}\n\n💡 {resolution[:300]}"
     send_text("4915771998747", msg)
+
+
+def _konsenzus_trio(problem: str, haiku: str, gemini: str, deepseek: str):
+    """
+    Konsenzus s 3 glasača (Haiku + Gemini + DeepSeek).
+    2/3 glasača se moraju složiti → agreed=True.
+    Jači od 2-glasačkog sustava — manji postotak lažnih alarma.
+    """
+    import anthropic
+    from django.conf import settings
+
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    prompt = f"""Tri AI modela analizirala su isti problem i dala prijedloge.
+
+Problem: {problem[:500]}
+
+Haiku (executor): {haiku[:400]}
+Gemini (researcher): {gemini[:400]}
+DeepSeek (reasoning): {deepseek[:400]}
+
+Ocijeni postoji li konsenzus (2/3 se slažu u ključnom rješenju).
+Odgovori JSON:
+{{
+  "agreed": true/false,
+  "postotak": 0-100,
+  "resolution": "konkretno rješenje u 2-3 rečenice"
+}}"""
+
+    try:
+        msg = client.messages.create(
+            model=settings.CLAUDE_MODEL,
+            max_tokens=400,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        import json
+
+        text = msg.content[0].text
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start >= 0:
+            data = json.loads(text[start:end])
+            return data.get("agreed", False), data.get("postotak", 50), data.get("resolution", text)
+    except Exception as e:
+        logger.error("_konsenzus_trio greška: %s", e)
+
+    # Fallback na 2-glasački
+    return _konsenzus(problem, haiku, gemini)

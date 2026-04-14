@@ -44,6 +44,13 @@ ALLOWED_HOSTS = [
 ]
 
 SITE_URL = "https://limit-connect.com"
+
+# ── AWS Bedrock (DeepSeek via EU hosting — GDPR compliant) ──────────────────
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
+AWS_BEDROCK_REGION = os.environ.get("AWS_BEDROCK_REGION", "eu-central-1")
+DEEPSEEK_MODEL_ID = os.environ.get("DEEPSEEK_MODEL_ID", "deepseek-v3-2")
+DEEPSEEK_SPECIALE_MODEL_ID = os.environ.get("DEEPSEEK_SPECIALE_MODEL_ID", "deepseek-v3-2-speciale")
 QR_HMAC_SECRET = os.environ.get("QR_HMAC_SECRET", SECRET_KEY)  # Uvijek HTTPS, bez trailing slash
 
 CSRF_TRUSTED_ORIGINS = [
