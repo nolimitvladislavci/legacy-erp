@@ -109,3 +109,10 @@ try:
 except Company.DoesNotExist:
     ...
 ```
+
+### PRAVILO 6 — QR kodovi uvijek kroz /qr/ endpoint
+Nikad `api.qrserver.com` ili bilo koji vanjski QR servis.
+Endpoint: `GET /qr/?data=URL&size=200&color=000000&bg=ffffff`
+Template: `{% load qr_tags %}` → `{% qr_url data %}`, `{% qr_img data %}`, `{% qr_b64 data %}`
+PDF/email: `from core.qr_views import qr_base64`
+Razlozi: HTTPS garantiran, radi offline, 24h cache, nema ovisnosti o trećoj strani.
