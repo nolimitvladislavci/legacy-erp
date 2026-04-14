@@ -403,3 +403,99 @@ def my_view(request):
 4. **Predictive Archiving** — Q3 2026.
    Kompleksno, ne žuriti.
 
+
+---
+
+# OPERACIJA: UMBRELLA COMPANY RESOLUTION — Dan 48 (Sesija 2)
+> "Kod je GLAVNI problem. Mora funkcionirati 100%." — Seki
+
+## DIJAGNOZA: 30+ modula NE poštuje umbrella kontekst
+
+### Root cause
+`request.user.profile.company` uvijek vraća umbrella RODITELJA (Konjik),
+čak i kad je bookkeeper switchao na dijete (Agrovladislavci).
+
+30+ view fajlova čita `profile.company` direktno umjesto `get_user_company(request)`:
+- `konto/views.py` — _get_company() → Konjik (treba Agrovladislavci)
+- `delivery/views.py` → Konjik
+- `calculator/views.py` → Konjik
+- `stolarija/views.py` → Konjik
+- `eracun/views_mandate.py` → Konjik
+- `work_orders/views.py` → Konjik
+- `propter/views.py` → Konjik
+- `burza/views.py` → Konjik
+- `honorari/views.py` → Konjik
+- `ai_assistant/views.py` → Konjik
+- `documents/views_gallery.py` → Konjik
+- ... i 20+ drugih
+
+### FIX: CompanyMiddleware umbrella context patch
+**JEDAN patch u `core/middleware/__init__.py`** koji popravlja SVE module odjednom.
+
+```python
+# Kad je umbrella_as_company aktivan, patchaj profile.company IN MEMORY
+if company and request.session.get("umbrella_as_company"):
+    profile = request.user.profile
+    if profile.company_id != company.pk:
+        profile._umbrella_original_company_id = profile.company_id
+        profile.company = company  # IN-MEMORY ONLY, ne save()
+
+# Na kraju requesta — restore original
+def process_response(self, request, response):
+    if hasattr(profile, "_umbrella_original_company_id"):
+        profile.company_id = original_id
+        del profile._umbrella_original_company_id
+```
+
+### Verifikacija
+```
+User: marija.brtan (Konjik company_admin)
+Original: Konjik d.o.o. (52e2e048)
+After patch: Agrovladislavci (5c4cd3be)
+konto _get_company(): Agrovladislavci ✅
+After restore: Konjik d.o.o. ✅
+
+Agrovladislavci: 12 journal entries (iz Synesis importa)
+Glazbeni Centar Mai: 437 journal entries
+Sa-Ni Mont: 90 journal entries
+```
+
+### Što je DANAS (Dan 48, Sesija 2) napravljeno
+
+| # | Stavka | Status |
+|---|--------|--------|
+| 1 | Multi-level umbrella switch (3 razine) | ✅ |
+| 2 | Module inheritance (dijete nasljeđuje module roditelja) | ✅ |
+| 3 | Data integrity (9 partnerstava, 6 workspace-a, max_children 100) | ✅ |
+| 4 | Breadcrumb banner + Quick Switch dropdown | ✅ |
+| 5 | Smart Desk (AI workload analiza po radnom stolu) | ✅ |
+| 6 | Client Pulse (zdravlje klijenata zeleno/žuto/crveno) | ✅ |
+| 7 | AI Priority Queue (hitnost, ne abeceda) | ✅ |
+| 8 | Deadline Radar (inline badge "PDV za 3d") | ✅ |
+| 9 | "Pokreni Dan" gumb (najhitniji klijent) | ✅ |
+| 10 | Client list v3 (clickable names, inline actions, search) | ✅ |
+| 11 | PIN Setup v2.0 (bez ljubimca, dismissible, security meter) | ✅ |
+| 12 | Arhiva × Komitent breadcrumb + empty state | ✅ |
+| 13 | Instant Scan (1-click kamera → arhiva) | ✅ |
+| 14 | iOS camera fix | ✅ |
+| 15 | **CompanyMiddleware umbrella patch — 30+ modula popravljeno ODJEDNOM** | ✅ |
+
+### Stanje baze
+```
+Aktivnih firmi:     101
+Umbrella djece:     81
+Aktivnih korisnika: 56
+Faktura:            15,330
+Arhiva dokumenata:  20,373
+Konto računi:       5,064
+Journal entries:    10,732 (59 firmi)
+Ledger lines:       56,858
+Workspaces:         36
+Health scores:      75
+Commits:            1,041+
+```
+
+### Moduli koji SAD rade u umbrella kontekstu (svi zahvaljujući jednom patchu):
+konto, delivery, calculator, stolarija, eracun, work_orders, propter,
+burza, honorari, ai_assistant, documents/gallery, appointments, pos,
+outreach, registration — SVE čita profile.company koji je sad ISPRAVAN.

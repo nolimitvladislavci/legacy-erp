@@ -45,9 +45,38 @@ class CompanyMiddleware(MiddlewareMixin):
         company = get_user_company(request)
         set_current_company(company)
         request.company = company
+
+        # ── UMBRELLA CONTEXT PATCH ──────────────────────────────────
+        # When bookkeeper switches to a child company via umbrella,
+        # patch profile.company IN MEMORY so that ALL modules (konto,
+        # delivery, stolarija, eracun, calculator, etc.) that read
+        # request.user.profile.company directly get the child company.
+        # This is the ONE fix that makes 30+ modules umbrella-aware.
+        if company and request.session.get("umbrella_as_company"):
+            try:
+                profile = request.user.profile
+                if profile.company_id != company.pk:
+                    profile._umbrella_original_company_id = profile.company_id
+                    profile.company = company
+                    # DO NOT save — this is in-memory only for this request
+            except AttributeError:
+                pass
+
         return None
 
     def process_response(self, request, response):
+        # Restore original company to prevent accidental DB writes
+        if hasattr(request, "user") and request.user.is_authenticated:
+            try:
+                profile = request.user.profile
+                original_id = getattr(profile, "_umbrella_original_company_id", None)
+                if original_id:
+                    from companies.models import Company
+
+                    profile.company_id = original_id
+                    del profile._umbrella_original_company_id
+            except AttributeError:
+                pass
         set_current_company(None)
         return response
 
