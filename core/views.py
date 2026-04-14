@@ -838,8 +838,9 @@ def umbrella_dashboard(request):
 
 @login_required
 def umbrella_switch_company(request, company_id):
-    """Umbrella admin switches to view a child company."""
+    """Umbrella admin switches to view a child company (multi-level)."""
     from companies.models import Company
+    from core.company_utils import _is_umbrella_ancestor
 
     user_company = request.user.profile.company
     if not user_company or not user_company.is_umbrella:
@@ -847,8 +848,13 @@ def umbrella_switch_company(request, company_id):
 
         return HttpResponseForbidden("Nemate umbrella pristup.")
     try:
-        child = Company.objects.get(pk=company_id, umbrella_parent=user_company)
+        child = Company.objects.get(pk=company_id)
     except Company.DoesNotExist:
+        from django.http import HttpResponseForbidden
+
+        return HttpResponseForbidden("Firma nije prona\u0111ena.")
+    # Multi-level: check if user_company is ANY ancestor of child (up to 3 levels)
+    if not _is_umbrella_ancestor(user_company, child):
         from django.http import HttpResponseForbidden
 
         return HttpResponseForbidden("Firma nije va\u0161a podru\u017enica/klijent.")

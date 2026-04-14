@@ -1303,7 +1303,7 @@ def client_portal(request, token):
     import json as _json
 
     seal_data = {
-        "inv": invoice.invoice_number,
+        "inv": invoice.number,
         "total": str(invoice.total),
         "subtotal": str(invoice.subtotal),
         "company_oib": invoice.company.oib if invoice.company else "",
@@ -2823,7 +2823,7 @@ def portal_ai_agent(request, token):
     system_prompt = f"""Ti si stručni prodajni savjetnik koji pomaže kupcu razumjeti vrijednost ponude.
 Zastupаš tvrtku "{company_name}" i pomažeš kupcu donijeti informiranu odluku.
 
-PONUDA #{invoice.invoice_number}:
+PONUDA #{invoice.number}:
 Ukupno: {invoice.total:.2f} EUR (s PDV-om)
 Neto: {invoice.subtotal:.2f} EUR
 {f"Stavke:{chr(10)}{items_text}" if items_text else ""}
@@ -2895,7 +2895,7 @@ def portal_accept_trail(request, token):
 
     trail_data = {
         "invoice": str(invoice.pk),
-        "number": invoice.invoice_number,
+        "number": invoice.number,
         "total": str(invoice.total),
         "ip": ip,
         "user_agent": ua,

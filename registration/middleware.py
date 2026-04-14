@@ -65,14 +65,23 @@ class SubscriptionMiddleware:
         # Superadmin impersonating — bypass subscription check
         if getattr(request, "impersonation_active", False):
             return None
+
+        # ── UMBRELLA INHERITANCE: bookkeeper gets parent's modules ──
+        # When viewing a child company, check effective modules (own + parent)
+        from core.company_utils import get_effective_modules
+
+        effective_modules = get_effective_modules(company, request)
+        if required_module in effective_modules:
+            request.upgrade_hint = None
+            return None
+
+        # Fallback: check subscription directly
         try:
             subscription = company.subscriptions.filter(is_active=True).order_by("-valid_from").first()
         except DatabaseError:
             return None
 
         # ── SOFT GATE: nikad ne blokiraj, samo označi za banner ──
-        # Svi moduli uvijek dostupni. Upgrade poruka se prikazuje u UI-ju.
-        # Korisnik vidi vrijednost PRIJE nego što plati.
         request.upgrade_hint = None
         if not subscription:
             request.upgrade_hint = required_module

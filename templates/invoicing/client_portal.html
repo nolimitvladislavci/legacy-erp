@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ invoice.invoice_number }} — {{ invoice.company.name }}</title>
+<title>{{ invoice.number }} — {{ invoice.company.name }}</title>
 <meta name="robots" content="noindex,nofollow">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -200,7 +200,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="meta-grid">
     <div class="meta-item">
       <div class="meta-label">Broj ponude</div>
-      <div class="meta-value">{{ invoice.invoice_number }}</div>
+      <div class="meta-value">{{ invoice.number }}</div>
     </div>
     <div class="meta-item">
       <div class="meta-label">Datum</div>
@@ -623,7 +623,7 @@ function scrollChat(){
 
 // Digital acceptance
 async function handleAccept(){
-  if(!confirm('Potvrđujete prihvaćanje ponude ' + '{{ invoice.invoice_number }}' + ' u iznosu {{ invoice.total|floatformat:2 }} €?')) return;
+  if(!confirm('Potvrđujete prihvaćanje ponude ' + '{{ invoice.number }}' + ' u iznosu {{ invoice.total|floatformat:2 }} €?')) return;
   try{
     const r = await fetch('/'+LANG+'/ponuda/'+TOKEN+'/prihvati/',{
       method:'POST',
