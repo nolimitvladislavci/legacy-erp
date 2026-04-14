@@ -506,3 +506,189 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.event_date})"
+
+
+# ════════════════════════════════════════════════════════════════
+# INOVACIJA I: "VOICE LEGACY" — Glas koji preživljava stoljeća
+# ════════════════════════════════════════════════════════════════
+
+
+class VoiceLegacy(models.Model):
+    """Snimka glasa — baka, djed, roditelj — čuvana zauvijek.
+
+    Ne samo MP3. Ekstrahiramo biometrijski potpis emocije:
+    - Frekvencijski raspon (toplina glasa)
+    - Tempo govora (mirnoća)
+    - Pauze (dramatičnost)
+    AI može rekonstruirati NOVU priču istim glasom.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="voice_legacies")
+    speaker_name = models.CharField(max_length=100, help_text="Tko govori (Baka Mara, Djed Ivo...)")
+    speaker_relation = models.CharField(max_length=50, blank=True, help_text="Baka, Djed, Mama, Tata, Ujak...")
+    audio_file = models.FileField(upload_to="world/voices/", help_text="Originalna snimka")
+    duration_seconds = models.PositiveIntegerField(default=0)
+    transcript = WorldEncryptedField(blank=True, help_text="Transkript (AES)")
+    # Biometrijski potpis glasa
+    voice_fingerprint = models.JSONField(default=dict, blank=True, help_text="Frekvencija, tempo, pauze, toplina")
+    emotion_tags = models.JSONField(default=list, blank=True, help_text="['nježno', 'veselo', 'tužno', 'smirujuće']")
+    # Metadata
+    language = models.CharField(max_length=5, default="hr")
+    dialect = models.CharField(max_length=50, blank=True, help_text="Npr. Slavonski, Kajkavski, Schwäbisch")
+    recorded_at = models.DateTimeField(null=True, blank=True)
+    integrity_hash = models.CharField(max_length=64, blank=True, help_text="SHA-256 originalne snimke")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_voice_legacy"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.speaker_name}: {self.duration_seconds}s ({self.language})"
+
+    def save(self, *args, **kwargs):
+        # Auto-hash za integritet
+        if self.audio_file and not self.integrity_hash:
+            import hashlib
+
+            try:
+                h = hashlib.sha256()
+                for chunk in self.audio_file.chunks():
+                    h.update(chunk)
+                self.integrity_hash = h.hexdigest()
+            except Exception:
+                pass
+        super().save(*args, **kwargs)
+
+
+# ════════════════════════════════════════════════════════════════
+# INOVACIJA II: "ETHICAL ALGORITHM" — Anti-dopaminski motor
+# ════════════════════════════════════════════════════════════════
+
+
+class EthicalSession(models.Model):
+    """Praćenje sesije djeteta — NE za engagement, nego za ZAŠTITU.
+
+    Ethical Algorithm:
+    - Ako dijete igra 15 min → predloži priču (promjena aktivnosti)
+    - Ako čita 20 min → predloži igru na otvorenom (Školica, Kubb)
+    - Nikad ne predlaže "još istog" — uvijek širi horizont
+    - "Noćni protokol": nakon 20h → samo audio, ekran se gasi
+    - Nema push notifikacija. NIKAD.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="ethical_sessions")
+    started_at = models.DateTimeField(auto_now_add=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    # Što je dijete radilo
+    activity_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("game", "Igra"),
+            ("story", "Priča"),
+            ("learning", "Učenje"),
+            ("spomenar", "Spomenar"),
+            ("voice", "Slušanje glasa"),
+            ("capsule", "TimeCapsule"),
+        ],
+    )
+    activity_id = models.UUIDField(null=True, blank=True, help_text="ID igre/priče/lekcije")
+    duration_minutes = models.PositiveSmallIntegerField(default=0)
+    # Ethical decisions
+    was_night_mode = models.BooleanField(default=False, help_text="Je li bio noćni protokol (audio-only)")
+    suggestion_given = models.CharField(
+        max_length=200, blank=True, help_text="Što je sustav predložio umjesto 'još istog'"
+    )
+    child_accepted_suggestion = models.BooleanField(null=True, help_text="Je li dijete prihvatilo diversifikaciju")
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_ethical_session"
+        ordering = ["-started_at"]
+
+    def __str__(self):
+        return f"{self.child.name}: {self.activity_type} ({self.duration_minutes}min)"
+
+
+class NightProtocol(models.Model):
+    """Konfiguracija Noćnog Protokola po djetetu.
+
+    Nakon zadanog sata: ekran → audio only.
+    Boje → topla žuta. Font → veći. Animacije → isključene.
+    Push notifikacije → ne postoje (nikad ih nismo ni imali).
+    """
+
+    child = models.OneToOneField(ChildProfile, on_delete=models.CASCADE, related_name="night_protocol")
+    is_enabled = models.BooleanField(default=True)
+    night_start_hour = models.PositiveSmallIntegerField(default=20, help_text="Sat kad počinje noćni mod (0-23)")
+    night_end_hour = models.PositiveSmallIntegerField(default=7, help_text="Sat kad završava")
+    audio_only = models.BooleanField(default=True, help_text="Samo zvuk, ekran se gasi")
+    max_stories_before_sleep = models.PositiveSmallIntegerField(default=2, help_text="Max priča prije 'Laku noć'")
+    lullaby_enabled = models.BooleanField(default=True, help_text="Uspavanka nakon zadnje priče")
+    parent_override_pin = models.CharField(max_length=4, blank=True, help_text="PIN za roditelja da produži")
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_night_protocol"
+
+    def __str__(self):
+        return f"Noćni protokol: {self.child.name} ({self.night_start_hour}:00-{self.night_end_hour}:00)"
+
+
+# ════════════════════════════════════════════════════════════════
+# INOVACIJA III: PRAVO NA ZABORAV + EMOCIONALNA SIGURNOST
+# ════════════════════════════════════════════════════════════════
+
+
+class MemoryGuard(models.Model):
+    """Zaštita sjećanja — pravo na skrivanje, pravo na zaborav.
+
+    Dijete (ili roditelj) može:
+    - Sakriti bolno sjećanje (vidljivo samo s PIN-om)
+    - Odgoditi otvaranje kapsule (nije spremno)
+    - Potpuno obrisati — ali tek nakon 30 dana "cooling period"
+    - Označiti sjećanje kao "samo za mene" (ni roditelj ne vidi)
+
+    GDPR Article 17 (Right to erasure) + emocionalna dimenzija.
+    """
+
+    GUARD_ACTIONS = [
+        ("hide", "Sakrij (vidljivo samo s PIN-om)"),
+        ("delay", "Odgodi otvaranje"),
+        ("private", "Samo za mene"),
+        ("delete_request", "Zahtjev za brisanje (30 dana)"),
+        ("deleted", "Obrisano"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="memory_guards")
+    # Što se čuva (generički — može biti bilo koji model)
+    content_type = models.CharField(max_length=50, help_text="Model name: MemoryEntry, TimeCapsule, VoiceLegacy...")
+    content_id = models.UUIDField(help_text="ID objekta koji se čuva")
+    action = models.CharField(max_length=20, choices=GUARD_ACTIONS)
+    reason = models.TextField(blank=True, help_text="Zašto (opcionalno, za dijete/roditelja)")
+    # Timing
+    requested_at = models.DateTimeField(auto_now_add=True)
+    cooling_period_ends = models.DateTimeField(null=True, blank=True, help_text="Za delete: 30 dana od zahtjeva")
+    executed_at = models.DateTimeField(null=True, blank=True)
+    # Tko je zatražio
+    requested_by = models.CharField(
+        max_length=20,
+        choices=[
+            ("child", "Dijete"),
+            ("parent", "Roditelj"),
+            ("system", "Sustav (GDPR)"),
+        ],
+        default="parent",
+    )
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_memory_guard"
+        ordering = ["-requested_at"]
+
+    def __str__(self):
+        return f"{self.get_action_display()}: {self.content_type}#{self.content_id}"
