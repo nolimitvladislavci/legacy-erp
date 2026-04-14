@@ -267,3 +267,21 @@ a:hover{color:var(--gold2)}
 
 /* ── ANIMATIONS ── */
 @keyframes float-up{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-120px) scale(0);opacity:0}}
+
+/* ── MOBILE NAV FIX — language dropdown + nav cleanup ── */
+@media(max-width:600px){
+  .mp-nav{padding:10px 14px}
+  .mp-nav-links{gap:8px}
+  .mp-nav-links .mp-nav-cta{padding:6px 12px;font-size:.75rem}
+  #mpLangWrap button{padding:3px 6px;font-size:.75rem}
+  .mp-lang-dd{
+    position:fixed !important;
+    top:52px !important;
+    right:10px !important;
+    left:auto !important;
+    min-width:140px;
+    max-height:70vh;
+    overflow-y:auto;
+  }
+  .mp-theme-toggle{padding:3px 8px;font-size:.8rem}
+}
