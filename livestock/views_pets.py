@@ -294,9 +294,7 @@ def pet_qr_code(request, pk):
     Generira QR kod koji vodi na memio.pet javni profil ljubimca.
     Vraća PNG ili PDF ovisno o ?format=pdf parametru.
     """
-    import io
-
-    import qrcode
+    from core.qr_views import qr_png_bytes
 
     company = get_user_company(request)
     pet = get_object_or_404(Livestock, pk=pk, company=company, vrsta__in=PET_VRSTE)
@@ -306,14 +304,7 @@ def pet_qr_code(request, pk):
 
     fmt = request.GET.get("format", "png")
 
-    qr = qrcode.QRCode(version=2, box_size=10, border=4, error_correction=qrcode.constants.ERROR_CORRECT_M)
-    qr.add_data(qr_url)
-    qr.make(fit=True)
-
-    img = qr.make_image(fill_color="#1a1a2e", back_color="white")
-    buf = io.BytesIO()
-    img.save(buf)
-    buf.seek(0)
+    png_data = qr_png_bytes(qr_url, size=250, color="1a1a2e")
 
     if fmt == "pdf":
         # PDF ogrlica — A6 format, QR + ime + chip
@@ -329,7 +320,7 @@ def pet_qr_code(request, pk):
                 "pet": pet,
                 "qr_url": qr_url,
                 "identifier": identifier,
-                "qr_b64": __import__("base64").b64encode(buf.read()).decode(),
+                "qr_b64": __import__("base64").b64encode(png_data).decode(),
             },
             request=request,
         )
@@ -350,9 +341,9 @@ def pet_qr_code(request, pk):
         except (FileNotFoundError, PermissionError, IOError) as e:
             logger.error("QR PDF error: %s", e)
             # Fallback: PNG
-            buf.seek(0)
+            pass
 
-    resp = HttpResponse(buf.read(), content_type="image/png")
+    resp = HttpResponse(png_data, content_type="image/png")
     resp["Content-Disposition"] = f'inline; filename="qr_{pet.name or identifier}.png"'
     return resp
 

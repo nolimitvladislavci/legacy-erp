@@ -343,10 +343,8 @@ def verify_magic_link(request, token):
 def setup_2fa(request):
     """Setup Google Authenticator / TOTP"""
     import base64
-    import io
 
     import pyotp
-    import qrcode
 
     try:
         profile = request.user.userprofile
@@ -383,13 +381,9 @@ def setup_2fa(request):
     uri = totp.provisioning_uri(name=request.user.email, issuer_name="LIMIT CONNECT")
 
     # QR kod
-    qr = qrcode.QRCode(box_size=6, border=2)
-    qr.add_data(uri)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    qr_b64 = base64.b64encode(buf.getvalue()).decode()
+    from core.qr_views import qr_png_bytes
+
+    qr_b64 = base64.b64encode(qr_png_bytes(uri, size=150)).decode()
 
     return render(
         request,
@@ -833,14 +827,10 @@ def device_token_detail(request, token_id):
         barcode_b64 = ""
 
     try:
-        import qrcode
+        from core.qr_views import qr_png_bytes
 
-        qr = qrcode.make(token.barcode_data, box_size=8, border=2)
-        buf = io.BytesIO()
-        qr.save(buf, format="PNG")
-        buf.seek(0)
-        qr_b64 = base64.b64encode(buf.read()).decode()
-    except IOError:
+        qr_b64 = base64.b64encode(qr_png_bytes(token.barcode_data, size=200)).decode()
+    except Exception:
         qr_b64 = ""
 
     return render(
@@ -1008,7 +998,6 @@ def device_token_auto_login(request):
 @login_required
 def device_token_qr_image(request, token_id):
     """Serve QR code as PNG image for inline display."""
-    import io
 
     from accounts.models import DeviceToken
 
@@ -1016,16 +1005,10 @@ def device_token_qr_image(request, token_id):
     if not token:
         return HttpResponse(status=404)
     try:
-        import qrcode
+        from core.qr_views import qr_png_bytes
 
-        qr = qrcode.QRCode(box_size=8, border=2)
-        qr.add_data(token.barcode_data)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="#c9a84c", back_color="#0a0a0a")
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        buf.seek(0)
-        return HttpResponse(buf.getvalue(), content_type="image/png")
+        png = qr_png_bytes(token.barcode_data, size=200, color="c9a84c", bg="0a0a0a")
+        return HttpResponse(png, content_type="image/png")
     except Exception:
         return HttpResponse(status=500)
 

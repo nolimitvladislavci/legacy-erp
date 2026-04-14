@@ -1068,7 +1068,6 @@ def cart_shared_checkout(request, token):
 def traceability_view(request, pk):
     """Farm-to-Fork QR traceability page — public."""
     import base64
-    from io import BytesIO
 
     from django.shortcuts import get_object_or_404
 
@@ -1079,18 +1078,11 @@ def traceability_view(request, pk):
     # Generate QR code pointing to this page
     qr_base64 = None
     try:
-        import qrcode
+        from core.qr_views import qr_png_bytes
 
         qr_url = request.build_absolute_uri()
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=5, border=2)
-        qr.add_data(qr_url)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        buf.seek(0)
-        qr_base64 = base64.b64encode(buf.read()).decode()
-    except IOError:
+        qr_base64 = base64.b64encode(qr_png_bytes(qr_url, size=125)).decode()
+    except Exception:
         pass
 
     # Check karenca status for egg products

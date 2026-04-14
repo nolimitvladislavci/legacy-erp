@@ -666,33 +666,11 @@ def complaint_qr_list(request):
 
 def _generate_qr_image(url, fmt="png"):
     """Generira QR kod kao PNG ili SVG."""
-    try:
-        import qrcode
-        from qrcode.image.svg import SvgPathImage
+    from core.qr_views import qr_png_bytes, qr_svg_bytes
 
-        if fmt == "svg":
-            qr = qrcode.QRCode(box_size=10, border=2)
-            qr.add_data(url)
-            qr.make(fit=True)
-            img = qr.make_image(image_factory=SvgPathImage)
-            buf = BytesIO()
-            img.save(buf)
-            return HttpResponse(buf.getvalue(), content_type="image/svg+xml")
-        else:
-            qr = qrcode.QRCode(box_size=10, border=2)
-            qr.add_data(url)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="#1a1a2e", back_color="white")
-            buf = BytesIO()
-            img.save(buf, format="PNG")
-            buf.seek(0)
-            return HttpResponse(buf.read(), content_type="image/png")
-    except ImportError:
-        # Fallback: return URL as text
-        return HttpResponse(
-            f"QR biblioteka nije instalirana. URL: {url}",
-            content_type="text/plain",
-        )
+    if fmt == "svg":
+        return HttpResponse(qr_svg_bytes(url, size=250), content_type="image/svg+xml")
+    return HttpResponse(qr_png_bytes(url, size=250, color="1a1a2e"), content_type="image/png")
 
 
 # ═══════════════════════════════════════════════════════════════════════

@@ -1787,10 +1787,6 @@ def api_booking_qr_login(request):
 @csrf_exempt
 def api_booking_generate_qr(request):
     """Generiraj QR kod sliku za gosta (PNG base64)."""
-    import base64 as _b64
-    import io
-
-    import qrcode
     from django.db import connection as _conn
 
     guest_id = request.GET.get("guest", "").strip()
@@ -1807,12 +1803,7 @@ def api_booking_generate_qr(request):
     base_url = "https://limit-connect.com"
     qr_url = f"{base_url}/hr/appointments/api/booking/qr-login/?qr={qr_token}"
 
-    qr = qrcode.QRCode(version=2, box_size=8, border=2)
-    qr.add_data(qr_url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="#c9a84c", back_color="#0a0a0a")
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    img_b64 = _b64.b64encode(buf.getvalue()).decode()
+    from core.qr_views import qr_base64 as _qr_b64
 
-    return JsonResponse({"qr_image": img_b64, "name": name, "qr_url": qr_url})
+    qr_data_uri = _qr_b64(qr_url, size=200, color="c9a84c", bg="0a0a0a")
+    return JsonResponse({"qr_image": qr_data_uri, "name": name, "qr_url": qr_url})

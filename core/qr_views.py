@@ -170,3 +170,18 @@ def qr_png_bytes(
     fill = _hex_to_rgb(color, (0, 0, 0))
     back = _hex_to_rgb(bg, (255, 255, 255))
     return _generate_png(data, size, fill, back, error_correction=error_correction)
+
+
+def qr_svg_bytes(data: str, size: int = 200) -> bytes:
+    """SVG bytes — za HttpResponse s content_type='image/svg+xml'."""
+    import qrcode
+    from qrcode.image.svg import SvgPathImage
+
+    box_size = max(1, size // 25)
+    qr = qrcode.QRCode(version=None, box_size=box_size, border=2)
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(image_factory=SvgPathImage)
+    buf = io.BytesIO()
+    img.save(buf)
+    return buf.getvalue()
