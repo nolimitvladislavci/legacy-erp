@@ -363,3 +363,55 @@ Enkripcija: WorldEncryptedField (AES, zaseban ključ)
 2. Letter of Intent od Marije Čačić
 3. Kontakt Creative Europe Desk Zagreb
 4. memio.world demo za prezentaciju
+
+---
+
+## MEMIO.WORLD — KOMPLETNA ARHITEKTURA (Dan 48, finale)
+
+### 21 tablica (od 8 na početku sesije)
+
+```
+TEMELJ (7):
+  WaitlistEntry, ChildProfile, MemoryEntry, Milestone,
+  TimeCapsule, MemoryVault, FamilyStory
+
+SADRŽAJ (6):
+  StoryBook (4 priče, 3 jezika)
+  TraditionalGame (11 igara, 9 EU zemalja, 5000 godina)
+  LearningModule (slova, brojevi)
+  Spomenar + SpomenarEntry
+  Event (rođendani, izleti, škola)
+
+INOVACIJE (5):
+  VoiceLegacy          — glas bake/djeda, SHA-256, biometrija, dijalekt
+  EthicalSession       — anti-dopaminski tracker
+  NightProtocol        — audio-only mod, max priča, uspavanka
+  MemoryGuard          — pravo na zaborav, 30d cooling, GDPR Art.17
+
+JOKER + 2 ASA (3):
+  DialectMap           — semantička mreža (8 riječi, 4 dijalekta)
+  LullabySession       — adaptivna uspavanka, tempo → tišina
+  HeritageOracle       — Mapa Porijekla, cross-platform (world+pet+farm)
+```
+
+### Seed Data:
+- 11 igara: Mlin(HR), Čovječe(DE), Školica(HR), Mensch(DE), Mölkky(FI),
+  Bocce(IT), Petteia(GR), Kubb(SE), Hurling(IE), Mangala(TR), Klasy(PL)
+- 4 priče: Zvjezdice(HR), Der Mond(DE), Little Star(EN), Jež(HR/Slavonija)
+- 1 lekcija: Slova A,B,C
+- 8 dijalektnih riječi: šogor, gemišt, gomboc, zakaj, hiža,
+  Maultasche, Grüß Gott, ćakula
+
+### Enkripcija:
+- MEMIO_WORLD_FERNET_KEY (zaseban od ERP i pets)
+- WorldEncryptedField na: poruke, opisi, priče, otisci
+
+### 15 Opasnih Riječi (Manifest):
+1.Besmrtnost 2.Bez granica 3.Nježnost 4.Sjeme 5.Glas
+6.Most 7.Čuvari 8.Neizbrisiво 9.Igra 10.Sloboda
+11.Tišina 12.Krug 13.Otisak 14.Korijen 15.Zagrljaj
+
+### EU Projekt: "PLAY.EU"
+- Konzorcij: NO LIMIT(HR) + LIMIT(HR) + Čačić(HR) + DE + Nordic
+- Cilj: Creative Europe Small Cooperation (€60K-200K)
+- Adut: digitalizacija 5000 godina EU kulturne baštine za djecu
