@@ -142,6 +142,13 @@ def _log_action(instance, action, created=False):
     user = get_current_user()
     if user and not user.is_authenticated:
         user = None
+    # Guard: provjeri da user postoji u DB (thread-local može imati stale user iz prethodnog testa)
+    if user:
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        if not User.objects.filter(pk=user.pk).exists():
+            user = None
 
     from django.db import transaction
 
