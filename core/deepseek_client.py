@@ -125,3 +125,97 @@ def deepseek_available() -> bool:
         return bool(getattr(settings, "AWS_BEDROCK_REGION", ""))
     except ImportError:
         return False
+
+
+# ── Pixtral — Vision model za skeniranje faktura ──────────────────────────────
+
+
+def pixtral_read_invoice(image_base64: str, media_type: str = "image/jpeg") -> dict:
+    """
+    Pixtral Large via AWS Bedrock — čita skenirane fakture iz slike.
+    Vraća strukturirane podatke: iznos, datum, partner, OIB, IBAN.
+
+    Args:
+        image_base64: Base64 enkodirana slika fakture
+        media_type: "image/jpeg" ili "image/png"
+
+    Returns:
+        dict s poljima: iznos, datum, partner, oib, iban, broj_fakture, valuta
+    """
+    import json
+
+    import boto3
+    from django.conf import settings
+
+    client = boto3.client(
+        "bedrock-runtime",
+        region_name=getattr(settings, "AWS_BEDROCK_REGION", "eu-central-1"),
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    )
+
+    prompt = """Analiziraj ovu fakturu i izvuci podatke. Odgovori SAMO JSON:
+{
+  "broj_fakture": "...",
+  "datum": "DD.MM.YYYY",
+  "datum_dospijeća": "DD.MM.YYYY ili null",
+  "partner_naziv": "...",
+  "partner_oib": "11 znamenki ili null",
+  "partner_iban": "HR... ili DE... ili null",
+  "iznos_bez_pdv": "decimalni broj",
+  "iznos_pdv": "decimalni broj",
+  "iznos_ukupno": "decimalni broj",
+  "valuta": "EUR ili HRK ili ...",
+  "napomena": "kratka napomena ako je relevantna"
+}
+Ako neko polje ne možeš pročitati, stavi null."""
+
+    try:
+        response = client.converse(
+            modelId=getattr(settings, "PIXTRAL_MODEL_ID", "eu.mistral.pixtral-large-2502-v1:0"),
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "image": {
+                                "format": media_type.split("/")[1],
+                                "source": {"bytes": __import__("base64").b64decode(image_base64)},
+                            }
+                        },
+                        {"text": prompt},
+                    ],
+                }
+            ],
+            inferenceConfig={"maxTokens": 500, "temperature": 0.1},
+        )
+        text = response["output"]["message"]["content"][0]["text"]
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start >= 0:
+            return json.loads(text[start:end])
+        return {"error": "Nije mogao parsirati JSON", "raw": text[:200]}
+    except Exception as e:
+        logger.error("Pixtral invoice read error: %s", e)
+        return {"error": str(e)[:200]}
+
+
+def devstral_code_review(code: str, context: str = "") -> str:
+    """
+    Devstral 123B — code review i prijedlozi za Django kod.
+    Koristi se u Trojstvu kao 3. glasač za tehničke probleme.
+    """
+    system = (
+        "Ti si senior Django/Python inženjer specijaliziran za ERP sustave. "
+        "Analiziraš kod i daješ konkretne, kratke prijedloge poboljšanja."
+    )
+    prompt = f"{context}\n\n```python\n{code[:2000]}\n```" if context else f"```python\n{code[:2000]}\n```"
+    return deepseek_chat(
+        prompt=prompt,
+        model=getattr(
+            __import__("django.conf", fromlist=["settings"]).settings, "DEEPSEEK_MODEL_ID", "mistral.devstral-2-123b"
+        ),
+        system=system,
+        max_tokens=800,
+        temperature=0.2,
+    )
