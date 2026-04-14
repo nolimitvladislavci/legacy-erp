@@ -2,11 +2,7 @@
 {% load i18n %}
 {% block title %}Partneri{% endblock %}
 {% block page_title %}Partneri{% endblock %}
-{% block extra_css %}
-<!-- responsive: fenix-tokens.css -->
-{% endblock %}
 {% block content %}
-<!-- lang: see topbar -->
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
@@ -43,7 +39,10 @@
       </select>
     </div>
     <div class="col-md-4 d-flex gap-2">
-      <button type="submit" class="btn btn-primary flex-grow-1"><span id="search-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1"></span>{% trans "Filtriraj" %}</button>
+      <button type="submit" class="btn btn-primary flex-grow-1">
+        <span id="search-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1"></span>
+        {% trans "Filtriraj" %}
+      </button>
       <a href="{% url 'partners:list' %}" class="btn btn-outline-secondary">{% trans "Reset" %}</a>
     </div>
   </form>
@@ -52,42 +51,59 @@
 {% if not page_obj %}
 {% include "partials/empty_state.html" with title="Dodajte prvog klijenta" subtitle="Kreirajte partnera za izdavanje računa i praćenje salda." cta_text="Novi partner" cta_url="/hr/partners/create/" icon="fas fa-handshake" time_estimate="1 min" %}
 {% else %}
-<div class="fenix-table-wrap">
+<div id="partner-table" class="fenix-table-wrap">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead >
+      <thead>
         <tr>
-          <th>{% trans "Naziv" %}</th><th>{% trans "Tip" %}</th><th>{% trans "Grad" %}</th><th>{% trans "Email / Telefon" %}</th>
-          <th class="text-end">{% trans "Saldo" %}</th><th>{% trans "Status" %}</th><th></th>
+          <th style="width:80px"></th>
+          <th>{% trans "Naziv" %}</th>
+          <th class="text-end">{% trans "Saldo" %}</th>
+          <th class="d-none d-md-table-cell">{% trans "Status" %}</th>
+          <th class="d-none d-md-table-cell">{% trans "Tip" %}</th>
+          <th class="d-none d-lg-table-cell">{% trans "Grad" %}</th>
+          <th class="d-none d-lg-table-cell">{% trans "Email / Telefon" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for p in page_obj %}
         <tr>
+          {# AKCIJE PRVE — uvijek vidljive #}
+          <td style="white-space:nowrap">
+            <a href="{% url 'partners:edit' p.pk %}" class="btn btn-sm btn-outline-warning" title="{% trans 'Uredi' %}"><i class="fas fa-edit"></i></a>
+            <a href="{% url 'partners:delete' p.pk %}" class="btn btn-sm btn-outline-danger ms-1" title="{% trans 'Obriši' %}"><i class="fas fa-trash"></i></a>
+          </td>
+          {# NAZIV + OIB #}
           <td>
-            <a href="{% url 'partners:detail' p.pk %}" class="fw-bold text-decoration-none text-dark">{{ p.name }}</a>
+            <a href="{% url 'partners:detail' p.pk %}" class="fw-bold text-decoration-none">{{ p.name }}</a>
             {% if not p.is_complete %}<span class="badge bg-warning text-dark ms-1 fx-fs-2xs">Nepotpun</span>{% endif %}
             {% if p.oib %}<br><small class="text-muted">OIB: {{ p.oib }}</small>{% endif %}
           </td>
-          <td>
+          {# SALDO — uvijek vidljiv #}
+          <td class="text-end fw-bold {% if p.cached_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+            {{ p.cached_balance|floatformat:2 }} €
+          </td>
+          {# STATUS — vidljiv od md #}
+          <td class="d-none d-md-table-cell">
+            {% if p.is_active %}
+              <span class="fenix-badge fenix-badge-success">{% trans "Aktivan" %}</span>
+            {% else %}
+              <span class="fenix-badge fenix-badge-danger">{% trans "Neaktivan" %}</span>
+            {% endif %}
+          </td>
+          {# TIP — vidljiv od md #}
+          <td class="d-none d-md-table-cell">
             {% if p.partner_type == 'client' %}<span class="fenix-badge fenix-badge-info">{{ p.get_partner_type_display }}</span>
             {% elif p.partner_type == 'supplier' %}<span class="fenix-badge fenix-badge-warning">{{ p.get_partner_type_display }}</span>
             {% elif p.partner_type == 'employee' %}<span class="badge bg-info text-dark">{{ p.get_partner_type_display }}</span>
             {% else %}<span class="fenix-badge fenix-badge-muted">{{ p.get_partner_type_display }}</span>{% endif %}
           </td>
-          <td>{{ p.city|default:"-" }}</td>
-          <td>
+          {# GRAD — samo desktop #}
+          <td class="d-none d-lg-table-cell">{{ p.city|default:"-" }}</td>
+          {# EMAIL / TEL — samo desktop #}
+          <td class="d-none d-lg-table-cell">
             {% if p.email %}<div><a href="mailto:{{ p.email }}" class="text-muted small">{{ p.email }}</a></div>{% endif %}
             {% if p.phone %}<div class="small text-muted">{{ p.phone }}</div>{% endif %}
-          </td>
-          <td class="text-end fw-bold {% if p.cached_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-            {{ p.cached_balance|floatformat:2 }} €
-          </td>
-          <td>{% if p.is_active %}<span class="fenix-badge fenix-badge-success">{% trans "Aktivan" %}</span>
-          {% else %}<span class="fenix-badge fenix-badge-danger">{% trans "Neaktivan" %}</span>{% endif %}</td>
-          <td>
-            <a href="{% url 'partners:edit' p.pk %}" class="btn btn-sm btn-outline-warning me-1"><i class="fas fa-edit"></i></a>
-            <a href="{% url 'partners:delete' p.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
           </td>
         </tr>
         {% empty %}
