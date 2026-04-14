@@ -975,3 +975,54 @@ class ScanToken(models.Model):
     def use(self):
         """Inkrement use_count atomično."""
         ScanToken.objects.filter(pk=self.pk).update(use_count=models.F("use_count") + 1)
+
+
+class ArhivaAccessToken(models.Model):
+    """
+    Magic link token za pristup arhivi komitenta.
+    Računovotkinja kreira → komitent klikne → vidi svoju arhivu.
+    Bez logina. Bez registracije.
+    """
+
+    token = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="arhiva_access_tokens")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="created_arhiva_tokens",
+    )
+    label = models.CharField(max_length=100, blank=True, help_text='npr. "Gašić Ivan — pristup arhivi"')
+    expires_at = models.DateTimeField(null=True, blank=True, help_text="NULL = ne istječe")
+    is_active = models.BooleanField(default=True)
+    last_accessed_at = models.DateTimeField(null=True, blank=True)
+    access_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = CompanyManager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Arhiva Access Token"
+        verbose_name_plural = "Arhiva Access Tokeni"
+
+    def __str__(self):
+        return f"{self.company.name} — {self.label or str(self.token)[:8]}"
+
+    def is_valid(self):
+        from django.utils import timezone
+
+        if not self.is_active:
+            return False
+        if self.expires_at and timezone.now() > self.expires_at:
+            return False
+        return True
+
+    def record_access(self):
+        """Zabilježi pristup atomično."""
+        from django.utils import timezone
+
+        ArhivaAccessToken.objects.filter(pk=self.pk).update(
+            access_count=models.F("access_count") + 1,
+            last_accessed_at=timezone.now(),
+        )

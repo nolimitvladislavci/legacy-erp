@@ -273,6 +273,7 @@
     <button class="u-tab" onclick="showTab('create',this)"><i class="fas fa-plus-circle"></i> Kreiraj</button>
     <button class="u-tab" onclick="showTab('link',this)"><i class="fas fa-link"></i> Povezi</button>
     <button class="u-tab" onclick="showTab('scan',this)"><i class="fas fa-camera"></i> Scan Tokeni</button>
+    <button class="u-tab" onclick="showTab('arhiva',this)"><i class="fas fa-folder-open"></i> Arhiva Linkovi</button>
   </div>
 
   <!-- Tab: All / Subsidiaries / Clients -->
@@ -459,6 +460,77 @@
     </div>
   </div>
 
+  <!-- Tab: Arhiva Linkovi -->
+  <div class="u-panel" id="tab-arhiva">
+    <div class="u-section">
+      <div class="u-section-title"><i class="fas fa-folder-open fx-text-gold"></i> Arhiva Linkovi</div>
+      <p class="fx-fs-sm fx-text-muted fx-mb-4">Kreirajte linkove za komitente da pregledaju svoju digitalnu arhivu. Bez logina, bez registracije.</p>
+      
+      <div class="d-flex fx-gap-2 fx-mb-4 fx-flex-wrap">
+        <button type="button" class="btn btn-sm fx-fw-bold" style="background:var(--gold);color:#0a0a0a" onclick="bulkCreateArhivaLinks()">
+          <i class="fas fa-magic"></i> Kreiraj za sve komitente
+        </button>
+        <span class="fx-fs-xs fx-text-muted d-flex align-items-center" id="bulkStatus"></span>
+      </div>
+      
+      <!-- Single create -->
+      <div class="fx-rounded fx-p-4 fx-mb-4" style="background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333)">
+        <h6 class="fx-fw-bold fx-mb-3"><i class="fas fa-plus-circle fx-text-gold"></i> Novi link za komitenta</h6>
+        <div class="row g-2">
+          <div class="col-md-5">
+            <label class="form-label fx-fs-sm">Firma (ID)</label>
+            <select class="form-select form-select-sm" id="arhivaCompanyId">
+              <option value="">-- Trenutna firma --</option>
+              {% for child in umbrella_children %}
+              <option value="{{ child.pk }}">{{ child.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fx-fs-sm">Oznaka</label>
+            <input type="text" class="form-control form-control-sm" id="arhivaLabel" placeholder="npr. Pristup arhivi">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fx-fs-sm">Istjece (dana)</label>
+            <input type="number" class="form-control form-control-sm" id="arhivaExpires" placeholder="Prazno = nikad">
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-sm w-100 fx-fw-bold" style="background:var(--gold);color:#0a0a0a" onclick="createArhivaLink()">
+              <i class="fas fa-link"></i> Kreiraj
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Rezultat -->
+      <div id="arhivaResult" style="display:none" class="fx-rounded fx-p-4 fx-mb-4" style="background:var(--card-bg);border:1px solid var(--gold)">
+        <div class="row align-items-center">
+          <div class="col-md-4 text-center">
+            <img id="arhivaQR" alt="QR" style="width:200px;height:200px;border-radius:8px">
+          </div>
+          <div class="col-md-8">
+            <h6 class="fx-fw-bold fx-text-gold" id="arhivaResultLabel"></h6>
+            <div class="input-group mb-2">
+              <input type="text" class="form-control form-control-sm" id="arhivaResultUrl" readonly>
+              <button class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('arhivaResultUrl').value);fenixToast('Kopirano!','success')"><i class="fas fa-copy"></i></button>
+            </div>
+            <a id="arhivaWhatsApp" href="#" target="_blank" class="btn btn-sm fx-fw-bold" style="background:#25D366;color:#fff">
+              <i class="fab fa-whatsapp"></i> Posalji WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Lista -->
+      <div class="fx-rounded" style="background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333)">
+        <div class="fx-p-3 fx-fw-bold fx-fs-sm" style="border-bottom:1px solid var(--border,#333)"><i class="fas fa-list"></i> Aktivni linkovi</div>
+        <div id="arhivaTokenBody" class="fx-p-3">
+          <div class="text-center fx-text-muted fx-fs-sm py-3">Ucitavanje...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
 function showTab(name,btn){
   document.querySelectorAll('.u-panel').forEach(function(p){p.classList.remove('active')});
@@ -544,7 +616,82 @@ var origShowTab=showTab;
 showTab=function(name,btn){
   origShowTab(name,btn);
   if(name==="scan") loadScanTokens();
+  if(name==="arhiva") loadArhivaLinks();
 };
+</script>
+
+<script>
+function createArhivaLink() {
+  var fd = new FormData();
+  fd.append("csrfmiddlewaretoken", getCsrf());
+  fd.append("company_id", document.getElementById("arhivaCompanyId").value);
+  fd.append("label", document.getElementById("arhivaLabel").value);
+  var exp = document.getElementById("arhivaExpires").value;
+  if (exp) fd.append("expires_days", exp);
+  fetch("/hr/documents/arhiva-access/create/", {method:"POST", body:fd})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok){
+      document.getElementById("arhivaResult").style.display="block";
+      document.getElementById("arhivaQR").src="data:image/png;base64,"+d.qr_data;
+      document.getElementById("arhivaResultUrl").value=d.url;
+      document.getElementById("arhivaResultLabel").textContent=d.company_name+" — "+d.label;
+      var msg=encodeURIComponent(d.company_name+" — pogledajte svoju digitalnu arhivu: "+d.url);
+      document.getElementById("arhivaWhatsApp").href="https://wa.me/?text="+msg;
+      loadArhivaLinks();
+      fenixToast("Link kreiran!","success");
+    } else {
+      fenixToast(d.error||"Greska","error");
+    }
+  }).catch(function(e){fenixToast("Greska: "+e.message,"error")});
+}
+
+function bulkCreateArhivaLinks() {
+  var fd = new FormData();
+  fd.append("csrfmiddlewaretoken", getCsrf());
+  fetch("/hr/documents/arhiva-access/bulk-create/", {method:"POST", body:fd})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok){
+      document.getElementById("bulkStatus").textContent=
+        "Kreirano: "+d.created+", Preskoceno: "+d.skipped+" (vec imaju link)";
+      loadArhivaLinks();
+      fenixToast("Bulk kreiranje gotovo! "+d.created+" novih linkova.","success");
+    } else {
+      fenixToast(d.error||"Greska","error");
+    }
+  });
+}
+
+function loadArhivaLinks() {
+  fetch("/hr/documents/arhiva-access/list/")
+  .then(function(r){return r.json()})
+  .then(function(d){
+    var body=document.getElementById("arhivaTokenBody");
+    if(!d.tokens||!d.tokens.length){
+      body.innerHTML="<div class=\"text-center fx-text-muted fx-fs-sm py-3\">Nema linkova. Kreirajte prvi!</div>";
+      return;
+    }
+    var html="";
+    d.tokens.forEach(function(t){
+      var badge=t.is_valid
+        ?"<span class=\"badge bg-success\">Aktivan</span>"
+        :"<span class=\"badge bg-secondary\">Neaktivan</span>";
+      var accessed=t.last_accessed_at?new Date(t.last_accessed_at).toLocaleDateString("hr"):"nikad";
+      html+="<div class=\"d-flex justify-content-between align-items-center fx-py-2\" style=\"border-bottom:1px solid var(--border,#333)\">"
+        +"<div>"
+        +"<strong class=\"fx-fs-sm\">"+t.company_name+"</strong> "
+        +badge
+        +"<br><span class=\"fx-fs-xs fx-text-muted\">"+t.access_count+"x pristup, zadnji: "+accessed+"</span>"
+        +"</div>"
+        +"<div class=\"d-flex fx-gap-2\">"
+        +"<button class=\"btn btn-outline-secondary btn-sm\" onclick=\"navigator.clipboard.writeText(\x27"+t.url+"\x27);fenixToast(\x27Kopirano!\x27,\x27success\x27)\"><i class=\"fas fa-copy\"></i></button>"
+        +"<a class=\"btn btn-outline-success btn-sm\" href=\"https://wa.me/?text="+encodeURIComponent(t.company_name+" arhiva: "+t.url)+"\" target=\"_blank\"><i class=\"fab fa-whatsapp\"></i></a>"
+        +"</div></div>";
+    });
+    body.innerHTML=html;
+  });
+}
 </script>
 
     <!-- Import Tab -->

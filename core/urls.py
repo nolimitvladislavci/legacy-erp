@@ -558,6 +558,11 @@ urlpatterns += i18n_patterns(
             ]
         ),
     ),
+    path(
+        "arhiva-portal/<str:token>/",
+        __import__("documents.views", fromlist=["arhiva_portal"]).arhiva_portal,
+        name="arhiva_portal",
+    ),
     path("superadmin/control-tower/", views.control_tower_view, name="control_tower"),
     path("superadmin/api/telemetry/", views.control_tower_api, name="control_tower_api"),
     path("superadmin/modules/<uuid:subscription_id>/", views.update_company_modules, name="update_company_modules"),

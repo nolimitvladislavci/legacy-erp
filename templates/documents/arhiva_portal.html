@@ -1,0 +1,132 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ company.name }} — {% trans "Digitalna Arhiva" %} | LIMIT Connect</title>
+<style>
+:root{--gold:#C9A84C;--bg:#0a0a0a;--bg-card:#151515;--text:#e0e0e0;--text-dim:#888;--green:#4CAF50;--border:#2a2a2a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100dvh}
+.header{background:var(--bg-card);border-bottom:1px solid var(--border);padding:20px 24px;text-align:center}
+.header .logo{color:var(--gold);font-size:.85rem;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.header h1{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.header .sub{color:var(--text-dim);font-size:.85rem}
+.container{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.welcome{background:linear-gradient(135deg,#1a1a0a,#1a180a);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:2rem 1.5rem;margin-bottom:2rem;text-align:center}
+.welcome .big-num{font-size:3rem;font-weight:800;color:var(--gold);line-height:1}
+.welcome .big-label{font-size:.9rem;color:var(--text-dim);margin-top:4px}
+.welcome .amount{font-size:1.4rem;font-weight:700;margin-top:12px}
+.stats{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;min-width:120px;text-align:center}
+.stat .val{font-size:1.2rem;font-weight:700;color:var(--gold)}
+.stat .lbl{font-size:.75rem;color:var(--text-dim);margin-top:2px}
+.zor{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:2rem;display:flex;align-items:center;gap:12px}
+.zor .icon{font-size:1.5rem;flex-shrink:0}
+.zor .text{font-size:.85rem;line-height:1.5}
+.zor .text strong{color:var(--gold)}
+.year-group{margin-bottom:1.5rem}
+.year-header{font-size:1rem;font-weight:700;color:var(--gold);padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.year-header .count{font-size:.75rem;color:var(--text-dim);font-weight:400}
+.entry{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;border-bottom:1px solid rgba(255,255,255,.04)}
+.entry:hover{background:rgba(201,168,76,.05)}
+.entry .type-icon{width:32px;height:32px;background:rgba(201,168,76,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold);flex-shrink:0}
+.entry .info{flex:1;min-width:0}
+.entry .info .name{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entry .info .meta{font-size:.72rem;color:var(--text-dim)}
+.entry .amount{font-size:.85rem;font-weight:600;color:var(--gold);text-align:right;flex-shrink:0}
+.scan-cta{background:var(--bg-card);border:1px solid rgba(201,168,76,.3);border-radius:16px;padding:1.5rem;text-align:center;margin-top:2rem}
+.scan-cta h3{font-size:1rem;font-weight:700;margin-bottom:8px}
+.scan-cta p{color:var(--text-dim);font-size:.82rem;margin-bottom:12px}
+.scan-cta .btn{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#0a0a0a;border:none;padding:12px 24px;border-radius:12px;font-size:1rem;font-weight:700;text-decoration:none;cursor:pointer}
+.empty{text-align:center;color:var(--text-dim);padding:3rem 1rem}
+.empty .icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
+.footer{text-align:center;padding:2rem;color:var(--text-dim);font-size:.72rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">LIMIT Connect</div>
+  <h1>{{ company.name }}</h1>
+  <div class="sub">{% trans "Digitalna Arhiva" %}</div>
+</div>
+
+<div class="container">
+
+  <!-- Welcome card -->
+  <div class="welcome">
+    <div class="big-num">{{ total_count }}</div>
+    <div class="big-label">{% trans "dokumenata u arhivi" %}</div>
+    {% if total_amount %}
+    <div class="amount">{{ total_amount|floatformat:2 }} EUR</div>
+    {% endif %}
+    <div class="stats">
+      <div class="stat">
+        <div class="val">{{ entries_by_year|length }}</div>
+        <div class="lbl">{% trans "godina" %}</div>
+      </div>
+      <div class="stat">
+        <div class="val">{{ total_count }}</div>
+        <div class="lbl">{% trans "dokumenata" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZOR info -->
+  <div class="zor">
+    <div class="icon">&#128203;</div>
+    <div class="text">
+      <strong>{% trans "Zakon o računovodstvu" %}</strong> — {% blocktrans with year=zor_until %}Dokumenti su zaštićeni i čuvaju se do {{ year }}. godine (11 godina).{% endblocktrans %}
+    </div>
+  </div>
+
+  <!-- Entries by year -->
+  {% for year, entries in entries_by_year.items %}
+  <div class="year-group">
+    <div class="year-header">
+      {{ year }}
+      <span class="count">{{ entries|length }} {% trans "dok." %}</span>
+    </div>
+    {% for entry in entries %}
+    <div class="entry">
+      <div class="type-icon">
+        {% if entry.has_image %}&#128247;{% elif entry.has_pdf %}&#128196;{% else %}&#128462;{% endif %}
+      </div>
+      <div class="info">
+        <div class="name">{% if entry.partner_name %}{{ entry.partner_name }}{% else %}{{ entry.doc_number }}{% endif %}</div>
+        <div class="meta">{{ entry.doc_date|date:"d.m.Y" }} &middot; {{ entry.get_source_type_display }} &middot; {{ entry.archive_number }}</div>
+      </div>
+      {% if entry.amount %}
+      <div class="amount">{{ entry.amount|floatformat:2 }}&nbsp;{{ entry.currency }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% empty %}
+  <div class="empty">
+    <div class="icon">&#128194;</div>
+    <p>{% trans "Još nema dokumenata u arhivi." %}</p>
+  </div>
+  {% endfor %}
+
+  <!-- Scan CTA -->
+  {% if scan_tokens %}
+  <div class="scan-cta">
+    <h3>&#128247; {% trans "Skenirajte račun" %}</h3>
+    <p>{% trans "Slikajte račun kamerom i automatski ga arhivirajte." %}</p>
+    {% with scan_tokens.0 as st %}
+    <a class="btn" href="/hr/scan/{{ st.token }}/">
+      &#128247; {% trans "Otvori kameru" %}
+    </a>
+    {% endwith %}
+  </div>
+  {% endif %}
+
+</div>
+
+<div class="footer">
+  LIMIT Connect &middot; {% trans "Digitalna arhiva" %} &middot; limit-connect.com
+</div>
+
+</body></html>

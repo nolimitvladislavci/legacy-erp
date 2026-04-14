@@ -9,6 +9,7 @@ from datetime import date as _date
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
+from django.db import models
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -416,5 +417,202 @@ def scan_batch_archive(request, pk):
         {
             "ok": True,
             "message": "Arhiviranje pokrenuto. Dokumenti se pojavljuju u arhivi.",
+        }
+    )
+
+
+# ================================================================
+# ARHIVA PORTAL — Magic Link pristup (ARHIVA-2)
+# ================================================================
+
+
+def arhiva_portal(request, token):
+    """GET /arhiva-portal/{token}/ — Read-only pristup arhivi. PUBLIC, bez logina."""
+    from .models import ArhivaAccessToken
+
+    access_token = ArhivaAccessToken.objects.select_related("company").filter(token=token).first()
+    if not access_token or not access_token.is_valid():
+        return render(
+            request,
+            "documents/arhiva_portal_expired.html",
+            {
+                "reason": "invalid" if not access_token else "expired",
+            },
+        )
+
+    company = access_token.company
+    access_token.record_access()
+
+    # Fetch arhiva entries for this company
+    entries = ArhivaEntry.objects.filter(company=company).order_by("-archived_at")
+
+    total_count = entries.count()
+    total_amount = entries.aggregate(total=models.Sum("amount"))["total"] or 0
+
+    # Group by year
+    from collections import defaultdict
+
+    by_year = defaultdict(list)
+    for e in entries[:200]:  # Limit for performance
+        year = e.doc_date.year if e.doc_date else "Nepoznato"
+        by_year[year].append(e)
+
+    # ZOR info
+    from datetime import date
+
+    zor_until = date.today().year + 11
+
+    context = {
+        "token": str(access_token.token),
+        "company": company,
+        "label": access_token.label,
+        "total_count": total_count,
+        "total_amount": total_amount,
+        "entries_by_year": dict(sorted(by_year.items(), reverse=True)),
+        "entries_recent": entries[:20],
+        "zor_until": zor_until,
+        "scan_tokens": ScanToken.objects.filter(company=company, is_active=True)[:5],
+    }
+    return render(request, "documents/arhiva_portal.html", context)
+
+
+@login_required
+def arhiva_access_create(request):
+    """Kreiraj ArhivaAccessToken za firmu. Umbrella panel."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"error": "Nema tvrtke"}, status=400)
+
+    # Target company (umbrella child)
+    target_company_id = request.POST.get("company_id", "")
+    if target_company_id:
+        from companies.models import Company as _Company
+
+        target = _Company.objects.filter(pk=target_company_id).first()
+        if not target:
+            return JsonResponse({"error": "Firma ne postoji"}, status=404)
+    else:
+        target = company
+
+    label = request.POST.get("label", "").strip() or f"Pristup arhivi — {target.name}"
+    expires_days = request.POST.get("expires_days", "")
+
+    expires_at = None
+    if expires_days:
+        try:
+            expires_at = timezone.now() + timezone.timedelta(days=int(expires_days))
+        except (ValueError, TypeError):
+            pass
+
+    from .models import ArhivaAccessToken
+
+    access_token = ArhivaAccessToken.objects.create(
+        company=target,
+        created_by=request.user,
+        label=label,
+        expires_at=expires_at,
+    )
+
+    url = request.build_absolute_uri(f"/hr/arhiva-portal/{access_token.token}/")
+
+    from core.qr_views import qr_base64 as _qr_b64
+
+    qr_data = _qr_b64(url, size=200, color="c9a84c", bg="0a0a0a")
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "token": str(access_token.token),
+            "url": url,
+            "qr_data": qr_data,
+            "label": access_token.label,
+            "company_name": target.name,
+            "expires_at": access_token.expires_at.isoformat() if access_token.expires_at else None,
+        }
+    )
+
+
+@login_required
+def arhiva_access_list(request):
+    """Lista aktivnih access tokena."""
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"tokens": []})
+
+    from .models import ArhivaAccessToken
+
+    # Show tokens for this company AND all umbrella children
+    company_ids = [company.pk]
+    from companies.models import Company as _Company
+
+    children = _Company.objects.filter(umbrella_parent=company).values_list("pk", flat=True)
+    company_ids.extend(children)
+
+    tokens = (
+        ArhivaAccessToken.objects.filter(company_id__in=company_ids)
+        .select_related("company")
+        .order_by("-created_at")[:100]
+    )
+
+    return JsonResponse(
+        {
+            "tokens": [
+                {
+                    "token": str(t.token),
+                    "label": t.label,
+                    "company_name": t.company.name,
+                    "access_count": t.access_count,
+                    "is_active": t.is_active,
+                    "is_valid": t.is_valid(),
+                    "last_accessed_at": t.last_accessed_at.isoformat() if t.last_accessed_at else None,
+                    "created_at": t.created_at.isoformat(),
+                    "expires_at": t.expires_at.isoformat() if t.expires_at else None,
+                    "url": request.build_absolute_uri(f"/hr/arhiva-portal/{t.token}/"),
+                }
+                for t in tokens
+            ]
+        }
+    )
+
+
+@login_required
+def arhiva_access_bulk_create(request):
+    """Bulk kreiranje access tokena za sve umbrella children."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"error": "Nema tvrtke"}, status=400)
+
+    from companies.models import Company as _Company
+
+    from .models import ArhivaAccessToken
+
+    children = _Company.objects.filter(umbrella_parent=company)
+    created = 0
+    skipped = 0
+
+    for child in children:
+        # Skip if already has active token
+        if ArhivaAccessToken.objects.filter(company=child, is_active=True).exists():
+            skipped += 1
+            continue
+        ArhivaAccessToken.objects.create(
+            company=child,
+            created_by=request.user,
+            label=f"Pristup arhivi — {child.name}",
+        )
+        created += 1
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "created": created,
+            "skipped": skipped,
+            "total_children": children.count(),
         }
     )
