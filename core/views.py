@@ -1258,7 +1258,7 @@ def company_dashboard(request):
         from pos.models import POSReceipt
 
         pos_qs = POSReceipt.objects.all()
-        pos_qs.filter(created_at__date=today).aggregate(s=Sum("total_amount"))["s"] or 0
+        pos_qs.filter(created_at__date=today).aggregate(s=Sum("total"))["s"] or 0
         pos_qs.filter(created_at__date=today).count()
     except DatabaseError:
         pass
@@ -3443,3 +3443,27 @@ def panel_detail(request):
             "fields": fields,
         },
     )
+
+
+# ── Custom set_language — sprema u profil + cookie ────────────────────────
+from django.views.i18n import set_language as _django_set_language
+
+
+def set_language_profile(request):
+    """
+    Wraps Django's set_language — additionally saves preferred_language
+    to UserProfile so LanguageMiddleware doesn't override on next request.
+    """
+    response = _django_set_language(request)
+    if request.method == "POST" and request.user.is_authenticated:
+        lang = request.POST.get("language", "")
+        valid = [code for code, _ in settings.LANGUAGES]
+        if lang in valid:
+            try:
+                profile = request.user.profile
+                if profile.preferred_language != lang:
+                    profile.preferred_language = lang
+                    profile.save(update_fields=["preferred_language"])
+            except Exception:
+                pass
+    return response

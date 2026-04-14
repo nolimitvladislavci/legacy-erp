@@ -10,7 +10,6 @@ from django.http import FileResponse, Http404
 from django.shortcuts import redirect
 from django.urls import include, path
 from django.views.generic import RedirectView
-from django.views.i18n import set_language
 
 from core import intelligence_views, oib_finalizer_views, onboarding_views, steuerberater_views, tc_views
 
@@ -179,7 +178,7 @@ urlpatterns = [
         __import__("interventions.views", fromlist=["tracking_view"]).tracking_view,
         name="intervention_tracking",
     ),
-    path("i18n/setlang/", set_language, name="set_language"),
+    path("i18n/setlang/", views.set_language_profile, name="set_language"),
     path("i18n/", include("django.conf.urls.i18n")),
     # Webhook Rampa (izvan i18n - nema language redirect)
     path(

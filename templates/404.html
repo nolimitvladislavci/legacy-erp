@@ -8,7 +8,7 @@
   <p class="fx-fs-md" style="color:var(--text-muted,#94a3b8);margin:12px 0 24px">
     Trazena stranica ne postoji, premjestena je, ili nemate pristup.<br>
     {% if request.user.is_authenticated %}
-    Ako bi trebali imati pristup, prijavite problem — BORG ce analizirati.
+    Ako bi trebali imati pristup, prijavite problem — sustav će analizirati.
     {% else %}
     Prijavite se ili provjerite URL.
     {% endif %}
@@ -34,7 +34,7 @@ function borgReport404(){
     type:'bug',message:'404 na '+location.href,page_url:location.href,
     context:{referrer:document.referrer,viewport:innerWidth+'x'+innerHeight}
   })}).then(r=>r.json()).then(d=>{
-    document.getElementById('report-result').innerHTML=d.ok?'<span class="fx-text-green">Signal poslan — BORG analizira.</span>':'<span class="fx-text-red">'+(d.error||'Greska')+'</span>';
+    document.getElementById('report-result').innerHTML=d.ok?'<span class="fx-text-green">Signal poslan — sustav analizira.</span>':'<span class="fx-text-red">'+(d.error||'Greska')+'</span>';
     btn.textContent='Poslano';
   }).catch(()=>{document.getElementById('report-result').textContent='Greska mreze';btn.disabled=false;btn.textContent='Prijavi problem';});
 }

@@ -36,7 +36,7 @@ class UserProfile(models.Model):
     preferred_language = models.CharField(
         max_length=5,
         default="hr",
-        choices=[("hr", "Hrvatski"), ("de", "Deutsch"), ("en", "English")],
+        choices=[("hr", "Hrvatski"), ("de", "Deutsch"), ("en", "English"), ("tr", "Türkçe"), ("el", "Ελληνικά")],
         verbose_name=_("Jezik sučelja"),
     )
     can_upload_photos = models.BooleanField(default=True, verbose_name=_("Može uploadati slike"))

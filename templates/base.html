@@ -226,6 +226,10 @@
         {% include "includes/_sidebar_modules.html" %}
 
         <div class="sidebar-footer">
+            <a href="{% url 'helpdesk:create' %}" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-no-underline fx-rounded fx-fs-compact align-items-center mb-1" style="padding:7px 12px;color:var(--text-dim);margin:1px 4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)">
+              <i class="fas fa-life-ring text-center" style="width:18px"></i>
+              <span>{% trans "Pomoć / Helpdesk" %}</span>
+            </a>
             {% if pending_claims_count > 0 %}
             <a href="{% url 'pending_claims' %}" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-no-underline fx-rounded fx-fs-compact align-items-center mb-1" style="padding:7px 12px;color:#facc15;margin:1px 4px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2)">
               <i class="fas fa-inbox text-center" style="width:18px"></i>
@@ -246,9 +250,9 @@
     </div>
 
 
-    <!-- ═══ RIGHT CONTEXT PANEL ═══ -->
-    <div class="shell-right-backdrop" id="shellRightBackdrop" onclick="closeShellRight()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1039;backdrop-filter:blur(2px)"></div>
-    <aside class="shell-right collapsed" id="shellRight" aria-label="Kontekst panel">
+    <!-- ═══ RIGHT CONTEXT PANEL — DISABLED ═══ -->
+    <div class="shell-right-backdrop" style="display:none!important" hidden id="shellRightBackdrop" onclick="closeShellRight()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1039;backdrop-filter:blur(2px)"></div>
+    <aside class="shell-right collapsed" id="shellRight" aria-label="Kontekst panel" style="display:none!important" hidden>
         <div class="shell-right-header">
             <span id="shell-right-title">{% block shell_right_title %}Kontekst{% endblock %}</span>
             <button class="shell-right-close" onclick="closeShellRight()" aria-label="Zatvori panel">&times;</button>

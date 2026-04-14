@@ -43,7 +43,7 @@ function borgReport500(){
     type:'bug',message:'500 greska'+(msg?' — '+msg:''),page_url:document.referrer||location.href,
     context:{type:'500',referrer:document.referrer,viewport:innerWidth+'x'+innerHeight}
   })}).then(r=>r.json()).then(d=>{
-    document.getElementById('result').innerHTML=d.ok?'<span class="fx-text-green">Hvala! BORG analizira vasu prijavu.</span>':'<span class="fx-text-red">Greska pri slanju</span>';
+    document.getElementById('result').innerHTML=d.ok?'<span class="fx-text-green">Hvala! Prijava je zaprimljena.</span>':'<span class="fx-text-red">Greska pri slanju</span>';
     btn.textContent='Poslano';
   }).catch(()=>{document.getElementById('result').textContent='Greska mreze';btn.disabled=false;btn.textContent='Prijavi detalje';});
 }

@@ -8,7 +8,7 @@ window._aiPageContext = (function(){
   if (p.includes('/pos/')) return 'Korisnik je u POS modulu (blagajna). Karenca check blokira prodaju kontaminiranih proizvoda. Z-izvještaj zatvara smjenu.';
   if (p.includes('/inventory/')) return 'Korisnik je u Skladištu. SplitAllocation dijeli zalihu između interne upotrebe i marketplace-a. Artikli mogu biti povezani s jatom (karenca).';
   if (p.includes('/invoicing/')) return 'Korisnik je u Fakturiranju. Podržani tipovi: R (račun), A (avansni), S (storno), FA (B2B), OTP (otpremnica).';
-  if (p.includes('/dashboard/operations')) return 'Korisnik je u BORG Hub-u — operativnom centru koji agregira SLA kršenja, intervencije, naloge, goste, zalihe i financije.';
+  if (p.includes('/dashboard/operations')) return 'Korisnik je u Operativnom centru — operativnom centru koji agregira SLA kršenja, intervencije, naloge, goste, zalihe i financije.';
   if (p.includes('/udruge/')) return 'Korisnik je u Udruge modulu. Podmoduli: članovi, članarine, donacije, golubar, perad/flock, dogadjaji, kampanje.';
   if (p.includes('/marketplace/')) return 'Korisnik je na OPG Tržnici. Proizvodi imaju auto-expiry, geofencing za kvarljivu robu, LOT slijedivost.';
   if (p.includes('/work-orders/')) return 'Korisnik je u Radnim nalozima. Kanban ploča s drag-and-drop. SLA timer prati trajanje po statusu.';
