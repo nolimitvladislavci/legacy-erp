@@ -122,3 +122,181 @@ DEFAULT_LEVEL = AccessLevel.COMPANY — sve što nije registrirano blokira se za
 Javne rute (bez logina): dodati u ROUTE_REGISTRY kao AccessLevel.PUBLIC
 Rute s loginom bez kompanije: AccessLevel.AUTHENTICATED
 Propust = 302 redirect za vanjske korisnike bez greške u logu (GracefulErrorMiddleware hvata).
+
+---
+
+# ZLATNI KOD — PLAN PRODUKCIJE
+**Donesen: 14.04.2026. | Status: AKTIVAN**
+
+> Cilj: Funkcionalan, stabilan kod bez grešaka → 100+ firmi u produkciji → #1 ERP za malo poduzetništvo u EU
+> Koraci su redni, ne datumski. Sljedeći kreće čim prethodni dobije ✅
+
+---
+
+## KORAK 1 — INVENTURA RUŠENJA ⬅ TRENUTNO AKTIVAN
+**Cilj:** Potpuni popis svih bugova, tiho preusmjeravanja i 5xx grešaka.
+```
+[ ] Izvuci sve GracefulErrorMiddleware redirecte (zadnjih 30 dana)
+[ ] Sentry 5xx lista po modulu
+[ ] Svi "return redirect('/')" za anonimne korisnike — jesu li legitimni?
+[ ] OUTPUT: BUGLIST.md — bug | modul | uzrok | prioritet
+```
+✅ Gotovo kad: BUGLIST.md postoji, svaki red ima uzrok.
+
+---
+
+## KORAK 2 — FIELD NAME AUDIT
+**Cilj:** Nula AttributeErrora zbog krivog imena polja.
+```
+[ ] Za svaki model: popis svih field-a iz models.py
+[ ] Pretraži sve views + templates za mismatch
+[ ] Fix, test, commit po modulu
+[ ] Posebno: Invoice, POSReceipt, UserProfile, Company
+```
+✅ Gotovo kad: 0 novih AttributeErrora u logovima 24h zaredom.
+
+---
+
+## KORAK 3 — ROUTEREGISTRY KOMPLETNI PROLAZ
+**Cilj:** Svaka javna ruta vraća 200 za anonimnog korisnika.
+```
+[ ] Izvuci sve URL nazive iz svih urls.py
+[ ] Usporedi s RouteRegistry (permissions/route_registry.py)
+[ ] Svaki bez @login_required → mora biti PUBLIC/AUTHENTICATED
+[ ] Automatizirani smoke test: curl svaki javni URL bez sessiona
+```
+✅ Gotovo kad: Smoke test prolazi 100% javnih URL-a.
+
+---
+
+## KORAK 4 — MIDDLEWARE AUDIT
+**Cilj:** Nijedan middleware ne blokira legitimnu akciju.
+```
+[ ] Mapiraj 28 middlewara — što svaki radi, koji su SKIP_PREFIXES
+[ ] Sinkroniziraj exempt liste: DomainGate, ForceTC, Force2FA, TC, LanguageMiddleware
+[ ] Test: anonimni user + logiran user bez kompanije — što prolazi, što ne
+```
+✅ Gotovo kad: Test suite "anon pristupa svim javnim rutama" prolazi.
+
+---
+
+## KORAK 5 — 504 ELIMINACIJA
+**Cilj:** Nula 504 timeoutova pod normalnim opterećenjem.
+```
+[ ] Django Silk na staging instanci — profiliraj sve sporije od 500ms
+[ ] select_related/prefetch_related gdje nedostaje
+[ ] DB indeksi na najčešćim filterima
+[ ] Gunicorn worker count optimizacija
+```
+✅ Gotovo kad: Regularni view < 2s, PDF < 15s, 0 x 504 u 48h.
+
+---
+
+## KORAK 6 — GLOBALNI STANDARDI (QR + CSS + URL)
+**Cilj:** 0 direktnih import qrcode, entity-link/col-actions svugdje, get_portal_url() svugdje.
+```
+[ ] Gemini GEMINI_TASK_QR_INTEGRATION.md → verificira Sonnet
+[ ] CSS pattern (entity-link, col-actions) → sve liste
+[ ] get_portal_url() → sve reference na ponuda URL
+[ ] FENIX pravila 1-7 → audit compliance
+```
+✅ Gotovo kad: grep za stare patterne = 0 rezultata.
+
+---
+
+## KORAK 7 — CRITICAL PATH TEST COVERAGE
+**Cilj:** Svaki klijentski dodir ima test.
+```
+Kritični putevi:
+[ ] Login / PIN / 2FA
+[ ] Kreiranje i slanje fakture
+[ ] POS bon + fiskalizacija
+[ ] Kupčeva soba (prihvat/odbijanje)
+[ ] Company switch
+[ ] Upload dokumenta + AI
+[ ] Worktime prijava
+Cilj: coverage > 40% na pos/, invoicing/, accounts/
+```
+✅ Gotovo kad: pytest kritični putevi 100%, coverage report > 40%.
+
+---
+
+## KORAK 8 — LOAD TEST
+**Cilj:** 50 konkurentnih korisnika bez pada.
+```
+[ ] k6 ili locust scenarij: login → dashboard → invoice → switch company
+[ ] 50 VU, 10 minuta
+[ ] P95 < 3s, 0 x 5xx
+[ ] Ako pada: profile → fix → ponovi
+```
+✅ Gotovo kad: Load test report zeleni.
+
+---
+
+## KORAK 9 — SECURITY HARDENING
+**Cilj:** Nema poznatih ranjivosti pri ulasku klijenata.
+```
+[ ] python manage.py check --deploy → 0 upozorenja
+[ ] Rate limiting: login, AI endpoint, PDF, API
+[ ] GDPR audit log za company switch
+[ ] OWASP Top 10 checklist
+```
+✅ Gotovo kad: Security checklist = sve zeleno.
+
+---
+
+## KORAK 10 — ONBOARDING PROVJERA
+**Cilj:** Nova firma → aktivni korisnik za < 30 minuta bez tehničke pomoći.
+```
+[ ] Registration wizard: novi korisnik, cijeli flow
+[ ] Company setup: OIB, IBAN, logo, fiskalizacija
+[ ] Prva faktura → pošalji → kupac prihvati
+[ ] POS: prvi bon bez greške
+[ ] Dokumenti: upload → AI → arhiva
+```
+✅ Gotovo kad: Netko tko nikad nije vidio platformu prođe za < 30 min.
+
+---
+
+## KORAK 11 — BETA (3-5 firmi)
+**Cilj:** Stvarni korisnici, kontrolirani uvjeti.
+```
+[ ] Odaberi 3-5 firmi iz čekaonice (različite djelatnosti)
+[ ] Onboarding uz asistenciju
+[ ] 2 tjedna aktivnog korištenja
+[ ] Svaki bug → odmah fix
+[ ] NPS > 8 od svih beta klijenata
+```
+✅ Gotovo kad: 3 aktivna klijenta, 0 kritičnih bugova 7 dana.
+
+---
+
+## KORAK 12 — PRODUKCIJA + EU KAMPANJA
+**Cilj:** Vrata otvorena, sustav drži, EU tržište.
+```
+[ ] Automatski onboarding (bez ručne asistencije)
+[ ] Pricing aktiviran (18 planova)
+[ ] Viskovic Bau DE referenca aktivna
+[ ] PR: "Made in Croatia, #1 ERP small business EU"
+[ ] LinkedIn kampanja s konkretnim brojevima
+```
+✅ Gotovo kad: 10 plaćajućih klijenata, 2+ u DE.
+
+---
+
+## GORIVO (praćenje napretka)
+| Korak | Status | Postotak |
+|-------|--------|----------|
+| 1 Inventura | 🔄 AKTIVAN | 0% |
+| 2 Field audit | ⏳ na redu | — |
+| 3 RouteRegistry | ⏳ na redu | — |
+| 4 Middleware | ⏳ na redu | — |
+| 5 504 eliminacija | ⏳ na redu | — |
+| 6 Globalni standardi | 🔄 AKTIVAN (Gemini) | 30% |
+| 7 Test coverage | ⏳ na redu | — |
+| 8 Load test | ⏳ na redu | — |
+| 9 Security | ⏳ na redu | — |
+| 10 Onboarding | ⏳ na redu | — |
+| 11 Beta | ⏳ na redu | — |
+| 12 EU kampanja | ⏳ na redu | — |
+
