@@ -89,3 +89,23 @@ Kršenje = migration bug koji se otkrije tek kad korisnik ne može odabrati jezi
 
 ### PRAVILO 4 — `--preload` zabranjeno u gunicorn service fajlu
 `--preload` zaključava kod u master procesu — template promjene, novi kod, migracije nisu vidljive workerima bez restarta mastera. Zamijenjen s `ExecReload=SIGHUP` + graceful reload.
+
+### PRAVILO 5 — Nikad conditional import unutar try/except bloka
+Ako `except` klauzula referira model (npr. `Company.DoesNotExist`), taj model mora biti importan **prije** `try` bloka — ne uvjetno unutar grana. Python scoping: varijabla definirana samo u jednoj `if` grani nije dostupna u `except`.
+
+```python
+# ZABRANJENO:
+try:
+    if uvjet:
+        from companies.models import Company
+        ...
+except Company.DoesNotExist:  # puca ako uvjet nije bio True
+    ...
+
+# ISPRAVNO:
+from companies.models import Company  # uvijek na vrhu
+try:
+    ...
+except Company.DoesNotExist:
+    ...
+```
