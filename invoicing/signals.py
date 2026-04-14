@@ -55,6 +55,10 @@ def auto_book_invoice(sender, instance, created, **kwargs):
     if not _total or _total <= 0:
         return
 
+    # Skip invoices without company (no accounting context)
+    if instance.company is None:
+        return
+
     try:
         from konto.services_file import book_invoice
 
