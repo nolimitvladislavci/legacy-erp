@@ -138,10 +138,24 @@ def translation_manager(request, lang_code="de"):
         elif action == "auto_translate_module":
             target_module = request.POST.get("target_module", "ALL")
             try:
-                from deep_translator import GoogleTranslator
+                import json
+                import urllib.parse
+                import urllib.request
+
+                def _translate_text(text, src="hr", dest="en"):
+                    """Translate via Google Translate free API (no dependency)."""
+                    url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl={}&tl={}&dt=t&q={}".format(
+                        src, dest, urllib.parse.quote(text)
+                    )
+                    try:
+                        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                        with urllib.request.urlopen(req, timeout=5) as resp:
+                            data = json.loads(resp.read().decode())
+                            return "".join(part[0] for part in data[0] if part[0])
+                    except Exception:
+                        return ""
 
                 po = polib.pofile(po_path)
-                translator = GoogleTranslator(source="hr", target=lang_code)
                 count = 0
                 for entry in po:
                     if not entry.msgstr and entry.msgid:
@@ -157,8 +171,10 @@ def translation_manager(request, lang_code="de"):
                                 continue
 
                         try:
-                            entry.msgstr = translator.translate(entry.msgid)
-                            count += 1
+                            translated = _translate_text(entry.msgid, "hr", lang_code)
+                            if translated:
+                                entry.msgstr = translated
+                                count += 1
                         except Exception:
                             pass
                 po.save()
