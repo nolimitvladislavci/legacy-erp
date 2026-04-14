@@ -25,16 +25,30 @@
 
 ---
 
-## FIELD NAME MISMATCH (KORAK 2 — sljedeće)
+## FIELD NAME MISMATCH (KORAK 2 — ✅ GOTOVO)
 
 | # | Bug | Ispravan field | Gdje greška | Status |
 |---|-----|---------------|-------------|--------|
 | F-01 | `invoice.invoice_number` → `invoice.number` | `Invoice.number` | `client_portal`, `portal_ai_agent`, `portal_accept_trail` | ✅ |
 | F-02 | `invoice.valid_until` → `invoice.validity_date` | `Invoice.validity_date` | `client_portal` view + template | ✅ |
 | F-03 | `POSReceipt.total_amount` → `POSReceipt.total` | `POSReceipt.total` | `core/views.py:1261` | ✅ |
-| F-04 | `Company.is_active` ne postoji | nema — filter po subscriptions | `inventory/prediction_tasks.py` | ✅ |
+| F-04 | `Company.is_active` ne postoji | `Company.objects.all()` | `konto/tasks_vat.py`, `core/nudge_tasks.py`, `maintenance/tasks.py`, `superadmin_ai/ai_ops.py`, `tax_wizard/tasks.py` | ✅ |
 | F-05 | `switch_company` — `Company` conditional import u try/except | mora biti na vrhu funkcije | `accounts/views.py` | ✅ |
-| F-?? | Preostali mismatchi u 89 app-ova | — | KORAK 2 | ⏳ |
+
+### Bilješka o F-04 audit (14.04.2026.)
+Sistematski scan pronašao **jedini preostali bug**: `tax_wizard/tasks.py:225`.
+Ostali fajlovi (konto, nudge, maintenance, pos, limit_connect_ai, superadmin_ai) su bili već ispravljeni
+ili koriste `is_active=True` na modelima koji to polje imaju:
+- `POSTerminal.is_active` ✓ (pos modeli)
+- `InventoryItem.is_active` ✓ (inventory modeli)
+- `POSCashier.is_active` ✓ (pos modeli)
+- `AIAgentMission.is_active` ✓ (limit_connect_ai modeli)
+- `CompanySubscription.is_active` ✓ (subscriptions modeli)
+- `User.is_active` ✓ (Django auth)
+- `CompanyMembership.is_active` ✓ (accounts modeli)
+- `invoice_number` reference → sve na `ERacun` modelu koji TO polje IMA ✓
+
+**Grep provjera: 0 rezultata za `Company.objects.filter(is_active`** ✓
 
 ---
 
@@ -86,15 +100,3 @@
 | I-03 | `systemctl reload` umjesto `restart` u CI/CD | ✅ |
 | I-04 | 58k notifikacija → memory pressure | ✅ 30k obrisano |
 | I-05 | HMAC na QR endpoint | ✅ |
-
----
-
-## PREOSTALO ZA KORAK 2
-
-```bash
-# Sistemski prolaz field mismatch — pokrenuti:
-grep -rn "\.invoice_number\|\.valid_until\|\.is_active" \
-  /var/www/fina-connect/ --include="*.py" --include="*.html" \
-  | grep -v "venv\|backup\|migration" | grep -v "User\.is_active\|InvoiceItem\|CompanyBranch"
-```
-

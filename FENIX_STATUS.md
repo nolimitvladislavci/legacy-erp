@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-13 (Dan 47), commit abdfe6fa + val5
+> Zadnji update: 2026-04-14 (Dan 48), commit efe849a3 — KORAK 2 field audit ✅
 
 ## OCJENE
 
@@ -288,8 +288,8 @@ Cilj: coverage > 40% na pos/, invoicing/, accounts/
 | Korak | Status | Postotak |
 |-------|--------|----------|
 | 1 Inventura | ✅ GOTOVO | 100% |
-| 2 Field audit | 🔄 AKTIVAN | 0% |
-| 3 RouteRegistry | ⏳ na redu | — |
+| 2 Field audit | ✅ GOTOVO | 100% |
+| 3 RouteRegistry | 🔄 AKTIVAN | 0% |
 | 4 Middleware | ⏳ na redu | — |
 | 5 504 eliminacija | ⏳ na redu | — |
 | 6 Globalni standardi | 🔄 AKTIVAN (Gemini) | 30% |
