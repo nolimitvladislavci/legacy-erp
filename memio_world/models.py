@@ -692,3 +692,188 @@ class MemoryGuard(models.Model):
 
     def __str__(self):
         return f"{self.get_action_display()}: {self.content_type}#{self.content_id}"
+
+
+# ════════════════════════════════════════════════════════════════
+# AS #1: "LINGUISTIC TIME-MACHINE" — Čuvar izumirućih dijalekata
+# ════════════════════════════════════════════════════════════════
+
+
+class DialectMap(models.Model):
+    """Semantička mreža: moderan jezik ↔ bakin dijalekt.
+
+    Kad dijete sluša VoiceLegacy snimku i baka kaže "šogor" ili "fijaker"
+    ili "gomboc" — sustav nenametljivo objašnjava kroz mini-igru.
+
+    EU adut: očuvanje lingvističke raznolikosti Europe.
+    Svaki dijalekt je jezik koji umire — mi ga digitaliziramo.
+    """
+
+    DIALECT_FAMILIES = [
+        # Hrvatski
+        ("stokavski", "Štokavski"),
+        ("kajkavski", "Kajkavski"),
+        ("cakavski", "Čakavski"),
+        ("slavonski", "Slavonski"),
+        ("dalmatinski", "Dalmatinski"),
+        ("zagorski", "Zagorski"),
+        # Njemački
+        ("schwabisch", "Schwäbisch"),
+        ("bayerisch", "Bayerisch"),
+        ("plattdeutsch", "Plattdeutsch"),
+        ("osterreichisch", "Österreichisch"),
+        # Ostali EU
+        ("siciliano", "Siciliano (IT)"),
+        ("scots", "Scots (UK)"),
+        ("breton", "Breton (FR)"),
+        ("basque", "Euskara (ES)"),
+        ("sami", "Sámi (FI/NO/SE)"),
+        ("other", "Ostalo"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    dialect = models.CharField(max_length=20, choices=DIALECT_FAMILIES)
+    word_original = models.CharField(max_length=100, help_text="Riječ na dijalektu (npr. šogor)")
+    word_standard = models.CharField(max_length=100, help_text="Standardni oblik (npr. šurjak / Schwager)")
+    word_english = models.CharField(max_length=100, blank=True, help_text="Engleski (brother-in-law)")
+    meaning = models.TextField(help_text="Objašnjenje prilagođeno djeci")
+    example_sentence = models.TextField(blank=True, help_text="Primjer u rečenici na dijalektu")
+    audio_pronunciation = models.FileField(upload_to="world/dialect/", null=True, blank=True)
+    region = models.CharField(max_length=100, blank=True, help_text="Npr. Baranja, Zagorje, Schwaben")
+    is_archaic = models.BooleanField(default=False, help_text="Riječ koja se više ne koristi aktivno")
+    era_estimate = models.CharField(max_length=50, blank=True, help_text="Npr. '19. st.', 'predratno'")
+    # Gamification
+    fun_fact = models.TextField(blank=True, help_text="Zabavna činjenica za djecu")
+    related_game = models.ForeignKey(
+        "TraditionalGame",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Igra u kojoj se koristi ova riječ",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_dialect_map"
+        ordering = ["dialect", "word_original"]
+        unique_together = [("dialect", "word_original")]
+
+    def __str__(self):
+        return f"{self.word_original} → {self.word_standard} ({self.get_dialect_display()})"
+
+
+# ════════════════════════════════════════════════════════════════
+# AS #2: "BIO-METRIC LULLABY" — Nježnost kao algoritam
+# ════════════════════════════════════════════════════════════════
+
+
+class LullabySession(models.Model):
+    """Adaptivna uspavanka — tempo se prilagođava djetetu.
+
+    Sustav NE koristi kameru/mikrofon bez pristanka.
+    Koristi samo: tempo interakcije (koliko brzo dijete tapka),
+    vrijeme od zadnjeg dodira (zaspalo?), ambient light sensor (mrak=spava).
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="lullaby_sessions")
+    story = models.ForeignKey(StoryBook, null=True, blank=True, on_delete=models.SET_NULL)
+    voice = models.ForeignKey(
+        VoiceLegacy, null=True, blank=True, on_delete=models.SET_NULL, help_text="Bakin glas koji čita (ako postoji)"
+    )
+    started_at = models.DateTimeField(auto_now_add=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    # Adaptivni parametri
+    initial_tempo = models.FloatField(default=1.0, help_text="Početna brzina čitanja (1.0 = normalna)")
+    final_tempo = models.FloatField(default=0.7, help_text="Završna brzina (usporeno)")
+    volume_curve = models.JSONField(default=list, blank=True, help_text="Krivulja glasnoće kroz sesiju")
+    # Detekcija stanja (bez kamere/mikrofona)
+    last_interaction_seconds = models.PositiveIntegerField(
+        default=0, help_text="Sekundi od zadnjeg dodira ekrana (proxy za 'zaspalo')"
+    )
+    ambient_light_lux = models.FloatField(null=True, blank=True, help_text="Osvjetljenje (ako dopušteno)")
+    # Ishod
+    fell_asleep = models.BooleanField(null=True, help_text="Roditelj potvrdi: je li zaspalo")
+    parent_rating = models.PositiveSmallIntegerField(null=True, help_text="1-5 zvjezdica")
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_lullaby_session"
+        ordering = ["-started_at"]
+
+    def __str__(self):
+        story_name = self.story.title if self.story else "—"
+        return f"Uspavanka: {self.child.name} — {story_name}"
+
+
+# ════════════════════════════════════════════════════════════════
+# JOKER: "HERITAGE ORACLE" — Krug Života kroz 3 platforme
+# ════════════════════════════════════════════════════════════════
+
+
+class HeritageOracle(models.Model):
+    """Joker Agent: povezuje djetinjstvo, obitelj i rad u neraskidivu priču.
+
+    Na 18. rođendan, Oracle dešifrira rane zapise i kreira "Mapu Porijekla":
+      - memio.world: sjećanja, priče, kapsule
+      - memio.pet: prvi pas, odgovornost, Dugini Most
+      - memio.farm: djedova farma, stablo posađeno davno
+
+    Krug (Riječ br. 12): dijete čuje priču → odraste → priča svom djetetu.
+    """
+
+    ORACLE_STATUS = [
+        ("collecting", "Skuplja fragmente"),
+        ("sealed", "Zapečaćeno — čeka otvaranje"),
+        ("unlocking", "U procesu otključavanja"),
+        ("revealed", "Otkriveno — Mapa Porijekla generirana"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.OneToOneField(ChildProfile, on_delete=models.CASCADE, related_name="heritage_oracle")
+    status = models.CharField(max_length=15, choices=ORACLE_STATUS, default="collecting")
+    unlock_age = models.PositiveSmallIntegerField(default=18, help_text="Dob kad se otvara (default 18)")
+
+    # Cross-platform fragmenti (UUID reference, ne FK jer su u drugim bazama)
+    world_fragments = models.JSONField(
+        default=list, blank=True, help_text="[{type:'memory', id:'uuid', title:'...', date:'...'}, ...]"
+    )
+    pet_fragments = models.JSONField(
+        default=list, blank=True, help_text="[{type:'first_pet', chip:'...', name:'Rex', memorial:true}, ...]"
+    )
+    farm_fragments = models.JSONField(
+        default=list, blank=True, help_text="[{type:'grandpa_farm', animal_uuid:'...', tree_planted:'2026'}, ...]"
+    )
+
+    # Generirana Mapa Porijekla
+    heritage_map = WorldEncryptedField(blank=True, help_text="AI-generirana priča života (enkriptirano do otvaranja)")
+    heritage_map_generated_at = models.DateTimeField(null=True, blank=True)
+
+    # Emocionalni profil (iz EthicalSession podataka)
+    personality_mosaic = models.JSONField(
+        default=dict, blank=True, help_text="Mozaik interesa: {igre:40%, priče:30%, učenje:20%, kreativnost:10%}"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    unlocked_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_heritage_oracle"
+
+    def __str__(self):
+        return f"Oracle: {self.child.name} — {self.get_status_display()} (unlock@{self.unlock_age})"
+
+    @property
+    def years_until_unlock(self):
+        if not self.child.date_of_birth:
+            return None
+        from datetime import date
+
+        age = (date.today() - self.child.date_of_birth).days // 365
+        return max(0, self.unlock_age - age)
+
+    @property
+    def total_fragments(self):
+        return len(self.world_fragments) + len(self.pet_fragments) + len(self.farm_fragments)
