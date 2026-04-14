@@ -1,4 +1,14 @@
 """
+DeepSeek — dva načina pristupa:
+1. DIREKTNI API (za kod, zadatke bez klijentskih podataka) — odmah dostupan
+2. AWS Bedrock eu-central-1 (za klijentske podatke, GDPR) — od sutra
+
+GDPR pravilo:
+  - Direktni API → SAMO anonimni kod, nikad OIB/IBAN/osobni podaci
+  - Bedrock API → sve, uključujući klijentske dokumente
+"""
+
+"""
 DeepSeek via AWS Bedrock — GDPR compliant (eu-central-1).
 Koristi se umjesto direktnog DeepSeek API-ja.
 
@@ -219,3 +229,91 @@ def devstral_code_review(code: str, context: str = "") -> str:
         max_tokens=800,
         temperature=0.2,
     )
+
+
+# ── Direktni DeepSeek API (OpenAI-compatible) ─────────────────────────────────
+# Koristiti SAMO za: generiranje testova, analiza koda, Trojstvo za tehničke zadatke
+# NIKAD za: OIB, IBAN, ime klijenta, sadržaj faktura
+
+
+def deepseek_direct(
+    prompt: str,
+    system: str = "",
+    model: str = "deepseek-chat",
+    max_tokens: int = 1000,
+    temperature: float = 0.3,
+) -> str:
+    """
+    DeepSeek direktni API — OpenAI compatible.
+    Samo za zadatke bez klijentskih podataka (kod, testovi, analiza strukture).
+    """
+    from django.conf import settings as dj_settings
+
+    api_key = getattr(dj_settings, "DEEPSEEK_API_KEY", "")
+    if not api_key:
+        logger.warning("DEEPSEEK_API_KEY nije postavljen")
+        return _fallback_to_haiku(prompt, system, max_tokens)
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(
+            api_key=api_key,
+            base_url="https://api.deepseek.com",
+        )
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        logger.error("DeepSeek direktni API error: %s", e)
+        return _fallback_to_haiku(prompt, system, max_tokens)
+
+
+def deepseek_reasoner(prompt: str, system: str = "", max_tokens: int = 2000) -> str:
+    """
+    DeepSeek-R1 (reasoner) — za kompleksne logičke zadatke.
+    Sporiji, ali reasoning-first arhitektura.
+    Samo za zadatke bez klijentskih podataka.
+    """
+    return deepseek_direct(
+        prompt=prompt,
+        system=system,
+        model="deepseek-reasoner",
+        max_tokens=max_tokens,
+        temperature=0.1,
+    )
+
+
+def deepseek_auto(
+    prompt: str,
+    system: str = "",
+    max_tokens: int = 1000,
+    has_client_data: bool = False,
+) -> str:
+    """
+    Automatski odabir: Bedrock (klijentski podaci) ili direktni API (kod).
+    Ovo je preporučena funkcija za sve module.
+
+    Args:
+        prompt: Upit
+        system: System prompt
+        max_tokens: Max tokena
+        has_client_data: True = sadrži OIB/IBAN/osobne podatke → koristi Bedrock
+    """
+    if has_client_data:
+        # Klijentski podaci → samo Bedrock (EU hosting)
+        if deepseek_available():
+            return deepseek_chat(prompt, system=system, max_tokens=max_tokens)
+        else:
+            # Fallback na Claude ako Bedrock nije dostupan
+            return _fallback_to_haiku(prompt, system, max_tokens)
+    else:
+        # Kod/analiza → direktni API
+        return deepseek_direct(prompt, system=system, max_tokens=max_tokens)
