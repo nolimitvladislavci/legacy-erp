@@ -128,6 +128,10 @@ def dashboard_router(request):
     # Route by role
     role = profile.role
 
+    # Umbrella admin viewing a child company → company_dashboard (not umbrella loop)
+    if request.session.get("umbrella_as_company"):
+        return redirect("company_dashboard")
+
     # Umbrella admins → umbrella dashboard (not POS)
     if role in ("company_admin", "tenant_admin") and profile.company and profile.company.is_umbrella:
         return redirect("umbrella_dashboard")
@@ -558,7 +562,16 @@ def umbrella_dashboard(request):
 
     User = get_user_model()
 
-    company = get_user_company(request)
+    # If user is in umbrella_as_company mode, use their HOME company (the actual umbrella)
+    umbrella_home_id = request.session.get("umbrella_home_company")
+    if umbrella_home_id:
+        try:
+            company = Company.objects.get(pk=umbrella_home_id)
+        except Company.DoesNotExist:
+            company = get_user_company(request)
+    else:
+        company = get_user_company(request)
+
     if not company:
         messages.error(request, _("Nemate dodijeljenu tvrtku. Obratite se administratoru za pristup."))
         return redirect("dashboard")
@@ -572,6 +585,9 @@ def umbrella_dashboard(request):
             pass
 
     if not company.is_umbrella and not request.user.is_superuser:
+        # Clear stale umbrella session to prevent redirect loops
+        for key in ("umbrella_as_company", "umbrella_home_company", "umbrella_home_name"):
+            request.session.pop(key, None)
         messages.warning(request, _("Vasa tvrtka nije umbrella tvrtka."))
         return redirect("dashboard")
 
