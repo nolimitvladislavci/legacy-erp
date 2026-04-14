@@ -5,114 +5,195 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Skeniraj racun | LIMIT Connect</title>
 <style>
+:root{--gold:#C9A84C;--bg:#0a0a0a;--bg-card:#151515;--text:#e0e0e0;--text-dim:#888;--green:#4CAF50;--red:#f44336}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
-.top{padding:12px 16px;background:var(--bg-card);border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between}
-.top .logo{color:var(--gold);font-weight:700;font-size:.95rem}
-.top .status{font-size:var(--font-size-sm);color:var(--text-dim)}
-.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem}
-.cam-btn{background:var(--gold);color:var(--text);border:none;padding:16px 32px;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:1rem}
-.cam-btn i{font-size:1.3rem}
-.hint{color:var(--text-dim);font-size:.82rem;text-align:center;max-width:280px;line-height:1.4}
-.preview{display:none;text-align:center;width:100%}
-.preview img{max-width:90%;max-height:50vh;border-radius:8px;border:2px solid var(--gold);margin-bottom:1rem}
-.preview-actions{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
-.btn-send{background:var(--gold);color:var(--text);border:none;padding:14px 28px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer}
-.btn-again{background:transparent;border:1px solid #333;color:var(--text-muted);padding:14px 28px;border-radius:10px;font-size:1rem;cursor:pointer}
-.done{display:none;text-align:center;padding:2rem}
-.done .check{font-size:3rem;margin-bottom:1rem}
-.done h2{color:var(--green);font-size:1.2rem;margin-bottom:.5rem}
-.done p{color:var(--text-muted);font-size:.88rem}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100dvh;display:flex;flex-direction:column}
+.top{padding:16px 20px;background:var(--bg-card);border-bottom:1px solid #333;text-align:center}
+.top .logo{color:var(--gold);font-weight:700;font-size:1rem;letter-spacing:.5px}
+.top .company{font-size:1.1rem;font-weight:600;margin-top:6px;color:var(--text)}
+.top .label{font-size:.85rem;color:var(--text-dim);margin-top:2px}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;gap:1.5rem}
+.cam-btn{
+  background:var(--gold);color:#0a0a0a;border:none;
+  width:100%;max-width:360px;padding:24px 32px;
+  border-radius:16px;font-size:1.4rem;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;
+  box-shadow:0 4px 20px rgba(201,168,76,.3);
+  transition:transform .1s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cam-btn:active{transform:scale(.97)}
+.cam-btn svg{width:32px;height:32px}
+.hint{color:var(--text-dim);font-size:.9rem;text-align:center;max-width:300px;line-height:1.5}
+.preview{display:none;text-align:center;width:100%;padding:1rem}
+.preview img{max-width:90%;max-height:45vh;border-radius:12px;border:2px solid var(--gold);margin-bottom:1.2rem}
+.preview-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-send{background:var(--gold);color:#0a0a0a;border:none;padding:16px 32px;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;min-width:140px}
+.btn-again{background:transparent;border:1px solid #444;color:var(--text-dim);padding:16px 28px;border-radius:12px;font-size:1rem;cursor:pointer}
+.done{display:none;text-align:center;padding:2rem 1.5rem}
+.done .check{font-size:4rem;margin-bottom:1rem;color:var(--green)}
+.done h2{color:var(--green);font-size:1.3rem;margin-bottom:.5rem}
+.done .ocr-info{color:var(--text);font-size:1rem;margin:.5rem 0;line-height:1.6}
+.done .ocr-info strong{color:var(--gold)}
+.done p{color:var(--text-dim);font-size:.88rem;margin-top:.5rem}
+.done .archive-num{color:var(--gold);font-size:.85rem;margin-top:.3rem}
 .uploading{display:none;text-align:center;padding:2rem}
-.spinner{width:40px;height:40px;border:3px solid #333;border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+.spinner{width:48px;height:48px;border:3px solid #333;border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1.2rem}
+.uploading-text{color:var(--gold);font-size:1.1rem;font-weight:600}
 @keyframes spin{to{transform:rotate(360deg)}}
 input[type=file]{display:none}
+.error-msg{display:none;text-align:center;padding:2rem}
+.error-msg .icon{font-size:3rem;margin-bottom:1rem}
+.error-msg h2{color:var(--red);font-size:1.2rem;margin-bottom:.5rem}
+.counter{color:var(--text-dim);font-size:.82rem;margin-top:auto;padding:12px;text-align:center}
 </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
 <div class="top">
-  <span class="logo"><i class="fas fa-camera"></i> LIMIT Connect</span>
-  <span class="status" id="statusText">Spremno za skeniranje</span>
+  <div class="logo">LIMIT Connect</div>
+  <div class="company">{{ company_name }}</div>
+  {% if label %}<div class="label">{{ label }}</div>{% endif %}
 </div>
 
 <div class="main" id="mainArea">
-  <button type="button" class="cam-btn" onclick="document.getElementById('camInput').click()">
-    <i class="fas fa-camera"></i> Slikaj racun
+  <button type="button" class="cam-btn" id="camBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+    {% trans "Slikaj racun" %}
   </button>
   <div class="hint">
-    Slikajte racun kamerom. Slika ce se automatski poslati na racunalo.
+    {% trans "Slikajte racun kamerom ili odaberite datoteku. Dokument se automatski arhivira." %}
   </div>
 </div>
 
 <div class="preview" id="previewArea">
   <img id="previewImg" alt="preview">
   <div class="preview-actions">
-    <button type="button" class="btn-send" onclick="sendPhoto()"><i class="fas fa-paper-plane"></i> Posalji</button>
-    <button type="button" class="btn-again" onclick="resetScan()"><i class="fas fa-redo"></i> Ponovi</button>
+    <button type="button" class="btn-send" id="sendBtn">{% trans "Arhiviraj" %}</button>
+    <button type="button" class="btn-again" onclick="resetScan()">{% trans "Ponovi" %}</button>
   </div>
 </div>
 
 <div class="uploading" id="uploadingArea">
   <div class="spinner"></div>
-  <div class="fx-fw-semibold fx-text-gold">Saljem sliku...</div>
+  <div class="uploading-text">{% trans "Arhiviranje..." %}</div>
 </div>
 
 <div class="done" id="doneArea">
   <div class="check">&#10004;</div>
-  <h2>Slika poslana!</h2>
-  <p>Mozete zatvoriti ovu stranicu.<br>Konverzija se odvija na racunalu.</p>
-  <button type="button" class="btn-again mt-3" onclick="resetScan()"><i class="fas fa-camera"></i> Slikaj jos jedan</button>
+  <h2>{% trans "Arhivirano" %} &#10003;</h2>
+  <div class="ocr-info" id="ocrInfo"></div>
+  <div class="archive-num" id="archiveNum"></div>
+  <p>{% trans "Dokument je spremljen u digitalnu arhivu." %}</p>
+  <button type="button" class="cam-btn" style="margin-top:1.5rem;font-size:1.1rem;padding:18px 28px" onclick="resetScan()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+    {% trans "Slikaj jos jedan" %}
+  </button>
 </div>
 
-<input type="file" id="camInput" accept="image/*" capture="environment">
+<div class="error-msg" id="errorArea">
+  <div class="icon">&#9888;</div>
+  <h2 id="errorText">{% trans "Greska" %}</h2>
+  <button type="button" class="cam-btn" style="margin-top:1.5rem;font-size:1rem;padding:16px 24px" onclick="resetScan()">{% trans "Pokusaj ponovo" %}</button>
+</div>
 
-<script>
-(function(){
-  var origBtn = document.querySelector('.cam-btn');
-  if(origBtn && window.FenixCamera){
-    origBtn.onclick = function(e){
-      e.preventDefault();
-      FenixCamera.quick('fenix-scan-preview',{onReady:function(r){
-        var byteStr = atob(r.b64);
-        var ab = new ArrayBuffer(byteStr.length);
-        var ia = new Uint8Array(ab);
-        for(var i=0;i<byteStr.length;i++) ia[i]=byteStr.charCodeAt(i);
-        _file = new Blob([ab],{type:'image/jpeg'});
-        _file.name = r.filename;
-        document.getElementById('previewImg').src = r.dataUrl;
-        document.getElementById('mainArea').style.display = 'none';
-        document.getElementById('previewArea').style.display = 'block';
-        document.getElementById('statusText').textContent = 'Pregled slike';
-      }});
-    };
-    var pdiv = document.createElement('div');
-    pdiv.id = 'fenix-scan-preview';
-    pdiv.style.display = 'none';
-    document.querySelector('.main').appendChild(pdiv);
-  }
-})();
-</script>
+<div class="counter" id="counter"></div>
+
+<input type="file" id="camInput" accept="image/*,application/pdf" capture="environment">
 
 <script>
 var TOKEN = '{{ token }}';
 var _file = null;
+var _uploadCount = 0;
+
+document.getElementById('camBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  document.getElementById('camInput').click();
+});
 
 document.getElementById('camInput').addEventListener('change', function() {
   if (!this.files[0]) return;
   _file = this.files[0];
+  if (_file.type === 'application/pdf') {
+    document.getElementById('previewImg').src = '';
+    document.getElementById('previewImg').alt = _file.name;
+    document.getElementById('previewImg').style.display = 'none';
+    show('previewArea');
+    hide('mainArea');
+    return;
+  }
   var reader = new FileReader();
   reader.onload = function(e) {
-    document.getElementById('previewImg').src = e.target.result;
-    document.getElementById('mainArea').style.display = 'none';
-    document.getElementById('previewArea').style.display = 'block';
-    document.getElementById('statusText').textContent = 'Pregled slike';
+    var img = document.getElementById('previewImg');
+    img.src = e.target.result;
+    img.style.display = '';
+    show('previewArea');
+    hide('mainArea');
   };
   reader.readAsDataURL(_file);
 });
 
-// Android fallback
+document.getElementById('sendBtn').addEventListener('click', sendPhoto);
+
+function sendPhoto() {
+  if (!_file) return;
+  hide('previewArea');
+  show('uploadingArea');
+
+  var fd = new FormData();
+  fd.append('file', _file);
+
+  fetch(location.pathname + 'upload/', {
+    method: 'POST',
+    body: fd,
+  })
+  .then(function(r) { return r.json().then(function(d) { return {status: r.status, data: d}; }); })
+  .then(function(r) {
+    hide('uploadingArea');
+    if (r.data.ok) {
+      _uploadCount++;
+      var info = '';
+      if (r.data.partner) info += '<strong>' + esc(r.data.partner) + '</strong><br>';
+      if (r.data.amount && r.data.amount !== '' && r.data.amount !== '0') info += r.data.amount + ' EUR<br>';
+      document.getElementById('ocrInfo').innerHTML = info;
+      if (r.data.archive_number) {
+        document.getElementById('archiveNum').textContent = r.data.archive_number;
+      }
+      document.getElementById('counter').textContent = _uploadCount + ' dokument(a) arhivirano';
+      show('doneArea');
+    } else {
+      document.getElementById('errorText').textContent = r.data.error || 'Greska pri slanju';
+      show('errorArea');
+    }
+  })
+  .catch(function(e) {
+    hide('uploadingArea');
+    document.getElementById('errorText').textContent = 'Mreza nedostupna: ' + e.message;
+    show('errorArea');
+  });
+}
+
+function resetScan() {
+  _file = null;
+  document.getElementById('camInput').value = '';
+  show('mainArea');
+  hide('previewArea');
+  hide('uploadingArea');
+  hide('doneArea');
+  hide('errorArea');
+}
+
+function show(id) { document.getElementById(id).style.display = id === 'mainArea' ? 'flex' : 'block'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// Android back-from-camera fix
 window.addEventListener('pageshow', function() {
   var cam = document.getElementById('camInput');
   if (cam.files && cam.files[0] && !_file) {
@@ -120,55 +201,11 @@ window.addEventListener('pageshow', function() {
     var reader = new FileReader();
     reader.onload = function(e) {
       document.getElementById('previewImg').src = e.target.result;
-      document.getElementById('mainArea').style.display = 'none';
-      document.getElementById('previewArea').style.display = 'block';
+      show('previewArea');
+      hide('mainArea');
     };
     reader.readAsDataURL(_file);
   }
 });
-
-function sendPhoto() {
-  if (!_file) return;
-  document.getElementById('previewArea').style.display = 'none';
-  document.getElementById('uploadingArea').style.display = 'block';
-  document.getElementById('statusText').textContent = 'Saljem...';
-
-  var fd = new FormData();
-  fd.append('file', _file);
-
-  var csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
-  if (csrfMatch) fd.append('csrfmiddlewaretoken', csrfMatch[1]);
-
-  fetch('/scan/' + TOKEN + '/upload/', {
-    method: 'POST',
-    body: fd,
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    document.getElementById('uploadingArea').style.display = 'none';
-    if (data.ok) {
-      document.getElementById('doneArea').style.display = 'block';
-      document.getElementById('statusText').textContent = 'Poslano!';
-    } else {
-      fenixToast(data.error || 'Greska pri slanju', 'error');
-      resetScan();
-    }
-  })
-  .catch(function(e) {
-    document.getElementById('uploadingArea').style.display = 'none';
-    fenixToast('Greska: ' + e.message, 'error');
-    resetScan();
-  });
-}
-
-function resetScan() {
-  _file = null;
-  document.getElementById('camInput').value = '';
-  document.getElementById('mainArea').style.display = 'flex';
-  document.getElementById('previewArea').style.display = 'none';
-  document.getElementById('uploadingArea').style.display = 'none';
-  document.getElementById('doneArea').style.display = 'none';
-  document.getElementById('statusText').textContent = 'Spremno za skeniranje';
-}
 </script>
 </body></html>

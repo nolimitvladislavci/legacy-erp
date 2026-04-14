@@ -930,3 +930,48 @@ class ScanBatchImage(models.Model):
     def __str__(self):
         group = f" [dok.{self.document_group}]" if self.document_group else ""
         return f"Slika #{self.order}{group} — batch #{self.batch_id}"
+
+
+class ScanToken(models.Model):
+    """
+    Trajni QR/link token za skeniranje dokumenata.
+    Komitent dobije link → slika račun → ide u arhivu Konjika.
+    Bez logina. Bez registracije. Jedan klik.
+    """
+
+    token = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="scan_tokens")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="created_scan_tokens"
+    )
+    label = models.CharField(max_length=100, blank=True, help_text='npr. "Gašić Ivan — gorivo"')
+    expires_at = models.DateTimeField(null=True, blank=True, help_text="NULL = ne istječe")
+    max_uses = models.IntegerField(default=0, help_text="0 = neograničeno")
+    use_count = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = CompanyManager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Scan token"
+        verbose_name_plural = "Scan tokeni"
+
+    def __str__(self):
+        return f"{self.company.name} — {self.label or str(self.token)[:8]}"
+
+    def is_valid(self):
+        from django.utils import timezone
+
+        if not self.is_active:
+            return False
+        if self.expires_at and timezone.now() > self.expires_at:
+            return False
+        if self.max_uses > 0 and self.use_count >= self.max_uses:
+            return False
+        return True
+
+    def use(self):
+        """Inkrement use_count atomično."""
+        ScanToken.objects.filter(pk=self.pk).update(use_count=models.F("use_count") + 1)

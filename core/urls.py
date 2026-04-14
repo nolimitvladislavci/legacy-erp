@@ -544,7 +544,7 @@ urlpatterns += i18n_patterns(
         lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/letak_a4_korpas.html"),
     ),
     path(
-        "scan/<path:token>/",
+        "scan/<str:token>/",
         include(
             [
                 path(

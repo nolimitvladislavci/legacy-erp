@@ -1,133 +1,307 @@
-"""Scan Views — QR scan + Scan Batch (Enterprise Architecture)."""
+"""Scan Views — ScanToken mobile portal + QR scan + Scan Batch.
 
-import json
+ARHIVA-1: Komitent dobije link -> otvori na mobitelu -> slika racun -> ArhivaEntry.
+Bez logina. Bez instalacije. Jedan gumb.
+"""
+
 import logging
-import uuid as _uuid
+from datetime import date as _date
+from decimal import Decimal
 
-from core.qr_views import qr_base64 as _qr_b64
-import redis as _redis
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.csrf import csrf_exempt as _csrf_exempt
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from core.company_utils import get_user_company
 
-from .models import ScanBatch, ScanBatchImage
+from .models import ArhivaEntry, ScanBatch, ScanBatchImage, ScanToken
+from .storage_backends import store_document
 
 logger = logging.getLogger(__name__)
 
 
 # ================================================================
-# QR SCAN — Remote skeniranje s mobitela
+# SCAN TOKEN — Persistent mobile scan portal (ARHIVA-1)
 # ================================================================
 
 
-def _get_redis():
-    return _redis.Redis(host="127.0.0.1", port=6379, db=2, decode_responses=False)
+def scan_mobile_page(request, token):
+    """GET /scan/{token}/ — Mobile kamera sucelje. PUBLIC, bez logina."""
+    scan_token = ScanToken.objects.select_related("company").filter(token=token).first()
+    if not scan_token or not scan_token.is_valid():
+        return render(
+            request,
+            "documents/scan_expired.html",
+            {
+                "reason": "invalid" if not scan_token else "expired",
+            },
+        )
+    return render(
+        request,
+        "documents/scan_mobile.html",
+        {
+            "token": str(scan_token.token),
+            "company_name": scan_token.company.name,
+            "label": scan_token.label or "",
+            "direct_upload": True,
+        },
+    )
 
 
-@login_required
-def scan_create_token(request):
-    token = str(_uuid.uuid4())
-    r = _get_redis()
-    company = get_user_company(request)
-    r.setex("scan:%s" % token, 600, ("%d:%d" % (company.id if company else 0, request.user.id)).encode())
-    from django.urls import reverse
+@csrf_exempt
+def scan_upload(request, token):
+    """POST /scan/{token}/upload/ — Prima sliku, kreira ArhivaEntry. PUBLIC."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
-    url = request.build_absolute_uri(reverse("documents:scan_mobile_page", args=[token]))
+    scan_token = ScanToken.objects.select_related("company").filter(token=token).first()
+    if not scan_token or not scan_token.is_valid():
+        return JsonResponse({"error": "Token nije valjan ili je istekao"}, status=410)
+
+    uploaded = request.FILES.get("file")
+    if not uploaded:
+        return JsonResponse({"error": "Nema datoteke"}, status=400)
+
+    allowed_types = ("image/", "application/pdf")
+    if not any(uploaded.content_type.startswith(t) for t in allowed_types):
+        return JsonResponse({"error": "Samo slike ili PDF"}, status=400)
+
+    file_bytes = uploaded.read()
+    if len(file_bytes) > 10 * 1024 * 1024:
+        return JsonResponse({"error": "Max 10MB"}, status=400)
+
+    company = scan_token.company
+    is_image = uploaded.content_type.startswith("image/")
+    is_pdf = uploaded.name.lower().endswith(".pdf")
+
+    # Store file via storage backend
+    try:
+        result = store_document(
+            file_bytes=file_bytes,
+            filename=uploaded.name,
+            company_id=company.id,
+            source_type="receipt_scan",
+        )
+    except Exception:
+        logger.exception("scan_upload: store_document failed for token %s", token)
+        return JsonResponse({"error": "Greska pri spremanju"}, status=500)
+
+    # Create ArhivaEntry
+    try:
+        entry = ArhivaEntry(
+            company=company,
+            source_type="receipt_scan",
+            source_id=result.get("hash", ""),
+            doc_number=uploaded.name,
+            amount=Decimal("0"),
+            currency="EUR",
+            doc_date=_date.today(),
+            file_path=result["path"],
+            has_pdf=is_pdf,
+            has_image=is_image,
+            archived_by=scan_token.created_by,
+            session_key=f"scan_token_{scan_token.pk}",
+            content_category="scan",
+            ai_status="pending",
+        )
+        entry.save()
+    except Exception:
+        logger.exception("scan_upload: ArhivaEntry creation failed for token %s", token)
+        return JsonResponse({"error": "Greska pri arhiviranju"}, status=500)
+
+    # Increment use count
+    scan_token.use()
+
+    # Trigger AI OCR async
+    ocr_result = {}
+    try:
+        from documents.tasks import generate_ai_proposal
+
+        generate_ai_proposal.apply_async(args=[entry.pk], countdown=2)
+    except Exception as e:
+        logger.warning("scan_upload: AI task dispatch failed (non-blocking): %s", e)
+
+    # Inline quick OCR for immediate feedback (if small image)
+    if is_image and len(file_bytes) < 3_700_000:
+        try:
+            import base64
+
+            from core.views_scan import _build_content, _call_anthropic, _parse_json, _post_process
+
+            b64 = base64.b64encode(file_bytes).decode()
+            content = _build_content([b64], "invoice")
+            raw = _call_anthropic(content, max_tokens=400)
+            fields = _parse_json(raw)
+            fields = _post_process(fields, "invoice")
+            ocr_result = fields
+
+            # Update entry with OCR data
+            update_fields = []
+            if fields.get("dobavljac"):
+                entry.partner_name = fields["dobavljac"]
+                entry.doc_number = fields.get("broj_racuna") or uploaded.name
+                update_fields.extend(["partner_name", "doc_number"])
+            if fields.get("iznos_ukupno"):
+                try:
+                    entry.amount = Decimal(str(fields["iznos_ukupno"]))
+                    update_fields.append("amount")
+                except Exception:
+                    pass
+            if fields.get("datum"):
+                try:
+                    entry.doc_date = fields["datum"]
+                    update_fields.append("doc_date")
+                except Exception:
+                    pass
+            if update_fields:
+                entry.save(update_fields=update_fields)
+                logger.info(
+                    "scan_upload: OCR ok, partner=%s, amount=%s",
+                    fields.get("dobavljac", "?"),
+                    fields.get("iznos_ukupno", "?"),
+                )
+        except Exception as e:
+            logger.warning("scan_upload: inline OCR failed (non-blocking): %s", e)
+
     return JsonResponse(
         {
-            "token": token,
-            "qr_data": _qr_b64(url, size=200, color="c9a84c", bg="0a0a0a"),
-            "url": url,
-            "expires_in": 600,
+            "ok": True,
+            "message": "Arhivirano ✓",
+            "entry_id": entry.pk,
+            "partner": ocr_result.get("dobavljac", ""),
+            "amount": str(ocr_result.get("iznos_ukupno", "")),
+            "archive_number": entry.archive_number,
         }
     )
 
 
-def scan_mobile_page(request, token):
-    r = _get_redis()
-    if not r.get("scan:%s" % token):
-        return render(request, "documents/scan_expired.html", {})
-    return render(request, "documents/scan_mobile.html", {"token": token})
-
-
-@_csrf_exempt
-def scan_upload(request, token):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST only"}, status=405)
-    r = _get_redis()
-    if not r.get("scan:%s" % token):
-        return JsonResponse({"error": "Token istekao"}, status=410)
-    uploaded = request.FILES.get("file")
-    if not uploaded:
-        return JsonResponse({"error": "Nema datoteke"}, status=400)
-    if not uploaded.content_type.startswith("image/"):
-        return JsonResponse({"error": "Samo slike"}, status=400)
-    file_bytes = uploaded.read()
-    if len(file_bytes) > 10 * 1024 * 1024:
-        return JsonResponse({"error": "Max 10MB"}, status=400)
-    meta = json.dumps({"filename": uploaded.name, "size": len(file_bytes), "content_type": uploaded.content_type})
-    r.setex("scan_img:%s" % token, 300, file_bytes)
-    r.setex("scan_meta:%s" % token, 300, meta.encode())
-    r.setex("scan_ready:%s" % token, 300, b"1")
-    r.delete("scan:%s" % token)
-    return JsonResponse({"ok": True, "message": "Slika primljena!"})
-
-
 @login_required
 def scan_poll(request, token):
-    r = _get_redis()
-    if not r.get("scan_ready:%s" % token):
+    """Poll za status — legacy kompatibilnost. Sada samo vraća entry info."""
+    scan_token = ScanToken.objects.filter(token=token).first()
+    if not scan_token:
+        return JsonResponse({"ready": False, "error": "Token ne postoji"})
+    # Return last entry for this token
+    last_entry = (
+        ArhivaEntry.objects.filter(company=scan_token.company, session_key=f"scan_token_{scan_token.pk}")
+        .order_by("-archived_at")
+        .first()
+    )
+    if not last_entry:
         return JsonResponse({"ready": False})
-    meta_raw = r.get("scan_meta:%s" % token)
-    file_bytes = r.get("scan_img:%s" % token)
-    if not file_bytes or not meta_raw:
-        return JsonResponse({"ready": False})
-    meta = json.loads(meta_raw.decode())
-    company = get_user_company(request)
-    if not company:
-        return JsonResponse({"error": "Nema tvrtke"}, status=400)
-    try:
-        from documents.conversion_service import convert_image_to_xml
-
-        record = convert_image_to_xml(
-            file_bytes=file_bytes, filename=meta.get("filename", "scan.jpg"), company=company, user=request.user
-        )
-        for k in ["scan:%s", "scan_img:%s", "scan_meta:%s", "scan_ready:%s"]:
-            r.delete(k % token)
-        return JsonResponse(
-            {
-                "ready": True,
-                "converted": True,
-                "record_id": str(record.id),
-                "status": record.status,
-                "confidence_score": record.ai_confidence_score,
-                "fields_extracted": record.fields_extracted,
-                "items_extracted": record.items_extracted,
-                "is_valid": record.is_valid,
-                "validation_errors": record.validation_errors,
-                "extracted_data": record.extracted_data,
-                "savings": record.savings_display,
-                "size_reduction_pct": round(record.size_reduction_pct, 1),
-            }
-        )
-    except ImportError as e:
-        return JsonResponse({"ready": True, "converted": False, "error": str(e)})
+    return JsonResponse(
+        {
+            "ready": True,
+            "entry_id": last_entry.pk,
+            "partner": last_entry.partner_name,
+            "amount": str(last_entry.amount),
+            "doc_number": last_entry.doc_number,
+            "ai_status": last_entry.ai_status,
+        }
+    )
 
 
 # ================================================================
-# SCAN BATCH — Enterprise Pipeline (3 klika)
-# Views su TANKI — sva logika u DocumentProcessor
+# TOKEN MANAGEMENT — Kreiranje i upravljanje tokenima
+# ================================================================
+
+
+@login_required
+def scan_create_token(request):
+    """Kreiraj novi ScanToken za firmu. Vrati link + QR."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"error": "Nema tvrtke"}, status=400)
+
+    label = request.POST.get("label", "").strip()
+    expires_days = request.POST.get("expires_days", "")
+    max_uses = int(request.POST.get("max_uses", 0) or 0)
+
+    expires_at = None
+    if expires_days:
+        try:
+            expires_at = timezone.now() + timezone.timedelta(days=int(expires_days))
+        except (ValueError, TypeError):
+            pass
+
+    scan_token = ScanToken.objects.create(
+        company=company,
+        created_by=request.user,
+        label=label,
+        expires_at=expires_at,
+        max_uses=max_uses,
+    )
+
+    url = request.build_absolute_uri(reverse("documents:scan_mobile_page", args=[str(scan_token.token)]))
+
+    from core.qr_views import qr_base64 as _qr_b64
+
+    qr_data = _qr_b64(url, size=200, color="c9a84c", bg="0a0a0a")
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "token": str(scan_token.token),
+            "url": url,
+            "qr_data": qr_data,
+            "label": scan_token.label,
+            "expires_at": scan_token.expires_at.isoformat() if scan_token.expires_at else None,
+        }
+    )
+
+
+@login_required
+def scan_token_list(request):
+    """Lista aktivnih tokena za firmu (JSON)."""
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"tokens": []})
+    tokens = ScanToken.objects.filter(company=company).order_by("-created_at")[:50]
+    return JsonResponse(
+        {
+            "tokens": [
+                {
+                    "token": str(t.token),
+                    "label": t.label,
+                    "use_count": t.use_count,
+                    "is_active": t.is_active,
+                    "is_valid": t.is_valid(),
+                    "created_at": t.created_at.isoformat(),
+                    "expires_at": t.expires_at.isoformat() if t.expires_at else None,
+                    "url": request.build_absolute_uri(reverse("documents:scan_mobile_page", args=[str(t.token)])),
+                }
+                for t in tokens
+            ]
+        }
+    )
+
+
+@login_required
+@require_POST
+def scan_token_toggle(request, token):
+    """Aktiviraj/deaktiviraj token."""
+    company = get_user_company(request)
+    scan_token = get_object_or_404(ScanToken, token=token, company=company)
+    scan_token.is_active = not scan_token.is_active
+    scan_token.save(update_fields=["is_active"])
+    return JsonResponse({"ok": True, "is_active": scan_token.is_active})
+
+
+# ================================================================
+# SCAN BATCH — Enterprise Pipeline (existing, preserved)
 # ================================================================
 
 
 @login_required
 def scan_batch_new(request):
     company = get_user_company(request)
-    # Radnica moze kreirati batch za komitenta iz svog stola
     override_id = request.GET.get("company", "")
     if override_id:
         from accounts.models import CompanyMembership
@@ -152,10 +326,7 @@ def scan_batch_detail(request, pk):
     return render(
         request,
         "documents/scan_batch.html",
-        {
-            "batch": batch,
-            "images": batch.images.order_by("order"),
-        },
+        {"batch": batch, "images": batch.images.order_by("order")},
     )
 
 
@@ -164,27 +335,25 @@ def scan_batch_detail(request, pk):
 def scan_batch_upload(request, pk):
     company = get_user_company(request)
     batch = get_object_or_404(ScanBatch, pk=pk, company=company)
-
     if batch.status != "collecting":
         return JsonResponse({"ok": False, "error": "Batch nije u collecting statusu"}, status=400)
-
     files = request.FILES.getlist("images")
     if not files:
         return JsonResponse({"ok": False, "error": "Nema slika"}, status=400)
-
     current = batch.images.count()
     if current + len(files) > 100:
         return JsonResponse({"ok": False, "error": "Max 100 slika (trenutno %d)" % current}, status=400)
-
     for i, f in enumerate(files):
         ScanBatchImage.objects.create(
-            batch=batch, image=f, order=current + i + 1, original_filename=f.name, file_size_kb=f.size // 1024
+            batch=batch,
+            image=f,
+            order=current + i + 1,
+            original_filename=f.name,
+            file_size_kb=f.size // 1024,
         )
-
     batch.total_images = batch.images.count()
     batch.total_size_kb = sum(img.file_size_kb for img in batch.images.all())
     batch.save(update_fields=["total_images", "total_size_kb", "updated_at"])
-
     return JsonResponse(
         {
             "ok": True,
@@ -201,23 +370,17 @@ def scan_batch_process(request, pk):
     """Klik 2: Pokreni AI analizu. Self-rescheduling, zero blocking."""
     company = get_user_company(request)
     batch = get_object_or_404(ScanBatch, pk=pk, company=company)
-
     if batch.total_images == 0:
         return JsonResponse({"ok": False, "error": "Nema slika"}, status=400)
-
     batch.status = "processing"
     batch.error_message = "Pokrecem AI analizu..."
     batch.save(update_fields=["status", "error_message"])
-
-    # Self-rescheduling task — NEMA time.sleep
     from documents.tasks_scan_gemini import process_scan_chunk
 
     process_scan_chunk.delay(batch.pk, 0, 0, 0)
-
     total = batch.total_images
     chunks = (total + 9) // 10
-    est = max(1, chunks + (chunks - 1))  # obrada + pauze
-
+    est = max(1, chunks + (chunks - 1))
     return JsonResponse(
         {
             "ok": True,
@@ -233,7 +396,6 @@ def scan_batch_status(request, pk):
     """Polling endpoint — delegira na DocumentProcessor."""
     company = get_user_company(request)
     batch = get_object_or_404(ScanBatch, pk=pk, company=company)
-
     from documents.services.document_processor import DocumentProcessor
 
     return JsonResponse(DocumentProcessor.get_summary(batch.pk))
@@ -245,14 +407,11 @@ def scan_batch_archive(request, pk):
     """Klik 3: Async arhiviranje s atomic transactions."""
     company = get_user_company(request)
     batch = get_object_or_404(ScanBatch, pk=pk, company=company)
-
     if batch.status != "ready":
         return JsonResponse({"ok": False, "error": "Batch nije spreman"}, status=400)
-
     from documents.tasks_scan_gemini import archive_scan_batch
 
     archive_scan_batch.delay(batch.pk, request.user.pk)
-
     return JsonResponse(
         {
             "ok": True,

@@ -116,6 +116,7 @@ ROUTE_REGISTRY: dict = {
     "resend_verification": AccessLevel.PUBLIC,
     "public_booking_by_slug": AccessLevel.PUBLIC,
     "scan_mobile": AccessLevel.PUBLIC,
+    "scan_mobile_page": AccessLevel.PUBLIC,
     "scan_upload": AccessLevel.PUBLIC,
     "ai_agent_gateway": AccessLevel.PUBLIC,
     "whatsapp_health": AccessLevel.PUBLIC,
