@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-14 (Dan 48), commit 8327b5ad — ARHIVA-1 ScanToken LIVE ✅
+> Zadnji update: 2026-04-15 (Dan 49), commit 2f2699bf — ARHIVA-2 Magic Link LIVE ✅
 
 ---
 
@@ -14,6 +14,7 @@
 | 2026-04-14 | CC Code | Korak 10 | 9 bugova, 21/21 smoke testovi ✅ | c74c539f |
 | 2026-04-14 | Sonnet | Korak 11 + Arhiva | Beta Konjik. OCR 100%. Arhiva HR-DE plan. Memio kontekst. | c74c539f |
 | 2026-04-14 | Opus CC | ARHIVA-1 | ScanToken model+views+UI+tests, 9/9 pass, LIVE | 8327b5ad |
+| 2026-04-15 | Opus CC | ARHIVA-2 | ArhivaAccessToken, portal, bulk generator, 17/17 tests | 2f2699bf |
 
 ### KONTEKST ZA SLJEDEĆU SESIJU
 ```
@@ -104,7 +105,7 @@ Blokeri:  ARHIVA-1 mora biti live
 | Koraci 1-10 | ✅ | 100% |
 | Korak 11 Beta | 🔄 | 10% |
 | **ARHIVA-1** Mobile Scan | ✅ LIVE | 95% |
-| ARHIVA-2 Magic Link | ⏳ | — |
+| ARHIVA-2 Magic Link | ✅ LIVE | 100% |
 | ARHIVA-3 Network Disk | ⏳ | — |
 | ARHIVA-4 WhatsApp Share | ⏳ | — |
 | ARHIVA-5 WhatsApp-IN | ⏳ | — |
