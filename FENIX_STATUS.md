@@ -338,3 +338,118 @@ Cilj: coverage > 40% na pos/, invoicing/, accounts/
 | 10 Onboarding | ⏳ na redu | — |
 | 11 Beta | ⏳ na redu | — |
 | 12 EU kampanja | ⏳ na redu | — |
+
+---
+
+# PLAN 2 — ZLATNI PRODUKT
+**Donesen: 14.04.2026. | Paralelno s Planom 1**
+
+## KORACI
+
+| Korak | Cilj | Tko | Status |
+|-------|------|-----|--------|
+| A | Multi-tenant sigurnosni napad | CC Code + Gemini | ⏳ |
+| B | Poslovni edge case audit (PDV/FINA/GoBD) | CC Code | ⏳ |
+| C | AI kvaliteta mjerenje (Trojstvo accuracy) | Sonnet + Gemini | ⏳ |
+| D | Mobile-First UX audit (Lighthouse > 90) | Ivan + Sonnet | ⏳ |
+| E | Observability platforma (biznis metrici) | CC Code | ⏳ |
+| F | Competitive intelligence (Pupilla, Minimax) | Sonnet | ⏳ |
+| G | Integracijski ekosustav (Zapier, DATEV, SEPA) | CC Code | ⏳ |
+| H | Pravna certifikacija (FINA, GoBD, TSE) | Ivan | ⏳ |
+
+## 5 KILLER FEATURES (jedini u HR+DE)
+1. Company Switcher Command Palette — Ctrl+K, instant search, 100+ firmi
+2. Kupčeva soba s AI agentom + KfW bankovnom integracijom
+3. Trojstvo AI consensus (Haiku+Gemini+Sonnet arbitration)
+4. FINA + KassenSichV u jednom produktu (HR+DE)
+5. SHA-256 digitalni pečat svake ponude s audit trailom
+
+---
+
+# DEEPSEEK-V3.2 — ANALIZA ZA FENIX
+**Datum: 14.04.2026. | Izvor: DeepSeek tweet 01.12.2025.**
+
+## Što je DeepSeek-V3.2
+- Reasoning-first arhitektura ugrađena u jezgru (ne "zakrpa" kao o1)
+- V3.2-Speciale: API-only, za najteže logičke probleme
+- Dramatično niža cijena API-ja od GPT/Claude ekvivalenata
+- Manji hallucination rate, bolje za agentizaciju
+
+## Gdje ga ugrađujemo u Trojstvo
+
+### ODMAH DOSTUPNO
+| Primjena | Trenutno | S V3.2 |
+|----------|----------|---------|
+| Invoice AI ekstrakcija | Haiku | V3.2 (reasoning o polju) |
+| Baustela slika → podaci | nema | V3.2 (jeftino, brzo) |
+| Trojstvo 4. model | nema | V3.2-Speciale za arbitražu |
+| Porezni obračun audit | ručno | V3.2-Speciale dokazuje |
+
+### ARHITEKTURALNI POMAK
+```
+TRENUTNO:
+  Haiku (executor) → Gemini (deep) → Sonnet (arbitrator)
+
+S DeepSeek-V3.2:
+  Haiku (brzi) → V3.2 (reasoning executor) → Gemini (istraživanje)
+  → V3.2-Speciale (kompleksna logika) → Sonnet (finalna odluka)
+```
+
+### KONKRETNE PRIMJENE ZA LIMIT CONNECT
+
+**1. Self-healing agent (KORAK B Plan 2)**
+V3.2 kao "čuvar" koji vrti logičke provjere u pozadini:
+- Detektira cross-tenant propuste
+- Verificira PDV algoritam na svakoj fakturi
+- Upozori PRIJE korisnik primijeti grešku
+
+**2. Stolarija Baustela — Slika → Narudžba**
+```
+Korisnik slika gradilište →
+V3.2 reasoning: "Montaža prozora, projekt Viskovic, nedostaje letvica" →
+Automatska obavijest nabavi → bez unosa podataka
+```
+
+**3. Automatski porezni obračun (KORAK B)**
+V3.2-Speciale za dokazivanje ispravnosti:
+- HR: PDV split rate, R1, ZOR čuvanje
+- DE: GoBD neizmjenjivost, §13b reverse charge, Kleinunternehmer
+
+**4. Invoice AI — smanjenje halucinacija**
+Trenutno Haiku griješi na: iznosi s decimalama, OIB formatima, datumima
+V3.2 reasoning: "Ovaj broj mora biti OIB (11 znamenki, HR) — validacija."
+
+### RIZICI (ne ignorirati)
+
+1. **Geopolitički**: Kineska firma → EU podaci → GDPR upitnik
+   → Koristiti SAMO za interne zadatke, NIKAD za podatke klijenata
+   → Processing API pozivi ne smiju sadržavati OIB, IBAN, osobne podatke
+
+2. **API nestabilnost**: DeepSeek ima česte outageove
+   → Uvijek fallback na Claude/Gemini ako DeepSeek timeout > 3s
+
+3. **Lažna sigurnost**: Reasoning model zvuči uvjerljivo = veća opasnost
+   → Svaki V3.2 output prolazi kroz Gemini reviewer (Trojstvo princip)
+
+### IMPLEMENTACIJSKI PLAN
+```
+Faza 1 (odmah): Testirati V3.2 API na bezopasnim zadacima
+  → Analiza koda bez klijentskih podataka
+  → FENIX pravilo audit (br. 1-7)
+  → Generiranje testova (KORAK 7)
+
+Faza 2 (nakon Plan 1 KORAK 9): Invoice AI zamjena Haiku → V3.2
+  → A/B test: 50 faktura Haiku vs V3.2 accuracy
+  → Ako V3.2 > 95% → zamjena u produkciji
+
+Faza 3 (Plan 2 KORAK C): Trojstvo upgrade
+  → V3.2-Speciale kao 4. model za složenu logiku
+  → Mjerenje consensus rate i accuracy
+```
+
+### KLJUČNA PORUKA
+DeepSeek-V3.2 ne mijenja plan — ubrzava ga.
+Plan 1 KORAK 7 (test coverage) može koristiti V3.2 za generiranje testova.
+Plan 2 KORAK C (AI kvaliteta) mjeri V3.2 vs Haiku.
+Trojstvo ostaje arhitektura, V3.2 je novi član tima.
+
