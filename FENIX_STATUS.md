@@ -329,3 +329,37 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 | B-05 | WhatsApp-IN nepoznati pošiljatelji | NIZAK | ARHIVA-5 |
 | B-06 | DATEV header verifikacija | VISOK | ARHIVA-7 |
 | B-07 | POS free tier konfiguracija za Mariju Čačić | SREDNJE | memio.world MVP |
+
+---
+
+## EU FUNDING STRATEGIJA — PLAY.EU (Dan 48)
+
+### Konzorcij:
+```
+NO LIMIT udruga (HR)        → koordinator (registracija u tijeku)
+Konjik d.o.o. / LIMIT (HR)  → tech partner, platforma
+Marija Čačić / čitaonica (HR)→ kultura/edukacija
+DE partner                   → Viskovic Bau / knjižnica Herrenberg
+Nordijski partner            → Erasmus mreža
+```
+
+### Bonus: Ivica Kruljac (agro), Antonio (mladi osnivač)
+
+### Ciljani program: Creative Europe Small Cooperation (€60K-200K)
+### Projekt: "PLAY.EU — Digitizing Europe's Intangible Heritage Through Children's Games"
+
+### memio.world MVP stanje:
+```
+Modeli:  14 tablica (ChildProfile, TimeCapsule, MemoryVault, FamilyStory,
+         StoryBook, TraditionalGame, LearningModule, Spomenar, SpomenarEntry,
+         Event, Milestone, MemoryEntry, WaitlistEntry)
+Seed:    Mlin (kompletna pravila), Čovječe, Školica, priča "Zvjezdice i Mjesec",
+         lekcija "Učimo slova A,B,C"
+Enkripcija: WorldEncryptedField (AES, zaseban ključ)
+```
+
+### Koraci dok registracija traje:
+1. Vizija NO LIMIT na papiru (1 A4)
+2. Letter of Intent od Marije Čačić
+3. Kontakt Creative Europe Desk Zagreb
+4. memio.world demo za prezentaciju
