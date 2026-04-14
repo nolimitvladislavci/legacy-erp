@@ -1,6 +1,6 @@
 {% load i18n %}
-{# Umbrella Client List v2.0 — 10/10 EU #1 #}
-{# Name = clickable link, actions INLINE next to name, health indicator, search #}
+{# Umbrella Client List v3.0 — EU #1 Innovation Edition #}
+{# AI Priority Queue + Deadline Radar + Start My Day #}
 
 {% if items %}
 <div class="u-client-list">
@@ -13,69 +13,64 @@
              oninput="filterClients(this)" autocomplete="off"
              style="width:100%;padding:10px 12px 10px 36px;border:1px solid var(--border,#e2e8f0);border-radius:8px;font-size:14px;background:var(--input-bg,#fff);color:var(--text,#0f172a);outline:none;transition:border-color .15s;"
              onfocus="this.style.borderColor='var(--gold,#c9a84c)'" onblur="this.style.borderColor='var(--border,#e2e8f0)'">
+      <span id="u-search-count" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text-muted,#94a3b8);display:none;"></span>
     </div>
   </div>
   {% endif %}
 
-  {# Client cards #}
+  {# Client cards — sorted by AI urgency (most urgent first) #}
   <div class="u-client-grid">
     {% for cd in items %}
-    <div class="u-client-card" data-name="{{ cd.company.name|lower }}">
-      {# Row 1: Name (clickable!) + inline actions #}
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
+    <div class="u-client-card {% if cd.urgency > 50 %}u-urgent{% elif cd.urgency > 10 %}u-attention{% endif %}" data-name="{{ cd.company.name|lower }}">
+      {# Row 1: Actions LEFT + Name (clickable) #}
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        {# Left: open button #}
+        <a href="{% url 'umbrella_switch_company' cd.company.pk %}" class="u-open-btn" title="{% trans 'Otvori' %} {{ cd.company.name }}">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+        {# Center: name + city + badges #}
         <div style="flex:1;min-width:0;">
-          <a href="{% url 'umbrella_switch_company' cd.company.pk %}" class="u-client-name" title="{% trans 'Otvori' %} {{ cd.company.name }}">
-            {# Health dot #}
-            {% if cd.company.health_score %}
-              {% if cd.company.health_score.status == "green" %}
-                <span class="u-health-dot" style="background:#22c55e;" title="OK"></span>
-              {% elif cd.company.health_score.status == "yellow" %}
-                <span class="u-health-dot" style="background:#f59e0b;" title="{% trans 'Treba pažnju' %}"></span>
-              {% else %}
-                <span class="u-health-dot" style="background:#ef4444;" title="{% trans 'Kritično' %}"></span>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <a href="{% url 'umbrella_switch_company' cd.company.pk %}" class="u-client-name">
+              {# Health dot #}
+              {% if cd.company.health_score %}
+                {% if cd.company.health_score.status == "green" %}
+                  <span class="u-health-dot" style="background:#22c55e;"></span>
+                {% elif cd.company.health_score.status == "yellow" %}
+                  <span class="u-health-dot" style="background:#f59e0b;"></span>
+                {% else %}
+                  <span class="u-health-dot" style="background:#ef4444;"></span>
+                {% endif %}
               {% endif %}
-            {% endif %}
-            {{ cd.company.name }}
-          </a>
-          {% if cd.company.city %}
-            <div class="u-client-city">{{ cd.company.city }}{% if cd.company.oib %} &middot; {{ cd.company.oib }}{% endif %}</div>
-          {% endif %}
+              {{ cd.company.name }}
+            </a>
+            {# Urgency badges — INLINE with name #}
+            {% for badge in cd.urgency_badges %}
+              <span class="u-urgency-badge u-urgency-{{ badge.type }}">
+                <i class="fas fa-{{ badge.icon }}"></i> {{ badge.text }}
+              </span>
+            {% endfor %}
+          </div>
+          {# Subtitle: city + stats #}
+          <div class="u-client-meta">
+            {% if cd.company.city %}{{ cd.company.city }} &middot; {% endif %}
+            {% if cd.plan and cd.plan != "-" %}<span class="u-chip u-chip-gold">{{ cd.plan }}</span>{% endif %}
+            {% if cd.user_count %}<span class="u-chip"><i class="fas fa-user"></i> {{ cd.user_count }}</span>{% endif %}
+            {% if cd.inv_revenue %}<span class="u-chip u-chip-green">&euro;{{ cd.inv_revenue|floatformat:0 }}</span>{% endif %}
+            {% if cd.pos_revenue %}<span class="u-chip u-chip-blue">&euro;{{ cd.pos_revenue|floatformat:0 }}</span>{% endif %}
+            {% if cd.synesis %}<span class="u-chip" style="color:#4caf7d;"><i class="fas fa-database"></i></span>{% endif %}
+            {% if cd.company.umbrella_relation == 'subsidiary' %}<span class="u-chip u-chip-purple">{% trans "Podružnica" %}</span>{% endif %}
+          </div>
         </div>
-        {# Inline actions — visible immediately #}
-        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          <a href="{% url 'umbrella_switch_company' cd.company.pk %}" class="u-action-btn u-action-primary" title="{% trans 'Otvori firmu' %}">
-            <i class="fas fa-external-link-alt"></i>
-          </a>
-          <form method="post" style="display:inline;margin:0;">{% csrf_token %}
-            <input type="hidden" name="action" value="remove_child">
-            <input type="hidden" name="company_id" value="{{ cd.company.pk }}">
-            <button type="submit" class="u-action-btn u-action-danger" title="{% trans 'Odvezi' %}"
-                    onclick="return confirm('{% trans "Odvezati" %} {{ cd.company.name }}?')">
-              <i class="fas fa-unlink"></i>
-            </button>
-          </form>
-        </div>
-      </div>
-      {# Row 2: Compact stats chips #}
-      <div class="u-client-stats">
-        {% if cd.plan and cd.plan != "-" %}
-          <span class="u-chip u-chip-gold">{{ cd.plan }}</span>
-        {% endif %}
-        {% if cd.user_count %}
-          <span class="u-chip"><i class="fas fa-user"></i> {{ cd.user_count }}</span>
-        {% endif %}
-        {% if cd.inv_revenue %}
-          <span class="u-chip u-chip-green"><i class="fas fa-file-invoice"></i> &euro;{{ cd.inv_revenue|floatformat:0 }}</span>
-        {% endif %}
-        {% if cd.pos_revenue %}
-          <span class="u-chip u-chip-blue"><i class="fas fa-cash-register"></i> &euro;{{ cd.pos_revenue|floatformat:0 }}</span>
-        {% endif %}
-        {% if cd.synesis %}
-          <span class="u-chip" style="color:#4caf7d;"><i class="fas fa-database"></i> Synesis</span>
-        {% endif %}
-        {% if cd.company.umbrella_relation == 'subsidiary' %}
-          <span class="u-chip u-chip-purple">{% trans "Podružnica" %}</span>
-        {% endif %}
+        {# Right: unlink (secondary action) #}
+        <form method="post" style="margin:0;flex-shrink:0;">{% csrf_token %}
+          <input type="hidden" name="action" value="remove_child">
+          <input type="hidden" name="company_id" value="{{ cd.company.pk }}">
+          <button type="submit" class="u-unlink-btn" title="{% trans 'Odvezi' %}"
+                  onclick="return confirm('{% trans "Odvezati" %} {{ cd.company.name }}?')">
+            <i class="fas fa-unlink"></i>
+          </button>
+        </form>
       </div>
     </div>
     {% endfor %}
@@ -83,122 +78,63 @@
 </div>
 
 <style>
-.u-client-grid {
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-}
-.u-client-card {
-  padding:10px 14px;
-  border-radius:8px;
-  background:var(--bg-card,#fff);
-  border:1px solid transparent;
-  transition:all .12s ease;
-}
-.u-client-card:hover {
-  background:var(--hover-bg,#f8fafc);
-  border-color:var(--gold,#c9a84c);
-  box-shadow:0 2px 8px rgba(201,168,76,.08);
-}
-.u-client-name {
-  font-weight:700;
-  font-size:14px;
-  color:var(--text,#0f172a);
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  line-height:1.3;
-  transition:color .12s;
-}
-.u-client-name:hover {
-  color:var(--gold,#c9a84c);
-}
-.u-health-dot {
-  display:inline-block;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  flex-shrink:0;
-}
-.u-client-city {
-  font-size:11px;
-  color:var(--text-muted,#94a3b8);
-  margin-top:1px;
-  padding-left:14px;
-}
-.u-client-stats {
-  display:flex;
-  flex-wrap:wrap;
-  gap:4px;
-  padding-left:14px;
-}
-.u-chip {
-  display:inline-flex;
-  align-items:center;
-  gap:3px;
-  padding:2px 7px;
-  border-radius:4px;
-  font-size:11px;
-  font-weight:600;
-  color:var(--text-muted,#64748b);
-  background:var(--chip-bg,rgba(0,0,0,.04));
-  line-height:1.4;
-}
-.u-chip-gold { background:rgba(201,168,76,.1); color:var(--gold,#c9a84c); }
-.u-chip-green { background:rgba(34,197,94,.08); color:#16a34a; }
-.u-chip-blue { background:rgba(59,130,246,.08); color:#2563eb; }
-.u-chip-purple { background:rgba(168,85,247,.08); color:#9333ea; }
+.u-client-grid{display:flex;flex-direction:column;gap:1px;background:var(--border,#e2e8f0);border-radius:10px;overflow:hidden;border:1px solid var(--border,#e2e8f0);}
+.u-client-card{padding:10px 12px;background:var(--bg-card,#fff);transition:all .12s ease;}
+.u-client-card:hover{background:var(--hover-bg,#fefce8);}
 
-.u-action-btn {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  border-radius:6px;
-  border:1px solid var(--border,#e2e8f0);
-  background:transparent;
-  color:var(--text-muted,#94a3b8);
-  font-size:12px;
-  cursor:pointer;
-  transition:all .12s;
-  text-decoration:none;
-}
-.u-action-primary:hover {
-  background:var(--gold,#c9a84c);
-  color:#fff;
-  border-color:var(--gold,#c9a84c);
-}
-.u-action-danger:hover {
-  background:#fef2f2;
-  color:#ef4444;
-  border-color:#fca5a5;
-}
+/* Urgent cards — visual priority */
+.u-client-card.u-urgent{border-left:3px solid #ef4444;background:#fef2f2;}
+.u-client-card.u-urgent:hover{background:#fee2e2;}
+.u-client-card.u-attention{border-left:3px solid #f59e0b;background:#fffbeb;}
+.u-client-card.u-attention:hover{background:#fef3c7;}
 
-/* Alternating rows subtle */
-.u-client-card:nth-child(even) {
-  background:var(--alt-row-bg,rgba(0,0,0,.01));
-}
-.u-client-card:nth-child(even):hover {
-  background:var(--hover-bg,#f8fafc);
-}
+.u-open-btn{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--gold,#c9a84c);color:#fff;text-decoration:none;font-size:12px;flex-shrink:0;transition:all .12s;margin-top:1px;}
+.u-open-btn:hover{background:#b8942f;transform:scale(1.05);}
 
-@media(max-width:640px) {
-  .u-client-card { padding:8px 10px; }
-  .u-client-name { font-size:13px; }
-  .u-chip { font-size:10px; padding:1px 5px; }
-  .u-action-btn { width:32px; height:32px; font-size:14px; }
+.u-client-name{font-weight:700;font-size:14px;color:var(--text,#0f172a);text-decoration:none;display:inline-flex;align-items:center;gap:5px;line-height:1.3;transition:color .12s;}
+.u-client-name:hover{color:var(--gold,#c9a84c);}
+
+.u-health-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+.u-urgency-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;line-height:1.5;white-space:nowrap;}
+.u-urgency-danger{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.u-urgency-warning{background:#fffbeb;color:#d97706;border:1px solid #fcd34d;}
+.u-urgency-muted{background:var(--chip-bg,rgba(0,0,0,.03));color:var(--text-muted,#94a3b8);border:1px solid var(--border,#e2e8f0);}
+
+.u-client-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:2px;font-size:11px;color:var(--text-muted,#94a3b8);}
+
+.u-chip{display:inline-flex;align-items:center;gap:2px;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;color:var(--text-muted,#64748b);background:var(--chip-bg,rgba(0,0,0,.03));}
+.u-chip-gold{background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);}
+.u-chip-green{background:rgba(34,197,94,.06);color:#16a34a;}
+.u-chip-blue{background:rgba(59,130,246,.06);color:#2563eb;}
+.u-chip-purple{background:rgba(168,85,247,.06);color:#9333ea;}
+
+.u-unlink-btn{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text-muted,#cbd5e1);font-size:11px;cursor:pointer;transition:all .12s;margin-top:4px;}
+.u-unlink-btn:hover{background:#fef2f2;color:#ef4444;border-color:#fca5a5;}
+
+@media(max-width:640px){
+  .u-client-card{padding:8px 10px;}
+  .u-client-name{font-size:13px;}
+  .u-open-btn{width:36px;height:36px;font-size:14px;}
+  .u-urgency-badge{font-size:9px;padding:1px 5px;}
 }
 </style>
 
 <script>
-function filterClients(input) {
-  const q = input.value.toLowerCase();
-  document.querySelectorAll('.u-client-card').forEach(card => {
-    const name = card.dataset.name || '';
-    card.style.display = name.includes(q) ? '' : 'none';
+function filterClients(input){
+  const q=input.value.toLowerCase();
+  let shown=0,total=0;
+  document.querySelectorAll('.u-client-card').forEach(c=>{
+    total++;
+    const match=c.dataset.name.includes(q);
+    c.style.display=match?'':'none';
+    if(match)shown++;
   });
+  const counter=document.getElementById('u-search-count');
+  if(counter){
+    if(q){counter.style.display='';counter.textContent=shown+'/'+total;}
+    else{counter.style.display='none';}
+  }
 }
 </script>
 {% else %}

@@ -10,9 +10,7 @@ Endpointi:
   GET/POST /ljubimac/token/<tok>/ -- Dodaj ljubimca putem magic tokena
 """
 
-import io
-
-import qrcode
+from core.qr_views import qr_png_bytes
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError, IntegrityError
@@ -167,14 +165,8 @@ def pet_qr_code(request, chip_or_tag):
         return HttpResponse("Ljubimac nije pronadjen.", status=404, content_type="text/plain")
     identifier = animal.chip_number or animal.ear_tag
     url = f"https://memio.pet/pas/{identifier}/"
-    qr = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=4)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="#000000", back_color="#ffffff")
-    buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
-    buffer.seek(0)
-    response = HttpResponse(buffer.getvalue(), content_type="image/png")
+    png = qr_png_bytes(url, size=250, error_correction="H")
+    response = HttpResponse(png, content_type="image/png")
     response["Cache-Control"] = "public, max-age=86400"
     response["Content-Disposition"] = f'inline; filename="memio-{identifier}.png"'
     return response

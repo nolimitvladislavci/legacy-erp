@@ -1,7 +1,6 @@
-import io
 import logging
 
-import qrcode
+from core.qr_views import qr_png_bytes
 from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
@@ -59,16 +58,8 @@ def fetch_social_import(import_id):
 def generate_pet_qr(pet_id):
     try:
         pet = PetProfile.objects.get(id=pet_id)
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(f"https://memio.pet/{pet.slug}/")
-        qr.make(fit=True)
-
-        img = qr.make_image(fill_color="black", back_color="white")
-        img_io = io.BytesIO()
-        img.save(img_io, "PNG")
-        img_io.seek(0)
-
-        pet.qr_code.save(f"qr_{pet.id}.png", ContentFile(img_io.getvalue()))
+        png_bytes = qr_png_bytes(f"https://memio.pet/{pet.slug}/", size=250)
+        pet.qr_code.save(f"qr_{pet.id}.png", ContentFile(png_bytes))
         pet.save()
         logger.info(f"QR code generated for pet {pet_id}")
     except PetProfile.DoesNotExist:

@@ -7,27 +7,18 @@ Viral code za referral link.
 """
 import base64
 import hashlib
-from io import BytesIO
 
 logger = logging.getLogger("udruge")
 
 
 def generate_qr_base64(data, box_size=4, border=1):
     """Generira QR kod kao base64 PNG string."""
-    try:
-        import qrcode
+    from core.qr_views import qr_png_bytes
 
-        qr = qrcode.QRCode(
-            version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=box_size, border=border
-        )
-        qr.add_data(data)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        buf.seek(0)
-        return base64.b64encode(buf.read()).decode()
-    except IOError as e:
+    size = max(50, box_size * 25)
+    try:
+        return base64.b64encode(qr_png_bytes(data, size=size)).decode()
+    except Exception as e:
         logger.error("QR generiranje: %s", e)
         return None
 

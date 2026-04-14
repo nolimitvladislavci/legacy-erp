@@ -773,6 +773,15 @@ def umbrella_dashboard(request):
     if request.user.is_superuser:
         all_umbrellas = Company.objects.filter(is_umbrella=True).select_related("umbrella_parent").order_by("name")
 
+    # ── EU #1 Innovation: Enrich with urgency, deadlines, AI priority ──
+    start_my_day = None
+    try:
+        from companies.umbrella_enrichment import enrich_children_data
+
+        children_data, start_my_day = enrich_children_data(children_data, company)
+    except Exception as _enrich_err:
+        logger.warning("Umbrella enrichment failed: %s", _enrich_err)
+
     subsidiaries = [cd for cd in children_data if cd["company"].umbrella_relation == "subsidiary"]
     clients = [cd for cd in children_data if cd["company"].umbrella_relation != "subsidiary"]
 
@@ -836,6 +845,7 @@ def umbrella_dashboard(request):
             "max_children": company.umbrella_max_children,
             "month_label": now.strftime("%m/%Y"),
             "available_partners": available_partners,
+            "start_my_day": start_my_day,
         },
     )
 

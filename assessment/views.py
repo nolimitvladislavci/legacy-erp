@@ -223,17 +223,11 @@ def assessment_pdf(request, pk):
     # QR code
     qr_b64 = ""
     try:
-        import qrcode
+        from core.qr_views import qr_png_bytes
 
         qr_url = request.build_absolute_uri(assessment.get_absolute_url())
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=2)
-        qr.add_data(qr_url)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-        buf = io.BytesIO()
-        img.save(buf, "PNG")
-        qr_b64 = base64.b64encode(buf.getvalue()).decode()
-    except ValueError:
+        qr_b64 = base64.b64encode(qr_png_bytes(qr_url, size=100)).decode()
+    except Exception:
         pass
 
     # Company logo

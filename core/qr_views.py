@@ -74,13 +74,20 @@ def _hex_to_rgb(hex_str: str, default: tuple) -> tuple:
     return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
 
-def _generate_png(data: str, size: int, fill: tuple, back: tuple) -> bytes:
+def _generate_png(data: str, size: int, fill: tuple, back: tuple, error_correction: str | None = None) -> bytes:
     import qrcode
 
+    ec_map = {
+        "H": qrcode.constants.ERROR_CORRECT_H,
+        "Q": qrcode.constants.ERROR_CORRECT_Q,
+        "M": qrcode.constants.ERROR_CORRECT_M,
+        "L": qrcode.constants.ERROR_CORRECT_L,
+    }
+    ec = ec_map.get(error_correction, qrcode.constants.ERROR_CORRECT_M)
     box_size = max(1, size // 25)
     qr = qrcode.QRCode(
         version=None,
-        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        error_correction=ec,
         box_size=box_size,
         border=2,
     )
@@ -140,9 +147,26 @@ def qr_code_view(request):
     return HttpResponse(png_bytes, content_type="image/png")
 
 
-def qr_base64(data: str, size: int = 200, color: str = "000000", bg: str = "ffffff") -> str:
-    """Base64 data URI — za PDF (WeasyPrint) i email inline."""
+def qr_base64(
+    data: str, size: int = 200, color: str = "000000", bg: str = "ffffff", error_correction: str | None = None
+) -> str:
+    """Base64 data URI — za PDF (WeasyPrint) i email inline.
+
+    error_correction: None/"M" (default), "H" (FINA fiskalizacija), "Q", "L"
+    """
     fill = _hex_to_rgb(color, (0, 0, 0))
     back = _hex_to_rgb(bg, (255, 255, 255))
-    png_bytes = _generate_png(data, size, fill, back)
+    png_bytes = _generate_png(data, size, fill, back, error_correction=error_correction)
     return "data:image/png;base64," + base64.b64encode(png_bytes).decode()
+
+
+def qr_png_bytes(
+    data: str, size: int = 200, color: str = "000000", bg: str = "ffffff", error_correction: str | None = None
+) -> bytes:
+    """Raw PNG bytes — za HttpResponse views i file saves (npr. ImageField).
+
+    error_correction: None/"M" (default), "H" (FINA), "Q", "L"
+    """
+    fill = _hex_to_rgb(color, (0, 0, 0))
+    back = _hex_to_rgb(bg, (255, 255, 255))
+    return _generate_png(data, size, fill, back, error_correction=error_correction)

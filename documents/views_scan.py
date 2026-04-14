@@ -1,12 +1,10 @@
 """Scan Views — QR scan + Scan Batch (Enterprise Architecture)."""
 
-import base64 as _b64
-import io as _io
 import json
 import logging
 import uuid as _uuid
 
-import qrcode as _qrcode
+from core.qr_views import qr_base64 as _qr_b64
 import redis as _redis
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -39,16 +37,10 @@ def scan_create_token(request):
     from django.urls import reverse
 
     url = request.build_absolute_uri(reverse("documents:scan_mobile_page", args=[token]))
-    qr = _qrcode.QRCode(version=1, error_correction=_qrcode.constants.ERROR_CORRECT_M, box_size=8, border=2)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="#c9a84c", back_color="#0a0a0a")
-    buf = _io.BytesIO()
-    img.save(buf, format="PNG")
     return JsonResponse(
         {
             "token": token,
-            "qr_data": "data:image/png;base64," + _b64.b64encode(buf.getvalue()).decode(),
+            "qr_data": _qr_b64(url, size=200, color="c9a84c", bg="0a0a0a"),
             "url": url,
             "expires_in": 600,
         }
