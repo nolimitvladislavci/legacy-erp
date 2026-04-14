@@ -287,8 +287,8 @@ Cilj: coverage > 40% na pos/, invoicing/, accounts/
 ## GORIVO (praćenje napretka)
 | Korak | Status | Postotak |
 |-------|--------|----------|
-| 1 Inventura | 🔄 AKTIVAN | 0% |
-| 2 Field audit | ⏳ na redu | — |
+| 1 Inventura | ✅ GOTOVO | 100% |
+| 2 Field audit | 🔄 AKTIVAN | 0% |
 | 3 RouteRegistry | ⏳ na redu | — |
 | 4 Middleware | ⏳ na redu | — |
 | 5 504 eliminacija | ⏳ na redu | — |
