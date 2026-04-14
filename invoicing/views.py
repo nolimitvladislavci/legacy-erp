@@ -13,6 +13,7 @@ from permissions.decorators import require_permission
 
 logger = logging.getLogger(__name__)
 from django.db import DatabaseError, IntegrityError, transaction
+from django.views.decorators.http import require_POST
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions, viewsets
 
@@ -2747,4 +2748,146 @@ def ira_ura_dashboard(request):
             "month": month,
             "page_title": f"IRA/URA Pregled — {month:02d}/{year}",
         },
+    )
+
+
+# ── KUPČEVA SOBA — AI Agent (server-side Anthropic proxy) ─────────────────────
+@require_POST
+def portal_ai_agent(request, token):
+    """
+    AI psihološki agent za kupčevu sobu — server-side proxy za Anthropic.
+    Haiku model (brz, jeftin) s kontekstom specifičnim za ponudu.
+    """
+    import json
+
+    from django.conf import settings
+    from django.http import JsonResponse
+
+    # Rate limit: 20 poruka po sesiji
+    rl_key = f"portal_ai_{token}"
+    from django.core.cache import cache
+
+    count = cache.get(rl_key, 0)
+    if count >= 20:
+        return JsonResponse({"error": "Dosegli ste limit poruka."}, status=429)
+    cache.set(rl_key, count + 1, 3600)
+
+    invoice = get_object_or_404(Invoice, client_token=token)
+
+    try:
+        body = json.loads(request.body)
+        user_message = body.get("message", "").strip()[:1000]
+        history = body.get("history", [])[-6:]  # max 6 prethodnih poruka
+    except (json.JSONDecodeError, AttributeError):
+        return JsonResponse({"error": "Neispravan zahtjev."}, status=400)
+
+    if not user_message:
+        return JsonResponse({"error": "Prazna poruka."}, status=400)
+
+    # Kontekst o ponudi za AI
+    items_text = "\n".join(
+        f"  - {i.description}: {i.quantity} {i.unit or 'kom'} × {i.unit_price:.2f} EUR = {i.total_price:.2f} EUR"
+        for i in invoice.items.all()[:20]
+    )
+    company_name = invoice.company.name if invoice.company else "Izvođač"
+
+    system_prompt = f"""Ti si stručni prodajni savjetnik koji pomaže kupcu razumjeti vrijednost ponude.
+Zastupаš tvrtku "{company_name}" i pomažeš kupcu donijeti informiranu odluku.
+
+PONUDA #{invoice.invoice_number}:
+Ukupno: {invoice.total:.2f} EUR (s PDV-om)
+Neto: {invoice.subtotal:.2f} EUR
+{f"Stavke:{chr(10)}{items_text}" if items_text else ""}
+{f"Napomene: {invoice.notes}" if invoice.notes else ""}
+
+KLJUČNE PREDNOSTI koje naglašavaš u razgovoru:
+1. Zakonska garancija na radove — bez dodatnih troškova, obavezna po zakonu
+2. Ekipa od 4 majstora + 1 pomoćni — profesionalni, brzi, iskusni
+3. Nema šute i kontejnera — svo smeće stane u nekoliko vreća, veći dio na reciklažno dvorište (ekološki plus)
+4. Usporedba s crnim tržištem: bez računa nema garancije, nema pravne zaštite, porezni rizik
+5. Cijena je formirana pošteno — garancija nije uračunata kao markup, dobivaš je besplatno
+6. Društveni status: uredna fasada/renovacija je vizitka doma, tema razgovora, primjer susjedima
+7. Za malo novaca — u omjeru kvaliteta/cijena ovo je investicija, ne trošak
+8. Osiguranje radova moguće — zaštita od svih scenarija, vrijedi min. 2 godine
+
+STIL komunikacije:
+- Topao, razumijevajući, nikad agresivan
+- Konkretni brojevi i usporedbe, ne apstraktni marketing
+- Kratki odgovori (2-4 rečenice), direktni
+- Na hrvatskom jeziku
+- Nikad ne obećavaš ono što nije u ponudi
+- Ako pitaju o nečemu što ne znaš — reci da ćeš provjeriti s izvođačem"""
+
+    try:
+        import anthropic
+
+        client_ai = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+
+        messages = []
+        for h in history:
+            if h.get("role") in ("user", "assistant") and h.get("content"):
+                messages.append({"role": h["role"], "content": str(h["content"])[:500]})
+        messages.append({"role": "user", "content": user_message})
+
+        response = client_ai.messages.create(
+            model=settings.HAIKU_MODEL,
+            max_tokens=400,
+            system=system_prompt,
+            messages=messages,
+        )
+        reply = response.content[0].text if response.content else "Žao mi je, ne mogu odgovoriti."
+        return JsonResponse({"reply": reply})
+
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).error("portal_ai_agent error: %s", e)
+        return JsonResponse({"reply": "Trenutno ne mogu odgovoriti. Kontaktirajte nas direktno."})
+
+
+# ── KUPČEVA SOBA — Digital Acceptance Trail ───────────────────────────────────
+@require_POST
+def portal_accept_trail(request, token):
+    """
+    Spremi digitalni trag prihvaćanja — timestamp, IP, user agent, SHA-256 hash.
+    Pravno prihvatljiv dokaz prihvaćanja ponude.
+    """
+    import hashlib
+    import json
+
+    from django.http import JsonResponse
+    from django.utils import timezone
+
+    invoice = get_object_or_404(Invoice, client_token=token)
+
+    ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))[:45]
+    ua = request.META.get("HTTP_USER_AGENT", "")[:200]
+    ts = timezone.now().isoformat()
+
+    trail_data = {
+        "invoice": str(invoice.pk),
+        "number": invoice.invoice_number,
+        "total": str(invoice.total),
+        "ip": ip,
+        "user_agent": ua,
+        "timestamp": ts,
+        "action": "ACCEPTED",
+    }
+    trail_hash = hashlib.sha256(json.dumps(trail_data, sort_keys=True).encode()).hexdigest()
+
+    # Spremi u invoice notes kao audit trail
+    trail_note = f"\n\n[DIGITALNO PRIHVAĆENO {ts[:19].replace('T', ' ')}]\nIP: {ip} | SHA256: {trail_hash[:16]}..."
+    if trail_note not in (invoice.notes or ""):
+        Invoice.objects.filter(pk=invoice.pk).update(
+            notes=(invoice.notes or "") + trail_note,
+            status="ACCEPTED",
+        )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "hash": trail_hash,
+            "timestamp": ts,
+            "message": "Prihvaćanje zabilježeno s digitalnim potpisom.",
+        }
     )

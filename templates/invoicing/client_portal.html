@@ -1,170 +1,236 @@
-{% load i18n l10n %}
+{% load i18n l10n qr_tags %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'hr' }}">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ invoice.invoice_number }} — {{ invoice.company.name }}</title>
-  <meta name="robots" content="noindex,nofollow">
-  <link rel="stylesheet" href="/static/css/fenix-tokens.css">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#0a0e1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:0}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ invoice.invoice_number }} — {{ invoice.company.name }}</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c9a84c;--amber:#f59e0b;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;
+  --bg:#0a0e1a;--card:#111827;--card2:#0d1525;--border:rgba(255,255,255,.07);
+  --text:#e2e8f0;--muted:#94a3b8;--dim:#64748b;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
 
-    .cp-header{background:#0d1525;border-bottom:1px solid rgba(201,168,76,.2);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .cp-logo{font-size:1.1rem;font-weight:800;color:#c9a84c;letter-spacing:.5px}
-    .cp-company{font-size:.8rem;color:#94a3b8}
+/* HEADER */
+.hdr{background:var(--card2);border-bottom:1px solid rgba(201,168,76,.25);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.hdr-logo{font-size:1.05rem;font-weight:800;color:var(--gold)}
+.hdr-actions{display:flex;gap:8px;align-items:center}
+.btn-hdr{padding:7px 14px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.btn-pdf{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.btn-pdf:hover{background:rgba(239,68,68,.2)}
+.btn-qr{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.btn-qr:hover{background:rgba(201,168,76,.18)}
 
-    .cp-wrap{max-width:860px;margin:0 auto;padding:24px 16px 60px}
+/* LAYOUT */
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
 
-    /* Status banner */
-    .cp-status{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:10px;margin-bottom:24px;font-weight:600}
-    .cp-status-draft,.cp-status-sent{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
-    .cp-status-accepted{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
-    .cp-status-rejected{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171}
-    .cp-status-expired{background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#94a3b8}
+/* HERO STATUS */
+.status-hero{text-align:center;padding:32px 20px;background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(201,168,76,.02));border:1px solid rgba(201,168,76,.2);border-radius:16px;margin-bottom:24px}
+.status-icon{font-size:2.5rem;margin-bottom:8px}
+.amount-big{font-size:2.8rem;font-weight:900;color:var(--gold);line-height:1.1}
+.amount-label{font-size:.8rem;color:var(--dim);margin-top:6px}
+.status-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-top:10px}
+.badge-sent{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.badge-accepted{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.badge-rejected{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
 
-    /* Dokument kartica */
-    .cp-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px;margin-bottom:20px}
-    .cp-card-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:14px}
+/* EXPIRED */
+.expired-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px 16px;margin-bottom:20px;color:#f87171;font-size:.88rem}
 
-    /* Iznos hero */
-    .cp-amount-hero{text-align:center;padding:20px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:10px;margin-bottom:20px}
-    .cp-amount-big{font-size:2.4rem;font-weight:800;color:#c9a84c}
-    .cp-amount-label{font-size:.8rem;color:#64748b;margin-top:4px}
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:14px;display:flex;align-items:center;gap:6px}
 
-    /* Meta grid */
-    .cp-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
-    .cp-meta-item{background:#0d1525;border-radius:8px;padding:12px 14px}
-    .cp-meta-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.8px;color:#64748b;margin-bottom:4px}
-    .cp-meta-value{font-size:.9rem;font-weight:600;color:#e2e8f0}
+/* META GRID */
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.meta-item{background:var(--card2);border-radius:8px;padding:11px 14px}
+.meta-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin-bottom:3px}
+.meta-value{font-size:.9rem;font-weight:600}
 
-    /* Stavke */
-    .cp-items{width:100%;border-collapse:collapse}
-    .cp-items th{font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:#64748b;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left}
-    .cp-items td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.88rem;color:#e2e8f0}
-    .cp-items tr:last-child td{border-bottom:none}
-    .cp-items .text-end{text-align:right}
+/* ITEMS TABLE */
+.items-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.items-table th{color:var(--dim);font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;padding:6px 10px;border-bottom:1px solid var(--border);text-align:left}
+.items-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.03)}
+.items-table .ta-r{text-align:right}
+.totals-row{font-weight:700;color:var(--gold);font-size:.95rem;border-top:1px solid rgba(201,168,76,.25) !important}
 
-    /* Totali */
-    .cp-totals{width:100%;max-width:320px;margin-left:auto;margin-top:12px}
-    .cp-totals td{padding:5px 12px;font-size:.88rem}
-    .cp-totals .cp-total-final td{font-size:1.05rem;font-weight:700;color:#c9a84c;border-top:1px solid rgba(201,168,76,.3);padding-top:10px}
+/* VALUE COMPARISON */
+.comparison{background:linear-gradient(135deg,rgba(34,197,94,.05),rgba(201,168,76,.04));border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:20px;margin-bottom:16px}
+.comp-title{font-size:.95rem;font-weight:700;margin-bottom:16px;color:var(--text)}
+.comp-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:.85rem}
+.comp-icon{width:24px;text-align:center;flex-shrink:0}
+.comp-label{flex:1;color:var(--muted)}
+.comp-no{color:#f87171;font-weight:600}
+.comp-yes{color:#4ade80;font-weight:600}
+.comp-divider{height:1px;background:var(--border);margin:14px 0}
+.slider-wrap{margin-top:16px}
+.slider-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--dim);margin-bottom:6px}
+.savings-box{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:12px 16px;margin-top:12px;text-align:center}
+.savings-amount{font-size:1.4rem;font-weight:800;color:#4ade80}
+.savings-label{font-size:.72rem;color:var(--dim);margin-top:2px}
 
-    /* Akcije (prihvati/odbij) */
-    .cp-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
-    .cp-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;text-align:center}
-    .cp-btn-accept{background:#22c55e;color:#0a1020}
-    .cp-btn-accept:hover{background:#16a34a}
-    .cp-btn-reject{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3)}
-    .cp-btn-reject:hover{background:rgba(239,68,68,.2)}
-    .cp-btn-undo{background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1)}
-    .cp-btn-undo:hover{background:rgba(255,255,255,.1)}
+/* GARANTEES */
+.guarantees{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.guarantee-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.guarantee-icon{font-size:1.6rem;margin-bottom:6px}
+.guarantee-text{font-size:.75rem;color:var(--muted);line-height:1.4}
+.guarantee-title{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:4px}
 
-    /* Poruke */
-    .cp-msg{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.9rem}
-    .cp-msg-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
-    .cp-msg-info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa}
+/* QR MODAL */
+.qr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.qr-overlay.show{display:flex}
+.qr-box{background:var(--card);border:1px solid rgba(201,168,76,.3);border-radius:16px;padding:24px;text-align:center;max-width:280px}
+.qr-box img{border-radius:8px;border:4px solid white;width:200px;height:200px}
+.qr-url{font-size:.65rem;color:var(--dim);margin-top:10px;word-break:break-all}
 
-    /* Footer */
-    .cp-footer{text-align:center;padding:20px;font-size:.72rem;color:#334155}
+/* AI AGENT */
+.ai-section{background:linear-gradient(135deg,rgba(59,130,246,.06),rgba(139,92,246,.04));border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:20px;margin-bottom:16px}
+.ai-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ai-avatar{width:36px;height:36px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.ai-name{font-weight:700;font-size:.9rem}
+.ai-sub{font-size:.7rem;color:var(--dim)}
+.chat-msgs{max-height:280px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{padding:10px 14px;border-radius:10px;font-size:.84rem;line-height:1.5;max-width:85%}
+.chat-msg.ai{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--text);align-self:flex-start}
+.chat-msg.user{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--text);align-self:flex-end;text-align:right}
+.chat-input-row{display:flex;gap:8px}
+.chat-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:.84rem;outline:none}
+.chat-input:focus{border-color:rgba(59,130,246,.4)}
+.chat-send{padding:10px 16px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;font-size:.84rem;transition:opacity .2s}
+.chat-send:hover{opacity:.85}
+.chat-send:disabled{opacity:.4;cursor:not-allowed}
+.quick-qs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.quick-q{padding:5px 10px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;font-size:.72rem;color:var(--muted);cursor:pointer;transition:all .15s}
+.quick-q:hover{border-color:rgba(59,130,246,.4);color:var(--text)}
 
-    @media(max-width:600px){
-      .cp-amount-big{font-size:1.8rem}
-      .cp-btn{min-width:0}
-    }
-  </style>
+/* AKCIJE */
+.actions-section{margin:24px 0}
+.btn-accept{width:100%;padding:16px;background:linear-gradient(135deg,#16a34a,#22c55e);border:none;border-radius:12px;color:white;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.btn-accept:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(34,197,94,.3)}
+.btn-reject{width:100%;padding:13px;background:transparent;border:1px solid rgba(239,68,68,.3);border-radius:12px;color:#f87171;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-reject:hover{background:rgba(239,68,68,.08)}
+.btn-undo{width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:.88rem;cursor:pointer}
+
+/* DIGITAL TRAIL */
+.trail-box{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:14px;margin-top:12px;font-size:.75rem;color:var(--dim);display:none}
+.trail-box.show{display:block}
+.trail-hash{font-family:monospace;color:#4ade80;word-break:break-all}
+
+/* MSGS */
+.msg{padding:12px 16px;border-radius:8px;margin-bottom:14px;font-size:.88rem}
+.msg-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
+.msg-info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa}
+.msg-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171}
+
+/* FOOTER */
+.cp-footer{text-align:center;padding:24px;font-size:.7rem;color:#334155;margin-top:20px}
+
+@media(max-width:600px){
+  .amount-big{font-size:2rem}
+  .hdr-logo{font-size:.9rem}
+  .items-table th:nth-child(3),.items-table td:nth-child(3){display:none}
+}
+</style>
 </head>
 <body>
 
 <!-- HEADER -->
-<div class="cp-header">
+<div class="hdr">
   <div>
-    <div class="cp-logo">{{ invoice.company.name }}</div>
-    {% if invoice.company.oib %}<div class="cp-company">OIB: {{ invoice.company.oib }}</div>{% endif %}
+    <div class="hdr-logo">{{ invoice.company.name }}</div>
+    {% if invoice.company.oib %}<div style="font-size:.7rem;color:var(--dim)">OIB: {{ invoice.company.oib }}</div>{% endif %}
   </div>
-  <div style="font-size:.78rem;color:#64748b">
-    {{ invoice.invoice_number }}
+  <div class="hdr-actions">
+    <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" target="_blank" class="btn-hdr btn-pdf">
+      📄 PDF
+    </a>
+    <button onclick="showQR()" class="btn-hdr btn-qr">📱 QR</button>
   </div>
 </div>
 
-<div class="cp-wrap">
-
-  <!-- DJANGO MESSAGES -->
-  {% for message in messages %}
-  <div class="cp-msg {% if message.tags == 'success' %}cp-msg-success{% else %}cp-msg-info{% endif %}">
-    {{ message }}
+<!-- QR MODAL -->
+<div class="qr-overlay" id="qrOverlay" onclick="hideQR()">
+  <div class="qr-box" onclick="event.stopPropagation()">
+    <div style="font-size:.8rem;font-weight:700;color:var(--gold);margin-bottom:14px">Skeniraj za otvaranje ponude</div>
+    <img src="{% qr_b64 request.build_absolute_uri size=200 %}" alt="QR">
+    <div class="qr-url">{{ request.build_absolute_uri }}</div>
+    <button onclick="hideQR()" style="margin-top:14px;padding:8px 20px;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:.8rem">Zatvori</button>
   </div>
+</div>
+
+<div class="wrap">
+
+  {% for message in messages %}
+  <div class="msg {% if message.tags == 'success' %}msg-success{% elif message.tags == 'error' %}msg-error{% else %}msg-info{% endif %}">{{ message }}</div>
   {% endfor %}
 
-  <!-- UPOZORENJE: ISTEKLA PONUDA -->
   {% if is_expired %}
-  <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#f87171;font-weight:600">
-    ⚠️ {% trans "Rok ove ponude je istekao" %} ({{ invoice.validity_date|date:"d.m.Y" }}).
-    <span style="font-weight:400;font-size:.85rem">{% trans "Kontaktirajte nas za novu ponudu." %}</span>
-  </div>
+  <div class="expired-banner">⚠️ Rok ponude je istekao ({{ invoice.validity_date|date:"d.m.Y" }}). Za novu ponudu kontaktirajte nas.</div>
   {% endif %}
 
-  <!-- STATUS BANNER -->
-  <div class="cp-status cp-status-{{ invoice.status|lower }}">
+  <!-- HERO -->
+  <div class="status-hero">
     {% if invoice.status == 'ACCEPTED' %}
-      ✅ {% trans "Ponuda prihvaćena" %}
+    <div class="status-icon">✅</div>
+    <div class="amount-big">{{ invoice.total|floatformat:2 }} €</div>
+    <div class="amount-label">Ukupno s PDV-om</div>
+    <div class="status-badge badge-accepted">Prihvaćeno</div>
     {% elif invoice.status == 'REJECTED' %}
-      ❌ {% trans "Ponuda odbijena" %}
-    {% elif invoice.status in 'DRAFT,SENT' %}
-      📋 {% trans "Ponuda čeka vašu odluku" %}
+    <div class="status-icon">❌</div>
+    <div class="amount-big">{{ invoice.total|floatformat:2 }} €</div>
+    <div class="status-badge badge-rejected">Odbijeno</div>
     {% else %}
-      📄 {{ invoice.get_status_display }}
-    {% endif %}
-    {% if invoice.validity_date %}
-      <span style="margin-left:auto;font-size:.8rem;font-weight:400;opacity:.7">
-        {% trans "Vrijedi do" %}: {{ invoice.validity_date|date:"d.m.Y" }}
-      </span>
+    <div class="status-icon">📋</div>
+    <div class="amount-big">{{ invoice.total|floatformat:2 }} €</div>
+    <div class="amount-label">Ukupno s PDV-om · čeka vašu odluku</div>
+    <div class="status-badge badge-sent">Ponuda aktivna{% if invoice.validity_date %} do {{ invoice.validity_date|date:"d.m.Y" }}{% endif %}</div>
     {% endif %}
   </div>
 
-  <!-- IZNOS HERO -->
-  <div class="cp-amount-hero">
-    <div class="cp-amount-big">{{ invoice.total|floatformat:2 }} €</div>
-    <div class="cp-amount-label">{% trans "Ukupan iznos s PDV-om" %}</div>
-  </div>
-
-  <!-- META PODACI -->
-  <div class="cp-meta">
-    <div class="cp-meta-item">
-      <div class="cp-meta-label">{% trans "Broj ponude" %}</div>
-      <div class="cp-meta-value">{{ invoice.invoice_number }}</div>
+  <!-- META -->
+  <div class="meta-grid">
+    <div class="meta-item">
+      <div class="meta-label">Broj ponude</div>
+      <div class="meta-value">{{ invoice.invoice_number }}</div>
     </div>
-    <div class="cp-meta-item">
-      <div class="cp-meta-label">{% trans "Datum" %}</div>
-      <div class="cp-meta-value">{{ invoice.invoice_date|date:"d.m.Y" }}</div>
+    <div class="meta-item">
+      <div class="meta-label">Datum</div>
+      <div class="meta-value">{{ invoice.date_issued|date:"d.m.Y"|default:"—" }}</div>
     </div>
-    {% if invoice.validity_date %}
-    <div class="cp-meta-item">
-      <div class="cp-meta-label">{% trans "Vrijedi do" %}</div>
-      <div class="cp-meta-value">{{ invoice.validity_date|date:"d.m.Y" }}</div>
+    <div class="meta-item">
+      <div class="meta-label">Neto iznos</div>
+      <div class="meta-value">{{ invoice.subtotal|floatformat:2 }} €</div>
+    </div>
+    {% if invoice.tax_amount %}
+    <div class="meta-item">
+      <div class="meta-label">PDV ({{ invoice.tax_percent|floatformat:0 }}%)</div>
+      <div class="meta-value">{{ invoice.tax_amount|floatformat:2 }} €</div>
     </div>
     {% endif %}
     {% if invoice.buyer_name %}
-    <div class="cp-meta-item">
-      <div class="cp-meta-label">{% trans "Kupac" %}</div>
-      <div class="cp-meta-value">{{ invoice.buyer_name }}</div>
+    <div class="meta-item">
+      <div class="meta-label">Naručitelj</div>
+      <div class="meta-value" style="font-size:.8rem">{{ invoice.buyer_name }}</div>
     </div>
     {% endif %}
   </div>
 
   <!-- STAVKE -->
   {% if invoice.items.exists %}
-  <div class="cp-card">
-    <div class="cp-card-title">{% trans "Stavke ponude" %}</div>
+  <div class="card">
+    <div class="card-title">📦 Stavke ponude</div>
     <div style="overflow-x:auto">
-      <table class="cp-items">
+      <table class="items-table">
         <thead>
           <tr>
-            <th>{% trans "Opis" %}</th>
-            <th class="text-end">{% trans "Kol." %}</th>
-            <th class="text-end">{% trans "Jed. cijena" %}</th>
-            <th class="text-end">{% trans "Iznos" %}</th>
+            <th>Opis</th>
+            <th class="ta-r">Kol.</th>
+            <th class="ta-r">Jed. cijena</th>
+            <th class="ta-r">Iznos</th>
           </tr>
         </thead>
         <tbody>
@@ -172,96 +238,166 @@
           <tr>
             <td>
               <span style="font-weight:500">{{ item.description }}</span>
-              {% if item.note %}<br><small style="color:#64748b">{{ item.note }}</small>{% endif %}
+              {% if item.note %}<br><small style="color:var(--dim)">{{ item.note }}</small>{% endif %}
             </td>
-            <td class="text-end">{{ item.quantity|floatformat:2 }} {{ item.unit|default:"kom" }}</td>
-            <td class="text-end">{{ item.unit_price|floatformat:2 }} €</td>
-            <td class="text-end" style="font-weight:600">{{ item.total_price|floatformat:2 }} €</td>
+            <td class="ta-r" style="white-space:nowrap">{{ item.quantity|floatformat:2 }} {{ item.unit|default:"kom" }}</td>
+            <td class="ta-r" style="white-space:nowrap">{{ item.unit_price|floatformat:2 }} €</td>
+            <td class="ta-r" style="font-weight:600;white-space:nowrap">{{ item.total_price|floatformat:2 }} €</td>
           </tr>
           {% endfor %}
+          <tr>
+            <td colspan="3" class="ta-r" style="padding-top:12px;color:var(--muted);font-size:.8rem">Neto:</td>
+            <td class="ta-r" style="padding-top:12px">{{ invoice.subtotal|floatformat:2 }} €</td>
+          </tr>
+          {% if invoice.tax_amount %}
+          <tr>
+            <td colspan="3" class="ta-r" style="color:var(--muted);font-size:.8rem">PDV:</td>
+            <td class="ta-r">{{ invoice.tax_amount|floatformat:2 }} €</td>
+          </tr>
+          {% endif %}
+          <tr class="totals-row">
+            <td colspan="3" class="ta-r">UKUPNO:</td>
+            <td class="ta-r">{{ invoice.total|floatformat:2 }} €</td>
+          </tr>
         </tbody>
       </table>
     </div>
-
-    <!-- TOTALI -->
-    <table class="cp-totals">
-      <tr>
-        <td style="color:#94a3b8">{% trans "Neto" %}</td>
-        <td class="text-end">{{ invoice.subtotal|floatformat:2 }} €</td>
-      </tr>
-      {% if invoice.tax_amount %}
-      <tr>
-        <td style="color:#94a3b8">{% trans "PDV" %} ({{ invoice.tax_rate|floatformat:0 }}%)</td>
-        <td class="text-end">{{ invoice.tax_amount|floatformat:2 }} €</td>
-      </tr>
-      {% endif %}
-      <tr class="cp-total-final">
-        <td>{% trans "UKUPNO" %}</td>
-        <td class="text-end">{{ invoice.total|floatformat:2 }} €</td>
-      </tr>
-    </table>
   </div>
   {% endif %}
+
+  <!-- VALUE COMPARISON: Legalno vs Crno tržište -->
+  <div class="comparison">
+    <div class="comp-title">⚖️ Legalni radovi vs. crno tržište — što dobivate za razliku?</div>
+    <div class="comp-row"><span class="comp-icon">🧾</span><span class="comp-label">Račun i dokumentacija</span><span class="comp-no">✗ Bez računa</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Račun, PDV</span></div>
+    <div class="comp-row"><span class="comp-icon">🛡️</span><span class="comp-label">Zakonska garancija na radove</span><span class="comp-no">✗ Nema</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Gratis, min. 2g.</span></div>
+    <div class="comp-row"><span class="comp-icon">⚖️</span><span class="comp-label">Pravna zaštita pri sporu</span><span class="comp-no">✗ Nema osnove</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Potpuna</span></div>
+    <div class="comp-row"><span class="comp-icon">🌿</span><span class="comp-label">Odlaganje otpada</span><span class="comp-no">✗ Vaš problem</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Vreće + reciklaža</span></div>
+    <div class="comp-row"><span class="comp-icon">👷</span><span class="comp-label">Osigurani radnici (MO/ZO)</span><span class="comp-no">✗ Vaša odgovornost</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Izvođač odgovara</span></div>
+    <div class="comp-row"><span class="comp-icon">🏦</span><span class="comp-label">Odbitak za obrt/tvrtku</span><span class="comp-no">✗ Ne može</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Porezno priznat</span></div>
+    <div class="comp-divider"></div>
+    <div class="slider-wrap">
+      <div class="slider-label">
+        <span>Crno tržište (procjena)</span>
+        <span id="blackPrice">—</span>
+      </div>
+      <input type="range" id="blackSlider" min="50" max="95" value="75" step="5"
+             style="width:100%;accent-color:var(--gold)"
+             oninput="updateComparison(this.value)">
+      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">Pomičite klizač: koliki % naše cijene bi tražili na crno?</div>
+      <div class="savings-box" id="savingsBox">
+        <div class="savings-amount" id="savingsAmt">—</div>
+        <div class="savings-label">razlika — a bez računa, bez garancije, bez zaštite</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GARANCIJE & PREDNOSTI -->
+  <div class="guarantees">
+    <div class="guarantee-item">
+      <div class="guarantee-icon">🏗️</div>
+      <div class="guarantee-title">Ekipa 4+1</div>
+      <div class="guarantee-text">4 majstora + 1 pomoćni radnik. Brzo, uredno, profesionalno.</div>
+    </div>
+    <div class="guarantee-item">
+      <div class="guarantee-icon">♻️</div>
+      <div class="guarantee-title">Bez kontejnera</div>
+      <div class="guarantee-text">Svo smeće stane u vreće. Veći dio ide na reciklažno dvorište.</div>
+    </div>
+    <div class="guarantee-item">
+      <div class="guarantee-icon">🛡️</div>
+      <div class="guarantee-title">Garancija gratis</div>
+      <div class="guarantee-text">Zakonska garancija nije uračunata u cijenu. Dobivate je besplatno.</div>
+    </div>
+    <div class="guarantee-item">
+      <div class="guarantee-icon">🏆</div>
+      <div class="guarantee-title">Vizitka doma</div>
+      <div class="guarantee-text">Uredna fasada/renovacija = društveni status. Bit će tema razgovora.</div>
+    </div>
+  </div>
 
   <!-- NAPOMENE -->
   {% if invoice.notes %}
-  <div class="cp-card">
-    <div class="cp-card-title">{% trans "Napomene" %}</div>
-    <p style="font-size:.9rem;color:#94a3b8;line-height:1.6">{{ invoice.notes }}</p>
+  <div class="card">
+    <div class="card-title">📝 Napomene</div>
+    <p style="font-size:.88rem;color:var(--muted);line-height:1.6">{{ invoice.notes|linebreaksbr }}</p>
   </div>
   {% endif %}
 
-  <!-- AKCIJE -->
-  {% if invoice.status in 'DRAFT,SENT' %}
-  <form method="post">
-    {% csrf_token %}
-    <div class="cp-actions">
-      <button type="submit" name="action" value="accept" class="cp-btn cp-btn-accept">
-        ✅ {% trans "Prihvaćam ponudu" %}
-      </button>
-      <button type="submit" name="action" value="reject" class="cp-btn cp-btn-reject"
-              onclick="return confirm('{% trans "Jeste li sigurni da želite odbiti ponudu?" %}')">
-        ❌ {% trans "Odbijam ponudu" %}
-      </button>
-    </div>
-  </form>
-  {% elif invoice.status == 'ACCEPTED' %}
-  <form method="post">
-    {% csrf_token %}
-    <div class="cp-actions">
-      <div class="cp-btn cp-btn-accept" style="cursor:default;opacity:.7;flex:none">
-        ✅ {% trans "Ponuda je prihvaćena" %}
+  <!-- AI AGENT -->
+  <div class="ai-section">
+    <div class="ai-header">
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="ai-name">AI savjetnik</div>
+        <div class="ai-sub">Odgovara na vaša pitanja o ponudi</div>
       </div>
-      <button type="submit" name="action" value="undo_accept" class="cp-btn cp-btn-undo">
-        ↩ {% trans "Opozovi prihvaćanje" %}
-      </button>
     </div>
-  </form>
+    <div class="quick-qs">
+      <button class="quick-q" onclick="sendQuick('Je li cijena poštena?')">Je li cijena poštena?</button>
+      <button class="quick-q" onclick="sendQuick('Kada bi radovi počeli?')">Kada bi radovi počeli?</button>
+      <button class="quick-q" onclick="sendQuick('Kako funkcionira garancija?')">Kako funkcionira garancija?</button>
+      <button class="quick-q" onclick="sendQuick('Zašto ne uzeti majstora na crno?')">Zašto ne crno tržište?</button>
+      <button class="quick-q" onclick="sendQuick('Mogu li platiti na rate?')">Mogu li na rate?</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="chat-msg ai">Pozdrav! Ovdje sam da odgovorim na svako vaše pitanje o ovoj ponudi. Što vas zanima?</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Postavite pitanje..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="chat-send" id="chatSend" onclick="sendMsg()">Pošalji</button>
+    </div>
+  </div>
+
+  <!-- AKCIJE -->
+  {% if invoice.status in 'DRAFT,SENT' and not is_expired %}
+  <div class="actions-section">
+    <form method="post" id="acceptForm">
+      {% csrf_token %}
+      <button type="button" onclick="handleAccept()" class="btn-accept">
+        ✅ Prihvaćam ponudu i potvrđujem narudžbu
+      </button>
+      <input type="hidden" name="action" id="actionInput" value="">
+    </form>
+    <button onclick="handleReject()" class="btn-reject">
+      ❌ Odbijam ponudu
+    </button>
+    <div class="trail-box" id="trailBox">
+      <div style="font-weight:600;color:#4ade80;margin-bottom:4px">✅ Prihvaćanje digitalno zabilježeno</div>
+      <div>Vaša odluka je kriptografski osigurana. SHA-256: <span class="trail-hash" id="trailHash">—</span></div>
+      <div style="margin-top:4px">Timestamp: <span id="trailTs">—</span></div>
+    </div>
+  </div>
+  {% elif invoice.status == 'ACCEPTED' %}
+  <div class="actions-section">
+    <div style="text-align:center;padding:20px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:12px;margin-bottom:12px">
+      <div style="font-size:2rem">✅</div>
+      <div style="font-weight:700;color:#4ade80;margin:6px 0">Ponuda je prihvaćena</div>
+      <div style="font-size:.8rem;color:var(--dim)">Kontaktirat ćemo vas uskoro s detaljima</div>
+    </div>
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="action" value="undo_accept">
+      <button type="submit" class="btn-undo">↩ Opozovi prihvaćanje</button>
+    </form>
+  </div>
   {% elif invoice.status == 'REJECTED' %}
-  <form method="post">
-    {% csrf_token %}
-    <div class="cp-actions">
-      <button type="submit" name="action" value="undo_reject" class="cp-btn cp-btn-accept">
-        ↩ {% trans "Predomislio sam se — prihvaćam" %}
-      </button>
-    </div>
-  </form>
+  <div class="actions-section">
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="action" value="undo_reject">
+      <button type="submit" class="btn-accept">↩ Predomislio/la sam se — prihvaćam</button>
+    </form>
+  </div>
   {% endif %}
 
   <!-- KONTAKT -->
   {% if invoice.company.email or invoice.company.phone %}
-  <div style="margin-top:32px;padding:16px;background:#0d1525;border-radius:10px;text-align:center">
-    <div style="font-size:.75rem;color:#64748b;margin-bottom:8px">{% trans "Pitanja? Kontaktirajte nas:" %}</div>
+  <div style="margin-top:24px;padding:16px;background:var(--card2);border-radius:10px;text-align:center">
+    <div style="font-size:.72rem;color:var(--dim);margin-bottom:8px">Pitanja? Kontaktirajte nas:</div>
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
       {% if invoice.company.email %}
-      <a href="mailto:{{ invoice.company.email }}" style="color:#c9a84c;font-size:.85rem;text-decoration:none">
-        ✉ {{ invoice.company.email }}
-      </a>
+      <a href="mailto:{{ invoice.company.email }}" style="color:var(--gold);font-size:.85rem;text-decoration:none">✉ {{ invoice.company.email }}</a>
       {% endif %}
       {% if invoice.company.phone %}
-      <a href="tel:{{ invoice.company.phone }}" style="color:#c9a84c;font-size:.85rem;text-decoration:none">
-        📞 {{ invoice.company.phone }}
-      </a>
+      <a href="tel:{{ invoice.company.phone }}" style="color:var(--gold);font-size:.85rem;text-decoration:none">📞 {{ invoice.company.phone }}</a>
       {% endif %}
     </div>
   </div>
@@ -269,9 +405,112 @@
 
 </div>
 
-<div class="cp-footer">
-  Powered by LIMIT Connect · limit-connect.com
-</div>
+<div class="cp-footer">Powered by LIMIT Connect · limit-connect.com</div>
 
+<script>
+const TOKEN = '{{ invoice.client_token }}';
+const LANG = '{{ LANGUAGE_CODE|default:"hr" }}';
+const TOTAL = {{ invoice.total|unlocalize }};
+let chatHistory = [];
+
+// QR Modal
+function showQR(){document.getElementById('qrOverlay').classList.add('show')}
+function hideQR(){document.getElementById('qrOverlay').classList.remove('show')}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')hideQR()});
+
+// Comparison slider
+function updateComparison(pct){
+  const black = TOTAL * pct / 100;
+  const diff = TOTAL - black;
+  document.getElementById('blackPrice').textContent = black.toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  document.getElementById('savingsAmt').textContent = diff.toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+}
+updateComparison(75);
+
+// AI Agent
+function sendQuick(q){
+  document.getElementById('chatInput').value = q;
+  sendMsg();
+}
+
+async function sendMsg(){
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  const btn = document.getElementById('chatSend');
+  btn.disabled = true;
+  input.value = '';
+  appendMsg('user', msg);
+  chatHistory.push({role:'user',content:msg});
+  const typing = appendMsg('ai','...');
+  try{
+    const resp = await fetch('/'+LANG+'/ponuda/'+TOKEN+'/ai/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+      body:JSON.stringify({message:msg,history:chatHistory.slice(-6)})
+    });
+    const d = await resp.json();
+    const reply = d.reply||'Žao mi je, pokušajte ponovo.';
+    typing.textContent = reply;
+    chatHistory.push({role:'assistant',content:reply});
+  }catch(e){
+    typing.textContent = 'Greška veze. Pokušajte ponovo.';
+  }
+  btn.disabled = false;
+  scrollChat();
+}
+
+function appendMsg(role, text){
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = 'chat-msg '+role;
+  div.textContent = text;
+  msgs.appendChild(div);
+  scrollChat();
+  return div;
+}
+
+function scrollChat(){
+  const msgs = document.getElementById('chatMsgs');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// Digital acceptance
+async function handleAccept(){
+  if(!confirm('Potvrđujete prihvaćanje ponude ' + '{{ invoice.invoice_number }}' + ' u iznosu {{ invoice.total|floatformat:2 }} €?')) return;
+  try{
+    const r = await fetch('/'+LANG+'/ponuda/'+TOKEN+'/prihvati/',{
+      method:'POST',
+      headers:{'X-CSRFToken':getCsrf()}
+    });
+    const d = await r.json();
+    if(d.ok){
+      document.getElementById('trailHash').textContent = d.hash;
+      document.getElementById('trailTs').textContent = d.timestamp.replace('T',' ').slice(0,19);
+      document.getElementById('trailBox').classList.add('show');
+      // Submiti form za status update
+      setTimeout(()=>{
+        document.getElementById('actionInput').value = 'accept';
+        document.getElementById('acceptForm').submit();
+      }, 2000);
+    }
+  }catch(e){
+    document.getElementById('actionInput').value = 'accept';
+    document.getElementById('acceptForm').submit();
+  }
+}
+
+function handleReject(){
+  if(confirm('Jeste li sigurni da želite odbiti ponudu?')){
+    const f = document.getElementById('acceptForm');
+    document.getElementById('actionInput').value = 'reject';
+    f.submit();
+  }
+}
+
+function getCsrf(){
+  return document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('csrftoken='))?.split('=')[1]||'';
+}
+</script>
 </body>
 </html>

@@ -921,7 +921,11 @@ urlpatterns += [path("qr/", _qr_view, name="qr_code")]
 from invoicing.views import client_portal as _client_portal_view
 
 # MORA biti u i18n_patterns — LanguageMiddleware dodaje /hr/ prefiks
+from invoicing.views import portal_ai_agent as _ai_agent, portal_accept_trail as _accept_trail
+
 urlpatterns += i18n_patterns(
     path("ponuda/<uuid:token>/", _client_portal_view, name="customer_room"),
+    path("ponuda/<uuid:token>/ai/", _ai_agent, name="portal_ai"),
+    path("ponuda/<uuid:token>/prihvati/", _accept_trail, name="portal_accept_trail"),
     prefix_default_language=True,
 )
