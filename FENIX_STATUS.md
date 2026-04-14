@@ -68,3 +68,24 @@ API docs:       /api/docs/ (Swagger) + /api/redoc/
 - Coverage target: 30%+ (2,319 tests exist, infrastructure ready)
 - App consolidation (89 custom apps — all wired, consolidation is architectural)
 - Staging environment
+
+---
+
+## FENIX RAZVOJNA PRAVILA (živući dokument)
+
+### PRAVILO 1 — Nema zakrpa, samo pravi fix
+Svaka promjena mora biti na globalnoj razini. Lokalni `<style>` blokovi, one-off template hacks, copy-paste koda — nisu prihvatljivi.
+- Globalni CSS → `fenix-ui.css` (`.entity-link`, `.col-actions`, `.btn-action`)
+- Globalni Python pattern → shared util, middleware, mixin
+- Zakrpa = žuti karton + odmah refaktor na globalnu razinu
+
+### PRAVILO 2 — Settings i model choices moraju biti sinkronizirani
+`settings.LANGUAGES` i `preferred_language choices` u modelu — uvijek isti skup.
+Kad se dodaje novi jezik u settings, odmah migracija na choices. Bez iznimke.
+Kršenje = migration bug koji se otkrije tek kad korisnik ne može odabrati jezik.
+
+### PRAVILO 3 — Template promjene zahtijevaju gunicorn reload
+`cached.Loader` je aktivan u produkciji. Svaki commit koji mijenja template mora završiti s `systemctl reload gunicorn-fina`. CI/CD to radi automatski — ručni deploji ne smiju zaboraviti.
+
+### PRAVILO 4 — `--preload` zabranjeno u gunicorn service fajlu
+`--preload` zaključava kod u master procesu — template promjene, novi kod, migracije nisu vidljive workerima bez restarta mastera. Zamijenjen s `ExecReload=SIGHUP` + graceful reload.
