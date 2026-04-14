@@ -205,6 +205,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "core.middleware.DomainGateMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "core.audit.AuditMiddleware",
     "core.middleware.UserLanguageMiddleware",

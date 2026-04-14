@@ -772,3 +772,231 @@ class LicenseCheckMiddleware:
             except ImportError:
                 pass
         return self.get_response(request)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DOMAIN GATE — Restricts URL access per domain
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class DomainGateMiddleware:
+    """
+    Svaka domena ima pristup samo relevantnim URL-ovima.
+    limit-connect.com → sve (master domena)
+    memio.farm → livestock, azili, dashboard, accounts, static/media
+    memio.pet → memio_pet, boxgram, accounts, static/media
+    no-limit.world → no_limit landing, static/media
+    viskovic-group.de → stolarija, website, accounts, static/media
+
+    Neovlašteni pristup → redirect na odgovarajući landing page domene.
+    Superadmini prolaze uvijek (za debug/admin pristup).
+    """
+
+    # Putanje koje su UVIJEK dostupne (auth, static, API, admin)
+    ALWAYS_ALLOWED = (
+        "/static/",
+        "/media/",
+        "/favicon",
+        "/robots.txt",
+        "/api/",
+        "/mcp/",
+        "/admin/",
+        "/j3wkuxuwuuc9/",
+        "/hr/accounts/",
+        "/de/accounts/",
+        "/en/accounts/",
+        "/hr/login",
+        "/de/login",
+        "/en/login",
+        "/login",
+        "/hr/dashboard/",
+        "/de/dashboard/",
+        "/en/dashboard/",
+        "/logout",
+        "/i18n/",
+        "/__debug__/",
+        "/hr/pocni/",
+        "/de/pocni/",
+        "/en/pocni/",
+        "/pocni/",
+        "/hr/gdpr/",
+        "/hr/export/",
+        "/privacy/",
+        "/terms/",
+    )
+
+    # Per-domain URL whitelist (paths that start with these prefixes)
+    DOMAIN_RULES = {
+        "memio.farm": (
+            "/hr/livestock/",
+            "/de/livestock/",
+            "/en/livestock/",
+            "/hr/udruge/",
+            "/de/udruge/",
+            "/en/udruge/",
+            "/hr/experiences/",
+            "/hr/marketplace/",
+            "/hr/invoicing/",
+            "/de/invoicing/",
+            "/en/invoicing/",
+            "/hr/partners/",
+            "/hr/inventory/",
+            "/hr/companies/",
+            "/de/companies/",
+            "/hr/worktime/",
+            "/hr/documents/",
+            "/hr/pos/",
+            "/de/pos/",
+            "/site/",
+            "/ponuda/",
+        ),
+        "www.memio.farm": "memio.farm",  # alias
+        "memio.pet": (
+            "/hr/memio/",
+            "/de/memio/",
+            "/en/memio/",
+            "/hr/boxgram/",
+            "/de/boxgram/",
+            "/pet/",
+            "/hr/pet/",
+            "/ponuda/",
+        ),
+        "www.memio.pet": "memio.pet",
+        "memio.world": (
+            "/hr/memio/",
+            "/de/memio/",
+            "/en/memio/",
+            "/hr/boxgram/",
+            "/de/boxgram/",
+            "/ponuda/",
+        ),
+        "www.memio.world": "memio.world",
+        "no-limit.world": (
+            "/no-limit/",
+            "/hr/no-limit/",
+            "/ponuda/",
+        ),
+        "www.no-limit.world": "no-limit.world",
+        "viskovic-group.de": (
+            "/hr/stolarija/",
+            "/de/stolarija/",
+            "/hr/invoicing/",
+            "/de/invoicing/",
+            "/hr/companies/",
+            "/de/companies/",
+            "/hr/partners/",
+            "/de/partners/",
+            "/hr/worktime/",
+            "/de/worktime/",
+            "/hr/documents/",
+            "/de/documents/",
+            "/hr/pos/",
+            "/de/pos/",
+            "/hr/inventory/",
+            "/de/inventory/",
+            "/site/",
+            "/ponuda/",
+        ),
+        "www.viskovic-group.de": "viskovic-group.de",
+        "fina-connect.online": (
+            "/hr/invoicing/",
+            "/de/invoicing/",
+            "/hr/companies/",
+            "/de/companies/",
+            "/hr/partners/",
+            "/de/partners/",
+            "/site/",
+            "/ponuda/",
+        ),
+        "www.fina-connect.online": "fina-connect.online",
+    }
+
+    # Landing pages per domain (where to redirect if blocked)
+    DOMAIN_LANDING = {
+        "memio.farm": "/hr/livestock/",
+        "memio.pet": "/hr/memio/",
+        "memio.world": "/hr/memio/",
+        "no-limit.world": "/no-limit/",
+        "viskovic-group.de": "/de/dashboard/",
+        "fina-connect.online": "/hr/dashboard/",
+    }
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        host = request.META.get("HTTP_HOST", "").split(":")[0].lower()
+        path = request.path
+
+        # Master domain — no restrictions
+        if "limit-connect.com" in host or host in ("localhost", "127.0.0.1", "37.27.248.86"):
+            request.domain_name = "limit-connect.com"
+            request.domain_restricted = False
+            return self.get_response(request)
+
+        # Always-allowed paths
+        if any(path.startswith(p) for p in self.ALWAYS_ALLOWED):
+            request.domain_name = host
+            request.domain_restricted = True
+            return self.get_response(request)
+
+        # Root path → domain landing
+        if path in ("/", "/hr/", "/de/", "/en/"):
+            landing = self._get_landing(host)
+            if landing:
+                from django.shortcuts import redirect
+
+                return redirect(landing)
+
+        # Superadmin bypass
+        if hasattr(request, "user") and request.user.is_authenticated:
+            if request.user.is_superuser:
+                request.domain_name = host
+                request.domain_restricted = False
+                return self.get_response(request)
+
+        # Check domain rules
+        rules = self._get_rules(host)
+        if rules is None:
+            # Unknown domain but in ALLOWED_HOSTS → allow (no restriction)
+            request.domain_name = host
+            request.domain_restricted = False
+            return self.get_response(request)
+
+        # Check if path is allowed for this domain
+        if any(path.startswith(prefix) for prefix in rules):
+            request.domain_name = host
+            request.domain_restricted = True
+            return self.get_response(request)
+
+        # BLOCKED — redirect to domain landing
+        landing = self._get_landing(host)
+        if landing and path != landing:
+            logger.warning(
+                "DomainGate blocked: host=%s path=%s user=%s → redirect %s",
+                host,
+                path,
+                getattr(request, "user", "anon"),
+                landing,
+            )
+            from django.shortcuts import redirect
+
+            return redirect(landing)
+
+        # Fallback — let it through with a warning (don't break things)
+        request.domain_name = host
+        request.domain_restricted = True
+        return self.get_response(request)
+
+    def _get_rules(self, host):
+        """Resolve rules, following aliases."""
+        rules = self.DOMAIN_RULES.get(host)
+        if isinstance(rules, str):
+            rules = self.DOMAIN_RULES.get(rules)
+        return rules
+
+    def _get_landing(self, host):
+        """Get landing page for domain."""
+        # Strip www.
+        bare = host.replace("www.", "")
+        return self.DOMAIN_LANDING.get(bare, self.DOMAIN_LANDING.get(host, "/"))
