@@ -109,3 +109,4 @@ sentry-sdk>=2.0
 zipstream-ng>=1.9
 holidays>=0.90
 django-ratelimit==4.1.0
+fastmcp==3.2.0
