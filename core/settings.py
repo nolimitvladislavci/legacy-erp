@@ -68,6 +68,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.memio.world",
     "https://memio.pet",
     "https://www.memio.pet",
+    "http://127.0.0.1:8000",  # load testing (local only)
 ]
 
 # ── Security (production only) ────────────────────────────────

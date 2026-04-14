@@ -1,1 +1,11 @@
 Count,Message,Traceback,Nodes
+2,argument of type 'NoneType' is not iterable,"  File ""/var/www/fina-connect/venv/lib/python3.12/site-packages/locust/user/task.py"", line 362, in run
+    self.execute_next_task()
+  File ""/var/www/fina-connect/venv/lib/python3.12/site-packages/locust/user/task.py"", line 395, in execute_next_task
+    self.execute_task(self._task_queue.popleft())
+  File ""/var/www/fina-connect/venv/lib/python3.12/site-packages/locust/user/task.py"", line 512, in execute_task
+    task(self.user)
+  File ""/var/www/fina-connect/load_tests/locustfile.py"", line 82, in dashboard
+    elif ""login"" in r.url:
+         ^^^^^^^^^^^^^^^^
+",local
