@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-14 (Dan 48), commit 32c0cbf8 — KORAK 10 Onboarding ✅
+> Zadnji update: 2026-04-14 (Dan 48), commit 8327b5ad — ARHIVA-1 ScanToken LIVE ✅
 
 ---
 
@@ -13,6 +13,7 @@
 | 2026-04-14 | CC Code | Korak 9 | Security: Django 5.1.15, rate limit, GDPR audit log | b04ec43a |
 | 2026-04-14 | CC Code | Korak 10 | 9 bugova, 21/21 smoke testovi ✅ | c74c539f |
 | 2026-04-14 | Sonnet | Korak 11 + Arhiva | Beta Konjik. OCR 100%. Arhiva HR-DE plan. Memio kontekst. | c74c539f |
+| 2026-04-14 | Opus CC | ARHIVA-1 | ScanToken model+views+UI+tests, 9/9 pass, LIVE | 8327b5ad |
 
 ### KONTEKST ZA SLJEDEĆU SESIJU
 ```
@@ -102,7 +103,7 @@ Blokeri:  ARHIVA-1 mora biti live
 |-----|--------|---|
 | Koraci 1-10 | ✅ | 100% |
 | Korak 11 Beta | 🔄 | 10% |
-| **ARHIVA-1** Mobile Scan | 🔄 CC Task aktivan | 0% |
+| **ARHIVA-1** Mobile Scan | ✅ LIVE | 95% |
 | ARHIVA-2 Magic Link | ⏳ | — |
 | ARHIVA-3 Network Disk | ⏳ | — |
 | ARHIVA-4 WhatsApp Share | ⏳ | — |
@@ -143,12 +144,12 @@ Ukupno:   73.14€ | PDV: 14.43€
 ## ARHIVA-1 — MOBILE SCAN PORTAL 🔄 CC Task zapisan
 **Link → mobitel → kamera → arhiva. Bez logina. Bez instalacije.**
 ```
-[ ] ScanToken model + migracija
-[ ] /scan/{token}/ PUBLIC ruta
-[ ] Mobile UI — 1 gumb, zlatni, 80px, kamera
-[ ] Token generator za Mariju u panelu
-[ ] QR kod za token
-[ ] 5 pytest testova
+[x] ScanToken model + migracija ✅
+[x] /scan/{token}/ PUBLIC ruta ✅
+[x] Mobile UI — 1 gumb, zlatni, kamera ✅
+[x] Token generator za Mariju u panelu ✅
+[x] QR kod za token ✅
+[x] 9 pytest testova ✅
 Test: Marija → token → Gašić Ivan slika → pojavi se u arhivi
 ```
 
