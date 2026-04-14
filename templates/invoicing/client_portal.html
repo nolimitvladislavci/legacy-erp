@@ -100,7 +100,7 @@
   <!-- UPOZORENJE: ISTEKLA PONUDA -->
   {% if is_expired %}
   <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#f87171;font-weight:600">
-    ⚠️ {% trans "Rok ove ponude je istekao" %} ({{ invoice.valid_until|date:"d.m.Y" }}).
+    ⚠️ {% trans "Rok ove ponude je istekao" %} ({{ invoice.validity_date|date:"d.m.Y" }}).
     <span style="font-weight:400;font-size:.85rem">{% trans "Kontaktirajte nas za novu ponudu." %}</span>
   </div>
   {% endif %}
@@ -116,9 +116,9 @@
     {% else %}
       📄 {{ invoice.get_status_display }}
     {% endif %}
-    {% if invoice.valid_until %}
+    {% if invoice.validity_date %}
       <span style="margin-left:auto;font-size:.8rem;font-weight:400;opacity:.7">
-        {% trans "Vrijedi do" %}: {{ invoice.valid_until|date:"d.m.Y" }}
+        {% trans "Vrijedi do" %}: {{ invoice.validity_date|date:"d.m.Y" }}
       </span>
     {% endif %}
   </div>
@@ -139,10 +139,10 @@
       <div class="cp-meta-label">{% trans "Datum" %}</div>
       <div class="cp-meta-value">{{ invoice.invoice_date|date:"d.m.Y" }}</div>
     </div>
-    {% if invoice.valid_until %}
+    {% if invoice.validity_date %}
     <div class="cp-meta-item">
       <div class="cp-meta-label">{% trans "Vrijedi do" %}</div>
-      <div class="cp-meta-value">{{ invoice.valid_until|date:"d.m.Y" }}</div>
+      <div class="cp-meta-value">{{ invoice.validity_date|date:"d.m.Y" }}</div>
     </div>
     {% endif %}
     {% if invoice.buyer_name %}

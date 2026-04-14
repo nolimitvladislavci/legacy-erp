@@ -1236,7 +1236,7 @@ def client_portal(request, token):
     # Provjeri je li ponuda istekla
     from django.utils import timezone as _tz
 
-    is_expired = invoice.valid_until and invoice.valid_until < _tz.now().date()
+    is_expired = invoice.validity_date and invoice.validity_date < _tz.now().date()
 
     if request.method == "POST" and invoice.status in ("DRAFT", "SENT", "ACCEPTED", "REJECTED"):
         # Blokiraj akcije na istekloj ponudi
