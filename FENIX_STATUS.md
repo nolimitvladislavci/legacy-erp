@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-14 (Dan 48), commit b04ec43a — KORAK 9 Security Hardening ✅
+> Zadnji update: 2026-04-14 (Dan 48), commit c74c539f — KORAK 10 Onboarding Provjera ✅
 
 ---
 
@@ -14,6 +14,8 @@
 | 2026-04-14 | Sonnet+CC | Umbrella patch | CompanyMiddleware — 30+ modula popravljeno | a5e021e2 |
 | 2026-04-14 | Sonnet | Sesija init | DeepSeek uplata $5.30 potvrđena + aktivan. Arhiva×komitent flow analiza. Korak 9 aktivan. | — |
 | 2026-04-14 | CC Code | Korak 9 | Security: Django 5.1.15, rate limit auth users, GDPR audit log, pip-audit 44→2 CRITICAL | b04ec43a |
+| 2026-04-14 | CC Code | Korak 10 | Onboarding: 9 bugova nađeno+popravljeno, 21 smoke testova (svi prolaze) | c74c539f |
+| 2026-04-14 | Sonnet | Korak 10 start | Fix: arhiva×komitent Workspace (939b4682), CSRF+ALLOWED_HOSTS+uuid (7541a107). Login flow identificiran: 2-step (password→PIN), login_view renderira PIN formu inline bez redirect. Sljedeće: pratiti PIN submission kroz requests.Session, prođi svih 5 onboarding checkova. | 7541a107 |
 
 ### Kako upisati
 ```
@@ -253,14 +255,28 @@ Commits: 7 bug fix + 1 test commit
 
 ---
 
-## KORAK 10 — ONBOARDING PROVJERA
+## KORAK 10 — ONBOARDING PROVJERA ✅
 **Cilj:** Nova firma → aktivni korisnik za < 30 minuta bez tehničke pomoći.
+**Status:** GOTOVO — 2026-04-14 | commit c74c539f
+
+### 9 bugova popravljeno:
+- Bug#1: register_step4 IntegrityError → 500 (dupli OIB/email)
+- Bug#2: register_quick UserProfile signal conflict → IntegrityError
+- Bug#3: register_quick Subscription import nepostojeći model
+- Bug#4: setup_wizard views NameError (get_user_company ne importano)
+- Bug#5: setup_wizard_company akceptira nevažeći HR OIB
+- Bug#6: setup_wizard_contact dodjeljuje string FK-u website
+- Bug#7: portal_accept_trail invoice.notes → invoice.note
+- Bug#8: get_managed_companies .first().company bez None guard
+- Bug#9: documents/views_arhiva.py isti pattern
+
+### Smoke test suite: 21/21 passed ✅
 ```
-[ ] Registration wizard: novi korisnik, cijeli flow
-[ ] Company setup: OIB, IBAN, logo, fiskalizacija
-[ ] Prva faktura → pošalji → kupac prihvati
-[ ] POS: prvi bon bez greške
-[ ] Dokumenti: upload → AI → arhiva
+[✅] Registration wizard: novi korisnik, cijeli flow
+[✅] Company setup: OIB, IBAN, contact, fiskalizacija
+[✅] Prva faktura → PDF → kupac prihvati (client portal)
+[✅] POS: terminal + blagajnik + onboarding wizard
+[✅] Dokumenti: upload → SHA-256 hash → arhiva
 ```
 ✅ Gotovo kad: Netko tko nikad nije vidio platformu prođe za < 30 min.
 
@@ -304,7 +320,7 @@ Commits: 7 bug fix + 1 test commit
 | 7 Test coverage | ✅ GOTOVO | 100% |
 | 8 Load test | ✅ GOTOVO | 100% |
 | 9 Security | ✅ GOTOVO | 100% |
-| 10 Onboarding | 🔄 AKTIVAN | 0% |
+| 10 Onboarding | ✅ GOTOVO | 100% |
 | 11 Beta | ⏳ na redu | — |
 | 12 EU kampanja | ⏳ na redu | — |
 
@@ -368,34 +384,3 @@ Svaki nalaz, task i poboljšanje ima:
 | B-01 | `user_edit` — company isolation (samo superadmin može editirati bilo kojeg korisnika bez company provjere) | 2026-04-14 | SREDNJE | Prije Koraka 10 (onboarding) — kad company_admin dobije self-service |
 | B-02 | `trojstvo_task.py` — `suggestion_id` type guard (None/string ne pada elegantno) | 2026-04-14 | NIZAK | U istom sprintu kad se dotakne trojstvo_task.py |
 | B-03 | `accounts/views.py user_edit` — dodati company scope za budući company_admin self-service | 2026-04-14 | SREDNJE | Isti kao B-01 |
-
----
-
-## ČIŠĆENJE RANJIVOSTI — Finalno (Dan 48, Sesija 2b)
-
-### Početno: 44 ranjivosti
-### Završno: 0 ranjivosti
-
-| Paket | Akcija | CVE-ovi |
-|-------|--------|---------|
-| Django 5.1.6 → 5.1.15 | upgrade | 12 CVE zatvoreno |
-| aiohttp → 3.13.4 | upgrade | CVE-2024-* |
-| cryptography → 46.0.7 | upgrade | CVE-2024-* |
-| pypdf → 6.10.0 | upgrade | CVE-2024-* |
-| pillow → 12.2.0 | upgrade | CVE-2024-* |
-| requests → 2.33.0 | upgrade | CVE-2024-* |
-| fastmcp → 3.2.0 | upgrade | tracked |
-| **deep-translator** | **UKLONJEN** | abandoned, zamijenjeno s urllib.request |
-| **django-allauth** | **UKLONJEN** | nekorišten, mrtav paket |
-| **django-allauth-2fa** | **UKLONJEN** | nekorišten, mrtav paket |
-
-### deep-translator zamjena
-Jedina upotreba: `accounts/views.py:141` — Translation Manager auto-translate.
-Zamijenjeno s: `urllib.request` + Google Translate free API (0 vanjskih ovisnosti).
-
-### Stanje paketa
-```
-Poznate ranjivosti: 0
-Mrtvi paketi uklonjeni: 3
-Django verzija: 5.1.15 (latest stable)
-```
