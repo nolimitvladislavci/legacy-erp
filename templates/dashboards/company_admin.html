@@ -130,7 +130,8 @@ function dismissOnboarding() {
   </div>
 </div>
 
-<!-- AI Uvidi — proactive widget -->
+<!-- AI Uvidi — proactive widget (hidden on mobile) -->
+<div class="d-none d-md-block">
 {% if ai_insights and ai_insights.total_alerts > 0 or ai_insights and ai_insights.total_suggestions > 0 or ai_insights and ai_insights.total_opportunities > 0 or ai_insights and ai_insights.total_legal_alerts > 0 %}
 <div class="ai-insights-widget">
   <div class="ai-insights-header">
@@ -196,8 +197,10 @@ function dismissOnboarding() {
   {% endif %}
 </div>
 {% endif %}
+</div>
 
-<!-- Wizard Funnel — Ured u džepu -->
+<!-- Wizard Funnel — hidden on mobile -->
+<div class="d-none d-md-block">
 {% if wizard_funnel and wizard_funnel.total > 0 %}
 <div class="fenix-filters" style="border-left:3px solid #6366f1">
   <div class="d-flex align-items-center justify-content-between px-3 pt-3 pb-2">
@@ -263,8 +266,10 @@ function dismissOnboarding() {
   </div>
 </div>
 {% endif %}
+</div>
 
-<!-- Push notification opt-in -->
+<!-- Push notification opt-in (hidden on mobile) -->
+<div class="d-none d-md-block">
 <div id="push-banner" class="push-banner">
   <div class="push-banner-inner">
     <i class="fas fa-bell fx-fs-3xl fx-text-gold"></i>
@@ -315,6 +320,7 @@ function dismissPushBanner(){
   </form>
   {% endfor %}
 </div>
+</div>{# /d-none d-md-block for push+lang #}
 
 <div class="cd-wrap page-enter">
   <div class="cd-title"><a href="{% url 'dashboard' %}" class="fx-no-underline fx-fs-body-sm fx-text-dim fx-mr-3"><i class="fas fa-arrow-left"></i></a> Admin nadzorna ploča
@@ -499,7 +505,8 @@ function dismissPushBanner(){
 
 
 {% if synesis_cfg %}
-<!-- SYNESIS widget -->
+<!-- SYNESIS widget (hidden on mobile) -->
+<div class="d-none d-md-block">
 <div class="fx-rounded mb-3 fx-bg-surface" style="border:1px solid #3b82f622;padding:18px">
   <div class="d-flex justify-content-between align-items-center fx-mb-3">
     <span class="fx-text-blue fx-fw-semibold"><i class="fas fa-database me-2"></i>Synesis integracija</span>
@@ -598,6 +605,7 @@ function dismissPushBanner(){
   </div>
 
 </div>
+</div>{# /d-none d-md-block for synesis #}
 
 {% if inventory_stats.total_items %}
 <!-- SKLADIŠTE card -->

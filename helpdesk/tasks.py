@@ -1,8 +1,12 @@
+import logging
+
 from celery import shared_task
 from django.core.exceptions import ObjectDoesNotExist
 
 from helpdesk.models import Ticket
 from superadmin_ai.models import AIModulePermission, PendingAIAction
+
+logger = logging.getLogger("helpdesk.tasks")
 
 
 @shared_task
@@ -13,7 +17,9 @@ def analyze_ticket_and_propose_action(ticket_id):
         # Provjeri AI dozvolu za helpdesk modul
         perm = AIModulePermission.get_perm(ticket.company, "helpdesk")
         if not perm or not perm.can_read:
-            return  # AI nema pristup helpdesku
+            # AI nema pristup — eskalacija direktno na WhatsApp
+            _whatsapp_escalate(ticket, reason="AI nema pristup helpdesku")
+            return
 
         proposed_code = ""
         action_desc = f"AI Analiza ticketa #{ticket.ticket_number}: {ticket.subject}"
@@ -48,7 +54,38 @@ def analyze_ticket_and_propose_action(ticket_id):
         ticket.status = "waiting_internal"
         ticket.save(update_fields=["status"])
 
+        # WhatsApp eskalacija — obavijest Ivanu i Mariji
+        _whatsapp_escalate(ticket, reason=f"Trojstvo: {action_type}")
+
     except Ticket.DoesNotExist:
         pass
     except ObjectDoesNotExist as e:
-        print(f"Greška u AI tasku: {str(e)}")
+        logger.error("Helpdesk AI task greška: %s", e)
+
+
+def _whatsapp_escalate(ticket, reason=""):
+    """Pošalji WhatsApp obavijest Ivanu i Mariji o novom tiketu."""
+    try:
+        from core.whatsapp import send_text
+
+        company_name = ticket.company.name if ticket.company else "N/A"
+        msg = (
+            f"Helpdesk #{ticket.ticket_number}\n"
+            f"Firma: {company_name}\n"
+            f"Prioritet: {ticket.get_priority_display()}\n"
+            f"Predmet: {ticket.subject}\n"
+        )
+        if reason:
+            msg += f"Status: {reason}\n"
+        msg += f"\nhttps://limit-connect.com/hr/helpdesk/{ticket.pk}/"
+
+        # Ivan (DE)
+        send_text("4915771998747", msg)
+        # Marija (HR)
+        send_text("385976091655", msg)
+
+        logger.info("WhatsApp eskalacija poslana za tiket %s", ticket.ticket_number)
+    except ImportError:
+        logger.warning("WhatsApp modul nije dostupan za eskalaciju tiketa %s", ticket.ticket_number)
+    except Exception as e:
+        logger.error("WhatsApp eskalacija failed za tiket %s: %s", ticket.ticket_number, e)

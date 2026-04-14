@@ -10,28 +10,46 @@
   </div>
   {% endif %}
 
-  {# Brze akcije po modulu (URL-based) #}
+  {# Navigacija — prikazuje samo linkove za aktivirane module #}
   <div style="display:flex;flex-direction:column;gap:5px">
     <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim,#94a3b8);margin-bottom:2px">{% trans "Navigacija" %}</div>
 
     {% url 'dashboard' as nav_dash %}
-    {% url 'pos:dashboard' as nav_pos %}
-    {% url 'documents:arhiva_list' as nav_arh %}
-    {% url 'invoicing:index' as nav_inv %}
-    {% url 'konto:dashboard' as nav_kon %}
-    {% url 'partners:partner_list' as nav_par %}
-    {% url 'inventory:list' as nav_zal %}
-    {% url 'stolarija:dashboard' as nav_sto %}
     {% include "includes/_panel_link.html" with href=nav_dash icon="fa-home" label="Dashboard" %}
-    {% include "includes/_panel_link.html" with href=nav_pos icon="fa-cash-register" label="POS Kasa" %}
+
+    {% url 'documents:arhiva_list' as nav_arh %}
     {% include "includes/_panel_link.html" with href=nav_arh icon="fa-archive" label="Arhiva" %}
+
     {% url 'documents:gallery_dashboard' as nav_gallery %}
     {% include "includes/_panel_link.html" with href=nav_gallery icon="fa-images" label="Galerija" %}
+
+    {% url 'invoicing:index' as nav_inv %}
     {% include "includes/_panel_link.html" with href=nav_inv icon="fa-file-invoice-dollar" label="Fakture" %}
+
+    {% url 'konto:dashboard' as nav_kon %}
     {% include "includes/_panel_link.html" with href=nav_kon icon="fa-book" label="Konto" %}
+
+    {% url 'partners:partner_list' as nav_par %}
     {% include "includes/_panel_link.html" with href=nav_par icon="fa-users" label="Partneri" %}
+
+    {% url 'helpdesk:create' as nav_help %}
+    {% include "includes/_panel_link.html" with href=nav_help icon="fa-life-ring" label="Pomoć" %}
+
+    {# Module-dependent links — only show if module is enabled #}
+    {% if 'pos' in sidebar_enabled_ids %}
+    {% url 'pos:dashboard' as nav_pos %}
+    {% include "includes/_panel_link.html" with href=nav_pos icon="fa-cash-register" label="POS Kasa" %}
+    {% endif %}
+
+    {% if 'inventory' in sidebar_enabled_ids %}
+    {% url 'inventory:list' as nav_zal %}
     {% include "includes/_panel_link.html" with href=nav_zal icon="fa-boxes" label="Zalihe" %}
+    {% endif %}
+
+    {% if 'stolarija' in sidebar_enabled_ids %}
+    {% url 'stolarija:dashboard' as nav_sto %}
     {% include "includes/_panel_link.html" with href=nav_sto icon="fa-window-maximize" label="Stolarija" %}
+    {% endif %}
   </div>
 
   {# Workspace info #}
@@ -43,20 +61,5 @@
     </div>
   </div>
   {% endif %}
-
-  {# HTMX hint #}
-  <div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05)">
-    <div style="font-size:.75rem;color:var(--text-dim,#94a3b8);line-height:1.5">
-      <i class="fas fa-mouse-pointer" style="margin-right:6px;opacity:.5"></i>
-      Klikni na red u tablici za detalje u ovom panelu.
-    </div>
-  </div>
-
-  {# Keyboard shortcuts reminder #}
-  <div style="display:flex;flex-direction:column;gap:3px;font-size:.72rem;color:var(--text-dim,#94a3b8)">
-    <div><kbd style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-size:.65rem">Ctrl+K</kbd> Pretraga</div>
-    <div><kbd style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-size:.65rem">Alt+P</kbd> Panel</div>
-    <div><kbd style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-size:.65rem">Alt+J</kbd> Fullscreen</div>
-  </div>
 
 </div>

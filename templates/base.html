@@ -427,7 +427,10 @@ window.FC = {
 <!-- VAPID Web Push + push opt-in now in core.js -->
 
 <!-- Offline queue + password toggle now in core.js -->
+{# AI Chat — hidden on mobile via CSS, visible on desktop #}
+<div class="d-none d-md-block">
 {% if request.user.is_authenticated %}{% include "ai_assistant/chat_widget.html" %}{% endif %}
+</div>
 
 <!-- Notification polling now in core.js -->
 <script src="{% static 'js/fina-utils.js' %}"></script>
@@ -490,7 +493,8 @@ window.FC = {
 {% endif %}
 </script>
 
-{% include "includes/_zlatno_dugme.html" %}
+{# Zlatno dugme HIDDEN — aktivirat cemo per-user za testere (Marija, Seki, Katarina) #}
+{# {% include "includes/_zlatno_dugme.html" %} #}
 
 
 <!-- ═══ JOKER FULLSCREEN OVERLAY ═══ -->
