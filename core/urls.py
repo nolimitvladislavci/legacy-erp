@@ -915,6 +915,8 @@ urlpatterns += [
 # ── Kupčeva soba — javni pristup ponudama (kratki URL za QR kod) ──
 from invoicing.views import client_portal as _client_portal_view
 
-urlpatterns += [
+# MORA biti u i18n_patterns — LanguageMiddleware dodaje /hr/ prefiks
+urlpatterns += i18n_patterns(
     path("ponuda/<uuid:token>/", _client_portal_view, name="customer_room"),
-]
+    prefix_default_language=True,
+)

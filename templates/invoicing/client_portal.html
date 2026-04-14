@@ -1,0 +1,269 @@
+{% load i18n l10n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ invoice.invoice_number }} — {{ invoice.company.name }}</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/static/css/fenix-tokens.css">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0e1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:0}
+
+    .cp-header{background:#0d1525;border-bottom:1px solid rgba(201,168,76,.2);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .cp-logo{font-size:1.1rem;font-weight:800;color:#c9a84c;letter-spacing:.5px}
+    .cp-company{font-size:.8rem;color:#94a3b8}
+
+    .cp-wrap{max-width:860px;margin:0 auto;padding:24px 16px 60px}
+
+    /* Status banner */
+    .cp-status{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:10px;margin-bottom:24px;font-weight:600}
+    .cp-status-draft,.cp-status-sent{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
+    .cp-status-accepted{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
+    .cp-status-rejected{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171}
+    .cp-status-expired{background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:#94a3b8}
+
+    /* Dokument kartica */
+    .cp-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px;margin-bottom:20px}
+    .cp-card-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:14px}
+
+    /* Iznos hero */
+    .cp-amount-hero{text-align:center;padding:20px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:10px;margin-bottom:20px}
+    .cp-amount-big{font-size:2.4rem;font-weight:800;color:#c9a84c}
+    .cp-amount-label{font-size:.8rem;color:#64748b;margin-top:4px}
+
+    /* Meta grid */
+    .cp-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+    .cp-meta-item{background:#0d1525;border-radius:8px;padding:12px 14px}
+    .cp-meta-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.8px;color:#64748b;margin-bottom:4px}
+    .cp-meta-value{font-size:.9rem;font-weight:600;color:#e2e8f0}
+
+    /* Stavke */
+    .cp-items{width:100%;border-collapse:collapse}
+    .cp-items th{font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:#64748b;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left}
+    .cp-items td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.88rem;color:#e2e8f0}
+    .cp-items tr:last-child td{border-bottom:none}
+    .cp-items .text-end{text-align:right}
+
+    /* Totali */
+    .cp-totals{width:100%;max-width:320px;margin-left:auto;margin-top:12px}
+    .cp-totals td{padding:5px 12px;font-size:.88rem}
+    .cp-totals .cp-total-final td{font-size:1.05rem;font-weight:700;color:#c9a84c;border-top:1px solid rgba(201,168,76,.3);padding-top:10px}
+
+    /* Akcije (prihvati/odbij) */
+    .cp-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+    .cp-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;text-align:center}
+    .cp-btn-accept{background:#22c55e;color:#0a1020}
+    .cp-btn-accept:hover{background:#16a34a}
+    .cp-btn-reject{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+    .cp-btn-reject:hover{background:rgba(239,68,68,.2)}
+    .cp-btn-undo{background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1)}
+    .cp-btn-undo:hover{background:rgba(255,255,255,.1)}
+
+    /* Poruke */
+    .cp-msg{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.9rem}
+    .cp-msg-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
+    .cp-msg-info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:#60a5fa}
+
+    /* Footer */
+    .cp-footer{text-align:center;padding:20px;font-size:.72rem;color:#334155}
+
+    @media(max-width:600px){
+      .cp-amount-big{font-size:1.8rem}
+      .cp-btn{min-width:0}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="cp-header">
+  <div>
+    <div class="cp-logo">{{ invoice.company.name }}</div>
+    {% if invoice.company.oib %}<div class="cp-company">OIB: {{ invoice.company.oib }}</div>{% endif %}
+  </div>
+  <div style="font-size:.78rem;color:#64748b">
+    {{ invoice.invoice_number }}
+  </div>
+</div>
+
+<div class="cp-wrap">
+
+  <!-- DJANGO MESSAGES -->
+  {% for message in messages %}
+  <div class="cp-msg {% if message.tags == 'success' %}cp-msg-success{% else %}cp-msg-info{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+
+  <!-- STATUS BANNER -->
+  <div class="cp-status cp-status-{{ invoice.status|lower }}">
+    {% if invoice.status == 'ACCEPTED' %}
+      ✅ {% trans "Ponuda prihvaćena" %}
+    {% elif invoice.status == 'REJECTED' %}
+      ❌ {% trans "Ponuda odbijena" %}
+    {% elif invoice.status in 'DRAFT,SENT' %}
+      📋 {% trans "Ponuda čeka vašu odluku" %}
+    {% else %}
+      📄 {{ invoice.get_status_display }}
+    {% endif %}
+    {% if invoice.valid_until %}
+      <span style="margin-left:auto;font-size:.8rem;font-weight:400;opacity:.7">
+        {% trans "Vrijedi do" %}: {{ invoice.valid_until|date:"d.m.Y" }}
+      </span>
+    {% endif %}
+  </div>
+
+  <!-- IZNOS HERO -->
+  <div class="cp-amount-hero">
+    <div class="cp-amount-big">{{ invoice.total|floatformat:2 }} €</div>
+    <div class="cp-amount-label">{% trans "Ukupan iznos s PDV-om" %}</div>
+  </div>
+
+  <!-- META PODACI -->
+  <div class="cp-meta">
+    <div class="cp-meta-item">
+      <div class="cp-meta-label">{% trans "Broj ponude" %}</div>
+      <div class="cp-meta-value">{{ invoice.invoice_number }}</div>
+    </div>
+    <div class="cp-meta-item">
+      <div class="cp-meta-label">{% trans "Datum" %}</div>
+      <div class="cp-meta-value">{{ invoice.invoice_date|date:"d.m.Y" }}</div>
+    </div>
+    {% if invoice.valid_until %}
+    <div class="cp-meta-item">
+      <div class="cp-meta-label">{% trans "Vrijedi do" %}</div>
+      <div class="cp-meta-value">{{ invoice.valid_until|date:"d.m.Y" }}</div>
+    </div>
+    {% endif %}
+    {% if invoice.buyer_name %}
+    <div class="cp-meta-item">
+      <div class="cp-meta-label">{% trans "Kupac" %}</div>
+      <div class="cp-meta-value">{{ invoice.buyer_name }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- STAVKE -->
+  {% if invoice.items.exists %}
+  <div class="cp-card">
+    <div class="cp-card-title">{% trans "Stavke ponude" %}</div>
+    <div style="overflow-x:auto">
+      <table class="cp-items">
+        <thead>
+          <tr>
+            <th>{% trans "Opis" %}</th>
+            <th class="text-end">{% trans "Kol." %}</th>
+            <th class="text-end">{% trans "Jed. cijena" %}</th>
+            <th class="text-end">{% trans "Iznos" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in invoice.items.all %}
+          <tr>
+            <td>
+              <span style="font-weight:500">{{ item.description }}</span>
+              {% if item.note %}<br><small style="color:#64748b">{{ item.note }}</small>{% endif %}
+            </td>
+            <td class="text-end">{{ item.quantity|floatformat:2 }} {{ item.unit|default:"kom" }}</td>
+            <td class="text-end">{{ item.unit_price|floatformat:2 }} €</td>
+            <td class="text-end" style="font-weight:600">{{ item.total_price|floatformat:2 }} €</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TOTALI -->
+    <table class="cp-totals">
+      <tr>
+        <td style="color:#94a3b8">{% trans "Neto" %}</td>
+        <td class="text-end">{{ invoice.subtotal|floatformat:2 }} €</td>
+      </tr>
+      {% if invoice.tax_amount %}
+      <tr>
+        <td style="color:#94a3b8">{% trans "PDV" %} ({{ invoice.tax_rate|floatformat:0 }}%)</td>
+        <td class="text-end">{{ invoice.tax_amount|floatformat:2 }} €</td>
+      </tr>
+      {% endif %}
+      <tr class="cp-total-final">
+        <td>{% trans "UKUPNO" %}</td>
+        <td class="text-end">{{ invoice.total|floatformat:2 }} €</td>
+      </tr>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- NAPOMENE -->
+  {% if invoice.notes %}
+  <div class="cp-card">
+    <div class="cp-card-title">{% trans "Napomene" %}</div>
+    <p style="font-size:.9rem;color:#94a3b8;line-height:1.6">{{ invoice.notes }}</p>
+  </div>
+  {% endif %}
+
+  <!-- AKCIJE -->
+  {% if invoice.status in 'DRAFT,SENT' %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="cp-actions">
+      <button type="submit" name="action" value="accept" class="cp-btn cp-btn-accept">
+        ✅ {% trans "Prihvaćam ponudu" %}
+      </button>
+      <button type="submit" name="action" value="reject" class="cp-btn cp-btn-reject"
+              onclick="return confirm('{% trans "Jeste li sigurni da želite odbiti ponudu?" %}')">
+        ❌ {% trans "Odbijam ponudu" %}
+      </button>
+    </div>
+  </form>
+  {% elif invoice.status == 'ACCEPTED' %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="cp-actions">
+      <div class="cp-btn cp-btn-accept" style="cursor:default;opacity:.7;flex:none">
+        ✅ {% trans "Ponuda je prihvaćena" %}
+      </div>
+      <button type="submit" name="action" value="undo_accept" class="cp-btn cp-btn-undo">
+        ↩ {% trans "Opozovi prihvaćanje" %}
+      </button>
+    </div>
+  </form>
+  {% elif invoice.status == 'REJECTED' %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="cp-actions">
+      <button type="submit" name="action" value="undo_reject" class="cp-btn cp-btn-accept">
+        ↩ {% trans "Predomislio sam se — prihvaćam" %}
+      </button>
+    </div>
+  </form>
+  {% endif %}
+
+  <!-- KONTAKT -->
+  {% if invoice.company.email or invoice.company.phone %}
+  <div style="margin-top:32px;padding:16px;background:#0d1525;border-radius:10px;text-align:center">
+    <div style="font-size:.75rem;color:#64748b;margin-bottom:8px">{% trans "Pitanja? Kontaktirajte nas:" %}</div>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      {% if invoice.company.email %}
+      <a href="mailto:{{ invoice.company.email }}" style="color:#c9a84c;font-size:.85rem;text-decoration:none">
+        ✉ {{ invoice.company.email }}
+      </a>
+      {% endif %}
+      {% if invoice.company.phone %}
+      <a href="tel:{{ invoice.company.phone }}" style="color:#c9a84c;font-size:.85rem;text-decoration:none">
+        📞 {{ invoice.company.phone }}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<div class="cp-footer">
+  Powered by LIMIT Connect · limit-connect.com
+</div>
+
+</body>
+</html>
