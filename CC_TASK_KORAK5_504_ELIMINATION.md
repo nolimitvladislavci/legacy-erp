@@ -1,3 +1,26 @@
+## ⚠️ VAŽNE NAPOMENE (iz KORAK 4 iskustva)
+
+1. **Python putanja** — uvijek koristiti:
+   `/var/www/fina-connect/venv/bin/python` — NIKAD samo `python`
+
+2. **systemctl** — CC Code nema privilegije. Na kraju taska NEMOJ pokušati
+   `systemctl reload gunicorn-fina`. Sonnet će to napraviti.
+   Umjesto toga napiši u log: "POTREBAN GUNICORN RELOAD"
+
+3. **WhatsApp** — koristiti ovaj pattern:
+   ```bash
+   /var/www/fina-connect/venv/bin/python -c "
+   import os,sys,django
+   os.environ['DJANGO_SETTINGS_MODULE']='core.settings'
+   sys.path.insert(0,'/var/www/fina-connect')
+   django.setup()
+   from core.whatsapp import send_text
+   send_text('4915771998747','PORUKA')
+   " 2>/dev/null
+   ```
+
+---
+
 # CC TASK — KORAK 5: 504 Eliminacija
 **Datum: 14.04.2026.**
 **Pokreni NAKON što KORAK 4 dobije ✅**
