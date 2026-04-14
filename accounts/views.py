@@ -666,3 +666,12 @@ def switch_company_get(request, company_id):
     request.session["superadmin_as_company"] = str(company.pk)
     messages.success(request, _("Prebaceno na: %s") % company.name)
     return redirect("/")
+
+
+def dismiss_pin_banner(request):
+    """AJAX: dismiss the PIN setup banner for this session."""
+    from django.http import JsonResponse
+
+    if request.method == "POST":
+        request.session["pin_banner_dismissed"] = True
+    return JsonResponse({"ok": True})

@@ -5,6 +5,7 @@ from . import data_export, deactivation, trikey_views, views
 
 app_name = "accounts"
 urlpatterns = [
+    path("dismiss-pin-banner/", views.dismiss_pin_banner, name="dismiss_pin_banner"),
     path("switch-company/", views.switch_company, name="switch_company"),
     path("password/", views.change_password, name="change_password"),
     path("", views.UserListView.as_view(), name="user_list"),

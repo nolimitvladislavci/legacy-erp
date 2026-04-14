@@ -331,8 +331,8 @@ Cilj: coverage > 40% na pos/, invoicing/, accounts/
 | 3 RouteRegistry | ✅ GOTOVO | 100% |
 | 4 Middleware | ✅ GOTOVO | 100% |
 | 5 504 eliminacija | ✅ GOTOVO | 100% |
-| 6 Globalni standardi | 🔄 AKTIVAN | 0% |
-| 7 Test coverage | ⏳ na redu | — |
+| 6 Globalni standardi | ✅ GOTOVO | 100% |
+| 7 Test coverage | 🔄 AKTIVAN | 0% |
 | 8 Load test | ⏳ na redu | — |
 | 9 Security | ⏳ na redu | — |
 | 10 Onboarding | ⏳ na redu | — |

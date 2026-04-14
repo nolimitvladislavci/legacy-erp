@@ -431,22 +431,23 @@
             {% endif %}
             {% if user.is_authenticated %}
             {% with trikey=user.trikeyprofile %}
-            {% if not trikey.pin_hash %}
-            <div class="fx-rounded" style="background:linear-gradient(135deg,rgba(34,197,94,.06),rgba(34,197,94,.02));border:1px solid rgba(34,197,94,.2);padding:14px 20px;margin-bottom:12px">
+            {% if not trikey.pin_hash and not request.session.pin_banner_dismissed %}
+            <div class="fx-rounded" id="pinBanner" style="background:linear-gradient(135deg,rgba(34,197,94,.04),transparent);border:1px solid rgba(34,197,94,.15);padding:10px 16px;margin-bottom:12px">
               <div class="d-flex fx-flex-wrap fx-gap-3 align-items-center justify-content-between">
-                <div class="d-flex fx-gap-3 align-items-center">
-                  <div style="width:40px;height:40px;background:rgba(34,197,94,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                    <i class="fas fa-hashtag" style="color:#22c55e;font-size:1.1rem"></i>
-                  </div>
-                  <div>
-                    <div style="font-size:.88rem;font-weight:700;color:#22c55e">Postavi PIN za brzi dnevni ulaz</div>
-                    <div style="font-size:.75rem;color:#94a3b8">Email + 6 znamenki svaki dan. Lozinka ostaje za arhivu i pristup za 11 godina.</div>
+                <div class="d-flex fx-gap-3 align-items-center" style="flex:1;min-width:0;">
+                  <i class="fas fa-hashtag" style="color:#22c55e;font-size:.9rem;flex-shrink:0;"></i>
+                  <div style="font-size:.8rem;color:var(--text-muted,#94a3b8);">
+                    <strong style="color:#22c55e;">PIN za brzi ulaz</strong> — email + 6 znamenki. Opcionalno.
                   </div>
                 </div>
-                <a href="{% url 'accounts:pin_setup' %}"
-                   style="background:#22c55e;color:#0a0e1a;border:none;padding:8px 18px;border-radius:6px;font-size:.82rem;font-weight:800;text-decoration:none;white-space:nowrap;flex-shrink:0">
-                  <i class="fas fa-hashtag me-1"></i> Postavi PIN
-                </a>
+                <div class="d-flex fx-gap-2 align-items-center" style="flex-shrink:0;">
+                  <a href="{% url 'accounts:pin_setup' %}" style="background:#22c55e;color:#0a0e1a;padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+                    Postavi
+                  </a>
+                  <button onclick="document.getElementById('pinBanner').remove();fetch('/accounts/dismiss-pin-banner/',{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}})" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:14px;padding:4px;" title="{% trans 'Ne prikazuj više' %}">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
             </div>
             {% endif %}

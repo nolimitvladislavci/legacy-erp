@@ -1,101 +1,186 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}PIN Setup — TriKey{% endblock %}
-{% block page_title %}Postavi PIN{% endblock %}
+{% block title %}{% trans "PIN Setup" %} — LIMIT Connect{% endblock %}
 {% block content %}
 <style>
-.trikey-setup{max-width:560px;margin:0 auto}
-.key-card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;margin-bottom:20px}
-.key-card h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin:0 0 16px}
-.pin-display{display:flex;gap:10px;justify-content:center;margin:20px 0}
-.pin-display input{width:52px;height:60px;text-align:center;font-size:1.6rem;font-weight:800;background:rgba(15,23,42,.6);border:2px solid #334155;border-radius:12px;color:#c9a84c;outline:none}
-.pin-display input:focus{border-color:#c9a84c;box-shadow:0 0 0 3px rgba(201,168,76,.15)}
-.suggested{background:rgba(201,168,76,.08);border:1px dashed #c9a84c;border-radius:10px;padding:12px 16px;text-align:center;margin:12px 0}
-.suggested .code{font-family:'IBM Plex Mono',monospace;font-size:1.4rem;font-weight:800;color:#c9a84c;letter-spacing:6px}
-.suggested .hint{font-size:.75rem;color:#64748b;margin-top:4px}
-.btn-gold{background:#c9a84c;border:none;color:#0f172a;font-weight:700;padding:12px 24px;border-radius:8px;width:100%;transition:all .3s}
-.btn-gold:hover{background:#e8c96a;transform:translateY(-2px)}
-.status-keys{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
-.sk{padding:8px 16px;border-radius:10px;font-size:.78rem;font-weight:700;border:2px solid #334155;color:#64748b}
-.sk.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.08)}
-.sk.current{border-color:#c9a84c;color:#c9a84c;background:rgba(201,168,76,.08);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.pin-page{max-width:480px;margin:0 auto;padding:20px 0;}
+.pin-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:14px;padding:28px;margin-bottom:16px;}
+.pin-card h2{font-size:1.1rem;font-weight:800;margin:0 0 4px;color:var(--text,#0f172a);}
+.pin-card .subtitle{font-size:.8rem;color:var(--text-muted,#94a3b8);margin-bottom:20px;}
+.pin-status{display:flex;gap:8px;justify-content:center;margin-bottom:20px;}
+.pin-status .dot{width:10px;height:10px;border-radius:50%;background:var(--border,#e2e8f0);}
+.pin-status .dot.done{background:#22c55e;}
+.pin-status .dot.current{background:var(--gold,#c9a84c);animation:dotPulse 1.5s infinite;}
+@keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+.pin-display{display:flex;gap:8px;justify-content:center;margin:16px 0;}
+.pin-display input{width:48px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:var(--input-bg,#f8fafc);border:2px solid var(--border,#e2e8f0);border-radius:10px;color:var(--gold,#c9a84c);outline:none;transition:border-color .15s;}
+.pin-display input:focus{border-color:var(--gold,#c9a84c);box-shadow:0 0 0 3px rgba(201,168,76,.12);}
+.suggested-box{background:rgba(201,168,76,.06);border:1px dashed rgba(201,168,76,.3);border-radius:8px;padding:10px 14px;text-align:center;margin-bottom:16px;}
+.suggested-code{font-family:'IBM Plex Mono',monospace;font-size:1.4rem;font-weight:800;color:var(--gold,#c9a84c);letter-spacing:6px;}
+.btn-pin{background:var(--gold,#c9a84c);border:none;color:#0f172a;font-weight:700;padding:12px;border-radius:8px;width:100%;font-size:.9rem;cursor:pointer;transition:all .15s;}
+.btn-pin:hover{background:#b8942f;transform:translateY(-1px);}
+.btn-skip{background:transparent;border:1px solid var(--border,#e2e8f0);color:var(--text-muted,#94a3b8);font-weight:600;padding:10px;border-radius:8px;width:100%;font-size:.82rem;cursor:pointer;margin-top:8px;transition:all .15s;}
+.btn-skip:hover{border-color:var(--text-muted,#94a3b8);color:var(--text,#0f172a);}
+/* Innovation: Biometric hint */
+.bio-hint{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(59,130,246,.04);border:1px solid rgba(59,130,246,.15);border-radius:10px;margin-top:12px;font-size:.78rem;color:var(--text-muted,#64748b);}
+.bio-hint i{color:#3b82f6;font-size:1.1rem;flex-shrink:0;}
+/* Innovation: Security meter */
+.sec-meter{height:4px;background:var(--border,#e2e8f0);border-radius:2px;margin-top:8px;overflow:hidden;}
+.sec-meter .fill{height:100%;border-radius:2px;transition:width .3s,background .3s;}
 </style>
 
-<div class="trikey-setup">
-    <div class="status-keys">
-        <div class="sk {% if trikey.pin_hash %}done{% else %}current{% endif %}"><i class="fas fa-hashtag me-1"></i> PIN</div>
-        <div class="sk {% if trikey.passkey_credential_id %}done{% endif %}"><i class="fas fa-fingerprint me-1"></i> Passkey</div>
-        <div class="sk {% if trikey.fina_cert_fingerprint or trikey.eposrednik_api_key_hash %}done{% endif %}"><i class="fas fa-certificate me-1"></i> Business Key</div>
+<div class="pin-page">
+  {# Progress dots #}
+  <div class="pin-status">
+    <div class="dot {% if trikey.pin_hash %}done{% else %}current{% endif %}"></div>
+    <div class="dot {% if trikey.passkey_credential_id %}done{% endif %}"></div>
+    <div class="dot {% if trikey.fina_cert_fingerprint %}done{% endif %}"></div>
+  </div>
+
+  <div class="pin-card">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="width:48px;height:48px;background:rgba(201,168,76,.1);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px;">
+        <i class="fas fa-shield-alt" style="color:var(--gold,#c9a84c);font-size:1.3rem;"></i>
+      </div>
+      <h2>{% if trikey.pin_hash %}{% trans "Promijeni PIN" %}{% else %}{% trans "Postavi PIN za brzi ulaz" %}{% endif %}</h2>
+      <div class="subtitle">{% trans "6 znamenki. Koristite svaki dan umjesto lozinke." %}</div>
     </div>
 
-    <div class="key-card">
-        <h3><i class="fas fa-hashtag me-2" style="color:#c9a84c"></i> Postavi 6-znamenkasti PIN</h3>
+    {% if messages %}
+    {% for msg in messages %}
+    <div style="background:rgba(220,53,69,.08);border:1px solid rgba(220,53,69,.2);color:#dc2626;border-radius:8px;padding:8px 12px;font-size:.82rem;margin-bottom:12px;">{{ msg }}</div>
+    {% endfor %}
+    {% endif %}
 
-        {% if messages %}
-        {% for msg in messages %}
-        <div style="background:rgba(220,53,69,.15);border:1px solid rgba(220,53,69,.3);color:#f87171;border-radius:8px;padding:8px 12px;font-size:.85rem;margin-bottom:12px">{{ msg }}</div>
-        {% endfor %}
-        {% endif %}
-
-        <div class="suggested">
-            <div class="hint">Predloženi PIN (možete promijeniti)</div>
-            <div class="code" id="suggestedPin">{{ suggested_pin }}</div>
-            <button type="button" onclick="useSuggested()" style="background:none;border:1px solid #c9a84c;color:#c9a84c;border-radius:6px;padding:4px 12px;font-size:.75rem;margin-top:6px;cursor:pointer">Koristi ovaj</button>
-        </div>
-
-        <form method="post" action="{% url 'accounts:pin_setup' %}" id="setupForm">
-            {% csrf_token %}
-            <label style="color:#94a3b8;font-size:.82rem;display:block;margin-bottom:4px">Unesite PIN:</label>
-            <div class="pin-display">
-                <input type="password" maxlength="1" inputmode="numeric" data-p="0" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-p="1" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-p="2" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-p="3" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-p="4" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-p="5" autocomplete="off">
-            </div>
-            <input type="hidden" name="pin" id="pinVal">
-
-            <label style="color:#94a3b8;font-size:.82rem;display:block;margin:12px 0 4px">Potvrdite PIN:</label>
-            <div class="pin-display" id="confirmPins">
-                <input type="password" maxlength="1" inputmode="numeric" data-c="0" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-c="1" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-c="2" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-c="3" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-c="4" autocomplete="off">
-                <input type="password" maxlength="1" inputmode="numeric" data-c="5" autocomplete="off">
-            </div>
-            <input type="hidden" name="pin_confirm" id="pinConfVal">
-
-            <button type="submit" class="btn-gold mt-3"><i class="fas fa-check me-2"></i> Spremi PIN</button>
-        </form>
+    {# Suggested PIN #}
+    <div class="suggested-box">
+      <div style="font-size:.72rem;color:var(--text-muted,#94a3b8);margin-bottom:4px;">{% trans "Predloženi PIN" %}</div>
+      <div class="suggested-code" id="suggestedPin">{{ suggested_pin }}</div>
+      <div style="margin-top:6px;">
+        <button type="button" onclick="useSuggested()" style="background:none;border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);border-radius:6px;padding:4px 12px;font-size:.72rem;font-weight:600;cursor:pointer;">
+          {% trans "Koristi ovaj" %}
+        </button>
+      </div>
     </div>
 
-    <div style="text-align:center">
-        <a href="{% url 'accounts:trikey_status' %}" style="color:#64748b;font-size:.82rem;text-decoration:none"><i class="fas fa-arrow-left me-1"></i> Natrag na TriKey status</a>
+    <form method="post" action="{% url 'accounts:pin_setup' %}" id="setupForm">
+      {% csrf_token %}
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-muted,#64748b);display:block;margin-bottom:4px;">{% trans "Unesite PIN:" %}</label>
+      <div class="pin-display">
+        <input type="password" maxlength="1" inputmode="numeric" data-p="0" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-p="1" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-p="2" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-p="3" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-p="4" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-p="5" autocomplete="off">
+      </div>
+      <input type="hidden" name="pin" id="pinVal">
+
+      {# Security meter — innovation #}
+      <div class="sec-meter" id="secMeter"><div class="fill" id="secFill" style="width:0;background:#ef4444;"></div></div>
+
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-muted,#64748b);display:block;margin:14px 0 4px;">{% trans "Potvrdite PIN:" %}</label>
+      <div class="pin-display" id="confirmPins">
+        <input type="password" maxlength="1" inputmode="numeric" data-c="0" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-c="1" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-c="2" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-c="3" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-c="4" autocomplete="off">
+        <input type="password" maxlength="1" inputmode="numeric" data-c="5" autocomplete="off">
+      </div>
+      <input type="hidden" name="pin_confirm" id="pinConfVal">
+
+      <button type="submit" class="btn-pin" id="submitBtn" disabled>
+        <i class="fas fa-check me-1"></i> {% trans "Spremi PIN" %}
+      </button>
+    </form>
+
+    {# Skip button — for users who don't want PIN #}
+    <button onclick="window.location='{% url 'dashboard' %}'" class="btn-skip">
+      <i class="fas fa-forward me-1"></i> {% trans "Preskoči — koristit ću lozinku" %}
+    </button>
+
+    {# Innovation 1: Biometric hint #}
+    <div class="bio-hint">
+      <i class="fas fa-fingerprint"></i>
+      <div>
+        <strong>{% trans "Uskoro: Biometrijski ulaz" %}</strong><br>
+        {% trans "Nakon PIN-a, aktivirajte otisak prsta ili Face ID za ulaz bez tipkanja." %}
+      </div>
     </div>
+  </div>
+
+  {# Innovation 2: Security level indicator #}
+  <div style="text-align:center;font-size:.75rem;color:var(--text-muted,#94a3b8);">
+    <div style="display:inline-flex;align-items:center;gap:6px;">
+      <i class="fas fa-lock" style="color:var(--gold,#c9a84c);"></i>
+      {% if trikey.pin_hash %}
+        {% trans "PIN aktivan" %} ·
+      {% endif %}
+      {% if trikey.passkey_credential_id %}
+        {% trans "Passkey aktivan" %} ·
+      {% endif %}
+      {% trans "Razina:" %}
+      <strong style="color:var(--gold,#c9a84c);">
+        {% if trikey.pin_hash and trikey.passkey_credential_id %}3/3{% elif trikey.pin_hash %}1/3{% else %}0/3{% endif %}
+      </strong>
+    </div>
+  </div>
 </div>
 
 <script>
 function setupPinInputs(selector, hiddenId){
-    const pins=document.querySelectorAll(selector);
-    const hidden=document.getElementById(hiddenId);
-    pins.forEach((inp,i)=>{
-        inp.addEventListener('input',()=>{inp.value=inp.value.replace(/\D/g,'');if(inp.value&&i<5)pins[i+1].focus();collect();});
-        inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!inp.value&&i>0){pins[i-1].focus();pins[i-1].value='';}});
-        inp.addEventListener('paste',e=>{e.preventDefault();const d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);d.split('').forEach((c,j)=>{if(pins[j])pins[j].value=c;});collect();if(pins[Math.min(d.length,5)])pins[Math.min(d.length,5)].focus();});
+  const pins=document.querySelectorAll(selector);
+  const hidden=document.getElementById(hiddenId);
+  pins.forEach((inp,i)=>{
+    inp.addEventListener('input',()=>{
+      inp.value=inp.value.replace(/\D/g,'');
+      if(inp.value&&i<5)pins[i+1].focus();
+      collect();
+      checkReady();
     });
-    function collect(){hidden.value=Array.from(pins).map(p=>p.value).join('');}
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!inp.value&&i>0){pins[i-1].focus();pins[i-1].value='';}
+    });
+    inp.addEventListener('paste',e=>{
+      e.preventDefault();
+      const d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+      d.split('').forEach((c,j)=>{if(pins[j])pins[j].value=c;});
+      collect();checkReady();
+      if(pins[Math.min(d.length,5)])pins[Math.min(d.length,5)].focus();
+    });
+  });
+  function collect(){hidden.value=Array.from(pins).map(p=>p.value).join('');}
 }
 setupPinInputs('[data-p]','pinVal');
 setupPinInputs('[data-c]','pinConfVal');
+
 function useSuggested(){
-    const pin=document.getElementById('suggestedPin').textContent.trim();
-    document.querySelectorAll('[data-p]').forEach((inp,i)=>{inp.value=pin[i]||'';});
-    document.querySelectorAll('[data-c]').forEach((inp,i)=>{inp.value=pin[i]||'';});
-    document.getElementById('pinVal').value=pin;
-    document.getElementById('pinConfVal').value=pin;
+  const pin=document.getElementById('suggestedPin').textContent.trim();
+  document.querySelectorAll('[data-p]').forEach((inp,i)=>{inp.value=pin[i]||'';});
+  document.querySelectorAll('[data-c]').forEach((inp,i)=>{inp.value=pin[i]||'';});
+  document.getElementById('pinVal').value=pin;
+  document.getElementById('pinConfVal').value=pin;
+  checkReady();
+}
+
+function checkReady(){
+  const p=document.getElementById('pinVal').value;
+  const c=document.getElementById('pinConfVal').value;
+  const btn=document.getElementById('submitBtn');
+  const fill=document.getElementById('secFill');
+  // Security meter
+  const unique=new Set(p.split('')).size;
+  const sequential='0123456789'.includes(p)||'9876543210'.includes(p);
+  const repeated=p.split('').every(c=>c===p[0]);
+  let strength=0;
+  if(p.length>=6)strength+=40;
+  if(unique>=4)strength+=30;
+  if(!sequential&&!repeated)strength+=30;
+  fill.style.width=strength+'%';
+  fill.style.background=strength>=70?'#22c55e':strength>=40?'#f59e0b':'#ef4444';
+  // Enable submit
+  btn.disabled=!(p.length===6&&c.length===6&&p===c);
 }
 </script>
 {% endblock %}
