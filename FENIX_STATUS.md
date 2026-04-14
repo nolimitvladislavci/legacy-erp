@@ -1,10 +1,10 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-14 (Dan 48), commit 12c4ef7d — KORAK 3 RouteRegistry ✅
+> Zadnji update: 2026-04-14 (Dan 48), commit TBD — KORAK 4 Middleware Audit ✅
 
 ## OCJENE
 
 | Sesija | Ocjena | Delta | Ključno |
-|--------|--------|-------|---------|
+|--------|--------|-------|---------| 
 | Baseline | **6.9** | — | Prva mjerenja |
 | Val 1 | **7.75** | +0.85 | Exception refactoring |
 | Val 2 | **8.2** | +0.45 | Abstract, i18n, ORM |
@@ -160,10 +160,10 @@ Propust = 302 redirect za vanjske korisnike bez greške u logu (GracefulErrorMid
 ## KORAK 3 — ROUTEREGISTRY KOMPLETNI PROLAZ
 **Cilj:** Svaka javna ruta vraća 200 za anonimnog korisnika.
 ```
-[ ] Izvuci sve URL nazive iz svih urls.py
-[ ] Usporedi s RouteRegistry (permissions/route_registry.py)
-[ ] Svaki bez @login_required → mora biti PUBLIC/AUTHENTICATED
-[ ] Automatizirani smoke test: curl svaki javni URL bez sessiona
+[x] Izvuci sve URL nazive iz svih urls.py
+[x] Usporedi s RouteRegistry (permissions/route_registry.py)
+[x] Svaki bez @login_required → mora biti PUBLIC/AUTHENTICATED
+[x] Automatizirani smoke test: curl svaki javni URL bez sessiona
 ```
 ✅ Gotovo kad: Smoke test prolazi 100% javnih URL-a.
 
@@ -172,11 +172,50 @@ Propust = 302 redirect za vanjske korisnike bez greške u logu (GracefulErrorMid
 ## KORAK 4 — MIDDLEWARE AUDIT
 **Cilj:** Nijedan middleware ne blokira legitimnu akciju.
 ```
-[ ] Mapiraj 28 middlewara — što svaki radi, koji su SKIP_PREFIXES
-[ ] Sinkroniziraj exempt liste: DomainGate, ForceTC, Force2FA, TC, LanguageMiddleware
-[ ] Test: anonimni user + logiran user bez kompanije — što prolazi, što ne
+[x] Mapiraj 30 middlewara — što svaki radi, koji su SKIP_PREFIXES
+[x] Sinkroniziraj exempt liste: Force2FA i ForceTCMiddleware → RouteRegistry ✓
+    middleware_tc.py (TCConsentMiddleware) → mrtvi kod, uklonjen
+    DomainGateMiddleware → limit-connect.com propušta sve ✓
+    UserLanguageMiddleware → samo za auth usere, SKIP_PREFIXES ispravni ✓
+[x] Test: anon → COMPANY rute = redirect na login ✓
+    anon → PUBLIC rute = 200 ✓
+    auth bez company → AUTHENTICATED rute = 200 ✓
 ```
 ✅ Gotovo kad: Test suite "anon pristupa svim javnim rutama" prolazi.
+
+### MIDDLEWARE MAPA (30 middlewara)
+| # | Middleware | Exempt strategija | Status |
+|---|-----------|-------------------|--------|
+| 1 | GracefulErrorMiddleware | exceptions only | ✓ |
+| 2 | SecurityMiddleware | Django std | ✓ |
+| 3 | WhiteLabelMiddleware | - | ✓ |
+| 4 | LicenseCheckMiddleware | BYPASS_PATHS hardcoded | ✓ |
+| 5 | WhiteNoiseMiddleware | static files | ✓ |
+| 6 | SessionMiddleware | Django std | ✓ |
+| 7 | CommonMiddleware | Django std | ✓ |
+| 8 | CsrfViewMiddleware | Django std | ✓ |
+| 9 | AuthenticationMiddleware | Django std | ✓ |
+| 10 | DomainGateMiddleware | ALWAYS_ALLOWED + per-domain | ✓ |
+| 11 | MessageMiddleware | Django std | ✓ |
+| 12 | AuditMiddleware | - | ✓ |
+| 13 | UserLanguageMiddleware | SKIP_PREFIXES, auth only | ✓ |
+| 14 | LocaleMiddleware | Django std | ✓ |
+| 15 | RolePermissionMiddleware | SKIP_PREFIXES | ✓ |
+| 16 | CompanyMiddleware | - | ✓ |
+| 17 | ImpersonationMiddleware | superadmin only | ✓ |
+| 18 | CompanyBranchMiddleware | auth only | ✓ |
+| 19 | AdminLangRedirectMiddleware | admin paths only | ✓ |
+| 20 | ForcePasswordChangeMiddleware | path-based | ✓ |
+| 21 | Force2FAMiddleware | **RouteRegistry** | ✓ |
+| 22 | ForceTCMiddleware | **RouteRegistry** | ✓ |
+| 23 | SubscriptionMiddleware | ALWAYS_ALLOWED_PREFIXES | ✓ |
+| 24 | ArchiveReadonlyMiddleware | EXEMPT_PATHS | ✓ |
+| 25 | ImageQuotaMiddleware | upload only | ✓ |
+| 26 | XFrameOptionsMiddleware | Django std | ✓ |
+| 27 | IPFilterMiddleware | IP whitelist | ✓ |
+| 28 | ApiErrorFormatMiddleware | API paths | ✓ |
+| 29 | SecurityHeadersMiddleware | /mcp/ skip | ✓ |
+| 30 | RateLimitMiddleware | SKIP_PREFIXES + auth bypass | ✓ |
 
 ---
 
@@ -290,8 +329,8 @@ Cilj: coverage > 40% na pos/, invoicing/, accounts/
 | 1 Inventura | ✅ GOTOVO | 100% |
 | 2 Field audit | ✅ GOTOVO | 100% |
 | 3 RouteRegistry | ✅ GOTOVO | 100% |
-| 4 Middleware | 🔄 AKTIVAN | 0% |
-| 5 504 eliminacija | ⏳ na redu | — |
+| 4 Middleware | ✅ GOTOVO | 100% |
+| 5 504 eliminacija | 🔄 AKTIVAN | 0% |
 | 6 Globalni standardi | 🔄 AKTIVAN (Gemini) | 30% |
 | 7 Test coverage | ⏳ na redu | — |
 | 8 Load test | ⏳ na redu | — |
@@ -299,4 +338,3 @@ Cilj: coverage > 40% na pos/, invoicing/, accounts/
 | 10 Onboarding | ⏳ na redu | — |
 | 11 Beta | ⏳ na redu | — |
 | 12 EU kampanja | ⏳ na redu | — |
-
