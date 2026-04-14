@@ -272,3 +272,25 @@ Commits: 7 bug fix + 1 test commit
 | 10 Onboarding | ⏳ na redu | — |
 | 11 Beta | ⏳ na redu | — |
 | 12 EU kampanja | ⏳ na redu | — |
+
+---
+
+## AWS BEDROCK STATUS — 14.04.2026.
+
+### Što je gotovo
+- AWS account: 659220242591 (Limit-connect)
+- Credentials u .env: ✅
+- Modeli AUTHORIZED: ✅
+  - mistral.devstral-2-123b (Trojstvo 3. glasač)
+  - eu.mistral.pixtral-large-2502-v1:0 (Invoice OCR)
+- Bedrock client kod: ✅ core/deepseek_client.py
+
+### Privremeni blokator
+Novi AWS account ima hardkodirani dnevni token limit.
+**Resetira se sutra (15.04.2026. ponoć UTC).**
+Nema potrebe za ručnom akcijom.
+
+### Od sutra
+- Trojstvo dobiva 3. glasača (Devstral 123B)
+- Pixtral čita skeniranejakture iz slike → JSON
+- Sve ostaje GDPR compliant (eu-central-1)
