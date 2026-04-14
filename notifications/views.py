@@ -26,17 +26,16 @@ def notification_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"unread_count": 0, "recent": []}, status=401)
 
-    # Optimizirano: count samo unread, recent top 5 po datumu
     unread = Notification.objects.filter(recipient=request.user, is_read=False).count()
-
-    # Cap unread na 99 za UI (ne prikazuj 436)
     display_count = min(unread, 99)
 
-    recent = list(
+    recent_qs = (
         Notification.objects.filter(recipient=request.user)
         .order_by("-created_at")[:5]
         .values("id", "title", "message", "url", "is_read", "notification_type", "created_at")
     )
+    # created_at je datetime — eksplicitno na ISO string da JsonResponse ne puca
+    recent = [{**n, "created_at": n["created_at"].isoformat() if n["created_at"] else None} for n in recent_qs]
     return JsonResponse({"unread_count": display_count, "recent": recent})
 
 

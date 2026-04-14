@@ -61,12 +61,12 @@ def get_user_company(request=None):
                         request.session.pop(key, None)
             except ObjectDoesNotExist:
                 pass
-    # 3. Fallback to profile.company
-    if request:
+    # 3. Fallback to profile.company — samo za autenticirane korisnike
+    if request and hasattr(request, "user") and request.user.is_authenticated:
         try:
             return request.user.profile.company
-        except AttributeError:
-            logger.exception("Profile access failed")
+        except (AttributeError, ObjectDoesNotExist):
+            logger.debug("Profile/company not found for user %s", request.user)
     return None
 
 

@@ -3991,11 +3991,14 @@ def fiscal_room_sync(request):
 
 
 @login_required
+@login_required
 def fiscal_status_api(request):
     """AJAX: broj PAID računa koji čekaju fiskalizaciju — per company."""
     from django.db.models import Q
 
     company = get_user_company(request)
+    if not company:
+        return JsonResponse({"pending": 0})
     pending = (
         POSReceipt.objects.filter(session__terminal__company=company, status="paid")
         .filter(Q(jir__isnull=True) | Q(jir=""))

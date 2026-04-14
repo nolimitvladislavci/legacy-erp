@@ -330,6 +330,11 @@ def generate_invoice_pdf(invoice, request=None):
         kwargs = {"string": html}
         if request:
             kwargs["base_url"] = request.build_absolute_uri("/")
+        else:
+            # Celery/async kontekst — nema request-a, koristi SITE_URL
+            from django.conf import settings
+
+            kwargs["base_url"] = getattr(settings, "SITE_URL", "https://limit-connect.com") + "/"
         return HTML(**kwargs).write_pdf(), "application/pdf"
     except ImportError:
         return html.encode("utf-8"), "text/html"

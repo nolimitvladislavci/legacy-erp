@@ -23,7 +23,8 @@ def check_predictive_stockouts(self):
 
     User = get_user_model()
 
-    for company in Company.objects.filter(is_active=True):
+    # Company nema is_active field — filter po firmama koje imaju inventory
+    for company in Company.objects.filter(inventory_items__isnull=False).distinct():
         try:
             # Get items with critical/warning reorder status
             items = InventoryItem.objects.filter(
@@ -70,7 +71,10 @@ def check_predictive_stockouts(self):
             message = "\n".join(msg_lines)
 
             # Notify company admins
-            admins = User.objects.filter(company=company, is_active=True, is_staff=True)[:5]
+            from accounts.models import UserProfile
+
+            admin_ids = UserProfile.objects.filter(company=company).values_list("user_id", flat=True)
+            admins = User.objects.filter(id__in=admin_ids, is_active=True, is_staff=True)[:5]
 
             for admin in admins:
                 notify(

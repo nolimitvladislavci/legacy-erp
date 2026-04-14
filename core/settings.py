@@ -1404,3 +1404,8 @@ CELERY_BEAT_SCHEDULE["worktime-iban-vault-check"] = {
     "task": "worktime.tasks.iban_vault_check",
     "schedule": 86400,  # daily
 }
+
+CELERY_BEAT_SCHEDULE["notifications-purge-old"] = {
+    "task": "notifications.tasks.purge_old_notifications",
+    "schedule": 604800.0,  # 1x tjedno (nedjelja)
+}

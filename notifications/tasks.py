@@ -62,3 +62,41 @@ def cleanup_old_notifications():
         )
 
     return {"deleted": deleted, "marked_read": marked, "capped": capped}
+
+
+@shared_task
+def purge_old_notifications():
+    """
+    Briši pročitane notifikacije starije od 90 dana.
+    Maksimum 500 pročitanih po korisniku — briši najstarije.
+    Pokretati jednom tjedno (Celery Beat).
+    """
+    import datetime
+
+    from django.db.models import Count
+    from django.utils import timezone
+
+    cutoff = timezone.now() - datetime.timedelta(days=90)
+
+    # 1. Briši sve stare pročitane
+    deleted_old, _ = Notification.objects.filter(is_read=True, created_at__lt=cutoff).delete()
+
+    # 2. Po korisniku: ako ima > 500 pročitanih, briši najstarije
+    users_with_many = (
+        Notification.objects.filter(is_read=True).values("recipient_id").annotate(n=Count("id")).filter(n__gt=500)
+    )
+    deleted_excess = 0
+    for row in users_with_many:
+        uid = row["recipient_id"]
+        keep_ids = (
+            Notification.objects.filter(recipient_id=uid, is_read=True)
+            .order_by("-created_at")
+            .values_list("id", flat=True)[:500]
+        )
+        d, _ = Notification.objects.filter(recipient_id=uid, is_read=True).exclude(id__in=list(keep_ids)).delete()
+        deleted_excess += d
+
+    import logging
+
+    logging.getLogger(__name__).info("purge_old_notifications: %d old + %d excess deleted", deleted_old, deleted_excess)
+    return f"Deleted: {deleted_old} old + {deleted_excess} excess"

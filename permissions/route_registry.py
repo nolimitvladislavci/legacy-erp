@@ -36,6 +36,9 @@ ROUTE_REGISTRY: dict = {
     "logout": AccessLevel.PUBLIC,
     "health_check": AccessLevel.PUBLIC,
     "customer_room": AccessLevel.PUBLIC,
+    "fiscal_status_api": AccessLevel.AUTHENTICATED,  # AJAX — treba login, ne company
+    "notification_api": AccessLevel.AUTHENTICATED,  # AJAX polling
+    "push_vapid_key": AccessLevel.PUBLIC,  # PWA push
     "portal_ai": AccessLevel.PUBLIC,
     "portal_accept_trail": AccessLevel.PUBLIC,
     "public_pdf": AccessLevel.PUBLIC,  # Javna kupčeva soba — ponuda/UUID
