@@ -35,6 +35,8 @@ ROUTE_REGISTRY: dict = {
     "login_fallback": AccessLevel.PUBLIC,
     "logout": AccessLevel.PUBLIC,
     "health_check": AccessLevel.PUBLIC,
+    "customer_room": AccessLevel.PUBLIC,  # Javna kupčeva soba — ponuda/UUID
+    "qr_code": AccessLevel.PUBLIC,  # QR endpoint — javni
     "api_validate": AccessLevel.PUBLIC,
     "brochure_croxmlverify": AccessLevel.PUBLIC,
     "no_limit_web": AccessLevel.PUBLIC,
