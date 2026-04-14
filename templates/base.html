@@ -196,28 +196,14 @@
                     {% endif %}
                 </div>
                 {% if has_multiple_companies %}
-                <i class="fas fa-chevron-down fx-pointer fx-text-dim fx-fs-2xs" style="transition:transform .2s" onclick="var s=document.getElementById('companySwitcher');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.style.transform=open?'':'rotate(180deg)'" title="Promijeni tvrtku"></i>
+                <i class="fas fa-chevron-down fx-pointer fx-text-dim fx-fs-2xs" style="transition:transform .2s" onclick="toggleCompanySwitcher()" title="Promijeni tvrtku (Ctrl+K)"></i>
                 {% endif %}
             </div>
         </div>
-        {% if has_multiple_companies %}
-        <div id="companySwitcher" class="fx-hidden fx-rounded fx-p-8 fx-scroll-y" style="position:fixed;top:80px;left:8px;right:8px;max-width:280px;background:#0a1020;border:1px solid rgba(201,168,76,0.27);max-height:300px;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.7)">
-            {% for mem in user_memberships %}
-            <form method="post" action="{% url 'accounts:switch_company' %}" class="fx-m-0">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                {% if mem.pk %}<input type="hidden" name="membership_id" value="{{ mem.id }}">{% else %}<input type="hidden" name="company_id" value="{{ mem.company.id }}">{% endif %}
-                <button type="submit" class="fx-w-full fx-border-none fx-text-body fx-fs-tiny fx-pointer fx-rounded-sm d-flex fx-gap-2" style="text-align:left;background:{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %};padding:5px 10px;align-items:center;transition:background .15s;margin-bottom:2px" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %}'">
-                    {% if mem.company.id == request.company.id %}<i class="fas fa-check fx-text-gold" style="font-size:.5rem"></i>{% else %}<i class="fas fa-building fx-text-dim" style="font-size:.5rem"></i>{% endif %}
-                    {{ mem.company.name }}
-                    <span class="fx-ml-auto" style="opacity:0.4;font-size:.5rem">{{ mem.get_role_display }}</span>
-                </button>
-            </form>
-            {% endfor %}
-        </div>
+        {% endif %}
+        {% endif %}
 
-        {% endif %}
-        {% endif %}
-        {% endif %}
+        {% include "includes/_company_switcher.html" %}
 
         <!-- ══ WORKSPACE CLIENTS ══ -->
         {% include "includes/_sidebar_workspace.html" %}

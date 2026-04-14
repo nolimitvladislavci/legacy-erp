@@ -1,0 +1,268 @@
+{% load i18n %}
+{# ═══════════════════════════════════════════════════════════════
+   FENIX COMPANY SWITCHER — Command Palette za promjenu firme
+   Trigger: toggleCompanySwitcher() ili Ctrl+K
+   ═══════════════════════════════════════════════════════════════ #}
+
+{% if has_multiple_companies %}
+<!-- Overlay backdrop -->
+<div id="cswBackdrop"
+     onclick="closeCompanySwitcher()"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10050;backdrop-filter:blur(4px)">
+</div>
+
+<!-- Modal -->
+<div id="cswModal"
+     role="dialog" aria-modal="true" aria-label="{% trans 'Odabir tvrtke' %}"
+     style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+            width:min(520px,96vw);max-height:80vh;z-index:10051;
+            background:var(--bg-body,#0a1020);border:1px solid rgba(201,168,76,.3);
+            border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.8);
+            display:none;flex-direction:column;overflow:hidden">
+
+  <!-- Header -->
+  <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border,#1e293b);flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <i class="fas fa-building" style="color:var(--gold,#c9a84c);font-size:.85rem"></i>
+      <input id="cswSearch"
+             type="text"
+             placeholder="{% trans 'Pretraži naziv ili OIB...' %}"
+             autocomplete="off"
+             oninput="cswFilter(this.value)"
+             onkeydown="cswKeyNav(event)"
+             style="flex:1;background:transparent;border:none;outline:none;
+                    color:var(--text-primary,#e2e8f0);font-size:.95rem;font-weight:500">
+      <span style="font-size:.65rem;color:var(--text-dim,#64748b);white-space:nowrap">
+        <kbd style="background:rgba(255,255,255,.06);border:1px solid #334155;border-radius:4px;padding:1px 6px">ESC</kbd>
+      </span>
+      <button onclick="closeCompanySwitcher()"
+              style="background:none;border:none;color:var(--text-dim,#94a3b8);cursor:pointer;font-size:1.1rem;line-height:1;padding:0 2px">✕</button>
+    </div>
+    <div id="cswCount"
+         style="font-size:.68rem;color:var(--text-dim,#64748b);margin-top:6px;padding-left:24px">
+      {{ user_memberships|length }} {% trans "tvrtki" %}
+    </div>
+  </div>
+
+  <!-- Lista firmi -->
+  <div id="cswList"
+       style="overflow-y:auto;flex:1;padding:6px 0"
+       tabindex="-1">
+
+    {% for mem in user_memberships %}
+    {% with is_active=mem.company.id|stringformat:"s" %}
+    <div class="csw-row {% if mem.company.id == request.company.id %}csw-active{% endif %}"
+         data-name="{{ mem.company.name|lower }}"
+         data-oib="{{ mem.company.oib|default:'' }}"
+         style="display:flex;align-items:center;gap:0;padding:0;
+                border-bottom:1px solid rgba(255,255,255,.04);
+                {% if mem.company.id == request.company.id %}background:rgba(201,168,76,.07);{% endif %}">
+
+      {# SWITCH AKCIJA — klik na naziv prebacuje firmu #}
+      <form method="post" action="{% url 'accounts:switch_company' %}" class="csw-main-form" style="flex:1;min-width:0">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        {% if mem.pk %}<input type="hidden" name="membership_id" value="{{ mem.id }}">
+        {% else %}<input type="hidden" name="company_id" value="{{ mem.company.id }}">{% endif %}
+        <button type="submit"
+                style="width:100%;background:none;border:none;cursor:pointer;
+                       text-align:left;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          {# Checkmark ili building ikona #}
+          <span style="width:16px;flex-shrink:0;text-align:center">
+            {% if mem.company.id == request.company.id %}
+              <i class="fas fa-check" style="color:var(--gold,#c9a84c);font-size:.65rem"></i>
+            {% else %}
+              <i class="fas fa-building" style="color:var(--text-dim,#64748b);font-size:.6rem"></i>
+            {% endif %}
+          </span>
+          {# Naziv + OIB #}
+          <span style="flex:1;min-width:0">
+            <span class="csw-name" style="display:block;font-weight:600;font-size:.875rem;
+                   color:{% if mem.company.id == request.company.id %}var(--gold,#c9a84c){% else %}var(--text-primary,#e2e8f0){% endif %};
+                   white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              {{ mem.company.name }}
+            </span>
+            {% if mem.company.oib %}
+            <span class="csw-oib" style="display:block;font-size:.65rem;color:var(--text-dim,#64748b);font-family:monospace;margin-top:1px">
+              {{ mem.company.oib }}
+            </span>
+            {% endif %}
+          </span>
+        </button>
+      </form>
+
+      {# BRZE AKCIJE — vidljive na hoveru #}
+      <div class="csw-actions"
+           style="display:flex;gap:2px;padding:0 10px;flex-shrink:0;opacity:0;transition:opacity .15s">
+        <a href="/{% if request.LANGUAGE_CODE %}{{ request.LANGUAGE_CODE }}/{% endif %}invoicing/"
+           onclick="closeCompanySwitcher()"
+           title="{% trans 'Fakture' %}"
+           style="padding:5px 7px;border-radius:5px;color:var(--text-dim,#94a3b8);
+                  text-decoration:none;font-size:.7rem;background:rgba(255,255,255,.04);
+                  transition:all .15s;white-space:nowrap"
+           onmouseover="this.style.color='var(--gold,#c9a84c)';this.style.background='rgba(201,168,76,.1)'"
+           onmouseout="this.style.color='var(--text-dim,#94a3b8)';this.style.background='rgba(255,255,255,.04)'">
+          <i class="fas fa-file-invoice-dollar"></i>
+        </a>
+        <a href="/{% if request.LANGUAGE_CODE %}{{ request.LANGUAGE_CODE }}/{% endif %}konto/"
+           onclick="closeCompanySwitcher()"
+           title="{% trans 'Konto' %}"
+           style="padding:5px 7px;border-radius:5px;color:var(--text-dim,#94a3b8);
+                  text-decoration:none;font-size:.7rem;background:rgba(255,255,255,.04);
+                  transition:all .15s"
+           onmouseover="this.style.color='#60a5fa';this.style.background='rgba(96,165,250,.1)'"
+           onmouseout="this.style.color='var(--text-dim,#94a3b8)';this.style.background='rgba(255,255,255,.04)'">
+          <i class="fas fa-book"></i>
+        </a>
+        <a href="/{% if request.LANGUAGE_CODE %}{{ request.LANGUAGE_CODE }}/{% endif %}documents/arhiva/"
+           onclick="closeCompanySwitcher()"
+           title="{% trans 'Arhiva' %}"
+           style="padding:5px 7px;border-radius:5px;color:var(--text-dim,#94a3b8);
+                  text-decoration:none;font-size:.7rem;background:rgba(255,255,255,.04);
+                  transition:all .15s"
+           onmouseover="this.style.color='#a78bfa';this.style.background='rgba(167,139,250,.1)'"
+           onmouseout="this.style.color='var(--text-dim,#94a3b8)';this.style.background='rgba(255,255,255,.04)'">
+          <i class="fas fa-archive"></i>
+        </a>
+      </div>
+
+    </div>
+    {% endwith %}
+    {% endfor %}
+
+    <!-- Empty state pri pretrazi -->
+    <div id="cswEmpty"
+         style="display:none;padding:40px 20px;text-align:center;color:var(--text-dim,#64748b)">
+      <i class="fas fa-search" style="font-size:1.5rem;margin-bottom:8px;display:block;opacity:.4"></i>
+      <span style="font-size:.85rem">{% trans "Nema rezultata" %}</span>
+    </div>
+  </div>
+
+  <!-- Footer hint -->
+  <div style="padding:8px 16px;border-top:1px solid var(--border,#1e293b);
+              display:flex;gap:16px;flex-shrink:0">
+    <span style="font-size:.62rem;color:var(--text-dim,#64748b)">
+      <kbd style="background:rgba(255,255,255,.06);border:1px solid #334155;border-radius:3px;padding:1px 5px">↑↓</kbd>
+      {% trans "navigacija" %}
+    </span>
+    <span style="font-size:.62rem;color:var(--text-dim,#64748b)">
+      <kbd style="background:rgba(255,255,255,.06);border:1px solid #334155;border-radius:3px;padding:1px 5px">Enter</kbd>
+      {% trans "odaberi" %}
+    </span>
+    <span style="font-size:.62rem;color:var(--text-dim,#64748b)">
+      <kbd style="background:rgba(255,255,255,.06);border:1px solid #334155;border-radius:3px;padding:1px 5px">Ctrl+K</kbd>
+      {% trans "otvori/zatvori" %}
+    </span>
+  </div>
+</div>
+
+<script>
+(function () {
+  var _open = false;
+  var _focusIdx = -1;
+
+  function rows() {
+    return Array.from(document.querySelectorAll('.csw-row:not([style*="display:none"])'));
+  }
+
+  window.openCompanySwitcher = function () {
+    var modal = document.getElementById('cswModal');
+    var backdrop = document.getElementById('cswBackdrop');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    backdrop.style.display = 'block';
+    _open = true;
+    _focusIdx = -1;
+    setTimeout(function () {
+      var s = document.getElementById('cswSearch');
+      if (s) { s.value = ''; s.focus(); cswFilter(''); }
+    }, 50);
+  };
+
+  window.closeCompanySwitcher = function () {
+    var modal = document.getElementById('cswModal');
+    var backdrop = document.getElementById('cswBackdrop');
+    if (modal) modal.style.display = 'none';
+    if (backdrop) backdrop.style.display = 'none';
+    _open = false;
+    _focusIdx = -1;
+  };
+
+  window.toggleCompanySwitcher = function () {
+    _open ? closeCompanySwitcher() : openCompanySwitcher();
+  };
+
+  window.cswFilter = function (q) {
+    q = (q || '').toLowerCase().trim();
+    var visible = 0;
+    document.querySelectorAll('.csw-row').forEach(function (row) {
+      var name = row.dataset.name || '';
+      var oib = row.dataset.oib || '';
+      var match = !q || name.includes(q) || oib.includes(q);
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    var empty = document.getElementById('cswEmpty');
+    var count = document.getElementById('cswCount');
+    if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+    if (count) count.textContent = visible + ' {% trans "tvrtki" %}';
+    _focusIdx = -1;
+    setHighlight(-1);
+  };
+
+  window.cswKeyNav = function (e) {
+    var r = rows();
+    if (e.key === 'Escape') { closeCompanySwitcher(); return; }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _focusIdx = Math.min(_focusIdx + 1, r.length - 1);
+      setHighlight(_focusIdx);
+      scrollToFocused(r);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _focusIdx = Math.max(_focusIdx - 1, 0);
+      setHighlight(_focusIdx);
+      scrollToFocused(r);
+    } else if (e.key === 'Enter' && _focusIdx >= 0) {
+      e.preventDefault();
+      var form = r[_focusIdx].querySelector('.csw-main-form');
+      if (form) form.submit();
+    }
+  };
+
+  function setHighlight(idx) {
+    document.querySelectorAll('.csw-row').forEach(function (row, i) {
+      var isActive = row.classList.contains('csw-active');
+      if (rows().indexOf(row) === idx) {
+        row.style.background = 'rgba(201,168,76,.12)';
+      } else {
+        row.style.background = isActive ? 'rgba(201,168,76,.07)' : '';
+      }
+    });
+  }
+
+  function scrollToFocused(r) {
+    if (_focusIdx >= 0 && r[_focusIdx]) {
+      r[_focusIdx].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  // Hover → prikaži brze akcije
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.csw-row').forEach(function (row) {
+      var actions = row.querySelector('.csw-actions');
+      if (!actions) return;
+      row.addEventListener('mouseenter', function () { actions.style.opacity = '1'; });
+      row.addEventListener('mouseleave', function () { actions.style.opacity = '0'; });
+    });
+  });
+
+  // Ctrl+K globalni shortcut
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      toggleCompanySwitcher();
+    }
+  });
+})();
+</script>
+{% endif %}
