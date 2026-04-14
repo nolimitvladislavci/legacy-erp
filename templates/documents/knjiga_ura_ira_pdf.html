@@ -101,7 +101,7 @@ tfoot td { font-weight:700; border-top:1.5pt solid #0f172a; padding:5pt 4pt; fon
     {{ company.name }}{% if company.oib %} · OIB: {{ company.oib }}{% endif %} · {% now "d.m.Y H:i" %}<br>
     <span style="font-size:6pt">Fiskalizacija u džepu · SHA-256 · limit-connect.com</span>
   </div>
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://limit-connect.com/register/%3Fsource%3Dknjiga&color=333333&bgcolor=ffffff"
+  <img src="/qr/?data=https://limit-connect.com/register/%3Fsource%3Dknjiga&size=50&color=333333&bg=ffffff"
        style="width:12mm;height:12mm" alt="QR">
 </div>
 

@@ -92,7 +92,7 @@
         <span class="scope-badge {{ scope }}">{{ scope|upper }}</span>
 
         <div style="margin: 1.5rem 0;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ qr_url|urlencode }}"
+            <img src="{% load qr_tags %}{% qr_url qr_url size=300 %}"
                  alt="QR kod za inspekciju" width="300" height="300">
         </div>
 

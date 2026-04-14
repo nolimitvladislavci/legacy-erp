@@ -289,6 +289,7 @@ class UserLanguageMiddleware(MiddlewareMixin):
         "/media/",
         "/admin/",
         "/i18n/",
+        "/qr/",  # QR code endpoint
         "/push/",
         "/sw.js",
         "/manifest.json",
@@ -817,6 +818,7 @@ class DomainGateMiddleware:
         "/de/logout",
         "/en/logout",
         "/i18n/",
+        "/qr/",  # QR code endpoint
         "/__debug__/",
         "/hr/pocni/",
         "/de/pocni/",

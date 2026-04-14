@@ -223,12 +223,12 @@ function _shGenerateQR() {
         url = window.location.origin + d.public_url;
       }
       document.getElementById('shQrImg').innerHTML =
-        '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url) + '" alt="QR">' +
+        '<img src="/qr/?data=' + encodeURIComponent(url) + '&size=180" alt="QR">' +
         '<div class="fx-fs-caption fx-text-dark mt-1">Skeniraj za pregled</div>';
     });
   } else {
     document.getElementById('shQrImg').innerHTML =
-      '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url) + '" alt="QR">' +
+      '<img src="/qr/?data=' + encodeURIComponent(url) + '&size=180" alt="QR">' +
       '<div class="fx-fs-caption fx-text-dark mt-1">Skeniraj za pregled</div>';
   }
 }

@@ -20,6 +20,7 @@ EXEMPT_PREFIXES = (
     "/invoicing/portal/",
     "/invoicing/client/",
     "/ponuda/",  # Kupčeva soba — javna stranica
+    "/qr/",  # QR code endpoint — javni, bez auth
     "/invoicing/public/",
     "/eracun/",
     "/einvoice/",

@@ -16,7 +16,7 @@
     </p>
     
     <div class="fx-rounded d-inline-block mb-3 fx-bg-card fx-p-4">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ qr_url|urlencode }}" 
+      <img src="{% load qr_tags %}{% qr_url qr_url size=300 %}" 
            alt="QR" width="300" height="300" class="d-block">
     </div>
     

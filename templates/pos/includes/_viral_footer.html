@@ -11,7 +11,7 @@ Varijable:
 {% if format == 'thermal' %}
 {# ── THERMAL (80mm) — QR + tekst ── #}
 <div class="text-center mt-1" style="padding-top:4px;border-top:1px dashed #ccc">
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://limit-connect.com/register/%3Fsource%3Dbon&color=000000&bgcolor=ffffff"
+  <img src="/qr/?data=https://limit-connect.com/register/%3Fsource%3Dbon&size=80&color=000000&bg=ffffff"
        class="d-block" style="width:20mm;height:20mm;margin:4px auto" alt="QR">
   {% if receipt.chain_link_safe %}
   <div class="fx-text-dim fx-font-mono" style="font-size:5.5pt">
@@ -46,7 +46,7 @@ Varijable:
     Fiskalizacija u džepu — besplatna POS blagajna
   </div>
   <div class="fx-mt-10">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://limit-connect.com/register/%3Fsource%3Dreceipt&color=c9a84c&bgcolor=0a0a0a"
+    <img src="/qr/?data=https://limit-connect.com/register/%3Fsource%3Dreceipt&size=100&color=c9a84c&bg=0a0a0a"
          alt="QR" class="fx-rounded-sm" style="width:80px;height:80px;border:1px solid #222">
     <div class="fx-text-dim" style="font-size:8px;margin-top:3px">Skeniraj za besplatnu registraciju</div>
   </div>
@@ -68,7 +68,7 @@ Varijable:
     {% endif %}
   </div>
   <div class="text-center" style="margin-left:8px">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://limit-connect.com/register/%3Fsource%3Dpdf&color=333333&bgcolor=ffffff"
+    <img src="/qr/?data=https://limit-connect.com/register/%3Fsource%3Dpdf&size=60&color=333333&bg=ffffff"
          style="width:15mm;height:15mm" alt="QR">
     <div class="fx-text-muted" style="font-size:5pt">limit-connect.com</div>
   </div>

@@ -912,6 +912,11 @@ urlpatterns += [
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
 
+# ── Fenix QR Code endpoint — server-side, bez vanjskih servisa ──
+from core.qr_views import qr_code_view as _qr_view
+
+urlpatterns += [path("qr/", _qr_view, name="qr_code")]
+
 # ── Kupčeva soba — javni pristup ponudama (kratki URL za QR kod) ──
 from invoicing.views import client_portal as _client_portal_view
 

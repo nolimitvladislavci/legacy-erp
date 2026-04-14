@@ -285,7 +285,7 @@ var shareText = lang==='hr'
 document.getElementById('wa-share').href = 'https://wa.me/?text=' + encodeURIComponent(shareText + '\n' + shareUrl);
 document.getElementById('email-share').href = 'mailto:?subject=' + encodeURIComponent('LIMIT Connect Partner') + '&body=' + encodeURIComponent(shareText + '\n\n' + shareUrl);
 // QR via API
-document.getElementById('partner-qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(shareUrl);
+document.getElementById('partner-qr').src = '/qr/?data=&size=150&color=000000&bg=ffffff' + encodeURIComponent(shareUrl);
 
 function copyLink(){
   navigator.clipboard.writeText(shareUrl).then(function(){
