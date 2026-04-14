@@ -294,3 +294,106 @@ Nema potrebe za ručnom akcijom.
 - Trojstvo dobiva 3. glasača (Devstral 123B)
 - Pixtral čita skeniranejakture iz slike → JSON
 - Sve ostaje GDPR compliant (eu-central-1)
+
+---
+
+# VIZIJA 2027 — TRI SMJERA
+**Datum: 14.04.2026. | Izvor: DeepSeek analiza + Sonnet procjena**
+
+---
+
+## 1. INVISIBLE UI — WhatsApp kao primarno sučelje
+
+**Koncept:** Korisnik šalje sliku/poruku WhatsApp → sustav reagira, bez dashboarda.
+
+**Što već imamo:**
+- WhatsApp WAHA integration ✅
+- Pixtral vision model (sutra) ✅
+- Stolarija model (prozori, vrata) ✅
+- Celery async ✅
+
+**Što nedostaje (2-3 sprinta):**
+- Intent parser: WhatsApp poruka → tip akcije (nalog/upit/slika)
+- WhatsApp → Pixtral → Stolarija workflow
+- "Stisni 1 za potvrdu" approval flow
+
+**Pilot:** Zdenko Šoš — slika prozora → nalog kreiran → WhatsApp potvrda.
+**Procjena:** 3 tjedna do MVP.
+
+---
+
+## 2. PREDICTIVE ARCHIVING — Arhiva koja sprječava sporove
+
+**Koncept:** AI detektira vizualne uzorke grešaka PRIJE reklamacije.
+
+**Što već imamo:**
+- ArhivaEntry s GPS + SHA-256 + timestamp ✅
+- Pixtral vision (sutra) ✅
+
+**Što nedostaje (kompleksno):**
+- Cross-job pattern detection (usporedba slika s više gradilišta)
+- Risk scoring model (85% reklamacija = što točno?)
+- Nije sprint — to je ML projekt
+
+**Realna procjena:** Faza 3, Q3 2026. Pilot na Viskovic Bau.
+**Upozorenje:** Ne podcijeniti kompleksnost. Pixtral čita jednu sliku dobro.
+Usporedba 50 slika s 5 gradilišta = drugačiji problem.
+
+---
+
+## 3. AUTONOMOUS DEVOPS — Portal koji se sam popravlja
+
+**Koncept:** Agent nađe bug → popravi u branchu → WhatsApp "stisni 1 za deploy".
+
+**Što već imamo:**
+- Trojstvo Beat ✅
+- CC Code autonomni executor ✅
+- Git workflow ✅
+- WhatsApp approval ✅
+
+**Što nedostaje (1 sprint):**
+- "Approval flow" task u Celeryju
+- Git branch kreiranje iz agenta
+- WhatsApp "1=deploy, 2=odbaci" parser
+- Staging environment provjera
+
+**Ovo je NAJBLIŽI cilj od tri.** Infrastruktura postoji.
+
+---
+
+## LATENCIJSKI ŠOK — Upozorenje (kritično)
+
+Sve AI pozive staviti u Celery. NIKAD sync AI call u web requestu.
+
+```python
+# ZABRANJENO (blokira user):
+def my_view(request):
+    result = deepseek_direct(...)  # ← blokira 2-5 sekundi
+    return JsonResponse(result)
+
+# ISPRAVNO:
+def my_view(request):
+    task = deepseek_analyze_task.delay(data)
+    return JsonResponse({"task_id": task.id, "status": "processing"})
+# Frontend polira /task-status/{id}/ svakih 2s
+```
+
+**Provjera:** Koliko direktnih AI poziva ima u views.py?
+→ CC Code KORAK 8 mora auditirati ovo.
+
+---
+
+## PRIORITETI (redoslijed nije slučajan)
+
+1. **KORAK 7** — Test coverage 40%+ (imunološki sustav)
+   Bez toga autonomni agenti ruše sustav.
+
+2. **Invisible UI MVP** — WhatsApp → Pixtral → Stolarija
+   Zdenko kao pilot. 3 tjedna.
+
+3. **Autonomous DevOps** — "Stisni 1 za deploy"
+   Infrastruktura postoji, treba 1 sprint.
+
+4. **Predictive Archiving** — Q3 2026.
+   Kompleksno, ne žuriti.
+
