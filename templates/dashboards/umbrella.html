@@ -272,6 +272,7 @@
     <button class="u-tab" onclick="showTab('clients',this)"><i class="fas fa-briefcase"></i> Klijenti ({{ client_count }})</button>
     <button class="u-tab" onclick="showTab('create',this)"><i class="fas fa-plus-circle"></i> Kreiraj</button>
     <button class="u-tab" onclick="showTab('link',this)"><i class="fas fa-link"></i> Povezi</button>
+    <button class="u-tab" onclick="showTab('scan',this)"><i class="fas fa-camera"></i> Scan Tokeni</button>
   </div>
 
   <!-- Tab: All / Subsidiaries / Clients -->
@@ -399,6 +400,65 @@
   </div>
 </div>
 
+  <!-- Tab: Scan Tokeni -->
+  <div class="u-panel" id="tab-scan">
+    <div class="u-section">
+      <div class="u-section-title"><i class="fas fa-camera fx-text-gold"></i> Scan Tokeni</div>
+      <p class="fx-fs-sm fx-text-muted fx-mb-4">Kreirajte trajne linkove za skeniranje racuna. Komitent otvori link na mobitelu, slika racun — automatski se arhivira.</p>
+      
+      <!-- Forma za kreiranje -->
+      <div class="fx-rounded fx-p-4 fx-mb-4" style="background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333)">
+        <h6 class="fx-fw-bold fx-mb-3"><i class="fas fa-plus-circle fx-text-gold"></i> Novi Scan Token</h6>
+        <div class="row g-2">
+          <div class="col-md-5">
+            <label class="form-label fx-fs-sm">Oznaka</label>
+            <input type="text" class="form-control form-control-sm" id="scanLabel" placeholder="npr. Gasic Ivan — gorivo">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fx-fs-sm">Istjece za (dana)</label>
+            <input type="number" class="form-control form-control-sm" id="scanExpires" placeholder="Prazno = nikad">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fx-fs-sm">Max koristi</label>
+            <input type="number" class="form-control form-control-sm" id="scanMaxUses" value="0" min="0">
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-sm w-100 fx-fw-bold" style="background:var(--gold);color:#0a0a0a" onclick="createScanToken()">
+              <i class="fas fa-qrcode"></i> Kreiraj
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Rezultat kreiranog tokena -->
+      <div id="scanResult" style="display:none" class="fx-rounded fx-p-4 fx-mb-4" style="background:var(--card-bg,#1a1a1a);border:1px solid var(--gold)">
+        <div class="row align-items-center">
+          <div class="col-md-4 text-center">
+            <img id="scanQR" alt="QR" style="width:200px;height:200px;border-radius:8px">
+          </div>
+          <div class="col-md-8">
+            <h6 class="fx-fw-bold fx-text-gold" id="scanResultLabel"></h6>
+            <div class="input-group mb-2">
+              <input type="text" class="form-control form-control-sm" id="scanResultUrl" readonly>
+              <button class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('scanResultUrl').value);fenixToast('Link kopiran!','success')"><i class="fas fa-copy"></i></button>
+            </div>
+            <a id="scanWhatsApp" href="#" target="_blank" class="btn btn-sm fx-fw-bold" style="background:#25D366;color:#fff">
+              <i class="fab fa-whatsapp"></i> Posalji WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Lista aktivnih tokena -->
+      <div id="scanTokenList" class="fx-rounded" style="background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333)">
+        <div class="fx-p-3 fx-fw-bold fx-fs-sm" style="border-bottom:1px solid var(--border,#333)"><i class="fas fa-list"></i> Aktivni tokeni</div>
+        <div id="scanTokenBody" class="fx-p-3">
+          <div class="text-center fx-text-muted fx-fs-sm py-3">Ucitavanje...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
 function showTab(name,btn){
   document.querySelectorAll('.u-panel').forEach(function(p){p.classList.remove('active')});
@@ -406,6 +466,85 @@ function showTab(name,btn){
   document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
 }
+</script>
+
+<script>
+function createScanToken() {
+  var label = document.getElementById("scanLabel").value;
+  var expires = document.getElementById("scanExpires").value;
+  var maxUses = document.getElementById("scanMaxUses").value;
+  var fd = new FormData();
+  fd.append("label", label);
+  fd.append("csrfmiddlewaretoken", getCsrf());
+  if (expires) fd.append("expires_days", expires);
+  if (maxUses) fd.append("max_uses", maxUses);
+  fetch("/hr/documents/scan/create-token/", {method:"POST", body:fd})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok){
+      document.getElementById("scanResult").style.display="block";
+      document.getElementById("scanQR").src="data:image/png;base64,"+d.qr_data;
+      document.getElementById("scanResultUrl").value=d.url;
+      document.getElementById("scanResultLabel").textContent=d.label||"Scan Token";
+      var msg=encodeURIComponent("Skeniraj racune ovdje: "+d.url);
+      document.getElementById("scanWhatsApp").href="https://wa.me/?text="+msg;
+      document.getElementById("scanLabel").value="";
+      loadScanTokens();
+      fenixToast("Token kreiran!","success");
+    } else {
+      fenixToast(d.error||"Greska","error");
+    }
+  }).catch(function(e){fenixToast("Greska: "+e.message,"error")});
+}
+
+function loadScanTokens() {
+  fetch("/hr/documents/scan/tokens/")
+  .then(function(r){return r.json()})
+  .then(function(d){
+    var body=document.getElementById("scanTokenBody");
+    if(!d.tokens||!d.tokens.length){
+      body.innerHTML="<div class=\"text-center fx-text-muted fx-fs-sm py-3\">Nema tokena. Kreirajte prvi!</div>";
+      return;
+    }
+    var html="";
+    d.tokens.forEach(function(t){
+      var statusBadge=t.is_valid
+        ?"<span class=\"badge bg-success\">Aktivan</span>"
+        :"<span class=\"badge bg-secondary\">Neaktivan</span>";
+      html+="<div class=\"d-flex justify-content-between align-items-center fx-py-2\" style=\"border-bottom:1px solid var(--border,#333)\">"
+        +"<div><strong class=\"fx-fs-sm\">"+(t.label||t.token.substring(0,8))+"</strong>"
+        +" <span class=\"fx-fs-xs fx-text-muted\">"+t.use_count+" koristenja</span> "+statusBadge+"</div>"
+        +"<div class=\"d-flex fx-gap-2\">"
+        +"<button class=\"btn btn-outline-secondary btn-sm\" onclick=\"navigator.clipboard.writeText(\x27"+t.url+"\x27);fenixToast(\x27Kopirano!\x27,\x27success\x27)\"><i class=\"fas fa-copy\"></i></button>"
+        +"<button class=\"btn btn-outline-warning btn-sm\" onclick=\"toggleScanToken(\x27"+t.token+"\x27)\"><i class=\"fas fa-power-off\"></i></button>"
+        +"</div></div>";
+    });
+    body.innerHTML=html;
+  });
+}
+
+function toggleScanToken(token) {
+  var fd=new FormData();
+  fd.append("csrfmiddlewaretoken",getCsrf());
+  fetch("/hr/documents/scan/tokens/"+token+"/toggle/",{method:"POST",body:fd})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    fenixToast(d.is_active?"Token aktiviran":"Token deaktiviran","success");
+    loadScanTokens();
+  });
+}
+
+function getCsrf(){
+  var m=document.cookie.match(/csrftoken=([^;]+)/);
+  return m?m[1]:"";
+}
+
+// Auto-load scan tokens when tab opens
+var origShowTab=showTab;
+showTab=function(name,btn){
+  origShowTab(name,btn);
+  if(name==="scan") loadScanTokens();
+};
 </script>
 
     <!-- Import Tab -->
