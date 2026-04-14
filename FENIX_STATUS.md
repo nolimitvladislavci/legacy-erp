@@ -395,3 +395,40 @@ memio.pet/privatnost/              → 200 ✅ Privacy policy
 ### Baza (memio_pets):
 - 2 životinje (Rex + Vučko memorial)
 - 13 profila (hoteli, krematoriji, vlasnici, OPG)
+
+---
+
+## MEMIO EKOSISTEM — Koraci A-D GOTOVI (Dan 48)
+
+### KORAK A: memio.pet LIVE ✅
+- DomainGate: 22 ruta whitelistano za memio.pet domenu
+- End-to-end: 12/12 ruta testirano (landing, registracija, profil, QR, BARF, udomljavanje...)
+- XSS test podatak očišćen iz baze
+- Link za uzgajivače: https://memio.pet/registracija/
+
+### KORAK B: Azil Bridge ✅  
+- NO LIMIT udruga: is_shelter=true, shelter_sponsor aktiviran
+- Demo Azil: is_shelter=true, pushat u memio_pets
+- Auto-sync signal: Company.save(is_shelter=true) → BreederProfile(shelter) u memio_pets
+- 2 shelter profila LIVE na memio.pet
+
+### KORAK C: Livestock SyncLink ✅
+- farm_animal_uuid: UUID referenca na memio_farm bazu (ne FK, cross-DB safe)
+- memio_pet_profile_id: UUID referenca na memio_pets bazu
+- public_farm_url + public_pet_url properties
+- Migracija: livestock.0008_add_farm_pet_synclink
+
+### KORAK D: memio.world Encryption ✅
+- MEMIO_WORLD_FERNET_KEY: zasebni AES ključ (ne dijeli se s ERP ni memio_pets)
+- WorldEncryptedField: transparentni AES-128-CBC za TextField
+- Enkriptirano: TimeCapsule.message, MemoryVault.description, FamilyStory.content,
+  MemoryEntry.content, ChildProfile.guardian_emails
+- Migracija: memio_world.0003_encrypt_sensitive_fields
+- Verifikacija: encrypt→decrypt roundtrip OK
+
+### Tri odvojene baze — tri odvojena ključa
+```
+fina_erp       → FERNET_KEY            (ERP podaci)
+memio_pets     → MEMIO_PETS_FERNET_KEY (PII ljubimaca/vlasnika)
+memio_world    → MEMIO_WORLD_FERNET_KEY (digitalne uspomene, 18yr)
+```
