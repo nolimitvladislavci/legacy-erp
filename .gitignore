@@ -30,3 +30,5 @@ ai_analiza.txt
 minio-data/
 node_modules/
 staticfiles/dist/
+minio-data/
+media/
