@@ -1409,3 +1409,14 @@ CELERY_BEAT_SCHEDULE["notifications-purge-old"] = {
     "task": "notifications.tasks.purge_old_notifications",
     "schedule": 604800.0,  # 1x tjedno (nedjelja)
 }
+
+# ── DJANGO SILK — Performance profiling (samo za DEBUG) ──────────────────────
+# Aktivira se kad DEBUG=True (staging/local).
+# Produkcija: DEBUG=False → silk se NE učitava.
+# UI: /silk/ (admin pristup)
+if DEBUG:
+    INSTALLED_APPS = list(INSTALLED_APPS) + ["silk"]
+    MIDDLEWARE = ["silk.middleware.SilkyMiddleware"] + list(MIDDLEWARE)
+    SILKY_PYTHON_PROFILER = True
+    SILKY_MAX_RECORDED_REQUESTS = 100
+    SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10

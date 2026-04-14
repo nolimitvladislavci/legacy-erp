@@ -330,7 +330,7 @@ Cilj: coverage > 40% na pos/, invoicing/, accounts/
 | 2 Field audit | ✅ GOTOVO | 100% |
 | 3 RouteRegistry | ✅ GOTOVO | 100% |
 | 4 Middleware | ✅ GOTOVO | 100% |
-| 5 504 eliminacija | 🔄 AKTIVAN | 0% |
+| 5 504 eliminacija | ✅ GOTOVO | 100% |
 | 6 Globalni standardi | 🔄 AKTIVAN (Gemini) | 30% |
 | 7 Test coverage | ⏳ na redu | — |
 | 8 Load test | ⏳ na redu | — |

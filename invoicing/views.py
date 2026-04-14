@@ -204,7 +204,10 @@ def generate_zki(invoice, cert_key="demo_key"):
 # ── PDF GENERIRANJE
 @login_required
 def generate_pdf(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(
+        Invoice.objects.select_related("company", "partner", "invoice_profile").prefetch_related("items"),
+        pk=pk,
+    )
     from invoicing.services.pdf_service import generate_invoice_pdf
 
     content, mime = generate_invoice_pdf(invoice, request)
@@ -215,7 +218,10 @@ def generate_pdf(request, pk):
 
 @login_required
 def download_pdf(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(
+        Invoice.objects.select_related("company", "partner", "invoice_profile").prefetch_related("items"),
+        pk=pk,
+    )
     from invoicing.services.pdf_service import generate_invoice_pdf
 
     content, mime = generate_invoice_pdf(invoice)
@@ -232,7 +238,10 @@ def public_pdf(request, token):
     if cache.get(cache_key):
         return HttpResponse("Previše zahtjeva. Pokušajte za 30 sekundi.", status=429)
     cache.set(cache_key, True, 30)
-    invoice = get_object_or_404(Invoice, client_token=token)
+    invoice = get_object_or_404(
+        Invoice.objects.select_related("company", "partner", "invoice_profile").prefetch_related("items"),
+        client_token=token,
+    )
     from invoicing.services.pdf_service import generate_invoice_pdf
 
     content, mime = generate_invoice_pdf(invoice, request)
@@ -288,7 +297,10 @@ def send_invoice_whatsapp(request, pk):
 
 @login_required
 def generate_eracun(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(
+        Invoice.objects.select_related("company", "partner").prefetch_related("items"),
+        pk=pk,
+    )
     from invoicing.services.pdf_service import generate_eracun_xml
 
     xml = generate_eracun_xml(invoice)

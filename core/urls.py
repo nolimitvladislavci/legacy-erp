@@ -945,3 +945,7 @@ urlpatterns += i18n_patterns(
     path("ponuda/<uuid:token>/prihvati/", _accept_trail, name="portal_accept_trail"),
     prefix_default_language=True,
 )
+
+# ── Django Silk — profiling UI (samo za DEBUG) ────────────────────────────────
+if settings.DEBUG:
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
