@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-14 (Dan 48), commit 5ea4e6f1 — KORAK 7 Test Coverage ✅
+> Zadnji update: 2026-04-14 (Dan 48), commit f46bd567 — KORAK 8 Load Test ✅
 
 ## OCJENE
 
@@ -194,7 +194,7 @@ Commits: 7 bug fix + 1 test commit
 
 ---
 
-## KORAK 8 — LOAD TEST ⬅ TRENUTNO AKTIVAN
+## KORAK 8 — LOAD TEST ✅
 **Cilj:** 50 konkurentnih korisnika bez pada.
 ```
 [ ] k6 ili locust scenarij: login → dashboard → invoice → switch company
@@ -202,7 +202,13 @@ Commits: 7 bug fix + 1 test commit
 [ ] P95 < 3s, 0 x 5xx
 [ ] Ako pada: profile → fix → ponovi
 ```
-✅ Gotovo kad: Load test report zeleni.
+✅ GOTOVO — 2026-04-14
+
+### Rezultat:
+- 1,353 requests | **0 failures** | **0 x 5xx** ✅
+- P95 = **850ms** (cilj <3000ms) ✅
+- Flow: login→invoicing→arhiva→smart-import→switch company
+- Tool: Locust 2.43.3, 50 VU, 10 min, HTTPS produkcija
 
 ---
 
@@ -267,8 +273,8 @@ Commits: 7 bug fix + 1 test commit
 | 5 504 eliminacija | ✅ GOTOVO | 100% |
 | 6 Globalni standardi | ✅ GOTOVO | 100% |
 | 7 Test coverage | ✅ GOTOVO | 100% |
-| 8 Load test | 🔄 AKTIVAN | 0% |
-| 9 Security | ⏳ na redu | — |
+| 8 Load test | ✅ GOTOVO | 100% |
+| 9 Security | 🔄 AKTIVAN | 0% |
 | 10 Onboarding | ⏳ na redu | — |
 | 11 Beta | ⏳ na redu | — |
 | 12 EU kampanja | ⏳ na redu | — |
