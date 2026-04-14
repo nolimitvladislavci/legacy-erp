@@ -129,16 +129,37 @@
           <button onclick="this.nextElementSibling.classList.toggle('fx-hidden')" class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:#e2e8f0;border:1px solid rgba(255,255,255,0.2);font-size:13px;">
             <i class="fas fa-exchange-alt"></i> {% trans "Prebaci" %}
           </button>
-          <div class="fx-hidden" style="position:absolute;right:0;top:100%;background:#1e293b;border:1px solid #334155;border-radius:10px;max-height:360px;overflow-y:auto;width:300px;z-index:9999;box-shadow:0 12px 32px rgba(0,0,0,0.5);margin-top:6px;padding:6px 0;">
-            <div style="padding:6px 14px 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;font-weight:700;border-bottom:1px solid #334155;">
+          <div class="fx-hidden u-switch-dropdown" id="switchDropdown" style="position:fixed;top:auto;right:16px;left:16px;max-width:340px;margin-left:auto;background:#1e293b;border:1px solid #334155;border-radius:10px;max-height:60vh;overflow-y:auto;z-index:9999;box-shadow:0 12px 32px rgba(0,0,0,0.5);padding:6px 0;">
+            <div style="padding:8px 14px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;font-weight:700;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;">
               {% trans "Prebaci na klijenta" %}
+              <button onclick="this.closest('.u-switch-dropdown').classList.add('fx-hidden')" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:14px;padding:0;"><i class="fas fa-times"></i></button>
             </div>
+            <div style="padding:6px 10px;">
+              <input type="text" placeholder="{% trans 'Traži...' %}" oninput="filterSwitchList(this)" style="width:100%;padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:13px;outline:none;" onfocus="this.style.borderColor='#c9a84c'" onblur="this.style.borderColor='#334155'">
+            </div>
+            <div id="switchList">
             {% for sib in umbrella_siblings %}
-              <a href="{% url 'umbrella_switch_company' sib.pk %}" style="display:block;padding:8px 14px;color:#e2e8f0;text-decoration:none;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" onmouseover="this.style.background='#334155';this.style.borderRadius='6px'" onmouseout="this.style.background='transparent'">
+              <a href="{% url 'umbrella_switch_company' sib.pk %}" class="u-switch-item" data-sname="{{ sib.name|lower }}" style="display:block;padding:8px 14px;color:#e2e8f0;text-decoration:none;font-size:13px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='transparent'">
                 <i class="fas fa-building" style="color:#64748b;margin-right:6px;font-size:11px;"></i>{{ sib.name }}
               </a>
             {% endfor %}
+            </div>
           </div>
+          <script>
+          function filterSwitchList(input){
+            const q=input.value.toLowerCase();
+            document.querySelectorAll('.u-switch-item').forEach(a=>{
+              a.style.display=a.dataset.sname.includes(q)?'':'none';
+            });
+          }
+          // Close dropdown on outside click
+          document.addEventListener('click',function(e){
+            const dd=document.getElementById('switchDropdown');
+            if(dd && !dd.classList.contains('fx-hidden') && !dd.contains(e.target) && !e.target.closest('.dropdown')){
+              dd.classList.add('fx-hidden');
+            }
+          });
+          </script>
         </div>
         <a href="{% url 'umbrella_switch_back' %}" class="btn btn-sm" style="background:#e2b93b;color:#1a1a2e;font-weight:600;font-size:13px;">
           <i class="fas fa-arrow-left"></i> {% trans "Natrag" %}

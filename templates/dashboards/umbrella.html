@@ -197,6 +197,7 @@
 @media(max-width:600px){.u-create-grid{grid-template-columns:1fr}.u-tabs{gap:0}.u-tab{padding:.5rem .6rem;font-size:.72rem}}
 .u-section{margin-bottom:1.5rem}
 .u-section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.6rem 1rem;display:flex;align-items:center;gap:.5rem}
+@keyframes u-pulse{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,.3)}50%{box-shadow:0 0 0 8px rgba(234,88,12,0)}}
 .u-badge{font-size:.65rem;background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);padding:2px 8px;border-radius:10px;font-weight:700}
 </style>
 <div class="fx-m-auto fx-p-4" style="max-width:1200px">
@@ -210,6 +211,12 @@
       <p class="fx-fs-note fx-text-muted" style="margin:4px 0 0">Umbrella Dashboard</p>
     </div>
     <div class="d-flex fx-flex-wrap fx-gap-2 align-items-center">
+      {% if start_my_day %}
+      <a href="{% url 'umbrella_switch_company' start_my_day.company.pk %}"
+         class="fx-gap-2 fx-rounded fx-fw-bold fx-fs-base fx-no-underline d-inline-flex align-items-center fx-p-8-16" style="background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;border:1px solid rgba(251,146,60,.4);animation:u-pulse 2s infinite;">
+        <i class="fas fa-rocket"></i> Pokreni dan — {{ start_my_day.company.name }}
+      </a>
+      {% endif %}
       <a href="{% url 'pos:dashboard' %}"
          class="fx-gap-2 fx-rounded fx-fw-bold fx-fs-base fx-no-underline d-inline-flex align-items-center fx-text-green fx-p-8-16" style="background:linear-gradient(135deg,#166534,#14532d);border:1px solid rgba(74,222,128,.3)">
         <i class="fas fa-cash-register"></i> Otvori POS
