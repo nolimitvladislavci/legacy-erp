@@ -58,7 +58,7 @@ def on_honey_harvest_saved(sender, instance, created, **kwargs):
                 },
             )
             logger.info(f"Boxgram sync: HoneyHarvest {instance.pk} → PetProfile {pet.id}")
-    except DatabaseError as e:
+    except (DatabaseError, ImportError) as e:
         logger.warning(f"Boxgram sync skip (HoneyHarvest {getattr(instance, 'pk', '?')}): {e}")
 
 
@@ -102,7 +102,7 @@ def on_hive_inspection_saved(sender, instance, created, **kwargs):
                     "is_public": False,
                 },
             )
-    except DatabaseError as e:
+    except (DatabaseError, ImportError) as e:
         logger.warning(f"Boxgram sync skip (HiveInspection {getattr(instance, 'pk', '?')}): {e}")
 
 
@@ -138,7 +138,7 @@ def on_epp_dojava_saved(sender, instance, created, **kwargs):
                     "is_public": True,
                 },
             )
-    except DatabaseError as e:
+    except (DatabaseError, ImportError) as e:
         logger.warning(f"Boxgram sync skip (EPPDojava {getattr(instance, 'pk', '?')}): {e}")
 
 
@@ -258,7 +258,7 @@ def on_invoice_saved(sender, instance, created, **kwargs):
             updated = LifeEvent.objects.filter(source_id=f"honey_{harvest.pk}").update(is_verified=True)
             if updated:
                 logger.info(f"Boxgram: LifeEvent verified via Invoice {instance.pk}")
-    except DatabaseError as e:
+    except (DatabaseError, ImportError) as e:
         logger.warning(f"Boxgram sync skip (Invoice {getattr(instance, 'pk', '?')}): {e}")
 
 
