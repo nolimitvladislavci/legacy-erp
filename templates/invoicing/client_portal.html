@@ -274,6 +274,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="comp-row"><span class="comp-icon">🌿</span><span class="comp-label">Odlaganje otpada</span><span class="comp-no">✗ Vaš problem</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Vreće + reciklaža</span></div>
     <div class="comp-row"><span class="comp-icon">👷</span><span class="comp-label">Osigurani radnici (MO/ZO)</span><span class="comp-no">✗ Vaša odgovornost</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Izvođač odgovara</span></div>
     <div class="comp-row"><span class="comp-icon">🏦</span><span class="comp-label">Odbitak za obrt/tvrtku</span><span class="comp-no">✗ Ne može</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Porezno priznat</span></div>
+    <div class="comp-row"><span class="comp-icon">🏛️</span><span class="comp-label">Bankovna dokumentacija za kredit</span><span class="comp-no">✗ Banka ne prima</span><span style="margin:0 8px;color:var(--dim)">→</span><span class="comp-yes">✓ Prihvaća svaka banka</span></div>
     <div class="comp-divider"></div>
     <div class="slider-wrap">
       <div class="slider-label">
@@ -345,6 +346,32 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="chat-input-row">
       <input class="chat-input" id="chatInput" placeholder="Postavite pitanje..." onkeydown="if(event.key==='Enter')sendMsg()">
       <button class="chat-send" id="chatSend" onclick="sendMsg()">Pošalji</button>
+    </div>
+  </div>
+
+  <!-- FINANCIRANJE BANNER -->
+  <div style="background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(139,92,246,.06));border:1px solid rgba(59,130,246,.25);border-radius:12px;padding:18px 20px;margin-bottom:16px">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="font-size:1.6rem;flex-shrink:0">🏛️</span>
+      <div>
+        <div style="font-weight:700;font-size:.95rem;color:#60a5fa;margin-bottom:6px">Ova ponuda se prihvaća u banci za kredit</div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.6">
+          Svaka hrvatska banka prihvaća ovu ponudu kao dokumentaciju za 
+          <strong style="color:var(--text)">namjenski kredit za adaptaciju ili rekonstrukciju</strong>.<br>
+          Ponuda sadrži OIB izvođača, specifikaciju radova i ukupni iznos — 
+          sve što banka zahtijeva.<br>
+          <span style="color:#f87171;font-weight:600">Rad na crno = bez računa = banka ne daje kredit.</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" target="_blank"
+             style="padding:7px 14px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#60a5fa;font-size:.78rem;font-weight:600;text-decoration:none">
+            📄 Preuzmi ponudu za banku
+          </a>
+          <span style="padding:7px 14px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:8px;color:#a78bfa;font-size:.78rem;font-weight:600">
+            💳 Mogućnost plaćanja po stavkama
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 
