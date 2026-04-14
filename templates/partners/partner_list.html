@@ -3,16 +3,6 @@
 {% block title %}Partneri{% endblock %}
 {% block page_title %}Partneri{% endblock %}
 {% block content %}
-<style>
-.partner-name-link {
-  color: var(--gold, #c9a84c);
-  text-decoration: none;
-}
-.partner-name-link:hover {
-  color: var(--amber, #f59e0b);
-  text-decoration: underline;
-}
-</style>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
@@ -66,7 +56,7 @@
     <table class="table table-hover mb-0">
       <thead>
         <tr>
-          <th style="width:80px"></th>
+          <th class="col-actions"></th>
           <th>{% trans "Naziv" %}</th>
           <th class="text-end">{% trans "Saldo" %}</th>
           <th class="d-none d-md-table-cell">{% trans "Status" %}</th>
@@ -80,12 +70,12 @@
         <tr>
           {# AKCIJE PRVE — uvijek vidljive #}
           <td style="white-space:nowrap">
-            <a href="{% url 'partners:edit' p.pk %}" class="btn btn-sm btn-outline-warning" title="{% trans 'Uredi' %}"><i class="fas fa-edit"></i></a>
-            <a href="{% url 'partners:delete' p.pk %}" class="btn btn-sm btn-outline-danger ms-1" title="{% trans 'Obriši' %}"><i class="fas fa-trash"></i></a>
+            <a href="{% url 'partners:edit' p.pk %}" class="btn btn-sm btn-outline-warning btn-action" title="{% trans 'Uredi' %}"><i class="fas fa-edit"></i></a>
+            <a href="{% url 'partners:delete' p.pk %}" class="btn btn-sm btn-outline-danger btn-action ms-1" title="{% trans 'Obriši' %}"><i class="fas fa-trash"></i></a>
           </td>
           {# NAZIV + OIB #}
           <td>
-            <a href="{% url 'partners:detail' p.pk %}" class="fw-bold partner-name-link">{{ p.name }}</a>
+            <a href="{% url 'partners:detail' p.pk %}" class="entity-link">{{ p.name }}</a>
             {% if not p.is_complete %}<span class="badge bg-warning text-dark ms-1 fx-fs-2xs">Nepotpun</span>{% endif %}
             {% if p.oib %}<br><small class="text-muted">OIB: {{ p.oib }}</small>{% endif %}
           </td>

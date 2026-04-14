@@ -1140,3 +1140,37 @@ textarea.is-invalid {
     margin: 0 6px;
     opacity: 0.5;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   FENIX LIST PATTERNS — globalni pattern za sve liste u platformi
+   Primjena: partner_list, invoice_list, work_order_list, itd.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Naziv entiteta kao link — klikabilno, gold, hover underline */
+.entity-link {
+    color: var(--primary-color, #c9a84c);
+    font-weight: 600;
+    text-decoration: none;
+}
+.entity-link:hover {
+    color: var(--amber, #f59e0b);
+    text-decoration: underline;
+}
+
+/* Kolona s akcijama — fiksna širina, uvijek vidljiva */
+.col-actions {
+    width: 80px;
+    white-space: nowrap;
+}
+
+/* Sekundarne kolone — responsive vidljivost */
+/* Koristiti na <th> i <td> za konzistentno sakrivanje */
+/* .d-none.d-md-table-cell → tablet+            */
+/* .d-none.d-lg-table-cell → desktop only       */
+
+/* Kompaktni action gumbi u listama */
+.btn-action {
+    padding: 3px 8px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
