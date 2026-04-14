@@ -43,7 +43,8 @@ ALLOWED_HOSTS = [
     "www.memio.farm",
 ]
 
-SITE_URL = "https://limit-connect.com"  # Uvijek HTTPS, bez trailing slash
+SITE_URL = "https://limit-connect.com"
+QR_HMAC_SECRET = os.environ.get("QR_HMAC_SECRET", SECRET_KEY)  # Uvijek HTTPS, bez trailing slash
 
 CSRF_TRUSTED_ORIGINS = [
     "https://limit-connect.com",
