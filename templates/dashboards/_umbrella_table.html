@@ -1,66 +1,209 @@
 {% load i18n %}
-<div class="fx-rounded fx-overflow-hidden" style="background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0)">
-  <div class="fx-scroll-x">
-    <table class="fx-w-full fx-fs-note fx-b-collapse">
-      <thead>
-        <tr class="fx-fs-xs fx-text-muted fx-uppercase" style="background:var(--table-header-bg,#f8fafc);letter-spacing:.05em">
-          <th class="text-start fx-p-8-12">Tvrtka</th>
-          <th class="text-start fx-p-8-12">OIB</th>
-          <th class="text-center fx-p-8-12">Plan</th>
-          <th class="text-center fx-p-8-12">Korisnici</th>
-          <th class="text-end fx-p-8-12">Fakture</th>
-          <th class="text-end fx-p-8-12">POS</th>
-          <th class="text-center fx-p-8-12">Synesis</th>
-          <th class="text-center fx-p-8-12">Tip</th>
-          <th class="text-center fx-p-8-12">Akcije</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for cd in items %}
-        <tr style="border-top:1px solid var(--border,#e2e8f0)">
-          <td class="fx-p-8-12">
-            <strong class="fx-text-body">{{ cd.company.name }}</strong>
-            {% if cd.company.city %}<div class="fx-fs-sm fx-text-muted">{{ cd.company.city }}</div>{% endif %}
-          </td>
-          <td class="fx-fs-caption fx-text-muted fx-p-8-12">{{ cd.company.oib }}</td>
-          <td class="text-center fx-p-8-12">
-            <span class="fx-fs-xs fx-fw-bold fx-text-gold" style="background:rgba(201,168,76,.1);padding:2px 6px;border-radius:3px">{{ cd.plan }}</span>
-          </td>
-          <td class="text-center fx-text-muted fx-p-8-12">{{ cd.user_count }}</td>
-          <td class="text-end fx-fw-semibold fx-text-body fx-p-8-12">
-            {% if cd.inv_revenue %}&euro;{{ cd.inv_revenue|floatformat:0 }}{% else %}-{% endif %}
-          </td>
-          <td class="text-end fx-fw-semibold fx-text-body fx-p-8-12">
-            {% if cd.pos_revenue %}&euro;{{ cd.pos_revenue|floatformat:0 }}{% else %}-{% endif %}
-          </td>
-          <td class="text-center fx-p-8-12">
-            {% if cd.synesis %}<span style="color:#4caf7d" title="Aktivan">&#9679;</span>
-            {% else %}<span class="fx-text-muted">-</span>{% endif %}
-          </td>
-          <td class="text-center fx-p-8-12">
-            {% if cd.company.umbrella_relation == 'subsidiary' %}
-              <span class="fx-fw-bold" style="background:rgba(168,85,247,.1);color:#a855f7;padding:2px 6px;border-radius:3px;font-size:.62rem">PODR.</span>
-            {% else %}
-              <span class="fx-text-blue fx-fw-bold" style="background:rgba(59,130,246,.1);padding:2px 6px;border-radius:3px;font-size:.62rem">KLIJENT</span>
+{# Umbrella Client List v2.0 — 10/10 EU #1 #}
+{# Name = clickable link, actions INLINE next to name, health indicator, search #}
+
+{% if items %}
+<div class="u-client-list">
+  {# Search bar for 10+ clients #}
+  {% if items|length > 9 %}
+  <div style="margin-bottom:12px;">
+    <div style="position:relative;">
+      <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted,#94a3b8);font-size:13px;"></i>
+      <input type="text" class="u-search-input" placeholder="{% trans 'Pretraži klijente...' %}"
+             oninput="filterClients(this)" autocomplete="off"
+             style="width:100%;padding:10px 12px 10px 36px;border:1px solid var(--border,#e2e8f0);border-radius:8px;font-size:14px;background:var(--input-bg,#fff);color:var(--text,#0f172a);outline:none;transition:border-color .15s;"
+             onfocus="this.style.borderColor='var(--gold,#c9a84c)'" onblur="this.style.borderColor='var(--border,#e2e8f0)'">
+    </div>
+  </div>
+  {% endif %}
+
+  {# Client cards #}
+  <div class="u-client-grid">
+    {% for cd in items %}
+    <div class="u-client-card" data-name="{{ cd.company.name|lower }}">
+      {# Row 1: Name (clickable!) + inline actions #}
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
+        <div style="flex:1;min-width:0;">
+          <a href="{% url 'umbrella_switch_company' cd.company.pk %}" class="u-client-name" title="{% trans 'Otvori' %} {{ cd.company.name }}">
+            {# Health dot #}
+            {% if cd.company.health_score %}
+              {% if cd.company.health_score.status == "green" %}
+                <span class="u-health-dot" style="background:#22c55e;" title="OK"></span>
+              {% elif cd.company.health_score.status == "yellow" %}
+                <span class="u-health-dot" style="background:#f59e0b;" title="{% trans 'Treba pažnju' %}"></span>
+              {% else %}
+                <span class="u-health-dot" style="background:#ef4444;" title="{% trans 'Kritično' %}"></span>
+              {% endif %}
             {% endif %}
-          </td>
-          <td class="text-center text-nowrap fx-p-8-12">
-            <a href="{% url 'umbrella_switch_company' cd.company.pk %}" title="Uđi u firmu"
-              class="fx-rounded-sm fx-fs-sm fx-no-underline d-inline-block fx-text-gold" style="border:1px solid var(--border,#e2e8f0);padding:3px 7px;margin-right:2px">
-              <i class="fas fa-sign-in-alt"></i>
-            </a>
-            <form method="post" class="d-inline">{% csrf_token %}
-              <input type="hidden" name="action" value="remove_child">
-              <input type="hidden" name="company_id" value="{{ cd.company.pk }}">
-              <button type="submit" title="Odvezi" onclick="return confirm('Odvezati {{ cd.company.name }}?')"
-                class="fx-rounded-sm fx-text-red fx-fs-sm fx-pointer fx-bg-transparent" style="border:1px solid var(--border,#e2e8f0);padding:3px 7px">
-                <i class="fas fa-unlink"></i>
-              </button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            {{ cd.company.name }}
+          </a>
+          {% if cd.company.city %}
+            <div class="u-client-city">{{ cd.company.city }}{% if cd.company.oib %} &middot; {{ cd.company.oib }}{% endif %}</div>
+          {% endif %}
+        </div>
+        {# Inline actions — visible immediately #}
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+          <a href="{% url 'umbrella_switch_company' cd.company.pk %}" class="u-action-btn u-action-primary" title="{% trans 'Otvori firmu' %}">
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+          <form method="post" style="display:inline;margin:0;">{% csrf_token %}
+            <input type="hidden" name="action" value="remove_child">
+            <input type="hidden" name="company_id" value="{{ cd.company.pk }}">
+            <button type="submit" class="u-action-btn u-action-danger" title="{% trans 'Odvezi' %}"
+                    onclick="return confirm('{% trans "Odvezati" %} {{ cd.company.name }}?')">
+              <i class="fas fa-unlink"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      {# Row 2: Compact stats chips #}
+      <div class="u-client-stats">
+        {% if cd.plan and cd.plan != "-" %}
+          <span class="u-chip u-chip-gold">{{ cd.plan }}</span>
+        {% endif %}
+        {% if cd.user_count %}
+          <span class="u-chip"><i class="fas fa-user"></i> {{ cd.user_count }}</span>
+        {% endif %}
+        {% if cd.inv_revenue %}
+          <span class="u-chip u-chip-green"><i class="fas fa-file-invoice"></i> &euro;{{ cd.inv_revenue|floatformat:0 }}</span>
+        {% endif %}
+        {% if cd.pos_revenue %}
+          <span class="u-chip u-chip-blue"><i class="fas fa-cash-register"></i> &euro;{{ cd.pos_revenue|floatformat:0 }}</span>
+        {% endif %}
+        {% if cd.synesis %}
+          <span class="u-chip" style="color:#4caf7d;"><i class="fas fa-database"></i> Synesis</span>
+        {% endif %}
+        {% if cd.company.umbrella_relation == 'subsidiary' %}
+          <span class="u-chip u-chip-purple">{% trans "Podružnica" %}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
   </div>
 </div>
+
+<style>
+.u-client-grid {
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.u-client-card {
+  padding:10px 14px;
+  border-radius:8px;
+  background:var(--bg-card,#fff);
+  border:1px solid transparent;
+  transition:all .12s ease;
+}
+.u-client-card:hover {
+  background:var(--hover-bg,#f8fafc);
+  border-color:var(--gold,#c9a84c);
+  box-shadow:0 2px 8px rgba(201,168,76,.08);
+}
+.u-client-name {
+  font-weight:700;
+  font-size:14px;
+  color:var(--text,#0f172a);
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  line-height:1.3;
+  transition:color .12s;
+}
+.u-client-name:hover {
+  color:var(--gold,#c9a84c);
+}
+.u-health-dot {
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.u-client-city {
+  font-size:11px;
+  color:var(--text-muted,#94a3b8);
+  margin-top:1px;
+  padding-left:14px;
+}
+.u-client-stats {
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  padding-left:14px;
+}
+.u-chip {
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:2px 7px;
+  border-radius:4px;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-muted,#64748b);
+  background:var(--chip-bg,rgba(0,0,0,.04));
+  line-height:1.4;
+}
+.u-chip-gold { background:rgba(201,168,76,.1); color:var(--gold,#c9a84c); }
+.u-chip-green { background:rgba(34,197,94,.08); color:#16a34a; }
+.u-chip-blue { background:rgba(59,130,246,.08); color:#2563eb; }
+.u-chip-purple { background:rgba(168,85,247,.08); color:#9333ea; }
+
+.u-action-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  border:1px solid var(--border,#e2e8f0);
+  background:transparent;
+  color:var(--text-muted,#94a3b8);
+  font-size:12px;
+  cursor:pointer;
+  transition:all .12s;
+  text-decoration:none;
+}
+.u-action-primary:hover {
+  background:var(--gold,#c9a84c);
+  color:#fff;
+  border-color:var(--gold,#c9a84c);
+}
+.u-action-danger:hover {
+  background:#fef2f2;
+  color:#ef4444;
+  border-color:#fca5a5;
+}
+
+/* Alternating rows subtle */
+.u-client-card:nth-child(even) {
+  background:var(--alt-row-bg,rgba(0,0,0,.01));
+}
+.u-client-card:nth-child(even):hover {
+  background:var(--hover-bg,#f8fafc);
+}
+
+@media(max-width:640px) {
+  .u-client-card { padding:8px 10px; }
+  .u-client-name { font-size:13px; }
+  .u-chip { font-size:10px; padding:1px 5px; }
+  .u-action-btn { width:32px; height:32px; font-size:14px; }
+}
+</style>
+
+<script>
+function filterClients(input) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('.u-client-card').forEach(card => {
+    const name = card.dataset.name || '';
+    card.style.display = name.includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% else %}
+<div class="text-center fx-text-muted fx-p-6" style="font-size:14px;">
+  <i class="fas fa-inbox fx-fs-icon d-block fx-opacity-40" style="margin-bottom:8px;"></i>
+  {% trans "Nema stavki u ovoj kategoriji." %}
+</div>
+{% endif %}

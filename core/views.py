@@ -591,7 +591,11 @@ def umbrella_dashboard(request):
         messages.warning(request, _("Vasa tvrtka nije umbrella tvrtka."))
         return redirect("dashboard")
 
-    children = Company.objects.filter(umbrella_parent=company).select_related("umbrella_parent").order_by("name")
+    children = (
+        Company.objects.filter(umbrella_parent=company)
+        .select_related("umbrella_parent", "health_score")
+        .order_by("name")
+    )
     now = timezone.now()
     month_start = now.date().replace(day=1)
 

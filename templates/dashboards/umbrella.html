@@ -121,7 +121,7 @@
               <tbody>
                 {% for item in children_data %}
                 <tr>
-                  <td><strong>{{ item.company.name }}</strong></td>
+                  <td><a href="{% url 'umbrella_switch_company' item.company.id %}" style="font-weight:700;color:var(--text,#0f172a);text-decoration:none;" onmouseover="this.style.color='var(--gold,#c9a84c)'" onmouseout="this.style.color='var(--text,#0f172a)'">{{ item.company.name }}</a></td>
                   <td><code>{{ item.company.oib }}</code></td>
                   <td>
                     {% if item.company.umbrella_relation == 'subsidiary' %}
@@ -521,7 +521,7 @@ function showTab(name,btn){
               <tbody>
                 {% for item in children_data %}
                 <tr>
-                  <td><strong>{{ item.company.name }}</strong></td>
+                  <td><a href="{% url 'umbrella_switch_company' item.company.id %}" style="font-weight:700;color:var(--text,#0f172a);text-decoration:none;" onmouseover="this.style.color='var(--gold,#c9a84c)'" onmouseout="this.style.color='var(--text,#0f172a)'">{{ item.company.name }}</a></td>
                   <td><code>{{ item.company.oib }}</code></td>
                   <td>
                     {% if item.company.umbrella_relation == 'subsidiary' %}
