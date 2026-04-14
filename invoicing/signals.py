@@ -46,7 +46,13 @@ def auto_book_invoice(sender, instance, created, **kwargs):
     if instance.doctype not in BOOKABLE_DOCTYPES:
         return
     # Skip zero-amount invoices
-    if not instance.total or instance.total <= 0:
+    from decimal import Decimal
+
+    try:
+        _total = Decimal(str(instance.total))
+    except Exception:
+        _total = Decimal(0)
+    if not _total or _total <= 0:
         return
 
     try:
