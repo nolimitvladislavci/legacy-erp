@@ -24,7 +24,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = [
     "limit-connect.com",
     "www.limit-connect.com",
-    ".limit-connect.com",
+    # ".limit-connect.com",  # wildcard uklonjen — koristiti eksplicitnu listu
     "viskovic-group.de",
     "www.viskovic-group.de",
     "37.27.248.86",
@@ -58,7 +58,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://limit-connect.com",
     "https://www.limit-connect.com",
     "https://viskovic-group.de",
-    "http://37.27.248.86",
+    # http://37.27.248.86 — UKLONJENO: HTTP origin nije dozvoljen u produkciji
     "https://www.viskovic-group.de",
     "https://fina-connect.online",
     "https://www.fina-connect.online",

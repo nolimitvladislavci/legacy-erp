@@ -1,4 +1,5 @@
 import uuid
+from uuid import uuid4 as _uuid4
 from decimal import Decimal
 
 from django.contrib.auth.models import User
@@ -54,7 +55,7 @@ class Invoice(models.Model):
     doctype = models.CharField(max_length=10, choices=DOCTYPE_CHOICES, default="R", verbose_name=_("Vrsta"))
     country = models.CharField(max_length=2, choices=COUNTRY_CHOICES, default="HR", verbose_name=_("Zemlja"))
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
-    client_token = models.UUIDField(default=__import__("uuid").uuid4, unique=True, verbose_name="Client portal token")
+    client_token = models.UUIDField(default=_uuid4, unique=True, verbose_name="Client portal token")
     number = models.CharField(max_length=50, unique=True, verbose_name=_("Broj računa"))
     internal_id = models.CharField(max_length=50, blank=True, verbose_name=_("Interni ID"))
 
