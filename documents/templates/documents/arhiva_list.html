@@ -30,18 +30,37 @@
 .arh-pagination .current{padding:4px 10px;background:var(--gold);color:#0a0a0a;border-radius:6px;font-weight:700}
 </style>
 
+<!-- Breadcrumb for umbrella context -->
+{% if umbrella_active %}
+<div style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-muted,#94a3b8);margin-bottom:8px;">
+  <a href="{% url 'umbrella_dashboard' %}" style="color:var(--gold,#c9a84c);text-decoration:none;">{{ umbrella_parent.name }}</a>
+  <i class="fas fa-chevron-right" style="font-size:8px;"></i>
+  <strong style="color:var(--text,#0f172a);">{{ umbrella_child.name }}</strong>
+  <i class="fas fa-chevron-right" style="font-size:8px;"></i>
+  <span>{% trans "Arhiva" %}</span>
+</div>
+{% endif %}
+
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
   <div>
     <div style="font-weight:700;font-size:1.1rem;color:var(--text)">
-      <i class="fas fa-archive" style="color:var(--gold)"></i> Arhiva dokumenata
+      <i class="fas fa-archive" style="color:var(--gold)"></i>
+      {% if umbrella_active %}{{ umbrella_child.name }}{% elif is_superadmin %}{% trans "Sve firme" %}{% else %}{{ request.company.name }}{% endif %}
+      — {% trans "Arhiva" %}
     </div>
     <div style="font-size:.7rem;color:var(--text-muted)">
-      {% if is_superadmin %}Sve firme{% else %}{{ request.company.name }}{% endif %}
+      {% trans "Zakonsko čuvanje dokumenata (11 godina)" %}
     </div>
   </div>
   <div class="ms-auto d-flex gap-2 flex-wrap">
-    <a href="{% url 'documents:scan_batch_new' %}" class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;font-weight:700">
-      <i class="fas fa-camera"></i> Skeniraj račune
+    <!-- INSTANT SCAN: 1-click camera → direct upload -->
+    <label class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;font-weight:700;cursor:pointer;margin:0;">
+      <i class="fas fa-camera"></i> {% trans "Slikaj račun" %}
+      <input type="file" accept="image/*" capture="environment" id="instantCam" hidden
+             onchange="instantUpload(this)">
+    </label>
+    <a href="{% url 'documents:scan_batch_new' %}" class="btn btn-sm btn-outline-secondary" title="{% trans 'Batch skeniranje više računa' %}">
+      <i class="fas fa-layer-group"></i> {% trans "Batch" %}
     </a>
     <a href="{% url 'documents:upload_shortcut' %}" class="btn btn-outline-secondary btn-sm">
       <i class="fas fa-upload"></i> Upload
@@ -198,12 +217,23 @@
 {% endif %}
 
 {% else %}
-<div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
-  <i class="fas fa-inbox fa-2x" style="opacity:.3;margin-bottom:12px;display:block"></i>
-  <div style="font-size:.9rem">Nema dokumenata za zadane filtre.</div>
-  <div style="margin-top:12px">
-    <a href="{% url 'documents:scan_batch_new' %}" class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;font-weight:700">
-      <i class="fas fa-camera"></i> Skeniraj prve račune
+<div style="text-align:center;padding:48px 20px;">
+  <div style="width:64px;height:64px;background:rgba(201,168,76,.08);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+    <i class="fas fa-archive" style="color:var(--gold,#c9a84c);font-size:1.5rem;"></i>
+  </div>
+  <div style="font-size:1rem;font-weight:700;color:var(--text,#0f172a);margin-bottom:4px;">
+    {% if umbrella_active %}{{ umbrella_child.name }} — {% endif %}{% trans "Arhiva je prazna" %}
+  </div>
+  <div style="font-size:.82rem;color:var(--text-muted,#94a3b8);max-width:400px;margin:0 auto 16px;">
+    {% trans "Skenirajte prvi račun kamerom ili uploadajte dokument. AI automatski prepoznaje partnera, iznos i datum." %}
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+    <label class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;font-weight:700;cursor:pointer;">
+      <i class="fas fa-camera"></i> {% trans "Slikaj prvi račun" %}
+      <input type="file" accept="image/*" capture="environment" hidden onchange="instantUpload(this)">
+    </label>
+    <a href="{% url 'documents:upload_shortcut' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-upload"></i> {% trans "Upload dokument" %}
     </a>
   </div>
 </div>
@@ -228,5 +258,47 @@ document.querySelectorAll('.bookmark-btn').forEach(btn => {
     }
   });
 });
+</script>
+
+<!-- Instant Scan: 1-click camera → direct to archive -->
+<script>
+function instantUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('source_type', 'receipt');
+
+  // Show upload indicator
+  const toast = document.createElement('div');
+  toast.id = 'instantToast';
+  toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;padding:12px 20px;border-radius:10px;z-index:9999;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px;';
+  toast.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#c9a84c;"></i> Uploading...';
+  document.body.appendChild(toast);
+
+  fetch('{% url "documents:arhiva_upload" %}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    body: formData,
+  })
+  .then(r => {
+    if (r.redirected) {
+      toast.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> Spremljeno!';
+      setTimeout(() => location.reload(), 800);
+    } else {
+      return r.text().then(t => {
+        toast.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> Spremljeno!';
+        setTimeout(() => location.reload(), 800);
+      });
+    }
+  })
+  .catch(err => {
+    toast.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Greška: ' + err.message;
+    setTimeout(() => toast.remove(), 3000);
+  });
+
+  // Reset input for next use
+  input.value = '';
+}
 </script>
 {% endblock %}
