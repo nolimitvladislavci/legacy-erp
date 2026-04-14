@@ -2918,9 +2918,9 @@ def portal_accept_trail(request, token):
 
     # Spremi u invoice notes kao audit trail
     trail_note = f"\n\n[DIGITALNO PRIHVAĆENO {ts[:19].replace('T', ' ')}]\nIP: {ip} | SHA256: {trail_hash[:16]}..."
-    if trail_note not in (invoice.notes or ""):
+    if trail_note not in (invoice.note or ""):
         Invoice.objects.filter(pk=invoice.pk).update(
-            notes=(invoice.notes or "") + trail_note,
+            note=(invoice.note or "") + trail_note,
             status="ACCEPTED",
         )
 

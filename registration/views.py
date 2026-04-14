@@ -182,6 +182,15 @@ def register_step2_combined(request):
             errors["oib"] = "OIB / Porezni broj je obavezan."
         elif company_data["country"] == "HR" and not _re.match(r"^\d{11}$", company_data["oib"]):
             errors["oib"] = "Hrvatski OIB mora imati točno 11 znamenki."
+        elif company_data["oib"] and "oib" not in errors:
+            from companies.models import Company as _Company
+
+            if _Company.objects.filter(oib=company_data["oib"]).exists():
+                errors["oib"] = (
+                    "⚠️ Firma s tim OIB-om već postoji. "
+                    '<a href="/hr/login/" style="color:#c9a84c;font-weight:700">→ Prijavite se</a> '
+                    "ili kontaktirajte podršku."
+                )
 
         # User validation — first_name auto-fill iz email prefiksa ako prazno
         if not user_data["first_name"] and user_data.get("email"):
@@ -553,8 +562,8 @@ def register_step4(request):
                     company_kwargs["business_type"] = "doo"
                 company = Company.objects.create(**company_kwargs)
 
-                # Create profile
-                UserProfile.objects.create(user=user, company=company, role="company_admin")
+                # Create profile — signal može auto-kreirati prazan profil, koristimo update_or_create
+                UserProfile.objects.update_or_create(user=user, defaults={"company": company, "role": "company_admin"})
                 # Create RBAC role for permissions
                 try:
                     from permissions.models import Role, UserRole
@@ -716,6 +725,31 @@ def register_step4(request):
 
                 return redirect("registration:register_success")
 
+        except IntegrityError as e:
+            logger.warning("Registration IntegrityError: %s", e)
+            err_str = str(e).lower()
+            if "oib" in err_str or "unique" in err_str and "company" in err_str:
+                messages.error(
+                    request,
+                    _(
+                        "Firma s tim OIB-om već postoji u sustavu. "
+                        "Ako ste već registrirani, <a href='/hr/login/'>prijavite se</a>."
+                    ),
+                )
+                return redirect("registration:register_step2_full")
+            elif "email" in err_str or "username" in err_str:
+                messages.error(
+                    request,
+                    _(
+                        "Korisnik s tom email adresom već postoji. "
+                        "<a href='/hr/login/'>Prijavite se</a> ili "
+                        "<a href='/password-reset/'>resetirajte lozinku</a>."
+                    ),
+                )
+                return redirect("registration:register_step2_full")
+            else:
+                messages.error(request, _("Registracija nije uspjela. Provjerite podatke i pokušajte ponovo."))
+                return redirect("registration:register_step4")
         except ObjectDoesNotExist:
             logger.exception("Self-service registration error")
             messages.error(request, _("Registracija nije uspjela. Provjerite podatke i pokušajte ponovo."))
@@ -847,7 +881,7 @@ def admin_approve_registration(request, pk):
             first_name=first_name,
             last_name=last_name,
         )
-        UserProfile.objects.create(user=user, company=company, role="company_admin")
+        UserProfile.objects.update_or_create(user=user, defaults={"company": company, "role": "company_admin"})
         # Create RBAC role for permissions
         try:
             from permissions.models import Role, UserRole
@@ -1915,29 +1949,34 @@ def register_quick(request):
                 tc_consent_version="v1.0-2026",
                 tc_consent_signed_at=__import__("django.utils.timezone", fromlist=["timezone"]).now(),
             )
-            UserProfile.objects.create(
+            # Signal može auto-kreirati prazan profil — koristimo update_or_create
+            UserProfile.objects.update_or_create(
                 user=user,
-                company=company,
-                role="company_admin",
-                totp_enabled=False,
+                defaults={
+                    "company": company,
+                    "role": "company_admin",
+                    "totp_enabled": False,
+                },
             )
             # Subscription
             try:
-                from registration.models import PricingPlan
+                from registration.models import CompanySubscription, PricingPlan
 
                 plan = PricingPlan.objects.filter(slug=plan_slug, is_active=True).first()
                 if plan:
                     from datetime import timedelta
 
-                    from django.utils import timezone as _tz
+                    from django.utils.timezone import now as _now
 
-                    from companies.models import Subscription
-
-                    Subscription.objects.create(
+                    trial_days = getattr(plan, "trial_days", None) or 14
+                    CompanySubscription.objects.create(
                         company=company,
-                        plan=plan,
-                        started_at=_tz.now(),
-                        expires_at=_tz.now() + timedelta(days=plan.trial_days or 14),
+                        plan=plan_slug,
+                        pricing_plan=plan,
+                        valid_from=_now().date(),
+                        trial_ends=_now().date() + timedelta(days=trial_days),
+                        billing_cycle="monthly",
+                        monthly_fee=plan.price_monthly,
                         is_active=True,
                     )
             except (IntegrityError, DatabaseError):
@@ -2109,8 +2148,8 @@ def register_trikey(request):
                     kw["business_type"] = "doo"
                 company = Company.objects.create(**kw)
 
-                # Profile
-                UserProfile.objects.create(user=user, company=company, role="company_admin")
+                # Profile — signal može auto-kreirati prazan profil
+                UserProfile.objects.update_or_create(user=user, defaults={"company": company, "role": "company_admin"})
 
                 # TriKey — set PIN
                 trikey = TriKeyProfile.objects.create(user=user)

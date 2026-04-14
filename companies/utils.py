@@ -9,8 +9,18 @@ def get_managed_companies(user):
     from .models import Company, CompanyPartnership
 
     try:
-        user_company = user.company_memberships.filter(is_active=True, is_default=True).first().company
-    except DatabaseError:
+        membership = user.company_memberships.filter(is_active=True, is_default=True).first()
+        if membership is None:
+            # Fallback: UserProfile company
+            from accounts.models import UserProfile
+
+            profile = UserProfile.objects.filter(user=user).first()
+            user_company = profile.company if profile else None
+        else:
+            user_company = membership.company
+        if user_company is None:
+            return Company.objects.none()
+    except (DatabaseError, AttributeError):
         return Company.objects.none()
 
     # Vlastita firma + aktivno upravljane

@@ -11,6 +11,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from rest_framework import permissions, viewsets
 
+from core.company_utils import get_user_company
+
 from .models import Company
 from .serializers import CompanySerializer
 
@@ -836,14 +838,39 @@ def setup_wizard_company(request):
         return redirect("/")
 
     if request.method == "POST":
-        company.name = request.POST.get("name", company.name).strip()
+        import re as _re
+
+        name = request.POST.get("name", company.name).strip()
         oib = request.POST.get("oib", "").strip()
+        country = request.POST.get("country", "HR")
+        errors = {}
+
+        if not name:
+            errors["name"] = _("Naziv tvrtke je obavezan.")
         if oib and not oib.startswith("DRAFT"):
+            if country == "HR" and not _re.match(r"^\d{11}$", oib):
+                errors["oib"] = _("Hrvatski OIB mora imati točno 11 znamenki.")
+            elif oib and not errors.get("oib"):
+                # Provjeri duplikat (ne smije biti isti OIB u drugoj firmi)
+                dup = Company.objects.filter(oib=oib).exclude(pk=company.pk).first()
+                if dup:
+                    errors["oib"] = _("Firma s tim OIB-om već postoji u sustavu.")
+
+        if errors:
+            messages.error(request, " ".join(errors.values()))
+            return render(
+                request,
+                "companies/setup_wizard.html",
+                {"edit_section": "company", "company": company, "errors": errors, "page_title": "Podaci tvrtke"},
+            )
+
+        company.name = name
+        if oib and not oib.startswith("DRAFT") and not errors.get("oib"):
             company.oib = oib
         company.address = request.POST.get("address", "").strip()
         company.city = request.POST.get("city", "").strip()
         company.zip_code = request.POST.get("zip_code", "").strip()
-        company.country = request.POST.get("country", "HR")
+        company.country = country
         company.industry = request.POST.get("industry", "other")
         company.is_draft = False
         company.save()
@@ -871,8 +898,19 @@ def setup_wizard_contact(request):
     if request.method == "POST":
         company.phone = request.POST.get("phone", "").strip()
         company.email = request.POST.get("email", "").strip()
-        company.website = request.POST.get("website", "").strip()
-        company.save(update_fields=["phone", "email", "website"])
+        # website je FK na CompanyWebsite — URL se sprema u CompanyWebsite.external_url ako postoji
+        website_url = request.POST.get("website", "").strip()
+        if website_url:
+            try:
+                from website.models import CompanyWebsite
+
+                cw = CompanyWebsite.objects.filter(company=company).first()
+                if cw:
+                    cw.external_url = website_url
+                    cw.save(update_fields=["external_url"])
+            except Exception:
+                pass
+        company.save(update_fields=["phone", "email"])
         messages.success(request, _("Kontakt podaci spremljeni."))
         return redirect("companies:setup_wizard")
 

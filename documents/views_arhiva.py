@@ -229,12 +229,9 @@ def arhiva_list(request):
 
         managed = get_managed_companies(request.user)
 
-        if (
-            managed.exists()
-            and not request.user.company_memberships.filter(is_active=True, is_default=True)
-            .first()
-            .company.is_platform_owner
-        ):
+        _membership = request.user.company_memberships.filter(is_active=True, is_default=True).first()
+        _is_platform_owner = _membership.company.is_platform_owner if _membership and _membership.company else False
+        if managed.exists() and not _is_platform_owner:
             companies = managed
             qs = (
                 ArhivaEntry.objects.select_related("company")
