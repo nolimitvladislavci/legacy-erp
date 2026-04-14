@@ -349,3 +349,22 @@ Aktivnih korisnika:  56  |  Faktura:     15,330
 Arhiva dokumenata: 20,373 |  Commits:    1,041+
 Journal entries:  10,732  |  Workspaces:     36
 ```
+
+---
+
+## PRAVILO 9 — Bez datuma izvršenja, samo redoslijed
+
+Svaki nalaz, task i poboljšanje ima:
+- **Datum kreiranja** (kad je nađeno)
+- **Redoslijed izvršenja** (prije čega mora biti gotovo)
+- **Nikad datum izvršenja** — izvršava se čim dođe red ili čim se dotičeni modul otvori
+
+---
+
+## BACKLOG — Redoslijed bez datuma
+
+| # | Nalaz | Kreiran | Ozbiljnost | Uvjet za izvršenje |
+|---|-------|---------|------------|-------------------|
+| B-01 | `user_edit` — company isolation (samo superadmin može editirati bilo kojeg korisnika bez company provjere) | 2026-04-14 | SREDNJE | Prije Koraka 10 (onboarding) — kad company_admin dobije self-service |
+| B-02 | `trojstvo_task.py` — `suggestion_id` type guard (None/string ne pada elegantno) | 2026-04-14 | NIZAK | U istom sprintu kad se dotakne trojstvo_task.py |
+| B-03 | `accounts/views.py user_edit` — dodati company scope za budući company_admin self-service | 2026-04-14 | SREDNJE | Isti kao B-01 |
