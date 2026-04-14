@@ -143,6 +143,9 @@ def should_fiscalize(invoice) -> Tuple[bool, str]:
     if country == "DE":
         return False, "DE racun — DSFinV-K, ne HR fiskalizacija"
 
+    if company is None:
+        return False, "Invoice nema firme — preskačem fiskalizaciju"
+
     if getattr(company, "fiscal_exempt", False):
         return False, "Firma nije obveznik fiskalizacije"
 
