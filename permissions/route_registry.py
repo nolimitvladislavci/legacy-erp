@@ -169,6 +169,46 @@ ROUTE_REGISTRY: dict = {
     "tc_consent_status": AccessLevel.SUPERADMIN,
     "tc_consent_remind": AccessLevel.SUPERADMIN,
     "borg_error_queue": AccessLevel.SUPERADMIN,
+    # ── Javne rute koje nedostaju (KORAK 3) ───────────────────
+    "set_language": AccessLevel.PUBLIC,  # i18n language switch
+    "set_language_profile": AccessLevel.PUBLIC,  # custom set_language
+    "pet_profile": AccessLevel.PUBLIC,  # memio.pet profil (flat)
+    "pet_qr": AccessLevel.PUBLIC,  # memio.pet QR (flat)
+    "pet_hotel_booking": AccessLevel.PUBLIC,  # memio.pet hotel (flat)
+    "barf_listings": AccessLevel.PUBLIC,  # memio.pet BARF (flat)
+    "registracija": AccessLevel.PUBLIC,  # memio.pet registracija
+    "njuskalo_badge": AccessLevel.PUBLIC,  # memio.pet badge (flat)
+    "breeder_profile": AccessLevel.PUBLIC,  # memio.pet uzgajivač (flat)
+    "inspection_tracking": AccessLevel.PUBLIC,  # Praćenje intervencije
+    "borg_ops:public_trace": AccessLevel.PUBLIC,  # Javni trace QR
+    "gastro_reviews_public": AccessLevel.PUBLIC,  # Javne recenzije
+    "gastro_order_public": AccessLevel.PUBLIC,  # Javna narudžba
+    "gastro_qr": AccessLevel.PUBLIC,  # Gastro QR stol
+    "booking_track": AccessLevel.PUBLIC,  # Praćenje rezervacije
+    "pickup_track": AccessLevel.PUBLIC,  # Praćenje preuzimanja
+    "email_tracking_pixel": AccessLevel.PUBLIC,  # Email tracking pixel
+    "btcpay_webhook": AccessLevel.PUBLIC,  # BTC Pay webhook
+    "distributor_apply": AccessLevel.PUBLIC,  # Postani distributer
+    "magic_login": AccessLevel.PUBLIC,  # Magic link login
+    "smart_entry": AccessLevel.PUBLIC,  # Počni/onboarding
+    "api_detect_email": AccessLevel.PUBLIC,  # Provjera emaila
+    # ── Namespace rute (KORAK 3) ──────────────────────────────
+    "borg_ops:borg_hub": AccessLevel.COMPANY,  # Operativni centar
+    "borg_ops:operations_dashboard": AccessLevel.COMPANY,
+    "memio_pet:landing": AccessLevel.PUBLIC,
+    "client_portal:portal_home": AccessLevel.PUBLIC,
+    "no_limit:no_limit_web": AccessLevel.PUBLIC,
+    # ── AJAX/API — treba login, ne company (KORAK 3) ─────────
+    "global_search": AccessLevel.AUTHENTICATED,
+    "system_improvement_api": AccessLevel.AUTHENTICATED,
+    "feedback_count_api": AccessLevel.AUTHENTICATED,
+    "alerts_api": AccessLevel.AUTHENTICATED,
+    "notification_mark_read": AccessLevel.AUTHENTICATED,
+    "notification_mark_all_read": AccessLevel.AUTHENTICATED,
+    "push_subscribe": AccessLevel.AUTHENTICATED,
+    "push_unsubscribe": AccessLevel.AUTHENTICATED,
+    "api_clock_in": AccessLevel.AUTHENTICATED,
+    "api_clock_out": AccessLevel.AUTHENTICATED,
     # Claim Your Business
     "claim_company": AccessLevel.PUBLIC,
     "submit_claim": AccessLevel.PUBLIC,
