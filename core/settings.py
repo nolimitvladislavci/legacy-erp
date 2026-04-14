@@ -802,6 +802,13 @@ CELERY_BEAT_SCHEDULE = {
         "task": "limit_connect_ai.tasks.growth_patrol",
         "schedule": 86400,
     },
+    # DeepSeek Code Patrol — nocni autonomni code review (02:45)
+    "deepseek-code-patrol-nightly": {
+        "task": "core.tasks_patrol.run_code_patrol",
+        "schedule": crontab(hour=2, minute=45),
+        "kwargs": {"min_priority": 3},
+        "options": {"queue": "heavy"},
+    },
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────
 import os as _os
