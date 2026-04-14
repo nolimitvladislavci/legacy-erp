@@ -609,3 +609,73 @@ deepseek_result = _deepseek_analiza(problem) # DeepSeek — novi
 # Konsenzus: 2/3 = prihvati, 1/3 = konflikt → Sonnet arbitrira
 ```
 
+
+---
+
+## DEEPSEEK INTEGRACIJA — KONAČNI PLAN
+**Datum: 14.04.2026. | Izvor: DeepSeek vlastita preporuka + naša analiza**
+
+### KLJUČNI NALAZ: AWS Bedrock Frankfurt rješava GDPR
+
+DeepSeek direktni API = podaci u Kini = GDPR bloker za klijentske podatke.
+DeepSeek via AWS Bedrock eu-central-1 = podaci u EU = GDPR compliant.
+
+```
+DIREKTNI API:          limit-connect.com → DeepSeek Kina ❌ (GDPR)
+AWS BEDROCK Frankfurt: limit-connect.com → AWS EU → DeepSeek  ✅ (GDPR)
+```
+
+### DVIJE RAZINE (preporuka DeepSeeka, potvrđena)
+
+RAZINA 1 — DeepSeek-V3.2 Standard (80% slučajeva):
+- Cijena: $0.27/$0.42 po MT (ulaz/izlaz)
+- Brzina: streaming, niska latencija
+- Primjena: Invoice AI, Company analysis, Trojstvo executor
+- Prednost nad Haikuom: Reasoning + 3x jeftiniji
+
+RAZINA 2 — DeepSeek-V3.2-Speciale (20% teških zadataka):
+- Cijena: $0.40/$1.20 po MT
+- Brzina: sporiji (razmišlja), NIJE za direktni UI
+- Primjena: PDV audit, GoBD verifikacija, kompleksna migracija
+- Pattern: V3.2 odgovori korisniku → Speciale u pozadini → "zlatni kod"
+
+### CACHING — 40-60% ušteda
+
+DeepSeek DSA (Sparse Attention) efikasan za duge kontekste.
+Implementirati: Redis cache za česte upite po kompaniji.
+Ključ: hash(company_id + query_type + model_version)
+TTL: 24h za statične analize, 5min za real-time
+
+### IMPLEMENTACIJSKI KORACI
+
+FAZA 1 (odmah):
+→ AWS Bedrock Frankfurt account — Ivan aktivira
+→ DeepSeek-V3.2 model ID na Bedrocku
+→ core/settings.py: DEEPSEEK_PROVIDER = "bedrock" | "direct"
+→ Novi Trojstvo član: _deepseek_analiza() kao 3. glasač
+
+FAZA 2 (Plan 1 KORAK 9):
+→ A/B test: 50 faktura Haiku vs DeepSeek-V3.2
+→ Ako accuracy > 95% → zamjena u produkciji
+→ Caching layer u Redis
+
+FAZA 3 (Plan 2 KORAK C):
+→ Speciale za PDV/GoBD audit
+→ Mjerenje Trojstvo accuracy s 3 vs 2 glasača
+→ Whitepaper: "AI konsenzus arhitektura za ERP compliance"
+
+### TROŠKOVNA ANALIZA (100 firmi, aktivna upotreba)
+
+Trenutno (Haiku only):
+  ~500 AI poziva/dan × $0.0003 = $0.15/dan = $55/god
+
+S DeepSeek-V3.2 (Bedrock):
+  500 poziva × $0.27/MT × ~2K tokena = $0.27/dan = $99/god
+  + Caching 50% hit rate = $50/god
+
+Speciale (samo kompleksni zadaci, 5% slučajeva):
+  25 poziva/dan × $1.20/MT × ~4K tokena = $0.12/dan = $44/god
+
+UKUPNO: ~$193/god vs $55 trenutno = +$138/god
+Za 100 firmi koje plaćaju: zanemarivo
+
