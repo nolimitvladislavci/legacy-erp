@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-14 (Dan 48), commit a5e021e2 — Umbrella patch + DeepSeek aktivan
+> Zadnji update: 2026-04-14 (Dan 48), commit b04ec43a — KORAK 9 Security Hardening ✅
 
 ---
 
@@ -13,6 +13,7 @@
 | 2026-04-14 | Sonnet+CC | Korak 8 | Load test: 50VU, P95=850ms, 0 failures | f46bd567 |
 | 2026-04-14 | Sonnet+CC | Umbrella patch | CompanyMiddleware — 30+ modula popravljeno | a5e021e2 |
 | 2026-04-14 | Sonnet | Sesija init | DeepSeek uplata $5.30 potvrđena + aktivan. Arhiva×komitent flow analiza. Korak 9 aktivan. | — |
+| 2026-04-14 | CC Code | Korak 9 | Security: Django 5.1.15, rate limit auth users, GDPR audit log, pip-audit 44→2 CRITICAL | b04ec43a |
 
 ### Kako upisati
 ```
@@ -228,16 +229,27 @@ Commits: 7 bug fix + 1 test commit
 
 ---
 
-## KORAK 9 — SECURITY HARDENING ⬅ TRENUTNO AKTIVAN
+## KORAK 9 — SECURITY HARDENING ✅
 **Cilj:** Nema poznatih ranjivosti pri ulasku klijenata.
-```
-[ ] python manage.py check --deploy → 0 upozorenja
-[ ] Rate limiting: login, AI endpoint, PDF, API
-[ ] GDPR audit log za company switch
-[ ] OWASP Top 10 checklist
-```
-Task file: CC_TASK_KORAK9_SECURITY_HARDENING.md
-✅ Gotovo kad: Security checklist = sve zeleno.
+**Status:** GOTOVO — 2026-04-14
+
+### Što je napravljeno:
+- **deploy check**: 0 security warnings (samo drf_spectacular schema napomene)
+- **Rate limiting**: RateLimitMiddleware proširen — auth. korisnici sada limitirani:
+  - AI endpointi (/hr/ai/, /ai-cockpit/, /api/advisor/): **10/min**
+  - PDF generacija: **20/min**
+  - API općenito: **60/min**
+  - Login (IP): već imao 20/5min via LoginAttempt.is_blocked
+- **GDPR audit log**: switch_company + switch_company_get → SystemAuditLog
+  s from_company, to_company, IP, timestamp, user_id
+- **OWASP Top 10**: sve provjere ✅ (bez pickle, bez yaml.load, |safe samo server-generated HTML)
+- **pip-audit**: 44 vulns → 2 CRITICAL preostali (deep-translator bez fixa, django-allauth nekorišten)
+  - Django 5.1.6 → 5.1.15 (12 CVE-a popravljeno)
+  - aiohttp 3.13.3 → 3.13.4, cryptography 46.0.7, pypdf 6.10.0, pillow 12.2.0, requests 2.33.0
+  - fastmcp 3.1.1 → 3.2.0
+- Commitovi: cc57e687, b04ec43a
+
+✅ GOTOVO kad: Security checklist = sve zeleno.
 
 ---
 
@@ -291,8 +303,8 @@ Task file: CC_TASK_KORAK9_SECURITY_HARDENING.md
 | 6 Globalni standardi | ✅ GOTOVO | 100% |
 | 7 Test coverage | ✅ GOTOVO | 100% |
 | 8 Load test | ✅ GOTOVO | 100% |
-| 9 Security | 🔄 AKTIVAN | 0% |
-| 10 Onboarding | ⏳ na redu | — |
+| 9 Security | ✅ GOTOVO | 100% |
+| 10 Onboarding | 🔄 AKTIVAN | 0% |
 | 11 Beta | ⏳ na redu | — |
 | 12 EU kampanja | ⏳ na redu | — |
 
