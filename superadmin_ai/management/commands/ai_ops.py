@@ -223,7 +223,7 @@ class Command(BaseCommand):
             from ai_assistant.patrol import run_patrol
             from companies.models import Company
 
-            companies = Company.objects.filter(is_active=True)
+            companies = Company.objects.all()
             for company in companies:
                 self.stdout.write(f"  Patrol za: {company.name}...")
                 try:

@@ -932,7 +932,7 @@ def classify_nn_updates():
         impact_score__gte=3,  # Skip trivial updates
     ).order_by("-publication_date")[:20]
 
-    companies = Company.objects.filter(is_active=True)[:100]
+    companies = Company.objects.all()[:100]
     classified = 0
     relevant = 0
 

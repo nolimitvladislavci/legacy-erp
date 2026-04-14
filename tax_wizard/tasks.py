@@ -222,7 +222,7 @@ def generate_annual_deadlines(self):
 
     year = timezone.now().year
     templates = TaxFormTemplate.objects.filter(is_active=True)
-    companies = Company.objects.filter(is_active=True)
+    companies = Company.objects.all()
 
     created = 0
     for template in templates:

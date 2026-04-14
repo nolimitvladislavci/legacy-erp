@@ -10,7 +10,7 @@ def monthly_depreciation_task():
 
     today = timezone.now().date()
     results = []
-    for company in Company.objects.filter(is_active=True):
+    for company in Company.objects.all():
         entries = run_monthly_depreciation(company, today.year, today.month)
         if entries:
             results.append(f"{company.name}: {len(entries)}")

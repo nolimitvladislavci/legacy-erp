@@ -2053,7 +2053,7 @@ def pos_settings(request):
     if not company:
         from companies.models import Company
 
-        company = Company.objects.filter(is_active=True).order_by("name").first()
+        company = Company.objects.order_by("name").first()
     if not company:
         return redirect("pos:dashboard")
 

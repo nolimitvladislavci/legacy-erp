@@ -36,7 +36,7 @@ def monthly_vat_calculation(self):
         target_year = today.year
         target_month = today.month - 1
 
-    companies = Company.objects.filter(is_active=True)
+    companies = Company.objects.all()
     results = []
     total_obveza = Decimal("0")
     obveznik_count = 0

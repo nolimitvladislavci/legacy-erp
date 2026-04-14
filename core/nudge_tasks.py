@@ -39,7 +39,7 @@ def user_nudge_patrol(self):
     results = {"checked": 0, "nudged": 0, "skipped": 0}
     now = timezone.now()
 
-    companies = Company.objects.filter(is_active=True)
+    companies = Company.objects.all()
 
     for company in companies:
         results["checked"] += 1
