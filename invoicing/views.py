@@ -1218,16 +1218,29 @@ def client_portal(request, token):
     lang_map = {"HR": "hr", "DE": "de"}
     activate(lang_map.get(invoice.country, "hr"))
 
-    # Track views
-    invoice.view_count += 1
-    if not invoice.first_viewed_at:
-        invoice.first_viewed_at = timezone.now()
-    update_fields = ["view_count", "first_viewed_at"]
-    if invoice.status == "SENT" and not invoice.first_viewed_at:
-        pass  # Keep SENT — already viewed tracking via first_viewed_at
-    invoice.save(update_fields=update_fields)
+    # Track views — rate limited po IP-u (1x per 30 min da boti ne napuhaju count)
+    from django.core.cache import cache
+
+    client_ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))[:45]
+    view_cache_key = f"portal_view_{invoice.pk}_{client_ip}"
+    if not cache.get(view_cache_key):
+        invoice.view_count += 1
+        if not invoice.first_viewed_at:
+            invoice.first_viewed_at = timezone.now()
+        update_fields = ["view_count", "first_viewed_at"]
+        invoice.save(update_fields=update_fields)
+        cache.set(view_cache_key, 1, 60 * 30)  # 30 minuta
+
+    # Provjeri je li ponuda istekla
+    from django.utils import timezone as _tz
+
+    is_expired = invoice.valid_until and invoice.valid_until < _tz.now().date()
 
     if request.method == "POST" and invoice.status in ("DRAFT", "SENT", "ACCEPTED", "REJECTED"):
+        # Blokiraj akcije na istekloj ponudi
+        if is_expired and invoice.status in ("DRAFT", "SENT"):
+            messages.error(request, _("Rok ponude je istekao. Kontaktirajte nas za novu ponudu."))
+            return redirect(request.path)
         action = request.POST.get("action")
         if action == "accept":
             invoice.status = "ACCEPTED"
@@ -1277,6 +1290,7 @@ def client_portal(request, token):
         "invoicing/client_portal.html",
         {
             "invoice": invoice,
+            "is_expired": is_expired,
             "items": all_items,
             "sections": sections,
             "can_accept": invoice.doctype == "PO" and invoice.status in ("DRAFT", "SENT"),

@@ -97,6 +97,14 @@
   </div>
   {% endfor %}
 
+  <!-- UPOZORENJE: ISTEKLA PONUDA -->
+  {% if is_expired %}
+  <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#f87171;font-weight:600">
+    ⚠️ {% trans "Rok ove ponude je istekao" %} ({{ invoice.valid_until|date:"d.m.Y" }}).
+    <span style="font-weight:400;font-size:.85rem">{% trans "Kontaktirajte nas za novu ponudu." %}</span>
+  </div>
+  {% endif %}
+
   <!-- STATUS BANNER -->
   <div class="cp-status cp-status-{{ invoice.status|lower }}">
     {% if invoice.status == 'ACCEPTED' %}
