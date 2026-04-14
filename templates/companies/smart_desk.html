@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Smart Desk — {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-6">
+  <div class="fx-flex fx-items-center fx-justify-between fx-mb-6">
+    <div>
+      <h1 class="fx-fs-2xl fx-fw-bold">
+        <i class="fas fa-brain fx-text-gold"></i>
+        Smart Desk — {% trans "Pametna Raspodjela" %}
+      </h1>
+      <p class="fx-text-muted fx-fs-body-sm">
+        {% trans "AI analiza opterećenja po radnim stolovima" %} — {{ month_label }}
+      </p>
+    </div>
+    <a href="{% url 'umbrella_dashboard' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left"></i> {% trans "Natrag" %}
+    </a>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="fx-grid fx-grid-4 fx-gap-4 fx-mb-6">
+    <div class="fx-card fx-p-4 text-center">
+      <div class="fx-fs-3xl fx-fw-bold fx-text-gold">{{ desk_data|length }}</div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Radnih stolova" %}</div>
+    </div>
+    <div class="fx-card fx-p-4 text-center">
+      <div class="fx-fs-3xl fx-fw-bold" style="color:#22c55e;">{{ avg_score|floatformat:0 }}</div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Prosječni score" %}</div>
+    </div>
+    <div class="fx-card fx-p-4 text-center">
+      <div class="fx-fs-3xl fx-fw-bold {% if imbalance > avg_score %}fx-text-red{% else %}fx-text-green{% endif %}">
+        {{ imbalance }}
+      </div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Nebalans (max-min)" %}</div>
+    </div>
+    <div class="fx-card fx-p-4 text-center">
+      <div class="fx-fs-3xl fx-fw-bold">{{ max_score }}</div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Najveći score" %}</div>
+    </div>
+  </div>
+
+  <!-- AI Recommendations -->
+  {% if recommendations %}
+  <div class="fx-card fx-p-4 fx-mb-6" style="border-left:4px solid #e2b93b;background:#fefce8;">
+    <h3 class="fx-fw-bold fx-mb-3">
+      <i class="fas fa-lightbulb fx-text-gold"></i> {% trans "AI Preporuke" %}
+    </h3>
+    {% for rec in recommendations %}
+    <div class="fx-flex fx-items-center fx-gap-3 fx-mb-2">
+      <i class="fas fa-arrows-alt-h fx-text-gold"></i>
+      <span>{{ rec.message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Desk Heatmap Table -->
+  <div class="fx-card fx-p-4">
+    <h3 class="fx-fw-bold fx-mb-4">
+      <i class="fas fa-th-large"></i> {% trans "Opterećenje po stolovima" %}
+    </h3>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>{% trans "Stol" %}</th>
+            <th>{% trans "Radnice" %}</th>
+            <th class="text-center">{% trans "Klijenti" %}</th>
+            <th class="text-center">{% trans "Fakture" %}</th>
+            <th class="text-center">{% trans "Dokumenti" %}</th>
+            <th class="text-center">{% trans "Knjiženja" %}</th>
+            <th class="text-center">{% trans "Score" %}</th>
+            <th>{% trans "Vizual" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in desk_data %}
+          <tr>
+            <td class="fx-fw-semibold">{{ d.desk.name }}</td>
+            <td class="fx-text-muted fx-fs-caption">{{ d.workers|join:", " }}</td>
+            <td class="text-center">{{ d.client_count }}</td>
+            <td class="text-center">{{ d.inv_count }}</td>
+            <td class="text-center">{{ d.doc_count }}</td>
+            <td class="text-center">{{ d.book_count }}</td>
+            <td class="text-center fx-fw-bold">
+              <span class="badge {% if d.score > avg_score %}bg-warning text-dark{% elif d.score > 0 %}bg-success{% else %}bg-secondary{% endif %}" style="font-size:14px;">
+                {{ d.score }}
+              </span>
+            </td>
+            <td style="width:200px;">
+              {% if max_score > 0 %}
+              <div style="background:#e5e7eb;border-radius:4px;height:20px;position:relative;">
+                {% widthratio d.score max_score 100 as pct %}
+                <div style="width:{{ pct }}%;height:100%;border-radius:4px;background:{% if d.score > avg_score %}#f59e0b{% else %}#22c55e{% endif %};transition:width .5s;"></div>
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

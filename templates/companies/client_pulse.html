@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Client Pulse — {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-6">
+  <div class="fx-flex fx-items-center fx-justify-between fx-mb-6">
+    <div>
+      <h1 class="fx-fs-2xl fx-fw-bold">
+        <i class="fas fa-heartbeat" style="color:#ef4444;"></i>
+        Client Pulse — {% trans "Zdravlje Klijenata" %}
+      </h1>
+      <p class="fx-text-muted fx-fs-body-sm">
+        {% trans "Real-time praćenje stanja svih klijenata" %}
+      </p>
+    </div>
+    <div class="fx-flex fx-gap-3">
+      <button onclick="recalculate()" class="btn btn-warning" id="recalcBtn">
+        <i class="fas fa-sync-alt"></i> {% trans "Osvježi" %}
+      </button>
+      <a href="{% url 'umbrella_dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> {% trans "Natrag" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Traffic Light Summary -->
+  <div class="fx-grid fx-grid-4 fx-gap-4 fx-mb-6">
+    <div class="fx-card fx-p-4 text-center">
+      <div class="fx-fs-3xl fx-fw-bold">{{ total }}</div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Ukupno klijenata" %}</div>
+    </div>
+    <div class="fx-card fx-p-4 text-center" style="border-left:4px solid #22c55e;">
+      <div class="fx-fs-3xl fx-fw-bold" style="color:#22c55e;">{{ green }}</div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Zeleno — OK" %}</div>
+    </div>
+    <div class="fx-card fx-p-4 text-center" style="border-left:4px solid #f59e0b;">
+      <div class="fx-fs-3xl fx-fw-bold" style="color:#f59e0b;">{{ yellow }}</div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Žuto — Pažnja" %}</div>
+    </div>
+    <div class="fx-card fx-p-4 text-center" style="border-left:4px solid #ef4444;">
+      <div class="fx-fs-3xl fx-fw-bold" style="color:#ef4444;">{{ red }}</div>
+      <div class="fx-text-muted fx-fs-caption">{% trans "Crveno — Kritično" %}</div>
+    </div>
+  </div>
+
+  <!-- Per-Workspace View -->
+  {% for wp in workspace_pulse %}
+  <div class="fx-card fx-p-4 fx-mb-4">
+    <h3 class="fx-fw-bold fx-mb-3">
+      <i class="fas fa-desktop fx-text-muted"></i> {{ wp.desk.name }}
+      {% if wp.red_count %}<span class="badge bg-danger ms-2">{{ wp.red_count }} kritičnih</span>{% endif %}
+      {% if wp.yellow_count %}<span class="badge bg-warning text-dark ms-2">{{ wp.yellow_count }} upozorenja</span>{% endif %}
+    </h3>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th style="width:30px;"></th>
+            <th>{% trans "Klijent" %}</th>
+            <th class="text-center">{% trans "Score" %}</th>
+            <th class="text-center">{% trans "Dospjeli" %}</th>
+            <th class="text-center">{% trans "Neaktivno" %}</th>
+            <th>{% trans "Rizici" %}</th>
+            <th>{% trans "Akcija" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in wp.scores %}
+          <tr>
+            <td>
+              {% if s.status == "green" %}
+                <i class="fas fa-circle" style="color:#22c55e;font-size:12px;" title="OK"></i>
+              {% elif s.status == "yellow" %}
+                <i class="fas fa-exclamation-triangle" style="color:#f59e0b;font-size:12px;" title="Pažnja"></i>
+              {% else %}
+                <i class="fas fa-times-circle" style="color:#ef4444;font-size:12px;" title="Kritično"></i>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'umbrella_switch_company' s.company.pk %}" class="fx-fw-semibold fx-no-underline">
+                {{ s.company.name }}
+              </a>
+              <div class="fx-text-muted fx-fs-caption">{{ s.company.city }}</div>
+            </td>
+            <td class="text-center">
+              <span class="badge {% if s.score >= 70 %}bg-success{% elif s.score >= 40 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                {{ s.score }}/100
+              </span>
+            </td>
+            <td class="text-center">
+              {% if s.overdue_invoices %}
+                <span class="badge bg-danger">{{ s.overdue_invoices }}</span>
+              {% else %}
+                <span class="fx-text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if s.days_since_last_activity > 14 %}
+                <span class="badge bg-warning text-dark">{{ s.days_since_last_activity }}d</span>
+              {% elif s.days_since_last_activity > 0 %}
+                <span class="fx-text-muted">{{ s.days_since_last_activity }}d</span>
+              {% else %}
+                <span class="fx-text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="fx-fs-caption">
+              {% for factor in s.risk_factors %}
+                <div class="fx-text-red">{{ factor }}</div>
+              {% empty %}
+                <span class="fx-text-muted">—</span>
+              {% endfor %}
+            </td>
+            <td>
+              <a href="{% url 'umbrella_switch_company' s.company.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Pregledaj' %}">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- All Scores (for clients not in workspace) -->
+  {% if scores %}
+  <div class="fx-card fx-p-4 fx-mt-4">
+    <h3 class="fx-fw-bold fx-mb-3">
+      <i class="fas fa-list"></i> {% trans "Svi klijenti" %}
+    </h3>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      {% for s in scores %}
+      <div style="padding:6px 12px;border-radius:20px;font-size:13px;border:1px solid {% if s.status == 'green' %}#22c55e{% elif s.status == 'yellow' %}#f59e0b{% else %}#ef4444{% endif %};background:{% if s.status == 'green' %}#f0fdf4{% elif s.status == 'yellow' %}#fefce8{% else %}#fef2f2{% endif %};">
+        {% if s.status == "green" %}
+          <i class="fas fa-check-circle" style="color:#22c55e;"></i>
+        {% elif s.status == "yellow" %}
+          <i class="fas fa-exclamation-circle" style="color:#f59e0b;"></i>
+        {% else %}
+          <i class="fas fa-times-circle" style="color:#ef4444;"></i>
+        {% endif %}
+        {{ s.company.name }}
+        <strong>({{ s.score }})</strong>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function recalculate() {
+  const btn = document.getElementById('recalcBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculating...';
+  fetch('{% url "client_pulse_recalculate" %}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Done (' + data.updated + ')';
+    setTimeout(() => location.reload(), 1000);
+  })
+  .catch(() => {
+    btn.innerHTML = '<i class="fas fa-exclamation"></i> Error';
+    btn.disabled = false;
+  });
+}
+</script>
+{% endblock %}

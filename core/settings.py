@@ -272,6 +272,7 @@ TEMPLATES = [
                 "core.context_processors.pending_claims_badge",
                 "core.context_processors.white_label_context",
                 "core.context_processors.workspace_context",
+                "core.context_processors.umbrella_context",
             ],
         },
     }

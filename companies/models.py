@@ -1270,3 +1270,101 @@ class Workspace(models.Model):
         for ws in workspaces:
             client_ids.update(ws.clients.values_list("id", flat=True))
         return Company.objects.filter(id__in=client_ids).order_by("name")
+
+
+class WorkloadSnapshot(models.Model):
+    """Smart Desk: daily workload snapshot per workspace desk."""
+
+    workspace = models.ForeignKey("Workspace", on_delete=models.CASCADE, related_name="workload_snapshots")
+    date = models.DateField()
+    client_count = models.PositiveIntegerField(default=0)
+    invoice_count = models.PositiveIntegerField(default=0)
+    booking_count = models.PositiveIntegerField(default=0)
+    document_count = models.PositiveIntegerField(default=0)
+    total_score = models.PositiveIntegerField(default=0, help_text="Weighted workload score")
+    details = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("workspace", "date")
+        ordering = ["-date"]
+
+    def __str__(self):
+        return f"{self.workspace.name} — {self.date} (score: {self.total_score})"
+
+
+class ClientHealthScore(models.Model):
+    """Client Pulse: real-time health tracking for umbrella children."""
+
+    HEALTH_CHOICES = [
+        ("green", "Zeleno — sve u redu"),
+        ("yellow", "Žuto — treba pažnju"),
+        ("red", "Crveno — kritično"),
+    ]
+
+    company = models.OneToOneField("Company", on_delete=models.CASCADE, related_name="health_score")
+    umbrella_parent = models.ForeignKey("Company", on_delete=models.CASCADE, related_name="children_health")
+    status = models.CharField(max_length=10, choices=HEALTH_CHOICES, default="green")
+    score = models.PositiveIntegerField(default=100, help_text="0-100, 100=perfect")
+
+    # Detaljni indikatori
+    missing_vat_returns = models.PositiveIntegerField(default=0)
+    unprocessed_bank_statements = models.PositiveIntegerField(default=0)
+    overdue_invoices = models.PositiveIntegerField(default=0)
+    missing_documents_count = models.PositiveIntegerField(default=0)
+    days_since_last_activity = models.PositiveIntegerField(default=0)
+    last_bookkeeper_activity = models.DateTimeField(null=True, blank=True)
+
+    # Predikcija
+    predicted_vat_delay_days = models.IntegerField(default=0, help_text="AI prediction: days late for next VAT")
+    risk_factors = models.JSONField(default=list, blank=True)
+
+    # WhatsApp notification tracking
+    last_notification_sent = models.DateTimeField(null=True, blank=True)
+    notification_count = models.PositiveIntegerField(default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["status", "score"]
+
+    def __str__(self):
+        return f"{self.company.name} — {self.get_status_display()} ({self.score})"
+
+    def recalculate(self):
+        """Recalculate health score from indicators."""
+        score = 100
+        factors = []
+
+        if self.missing_vat_returns > 0:
+            score -= self.missing_vat_returns * 20
+            factors.append(f"Nepredanih PDV prijava: {self.missing_vat_returns}")
+
+        if self.unprocessed_bank_statements > 0:
+            score -= self.unprocessed_bank_statements * 10
+            factors.append(f"Neobrađenih izvoda: {self.unprocessed_bank_statements}")
+
+        if self.overdue_invoices > 0:
+            score -= self.overdue_invoices * 5
+            factors.append(f"Dospjelih računa: {self.overdue_invoices}")
+
+        if self.missing_documents_count > 0:
+            score -= self.missing_documents_count * 3
+            factors.append(f"Nedostajućih dokumenata: {self.missing_documents_count}")
+
+        if self.days_since_last_activity > 14:
+            score -= (self.days_since_last_activity - 14) * 2
+            factors.append(f"Dana bez aktivnosti: {self.days_since_last_activity}")
+
+        self.score = max(0, min(100, score))
+        self.risk_factors = factors
+
+        if self.score >= 70:
+            self.status = "green"
+        elif self.score >= 40:
+            self.status = "yellow"
+        else:
+            self.status = "red"
+
+        self.save(update_fields=["score", "status", "risk_factors", "updated_at"])

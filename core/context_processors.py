@@ -214,3 +214,63 @@ def workspace_context(request):
     except DatabaseError:
         pass
     return {}
+
+
+def umbrella_context(request):
+    """Inject umbrella switching context into all templates.
+
+    Provides:
+      - umbrella_active: bool — is the user currently viewing a child company
+      - umbrella_child: Company — the child being viewed
+      - umbrella_parent: Company — the umbrella parent (home)
+      - umbrella_siblings: list of Company — other children for quick switch
+      - umbrella_breadcrumb: list of (name, url) for navigation
+    """
+    if not getattr(request, "user", None) or not request.user.is_authenticated:
+        return {}
+
+    umbrella_cid = request.session.get("umbrella_as_company")
+    if not umbrella_cid:
+        return {"umbrella_active": False}
+
+    try:
+        from companies.models import Company, Workspace
+
+        child = Company.objects.get(pk=umbrella_cid)
+        home_id = request.session.get("umbrella_home_company")
+        parent = Company.objects.get(pk=home_id) if home_id else None
+
+        if not parent:
+            return {"umbrella_active": False}
+
+        # Siblings: all children of same parent, for quick switch dropdown
+        siblings = (
+            Company.objects.filter(umbrella_parent=parent)
+            .exclude(pk=child.pk)
+            .exclude(name__istartswith="Debug")
+            .exclude(name__istartswith="Dbg")
+            .exclude(name__icontains="Fiskaly Test")
+            .order_by("name")
+            .values_list("pk", "name", named=True)
+        )
+
+        # Find which workspace this child belongs to (for breadcrumb)
+        workspace = Workspace.objects.filter(company=parent, type="desk", clients=child).first()
+
+        breadcrumb = [
+            (parent.name, "/hr/umbrella/"),
+        ]
+        if workspace:
+            breadcrumb.append((workspace.name, None))
+        breadcrumb.append((child.name, None))
+
+        return {
+            "umbrella_active": True,
+            "umbrella_child": child,
+            "umbrella_parent": parent,
+            "umbrella_workspace": workspace,
+            "umbrella_siblings": list(siblings),
+            "umbrella_breadcrumb": breadcrumb,
+        }
+    except Exception:
+        return {"umbrella_active": False}

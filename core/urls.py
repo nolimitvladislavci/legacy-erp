@@ -576,6 +576,22 @@ urlpatterns += i18n_patterns(
     path("api/oib-finalizer/", oib_finalizer_views.finalize_oib_api, name="finalize_oib_api"),
     path("umbrella/switch/<uuid:company_id>/", views.umbrella_switch_company, name="umbrella_switch_company"),
     path("umbrella/switch-back/", views.umbrella_switch_back, name="umbrella_switch_back"),
+    # Smart Desk + Client Pulse — EU #1 Innovation
+    path(
+        "umbrella/smart-desk/",
+        __import__("companies.umbrella_views", fromlist=["smart_desk_dashboard"]).smart_desk_dashboard,
+        name="smart_desk_dashboard",
+    ),
+    path(
+        "umbrella/client-pulse/",
+        __import__("companies.umbrella_views", fromlist=["client_pulse_dashboard"]).client_pulse_dashboard,
+        name="client_pulse_dashboard",
+    ),
+    path(
+        "umbrella/client-pulse/recalculate/",
+        __import__("companies.umbrella_views", fromlist=["client_pulse_recalculate"]).client_pulse_recalculate,
+        name="client_pulse_recalculate",
+    ),
     path("superadmin/users/<int:user_id>/edit/", views.superadmin_edit_user, name="superadmin_edit_user"),
     path("superadmin/impersonate/<uuid:company_id>/", views.start_impersonation, name="start_impersonation"),
     path("superadmin/impersonate/stop/", views.stop_impersonation, name="stop_impersonation"),
