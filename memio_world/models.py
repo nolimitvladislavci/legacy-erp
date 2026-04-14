@@ -283,3 +283,226 @@ class Milestone(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.achieved_date})"
+
+
+# ════════════════════════════════════════════════════════════════
+# EDUKATIVNI SADRŽAJ — Učenje kroz igru
+# ════════════════════════════════════════════════════════════════
+
+
+class StoryBook(models.Model):
+    """Bakine priče, bajke, priče za laku noć — audio + tekst."""
+
+    CATEGORY_CHOICES = [
+        ("laku_noc", "Za laku noć"),
+        ("bajka", "Bajka"),
+        ("narodna", "Narodna priča"),
+        ("bakina", "Bakina priča"),
+        ("zivotinje", "O životinjama"),
+        ("priroda", "O prirodi"),
+        ("avantura", "Avantura"),
+    ]
+    AGE_CHOICES = [
+        ("3-4", "3-4 godine"),
+        ("5-6", "5-6 godina"),
+        ("7-8", "7-8 godina"),
+        ("9+", "9+ godina"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200, blank=True, help_text="Autor ili 'Narodna'")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="laku_noc")
+    age_group = models.CharField(max_length=5, choices=AGE_CHOICES, default="3-4")
+    content = WorldEncryptedField(help_text="Tekst priče (enkriptirano)")
+    audio_url = models.URLField(blank=True, help_text="URL na audio snimku (S3/MinIO)")
+    cover_image = models.ImageField(upload_to="world/stories/", null=True, blank=True)
+    duration_minutes = models.PositiveSmallIntegerField(null=True, blank=True)
+    language = models.CharField(
+        max_length=5,
+        default="hr",
+        choices=[
+            ("hr", "Hrvatski"),
+            ("en", "English"),
+            ("de", "Deutsch"),
+            ("sl", "Slovenščina"),
+            ("sr", "Srpski"),
+        ],
+    )
+    is_published = models.BooleanField(default=False)
+    read_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_story_book"
+        ordering = ["age_group", "title"]
+
+    def __str__(self):
+        return f"{self.title} ({self.get_age_group_display()})"
+
+
+class TraditionalGame(models.Model):
+    """Stare igre — Mlin, Čovječe ne ljuti se, Škola, Lastik, Klikeri...
+    Digitalna konzervacija nematerijalne kulturne baštine EU.
+    """
+
+    GAME_TYPE_CHOICES = [
+        ("board", "Igra na ploči"),
+        ("outdoor", "Igra na otvorenom"),
+        ("card", "Kartaška igra"),
+        ("word", "Igra riječima"),
+        ("math", "Matematička igra"),
+        ("strategy", "Strateška igra"),
+        ("physical", "Fizička igra"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    name_local = models.CharField(max_length=200, blank=True, help_text="Lokalni naziv (npr. Mlin, Tri u nizu)")
+    game_type = models.CharField(max_length=15, choices=GAME_TYPE_CHOICES, default="board")
+    origin_country = models.CharField(max_length=100, blank=True, help_text="Zemlja porijekla ili 'Europa'")
+    origin_era = models.CharField(max_length=100, blank=True, help_text="Npr. 'Rimsko doba', 'Srednji vijek'")
+    min_players = models.PositiveSmallIntegerField(default=2)
+    max_players = models.PositiveSmallIntegerField(default=2)
+    age_min = models.PositiveSmallIntegerField(default=5)
+    rules_text = models.TextField(help_text="Pravila igre u Markdown formatu")
+    history_text = models.TextField(blank=True, help_text="Povijest igre — odakle dolazi, kako se mijenjala")
+    illustration = models.ImageField(upload_to="world/games/", null=True, blank=True)
+    video_tutorial_url = models.URLField(blank=True, help_text="YouTube/Vimeo tutorial")
+    is_playable_online = models.BooleanField(default=False, help_text="Može se igrati u browseru")
+    game_engine_data = models.JSONField(
+        default=dict, blank=True, help_text="Konfiguracija za web igru (board layout, rules engine)"
+    )
+    language = models.CharField(max_length=5, default="hr")
+    is_published = models.BooleanField(default=False)
+    play_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_traditional_game"
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.get_game_type_display()})"
+
+
+class LearningModule(models.Model):
+    """Interaktivni edukativni moduli — slova, brojevi, boje, oblici."""
+
+    SUBJECT_CHOICES = [
+        ("letters_hr", "Slova — Hrvatski"),
+        ("letters_en", "Letters — English"),
+        ("letters_de", "Buchstaben — Deutsch"),
+        ("numbers", "Brojevi / Numbers"),
+        ("colors", "Boje / Colors"),
+        ("shapes", "Oblici / Shapes"),
+        ("animals", "Životinje / Animals"),
+        ("nature", "Priroda / Nature"),
+        ("music", "Glazba / Music"),
+        ("reading", "Čitanje / Reading"),
+        ("writing", "Pisanje / Writing"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    subject = models.CharField(max_length=20, choices=SUBJECT_CHOICES)
+    age_min = models.PositiveSmallIntegerField(default=3)
+    age_max = models.PositiveSmallIntegerField(default=6)
+    description = models.TextField(blank=True)
+    content_data = models.JSONField(default=dict, help_text="Sadržaj lekcije (slike, zvukovi, kviz pitanja)")
+    cover_image = models.ImageField(upload_to="world/learning/", null=True, blank=True)
+    video_url = models.URLField(blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    is_published = models.BooleanField(default=False)
+    completion_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_learning_module"
+        ordering = ["subject", "order"]
+
+    def __str__(self):
+        return f"{self.title} ({self.get_subject_display()})"
+
+
+class Spomenar(models.Model):
+    """Digitalni spomenar — kao školski, ali zauvijek.
+    Prijatelji, učiteljice, krsni kumovi ostavljaju poruke.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="spomenari")
+    title = models.CharField(max_length=200, default="Moj Spomenar")
+    is_open = models.BooleanField(default=True, help_text="Prihvaća nove unose")
+    share_token = models.UUIDField(default=uuid.uuid4, unique=True, help_text="Link za dijeljenje")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_spomenar"
+
+    def __str__(self):
+        return f"{self.title} — {self.child.name}"
+
+    @property
+    def share_url(self):
+        return f"https://memio.world/spomenar/{self.share_token}/"
+
+
+class SpomenarEntry(models.Model):
+    """Jedan unos u spomenar — poruka od prijatelja/obitelji."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    spomenar = models.ForeignKey(Spomenar, on_delete=models.CASCADE, related_name="entries")
+    author_name = models.CharField(max_length=100)
+    author_relation = models.CharField(max_length=50, blank=True, help_text="Npr. 'Prijateljica', 'Baka', 'Učiteljica'")
+    message = WorldEncryptedField(help_text="Poruka (enkriptirano)")
+    drawing = models.ImageField(upload_to="world/spomenar/", null=True, blank=True, help_text="Crtež ili slika")
+    sticker = models.CharField(max_length=10, blank=True, help_text="Emoji sticker")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_spomenar_entry"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.author_name}: {self.message[:30]}..."
+
+
+class Event(models.Model):
+    """Događaji u životu djeteta — rođendani, izleti, prvi dan škole."""
+
+    EVENT_TYPES = [
+        ("birthday", "Rođendan"),
+        ("school_start", "Prvi dan škole"),
+        ("school_end", "Kraj školske godine"),
+        ("trip", "Izlet / Putovanje"),
+        ("performance", "Priredba / Nastup"),
+        ("sport", "Sportski događaj"),
+        ("holiday", "Blagdan"),
+        ("family", "Obiteljsko okupljanje"),
+        ("other", "Ostalo"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="events")
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
+    title = models.CharField(max_length=200)
+    description = WorldEncryptedField(blank=True)
+    event_date = models.DateField()
+    location = models.CharField(max_length=200, blank=True)
+    photos = models.JSONField(default=list, blank=True, help_text="Lista URL-ova fotografija")
+    video_url = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "mw_event"
+        ordering = ["-event_date"]
+
+    def __str__(self):
+        return f"{self.title} ({self.event_date})"
