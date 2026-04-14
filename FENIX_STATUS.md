@@ -116,3 +116,9 @@ Endpoint: `GET /qr/?data=URL&size=200&color=000000&bg=ffffff`
 Template: `{% load qr_tags %}` → `{% qr_url data %}`, `{% qr_img data %}`, `{% qr_b64 data %}`
 PDF/email: `from core.qr_views import qr_base64`
 Razlozi: HTTPS garantiran, radi offline, 24h cache, nema ovisnosti o trećoj strani.
+
+### PRAVILO 7 — Svaka nova javna ruta mora biti u RouteRegistry
+DEFAULT_LEVEL = AccessLevel.COMPANY — sve što nije registrirano blokira se za anonimne korisnike.
+Javne rute (bez logina): dodati u ROUTE_REGISTRY kao AccessLevel.PUBLIC
+Rute s loginom bez kompanije: AccessLevel.AUTHENTICATED
+Propust = 302 redirect za vanjske korisnike bez greške u logu (GracefulErrorMiddleware hvata).
