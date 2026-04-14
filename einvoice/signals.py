@@ -17,6 +17,9 @@ def on_invoice_status_change(sender, instance, **kwargs):
     # Trigger on FISCALIZED or SENT status
     if instance.status not in ("FISCALIZED", "SENT"):
         return
+    # Skip invoices without company (test/anonymous invoices)
+    if instance.company is None:
+        return
 
     try:
         config = TransportConfiguration.objects.get(company=instance.company)
