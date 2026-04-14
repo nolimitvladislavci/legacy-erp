@@ -1050,11 +1050,15 @@ def company_dashboard(request):
     from django.db.models import Sum
     from django.utils import timezone
 
-    company = None
-    try:
-        company = request.user.profile.company
-    except AttributeError:
-        logger.warning("Suppressed error", exc_info=True)
+    from core.company_utils import get_user_company
+
+    # Use get_user_company to respect umbrella_as_company session
+    company = get_user_company(request)
+    if not company:
+        try:
+            company = request.user.profile.company
+        except AttributeError:
+            logger.warning("Suppressed error", exc_info=True)
 
     # Korisnik bez firme — onboarding
     if not company:
@@ -1070,9 +1074,8 @@ def company_dashboard(request):
             },
         )
 
-    # Umbrella companies go to umbrella dashboard
-    if company and company.is_umbrella:
-        # Session-based anti-loop guard (referer is unreliable)
+    # Umbrella companies go to umbrella dashboard — but NOT when viewing a child
+    if company.is_umbrella and not request.session.get("umbrella_as_company"):
         if not request.GET.get("stay"):
             return redirect("umbrella_dashboard")
 
