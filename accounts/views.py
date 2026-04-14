@@ -424,6 +424,7 @@ def quick_register(request):
 @require_POST
 def switch_company(request):
     from accounts.models import CompanyMembership
+    from companies.models import Company  # mora biti ovdje — except klauzula referira Company.DoesNotExist
 
     membership_id = request.POST.get("membership_id")
     company_id = request.POST.get("company_id")
@@ -442,8 +443,6 @@ def switch_company(request):
             role_display = mem.get_role_display()
         elif company_id and request.user.is_superuser:
             # Superadmin pristup — filter first to avoid IntegrityError
-            from companies.models import Company
-
             company = Company.objects.get(pk=company_id)
             mem = CompanyMembership.objects.filter(user=request.user, company=company).first()
             if mem:
@@ -457,8 +456,6 @@ def switch_company(request):
             role_display = "Superadmin"
         elif company_id:
             # Umbrella admin pristup — auto-create membership za umbrella children
-            from companies.models import Company
-
             company = Company.objects.get(pk=company_id)
             user_co = request.user.profile.company
             if user_co and user_co.is_umbrella and company.umbrella_parent_id == user_co.id:
