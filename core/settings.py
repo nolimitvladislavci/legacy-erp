@@ -1400,6 +1400,11 @@ CELERY_BEAT_SCHEDULE.update(
     }
 )
 
+CELERY_BEAT_SCHEDULE["trojstvo-process-new"] = {
+    "task": "pos.trojstvo_task.process_new_suggestions",
+    "schedule": 300.0,  # svakih 5 minuta — procesira nove crvene poruke
+}
+
 CELERY_BEAT_SCHEDULE["worktime-iban-vault-check"] = {
     "task": "worktime.tasks.iban_vault_check",
     "schedule": 86400,  # daily

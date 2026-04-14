@@ -115,7 +115,8 @@ def trojstvo_rijesi(self, suggestion_id):
 
         if agreed:
             _log_agreed(s, postotak, resolution)
-            logger.info("Trojstvo AGREED %s%%: %s", postotak, s.title)
+            _whatsapp_ivan_agreed(s, postotak, resolution)  # uvijek obavijesti
+            logger.info("Trojstvo AGREED %s%%: %s → WhatsApp poslan", postotak, s.title)
         else:
             _log_conflict(s, haiku_result, gemini_result)
             _whatsapp_ivan(s, postotak, haiku_result, gemini_result)
@@ -299,3 +300,31 @@ def _whatsapp_ivan(s, postotak, haiku, gemini):
         send_text(IVAN_PHONE, msg)
     except ImportError as e:
         logger.error("WhatsApp greška: %s", e)
+
+
+# ── Automatski batch processor (Celery Beat svakih 5 min) ────────────────────
+
+
+@shared_task
+def process_new_suggestions():
+    """
+    Procesira sve ImprovementSuggestion s status='new'.
+    Pokrenuti u Celery Beat svakih 5 minuta.
+    """
+    from pos.models import ImprovementSuggestion
+
+    pending = ImprovementSuggestion.objects.filter(status="new").order_by("created_at")[:10]
+    count = pending.count()
+    if count == 0:
+        return "Nema novih prijedloga"
+    for s in pending:
+        trojstvo_rijesi.delay(s.pk)
+    return f"Pokrenuto {count} Trojstvo zadataka"
+
+
+def _whatsapp_ivan_agreed(s, postotak, resolution):
+    """Obavijesti Ivana o riješenom prijedlogu (konsenzus)."""
+    from core.whatsapp import send_text
+
+    msg = f"✅ #{s.id} RIJEŠENO ({postotak}% konsenzus)\n📋 {s.title}\n\n💡 {resolution[:300]}"
+    send_text("4915771998747", msg)

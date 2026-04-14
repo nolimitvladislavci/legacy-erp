@@ -453,3 +453,159 @@ Plan 1 KORAK 7 (test coverage) može koristiti V3.2 za generiranje testova.
 Plan 2 KORAK C (AI kvaliteta) mjeri V3.2 vs Haiku.
 Trojstvo ostaje arhitektura, V3.2 je novi član tima.
 
+
+---
+
+# AI TIM — KOMPLETNA ANALIZA I NOVA KONFIGURACIJA
+**Datum: 14.04.2026.**
+
+---
+
+## TRENUTNI PROBLEM: Trojstvo ne radi u praksi
+
+### Dijagnoza:
+1. **Trojstvo nije u Celery Beat** — nikad se automatski ne pokreće
+2. **WhatsApp samo na konflikt** — Ivan ne dobiva feedback kad se modeli slažu
+3. **Loop je otvoren** — poruka uđe, dobije "reviewed", nitko ne reagira
+
+### Fix (odmah):
+```python
+# core/settings.py — dodati:
+CELERY_BEAT_SCHEDULE["trojstvo-process-new"] = {
+    "task": "pos.trojstvo_task.process_new_suggestions",
+    "schedule": 300.0,  # svakih 5 minuta
+}
+
+# pos/trojstvo_task.py — uvijek slati feedback:
+if agreed:
+    _whatsapp_ivan_agreed(s, postotak, resolution)  # DODATI OVO
+```
+
+---
+
+## KOMPLETNA MAPA AI SERVISA (2026)
+
+### TIER 1 — Production Ready, u Trojstvu
+| Model | Provider | Snaga | Cijena/1M tok |
+|-------|----------|-------|---------------|
+| Claude Sonnet 4.6 | Anthropic | Koordinacija, arhitektura | ~$3 |
+| Claude Haiku 4.5 | Anthropic | Brzi executor, POS alerts | ~$0.25 |
+| Gemini 1.5 Pro | Google | Deep research, web search | ~$1.25 |
+
+### TIER 2 — Integrirati odmah
+| Model | Provider | Snaga | Cijena/1M tok |
+|-------|----------|-------|---------------|
+| DeepSeek-V3.2 | DeepSeek | Reasoning executor, kod | ~$0.14 |
+| DeepSeek-V3.2-Speciale | DeepSeek | Kompleksna logika, PDV audit | ~$0.50 |
+| Gemini Flash 2.0 | Google | Ultra-brzi AJAX, notifikacije | ~$0.075 |
+
+### TIER 3 — Specijalizirani, po potrebi
+| Model | Provider | Snaga | Napomena |
+|-------|----------|-------|----------|
+| GPT-4o mini | OpenAI | Vision (slike faktura) | Fallback ako Haiku griješi |
+| Mistral Large | Mistral | GDPR-safe (EU hosting) | Za klijentske podatke |
+| Llama 3.3 70B | Meta/self-host | Bez API ovisnosti | Lokalni deployment |
+| Whisper v3 | OpenAI | Audio → tekst (glasovni unos) | Stolarija, Baustela |
+
+### TIER 4 — Pratiti, ne koristiti još
+| Model | Zašto čekati |
+|-------|-------------|
+| GPT-5 | Tek izlazi, cijena nepoznata |
+| Gemini Ultra 2.0 | Nedostupno HR region |
+| Claude Opus 4.6 | Preskup za svakodnevni rad |
+
+---
+
+## NOVA KONFIGURACIJA TIMA (Trojstvo++ )
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   TROJSTVO CORE                      │
+│  Haiku (executor) ←→ Gemini (research) ←→ Sonnet   │
+│              ↕ consensus ↕                           │
+└─────────────────┬───────────────────────────────────┘
+                  │
+     ┌────────────┼────────────┐
+     ▼            ▼            ▼
+┌─────────┐ ┌─────────┐ ┌──────────────┐
+│DeepSeek │ │Gemini   │ │  Whisper v3  │
+│V3.2     │ │Flash 2.0│ │  (audio)     │
+│Reasoning│ │Ultra-   │ │  Stolarija   │
+│executor │ │fast AJAX│ │  Baustela    │
+└─────────┘ └─────────┘ └──────────────┘
+     │
+     ▼
+┌─────────────────┐
+│DeepSeek Speciale│
+│PDV audit        │
+│GoBD verifikacija│
+│Porezna logika   │
+└─────────────────┘
+```
+
+### Routing logika (nova):
+```python
+def route_to_model(task_type, data_sensitivity):
+    if data_sensitivity == "client_pii":
+        # OIB, IBAN, osobni podaci — SAMO EU hosting
+        return "claude-haiku"  # ili Mistral EU
+    
+    if task_type == "fast_ajax":
+        return "gemini-flash-2.0"  # < 100ms
+    
+    if task_type == "code_reasoning":
+        return "deepseek-v3.2"  # reasoning executor
+    
+    if task_type == "tax_logic" or task_type == "legal_verify":
+        return "deepseek-v3.2-speciale"  # dokazuje, ne pogađa
+    
+    if task_type == "audio_transcription":
+        return "whisper-v3"  # glasovni unos
+    
+    if task_type == "arbitration":
+        return "claude-sonnet"  # finalna odluka
+    
+    # Default Trojstvo flow
+    return "trojstvo_consensus"
+```
+
+---
+
+## TROJSTVO FIX — IMPLEMENTACIJSKI PLAN
+
+### Problem 1: Nije u Beat-u
+```python
+# Dodati u core/settings.py:
+CELERY_BEAT_SCHEDULE["trojstvo-process-new"] = {
+    "task": "pos.trojstvo_task.process_new_suggestions",
+    "schedule": 300.0,  # svakih 5 min
+}
+```
+
+### Problem 2: Nema feedback pri slaganju
+```python
+# pos/trojstvo_task.py — zamijeniti:
+if agreed:
+    _log_agreed(s, postotak, resolution)
+# s:
+if agreed:
+    _log_agreed(s, postotak, resolution)
+    _whatsapp_ivan_agreed(s, postotak, resolution)  # UVIJEK obavijesti
+
+# Nova funkcija:
+def _whatsapp_ivan_agreed(s, postotak, resolution):
+    msg = f"✅ #{s.id} RIJEŠENO ({postotak}% konsenzus)\n{s.title}\n\n{resolution[:200]}"
+    _whatsapp_ivan_send(msg)
+```
+
+### Problem 3: DeepSeek integracija u Trojstvo
+```python
+# Dodati DeepSeek kao 3. glasač (umjesto ili uz Gemini):
+# pos/trojstvo_task.py:
+haiku_result = _haiku_analiza(problem)      # Anthropic
+gemini_result = _gemini_analiza(problem)    # Google  
+deepseek_result = _deepseek_analiza(problem) # DeepSeek — novi
+
+# Konsenzus: 2/3 = prihvati, 1/3 = konflikt → Sonnet arbitrira
+```
+
