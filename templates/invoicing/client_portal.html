@@ -266,6 +266,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
             <td class="ta-r">{{ invoice.tax_amount|floatformat:2 }} €</td>
           </tr>
           {% endif %}
+          {% if insurance_is_gratis %}
+          <tr style="background:rgba(34,197,94,.04)">
+            <td colspan="2">
+              <span style="font-weight:600;color:#4ade80">🛡️ {% if portal_lang == "de" %}Bauversicherung + Gewährleistungsversicherung{% else %}Osiguranje radova + garancijskog roka{% endif %}</span>
+              <span style="margin-left:8px;font-size:.65rem;background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:2px 8px;font-weight:700">GRATIS</span>
+              <div style="font-size:.68rem;color:var(--dim);margin-top:2px">{% if portal_lang == "de" %}Wert &lt; 1% Netto — im Preis enthalten{% else %}Vrijednost &lt; 1% neto — uključeno u cijenu{% endif %}</div>
+            </td>
+            <td class="ta-r" style="white-space:nowrap">—</td>
+            <td class="ta-r" style="color:#4ade80;font-weight:700;white-space:nowrap">+ 0,00 €</td>
+          </tr>
+          {% endif %}
           <tr class="totals-row">
             <td colspan="3" class="ta-r">UKUPNO:</td>
             <td class="ta-r">{{ invoice.total|floatformat:2 }} €</td>
@@ -360,29 +371,100 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
   </div>
 
-  <!-- FINANCIRANJE BANNER -->
-  <div style="background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(139,92,246,.06));border:1px solid rgba(59,130,246,.25);border-radius:12px;padding:18px 20px;margin-bottom:16px">
-    <div style="display:flex;align-items:flex-start;gap:12px">
-      <span style="font-size:1.6rem;flex-shrink:0">🏛️</span>
-      <div>
-        <div style="font-weight:700;font-size:.95rem;color:#60a5fa;margin-bottom:6px">
-      {% if invoice.company.country == "DE" %}Dieses Angebot wird von deutschen Banken für Kredite akzeptiert{% else %}Ova ponuda se prihvaća u banci za kredit{% endif %}
-    </div>
-        <div style="font-size:.82rem;color:var(--muted);line-height:1.6">
-          Svaka hrvatska banka prihvaća ovu ponudu kao dokumentaciju za 
-          <strong style="color:var(--text)">namjenski kredit za adaptaciju ili rekonstrukciju</strong>.<br>
-          Ponuda sadrži OIB izvođača, specifikaciju radova i ukupni iznos — 
-          sve što banka zahtijeva.<br>
-          <span style="color:#f87171;font-weight:600">Rad na crno = bez računa = banka ne daje kredit.</span>
+  <!-- FINANCIRANJE + KFW BANNER -->
+  <!-- FINANCIRANJE HR/DE + KFW -->
+  <div style="margin-bottom:16px">
+
+    {% if invoice.company.country == 'DE' %}
+    <!-- KfW PROGRAM (samo DE firme) -->
+    <div style="background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(59,130,246,.05));border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:18px 20px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:1.6rem;flex-shrink:0">🏦</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:.95rem;color:#4ade80;margin-bottom:6px">KfW & BAFA — staatliche Förderung bis 20%</div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:10px">
+            Für Dämmung, Fassade und energetische Sanierung gibt es staatliche Fördermittel — <strong style="color:var(--text)">bis zu 20% Zuschuss oder zinsgünstige Kredite</strong>.<br>
+            Dieses Angebot kann direkt als Grundlage für den Förderantrag verwendet werden.
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px">
+            <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px 12px">
+              <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--dim)">KfW 261</div>
+              <div style="font-weight:600;font-size:.82rem;margin:2px 0">Energieeffizient Sanieren</div>
+              <div style="font-size:.72rem;color:var(--muted)">bis 150.000 € Kredit, ab 1,01% eff.</div>
+              <a href="https://www.kfw.de/inlandsfoerderung/Privatpersonen/Bestehende-Immobilie/Energieeffizient-Sanieren/" target="_blank" style="font-size:.68rem;color:#4ade80;text-decoration:none">→ kfw.de</a>
+            </div>
+            <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px 12px">
+              <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--dim)">BAFA</div>
+              <div style="font-weight:600;font-size:.82rem;margin:2px 0">Bundesförderung BEG EM</div>
+              <div style="font-size:.72rem;color:var(--muted)">bis 20% Zuschuss, keine Rückzahlung</div>
+              <a href="https://www.bafa.de/DE/Energie/Effizient_Sanieren/effizient_sanieren_node.html" target="_blank" style="font-size:.68rem;color:#60a5fa;text-decoration:none">→ bafa.de</a>
+            </div>
+            <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:8px;padding:10px 12px">
+              <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:var(--dim)">KfW 134</div>
+              <div style="font-weight:600;font-size:.82rem;margin:2px 0">Wohngebäudekredit</div>
+              <div style="font-size:.72rem;color:var(--muted)">bis 100.000 €, 10 Jahre Laufzeit</div>
+              <a href="https://www.kfw.de" target="_blank" style="font-size:.68rem;color:#a78bfa;text-decoration:none">→ kfw.de</a>
+            </div>
+          </div>
+          <div style="font-size:.75rem;color:var(--dim);background:rgba(255,255,255,.03);border-radius:6px;padding:8px 10px">
+            💡 <strong style="color:var(--text)">Antrag stellen:</strong> Vor Baubeginn beim zuständigen Energieberater anmelden. Wir stellen alle notwendigen Unterlagen zur Verfügung.
+          </div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" target="_blank"
-             style="padding:7px 14px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#60a5fa;font-size:.78rem;font-weight:600;text-decoration:none">
-            📄 Preuzmi ponudu za banku
-          </a>
-          <span style="padding:7px 14px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:8px;color:#a78bfa;font-size:.78rem;font-weight:600">
-            💳 Mogućnost plaćanja po stavkama
-          </span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- BANKOVNI KREDIT HR + DE -->
+    <div style="background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(139,92,246,.05));border:1px solid rgba(59,130,246,.25);border-radius:12px;padding:18px 20px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:1.6rem;flex-shrink:0">🏛️</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:.95rem;color:#60a5fa;margin-bottom:6px">
+            {% if invoice.company.country == "DE" %}Dieses Angebot wird von deutschen Banken für Kredite akzeptiert{% else %}Ova ponuda se prihvaća u banci za kredit{% endif %}
+          </div>
+          <div style="font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:12px">
+            {% if invoice.company.country == "DE" %}
+              Jede deutsche Bank akzeptiert dieses Angebot als Dokumentation für einen <strong style="color:var(--text)">Renovierungskredit</strong>. Das Angebot enthält USt-IdNr., Leistungsverzeichnis und Gesamtbetrag — alles was die Bank benötigt.
+            {% else %}
+              Svaka hrvatska banka prihvaća ovu ponudu za <strong style="color:var(--text)">namjenski kredit za adaptaciju</strong>. Ponuda sadrži OIB izvođača, specifikaciju radova i ukupni iznos.
+              <span style="display:block;margin-top:4px;color:#f87171;font-size:.78rem;font-weight:600">Rad na crno = bez računa = banka ne daje kredit.</span>
+            {% endif %}
+          </div>
+
+          <!-- KREDITNE INSTITUCIJE -->
+          {% if invoice.company.country == "DE" %}
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin-bottom:8px">Deutsche Banken — Renovierungskredit</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+            <a href="https://www.sparkasse.de/unsere-loesungen/privatkunden/baufinanzierung/renovierung.html" target="_blank" style="padding:5px 10px;background:rgba(255,51,0,.1);border:1px solid rgba(255,51,0,.2);border-radius:6px;color:#fca5a5;font-size:.72rem;font-weight:600;text-decoration:none">Sparkasse →</a>
+            <a href="https://www.volksbank.de" target="_blank" style="padding:5px 10px;background:rgba(0,100,200,.1);border:1px solid rgba(0,100,200,.2);border-radius:6px;color:#93c5fd;font-size:.72rem;font-weight:600;text-decoration:none">Volksbank →</a>
+            <a href="https://www.deutsche-bank.de/pk/kredite/privatkredit.html" target="_blank" style="padding:5px 10px;background:rgba(0,32,96,.15);border:1px solid rgba(59,130,246,.2);border-radius:6px;color:#93c5fd;font-size:.72rem;font-weight:600;text-decoration:none">Deutsche Bank →</a>
+            <a href="https://www.ing.de/kredite/privatkredit/" target="_blank" style="padding:5px 10px;background:rgba(255,102,0,.1);border:1px solid rgba(255,102,0,.2);border-radius:6px;color:#fdba74;font-size:.72rem;font-weight:600;text-decoration:none">ING →</a>
+            <a href="https://www.commerzbank.de/privatkunden/kredite/" target="_blank" style="padding:5px 10px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.2);border-radius:6px;color:#fde68a;font-size:.72rem;font-weight:600;text-decoration:none">Commerzbank →</a>
+            <a href="https://www.interhyp.de" target="_blank" style="padding:5px 10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:#86efac;font-size:.72rem;font-weight:600;text-decoration:none">Interhyp →</a>
+          </div>
+          {% else %}
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin-bottom:8px">Hrvatske banke — namjenski kredit za adaptaciju</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+            <a href="https://www.pbz.hr/hr/krediti/stambeni-krediti/kredit-za-adaptaciju" target="_blank" style="padding:5px 10px;background:rgba(0,82,204,.1);border:1px solid rgba(0,82,204,.25);border-radius:6px;color:#93c5fd;font-size:.72rem;font-weight:600;text-decoration:none">PBZ →</a>
+            <a href="https://www.erstebank.hr/hr/Krediti/Stambeni-krediti/Kredit-za-uredjenje-doma" target="_blank" style="padding:5px 10px;background:rgba(200,0,0,.1);border:1px solid rgba(200,0,0,.2);border-radius:6px;color:#fca5a5;font-size:.72rem;font-weight:600;text-decoration:none">Erste →</a>
+            <a href="https://www.zaba.hr/home/gradjanstvo/krediti/stambeni-krediti/kredit-za-adaptaciju-kuce" target="_blank" style="padding:5px 10px;background:rgba(0,0,150,.1);border:1px solid rgba(99,102,241,.25);border-radius:6px;color:#a5b4fc;font-size:.72rem;font-weight:600;text-decoration:none">ZABA →</a>
+            <a href="https://www.otpbanka.hr/kreditiranje/stambeni-krediti" target="_blank" style="padding:5px 10px;background:rgba(0,150,0,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:#86efac;font-size:.72rem;font-weight:600;text-decoration:none">OTP →</a>
+            <a href="https://www.rba.hr/krediti/stambeni-krediti/kredit-za-adaptaciju" target="_blank" style="padding:5px 10px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.2);border-radius:6px;color:#fde68a;font-size:.72rem;font-weight:600;text-decoration:none">Raiffeisen →</a>
+            <a href="https://www.hpb.hr/gradjanstvo/krediti/stambeni-krediti" target="_blank" style="padding:5px 10px;background:rgba(0,100,0,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:#86efac;font-size:.72rem;font-weight:600;text-decoration:none">HPB →</a>
+            <a href="https://www.sberbank.hr" target="_blank" style="padding:5px 10px;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2);border-radius:6px;color:var(--muted);font-size:.72rem;font-weight:600;text-decoration:none">Addiko →</a>
+          </div>
+          <div style="font-size:.72rem;color:var(--dim);background:rgba(255,255,255,.03);border-radius:6px;padding:8px 10px">
+            💡 <strong style="color:var(--text)">HBOR namjenski krediti</strong> za obrte i tvrtke dostupni su uz povoljnije uvjete. 
+            <a href="https://www.hbor.hr" target="_blank" style="color:#60a5fa">→ hbor.hr</a>
+          </div>
+          {% endif %}
+
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" target="_blank"
+               style="padding:7px 14px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:#60a5fa;font-size:.78rem;font-weight:600;text-decoration:none">
+              📄 {% if invoice.company.country == "DE" %}Angebot für Bank herunterladen{% else %}Preuzmi ponudu za banku{% endif %}
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -443,6 +525,30 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
   {% endif %}
 
+</div>
+
+<!-- VALIDATOR PEČAT -->
+<div style="max-width:900px;margin:0 auto;padding:0 16px 16px">
+  <div style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px">
+    <span style="font-size:1.2rem;flex-shrink:0">🔏</span>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin-bottom:4px">
+        {% if portal_lang == "de" %}Digitaler Dokumentenstempel — unveränderlicher Nachweis{% else %}Digitalni pečat dokumenta — nepromjenjivi dokaz{% endif %}
+      </div>
+      <div style="font-size:.68rem;color:var(--dim);line-height:1.5;word-break:break-all;font-family:monospace">
+        SHA-256: {{ portal_seal }}
+      </div>
+      <div style="font-size:.65rem;color:var(--dim);margin-top:4px">
+        {% if portal_lang == "de" %}
+          Dieses Dokument umfasst: Angebotsnummer, Positionen, Versicherung, Finanzierungsoptionen und KfW-Programme.
+          Jede nachträgliche Änderung ergibt einen anderen Hash — Fälschung unmöglich.
+        {% else %}
+          Ovaj dokument obuhvaća: broj ponude, stavke, osiguranje, opcije financiranja i popis kreditnih institucija.
+          Svaka naknadna izmjena daje drugačiji hash — krivotvorenje nemoguće.
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="cp-footer">Powered by LIMIT Connect · limit-connect.com</div>

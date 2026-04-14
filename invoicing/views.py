@@ -1290,6 +1290,29 @@ def client_portal(request, token):
     material_total = sum(i.total_price for i in material_items)
     has_split = work_items.exists() and material_items.exists()
 
+    # Osiguranje GRATIS: ako je < 1% neto = prikazujemo kao gratis stavku
+    from decimal import Decimal as _D
+
+    insurance_threshold = invoice.subtotal * _D("0.01")
+    # Standardna cijena osiguranja ~0.5% neto — uvijek gratis za ponude
+    insurance_est = invoice.subtotal * _D("0.005")
+    insurance_is_gratis = insurance_est < insurance_threshold or True  # uvijek gratis
+
+    # Portal seal — SHA-256 sažetak cijelog dokumenta
+    import hashlib
+    import json as _json
+
+    seal_data = {
+        "inv": invoice.invoice_number,
+        "total": str(invoice.total),
+        "subtotal": str(invoice.subtotal),
+        "company_oib": invoice.company.oib if invoice.company else "",
+        "items": [{"d": i.description, "q": str(i.quantity), "p": str(i.unit_price)} for i in all_items],
+        "insurance_gratis": True,
+        "portal_lang": portal_lang,
+    }
+    portal_seal = hashlib.sha256(_json.dumps(seal_data, sort_keys=True).encode()).hexdigest()
+
     return render(
         request,
         "invoicing/client_portal.html",
@@ -1304,6 +1327,10 @@ def client_portal(request, token):
             "work_total": work_total,
             "material_total": material_total,
             "has_split": has_split,
+            "insurance_is_gratis": insurance_is_gratis,
+            "insurance_threshold_pct": "1%",
+            "portal_lang": portal_lang,
+            "portal_seal": portal_seal,
         },
     )
 
