@@ -73,7 +73,7 @@
               <form method="post" action="{% url 'appointments:status' a.pk %}">
                 {% csrf_token %}
                 <input type="hidden" name="status" value="cancelled">
-                <button type="submit" class="btn btn-sm btn-outline-danger" title="Otkazi" onclick="return confirm('Otkazati termin?')"><i class="fas fa-times"></i></button>
+                <button type="submit" class="btn btn-sm btn-outline-danger btn-action" title="Otkaži" onclick="return confirm('Otkazati termin?')"><i class="fas fa-times"></i></button>
               </form>
               {% endif %}
               {% if a.status == "confirmed" %}
@@ -86,7 +86,7 @@
               <a href="{% url 'appointments:edit' a.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
               <form method="post" action="{% url 'appointments:delete' a.pk %}" onsubmit="return confirm('Obrisati?')">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                <button type="submit" class="btn btn-sm btn-outline-danger btn-action" title="Obriši"><i class="fas fa-trash"></i></button>
               </form>
             </div>
           </td>

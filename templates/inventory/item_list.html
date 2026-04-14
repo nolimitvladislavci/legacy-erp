@@ -64,7 +64,7 @@
       <tbody>
         {% for item in page_obj %}
         <tr {% if item.is_low_stock %}class="table-warning"{% endif %}>
-          <td><a href="{% url 'inventory:detail' item.pk %}" class="fw-bold text-decoration-none text-dark">{{ item.name }}</a>{% if item.webshop_visible %}<span class="badge bg-success ms-1" title="Vidljiv u webshopu"><i class="fas fa-store"></i></span>{% endif %}</td>
+          <td><a href="{% url 'inventory:detail' item.pk %}" class="entity-link">{{ item.name }}</a>{% if item.webshop_visible %}<span class="badge bg-success ms-1" title="Vidljiv u webshopu"><i class="fas fa-store"></i></span>{% endif %}</td>
           <td><code class="small">{{ item.sku }}</code></td>
           <td><span class="badge bg-secondary small">{{ item.get_category_display }}</span></td>
           <td class="small text-muted">{{ item.location|default:"-" }}</td>
@@ -76,7 +76,7 @@
             {% else %}<span class="fenix-badge fenix-badge-success">{% trans "OK" %}</span>{% endif %}
           </td>
           <td>
-            <a href="{% url 'inventory:edit' item.pk %}" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+            <a href="{% url 'inventory:edit' item.pk %}" class="btn btn-sm btn-outline-warning btn-action" title="Uredi"><i class="fas fa-edit"></i></a>
           </td>
         </tr>
         {% empty %}

@@ -26,7 +26,7 @@
         </div>
         <div>
           {% if c.is_vat_registered %}<span class="badge bg-success mb-2 d-block">{% trans "U sustavu PDV" %}</span>{% endif %}
-          <a href="{% url 'companies:edit' c.pk %}" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+          <a href="{% url 'companies:edit' c.pk %}" class="btn btn-sm btn-outline-warning btn-action" title="Uredi"><i class="fas fa-edit"></i></a>
         </div>
       </div>
     </div>
