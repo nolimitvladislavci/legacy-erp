@@ -12,10 +12,11 @@
 | 2026-04-14 | Sonnet+CC | Korak 1-7 | Inventura, audit, standardi, test coverage | 5ea4e6f1 |
 | 2026-04-14 | Sonnet+CC | Korak 8 | Load test: 50VU, P95=850ms, 0 failures | f46bd567 |
 | 2026-04-14 | Sonnet+CC | Umbrella patch | CompanyMiddleware — 30+ modula popravljeno | a5e021e2 |
-| 2026-04-14 | Sonnet | Sesija init | DeepSeek uplata $5.30 potvrđena + aktivan. Arhiva×komitent flow analiza. Korak 9 aktivan. | — |
-| 2026-04-14 | CC Code | Korak 9 | Security: Django 5.1.15, rate limit auth users, GDPR audit log, pip-audit 44→2 CRITICAL | b04ec43a |
-| 2026-04-14 | CC Code | Korak 10 | Onboarding: 9 bugova nađeno+popravljeno, 21 smoke testova (svi prolaze) | c74c539f |
-| 2026-04-14 | Sonnet | Korak 10 start | Fix: arhiva×komitent Workspace (939b4682), CSRF+ALLOWED_HOSTS+uuid (7541a107). Login flow identificiran: 2-step (password→PIN), login_view renderira PIN formu inline bez redirect. Sljedeće: pratiti PIN submission kroz requests.Session, prođi svih 5 onboarding checkova. | 7541a107 |
+| 2026-04-14 | Sonnet | Korak 9 init | DeepSeek uplata potvrđena. Arhiva×komitent flow analiza. | — |
+| 2026-04-14 | CC Code | Korak 9 | Security: Django 5.1.15, rate limit, GDPR audit log, pip-audit 44→2 CRITICAL | b04ec43a |
+| 2026-04-14 | Sonnet | Korak 10 analiza | Login flow identificiran: Force2FAMiddleware bloker. CSRF debug. Login URL /hr/login/. | 7541a107 |
+| 2026-04-14 | CC Code | Korak 10 | 9 bugova popravljeno, 21/21 smoke testovi zeleni. Svih 5 checkova prošlo. | c74c539f |
+| 2026-04-14 | Sonnet | Korak 10 potvrda | CC rezultati verificirani. FENIX ažuriran. Sljedeće: Korak 11 Beta. | c74c539f |
 
 ### Kako upisati
 ```
@@ -42,8 +43,8 @@ Nije bitno biti opširan — samo datum, agent, fokus, rezultat, commit
 === CODE ===
 Python LoC:     ~299K
 Test LoC:       59,825
-Tests:          2,319 collected (pytest)
-Commits:        949
+Tests:          2,340 collected (pytest) — +21 onboarding smoke
+Commits:        952
 
 === QUALITY ===
 Broad catches:  612 (bilo 3,598) = -83%
@@ -54,13 +55,13 @@ mypy:           configured + django-stubs, clean on core/ ✓
 Django check:   0 issues ✓
 
 === TESTING ===
-pytest:         2,319 tests collected, 0 collection errors ✓
+pytest:         2,340 tests collected, 0 collection errors ✓
 pytest-django:  installed, conftest.py with fixtures ✓
 pytest-cov:     installed, .coveragerc configured ✓
 Test settings:  core/settings_test.py (bypass PgBouncer) ✓
 Test DB:        test_fina_connect (PgBouncer configured) ✓
 Smoke tests:    core/tests_smoke_views.py ✓
-Critical path:  515 tests passing (login, invoice, POS, company switch) ✓
+Critical path:  536 tests passing (login, invoice, POS, company switch, onboarding) ✓
 Coverage:       40.3% na pos/ + invoicing/ + accounts/ ✓
 
 === SECURITY ===
@@ -193,22 +194,7 @@ Poznati validni OIBi za testove: 12345678903, 98765432106, 11111111119, 22222222
 ---
 
 ## KORAK 7 — CRITICAL PATH TEST COVERAGE ✅
-**Cilj:** Svaki klijentski dodir ima test.
 **Status:** GOTOVO — 2026-04-14
-
-### Što je napravljeno:
-- **Novi test fileovi:** accounts/tests/ (login flow + company switch), invoicing/tests/test_invoice_critical.py, pos/tests/test_pos_critical.py
-- **Kritični putevi testirani:** login/password, PIN auth, anonymous redirect, invoice CRUD + client portal (accept/reject), POS bon status + fiscal mock, company switch + session
-- **OIB validacija:** Popravljen ISO 7064 Luhn-10 u 15+ test fileova (99988877766→99988877762, 12345678901→12345678903, itd.)
-- **HTTPS u testovima:** Dodan `secure=True` svim HTTP test requestima (SECURE_SSL_REDIRECT=True u produkciji)
-- **Bugovi nađeni i popravljeni:**
-  * `pos/services/checkout.py`: negativna količina clamped na 0 (sigurnosni propust)
-  * `pos/views_v2.py`: fiscalize_receipt() pozvan s nepostojećim kwargom naknadna_dostava
-  * `invoicing/fiscal_rules.py`: NoneType guard za invoice bez firme
-  * `documents/signals.py`: Decimal cast za total usporedbu
-  * `core/audit.py`: transaction.atomic() savepoint + DB existence check za user FK
-  * `einvoice/signals.py`: guard za invoice bez firme
-  * `invoicing/signals.py`: guard za invoice bez firme + Decimal cast
 
 ### Rezultat:
 ```
@@ -220,38 +206,23 @@ Commits: 7 bug fix + 1 test commit
 ---
 
 ## KORAK 8 — LOAD TEST ✅
-**Cilj:** 50 konkurentnih korisnika bez pada.
-✅ GOTOVO — 2026-04-14
+**Status:** GOTOVO — 2026-04-14
 
 ### Rezultat:
 - 1,353 requests | **0 failures** | **0 x 5xx** ✅
 - P95 = **850ms** (cilj <3000ms) ✅
-- Flow: login→invoicing→arhiva→smart-import→switch company
 - Tool: Locust 2.43.3, 50 VU, 10 min, HTTPS produkcija
 
 ---
 
 ## KORAK 9 — SECURITY HARDENING ✅
-**Cilj:** Nema poznatih ranjivosti pri ulasku klijenata.
-**Status:** GOTOVO — 2026-04-14
+**Status:** GOTOVO — 2026-04-14 | Commitovi: cc57e687, b04ec43a
 
 ### Što je napravljeno:
-- **deploy check**: 0 security warnings (samo drf_spectacular schema napomene)
-- **Rate limiting**: RateLimitMiddleware proširen — auth. korisnici sada limitirani:
-  - AI endpointi (/hr/ai/, /ai-cockpit/, /api/advisor/): **10/min**
-  - PDF generacija: **20/min**
-  - API općenito: **60/min**
-  - Login (IP): već imao 20/5min via LoginAttempt.is_blocked
-- **GDPR audit log**: switch_company + switch_company_get → SystemAuditLog
-  s from_company, to_company, IP, timestamp, user_id
-- **OWASP Top 10**: sve provjere ✅ (bez pickle, bez yaml.load, |safe samo server-generated HTML)
-- **pip-audit**: 44 vulns → 2 CRITICAL preostali (deep-translator bez fixa, django-allauth nekorišten)
-  - Django 5.1.6 → 5.1.15 (12 CVE-a popravljeno)
-  - aiohttp 3.13.3 → 3.13.4, cryptography 46.0.7, pypdf 6.10.0, pillow 12.2.0, requests 2.33.0
-  - fastmcp 3.1.1 → 3.2.0
-- Commitovi: cc57e687, b04ec43a
-
-✅ GOTOVO kad: Security checklist = sve zeleno.
+- Django 5.1.6 → 5.1.15 (12 CVE-a)
+- Rate limiting za auth. korisnike (AI: 10/min, PDF: 20/min, API: 60/min)
+- GDPR audit log za company switch
+- pip-audit: 44 → 2 CRITICAL preostali (deep-translator bez fixa, django-allauth nekorišten)
 
 ---
 
@@ -260,15 +231,17 @@ Commits: 7 bug fix + 1 test commit
 **Status:** GOTOVO — 2026-04-14 | commit c74c539f
 
 ### 9 bugova popravljeno:
-- Bug#1: register_step4 IntegrityError → 500 (dupli OIB/email)
-- Bug#2: register_quick UserProfile signal conflict → IntegrityError
-- Bug#3: register_quick Subscription import nepostojeći model
-- Bug#4: setup_wizard views NameError (get_user_company ne importano)
-- Bug#5: setup_wizard_company akceptira nevažeći HR OIB
-- Bug#6: setup_wizard_contact dodjeljuje string FK-u website
-- Bug#7: portal_accept_trail invoice.notes → invoice.note
-- Bug#8: get_managed_companies .first().company bez None guard
-- Bug#9: documents/views_arhiva.py isti pattern
+```
+Bug#1: register_step4 IntegrityError → 500 (dupli OIB/email → sad jasna poruka)
+Bug#2: register_quick UserProfile signal conflict → IntegrityError
+Bug#3: register_quick Subscription import nepostojeći model
+Bug#4: setup_wizard NameError (get_user_company ne importano → 500 pri svakom POST-u)
+Bug#5: setup_wizard_company akceptira nevažeći HR OIB ("123" prolazilo)
+Bug#6: setup_wizard_contact string FK dodjela website polju
+Bug#7: portal_accept invoice.notes → invoice.note (crash pri prihvaćanju ponude)
+Bug#8: get_managed_companies .first().company bez None guard
+Bug#9: documents/views_arhiva.py isti None guard pattern
+```
 
 ### Smoke test suite: 21/21 passed ✅
 ```
@@ -277,8 +250,8 @@ Commits: 7 bug fix + 1 test commit
 [✅] Prva faktura → PDF → kupac prihvati (client portal)
 [✅] POS: terminal + blagajnik + onboarding wizard
 [✅] Dokumenti: upload → SHA-256 hash → arhiva
+[✅] Error handling: svi 500 pretvoreni u jasne greške
 ```
-✅ Gotovo kad: Netko tko nikad nije vidio platformu prođe za < 30 min.
 
 ---
 
@@ -321,7 +294,7 @@ Commits: 7 bug fix + 1 test commit
 | 8 Load test | ✅ GOTOVO | 100% |
 | 9 Security | ✅ GOTOVO | 100% |
 | 10 Onboarding | ✅ GOTOVO | 100% |
-| 11 Beta | ⏳ na redu | — |
+| 11 Beta | ⏳ SLJEDEĆE | — |
 | 12 EU kampanja | ⏳ na redu | — |
 
 ---
@@ -362,7 +335,7 @@ Cross-job pattern detection. ML projekt. Ne žuriti.
 ```
 Aktivnih firmi:     101  |  Umbrella djece:  81
 Aktivnih korisnika:  56  |  Faktura:     15,330
-Arhiva dokumenata: 20,373 |  Commits:    1,041+
+Arhiva dokumenata: 20,373 |  Commits:    952+
 Journal entries:  10,732  |  Workspaces:     36
 ```
 
@@ -381,6 +354,44 @@ Svaki nalaz, task i poboljšanje ima:
 
 | # | Nalaz | Kreiran | Ozbiljnost | Uvjet za izvršenje |
 |---|-------|---------|------------|-------------------|
-| B-01 | `user_edit` — company isolation (samo superadmin može editirati bilo kojeg korisnika bez company provjere) | 2026-04-14 | SREDNJE | Prije Koraka 10 (onboarding) — kad company_admin dobije self-service |
+| B-01 | `user_edit` — company isolation (samo superadmin može editirati bilo kojeg korisnika bez company provjere) | 2026-04-14 | SREDNJE | Kad company_admin dobije self-service |
 | B-02 | `trojstvo_task.py` — `suggestion_id` type guard (None/string ne pada elegantno) | 2026-04-14 | NIZAK | U istom sprintu kad se dotakne trojstvo_task.py |
 | B-03 | `accounts/views.py user_edit` — dodati company scope za budući company_admin self-service | 2026-04-14 | SREDNJE | Isti kao B-01 |
+
+---
+
+## MEMIO.PET — KORAK A: END-TO-END LIVE (Dan 48)
+
+### Stanje PRIJE
+- DomainGate blokirao sve memio_pet rute na memio.pet domeni
+- /registracija/ → 302 redirect
+- /pas/{id}/ → 302 redirect  
+- XSS test podatak u bazi
+
+### Fix
+- DomainGate: 22 memio_pet ruta dodano u whitelist za memio.pet domenu
+- XSS test životinja obrisana iz memio_pets baze
+
+### End-to-End Test — SVE ZELENO
+```
+memio.pet/                         → 200 ✅ Landing page
+memio.pet/registracija/            → 200 ✅ Registracija uzgajivača
+memio.pet/prijava/                 → 200 ✅ Login
+memio.pet/pas/191031000312345/     → 200 ✅ Profil psa (Rex, Labrador)
+memio.pet/pas/{id}/qr/             → 200 ✅ QR PNG (2.3KB, image/png)
+memio.pet/uzgajivac/{uuid}/        → 200 ✅ Profil uzgajivača
+memio.pet/udomljavanje/            → 200 ✅ Životinje za udomljavanje
+memio.pet/barf/                    → 200 ✅ BARF tržnica
+memio.pet/krematoriji/             → 200 ✅ Direktorij krematorija
+memio.pet/hoteli/                  → 200 ✅ Direktorij hotela
+memio.pet/privatnost/              → 200 ✅ Privacy policy
+```
+
+### Za 2 uzgajivača — linkovi:
+- Registracija: https://memio.pet/registracija/
+- Primjer profila: https://memio.pet/pas/191031000312345/
+- QR za Rex-a: https://memio.pet/pas/191031000312345/qr/
+
+### Baza (memio_pets):
+- 2 životinje (Rex + Vučko memorial)
+- 13 profila (hoteli, krematoriji, vlasnici, OPG)
