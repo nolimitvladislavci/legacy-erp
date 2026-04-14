@@ -368,3 +368,34 @@ Svaki nalaz, task i poboljšanje ima:
 | B-01 | `user_edit` — company isolation (samo superadmin može editirati bilo kojeg korisnika bez company provjere) | 2026-04-14 | SREDNJE | Prije Koraka 10 (onboarding) — kad company_admin dobije self-service |
 | B-02 | `trojstvo_task.py` — `suggestion_id` type guard (None/string ne pada elegantno) | 2026-04-14 | NIZAK | U istom sprintu kad se dotakne trojstvo_task.py |
 | B-03 | `accounts/views.py user_edit` — dodati company scope za budući company_admin self-service | 2026-04-14 | SREDNJE | Isti kao B-01 |
+
+---
+
+## ČIŠĆENJE RANJIVOSTI — Finalno (Dan 48, Sesija 2b)
+
+### Početno: 44 ranjivosti
+### Završno: 0 ranjivosti
+
+| Paket | Akcija | CVE-ovi |
+|-------|--------|---------|
+| Django 5.1.6 → 5.1.15 | upgrade | 12 CVE zatvoreno |
+| aiohttp → 3.13.4 | upgrade | CVE-2024-* |
+| cryptography → 46.0.7 | upgrade | CVE-2024-* |
+| pypdf → 6.10.0 | upgrade | CVE-2024-* |
+| pillow → 12.2.0 | upgrade | CVE-2024-* |
+| requests → 2.33.0 | upgrade | CVE-2024-* |
+| fastmcp → 3.2.0 | upgrade | tracked |
+| **deep-translator** | **UKLONJEN** | abandoned, zamijenjeno s urllib.request |
+| **django-allauth** | **UKLONJEN** | nekorišten, mrtav paket |
+| **django-allauth-2fa** | **UKLONJEN** | nekorišten, mrtav paket |
+
+### deep-translator zamjena
+Jedina upotreba: `accounts/views.py:141` — Translation Manager auto-translate.
+Zamijenjeno s: `urllib.request` + Google Translate free API (0 vanjskih ovisnosti).
+
+### Stanje paketa
+```
+Poznate ranjivosti: 0
+Mrtvi paketi uklonjeni: 3
+Django verzija: 5.1.15 (latest stable)
+```
