@@ -685,26 +685,29 @@ class GracefulErrorMiddleware:
             logger.warning("Failed to dispatch error notification: %s", e)
 
     def _audit_log(self, request, exception, category):
+        from django.db import transaction
+
         try:
             from core.models import SystemAuditLog
 
-            SystemAuditLog.objects.create(
-                user=request.user if request.user.is_authenticated else None,
-                company_id=getattr(request, "company_id", None),
-                model_name="_system_error",
-                object_id="0",
-                action="error",
-                changes={
-                    "category": category,
-                    "exception": type(exception).__name__,
-                    "message": str(exception)[:500],
-                    "path": request.path,
-                    "method": request.method,
-                },
-                ip_address=request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))
-                .split(",")[0]
-                .strip(),
-            )
+            with transaction.atomic():
+                SystemAuditLog.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    company_id=getattr(request, "company_id", None),
+                    model_name="_system_error",
+                    object_id="0",
+                    action="error",
+                    changes={
+                        "category": category,
+                        "exception": type(exception).__name__,
+                        "message": str(exception)[:500],
+                        "path": request.path,
+                        "method": request.method,
+                    },
+                    ip_address=request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))
+                    .split(",")[0]
+                    .strip(),
+                )
         except (IntegrityError, DatabaseError):
             pass
 
