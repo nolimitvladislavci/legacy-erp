@@ -679,3 +679,42 @@ Speciale (samo kompleksni zadaci, 5% slučajeva):
 UKUPNO: ~$193/god vs $55 trenutno = +$138/god
 Za 100 firmi koje plaćaju: zanemarivo
 
+
+---
+
+## GDPR GRANICA — PRECIZNA DEFINICIJA
+**Datum: 14.04.2026.**
+
+### Granica nije model — granica je jurisdikcija + DPA ugovor
+
+```
+DIREKTNI DEEPSEEK API → Kina → Bez DPA → ❌ GDPR prekršaj
+DEEPSEEK via AWS BEDROCK Frankfurt → EU → AWS DPA → ✅ Compliant
+CLAUDE (Anthropic API) → US → SCCs potpisani → ✅ Compliant
+GEMINI (Google API) → EU/US → DPA dostupan → ✅ Compliant
+```
+
+### Što smije svaki agent (jednaka pravila za sve)
+
+SMIJE:
+- Čitati skenirani dokument (OCR, ekstrakcija)
+- Parsirati OIB, iznos, datum iz slike
+- Generirati prijedlog konto klasifikacije
+- Analizirati strukturu koda
+
+NE SMIJE (bez DPA + eksplicitnog pristanka):
+- Slati podatke klijenata izvan EU bez SCCs
+- Zadržavati podatke dulje od API poziva
+- Koristiti podatke jedne firme za trening na drugoj
+
+### Zaključak
+
+DeepSeek-V3.2 SMIJE čitati skenirani račun, OIB, IBAN — pod uvjetom
+da API poziv ide kroz AWS Bedrock eu-central-1 (Frankfurt).
+Tada je DeepSeek samo model, AWS je data processor, podaci ostaju u EU.
+Identično kao Haiku ili Gemini.
+
+### Akcija
+
+Ivan aktivira AWS Bedrock Frankfurt → Sonnet integrira u Trojstvo.
+DeepSeek postaje 3. glasač s reasoning prednosti nad Haikuom.
