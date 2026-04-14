@@ -17,16 +17,12 @@ def generate_qr(invoice):
     """Generate QR code base64 for fiscal invoice."""
     try:
         import base64
-        from io import BytesIO
 
-        import qrcode
+        from core.qr_views import qr_png_bytes
 
         url = f"https://porezna.gov.hr/rn?jir={invoice.jir}&datv={invoice.fiscal_datetime}&izn={invoice.total}"
-        qr = qrcode.make(url)
-        buf = BytesIO()
-        qr.save(buf, format="PNG")
-        return base64.b64encode(buf.getvalue()).decode()
-    except ImportError:
+        return base64.b64encode(qr_png_bytes(url, size=150, error_correction="H")).decode()
+    except Exception:
         return ""
 
 

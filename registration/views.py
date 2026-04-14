@@ -1249,10 +1249,7 @@ def sales_wizard_submit(request):
 def agent_dashboard(request):
     """Agent referral dashboard 10/10 — KPI, QR, ghost firme, komisija."""
     import base64
-    import io
     from decimal import Decimal
-
-    import qrcode
 
     from companies.models import Company
     from registration.models import SalesLead
@@ -1276,13 +1273,9 @@ def agent_dashboard(request):
     invite_url = request.build_absolute_uri(f"/pocni/?ref={ref_code}")
 
     # QR kod (base64 PNG)
-    qr = qrcode.QRCode(version=1, box_size=8, border=2)
-    qr.add_data(invite_url)
-    qr.make(fit=True)
-    qr_img = qr.make_image(fill="black", back_color="white")
-    buffer = io.BytesIO()
-    qr_img.save(buffer, format="PNG")
-    qr_b64 = base64.b64encode(buffer.getvalue()).decode()
+    from core.qr_views import qr_png_bytes
+
+    qr_b64 = base64.b64encode(qr_png_bytes(invite_url, size=200)).decode()
 
     stats = {
         "total": leads.count(),

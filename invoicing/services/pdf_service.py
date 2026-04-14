@@ -142,9 +142,7 @@ def build_sections(invoice):
 
 def generate_qr(invoice):
     try:
-        import io
-
-        import qrcode
+        from core.qr_views import qr_png_bytes
 
         iban = (invoice.issuer_iban or "").replace(" ", "")
         payment_data = (
@@ -153,14 +151,8 @@ def generate_qr(invoice):
             f"EUR{invoice.total}\n\n{invoice.number}\n"
             f"Zahlung {invoice.number}"
         )
-        qr = qrcode.QRCode(version=1, box_size=5, border=2)
-        qr.add_data(payment_data)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        return base64.b64encode(buf.getvalue()).decode()
-    except ValueError:
+        return base64.b64encode(qr_png_bytes(payment_data, size=125)).decode()
+    except Exception:
         return ""
 
 
@@ -219,18 +211,10 @@ def _get_company_logo_b64(invoice):
 
 def _get_lc_brand_qr_b64():
     try:
-        import io
+        from core.qr_views import qr_png_bytes
 
-        import qrcode
-
-        qr = qrcode.QRCode(version=1, box_size=4, border=1, error_correction=qrcode.constants.ERROR_CORRECT_M)
-        qr.add_data("https://limit-connect.com")
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="#1e3a5f", back_color="white")
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        return base64.b64encode(buf.getvalue()).decode()
-    except ValueError:
+        return base64.b64encode(qr_png_bytes("https://limit-connect.com", size=100, color="1e3a5f")).decode()
+    except Exception:
         return ""
 
 

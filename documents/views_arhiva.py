@@ -900,12 +900,9 @@ def arhiva_barcode_png(request, pk):
         return HttpResponse(buf.getvalue(), content_type="image/png")
     except ImportError:
         try:
-            import qrcode
+            from core.qr_views import qr_png_bytes
 
-            qr = qrcode.make(code_value)
-            buf = io.BytesIO()
-            qr.save(buf, format="PNG")
-            return HttpResponse(buf.getvalue(), content_type="image/png")
+            return HttpResponse(qr_png_bytes(code_value, size=200), content_type="image/png")
         except Exception:
             from django.http import HttpResponseNotFound
 

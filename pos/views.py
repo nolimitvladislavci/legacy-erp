@@ -6002,17 +6002,10 @@ def revolut_qr(request, receipt_id):
 
     checkout_url = "https://checkout.revolut.com/pay/%s" % payment_id
 
+    from core.qr_views import qr_png_bytes
     import base64
-    from io import BytesIO
 
-    import qrcode
-
-    qr = qrcode.make(checkout_url, box_size=6, border=2)
-    buf = BytesIO()
-    qr.save(buf, format="PNG")
-    buf.seek(0)
-    qr_b64 = base64.b64encode(buf.read()).decode()
-
+    qr_b64 = base64.b64encode(qr_png_bytes(checkout_url, size=150)).decode()
     return JsonResponse(
         {
             "ok": True,

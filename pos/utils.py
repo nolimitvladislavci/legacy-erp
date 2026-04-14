@@ -4,7 +4,6 @@ POS Utility functions — QR kodovi, formatiranje, pomoćne funkcije.
 
 import base64
 import logging
-from io import BytesIO
 
 logger = logging.getLogger("pos")
 
@@ -28,7 +27,7 @@ def generate_fina_qr_base64(zki, receipt_date, total_amount):
         return None
 
     try:
-        import qrcode
+        from core.qr_views import qr_png_bytes
 
         # Format datuma: YYYYMMDD_HHMM
         if hasattr(receipt_date, "astimezone"):
@@ -39,23 +38,9 @@ def generate_fina_qr_base64(zki, receipt_date, total_amount):
         # Iznos: uvijek 2 decimale, točka kao separator
         formatted_amount = "%.2f" % float(total_amount)
 
-        # URL po FINA specifikaciji
+        # URL po FINA specifikaciji (ERROR_CORRECT_H per FINA standard)
         qr_data = "https://porezna.gov.hr/rn?z=%s&d=%s&i=%s" % (zki, formatted_date, formatted_amount)
-
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_M,
-            box_size=4,
-            border=1,
-        )
-        qr.add_data(qr_data)
-        qr.make(fit=True)
-
-        img = qr.make_image(fill_color="black", back_color="white")
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        buf.seek(0)
-        return base64.b64encode(buf.read()).decode()
+        return base64.b64encode(qr_png_bytes(qr_data, size=100, error_correction="H")).decode()
 
     except (ValueError, TypeError) as e:
         logger.error("FINA QR generiranje neuspješno: %s", e)
