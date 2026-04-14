@@ -110,6 +110,8 @@ jobs:
             python manage.py compilemessages --ignore=venv
             python manage.py collectstatic --noinput
             chown -R www-data:www-data /var/www/fina-connect/logs/
-            systemctl restart gunicorn-fina
+            systemctl reload gunicorn-fina
             systemctl restart celery-worker
+            sleep 4
+            curl -sf https://limit-connect.com/hr/health/ && echo "Health OK" || exit 1
             echo "Deployed at $(date)"

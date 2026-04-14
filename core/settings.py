@@ -234,8 +234,25 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "template_overrides", BASE_DIR / "templates"],
-        "APP_DIRS": True,
+        # APP_DIRS je False — koristimo eksplicitne loadere radi kontrole cachiranja
+        "APP_DIRS": False,
         "OPTIONS": {
+            "loaders": [
+                # Produkcija: predlošci se kešira u memoriji nakon prvog učitavanja
+                # Nakon deploya: gunicorn reload (SIGHUP) prazni cache automatski
+                (
+                    "django.template.loaders.cached.Loader",
+                    [
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                    ],
+                )
+            ]
+            if not __import__("os").environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
+            else [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
