@@ -1215,11 +1215,13 @@ def _notify_quote_action(invoice, action: str):
 def client_portal(request, token):
     invoice = get_object_or_404(Invoice, client_token=token)
 
-    # Aktiviraj jezik prema državi kupca (HR→hr, DE→de)
+    # Aktiviraj jezik: 1) ui_language firme 2) invoice.country 3) hr
     from django.utils.translation import activate
 
-    lang_map = {"HR": "hr", "DE": "de"}
-    activate(lang_map.get(invoice.country, "hr"))
+    lang_map = {"HR": "hr", "DE": "de", "AT": "de", "CH": "de"}
+    company_lang = getattr(invoice.company, "ui_language", None) if invoice.company else None
+    portal_lang = company_lang or lang_map.get(invoice.country, "hr")
+    activate(portal_lang)
 
     # Track views — rate limited po IP-u (1x per 30 min da boti ne napuhaju count)
     from django.core.cache import cache

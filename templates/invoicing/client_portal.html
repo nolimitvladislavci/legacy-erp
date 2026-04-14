@@ -142,7 +142,12 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div class="hdr">
   <div>
     <div class="hdr-logo">{{ invoice.company.name }}</div>
-    {% if invoice.company.oib %}<div style="font-size:.7rem;color:var(--dim)">OIB: {{ invoice.company.oib }}</div>{% endif %}
+    {% if invoice.company.country == 'DE' %}
+      {% if invoice.company.vat_id %}<div style="font-size:.7rem;color:var(--dim)">USt-IdNr.: {{ invoice.company.vat_id }}</div>{% endif %}
+      {% if invoice.company.iban %}<div style="font-size:.7rem;color:var(--dim)">IBAN: {{ invoice.company.iban }}</div>{% endif %}
+    {% else %}
+      {% if invoice.company.oib %}<div style="font-size:.7rem;color:var(--dim)">OIB: {{ invoice.company.oib }}</div>{% endif %}
+    {% endif %}
   </div>
   <div class="hdr-actions">
     <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" target="_blank" class="btn-hdr btn-pdf">
@@ -207,8 +212,14 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
     {% if invoice.tax_amount %}
     <div class="meta-item">
-      <div class="meta-label">PDV ({{ invoice.tax_percent|floatformat:0 }}%)</div>
+      <div class="meta-label">{% if invoice.company.country == "DE" %}MwSt. ({{ invoice.tax_percent|floatformat:0 }}%){% else %}PDV ({{ invoice.tax_percent|floatformat:0 }}%){% endif %}</div>
       <div class="meta-value">{{ invoice.tax_amount|floatformat:2 }} €</div>
+    </div>
+    {% endif %}
+    {% if invoice.company.country == 'DE' and invoice.company.iban %}
+    <div class="meta-item">
+      <div class="meta-label">IBAN plaćanje</div>
+      <div class="meta-value" style="font-size:.72rem;font-family:monospace">{{ invoice.company.iban }}</div>
     </div>
     {% endif %}
     {% if invoice.buyer_name %}
@@ -251,7 +262,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
           </tr>
           {% if invoice.tax_amount %}
           <tr>
-            <td colspan="3" class="ta-r" style="color:var(--muted);font-size:.8rem">PDV:</td>
+            <td colspan="3" class="ta-r" style="color:var(--muted);font-size:.8rem">{% if invoice.company.country == "DE" %}MwSt.:{% else %}PDV:{% endif %}</td>
             <td class="ta-r">{{ invoice.tax_amount|floatformat:2 }} €</td>
           </tr>
           {% endif %}
@@ -354,7 +365,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div style="display:flex;align-items:flex-start;gap:12px">
       <span style="font-size:1.6rem;flex-shrink:0">🏛️</span>
       <div>
-        <div style="font-weight:700;font-size:.95rem;color:#60a5fa;margin-bottom:6px">Ova ponuda se prihvaća u banci za kredit</div>
+        <div style="font-weight:700;font-size:.95rem;color:#60a5fa;margin-bottom:6px">
+      {% if invoice.company.country == "DE" %}Dieses Angebot wird von deutschen Banken für Kredite akzeptiert{% else %}Ova ponuda se prihvaća u banci za kredit{% endif %}
+    </div>
         <div style="font-size:.82rem;color:var(--muted);line-height:1.6">
           Svaka hrvatska banka prihvaća ovu ponudu kao dokumentaciju za 
           <strong style="color:var(--text)">namjenski kredit za adaptaciju ili rekonstrukciju</strong>.<br>
