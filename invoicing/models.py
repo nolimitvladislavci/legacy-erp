@@ -517,8 +517,11 @@ class Invoice(models.Model):
 
         return round(self.total * Decimal(self.advance_pct) / Decimal("100"), 2)
 
-    def get_customer_room_url(self):
-        return f"/ponuda/{self.client_token}/"
+    def get_customer_room_url(self, lang: str = "hr") -> str:
+        """Apsolutni HTTPS URL za kupčevu sobu."""
+        from invoicing.utils import get_portal_url
+
+        return get_portal_url(self, lang=lang)
 
 
 class InvoiceItem(models.Model):

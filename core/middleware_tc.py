@@ -19,6 +19,7 @@ EXEMPT_PREFIXES = (
     "/health",
     "/invoicing/portal/",
     "/invoicing/client/",
+    "/ponuda/",  # Kupčeva soba — javna stranica
     "/invoicing/public/",
     "/eracun/",
     "/einvoice/",

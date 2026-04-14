@@ -756,7 +756,7 @@ Sustav automatski provjerava ispravnost.">{% trans "OIB / USt-IdNr" %}</label>
                title="Pošalji klijentu via WhatsApp">
               💬 {% trans "WhatsApp" %}
             </a>
-            <a href="/invoicing/client/{{ invoice.client_token }}/" target="_blank" class="btn-action btn-outline" style="background:#0f172a;color:#94a3b8;border:1px solid #334155">
+            <a href="{% url "customer_room" invoice.client_token %}" target="_blank" class="btn-action btn-outline" style="background:#0f172a;color:#94a3b8;border:1px solid #334155">
               {% trans "🔗 Klijentski portal" %}
             </a>
             {% endif %}

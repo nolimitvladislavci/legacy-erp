@@ -43,6 +43,8 @@ ALLOWED_HOSTS = [
     "www.memio.farm",
 ]
 
+SITE_URL = "https://limit-connect.com"  # Uvijek HTTPS, bez trailing slash
+
 CSRF_TRUSTED_ORIGINS = [
     "https://limit-connect.com",
     "https://www.limit-connect.com",

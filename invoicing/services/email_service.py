@@ -30,8 +30,6 @@ def send_invoice_email(invoice):
         return False, "Klijent nema email adresu!"
 
     is_hr = getattr(invoice, "is_hr", invoice.country == "HR" if hasattr(invoice, "country") else True)
-    base_url = getattr(settings, "SITE_URL", "https://limit-connect.com")
-
     # Tracking pixel
     tracking_pixel_url = ""
     entry = None
@@ -46,10 +44,13 @@ def send_invoice_email(invoice):
     except DatabaseError as e:
         logger.debug("Tracking pixel setup: %s", e)
 
-    # Client portal URL
+    # Client portal URL — koristi centralnu get_portal_url()
+    from invoicing.utils import get_portal_url
+
     client_portal_url = ""
     if hasattr(invoice, "client_token") and invoice.client_token:
-        client_portal_url = f"{base_url}/invoicing/client/{invoice.client_token}/"
+        lang = "de" if not is_hr else "hr"
+        client_portal_url = get_portal_url(invoice, lang=lang)
 
     # Render HTML template
     ctx = {

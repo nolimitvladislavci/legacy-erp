@@ -260,7 +260,9 @@ def send_invoice_whatsapp(request, pk):
     if not phone:
         messages.error(request, _("Klijent nema broj telefona u sustavu."))
         return redirect("invoicing:index")
-    portal_url = f"https://limit-connect.com/hr/invoicing/client/{invoice.client_token}/"
+    from invoicing.utils import get_portal_url
+
+    portal_url = get_portal_url(invoice)
     doctype_names = {"PO": "Ponuda", "P": "Predračun", "R": "Račun", "A": "Avansni"}
     doc_name = doctype_names.get(invoice.doctype, "Dokument")
     msg = (
