@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences
+GET,/hr/dashboard/,CatchResponseError('Dashboard redirected to login — session lost'),23
