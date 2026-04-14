@@ -197,3 +197,23 @@ def on_animal_status_uginulo(sender, instance, **kwargs):
             )
         except ImportError:
             pass  # Celery možda nije aktivan
+
+
+# ═══════════════════════════════════════════════════════════════
+# BRIDGE SIGNAL: Company (ERP) → BreederProfile (memio_pets)
+# Kad se Company s is_shelter=True spremi, automatski sync u memio_pets
+# ═══════════════════════════════════════════════════════════════
+
+
+@receiver(post_save, sender="companies.Company")
+def on_company_shelter_save(sender, instance, **kwargs):
+    """Auto-push shelter/breeder profile to memio_pets when Company saved with is_shelter."""
+    if not instance.is_shelter:
+        return
+    try:
+        from memio_pet.bridge import push_breeder_profile
+
+        push_breeder_profile(instance)
+        logger.info("Bridge auto-push: %s → memio_pets (shelter)", instance.name)
+    except Exception as e:
+        logger.warning("Bridge push failed for %s: %s", instance.name, e)

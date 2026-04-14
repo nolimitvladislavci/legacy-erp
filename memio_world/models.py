@@ -9,6 +9,8 @@ GDPR kontekst: osobni podaci obitelji, ne ljubimci — zasebna izolacija.
 import uuid
 
 from django.db import models
+
+from memio_world.encrypted_fields import WorldEncryptedField
 from django.utils.translation import gettext_lazy as _
 
 
@@ -64,7 +66,7 @@ class TimeCapsule(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_email = models.EmailField(help_text="Kreator kapsule")
     title = models.CharField(max_length=200)
-    message = models.TextField(blank=True, help_text="Tekstualna poruka")
+    message = WorldEncryptedField(blank=True, help_text="Tekstualna poruka (AES enkriptirano)")
     media_urls = models.JSONField(default=list, blank=True, help_text="Lista URL-ova na medije (slike, video, audio)")
     recipients = models.JSONField(default=list, blank=True, help_text="Email adrese primatelja")
     open_date = models.DateField(help_text="Datum kad se kapsula otvara")
@@ -101,7 +103,7 @@ class MemoryVault(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_email = models.EmailField()
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
+    description = WorldEncryptedField(blank=True, help_text="AES enkriptirano")
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="other")
     media_url = models.URLField(blank=True, help_text="URL na pohranjeni medij")
     file_size_bytes = models.BigIntegerField(default=0)
@@ -130,7 +132,7 @@ class FamilyStory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     author_email = models.EmailField()
     title = models.CharField(max_length=200)
-    content = models.TextField(help_text="Markdown format")
+    content = WorldEncryptedField(help_text="Markdown format (AES enkriptirano)")
     media_urls = models.JSONField(default=list, blank=True)
     parent_story = models.ForeignKey(
         "self",
@@ -177,10 +179,9 @@ class ChildProfile(models.Model):
     birth_city = models.CharField(max_length=100, blank=True)
     birth_country = models.CharField(max_length=2, default="HR")
     photo = models.ImageField(upload_to="children/", null=True, blank=True)
-    guardian_emails = models.JSONField(
-        default=list,
+    guardian_emails_encrypted = WorldEncryptedField(
         blank=True,
-        help_text="Email adrese roditelja/skrbnika (cross-db, bez FK)",
+        help_text="Email adrese roditelja/skrbnika (AES enkriptirano, JSON format)",
     )
     visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default="private")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -224,7 +225,7 @@ class MemoryEntry(models.Model):
     child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="memories")
     entry_type = models.CharField(max_length=20, choices=ENTRY_TYPES)
     title = models.CharField(max_length=200)
-    content = models.TextField(blank=True)
+    content = WorldEncryptedField(blank=True, help_text="AES enkriptirano")
     media_file = models.FileField(upload_to="memories/", null=True, blank=True)
     entry_date = models.DateField(help_text="Datum sjećanja")
     age_at_entry = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -268,7 +269,7 @@ class Milestone(models.Model):
     child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name="milestones")
     milestone_type = models.CharField(max_length=30, choices=MILESTONE_TYPES)
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
+    description = WorldEncryptedField(blank=True, help_text="AES enkriptirano")
     achieved_date = models.DateField()
     photo = models.ImageField(upload_to="milestones/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

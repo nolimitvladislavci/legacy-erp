@@ -145,6 +145,23 @@ class Livestock(models.Model):
     father_name = models.CharField(max_length=80, blank=True, verbose_name="Otac (ime)")
     mother_name = models.CharField(max_length=80, blank=True, verbose_name="Majka (ime)")
     photo = models.ImageField(upload_to="livestock/pets/%Y/", blank=True, verbose_name="Fotografija")
+
+    # ── Cross-DB SyncLink: ERP ↔ memio.farm ↔ memio.pet ──────────
+    farm_animal_uuid = models.UUIDField(
+        null=True,
+        blank=True,
+        db_index=True,
+        verbose_name="memio.farm UUID",
+        help_text="Referenca na mf_farm_animal u memio_farm bazi (ne FK, cross-DB)",
+    )
+    memio_pet_profile_id = models.UUIDField(
+        null=True,
+        blank=True,
+        db_index=True,
+        verbose_name="memio.pet profil UUID",
+        help_text="Referenca na AnimalProfile u memio_pets bazi",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CompanyManager()
@@ -153,8 +170,21 @@ class Livestock(models.Model):
         db_table = "livestock_animal"
         ordering = ["ear_tag"]
         unique_together = [("company", "ear_tag")]
-        verbose_name = "Grlo"
-        verbose_name_plural = "Grla"
+
+    @property
+    def public_farm_url(self):
+        """URL na memio.farm javni profil (ako sinkroniziran)."""
+        if self.farm_animal_uuid:
+            return f"https://memio.farm/animal/{self.farm_animal_uuid}/"
+        return None
+
+    @property
+    def public_pet_url(self):
+        """URL na memio.pet javni profil (ako sinkroniziran)."""
+        identifier = self.chip_number or self.ear_tag
+        if self.memio_pet_profile_id and identifier:
+            return f"https://memio.pet/pas/{identifier}/"
+        return None
 
     def __str__(self):
         return f"{self.ear_tag} -- {self.get_vrsta_display()} ({self.get_status_display()})"
