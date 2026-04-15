@@ -882,6 +882,16 @@ class HeritageOracle(models.Model):
 # ════════════════════════════════════════════════════════════════
 # PLAY.EU — Dječja Digitalna Baština Europe (Sprint 1)
 # ════════════════════════════════════════════════════════════════
+# PLAY.EU Growth Engine — 5 inovacija
+from memio_world.growth_models import (  # noqa: F401, E402
+    BuddyPair,
+    FamilyQuest,
+    FamilyQuestCompletion,
+    PetBridgePost,
+    RealWorldVenue,
+    SpacedRepetitionCard,
+    TalentProfile,
+)
 from memio_world.kurikulum_models import (  # noqa: F401, E402
     ContentLink,
     LearningPath,

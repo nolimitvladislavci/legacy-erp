@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -528,3 +529,121 @@ class DomainRegistry(models.Model):
     @property
     def is_expiring_soon(self):
         return self.days_until_expiry <= 30
+
+
+# =============================================================================
+# FENIX AGENT COMMAND CENTER — Dan 49
+# =============================================================================
+
+import uuid as _uuid_mod
+
+
+class AgentTask(models.Model):
+    """Ivan zadaje zadatak agentu. Agent izvrsava. Ivan potvrdi commit."""
+
+    AGENT_CHOICES = [
+        ("haiku", "Claude Haiku — Executor"),
+        ("gemini", "Gemini — Researcher"),
+        ("deepseek", "DeepSeek — Coder"),
+        ("opus", "Claude Opus — Starjesina"),
+    ]
+    STATUS_CHOICES = [
+        ("draft", "Nacrt"),
+        ("queued", "U redu"),
+        ("running", "Izvrsava se"),
+        ("awaiting", "Ceka odobrenje"),
+        ("approved", "Odobreno"),
+        ("rejected", "Odbijeno"),
+        ("done", "Gotovo"),
+        ("failed", "Neuspjesno"),
+    ]
+    SCOPE_CHOICES = [
+        ("read", "Samo citanje"),
+        ("write", "Pisanje fajlova"),
+        ("deploy", "Migracija + restart"),
+        ("research", "Web istrazivanje"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=_uuid_mod.uuid4, editable=False)
+    agent = models.CharField(max_length=10, choices=AGENT_CHOICES)
+    title = models.CharField(max_length=200)
+    instruction = models.TextField(help_text="Ivan zadatak u prirodnom jeziku")
+    scope = models.CharField(max_length=10, choices=SCOPE_CHOICES, default="read")
+    context_files = models.JSONField(
+        default=list, blank=True, help_text='["documents/views_scan.py", "documents/models.py"]'
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")
+
+    agent_plan = models.TextField(blank=True, help_text="Sto agent planira napraviti")
+    agent_output = models.TextField(blank=True, help_text="Diff ili medurezultat (JSON messages)")
+    agent_summary = models.TextField(blank=True, help_text="Sazet opis zavrsenog rada")
+    error_log = models.TextField(blank=True)
+
+    requires_approval = models.BooleanField(default=False)
+    approval_prompt = models.TextField(blank=True, help_text="Sto agent pita Ivana")
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="approved_agent_tasks"
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    tokens_in = models.IntegerField(default=0)
+    tokens_out = models.IntegerField(default=0)
+    cost_usd = models.DecimalField(max_digits=8, decimal_places=6, default=0)
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="created_agent_tasks"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Agent Task"
+        verbose_name_plural = "Agent Tasks"
+        indexes = [
+            models.Index(fields=["status", "agent"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"[{self.agent.upper()}] {self.title} ({self.get_status_display()})"
+
+    @property
+    def cost_display(self):
+        if self.cost_usd < 0.001:
+            return f"<$0.001"
+        return f"${self.cost_usd:.4f}"
+
+
+class AgentTaskLog(models.Model):
+    """Svaki korak agenta — vidljivo u real-time kroz WebSocket."""
+
+    TOOL_CHOICES = [
+        ("think", "Razmisljanje"),
+        ("plan", "Plan"),
+        ("read_file", "Cita fajl"),
+        ("write_file", "Pise fajl"),
+        ("exec_cmd", "Izvrsava naredbu"),
+        ("git_op", "Git operacija"),
+        ("search_web", "Web pretraga"),
+        ("ask_ivan", "Pita Ivana"),
+        ("diff", "Diff prikaz"),
+        ("done", "Gotovo"),
+        ("error", "Greska"),
+    ]
+
+    task = models.ForeignKey(AgentTask, on_delete=models.CASCADE, related_name="logs")
+    tool_type = models.CharField(max_length=15, choices=TOOL_CHOICES)
+    tool_input = models.TextField(blank=True)
+    tool_output = models.TextField(blank=True)
+    is_approval_gate = models.BooleanField(default=False)
+    duration_ms = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = "Agent Log"
+        verbose_name_plural = "Agent Logovi"
+
+    def __str__(self):
+        return f"{self.task.title[:40]} → {self.tool_type} ({self.duration_ms}ms)"
