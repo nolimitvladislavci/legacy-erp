@@ -1,0 +1,33 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}💛 {% trans "Utjeha" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<div class="text-center mb-16">
+  <h1 style="font-family:var(--serif);font-size:1.6rem">💛 {% trans "Kako se osjećaš?" %}</h1>
+  <p style="font-size:.9rem;color:var(--ink-light)">{% trans "Odaberi — baka, mama i djed su tu za tebe." %}</p>
+</div>
+
+<div class="comfort-grid">
+  {% for card in cards %}
+  <a href="{% url 'memio_world:comfort_detail' card.situation %}" class="comfort-item">
+    <div class="icon">
+      {% if card.situation == "hurt_knee" %}🤕{% elif card.situation == "sad" %}😢{% elif card.situation == "angry" %}😤{% elif card.situation == "fight_friend" %}💔{% elif card.situation == "scared" %}😨{% elif card.situation == "lonely" %}🥺{% elif card.situation == "bullied" %}😞{% elif card.situation == "bad_grade" %}📝{% elif card.situation == "parents_fight" %}😟{% elif card.situation == "moving" %}🏠{% elif card.situation == "lost_pet" %}🐾{% elif card.situation == "miss_grandma" %}👵{% elif card.situation == "cant_sleep" %}🌙{% elif card.situation == "jealous" %}😑{% elif card.situation == "embarrassed" %}😳{% else %}💛{% endif %}
+    </div>
+    <div class="label">{{ card.get_situation_display }}</div>
+  </a>
+  {% endfor %}
+</div>
+
+{% if not cards %}
+<div class="play-empty">
+  <div class="icon">💛</div>
+  <p>{% trans "Kartice utjehe se pripremaju..." %}</p>
+</div>
+{% endif %}
+
+<div class="play-disclaimer mt-24">
+  {% trans "Ovaj sadržaj je edukativnog karaktera i ne zamjenjuje profesionalni savjet. Ako se dijete loše osjeća duže vrijeme, razgovarajte s pedijatrom ili dječjim psihologom." %}
+</div>
+{% endblock %}

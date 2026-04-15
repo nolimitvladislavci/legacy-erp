@@ -1,0 +1,68 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}🌙 {% trans "Noćni čuvar" %} — PLAY.EU{% endblock %}
+{% block body_class %}night-mode{% endblock %}
+
+{% block content %}
+<div class="dreamguard-wrap">
+  <div class="moon">🌙</div>
+  <h1>{% trans "Noćni čuvar" %}</h1>
+  <p style="color:#E8D9A0;margin-bottom:24px">{% trans "Sve je u redu. Baka je tu." %}</p>
+</div>
+
+{% if not selected %}
+<!-- Dream Type Selection -->
+<div class="text-center mb-16">
+  <p style="font-size:1rem;color:#E8D9A0">{% trans "Što te muči?" %}</p>
+</div>
+
+<div class="comfort-grid">
+  {% for dream in dreams %}
+  <a href="?type={{ dream.dream_type }}" class="comfort-item" style="background:#221C28;border-color:#3D3530">
+    <div class="icon">
+      {% if dream.dream_type == "nightmare" %}😰{% elif dream.dream_type == "scary" %}😱{% elif dream.dream_type == "falling" %}🕳️{% elif dream.dream_type == "chasing" %}🏃{% elif dream.dream_type == "lost" %}🗺️{% elif dream.dream_type == "monster" %}👹{% elif dream.dream_type == "dark" %}🌑{% elif dream.dream_type == "water" %}🌊{% elif dream.dream_type == "school" %}🏫{% else %}😟{% endif %}
+    </div>
+    <div class="label">{{ dream.get_dream_type_display }}</div>
+  </a>
+  {% endfor %}
+</div>
+
+{% else %}
+<!-- Comfort Display -->
+<div class="dreamguard-comfort">
+  <p style="font-size:.8rem;color:var(--gold);margin-bottom:12px">👵 {% trans "Baka kaže" %}:</p>
+  {{ selected.grandma_comfort }}
+</div>
+
+{% if selected.explanation_for_child %}
+<div class="play-card" style="background:rgba(255,248,231,.06);border-color:#3D3530">
+  <h3 style="color:#E8D9A0">💡 {% trans "Zašto se to događa" %}</h3>
+  <p style="color:#E8D9A0;margin-top:8px">{{ selected.explanation_for_child }}</p>
+</div>
+{% endif %}
+
+{% if selected.calming_technique %}
+<div class="play-card mt-16" style="background:rgba(255,248,231,.06);border-color:#3D3530">
+  <h3 style="color:#E8D9A0">🫁 {% trans "Tehnika smirivanja" %}</h3>
+  <p style="color:#E8D9A0;margin-top:8px">{{ selected.calming_technique }}</p>
+</div>
+{% endif %}
+
+<!-- Breathing Circle -->
+<div class="text-center mt-24">
+  <p style="font-size:.85rem;color:#E8D9A0;margin-bottom:12px">{% trans "Diši sa mnom... polako..." %}</p>
+  <div class="breathing-circle"></div>
+</div>
+
+<div class="text-center mt-24">
+  <a href="{% url 'memio_world:dreamguard' %}" class="play-btn play-btn-outline" style="border-color:#3D3530;color:#E8D9A0">
+    ← {% trans "Natrag" %}
+  </a>
+</div>
+{% endif %}
+
+<div class="play-disclaimer mt-24">
+  {{ disclaimer }}
+</div>
+{% endblock %}

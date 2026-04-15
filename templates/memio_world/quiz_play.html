@@ -1,0 +1,122 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}{{ quiz.title }} — PLAY.EU{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+  <h2 style="font-family:var(--serif);font-size:1.3rem;margin-bottom:16px">{{ quiz.title }}</h2>
+
+  <!-- Progress Bar -->
+  <div class="quiz-progress">
+    <div class="quiz-progress-bar" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <!-- Question Container -->
+  <div id="quiz-area">
+    <div class="text-center" style="padding:32px">
+      <p style="font-size:1rem;margin-bottom:20px">{{ quiz.description }}</p>
+      <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:20px">
+        {{ questions|length }} {% trans "pitanja" %}
+        {% if quiz.time_limit_minutes %}· {{ quiz.time_limit_minutes }} min{% endif %}
+      </p>
+      <button class="play-btn play-btn-gold" onclick="startQuiz()">
+        🚀 {% trans "Započni kviz" %}
+      </button>
+    </div>
+  </div>
+
+  <!-- Result (hidden) -->
+  <div id="quiz-result" style="display:none">
+    <div class="play-score">
+      <div class="big" id="result-score">0%</div>
+      <div class="label" id="result-text"></div>
+    </div>
+    <div id="result-details" class="mt-16"></div>
+    <div class="text-center mt-24">
+      <a href="{% url 'memio_world:quiz_list' %}" class="play-btn play-btn-outline">← {% trans "Svi kvizovi" %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const questions = {{ questions_json|safe }};
+let current = 0;
+let score = 0;
+let answers = [];
+
+function startQuiz() {
+  showQuestion(0);
+}
+
+function showQuestion(idx) {
+  const q = questions[idx];
+  const total = questions.length;
+  const pct = Math.round((idx / total) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  let html = '<div class="quiz-question">' + (idx+1) + '. ' + q.text + '</div>';
+  if (q.image_url) {
+    html += '<img src="' + q.image_url + '" style="max-width:100%;border-radius:8px;margin-bottom:16px" alt="">';
+  }
+  html += '<div class="quiz-answers">';
+  q.answers.forEach((a, i) => {
+    html += '<button class="quiz-answer" onclick="selectAnswer(' + idx + ',' + i + ',this)" data-correct="' + a.is_correct + '">'
+          + a.text + '</button>';
+  });
+  html += '</div>';
+  if (q.explanation) {
+    html += '<div id="explanation-' + idx + '" style="display:none" class="play-card mt-16" style="background:var(--parchment-dark)">'
+          + '<p style="font-size:.85rem">💡 ' + q.explanation + '</p></div>';
+  }
+  document.getElementById('quiz-area').innerHTML = html;
+}
+
+function selectAnswer(qIdx, aIdx, el) {
+  const btns = el.parentElement.querySelectorAll('.quiz-answer');
+  if (el.classList.contains('correct') || el.classList.contains('wrong')) return;
+
+  const isCorrect = el.dataset.correct === 'True';
+  answers.push({question: qIdx, answer: aIdx, correct: isCorrect});
+
+  btns.forEach(b => {
+    if (b.dataset.correct === 'True') b.classList.add('correct');
+    else b.classList.add('wrong');
+    b.style.pointerEvents = 'none';
+  });
+
+  if (isCorrect) score++;
+
+  const expEl = document.getElementById('explanation-' + qIdx);
+  if (expEl) expEl.style.display = 'block';
+
+  setTimeout(() => {
+    if (qIdx + 1 < questions.length) {
+      showQuestion(qIdx + 1);
+    } else {
+      showResult();
+    }
+  }, 1500);
+}
+
+function showResult() {
+  document.getElementById('progress-bar').style.width = '100%';
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('quiz-result').style.display = 'block';
+  document.getElementById('result-score').textContent = pct + '%';
+
+  let msg = '';
+  if (pct >= 90) msg = '🏆 {% trans "Izvrsno! Pravi poznavatelj baštine!" %}';
+  else if (pct >= 70) msg = '🌟 {% trans "Vrlo dobro! Naučio si puno." %}';
+  else if (pct >= 50) msg = '👍 {% trans "Dobar početak! Pokušaj ponovo." %}';
+  else msg = '📚 {% trans "Čitaj priče i pokušaj ponovo!" %}';
+  document.getElementById('result-text').textContent = msg;
+
+  let details = '<p style="font-size:.9rem;text-align:center">' + score + ' / ' + questions.length + ' {% trans "točno" %}</p>';
+  document.getElementById('result-details').innerHTML = details;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}{{ card.get_situation_display }} — PLAY.EU{% endblock %}
+
+{% block content %}
+<a href="{% url 'memio_world:comfort_home' %}" style="font-size:.85rem;color:var(--gold-dark);text-decoration:none">← {% trans "Natrag" %}</a>
+
+<div class="text-center mt-16 mb-16">
+  <h1 style="font-family:var(--serif);font-size:1.5rem">{{ card.title }}</h1>
+</div>
+
+<!-- Baka -->
+{% if card.grandma_says %}
+<div class="comfort-voice">
+  <div class="speaker">👵 {% trans "Baka kaže" %}:</div>
+  <div class="text">{{ card.grandma_says }}</div>
+</div>
+{% endif %}
+
+<!-- Mama -->
+{% if card.mama_says %}
+<div class="comfort-voice" style="border-left-color:var(--red-heritage)">
+  <div class="speaker" style="color:var(--red-heritage)">🤱 {% trans "Mama kaže" %}:</div>
+  <div class="text">{{ card.mama_says }}</div>
+</div>
+{% endif %}
+
+<!-- Djed -->
+{% if card.grandpa_says %}
+<div class="comfort-voice" style="border-left-color:var(--blue-heritage)">
+  <div class="speaker" style="color:var(--blue-heritage)">👴 {% trans "Djed kaže" %}:</div>
+  <div class="text">{{ card.grandpa_says }}</div>
+</div>
+{% endif %}
+
+<!-- What to do -->
+{% if card.what_to_do %}
+<div class="play-card mt-16">
+  <h3>✅ {% trans "Što možeš učiniti" %}</h3>
+  <div style="font-size:.95rem;line-height:1.7;margin-top:8px;white-space:pre-line">{{ card.what_to_do }}</div>
+</div>
+{% endif %}
+
+<!-- Healing story -->
+{% if card.healing_story %}
+<div class="play-card mt-16" style="background:var(--parchment-dark)">
+  <h3>📖 {% trans "Priča koja pomaže" %}</h3>
+  <div class="story-reader" style="font-size:1rem;padding:12px 0">{{ card.healing_story }}</div>
+</div>
+{% endif %}
+
+<div class="play-disclaimer mt-24">
+  {% trans "Ovaj sadržaj je edukativnog karaktera i ne zamjenjuje profesionalni savjet. Ako se dijete loše osjeća duže vrijeme, razgovarajte s pedijatrom ili dječjim psihologom." %}
+</div>
+{% endblock %}

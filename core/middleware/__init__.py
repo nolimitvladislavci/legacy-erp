@@ -961,6 +961,7 @@ class DomainGateMiddleware:
             "/hr/boxgram/",
             "/de/boxgram/",
             "/ponuda/",
+            "/api/memio-world/play/",
         ),
         "www.memio.world": "memio.world",
         "no-limit.world": (

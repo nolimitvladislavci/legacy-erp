@@ -1,0 +1,97 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}🎮 Memory — PLAY.EU{% endblock %}
+
+{% block content %}
+<div class="text-center mb-16">
+  <h1 style="font-family:var(--serif);font-size:1.6rem">🎮 Memory</h1>
+  <p style="font-size:.9rem;color:var(--ink-light)">{% trans "Pronađi parove — okreni kartice!" %}</p>
+</div>
+
+<!-- Score -->
+<div class="flex-between mb-16">
+  <span id="moves-counter" style="font-size:.85rem;font-weight:600">{% trans "Potezi" %}: 0</span>
+  <span id="pairs-counter" style="font-size:.85rem;font-weight:600">{% trans "Parovi" %}: 0 / <span id="total-pairs">{{ pairs|length }}</span></span>
+</div>
+
+<!-- Game Grid -->
+<div class="memory-grid" id="memory-board">
+  {% for card in shuffled_cards %}
+  <div class="memory-card" data-pair="{{ card.pair_id }}">
+    <div class="memory-card-inner">
+      <div class="memory-card-face memory-card-front">🏰</div>
+      <div class="memory-card-face memory-card-back">{{ card.display }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Win Message -->
+<div id="win-message" style="display:none" class="play-card text-center mt-24">
+  <div class="play-score">
+    <div class="big">🎉</div>
+    <div class="label mt-8">{% trans "Bravo! Sve parove si pronašao!" %}</div>
+    <p class="mt-8" style="font-size:.9rem" id="win-stats"></p>
+  </div>
+  <a href="{% url 'memio_world:memory_game' %}{% if current_set %}?set={{ current_set }}{% endif %}" class="play-btn play-btn-gold mt-16">
+    🔄 {% trans "Igraj ponovo" %}
+  </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const board = document.getElementById('memory-board');
+  const cards = board.querySelectorAll('.memory-card');
+  let flipped = [];
+  let matched = 0;
+  let moves = 0;
+  const totalPairs = parseInt(document.getElementById('total-pairs').textContent);
+  let locked = false;
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      if (locked) return;
+      if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+      card.classList.add('flipped');
+      flipped.push(card);
+
+      if (flipped.length === 2) {
+        moves++;
+        document.getElementById('moves-counter').textContent = '{% trans "Potezi" %}: ' + moves;
+        locked = true;
+
+        const [a, b] = flipped;
+        if (a.dataset.pair === b.dataset.pair) {
+          a.classList.add('matched');
+          b.classList.add('matched');
+          matched++;
+          document.getElementById('pairs-counter').innerHTML =
+            '{% trans "Parovi" %}: ' + matched + ' / <span id="total-pairs">' + totalPairs + '</span>';
+          flipped = [];
+          locked = false;
+
+          if (matched === totalPairs) {
+            setTimeout(() => {
+              document.getElementById('win-message').style.display = 'block';
+              document.getElementById('win-stats').textContent =
+                matched + ' {% trans "parova" %} u ' + moves + ' {% trans "poteza" %}';
+            }, 500);
+          }
+        } else {
+          setTimeout(() => {
+            a.classList.remove('flipped');
+            b.classList.remove('flipped');
+            flipped = [];
+            locked = false;
+          }, 800);
+        }
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

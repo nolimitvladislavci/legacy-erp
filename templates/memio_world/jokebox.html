@@ -1,0 +1,41 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}😄 {% trans "Šale dana" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<div class="text-center mb-16">
+  <h1 style="font-family:var(--serif);font-size:1.6rem">😄 {% trans "Šale dana" %}</h1>
+  <p style="font-size:.9rem;color:var(--ink-light)">{% trans "Svaki dan novi osmijeh!" %}</p>
+</div>
+
+{% for joke in jokes %}
+<div class="jokebox-card" id="joke-{{ forloop.counter }}">
+  <div class="joke-icon">
+    {% if joke.joke_type == "riddle" %}🤔{% elif joke.joke_type == "tongue_twister" %}😜{% elif joke.joke_type == "grandma_joke" %}👵{% elif joke.joke_type == "fun_fact" %}🤓{% elif joke.joke_type == "knock_knock" %}🚪{% elif joke.joke_type == "wordplay" %}🔤{% else %}😂{% endif %}
+  </div>
+  <div class="setup">{{ joke.setup }}</div>
+  <div class="punchline" id="punchline-{{ forloop.counter }}">{{ joke.punchline }}</div>
+  <button class="play-btn play-btn-gold mt-16" id="reveal-btn-{{ forloop.counter }}"
+    onclick="document.getElementById('punchline-{{ forloop.counter }}').classList.add('revealed');this.style.display='none'">
+    {% if joke.joke_type == "riddle" %}🤔 {% trans "Pokaži odgovor" %}{% else %}😂 {% trans "Pokaži poantu" %}{% endif %}
+  </button>
+  <div class="mt-8">
+    <span class="play-badge gold">{{ joke.get_joke_type_display }}</span>
+  </div>
+</div>
+{% empty %}
+<div class="play-empty">
+  <div class="icon">😄</div>
+  <p>{% trans "Šale se pripremaju..." %}</p>
+</div>
+{% endfor %}
+
+{% if jokes %}
+<div class="text-center mt-24">
+  <a href="{% url 'memio_world:joke_box' %}?refresh=1" class="play-btn play-btn-outline">
+    🔄 {% trans "Nove šale" %}
+  </a>
+</div>
+{% endif %}
+{% endblock %}

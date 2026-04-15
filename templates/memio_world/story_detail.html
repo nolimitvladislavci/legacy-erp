@@ -1,0 +1,56 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}{{ story.title_hr }} — PLAY.EU{% endblock %}
+
+{% block content %}
+<div class="play-card">
+  <h2>{{ title }}</h2>
+
+  <!-- Story Meta -->
+  <div class="story-meta">
+    <span class="play-badge gold">{{ story.get_story_type_display }}</span>
+    {% if story.country_of_origin %}
+    <span class="play-badge blue">{{ story.country_of_origin }}</span>
+    {% endif %}
+    <span class="play-badge green">{{ story.reading_time_minutes }} min</span>
+    {% if story.get_source_display %}
+    <span style="font-size:.75rem;color:var(--ink-light)">{{ story.get_source_display }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Language Switch -->
+  <div class="lang-switch">
+    {% for lc in languages %}
+    <a href="?lang={{ lc }}" class="{% if lc == lang %}active{% endif %}">
+      {% if lc == "hr" %}🇭🇷 HR{% elif lc == "de" %}🇩🇪 DE{% elif lc == "en" %}🇬🇧 EN{% elif lc == "fr" %}🇫🇷 FR{% elif lc == "it" %}🇮🇹 IT{% elif lc == "es" %}🇪🇸 ES{% elif lc == "tr" %}🇹🇷 TR{% else %}{{ lc|upper }}{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Story Text -->
+  <div class="story-reader" id="story-text">
+    {% for paragraph in paragraphs %}
+    <p>{{ paragraph }}</p>
+    {% endfor %}
+  </div>
+
+  {% if story.moral_lesson %}
+  <div class="play-card" style="background:var(--parchment-dark);margin-top:16px">
+    <h3>💡 {% trans "Pouka" %}</h3>
+    <p>{{ story.moral_lesson }}</p>
+  </div>
+  {% endif %}
+
+  {% if story.attribution %}
+  <div class="play-disclaimer">
+    {{ story.attribution }}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Navigation -->
+<div class="flex-between mt-16">
+  <a href="{% url 'memio_world:story_list' %}" class="play-btn play-btn-outline">← {% trans "Sve priče" %}</a>
+</div>
+{% endblock %}

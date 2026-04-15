@@ -1,0 +1,61 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}🃏 {% trans "Heritage kartice" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<h1 style="font-family:var(--serif);font-size:1.6rem;margin-bottom:8px">🃏 {% trans "Heritage kartice" %}</h1>
+<p style="font-size:.9rem;color:var(--ink-light);margin-bottom:20px">
+  {% trans "Digitalne rekonstrukcije europske kulturne baštine." %}
+</p>
+
+<!-- Set Filters -->
+{% if card_sets %}
+<div class="lang-switch mb-16">
+  <a href="?" class="{% if not current_set %}active{% endif %}">{% trans "Sve" %}</a>
+  {% for s in card_sets %}
+  <a href="?set={{ s }}" class="{% if current_set == s %}active{% endif %}">{{ s|title }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if cards %}
+<div class="play-grid cols-3">
+  {% for card in cards %}
+  <div class="play-grid-item" style="cursor:default">
+    <div class="thumb" style="background:{{ card.background_color }};font-size:2rem">
+      {% if card.card_type == "alphabet" %}{{ card.front_text }}{% elif card.card_type == "animal" %}🐉{% elif card.card_type == "number" %}{{ card.front_text }}{% else %}🎴{% endif %}
+    </div>
+    <div class="info">
+      <h3>{{ card.front_text }}</h3>
+      {% if card.back_text %}
+      <p style="font-size:.8rem;color:var(--ink-light);margin-top:4px">{{ card.back_text|truncatewords:15 }}</p>
+      {% endif %}
+      {% if card.fun_fact %}
+      <p style="font-size:.75rem;color:var(--gold-dark);margin-top:4px">💡 {{ card.fun_fact|truncatewords:12 }}</p>
+      {% endif %}
+      <div class="meta mt-8">
+        <span class="play-badge gold">{{ card.get_card_type_display }}</span>
+        {% if card.country_of_origin %}<span class="play-badge blue">{{ card.country_of_origin }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Memory Game Link -->
+{% if cards|length >= 4 %}
+<div class="text-center mt-24">
+  <a href="{% url 'memio_world:memory_game' %}{% if current_set %}?set={{ current_set }}{% endif %}" class="play-btn play-btn-gold">
+    🎮 {% trans "Igraj Memory" %}
+  </a>
+</div>
+{% endif %}
+
+{% else %}
+<div class="play-empty">
+  <div class="icon">🃏</div>
+  <p>{% trans "Nema kartica za ovaj set." %}</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}🧩 {% trans "Kvizovi" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<h1 style="font-family:var(--serif);font-size:1.6rem;margin-bottom:8px">🧩 {% trans "Kvizovi" %}</h1>
+<p style="font-size:.9rem;color:var(--ink-light);margin-bottom:20px">
+  {% trans "Testiraj znanje o europskoj baštini!" %}
+</p>
+
+{% if quizzes %}
+<div class="play-grid">
+  {% for quiz in quizzes %}
+  <a href="{% url 'memio_world:quiz_play' quiz.id %}" class="play-grid-item">
+    <div class="thumb">🧩</div>
+    <div class="info">
+      <h3>{{ quiz.title }}</h3>
+      <div class="meta">
+        {{ quiz.question_count }} {% trans "pitanja" %}
+        {% if quiz.time_limit_minutes %}· {{ quiz.time_limit_minutes }} min{% endif %}
+        <br>
+        <span class="play-badge gold">{{ quiz.get_quiz_type_display }}</span>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="play-empty">
+  <div class="icon">🧩</div>
+  <p>{% trans "Kvizovi se pripremaju..." %}</p>
+</div>
+{% endif %}
+{% endblock %}

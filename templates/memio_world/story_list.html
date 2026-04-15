@@ -1,0 +1,47 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}📖 {% trans "Priče" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<h1 style="font-family:var(--serif);font-size:1.6rem;margin-bottom:8px">📖 {% trans "Priče iz cijele Europe" %}</h1>
+<p style="font-size:.9rem;color:var(--ink-light);margin-bottom:20px">
+  {% trans "Ista priča na više jezika — čitaj, slušaj, usporedi." %}
+</p>
+
+<!-- Filters -->
+<div class="lang-switch mb-16">
+  <a href="?type=" class="{% if not type_filter %}active{% endif %}">{% trans "Sve" %}</a>
+  <a href="?type=fairy_tale" class="{% if type_filter == 'fairy_tale' %}active{% endif %}">🧚 {% trans "Bajke" %}</a>
+  <a href="?type=folk_tale" class="{% if type_filter == 'folk_tale' %}active{% endif %}">🏡 {% trans "Narodne" %}</a>
+  <a href="?type=fable" class="{% if type_filter == 'fable' %}active{% endif %}">🦊 {% trans "Basne" %}</a>
+  <a href="?type=nursery_rhyme" class="{% if type_filter == 'nursery_rhyme' %}active{% endif %}">🌙 {% trans "Uspavanke" %}</a>
+</div>
+
+{% if stories %}
+<div class="play-grid">
+  {% for story in stories %}
+  <a href="{% url 'memio_world:story_detail' story.slug %}" class="play-grid-item">
+    <div class="thumb">
+      {% if story.story_type == "fairy_tale" %}🧚{% elif story.story_type == "folk_tale" %}🏡{% elif story.story_type == "fable" %}🦊{% elif story.story_type == "nursery_rhyme" %}🌙{% elif story.story_type == "legend" %}⚔️{% else %}📜{% endif %}
+    </div>
+    <div class="info">
+      <h3>{{ story.title_hr }}</h3>
+      <div class="meta">
+        {% for lc in story.available_languages %}
+        <span class="play-badge gold">{{ lc|upper }}</span>
+        {% endfor %}
+        · {{ story.reading_time_minutes }} min
+        {% if story.country_of_origin %}· {{ story.country_of_origin }}{% endif %}
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="play-empty">
+  <div class="icon">📖</div>
+  <p>{% trans "Nema priča za ovaj filter." %}</p>
+</div>
+{% endif %}
+{% endblock %}
