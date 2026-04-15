@@ -1,0 +1,64 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}🏛️ {% trans "Europeana" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<h1 style="font-family:var(--serif);font-size:1.6rem;margin-bottom:8px">🏛️ {% trans "Europska kulturna riznica" %}</h1>
+<p style="font-size:.9rem;color:var(--ink-light);margin-bottom:20px">
+  {% trans "70+ predmeta iz europskih muzeja, knjižnica i arhiva." %}
+</p>
+
+<!-- Category Filters -->
+<div class="lang-switch mb-16">
+  <a href="?" class="{% if not cat_filter %}active{% endif %}">{% trans "Sve" %}</a>
+  <a href="?cat=alphabet" class="{% if cat_filter == 'alphabet' %}active{% endif %}">🔤 {% trans "Slovarice" %}</a>
+  <a href="?cat=bestiary" class="{% if cat_filter == 'bestiary' %}active{% endif %}">🐉 {% trans "Bestijarij" %}</a>
+  <a href="?cat=story" class="{% if cat_filter == 'story' %}active{% endif %}">📜 {% trans "Priče" %}</a>
+  <a href="?cat=illustration" class="{% if cat_filter == 'illustration' %}active{% endif %}">🎨 {% trans "Ilustracije" %}</a>
+  <a href="?cat=manuscript" class="{% if cat_filter == 'manuscript' %}active{% endif %}">📋 {% trans "Rukopisi" %}</a>
+  <a href="?cat=game" class="{% if cat_filter == 'game' %}active{% endif %}">🎲 {% trans "Igre" %}</a>
+  <a href="?cat=song" class="{% if cat_filter == 'song' %}active{% endif %}">🎵 {% trans "Pjesme" %}</a>
+</div>
+
+{% if items %}
+<div class="play-grid cols-3">
+  {% for item in items %}
+  <div class="play-grid-item" {% if item.thumbnail_url %}style="cursor:default"{% endif %}>
+    {% if item.thumbnail_url %}
+    <div class="thumb">
+      <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"
+        onerror="this.parentElement.innerHTML='🏛️'">
+    </div>
+    {% else %}
+    <div class="thumb">
+      {% if item.category == "alphabet" %}🔤{% elif item.category == "bestiary" %}🐉{% elif item.category == "story" %}📜{% elif item.category == "illustration" %}🎨{% elif item.category == "manuscript" %}📋{% elif item.category == "game" %}🎲{% elif item.category == "song" %}🎵{% else %}🏛️{% endif %}
+    </div>
+    {% endif %}
+    <div class="info">
+      <h3 style="font-size:.9rem">{{ item.title|truncatewords:8 }}</h3>
+      <div class="meta">
+        {{ item.provider|truncatewords:4 }}
+        {% if item.country %}· {{ item.country }}{% endif %}
+        {% if item.year_created %}· {{ item.year_created }}{% endif %}
+      </div>
+      <div class="mt-8">
+        <span class="play-badge gold">{{ item.get_category_display }}</span>
+        {% if item.rights %}<span class="play-badge green" style="font-size:.6rem">{{ item.rights }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="play-empty">
+  <div class="icon">🏛️</div>
+  <p>{% trans "Nema predmeta za ovaj filter." %}</p>
+</div>
+{% endif %}
+
+<div class="play-disclaimer mt-24">
+  {% trans "Sadržaj preuzet iz Europeana.eu — europskog digitalnog kulturnog portala. Svi prikazi poštuju autorska prava originala." %}
+  <br><a href="https://www.europeana.eu" target="_blank" style="color:var(--gold-dark)">europeana.eu</a>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}📚 {% trans "Putovi učenja" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<h1 style="font-family:var(--serif);font-size:1.6rem;margin-bottom:8px">📚 {% trans "Putovi učenja" %}</h1>
+<p style="font-size:.9rem;color:var(--ink-light);margin-bottom:20px">
+  {% trans "Ono što škola ne uči — promet, sigurnost, emocije, život." %}
+</p>
+
+<!-- Age Group Filters -->
+<div class="lang-switch mb-16">
+  <a href="?" class="{% if not age_filter %}active{% endif %}">{% trans "Sve dobi" %}</a>
+  <a href="?age=preschool" class="{% if age_filter == 'preschool' %}active{% endif %}">🧒 3-6</a>
+  <a href="?age=grade_1_2" class="{% if age_filter == 'grade_1_2' %}active{% endif %}">📗 1.-2.</a>
+  <a href="?age=grade_3_4" class="{% if age_filter == 'grade_3_4' %}active{% endif %}">📘 3.-4.</a>
+  <a href="?age=grade_5_6" class="{% if age_filter == 'grade_5_6' %}active{% endif %}">📙 5.-6.</a>
+</div>
+
+{% for group_label, paths in grouped_paths.items %}
+<section class="mb-16">
+  <h2 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:12px;color:var(--gold-dark)">{{ group_label }}</h2>
+  <div class="play-grid">
+    {% for path in paths %}
+    <div class="play-card" style="border-left:4px solid {{ path.color }}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:1.8rem">{{ path.icon_emoji|default:"📚" }}</span>
+        <div>
+          <h3>{{ path.title }}</h3>
+          <span class="play-badge gold">{{ path.get_subject_display }}</span>
+        </div>
+      </div>
+      {% if path.description %}
+      <p style="font-size:.85rem;color:var(--ink-light);margin-top:8px">{{ path.description|truncatewords:25 }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% empty %}
+<div class="play-empty">
+  <div class="icon">📚</div>
+  <p>{% trans "Nema putova učenja za ovaj filter." %}</p>
+</div>
+{% endfor %}
+{% endblock %}

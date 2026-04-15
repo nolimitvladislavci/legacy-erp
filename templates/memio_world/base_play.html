@@ -32,31 +32,31 @@
   {% block content %}{% endblock %}
 </main>
 
-<!-- Bottom Navigation -->
+<!-- Bottom Navigation — 5 kategorija -->
 <nav class="play-bottom">
   <a href="{% url 'memio_world:play_home' %}" class="{% if nav == 'home' %}active{% endif %}">
     <span class="nav-icon">🏠</span>
     <span>{% trans "Početna" %}</span>
   </a>
-  <a href="{% url 'memio_world:story_list' %}" class="{% if nav == 'stories' %}active{% endif %}">
+  <a href="{% url 'memio_world:story_list' %}" class="{% if nav == 'read' %}active{% endif %}">
     <span class="nav-icon">📖</span>
-    <span>{% trans "Priče" %}</span>
+    <span>{% trans "Čitaj" %}</span>
   </a>
-  <a href="{% url 'memio_world:card_list' %}" class="{% if nav == 'cards' %}active{% endif %}">
-    <span class="nav-icon">🃏</span>
-    <span>{% trans "Kartice" %}</span>
+  <a href="{% url 'memio_world:card_list' %}" class="{% if nav == 'play' %}active{% endif %}">
+    <span class="nav-icon">🎮</span>
+    <span>{% trans "Igraj" %}</span>
   </a>
-  <a href="{% url 'memio_world:quiz_list' %}" class="{% if nav == 'quiz' %}active{% endif %}">
-    <span class="nav-icon">🧩</span>
-    <span>{% trans "Kviz" %}</span>
+  <a href="{% url 'memio_world:learning_paths' %}" class="{% if nav == 'learn' %}active{% endif %}">
+    <span class="nav-icon">📚</span>
+    <span>{% trans "Uči" %}</span>
   </a>
-  <a href="{% url 'memio_world:comfort_home' %}" class="{% if nav == 'comfort' %}active{% endif %}">
-    <span class="nav-icon">💛</span>
-    <span>{% trans "Utjeha" %}</span>
+  <a href="{% url 'memio_world:comfort_home' %}" class="{% if nav == 'family' %}active{% endif %}">
+    <span class="nav-icon">👨‍👩‍👧</span>
+    <span>{% trans "Obitelj" %}</span>
   </a>
 </nav>
 
-<!-- Footer (above bottom nav) -->
+<!-- Footer -->
 <div class="play-footer">
   <a href="https://memio.world">memio.world</a> · PLAY.EU · Creative Europe
 </div>

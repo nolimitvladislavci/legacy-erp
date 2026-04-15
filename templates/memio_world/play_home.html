@@ -6,64 +6,110 @@
 {% block content %}
 <div class="play-hero">
   <h1>🏰 PLAY.<span>EU</span></h1>
-  <p>{% trans "Digitalizacija 5000 godina europske kulturne baštine — kroz igru, priče i smijeh." %}</p>
+  <p>{% trans "5000 godina europske kulturne baštine — kroz igru, priče i smijeh." %}</p>
 </div>
 
-<!-- Featured Stories -->
-{% if featured_stories %}
+<!-- ═══ ČITAJ — Stories + Wisdom ═══ -->
 <section class="mb-16">
   <div class="flex-between mb-16">
-    <h2 style="font-family:var(--serif);font-size:1.3rem">📖 {% trans "Priče iz cijele Europe" %}</h2>
-    <a href="{% url 'memio_world:story_list' %}" class="play-badge gold">{% trans "Sve" %} →</a>
+    <h2 style="font-family:var(--serif);font-size:1.3rem">📖 {% trans "Čitaj" %}</h2>
   </div>
   <div class="play-grid">
-    {% for story in featured_stories %}
-    <a href="{% url 'memio_world:story_detail' story.slug %}" class="play-grid-item">
+    <a href="{% url 'memio_world:story_list' %}" class="play-grid-item">
       <div class="thumb">📜</div>
       <div class="info">
-        <h3>{{ story.title_hr }}</h3>
-        <div class="meta">
-          {{ story.get_story_type_display }} · {{ story.country_of_origin }}
-          · {{ story.available_languages|length }} {% trans "jezika" %}
-        </div>
+        <h3>{% trans "Priče iz Europe" %}</h3>
+        <div class="meta">{{ story_count }} {% trans "priča" %} · HR/DE/EN</div>
       </div>
     </a>
-    {% endfor %}
+    <a href="{% url 'memio_world:wisdom_list' %}" class="play-grid-item">
+      <div class="thumb">👵</div>
+      <div class="info">
+        <h3>{% trans "Bakine mudrosti" %}</h3>
+        <div class="meta">{{ wisdom_count }} {% trans "mudrosti" %}</div>
+      </div>
+    </a>
   </div>
 </section>
-{% endif %}
 
-<!-- Heritage Cards -->
-{% if card_sets %}
+<!-- ═══ IGRAJ — Cards + Memory + Quiz ═══ -->
 <section class="mb-16">
   <div class="flex-between mb-16">
-    <h2 style="font-family:var(--serif);font-size:1.3rem">🃏 {% trans "Heritage kartice" %}</h2>
-    <a href="{% url 'memio_world:card_list' %}" class="play-badge gold">{% trans "Sve" %} →</a>
+    <h2 style="font-family:var(--serif);font-size:1.3rem">🎮 {% trans "Igraj" %}</h2>
   </div>
   <div class="play-grid">
-    {% for set_name, cards in card_sets.items %}
-    <a href="{% url 'memio_world:card_list' %}?set={{ set_name }}" class="play-grid-item">
-      <div class="thumb">
-        {% if "alphabet" in set_name %}🔤{% elif "bestiary" in set_name %}🐉{% else %}🎴{% endif %}
-      </div>
+    <a href="{% url 'memio_world:card_list' %}" class="play-grid-item">
+      <div class="thumb">🃏</div>
       <div class="info">
-        <h3>{{ set_name|title }}</h3>
-        <div class="meta">{{ cards }} {% trans "kartica" %}</div>
+        <h3>{% trans "Heritage kartice" %}</h3>
+        <div class="meta">{{ card_count }} {% trans "kartica" %}</div>
       </div>
     </a>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
-
-<!-- Quick Actions -->
-<section class="mb-16">
-  <div class="play-grid">
+    <a href="{% url 'memio_world:memory_game' %}" class="play-grid-item">
+      <div class="thumb">🧠</div>
+      <div class="info">
+        <h3>{% trans "Memory igra" %}</h3>
+        <div class="meta">{% trans "Pronađi parove!" %}</div>
+      </div>
+    </a>
     <a href="{% url 'memio_world:quiz_list' %}" class="play-grid-item">
       <div class="thumb">🧩</div>
       <div class="info">
         <h3>{% trans "Kvizovi" %}</h3>
-        <div class="meta">{{ quiz_count }} {% trans "kvizova spremno" %}</div>
+        <div class="meta">{{ quiz_count }} {% trans "kvizova" %}</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ═══ UČI — Learning Paths + Safety + Europeana ═══ -->
+<section class="mb-16">
+  <div class="flex-between mb-16">
+    <h2 style="font-family:var(--serif);font-size:1.3rem">📚 {% trans "Uči" %}</h2>
+  </div>
+  <div class="play-grid">
+    <a href="{% url 'memio_world:learning_paths' %}" class="play-grid-item">
+      <div class="thumb">🛤️</div>
+      <div class="info">
+        <h3>{% trans "Putovi učenja" %}</h3>
+        <div class="meta">{{ path_count }} {% trans "putova" %} · 4 {% trans "dobne skupine" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:safety_list' %}" class="play-grid-item">
+      <div class="thumb">🛡️</div>
+      <div class="info">
+        <h3>{% trans "Sigurnost" %}</h3>
+        <div class="meta">{{ safety_count }} {% trans "tema" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:europeana_gallery' %}" class="play-grid-item">
+      <div class="thumb">🏛️</div>
+      <div class="info">
+        <h3>{% trans "Europeana" %}</h3>
+        <div class="meta">{{ europeana_count }} {% trans "predmeta iz EU muzeja" %}</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ═══ OBITELJ — Comfort + DreamGuard + Jokes + Quests ═══ -->
+<section class="mb-16">
+  <div class="flex-between mb-16">
+    <h2 style="font-family:var(--serif);font-size:1.3rem">👨‍👩‍👧 {% trans "Obitelj" %}</h2>
+  </div>
+  <div class="play-grid">
+    <a href="{% url 'memio_world:comfort_home' %}" class="play-grid-item">
+      <div class="thumb">💛</div>
+      <div class="info">
+        <h3>{% trans "Utjeha" %}</h3>
+        <div class="meta">{% trans "Baka, mama, djed — tu su" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:dreamguard' %}" class="play-grid-item">
+      <div class="thumb">🌙</div>
+      <div class="info">
+        <h3>{% trans "Noćni čuvar" %}</h3>
+        <div class="meta">{% trans "Za mirne snove" %}</div>
       </div>
     </a>
     <a href="{% url 'memio_world:joke_box' %}" class="play-grid-item">
@@ -73,18 +119,11 @@
         <div class="meta">{{ joke_count }} {% trans "šala" %}</div>
       </div>
     </a>
-    <a href="{% url 'memio_world:comfort_home' %}" class="play-grid-item">
-      <div class="thumb">💛</div>
+    <a href="{% url 'memio_world:family_quests' %}" class="play-grid-item">
+      <div class="thumb">🏡</div>
       <div class="info">
-        <h3>{% trans "Utjeha" %}</h3>
-        <div class="meta">{% trans "Kad je teško — baka tješi" %}</div>
-      </div>
-    </a>
-    <a href="{% url 'memio_world:dreamguard' %}" class="play-grid-item">
-      <div class="thumb">🌙</div>
-      <div class="info">
-        <h3>{% trans "Noćni čuvar" %}</h3>
-        <div class="meta">{% trans "Za mirne snove" %}</div>
+        <h3>{% trans "Obiteljski izazovi" %}</h3>
+        <div class="meta">{{ quest_count }} {% trans "aktivnosti" %}</div>
       </div>
     </a>
   </div>
@@ -96,6 +135,7 @@
     🇪🇺 <strong>{{ total_items }}</strong> {% trans "kulturnih predmeta" %}
     · <strong>{{ story_count }}</strong> {% trans "priča" %}
     · <strong>{{ card_count }}</strong> {% trans "kartica" %}
+    · <strong>{{ europeana_count }}</strong> {% trans "iz Europeane" %}
     · <strong>3</strong> {% trans "jezika" %}
   </p>
 </div>

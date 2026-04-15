@@ -1,0 +1,35 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}🛡️ {% trans "Sigurnost" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<h1 style="font-family:var(--serif);font-size:1.6rem;margin-bottom:8px">🛡️ {% trans "Sigurnost" %}</h1>
+<p style="font-size:.9rem;color:var(--ink-light);margin-bottom:20px">
+  {% trans "Što napraviti kad je opasno — prometni znakovi, internet, požar." %}
+</p>
+
+{% for topic in topics %}
+<a href="{% url 'memio_world:safety_detail' topic.pk %}" class="play-card mb-16" style="display:block;text-decoration:none;color:inherit;border-left:4px solid {% if topic.severity == 3 %}var(--red-heritage){% elif topic.severity == 2 %}var(--gold){% else %}var(--blue-heritage){% endif %}">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+    <span style="font-size:1.4rem">
+      {% if "traffic" in topic.danger_category %}🚦{% elif "internet" in topic.danger_category %}🌐{% elif "fire" in topic.danger_category %}🔥{% elif "water" in topic.danger_category %}🌊{% elif "stranger" in topic.danger_category %}⚠️{% elif "first_aid" in topic.danger_category %}🩹{% elif "emotional" in topic.danger_category %}💔{% elif "peer" in topic.danger_category %}👥{% else %}🛡️{% endif %}
+    </span>
+    <div style="flex:1">
+      <h3 style="font-family:var(--serif);font-size:1rem">{{ topic.title }}</h3>
+      <div class="meta" style="font-size:.75rem;color:var(--ink-light)">
+        {{ topic.get_danger_category_display }}
+        · {% if topic.severity == 3 %}<span style="color:var(--red-heritage);font-weight:700">{% trans "KRITIČNO" %}</span>{% elif topic.severity == 2 %}{% trans "Važno" %}{% else %}{% trans "Informativno" %}{% endif %}
+      </div>
+    </div>
+    <span style="font-size:1.2rem;color:var(--ink-light)">→</span>
+  </div>
+  <p style="font-size:.85rem;color:var(--ink-light)">{{ topic.scenario|truncatewords:20 }}</p>
+</a>
+{% empty %}
+<div class="play-empty">
+  <div class="icon">🛡️</div>
+  <p>{% trans "Sigurnosne teme se pripremaju..." %}</p>
+</div>
+{% endfor %}
+{% endblock %}

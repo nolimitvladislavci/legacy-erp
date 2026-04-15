@@ -1,0 +1,62 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}{{ topic.title }} — PLAY.EU{% endblock %}
+
+{% block content %}
+<a href="{% url 'memio_world:safety_list' %}" style="font-size:.85rem;color:var(--gold-dark);text-decoration:none">← {% trans "Sve teme" %}</a>
+
+<div class="play-card mt-16">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    {% if topic.severity == 3 %}
+    <span class="play-badge red" style="font-size:.8rem">🚨 {% trans "KRITIČNO" %}</span>
+    {% elif topic.severity == 2 %}
+    <span class="play-badge gold">{% trans "Važno" %}</span>
+    {% endif %}
+    <span class="play-badge blue">{{ topic.get_danger_category_display }}</span>
+  </div>
+
+  <h1 style="font-family:var(--serif);font-size:1.4rem;margin-bottom:16px">{{ topic.title }}</h1>
+
+  <!-- Scenarij -->
+  <div style="background:var(--parchment-dark);padding:16px;border-radius:8px;margin-bottom:16px">
+    <h3 style="font-size:.85rem;font-weight:700;color:var(--ink-light);text-transform:uppercase;margin-bottom:6px">📋 {% trans "Situacija" %}</h3>
+    <p style="font-size:1rem;line-height:1.6;font-family:var(--serif)">{{ topic.scenario }}</p>
+  </div>
+
+  <!-- Correct Action -->
+  <div style="background:#D8F0D8;padding:16px;border-radius:8px;border-left:4px solid var(--green-heritage);margin-bottom:16px">
+    <h3 style="font-size:.85rem;font-weight:700;color:var(--green-heritage);text-transform:uppercase;margin-bottom:6px">✅ {% trans "Što napraviti" %}</h3>
+    <div style="font-size:.95rem;line-height:1.7;white-space:pre-line">{{ topic.correct_action }}</div>
+  </div>
+
+  <!-- Wrong Action -->
+  <div style="background:#F8E0D8;padding:16px;border-radius:8px;border-left:4px solid var(--red-heritage);margin-bottom:16px">
+    <h3 style="font-size:.85rem;font-weight:700;color:var(--red-heritage);text-transform:uppercase;margin-bottom:6px">❌ {% trans "Što NE napraviti" %}</h3>
+    <div style="font-size:.95rem;line-height:1.7;white-space:pre-line">{{ topic.wrong_action }}</div>
+  </div>
+
+  <!-- Who to call -->
+  {% if topic.who_to_call %}
+  <div style="background:var(--warm-white);padding:16px;border-radius:8px;border:2px solid var(--gold);text-align:center;margin-bottom:16px">
+    <h3 style="font-size:.85rem;font-weight:700;color:var(--gold-dark);margin-bottom:6px">📞 {% trans "Koga nazvati" %}</h3>
+    <p style="font-size:1.1rem;font-weight:700;font-family:var(--serif)">{{ topic.who_to_call }}</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Baka & Djed -->
+{% if topic.grandma_advice %}
+<div class="comfort-voice mt-16">
+  <div class="speaker">👵 {% trans "Baka kaže" %}:</div>
+  <div class="text">{{ topic.grandma_advice }}</div>
+</div>
+{% endif %}
+
+{% if topic.grandpa_advice %}
+<div class="comfort-voice" style="border-left-color:var(--blue-heritage)">
+  <div class="speaker" style="color:var(--blue-heritage)">👴 {% trans "Djed kaže" %}:</div>
+  <div class="text">{{ topic.grandpa_advice }}</div>
+</div>
+{% endif %}
+{% endblock %}

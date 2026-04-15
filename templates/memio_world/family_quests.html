@@ -1,0 +1,49 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}👨‍👩‍👧 {% trans "Obiteljski izazovi" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<div class="text-center mb-16">
+  <h1 style="font-family:var(--serif);font-size:1.6rem">👨‍👩‍👧 {% trans "Obiteljski izazovi" %}</h1>
+  <p style="font-size:.9rem;color:var(--ink-light)">{% trans "Aktivnosti za cijelu obitelj — kuhanje, šetnja, kreacija." %}</p>
+</div>
+
+{% for quest in quests %}
+<div class="play-card mb-16">
+  <div style="display:flex;align-items:flex-start;gap:12px">
+    <span style="font-size:2rem">
+      {% if quest.quest_type == "cooking" %}👨‍🍳{% elif quest.quest_type == "outdoor" %}🌿{% elif quest.quest_type == "craft" %}🎨{% elif quest.quest_type == "storytelling" %}📖{% elif quest.quest_type == "music" %}🎵{% elif quest.quest_type == "photo" %}📸{% elif quest.quest_type == "garden" %}🌱{% elif quest.quest_type == "science" %}🔬{% else %}🏠{% endif %}
+    </span>
+    <div style="flex:1">
+      <h3 style="font-family:var(--serif);font-size:1.1rem;margin-bottom:4px">{{ quest.title }}</h3>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <span class="play-badge gold">{{ quest.estimated_time }}</span>
+        {% if quest.requires_photo %}<span class="play-badge blue">📸 {% trans "foto" %}</span>{% endif %}
+        <span class="play-badge green">{{ quest.family_points }} {% trans "bodova" %}</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:.9rem;line-height:1.6;margin-top:8px;white-space:pre-line">{{ quest.description }}</div>
+
+  {% if quest.what_you_need %}
+  <div style="margin-top:12px;padding:10px 14px;background:var(--parchment-dark);border-radius:8px;font-size:.85rem">
+    🛒 <strong>{% trans "Trebate" %}:</strong> {{ quest.what_you_need }}
+  </div>
+  {% endif %}
+
+  {% if quest.grandma_tip %}
+  <div class="comfort-voice mt-16">
+    <div class="speaker">👵 {% trans "Bakin savjet" %}:</div>
+    <div class="text">{{ quest.grandma_tip }}</div>
+  </div>
+  {% endif %}
+</div>
+{% empty %}
+<div class="play-empty">
+  <div class="icon">👨‍👩‍👧</div>
+  <p>{% trans "Izazovi se pripremaju..." %}</p>
+</div>
+{% endfor %}
+{% endblock %}

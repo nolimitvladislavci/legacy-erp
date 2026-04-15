@@ -1,0 +1,49 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}👵 {% trans "Bakine mudrosti" %} — PLAY.EU{% endblock %}
+
+{% block content %}
+<div class="text-center mb-16">
+  <h1 style="font-family:var(--serif);font-size:1.6rem">👵 {% trans "Bakine i Djedove mudrosti" %}</h1>
+  <p style="font-size:.9rem;color:var(--ink-light)">{% trans "Glas iskustva koji digitalni svijet pokušava ugasiti. Mi ga pojačavamo." %}</p>
+</div>
+
+{% for w in wisdoms %}
+<div class="play-card mb-16">
+  <h2 style="font-family:var(--serif);font-size:1.15rem;margin-bottom:12px">
+    {{ w.title }}
+    <span class="play-badge gold" style="margin-left:8px">{{ w.get_category_display }}</span>
+  </h2>
+
+  <!-- Baka -->
+  <div class="comfort-voice">
+    <div class="speaker">👵 {% trans "Baka kaže" %}:</div>
+    <div class="text">{{ w.grandma_version }}</div>
+  </div>
+
+  <!-- Djed -->
+  <div class="comfort-voice" style="border-left-color:var(--blue-heritage)">
+    <div class="speaker" style="color:var(--blue-heritage)">👴 {% trans "Djed kaže" %}:</div>
+    <div class="text">{{ w.grandpa_version }}</div>
+  </div>
+
+  {% if not w.they_agree %}
+  <div style="font-size:.82rem;color:var(--red-heritage);padding:8px 12px;background:#F8E0D8;border-radius:8px;margin-top:8px">
+    💬 {% trans "Baka i djed se NE slažu — i to je OK! Razgovaraj s oboje i napravi svoj zaključak." %}
+  </div>
+  {% endif %}
+
+  {% if w.modern_context %}
+  <div style="margin-top:12px;padding:10px 14px;background:var(--parchment-dark);border-radius:8px;font-size:.85rem">
+    🌐 <strong>{% trans "Danas" %}:</strong> {{ w.modern_context }}
+  </div>
+  {% endif %}
+</div>
+{% empty %}
+<div class="play-empty">
+  <div class="icon">👵</div>
+  <p>{% trans "Mudrosti se pripremaju..." %}</p>
+</div>
+{% endfor %}
+{% endblock %}
