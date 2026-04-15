@@ -1,0 +1,403 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ lang|default:'hr' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>{{ title }} — PLAY.EU</title>
+<meta name="theme-color" content="#2c1810">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --parchment:#f5e6c8;--parchment-dark:#e8d4a8;--ink:#2c1810;--ink-light:#6b5a4e;
+  --gold:#c9a84c;--gold-glow:rgba(201,168,76,.3);--spine:#8b6914;
+  --page-w:min(92vw,560px);--page-h:min(80vh,780px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a120a;color:var(--ink);font-family:'Cormorant Garamond',Georgia,serif;
+  min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;user-select:none}
+
+/* ═══ TOP BAR ═══ */
+.top{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:20;flex-shrink:0}
+.top .brand{color:var(--gold);font-weight:700;font-size:.85rem;letter-spacing:1px;
+  font-family:'Space Grotesk',sans-serif;text-decoration:none}
+.top .controls{display:flex;gap:6px;align-items:center}
+.top .btn{background:none;border:1px solid rgba(255,255,255,.15);color:#ccc;
+  padding:4px 10px;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.15s;
+  font-family:'Space Grotesk',sans-serif}
+.top .btn:hover,.top .btn.active{border-color:var(--gold);color:var(--gold)}
+.top .btn-fs{font-size:.9rem;padding:4px 8px}
+
+/* ═══ BOOK CONTAINER ═══ */
+.book-wrap{flex:1;display:flex;align-items:center;justify-content:center;
+  perspective:1800px;padding:12px;position:relative}
+
+.book{width:var(--page-w);height:var(--page-h);position:relative;
+  transform-style:preserve-3d}
+
+/* ═══ PAGE ═══ */
+.page{position:absolute;inset:0;backface-visibility:hidden;
+  border-radius:4px 12px 12px 4px;overflow:hidden;
+  transition:transform .7s cubic-bezier(.645,.045,.355,1);
+  transform-origin:left center;transform-style:preserve-3d;
+  box-shadow:2px 0 8px rgba(0,0,0,.2)}
+.page.flipped{transform:rotateY(-180deg)}
+.page-front,.page-back{position:absolute;inset:0;backface-visibility:hidden;
+  display:flex;flex-direction:column;overflow:hidden}
+.page-back{transform:rotateY(180deg)}
+
+/* ═══ LAYOUTS ═══ */
+
+/* Layout: full_bleed */
+.lay-full_bleed{position:relative}
+.lay-full_bleed .page-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%}
+.lay-full_bleed .page-text{position:relative;z-index:2;margin-top:auto;
+  padding:2rem 1.5rem;background:linear-gradient(transparent,rgba(44,24,16,.85) 30%);color:#f5e6c8}
+.lay-full_bleed .page-title{font-size:2.2rem;font-weight:700;line-height:1.15;
+  text-shadow:0 2px 12px rgba(0,0,0,.6);margin-bottom:.5rem}
+
+/* Layout: top_image */
+.lay-top_image .page-img-wrap{height:45%;overflow:hidden;flex-shrink:0}
+.lay-top_image .page-img{width:100%;height:100%;object-fit:cover}
+.lay-top_image .page-text{flex:1;padding:1.5rem;overflow-y:auto;background:var(--parchment)}
+
+/* Layout: split_50_50 */
+.lay-split_50_50{flex-direction:row!important}
+.lay-split_50_50 .page-img-wrap{width:50%;height:100%;overflow:hidden;flex-shrink:0}
+.lay-split_50_50 .page-img{width:100%;height:100%;object-fit:cover}
+.lay-split_50_50 .page-text{width:50%;padding:1.5rem;overflow-y:auto;background:var(--parchment);
+  display:flex;flex-direction:column;justify-content:center}
+
+/* Layout: text_overlay */
+.lay-text_overlay{position:relative}
+.lay-text_overlay .page-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:.25}
+.lay-text_overlay .page-text{position:relative;z-index:2;padding:2rem 1.5rem;flex:1;
+  display:flex;flex-direction:column;justify-content:center;background:var(--parchment)}
+
+/* Layout: text_only */
+.lay-text_only .page-text{flex:1;padding:2.5rem 2rem;overflow-y:auto;background:var(--parchment);
+  display:flex;flex-direction:column;justify-content:center}
+
+/* Layout: image_only (full page illustration) */
+.lay-image_only .page-img{width:100%;height:100%;object-fit:cover}
+
+/* ═══ TEXT STYLING ═══ */
+.page-text p{font-size:1.25rem;line-height:1.7;margin-bottom:1em;color:var(--ink)}
+.page-text p:last-child{margin-bottom:0}
+.lay-full_bleed .page-text p{color:#f5e6c8;font-size:1.15rem}
+.page-text .page-num{font-size:.75rem;color:var(--ink-light);text-align:center;margin-top:auto;
+  padding-top:1rem;font-family:'Space Grotesk',sans-serif}
+
+/* ═══ COVER ═══ */
+.cover-front{background:linear-gradient(135deg,#2c1810 0%,#4a2c1a 50%,#2c1810 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem 2rem;text-align:center;border:3px solid var(--gold);border-radius:4px 12px 12px 4px}
+.cover-front .cover-title{font-size:2.4rem;font-weight:700;color:var(--parchment);
+  line-height:1.2;margin-bottom:1rem;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.cover-front .cover-author{font-size:1rem;color:var(--gold);font-style:italic;margin-bottom:2rem}
+.cover-front .cover-open{background:var(--gold);color:var(--ink);border:none;
+  padding:16px 40px;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;
+  font-family:'Cormorant Garamond',serif;letter-spacing:.5px;
+  box-shadow:0 4px 20px var(--gold-glow);transition:.2s}
+.cover-front .cover-open:hover{transform:scale(1.05);box-shadow:0 6px 30px var(--gold-glow)}
+.cover-front .cover-badge{display:flex;gap:8px;margin-top:1.5rem;flex-wrap:wrap;justify-content:center}
+.cover-front .badge{font-size:.7rem;padding:3px 10px;border-radius:12px;
+  border:1px solid rgba(201,168,76,.4);color:var(--gold);font-family:'Space Grotesk',sans-serif}
+.cover-img{position:absolute;inset:0;object-fit:cover;opacity:.15;border-radius:inherit}
+
+/* ═══ NAVIGATION ═══ */
+.nav-arrows{position:absolute;inset:0;display:flex;pointer-events:none;z-index:10}
+.nav-prev,.nav-next{flex:1;display:flex;align-items:center;pointer-events:auto;cursor:pointer;
+  padding:0 8px;opacity:0;transition:opacity .2s}
+.nav-prev:hover,.nav-next:hover{opacity:1}
+.nav-prev{justify-content:flex-start}.nav-next{justify-content:flex-end}
+.nav-arrow{width:40px;height:40px;background:rgba(0,0,0,.5);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;
+  backdrop-filter:blur(4px)}
+
+/* ═══ PROGRESS ═══ */
+.progress-bar{height:3px;background:rgba(201,168,76,.15);flex-shrink:0}
+.progress-fill{height:100%;background:var(--gold);transition:width .5s}
+
+/* ═══ AUDIO ═══ */
+.audio-bar{display:flex;align-items:center;gap:10px;padding:8px 16px;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);flex-shrink:0}
+.audio-btn{background:var(--gold);color:var(--ink);border:none;width:36px;height:36px;
+  border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:.15s}
+.audio-btn:hover{transform:scale(1.08)}
+.audio-progress{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;
+  cursor:pointer;position:relative}
+.audio-progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .1s}
+.audio-time{font-size:.72rem;color:#999;font-family:'Space Grotesk',sans-serif;min-width:60px;text-align:right}
+.audio-narrator{font-size:.72rem;color:var(--gold);font-family:'Space Grotesk',sans-serif}
+.audio-bar.hidden{display:none}
+
+/* ═══ FULLSCREEN ═══ */
+.fullscreen-active .top{position:absolute;top:0;left:0;right:0;opacity:0;transition:opacity .3s}
+.fullscreen-active .top:hover{opacity:1}
+.fullscreen-active .book-wrap{padding:0}
+.fullscreen-active .book{width:100vw;height:100dvh;border-radius:0}
+.fullscreen-active .page{border-radius:0}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:600px){
+  :root{--page-w:100vw;--page-h:calc(100dvh - 100px)}
+  .book-wrap{padding:0}
+  .page-text p{font-size:1.1rem;line-height:1.6}
+  .cover-front .cover-title{font-size:1.8rem}
+  .nav-prev,.nav-next{opacity:.5}
+  .lay-split_50_50{flex-direction:column!important}
+  .lay-split_50_50 .page-img-wrap{width:100%;height:40%}
+  .lay-split_50_50 .page-text{width:100%;padding:1rem}
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.anim-fade-up{animation:fadeUp .8s ease-out both}
+.anim-delay-1{animation-delay:.2s}
+.anim-delay-2{animation-delay:.4s}
+.anim-delay-3{animation-delay:.6s}
+</style>
+</head>
+<body id="bookBody">
+
+<!-- Top Bar -->
+<div class="top" id="topBar">
+  <a href="{% url 'memio_world:story_list' %}" class="brand">🏰 PLAY.EU</a>
+  <div class="controls">
+    {% for lc in languages %}
+    <button class="btn lang-btn {% if lc == lang %}active{% endif %}" data-lang="{{ lc }}" onclick="switchLang('{{ lc }}')">
+      {{ lc|upper }}
+    </button>
+    {% endfor %}
+    <button class="btn btn-fs" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<!-- Book -->
+<div class="book-wrap" id="bookWrap">
+  <div class="book" id="book">
+    <!-- Pages injected by JS -->
+  </div>
+
+  <!-- Navigation arrows -->
+  <div class="nav-arrows">
+    <div class="nav-prev" onclick="prevPage()"><div class="nav-arrow">‹</div></div>
+    <div class="nav-next" onclick="nextPage()"><div class="nav-arrow">›</div></div>
+  </div>
+</div>
+
+<!-- Audio Player -->
+<div class="audio-bar {% if not has_audio %}hidden{% endif %}" id="audioBar">
+  <button class="audio-btn" id="audioPlayBtn" onclick="toggleAudio()">▶</button>
+  <div class="audio-progress" onclick="seekAudio(event)">
+    <div class="audio-progress-fill" id="audioFill" style="width:0%"></div>
+  </div>
+  <span class="audio-time" id="audioTime">0:00</span>
+  <span class="audio-narrator">{% trans "Baka čita" %}</span>
+</div>
+
+<audio id="audioEl" preload="auto" {% if audio_url %}src="{{ audio_url }}"{% endif %}></audio>
+
+<script>
+// ═══ DATA ═══
+var PAGES = {{ pages_json|safe }};
+var LANG = '{{ lang }}';
+var LANGS_DATA = {{ langs_data|safe }};
+var TOTAL = PAGES.length;
+var currentPage = 0;
+var isFullscreen = false;
+
+// ═══ RENDER BOOK ═══
+function renderBook() {
+  var book = document.getElementById('book');
+  book.innerHTML = '';
+
+  PAGES.forEach(function(pg, i) {
+    var page = document.createElement('div');
+    page.className = 'page';
+    page.dataset.index = i;
+    page.style.zIndex = TOTAL - i;
+
+    var front = document.createElement('div');
+    front.className = 'page-front';
+
+    if (pg.type === 'cover') {
+      front.className += ' cover-front';
+      front.innerHTML =
+        (pg.cover_img ? '<img class="cover-img" src="' + pg.cover_img + '" alt="">' : '') +
+        '<div class="cover-title anim-fade-up">' + esc(pg.title) + '</div>' +
+        (pg.author ? '<div class="cover-author anim-fade-up anim-delay-1">' + esc(pg.author) + '</div>' : '') +
+        '<button class="cover-open anim-fade-up anim-delay-2" onclick="nextPage()">{% trans "Otvori" %} →</button>' +
+        '<div class="cover-badge anim-fade-up anim-delay-3">' +
+          (pg.type_label ? '<span class="badge">' + esc(pg.type_label) + '</span>' : '') +
+          (pg.country ? '<span class="badge">' + esc(pg.country) + '</span>' : '') +
+          (pg.reading_time ? '<span class="badge">' + pg.reading_time + ' min</span>' : '') +
+        '</div>';
+    } else {
+      var layout = pg.layout || 'text_only';
+      front.className += ' lay-' + layout;
+
+      var html = '';
+      if (pg.image && layout !== 'text_only') {
+        if (layout === 'full_bleed' || layout === 'text_overlay' || layout === 'image_only') {
+          html += '<img class="page-img" src="' + pg.image + '" alt="" loading="lazy">';
+        } else {
+          html += '<div class="page-img-wrap"><img class="page-img" src="' + pg.image + '" alt="" loading="lazy"></div>';
+        }
+      }
+      if (layout !== 'image_only') {
+        html += '<div class="page-text">';
+        if (pg.text) html += pg.text;
+        html += '<div class="page-num">' + (pg.page_num || '') + '</div>';
+        html += '</div>';
+      }
+      front.innerHTML = html;
+    }
+
+    page.appendChild(front);
+    book.appendChild(page);
+  });
+
+  updateProgress();
+}
+
+// ═══ NAVIGATION ═══
+function nextPage() {
+  if (currentPage >= TOTAL - 1) return;
+  var pages = document.querySelectorAll('.page');
+  pages[currentPage].classList.add('flipped');
+  currentPage++;
+  updateProgress();
+}
+
+function prevPage() {
+  if (currentPage <= 0) return;
+  currentPage--;
+  var pages = document.querySelectorAll('.page');
+  pages[currentPage].classList.remove('flipped');
+  updateProgress();
+}
+
+function goToPage(n) {
+  var pages = document.querySelectorAll('.page');
+  // Reset all
+  pages.forEach(function(p, i) {
+    if (i < n) p.classList.add('flipped');
+    else p.classList.remove('flipped');
+  });
+  currentPage = n;
+  updateProgress();
+}
+
+function updateProgress() {
+  var pct = TOTAL > 1 ? (currentPage / (TOTAL - 1)) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ═══ SWIPE ═══
+var touchStartX = 0;
+var touchStartY = 0;
+document.getElementById('bookWrap').addEventListener('touchstart', function(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive: true});
+document.getElementById('bookWrap').addEventListener('touchend', function(e) {
+  var dx = e.changedTouches[0].clientX - touchStartX;
+  var dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+    if (dx < 0) nextPage(); else prevPage();
+  }
+});
+
+// Keyboard
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextPage(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
+  if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  if (e.key === 'Escape' && isFullscreen) toggleFullscreen();
+});
+
+// ═══ LANGUAGE SWITCH (no reload) ═══
+function switchLang(lc) {
+  LANG = lc;
+  // Update pages data
+  if (LANGS_DATA[lc]) {
+    PAGES = LANGS_DATA[lc];
+    TOTAL = PAGES.length;
+    var savedPage = currentPage;
+    renderBook();
+    goToPage(Math.min(savedPage, TOTAL - 1));
+  }
+  // Update active button
+  document.querySelectorAll('.lang-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === lc);
+  });
+  // Update audio
+  var audioEl = document.getElementById('audioEl');
+  var newSrc = LANGS_DATA['audio_' + lc] || '';
+  if (newSrc && newSrc !== audioEl.src) {
+    audioEl.src = newSrc;
+    audioEl.load();
+  }
+  document.documentElement.lang = lc;
+}
+
+// ═══ FULLSCREEN ═══
+function toggleFullscreen() {
+  var body = document.getElementById('bookBody');
+  if (!isFullscreen) {
+    if (body.requestFullscreen) body.requestFullscreen();
+    else if (body.webkitRequestFullscreen) body.webkitRequestFullscreen();
+    body.classList.add('fullscreen-active');
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    body.classList.remove('fullscreen-active');
+  }
+  isFullscreen = !isFullscreen;
+}
+
+// ═══ AUDIO ═══
+var audioEl = document.getElementById('audioEl');
+var audioPlaying = false;
+
+function toggleAudio() {
+  if (audioPlaying) { audioEl.pause(); }
+  else { audioEl.play(); }
+}
+audioEl.addEventListener('play', function() {
+  audioPlaying = true;
+  document.getElementById('audioPlayBtn').textContent = '⏸';
+});
+audioEl.addEventListener('pause', function() {
+  audioPlaying = false;
+  document.getElementById('audioPlayBtn').textContent = '▶';
+});
+audioEl.addEventListener('timeupdate', function() {
+  var pct = audioEl.duration ? (audioEl.currentTime / audioEl.duration) * 100 : 0;
+  document.getElementById('audioFill').style.width = pct + '%';
+  var m = Math.floor(audioEl.currentTime / 60);
+  var s = Math.floor(audioEl.currentTime % 60);
+  document.getElementById('audioTime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+});
+function seekAudio(e) {
+  var rect = e.currentTarget.getBoundingClientRect();
+  var pct = (e.clientX - rect.left) / rect.width;
+  audioEl.currentTime = pct * audioEl.duration;
+}
+
+// ═══ UTILS ═══
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ═══ INIT ═══
+renderBook();
+</script>
+</body>
+</html>

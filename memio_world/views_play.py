@@ -17,7 +17,6 @@ from memio_world.kurikulum_models import LearningPath, SafetyTopic, WisdomEntry
 from memio_world.play_eu_models import EuropeanaItem, HeritageCard, ParallelStory
 from memio_world.quiz_models import Quiz
 
-
 DB = "memio_world"
 
 
@@ -113,18 +112,150 @@ def story_detail(request, slug):
     text = getattr(story, f"text_{lang}", "") or story.text_hr
     paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
 
+    # Book reader mode (default)
+    if request.GET.get("mode") == "simple":
+        return render(
+            request,
+            "memio_world/story_detail.html",
+            {
+                "nav": "read",
+                "lang": lang,
+                "story": story,
+                "title": title,
+                "languages": languages,
+                "paragraphs": paragraphs,
+            },
+        )
+
+    # Build book pages for flip engine
+    pages_data = _build_book_pages(story, lang)
+    langs_data = {}
+    for lc in languages:
+        langs_data[lc] = _build_book_pages(story, lc)
+        audio_field = getattr(story, f"audio_{lc}", None)
+        if audio_field and hasattr(audio_field, "url"):
+            try:
+                langs_data[f"audio_{lc}"] = audio_field.url
+            except ValueError:
+                pass
+
+    # Audio URL for current lang
+    audio_url = ""
+    audio_field = getattr(story, f"audio_{lang}", None)
+    if audio_field and hasattr(audio_field, "url"):
+        try:
+            audio_url = audio_field.url
+        except ValueError:
+            pass
+
+    import json
+
     return render(
         request,
-        "memio_world/story_detail.html",
+        "memio_world/book_reader.html",
         {
-            "nav": "read",
             "lang": lang,
             "story": story,
             "title": title,
             "languages": languages,
-            "paragraphs": paragraphs,
+            "has_audio": bool(audio_url),
+            "audio_url": audio_url,
+            "pages_json": json.dumps(pages_data, ensure_ascii=False),
+            "langs_data": json.dumps(langs_data, ensure_ascii=False),
         },
     )
+
+
+# Layout cycle for pages
+_LAYOUTS = ["top_image", "text_only", "split_50_50", "text_overlay", "top_image", "text_only"]
+
+
+def _build_book_pages(story, lang):
+    """Build page list for book flip engine."""
+    title = getattr(story, f"title_{lang}", "") or story.title_hr
+    text = getattr(story, f"text_{lang}", "") or story.text_hr
+    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
+
+    # Cover image
+    cover_img = ""
+    if story.cover_image:
+        try:
+            cover_img = story.cover_image.image_url or ""
+        except Exception:
+            pass
+
+    # Illustration images
+    illustrations = []
+    try:
+        for item in story.illustrations.all():
+            if item.image_url:
+                illustrations.append(item.image_url)
+    except Exception:
+        pass
+
+    pages = []
+
+    # Page 0: Cover
+    pages.append(
+        {
+            "type": "cover",
+            "title": title,
+            "author": story.attribution or (story.get_source_display() if hasattr(story, "get_source_display") else ""),
+            "cover_img": cover_img,
+            "type_label": story.get_story_type_display() if hasattr(story, "get_story_type_display") else "",
+            "country": story.country_of_origin or "",
+            "reading_time": story.reading_time_minutes,
+        }
+    )
+
+    # Content pages — 2-3 paragraphs per page
+    per_page = 2
+    page_num = 1
+    for i in range(0, len(paragraphs), per_page):
+        chunk = paragraphs[i : i + per_page]
+        text_html = "".join(f"<p>{p}</p>" for p in chunk)
+        layout_idx = (page_num - 1) % len(_LAYOUTS)
+        layout = _LAYOUTS[layout_idx]
+
+        # Use illustration if available
+        img = ""
+        img_idx = page_num - 1
+        if img_idx < len(illustrations):
+            img = illustrations[img_idx]
+        elif cover_img and page_num == 1:
+            img = cover_img
+            layout = "full_bleed"
+
+        # No image? Force text_only
+        if not img:
+            layout = "text_only"
+
+        pages.append(
+            {
+                "type": "page",
+                "layout": layout,
+                "text": text_html,
+                "image": img,
+                "page_num": str(page_num),
+            }
+        )
+        page_num += 1
+
+    # Moral lesson page
+    if story.moral_lesson:
+        pages.append(
+            {
+                "type": "page",
+                "layout": "text_only",
+                "text": '<p style="text-align:center;font-size:1.4rem;font-style:italic;color:var(--gold)">\U0001f4a1 '
+                + story.moral_lesson.replace('"', "&quot;")
+                + "</p>",
+                "image": "",
+                "page_num": "\u2022",
+            }
+        )
+
+    return pages
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -462,4 +593,70 @@ def family_quests(request):
             "lang": lang,
             "quests": quests,
         },
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
+# BOOK API — JSON za frontend book flip engine
+# ═══════════════════════════════════════════════════════════════
+
+
+def book_api(request, slug):
+    """JSON API za book reader — sve stranice jedne slikovnice."""
+    from django.http import JsonResponse
+
+    from memio_world.book_models import StoryPage
+
+    lang = _lang(request)
+    story = get_object_or_404(ParallelStory.objects.using(DB), slug=slug, is_published=True)
+    pages = StoryPage.objects.using(DB).filter(story=story).order_by("page_number")
+
+    pages_data = []
+    for p in pages:
+        text = getattr(p, f"text_{lang}", "") or p.text_hr
+        audio_field = getattr(p, f"audio_{lang}", None)
+        audio_url = ""
+        if audio_field:
+            try:
+                audio_url = audio_field.url
+            except ValueError:
+                pass
+
+        image_url = ""
+        if p.image:
+            try:
+                image_url = p.image.url
+            except ValueError:
+                pass
+
+        thumb_url = ""
+        if p.image_thumbnail:
+            try:
+                thumb_url = p.image_thumbnail.url
+            except ValueError:
+                pass
+
+        pages_data.append(
+            {
+                "page_number": p.page_number,
+                "page_type": p.page_type,
+                "layout": p.layout,
+                "text": text,
+                "image_url": image_url,
+                "thumbnail_url": thumb_url,
+                "image_alt": p.image_alt_text,
+                "audio_url": audio_url,
+                "background_color": p.background_color,
+                "has_image": bool(p.image),
+            }
+        )
+
+    return JsonResponse(
+        {
+            "slug": story.slug,
+            "title": getattr(story, f"title_{lang}", "") or story.title_hr,
+            "languages": story.available_languages(),
+            "total_pages": len(pages_data),
+            "pages": pages_data,
+        }
     )

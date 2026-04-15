@@ -32,4 +32,6 @@ urlpatterns = [
     path("play/night/", views_play.dreamguard, name="dreamguard"),
     path("play/joke/", views_play.joke_box, name="joke_box"),
     path("play/quests/", views_play.family_quests, name="family_quests"),
+    # ── Book API (JSON za flip engine) ────────────────────────
+    path("play/book/<slug:slug>/", views_play.book_api, name="book_api"),
 ]
