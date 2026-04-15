@@ -62,7 +62,7 @@ Admin: registrirano za sva 3 modela.
 
 ---
 
-## FAZA C: Sadržaj
+## FAZA C: Sadržaj ✅ DONE
 
 ### C.1: Grimm Priče (5 jezika)
 - Scrape GrimmStories.com (13 jezika dostupno, public domain)
