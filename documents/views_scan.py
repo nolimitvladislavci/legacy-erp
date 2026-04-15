@@ -682,3 +682,59 @@ def arhiva_access_bulk_create(request):
             "total_children": children.count(),
         }
     )
+
+
+# ================================================================
+# PORTAL DOWNLOAD — Token-authorized file download (ARHIVA-2+)
+# ================================================================
+
+
+def arhiva_portal_download(request, token, entry_id):
+    """Download file from portal — authorized by ArhivaAccessToken or ScanToken."""
+    import os
+
+    from django.http import FileResponse, Http404
+
+    from .models import ArhivaAccessToken, ArhivaEntry, DocumentBlob
+
+    # Authorize via access token
+    access_token = ArhivaAccessToken.objects.select_related("company").filter(token=token).first()
+    if not access_token or not access_token.is_valid():
+        raise Http404
+
+    company = access_token.company
+
+    # Get entry — must belong to same company
+    entry = ArhivaEntry.objects.filter(pk=entry_id, company=company).first()
+    if not entry:
+        raise Http404
+
+    # Try file_path
+    if entry.file_path:
+        full_path = entry.file_path
+        if not os.path.isabs(full_path):
+            full_path = os.path.join("/var/www/fina-connect", full_path)
+        if os.path.exists(full_path):
+            # Log download
+            from .models import ArhivaAuditLog, log_arhiva_action
+
+            log_arhiva_action(entry, ArhivaAuditLog.Action.DOWNLOADED, request=request)
+            return FileResponse(
+                open(full_path, "rb"),
+                as_attachment=True,
+                filename=os.path.basename(full_path),
+            )
+
+    # Try DocumentBlob
+    from django.http import HttpResponse
+
+    blob = DocumentBlob.objects.filter(
+        company=company,
+        source_type=entry.source_type,
+    ).first()
+    if blob:
+        response = HttpResponse(blob.file_data, content_type=blob.content_type)
+        response["Content-Disposition"] = f'attachment; filename="{blob.filename}"'
+        return response
+
+    raise Http404

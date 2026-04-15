@@ -1560,6 +1560,38 @@ def company_dashboard(request):
     context["first_login"] = first_login
     context["setup_completion"] = setup_completion
 
+    # ── Arhiva Widget — komitent vidi svoju arhivu ──────────────────────
+    try:
+        from documents.models import ArhivaAccessToken, ArhivaEntry, ScanToken
+
+        arhiva_qs = ArhivaEntry.objects.filter(company=company)
+        arhiva_count = arhiva_qs.count()
+        if arhiva_count > 0:
+            context["arhiva_count"] = arhiva_count
+            context["arhiva_amount"] = arhiva_qs.aggregate(s=Sum("amount"))["s"] or 0
+            context["arhiva_recent"] = arhiva_qs.order_by("-archived_at")[:5]
+
+            # Check if umbrella parent manages this company
+            if company.umbrella_parent_id:
+                context["arhiva_managed_by"] = company.umbrella_parent.name
+                # Find or create access token for self-service
+                access_token = ArhivaAccessToken.objects.filter(
+                    company=company,
+                    is_active=True,
+                ).first()
+                if access_token and access_token.is_valid():
+                    context["arhiva_portal_url"] = f"/hr/arhiva-portal/{access_token.token}/"
+
+            # Find scan token for this company
+            scan_token = ScanToken.objects.filter(
+                company=company,
+                is_active=True,
+            ).first()
+            if scan_token and scan_token.is_valid():
+                context["scan_url"] = f"/hr/scan/{scan_token.token}/"
+    except Exception:
+        pass
+
     return render(request, "dashboards/company_admin.html", context)
 
 

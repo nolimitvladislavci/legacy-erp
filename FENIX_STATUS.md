@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-15 (Dan 49), commit 500aebbd — EU Tax Categories + UX ✅
+> Zadnji update: 2026-04-15 (Dan 49), commit 9dd0ebea — PLAY.EU Faza E Frontend LIVE
 
 ---
 
@@ -21,6 +21,7 @@
 | 2026-04-15 | Opus CC | Growth Engine | TalentRadar, BuddySystem, FamilyQuest, SpacedRepetition, PetBridge | d542d1cf |
 | 2026-04-15 | Opus CC | Comfort Engine | DreamGuard, ComfortCard, JokeBox, LegalCompliance | fb6addad |
 | 2026-04-15 | Opus CC | DeepSeek Patrol | Fix autodiscovery, Celery Beat registered, nocni run 02:45 | 5cf29da6 |
+| 2026-04-15 | Opus CC | PLAY.EU Faza E | PWA shell, 11 views, 12 templates, memory game, quiz JS, night mode | 9dd0ebea |
 
 ### KONTEKST ZA SLJEDEĆU SESIJU
 ```
@@ -122,7 +123,7 @@ Blokeri:  ARHIVA-1 mora biti live
 | ARHIVA-10 Billing | ⏳ | — |
 | **POS free tier** (Marija Čačić) | ⏳ | — |
 | **PLAY.EU Sprint 1** | ✅ DONE | 100% (23 modela, 237 sadrzaja) |
-| PLAY.EU Frontend (Faza E) | ⏳ | — |
+| PLAY.EU Frontend (Faza E) | ✅ DONE | 100% (11 views, 12 templates) |
 | memio.pet booking | ⏳ | — |
 | Korak 12 EU Kampanja | ⏳ | — |
 
@@ -438,7 +439,7 @@ Faza D: Quiz Engine                 ✅ DONE (4 modela, 40 pitanja)
 Kurikulum 2.0                       ✅ DONE (23 puta, 10 mudrosti, 9 sigurnosti)
 Growth Engine                       ✅ DONE (7 modela: Talent, Buddy, Family, Spaced, Pet)
 Comfort Engine                      ✅ DONE (4 modela: Dream, Comfort, Joke, Legal)
-Faza E: Frontend UI                 ⏳ SLJEDECA (PWA shell + 3 demo scenarija)
+Faza E: Frontend UI                 ✅ DONE SLJEDECA (PWA shell + 3 demo scenarija)
 ```
 
 ### Modeli (23 novih u memio_world bazi):

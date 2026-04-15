@@ -35,6 +35,8 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,
 .entry .info .name{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .entry .info .meta{font-size:.72rem;color:var(--text-dim)}
 .entry .amount{font-size:.85rem;font-weight:600;color:var(--gold);text-align:right;flex-shrink:0}
+.entry .dl-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);padding:4px 8px;font-size:.75rem;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;flex-shrink:0}
+.entry .dl-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
 .scan-cta{background:var(--bg-card);border:1px solid rgba(201,168,76,.3);border-radius:16px;padding:1.5rem;text-align:center;margin-top:2rem}
 .scan-cta h3{font-size:1rem;font-weight:700;margin-bottom:8px}
 .scan-cta p{color:var(--text-dim);font-size:.82rem;margin-bottom:12px}
@@ -127,6 +129,11 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,
       </div>
       {% if entry.amount %}
       <div class="amount">{{ entry.amount|floatformat:2 }}&nbsp;{{ entry.currency }}</div>
+      {% endif %}
+      {% if entry.file_path %}
+      <a href="/hr/arhiva-portal/{{ token }}/download/{{ entry.pk }}/" class="dl-btn" title="Preuzmi">
+        &#11015; {% trans "Preuzmi" %}
+      </a>
       {% endif %}
     </div>
     {% endfor %}

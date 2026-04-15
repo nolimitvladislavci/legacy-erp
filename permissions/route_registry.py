@@ -119,6 +119,7 @@ ROUTE_REGISTRY: dict = {
     "scan_mobile_page": AccessLevel.PUBLIC,
     "scan_upload": AccessLevel.PUBLIC,
     "arhiva_portal": AccessLevel.PUBLIC,
+    "arhiva_portal_download": AccessLevel.PUBLIC,
     "ai_agent_gateway": AccessLevel.PUBLIC,
     "whatsapp_health": AccessLevel.PUBLIC,
     "synesis_script_public": AccessLevel.PUBLIC,

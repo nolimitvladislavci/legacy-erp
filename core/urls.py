@@ -560,8 +560,20 @@ urlpatterns += i18n_patterns(
     ),
     path(
         "arhiva-portal/<str:token>/",
-        __import__("documents.views", fromlist=["arhiva_portal"]).arhiva_portal,
-        name="arhiva_portal",
+        include(
+            [
+                path(
+                    "",
+                    __import__("documents.views", fromlist=["arhiva_portal"]).arhiva_portal,
+                    name="arhiva_portal",
+                ),
+                path(
+                    "download/<int:entry_id>/",
+                    __import__("documents.views", fromlist=["arhiva_portal_download"]).arhiva_portal_download,
+                    name="arhiva_portal_download",
+                ),
+            ]
+        ),
     ),
     path("superadmin/control-tower/", views.control_tower_view, name="control_tower"),
     path("superadmin/api/telemetry/", views.control_tower_api, name="control_tower_api"),
