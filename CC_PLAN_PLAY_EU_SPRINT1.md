@@ -83,7 +83,7 @@ Admin: registrirano za sva 3 modela.
 
 ---
 
-## FAZA D: Kviz Engine
+## FAZA D: Kviz Engine ✅ DONE
 
 ### D.1: Quiz Model
 - `memio_world/quiz_models.py`
