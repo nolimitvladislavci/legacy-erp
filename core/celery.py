@@ -17,6 +17,8 @@ app.autodiscover_tasks(["smart_import"])
 app.autodiscover_tasks(["core.tasks"])
 # Eksplicitni import za nestandardne module
 app.autodiscover_tasks(["core.gemini_tasks", "core.whatsapp_tasks"])
+# DeepSeek Code Patrol — nocni autonomni code review
+app.autodiscover_tasks(["core.tasks_patrol"])
 
 
 @app.on_after_finalize.connect
