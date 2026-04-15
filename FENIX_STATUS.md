@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-15 (Dan 49), commit 2f2699bf — ARHIVA-2 Magic Link LIVE ✅
+> Zadnji update: 2026-04-15 (Dan 49), commit fb6addad — PLAY.EU 23 modela, 237 sadrzaja
 
 ---
 
@@ -15,6 +15,11 @@
 | 2026-04-14 | Sonnet | Korak 11 + Arhiva | Beta Konjik. OCR 100%. Arhiva HR-DE plan. Memio kontekst. | c74c539f |
 | 2026-04-14 | Opus CC | ARHIVA-1 | ScanToken model+views+UI+tests, 9/9 pass, LIVE | 8327b5ad |
 | 2026-04-15 | Opus CC | ARHIVA-2 | ArhivaAccessToken, portal, bulk generator, 17/17 tests | 2f2699bf |
+| 2026-04-15 | Opus CC | PLAY.EU A-D | 3 core + 4 quiz modela, Europeana API, 70 items, 20 bajki, 40 kartica | fdbd2e49→4a8fda1f |
+| 2026-04-15 | Opus CC | Kurikulum 2.0 | 23 puta ucenja, 10 mudrosti, 9 sigurnosnih tema, prometni znakovi | 7394a16a |
+| 2026-04-15 | Opus CC | Growth Engine | TalentRadar, BuddySystem, FamilyQuest, SpacedRepetition, PetBridge | d542d1cf |
+| 2026-04-15 | Opus CC | Comfort Engine | DreamGuard, ComfortCard, JokeBox, LegalCompliance | fb6addad |
+| 2026-04-15 | Opus CC | DeepSeek Patrol | Fix autodiscovery, Celery Beat registered, nocni run 02:45 | 5cf29da6 |
 
 ### KONTEKST ZA SLJEDEĆU SESIJU
 ```
@@ -115,7 +120,8 @@ Blokeri:  ARHIVA-1 mora biti live
 | ARHIVA-9 Synesis Retroaktiv | ⏳ | — |
 | ARHIVA-10 Billing | ⏳ | — |
 | **POS free tier** (Marija Čačić) | ⏳ | — |
-| memio.world MVP | ⏳ | — |
+| **PLAY.EU Sprint 1** | ✅ DONE | 100% (23 modela, 237 sadrzaja) |
+| PLAY.EU Frontend (Faza E) | ⏳ | — |
 | memio.pet booking | ⏳ | — |
 | Korak 12 EU Kampanja | ⏳ | — |
 
@@ -306,7 +312,7 @@ Pilot:  OPG Kruljac Slađana (~60 goveda)
 Server:          37.27.248.86 (Hetzner)
 Aktivnih firmi:  101 | Umbrella djece:  81
 Korisnika:        56 | Faktura:     15,330
-Arhiva dok.:   5.874 | Commits:       952+
+Arhiva dok.:   5.874 | Commits:       970+
 Journal:      10,732 | Workspaces:      36
 Konjik top:        Glazbeni Centar Mai 1.688 dok.
 ```
@@ -370,7 +376,7 @@ Enkripcija: WorldEncryptedField (AES, zaseban ključ)
 
 ## MEMIO.WORLD — KOMPLETNA ARHITEKTURA (Dan 48, finale)
 
-### 21 tablica (od 8 na početku sesije)
+### 44 tablica (21 originalne + 23 PLAY.EU novih)
 
 ```
 TEMELJ (7):
@@ -417,3 +423,65 @@ JOKER + 2 ASA (3):
 - Konzorcij: NO LIMIT(HR) + LIMIT(HR) + Čačić(HR) + DE + Nordic
 - Cilj: Creative Europe Small Cooperation (€60K-200K)
 - Adut: digitalizacija 5000 godina EU kulturne baštine za djecu
+
+---
+
+## PLAY.EU — SPRINT 1 STANJE (15.04.2026)
+
+### Faze:
+```
+Faza A: Modeli + Migracije          ✅ DONE (0007)
+Faza B: Europeana API               ✅ DONE (70 items, client + sync)
+Faza C: Sadrzaj                     ✅ DONE (20 bajki, 40 kartica, DeepSeek prijevodi)
+Faza D: Quiz Engine                 ✅ DONE (4 modela, 40 pitanja)
+Kurikulum 2.0                       ✅ DONE (23 puta, 10 mudrosti, 9 sigurnosti)
+Growth Engine                       ✅ DONE (7 modela: Talent, Buddy, Family, Spaced, Pet)
+Comfort Engine                      ✅ DONE (4 modela: Dream, Comfort, Joke, Legal)
+Faza E: Frontend UI                 ⏳ SLJEDECA (PWA shell + 3 demo scenarija)
+```
+
+### Modeli (23 novih u memio_world bazi):
+```
+CORE:       EuropeanaItem, ParallelStory, HeritageCard
+QUIZ:       Quiz, QuizQuestion, QuizAnswer, QuizAttempt
+KURIKULUM:  LearningPath, LifeLesson, WisdomEntry, SafetyTopic, ContentLink
+GROWTH:     TalentProfile, RealWorldVenue, BuddyPair, FamilyQuest,
+            FamilyQuestCompletion, SpacedRepetitionCard, PetBridgePost
+COMFORT:    DreamGuard, ComfortCard, JokeEntry, LegalCompliance
+```
+
+### Sadrzaj u bazi: 237
+```
+70  Europeana items (8 kategorija)
+20  paralelnih prica (10 s tekstom HR+DE+EN)
+40  Heritage kartica (30 slovarica + 10 bestijarij)
+2   kviza, 40 pitanja
+23  putova ucenja (5 dobnih skupina)
+10  bakinih mudrosti
+9   sigurnosnih tema (promet, internet, pozar)
+10  obiteljskih izazova
+5   dream guard zapisa
+5   comfort kartica
+25  sala/zagonetki/brzalica
+```
+
+### DeepSeek Code Patrol:
+```
+Status:    FIX DEPLOYIRAN — autodiscovery dodano u celery.py
+Nocni run: 02:45 na heavy queue
+Root cause noci 14→15.04: unregistered task (celery.py autodiscovery missing)
+```
+
+### Sljedeca sesija — Faza E Frontend:
+```
+1. PWA shell (mobile-first, offline, parchment stil)
+2. 3 demo scenarija:
+   a) Dijete bira bajku → cita HR → prebacuje DE → slusa audio
+   b) Ucitelj kreira kviz iz bestijarij kartica → ucenici igraju memory
+   c) Roditelj gleda napredak → vidi interese → predlozeni klubovi
+3. DreamGuard nocni UI (topla zuta, veliki font, audio-only opcija)
+4. JokeBox daily widget (svakog jutra nova sala)
+5. ComfortCard UI (dijete bira emociju → baka tjesi)
+```
+
+### Creative Europe deadline: 2026-05-07
