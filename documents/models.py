@@ -427,6 +427,17 @@ class ArhivaEntry(models.Model):
     )
     ai_status_message = models.CharField(max_length=200, blank=True, default="", verbose_name=_("AI poruka"))
 
+    # EU Tax Category (ARHIVA porezna prijava)
+    expense_category = models.ForeignKey(
+        "ArhivaCategory",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="entries",
+        verbose_name=_("Kategorija troška"),
+        help_text="Gorivo, Hrana, Usluge, Reprezentacija...",
+    )
+
     # Sprint 3: Labele za kategorizaciju
     labels = models.ManyToManyField("ArhivaLabel", blank=True, related_name="entries", verbose_name=_("Labele"))
 
@@ -1026,3 +1037,118 @@ class ArhivaAccessToken(models.Model):
             access_count=models.F("access_count") + 1,
             last_accessed_at=timezone.now(),
         )
+
+
+# ════════════════════════════════════════════════════════════
+# ArhivaCategory — EU porezne kategorije troškova
+# ════════════════════════════════════════════════════════════
+
+
+class ArhivaCategory(models.Model):
+    """
+    Kategorija troška za poreznu prijavu.
+    Mapira na SKR03 (DE), PDV kategorije (HR), i ostale EU standarde.
+    Predefined per-country, customizable per-company.
+    """
+
+    COUNTRY_CHOICES = [
+        ("EU", _("EU zajedničko")),
+        ("HR", _("Hrvatska")),
+        ("DE", _("Njemačka")),
+        ("AT", _("Austrija")),
+        ("SI", _("Slovenija")),
+        ("IT", _("Italija")),
+    ]
+
+    code = models.CharField(
+        max_length=20,
+        db_index=True,
+        verbose_name=_("Šifra"),
+        help_text="Kratka šifra, npr. FUEL, FOOD, SERVICES",
+    )
+    name_hr = models.CharField(max_length=100, verbose_name=_("Naziv (HR)"))
+    name_de = models.CharField(max_length=100, blank=True, verbose_name=_("Naziv (DE)"))
+    name_en = models.CharField(max_length=100, blank=True, verbose_name=_("Naziv (EN)"))
+    icon = models.CharField(max_length=30, default="tag", verbose_name=_("Ikona"))
+    color = models.CharField(max_length=7, default="#C9A84C", verbose_name=_("Boja"))
+    country = models.CharField(
+        max_length=3,
+        choices=COUNTRY_CHOICES,
+        default="EU",
+        db_index=True,
+        verbose_name=_("Zemlja"),
+    )
+
+    # Tax mapping
+    skr03_konto = models.CharField(
+        max_length=10,
+        blank=True,
+        verbose_name="SKR03 Konto",
+        help_text="DE: SKR03 broj konta, npr. 4530 za gorivo",
+    )
+    skr04_konto = models.CharField(
+        max_length=10,
+        blank=True,
+        verbose_name="SKR04 Konto",
+    )
+    pdv_category = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name=_("PDV kategorija"),
+        help_text="HR: Pretporez, Reprezentacija 50%, Neoporezivo...",
+    )
+    tax_deductible_pct = models.IntegerField(
+        default=100,
+        verbose_name=_("Porezno priznat %"),
+        help_text="100=potpuno, 50=reprezentacija HR, 70=Bewirtung DE",
+    )
+    euer_line = models.CharField(
+        max_length=10,
+        blank=True,
+        verbose_name="EÜR Zeile",
+        help_text="DE: Zeile in Anlage EÜR, npr. 26 za Wareneinkauf",
+    )
+
+    # Ordering & defaults
+    sort_order = models.IntegerField(default=100, verbose_name=_("Redoslijed"))
+    is_default = models.BooleanField(
+        default=False,
+        verbose_name=_("Default kategorija"),
+        help_text="Koristi se kad AI ne može odrediti kategoriju",
+    )
+    is_active = models.BooleanField(default=True)
+
+    # Company override (NULL = globalna kategorija)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="custom_categories",
+        verbose_name=_("Firma"),
+        help_text="Prazno = globalna kategorija za sve firme",
+    )
+
+    class Meta:
+        ordering = ["sort_order", "code"]
+        verbose_name = _("Kategorija troška")
+        verbose_name_plural = _("Kategorije troškova")
+        unique_together = [("code", "country", "company")]
+
+    def __str__(self):
+        return f"{self.code} — {self.name_hr}"
+
+    def get_name(self, lang="hr"):
+        if lang == "de" and self.name_de:
+            return self.name_de
+        if lang == "en" and self.name_en:
+            return self.name_en
+        return self.name_hr
+
+    # AI matching keywords per category
+    ai_keywords = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("AI ključne riječi"),
+        help_text='["benzin","diesel","ina","petrol","shell","omv"] za gorivo',
+    )

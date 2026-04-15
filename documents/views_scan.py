@@ -30,6 +30,38 @@ logger = logging.getLogger(__name__)
 # ================================================================
 
 
+def _get_categories_for_company(company):
+    """Get categories applicable to this company (global + custom)."""
+    from .models import ArhivaCategory
+
+    return list(
+        ArhivaCategory.objects.filter(
+            is_active=True,
+        )
+        .filter(models.Q(company=company) | models.Q(company__isnull=True))
+        .exclude(country__in=["DE", "AT", "SI", "IT"])  # Show EU + HR for now
+        .order_by("sort_order")
+        .values("code", "name_hr", "name_de", "name_en", "icon", "color")
+    )
+
+
+def _auto_categorize(partner_name, company):
+    """AI keyword-based auto-categorization."""
+    from .models import ArhivaCategory
+
+    partner_lower = partner_name.lower()
+    categories = ArhivaCategory.objects.filter(
+        is_active=True,
+    ).filter(models.Q(company=company) | models.Q(company__isnull=True))
+
+    for cat in categories:
+        if cat.ai_keywords:
+            for kw in cat.ai_keywords:
+                if kw.lower() in partner_lower:
+                    return cat
+    return None
+
+
 def scan_mobile_page(request, token):
     """GET /scan/{token}/ — Mobile kamera sucelje. PUBLIC, bez logina."""
     scan_token = ScanToken.objects.select_related("company").filter(token=token).first()
@@ -49,6 +81,7 @@ def scan_mobile_page(request, token):
             "company_name": scan_token.company.name,
             "label": scan_token.label or "",
             "direct_upload": True,
+            "categories": _get_categories_for_company(scan_token.company),
         },
     )
 
@@ -93,6 +126,18 @@ def scan_upload(request, token):
 
     # Create ArhivaEntry
     try:
+        # Resolve expense category
+        category_code = request.POST.get("category", "")
+        expense_cat = None
+        if category_code:
+            from .models import ArhivaCategory
+
+            expense_cat = (
+                ArhivaCategory.objects.filter(code=category_code, is_active=True)
+                .filter(models.Q(company=company) | models.Q(company__isnull=True))
+                .first()
+            )
+
         entry = ArhivaEntry(
             company=company,
             source_type="receipt_scan",
@@ -108,6 +153,7 @@ def scan_upload(request, token):
             session_key=f"scan_token_{scan_token.pk}",
             content_category="scan",
             ai_status="pending",
+            expense_category=expense_cat,
         )
         entry.save()
     except Exception:
@@ -158,6 +204,12 @@ def scan_upload(request, token):
                     update_fields.append("doc_date")
                 except Exception:
                     pass
+            # Auto-categorize from OCR partner name
+            if not expense_cat and fields.get("dobavljac"):
+                auto_cat = _auto_categorize(fields["dobavljac"], company)
+                if auto_cat:
+                    entry.expense_category = auto_cat
+                    update_fields.append("expense_category")
             if update_fields:
                 entry.save(update_fields=update_fields)
                 logger.info(
@@ -462,6 +514,18 @@ def arhiva_portal(request, token):
 
     zor_until = date.today().year + 11
 
+    # Category stats
+
+    cats_with_entries = (
+        entries.filter(expense_category__isnull=False)
+        .values(
+            "expense_category__code", "expense_category__name_hr", "expense_category__icon", "expense_category__color"
+        )
+        .annotate(count=models.Count("id"), total=models.Sum("amount"))
+        .order_by("-count")
+    )
+    uncategorized = entries.filter(expense_category__isnull=True).count()
+
     context = {
         "token": str(access_token.token),
         "company": company,
@@ -472,6 +536,8 @@ def arhiva_portal(request, token):
         "entries_recent": entries[:20],
         "zor_until": zor_until,
         "scan_tokens": ScanToken.objects.filter(company=company, is_active=True)[:5],
+        "category_stats": list(cats_with_entries),
+        "uncategorized_count": uncategorized,
     }
     return render(request, "documents/arhiva_portal.html", context)
 

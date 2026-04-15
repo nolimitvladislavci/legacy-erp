@@ -24,6 +24,10 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,
 }
 .cam-btn:active{transform:scale(.97)}
 .cam-btn svg{width:32px;height:32px}
+.cat-grid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:1rem;max-width:360px;width:100%}
+.cat-btn{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:.78rem;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.cat-btn:hover,.cat-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.cat-btn i{font-size:.85rem}
 .hint{color:var(--text-dim);font-size:.9rem;text-align:center;max-width:300px;line-height:1.5}
 .preview{display:none;text-align:center;width:100%;padding:1rem}
 .preview img{max-width:90%;max-height:45vh;border-radius:12px;border:2px solid var(--gold);margin-bottom:1.2rem}
@@ -64,6 +68,15 @@ input[type=file]{display:none}
     </svg>
     {% trans "Slikaj racun" %}
   </button>
+  {% if categories %}
+  <div class="cat-grid" id="catGrid">
+    {% for cat in categories %}
+    <button type="button" class="cat-btn" data-code="{{ cat.code }}" onclick="selectCat(this)">
+      <i class="fas fa-{{ cat.icon }}" style="color:{{ cat.color }}"></i> {{ cat.name_hr }}
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
   <div class="hint">
     {% trans "Slikajte racun kamerom ili odaberite datoteku. Dokument se automatski arhivira." %}
   </div>
@@ -111,6 +124,14 @@ input[type=file]{display:none}
 var TOKEN = '{{ token }}';
 var _file = null;
 var _uploadCount = 0;
+var _selectedCat = '';
+
+function selectCat(btn) {
+  document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('active')});
+  if (btn.dataset.code === _selectedCat) { _selectedCat = ''; return; }
+  btn.classList.add('active');
+  _selectedCat = btn.dataset.code;
+}
 
 document.getElementById('camBtn').addEventListener('click', function(e) {
   e.preventDefault();
@@ -148,6 +169,7 @@ function sendPhoto() {
 
   var fd = new FormData();
   fd.append('file', _file);
+  if (_selectedCat) fd.append('category', _selectedCat);
 
   fetch(location.pathname + 'upload/', {
     method: 'POST',
@@ -159,6 +181,7 @@ function sendPhoto() {
     if (r.data.ok) {
       _uploadCount++;
       var info = '';
+      if (r.data.category_name) info += '<span style="background:rgba(201,168,76,.15);padding:2px 8px;border-radius:6px;font-size:.8rem;color:var(--gold)">' + esc(r.data.category_name) + '</span><br>';
       if (r.data.partner) info += '<strong>' + esc(r.data.partner) + '</strong><br>';
       if (r.data.amount && r.data.amount !== '' && r.data.amount !== '0') info += r.data.amount + ' EUR<br>';
       document.getElementById('ocrInfo').innerHTML = info;

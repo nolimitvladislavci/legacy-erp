@@ -130,6 +130,15 @@ def get_dashboard_url(user):
     try:
         profile = user.userprofile
         role = profile.role
+
+        # Umbrella admin → umbrella dashboard (ne POS)
+        if role in ("company_admin", "tenant_admin") and profile.company:
+            try:
+                if profile.company.is_umbrella:
+                    return "/hr/stolovi/"
+            except Exception:
+                pass
+
         urls = {
             "superadmin": "/superadmin/",
             "company_admin": "/hr/pos/",
@@ -139,7 +148,7 @@ def get_dashboard_url(user):
             "partner": "/dashboard/partner/",
         }
         return urls.get(role, "/dashboard/")
-    except KeyError:
+    except Exception:
         if user.is_superuser:
             return "/superadmin/"
         return "/dashboard/"

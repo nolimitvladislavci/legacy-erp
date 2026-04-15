@@ -81,6 +81,34 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,
     </div>
   </div>
 
+  <!-- Category breakdown -->
+  {% if category_stats %}
+  <div style="margin-bottom:2rem">
+    <h3 style="font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:12px">&#128202; {% trans "Kategorije troškova" %}</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      {% for cs in category_stats %}
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;min-width:120px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <i class="fas fa-{{ cs.expense_category__icon }}" style="color:{{ cs.expense_category__color }};font-size:.85rem"></i>
+          <span style="font-size:.8rem;font-weight:600">{{ cs.expense_category__name_hr }}</span>
+        </div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--gold)">{{ cs.count }}</div>
+        <div style="font-size:.72rem;color:var(--text-dim)">{{ cs.total|floatformat:2 }} EUR</div>
+      </div>
+      {% endfor %}
+      {% if uncategorized_count %}
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;min-width:120px;opacity:.6">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <i class="fas fa-question-circle" style="color:var(--text-dim);font-size:.85rem"></i>
+          <span style="font-size:.8rem;font-weight:600">{% trans "Nekategorizirano" %}</span>
+        </div>
+        <div style="font-size:1.1rem;font-weight:700">{{ uncategorized_count }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Entries by year -->
   {% for year, entries in entries_by_year.items %}
   <div class="year-group">
@@ -95,7 +123,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,
       </div>
       <div class="info">
         <div class="name">{% if entry.partner_name %}{{ entry.partner_name }}{% else %}{{ entry.doc_number }}{% endif %}</div>
-        <div class="meta">{{ entry.doc_date|date:"d.m.Y" }} &middot; {{ entry.get_source_type_display }} &middot; {{ entry.archive_number }}</div>
+        <div class="meta">{{ entry.doc_date|date:"d.m.Y" }} &middot; {{ entry.get_source_type_display }}{% if entry.expense_category %} &middot; <span style="color:{{ entry.expense_category.color }}"><i class="fas fa-{{ entry.expense_category.icon }}"></i> {{ entry.expense_category.name_hr }}</span>{% endif %} &middot; {{ entry.archive_number }}</div>
       </div>
       {% if entry.amount %}
       <div class="amount">{{ entry.amount|floatformat:2 }}&nbsp;{{ entry.currency }}</div>
