@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-15 (Dan 49), commit 9dd0ebea — PLAY.EU Faza E Frontend LIVE
+> Zadnji update: 2026-04-15 (Dan 49), commit 70987304 — Portal Download + Dashboard Widget ✅
 
 ---
 
@@ -16,6 +16,7 @@
 | 2026-04-14 | Opus CC | ARHIVA-1 | ScanToken model+views+UI+tests, 9/9 pass, LIVE | 8327b5ad |
 | 2026-04-15 | Opus CC | ARHIVA-2 | ArhivaAccessToken, portal, bulk generator, 17/17 tests | 2f2699bf |
 | 2026-04-15 | Opus CC | EU Categories | 24 kategorija, AI auto-cat, UX gumbi, smart redirect | 500aebbd |
+| 2026-04-15 | Opus CC | Download+Widget | Portal download, dashboard arhiva widget, Invoice PDF fallback | 70987304 |
 | 2026-04-15 | Opus CC | PLAY.EU A-D | 3 core + 4 quiz modela, Europeana API, 70 items, 20 bajki, 40 kartica | fdbd2e49→4a8fda1f |
 | 2026-04-15 | Opus CC | Kurikulum 2.0 | 23 puta ucenja, 10 mudrosti, 9 sigurnosnih tema, prometni znakovi | 7394a16a |
 | 2026-04-15 | Opus CC | Growth Engine | TalentRadar, BuddySystem, FamilyQuest, SpacedRepetition, PetBridge | d542d1cf |
