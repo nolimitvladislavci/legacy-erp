@@ -496,7 +496,7 @@ def arhiva_portal(request, token):
     access_token.record_access()
 
     # Fetch arhiva entries for this company
-    entries = ArhivaEntry.objects.filter(company=company).order_by("-archived_at")
+    entries = ArhivaEntry.objects.filter(company=company).select_related("expense_category").order_by("-archived_at")
 
     total_count = entries.count()
     total_amount = entries.aggregate(total=models.Sum("amount"))["total"] or 0
