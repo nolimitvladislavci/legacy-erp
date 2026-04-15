@@ -591,11 +591,69 @@ def umbrella_dashboard(request):
         messages.warning(request, _("Vasa tvrtka nije umbrella tvrtka."))
         return redirect("dashboard")
 
-    children = (
-        Company.objects.filter(umbrella_parent=company)
-        .select_related("umbrella_parent", "health_score")
-        .order_by("name")
+    # ── Workspace filtering ─────────────────────────────────────
+    from companies.models import Workspace
+
+    user_workspaces = Workspace.objects.filter(
+        company=company,
+        workers=request.user,
+        is_active=True,
     )
+    all_workspaces = Workspace.objects.filter(
+        company=company,
+        type="desk",
+        is_active=True,
+    ).prefetch_related("workers")
+
+    is_admin = request.user.is_superuser or (
+        hasattr(request.user, "userprofile")
+        and request.user.userprofile.role in ("company_admin", "tenant_admin", "superadmin")
+    )
+
+    # Selected workspace filter (from query param or auto-detect)
+    selected_ws_id = request.GET.get("ws", "")
+    active_workspace = None
+
+    if selected_ws_id == "all" or (not selected_ws_id and is_admin):
+        # Admin sees all, or explicit "all"
+        children = (
+            Company.objects.filter(umbrella_parent=company)
+            .select_related("umbrella_parent", "health_score")
+            .order_by("name")
+        )
+    elif selected_ws_id:
+        # Specific workspace selected
+        try:
+            active_workspace = Workspace.objects.get(pk=selected_ws_id, company=company)
+            ws_client_ids = active_workspace.clients.values_list("pk", flat=True)
+            children = (
+                Company.objects.filter(pk__in=ws_client_ids)
+                .select_related("umbrella_parent", "health_score")
+                .order_by("name")
+            )
+        except Workspace.DoesNotExist:
+            children = (
+                Company.objects.filter(umbrella_parent=company)
+                .select_related("umbrella_parent", "health_score")
+                .order_by("name")
+            )
+    else:
+        # Non-admin: auto-filter to their workspace
+        if user_workspaces.exists():
+            active_workspace = user_workspaces.first()
+            ws_client_ids = active_workspace.clients.values_list("pk", flat=True)
+            children = (
+                Company.objects.filter(pk__in=ws_client_ids)
+                .select_related("umbrella_parent", "health_score")
+                .order_by("name")
+            )
+        else:
+            # No workspace assigned — show all (fallback)
+            children = (
+                Company.objects.filter(umbrella_parent=company)
+                .select_related("umbrella_parent", "health_score")
+                .order_by("name")
+            )
     now = timezone.now()
     month_start = now.date().replace(day=1)
 
@@ -846,6 +904,10 @@ def umbrella_dashboard(request):
             "month_label": now.strftime("%m/%Y"),
             "available_partners": available_partners,
             "start_my_day": start_my_day,
+            "all_workspaces": all_workspaces,
+            "active_workspace": active_workspace,
+            "is_admin": is_admin,
+            "umbrella_children": children,
         },
     )
 
