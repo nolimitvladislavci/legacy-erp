@@ -40,7 +40,7 @@ Admin: registrirano za sva 3 modela.
 
 ---
 
-## FAZA B: Europeana API Integracija
+## FAZA B: Europeana API Integracija ✅ DONE
 
 ### B.1: API Client
 - `memio_world/europeana_client.py`
