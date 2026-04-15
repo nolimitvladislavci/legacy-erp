@@ -80,7 +80,7 @@
             <input type="hidden" name="action" value="remove_child">
             <input type="hidden" name="company_id" value="{{ cd.company.pk }}">
             <button type="submit" class="u-unlink-btn" title="{% trans 'Odvezi' %}"
-                    onclick="return confirm('{% trans \"Odvezati\" %} {{ cd.company.name }}?')">
+                    onclick="return confirm('Odvezati {{ cd.company.name }}?')"
               <i class="fas fa-unlink"></i>
             </button>
           </form>
