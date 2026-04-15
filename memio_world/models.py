@@ -883,6 +883,7 @@ class HeritageOracle(models.Model):
 # PLAY.EU — Dječja Digitalna Baština Europe (Sprint 1)
 # ════════════════════════════════════════════════════════════════
 # PLAY.EU Growth Engine — 5 inovacija
+from memio_world.comfort_models import ComfortCard, DreamGuard, JokeEntry, LegalCompliance  # noqa: F401, E402
 from memio_world.growth_models import (  # noqa: F401, E402
     BuddyPair,
     FamilyQuest,
