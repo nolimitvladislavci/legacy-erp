@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-15 (Dan 49), commit 70987304 — Portal Download + Dashboard Widget ✅
+> Zadnji update: 2026-04-15 (Dan 49), commit f0526b0a — PLAY.EU 5 kategorija + Slikovnice plan
 
 ---
 
@@ -488,3 +488,33 @@ Root cause noci 14→15.04: unregistered task (celery.py autodiscovery missing)
 ```
 
 ### Creative Europe deadline: 2026-05-07
+
+---
+
+## SLIKOVNICE — Picture Book Engine (Dan 49)
+
+**Plan:** PLAN_SLIKOVNICE.md (detaljan, 3 glave)
+**Status:** PLAN ZAPISAN, čeka start
+
+### Tri glave:
+```
+GLAVA 1 — Backend: StoryPage model, split command, AI API, audio command
+GLAVA 2 — Frontend: Book flip UI, cover page, 6 layouta, swipe, audio player
+GLAVA 3 — Sadržaj: 99 ilustracija (watercolor parchment), 270 audio fajlova
+```
+
+### Brojke:
+```
+10 priča × 9 str. = 90 unutarnjih + 10 naslovnica = 99 ilustracija
+10 priča × 3 jezika = 30 audio setova (270 fajlova)
+Budžet: ~$5 (DALL-E 3 za sve)
+```
+
+### Checkpoints:
+```
+CP1 (20.04): Model + 90 skeleton stranica + scene descriptions
+CP2 (25.04): 10 naslovnica generirano, book reader radi
+CP3 (02.05): 99 slika + HR audio, reader kompletiran
+CP4 (05.05): 3 jezika, fullscreen, mobile
+CP5 (07.05): Creative Europe demo spreman
+```
