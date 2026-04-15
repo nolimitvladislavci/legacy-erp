@@ -6,160 +6,404 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>{{ title }} — PLAY.EU</title>
 <meta name="theme-color" content="#2c1810">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --parchment:#f5e6c8;--parchment-dark:#e8d4a8;--ink:#2c1810;--ink-light:#6b5a4e;
-  --gold:#c9a84c;--gold-glow:rgba(201,168,76,.3);--spine:#8b6914;
-  --page-w:min(92vw,560px);--page-h:min(80vh,780px);
+/* ═══════════════════════════════════════════════════════════════
+   PLAY.EU BOOK READER v2 — "Budućnost, ne poljski WC"
+   Codex layout: slika lijevo, tekst desno, rukopisni font
+   Per-page zvučnik (TTS) + mikrofon (snimanje)
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --parchment: #f5e6c8;
+  --parchment-light: #faf3e3;
+  --parchment-dark: #e8d4a8;
+  --ink: #2c1810;
+  --ink-light: #6b5a4e;
+  --ink-faded: #9c8a7a;
+  --gold: #c9a84c;
+  --gold-glow: rgba(201,168,76,.35);
+  --gold-dark: #8b6914;
+  --spine: #5c3d1a;
+  --red-accent: #8b2500;
+  --page-shadow: rgba(44,24,16,.12);
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a120a;color:var(--ink);font-family:'Cormorant Garamond',Georgia,serif;
-  min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;
-  -webkit-tap-highlight-color:transparent;user-select:none}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #1a120a;
+  color: var(--ink);
+  font-family: 'MedievalSharp', 'Cormorant Garamond', Georgia, serif;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
 
 /* ═══ TOP BAR ═══ */
-.top{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;
-  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:20;flex-shrink:0}
-.top .brand{color:var(--gold);font-weight:700;font-size:.85rem;letter-spacing:1px;
-  font-family:'Space Grotesk',sans-serif;text-decoration:none}
-.top .controls{display:flex;gap:6px;align-items:center}
-.top .btn{background:none;border:1px solid rgba(255,255,255,.15);color:#ccc;
-  padding:4px 10px;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.15s;
-  font-family:'Space Grotesk',sans-serif}
-.top .btn:hover,.top .btn.active{border-color:var(--gold);color:var(--gold)}
-.top .btn-fs{font-size:.9rem;padding:4px 8px}
+.top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 16px;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(10px);
+  z-index: 50; flex-shrink: 0;
+}
+.top .brand {
+  color: var(--gold); font-weight: 700; font-size: .85rem;
+  letter-spacing: 1px; font-family: 'Space Grotesk', sans-serif;
+  text-decoration: none;
+}
+.top .controls { display: flex; gap: 6px; align-items: center; }
+.top .btn {
+  background: none; border: 1px solid rgba(255,255,255,.15); color: #ccc;
+  padding: 4px 10px; border-radius: 6px; font-size: .75rem; cursor: pointer;
+  transition: .15s; font-family: 'Space Grotesk', sans-serif;
+}
+.top .btn:hover, .top .btn.active { border-color: var(--gold); color: var(--gold); }
 
-/* ═══ BOOK CONTAINER ═══ */
-.book-wrap{flex:1;display:flex;align-items:center;justify-content:center;
-  perspective:1800px;padding:12px;position:relative}
+/* ═══ PROGRESS BAR ═══ */
+.progress-bar { height: 3px; background: rgba(201,168,76,.15); flex-shrink: 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); transition: width .5s; }
 
-.book{width:var(--page-w);height:var(--page-h);position:relative;
-  transform-style:preserve-3d}
+/* ═══ CODEX CONTAINER ═══ */
+.codex-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 12px; position: relative; overflow: hidden;
+}
 
-/* ═══ PAGE ═══ */
-.page{position:absolute;inset:0;backface-visibility:hidden;
-  border-radius:4px 12px 12px 4px;overflow:hidden;
-  transition:transform .7s cubic-bezier(.645,.045,.355,1);
-  transform-origin:left center;transform-style:preserve-3d;
-  box-shadow:2px 0 8px rgba(0,0,0,.2)}
-.page.flipped{transform:rotateY(-180deg)}
-.page-front,.page-back{position:absolute;inset:0;backface-visibility:hidden;
-  display:flex;flex-direction:column;overflow:hidden}
-.page-back{transform:rotateY(180deg)}
+/* Open book — two facing pages */
+.codex {
+  display: flex; width: min(96vw, 1100px); height: min(82vh, 720px);
+  border-radius: 6px; overflow: hidden;
+  box-shadow:
+    0 0 0 2px var(--gold-dark),
+    0 8px 40px rgba(0,0,0,.5),
+    0 2px 15px rgba(0,0,0,.3),
+    inset 0 0 60px var(--page-shadow);
+  position: relative;
+  transition: opacity .4s;
+}
 
-/* ═══ LAYOUTS ═══ */
+/* Spine shadow in center */
+.codex::after {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 30px;
+  transform: translateX(-50%); z-index: 5; pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent, rgba(44,24,16,.15) 30%,
+    rgba(44,24,16,.25) 50%,
+    rgba(44,24,16,.15) 70%, transparent);
+}
 
-/* Layout: full_bleed */
-.lay-full_bleed{position:relative}
-.lay-full_bleed .page-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%}
-.lay-full_bleed .page-text{position:relative;z-index:2;margin-top:auto;
-  padding:2rem 1.5rem;background:linear-gradient(transparent,rgba(44,24,16,.85) 30%);color:#f5e6c8}
-.lay-full_bleed .page-title{font-size:2.2rem;font-weight:700;line-height:1.15;
-  text-shadow:0 2px 12px rgba(0,0,0,.6);margin-bottom:.5rem}
+/* Left page = illustration */
+.codex-left {
+  width: 50%; height: 100%; position: relative; overflow: hidden;
+  background: var(--parchment-dark);
+  border-right: 1px solid rgba(44,24,16,.1);
+}
+.codex-left img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: opacity .5s;
+}
+/* Placeholder when no image */
+.codex-left .placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, var(--parchment) 0%, var(--parchment-dark) 100%);
+  color: var(--ink-faded); font-size: 4rem;
+}
+.codex-left .placeholder .pl-label {
+  font-size: .9rem; margin-top: 12px;
+  font-family: 'MedievalSharp', serif; color: var(--ink-faded);
+}
+/* Decorative border on image side */
+.codex-left::after {
+  content: ''; position: absolute; inset: 12px; pointer-events: none;
+  border: 1px solid rgba(201,168,76,.2); border-radius: 2px;
+}
 
-/* Layout: top_image */
-.lay-top_image .page-img-wrap{height:45%;overflow:hidden;flex-shrink:0}
-.lay-top_image .page-img{width:100%;height:100%;object-fit:cover}
-.lay-top_image .page-text{flex:1;padding:1.5rem;overflow-y:auto;background:var(--parchment)}
+/* Right page = text */
+.codex-right {
+  width: 50%; height: 100%; overflow: hidden;
+  background: var(--parchment);
+  display: flex; flex-direction: column;
+  position: relative;
+  /* Subtle parchment texture via gradient */
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(245,230,200,.5) 0%, transparent 70%),
+    linear-gradient(180deg, var(--parchment-light) 0%, var(--parchment) 40%, var(--parchment-dark) 100%);
+}
 
-/* Layout: split_50_50 */
-.lay-split_50_50{flex-direction:row!important}
-.lay-split_50_50 .page-img-wrap{width:50%;height:100%;overflow:hidden;flex-shrink:0}
-.lay-split_50_50 .page-img{width:100%;height:100%;object-fit:cover}
-.lay-split_50_50 .page-text{width:50%;padding:1.5rem;overflow-y:auto;background:var(--parchment);
-  display:flex;flex-direction:column;justify-content:center}
+/* Page edge shadow (like real book pages) */
+.codex-right::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 20px;
+  background: linear-gradient(90deg, rgba(44,24,16,.08), transparent);
+  z-index: 2; pointer-events: none;
+}
 
-/* Layout: text_overlay */
-.lay-text_overlay{position:relative}
-.lay-text_overlay .page-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:.25}
-.lay-text_overlay .page-text{position:relative;z-index:2;padding:2rem 1.5rem;flex:1;
-  display:flex;flex-direction:column;justify-content:center;background:var(--parchment)}
+/* Text content area */
+.codex-text {
+  flex: 1; overflow-y: auto; padding: 2.5rem 2rem 1rem 2.5rem;
+  scrollbar-width: thin; scrollbar-color: var(--gold-dark) transparent;
+}
+.codex-text::-webkit-scrollbar { width: 4px; }
+.codex-text::-webkit-scrollbar-track { background: transparent; }
+.codex-text::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
 
-/* Layout: text_only */
-.lay-text_only .page-text{flex:1;padding:2.5rem 2rem;overflow-y:auto;background:var(--parchment);
-  display:flex;flex-direction:column;justify-content:center}
+/* ═══ MANUSCRIPT TEXT STYLING ═══ */
+.codex-text p {
+  font-family: 'MedievalSharp', 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 2;
+  color: var(--ink);
+  margin-bottom: .8em;
+  text-indent: 1.5em;
+  letter-spacing: .02em;
+  text-align: justify;
+  hyphens: auto;
+}
+.codex-text p:first-child { text-indent: 0; }
 
-/* Layout: image_only (full page illustration) */
-.lay-image_only .page-img{width:100%;height:100%;object-fit:cover}
+/* Drop cap — velika inicijala kao u srednjovjekovnim rukopisima */
+.codex-text p:first-child::first-letter {
+  font-family: 'Uncial Antiqua', 'MedievalSharp', cursive;
+  font-size: 4.5rem;
+  float: left;
+  line-height: .75;
+  margin: 4px 12px 0 0;
+  color: var(--red-accent);
+  text-shadow: 1px 1px 0 rgba(201,168,76,.4);
+}
 
-/* ═══ TEXT STYLING ═══ */
-.page-text p{font-size:1.25rem;line-height:1.7;margin-bottom:1em;color:var(--ink)}
-.page-text p:last-child{margin-bottom:0}
-.lay-full_bleed .page-text p{color:#f5e6c8;font-size:1.15rem}
-.page-text .page-num{font-size:.75rem;color:var(--ink-light);text-align:center;margin-top:auto;
-  padding-top:1rem;font-family:'Space Grotesk',sans-serif}
+/* Page number */
+.codex-page-num {
+  text-align: center; padding: 8px; font-size: .8rem;
+  color: var(--ink-faded); font-family: 'Uncial Antiqua', serif;
+  letter-spacing: 2px;
+}
 
-/* ═══ COVER ═══ */
-.cover-front{background:linear-gradient(135deg,#2c1810 0%,#4a2c1a 50%,#2c1810 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:3rem 2rem;text-align:center;border:3px solid var(--gold);border-radius:4px 12px 12px 4px}
-.cover-front .cover-title{font-size:2.4rem;font-weight:700;color:var(--parchment);
-  line-height:1.2;margin-bottom:1rem;text-shadow:0 2px 8px rgba(0,0,0,.5)}
-.cover-front .cover-author{font-size:1rem;color:var(--gold);font-style:italic;margin-bottom:2rem}
-.cover-front .cover-open{background:var(--gold);color:var(--ink);border:none;
-  padding:16px 40px;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;
-  font-family:'Cormorant Garamond',serif;letter-spacing:.5px;
-  box-shadow:0 4px 20px var(--gold-glow);transition:.2s}
-.cover-front .cover-open:hover{transform:scale(1.05);box-shadow:0 6px 30px var(--gold-glow)}
-.cover-front .cover-badge{display:flex;gap:8px;margin-top:1.5rem;flex-wrap:wrap;justify-content:center}
-.cover-front .badge{font-size:.7rem;padding:3px 10px;border-radius:12px;
-  border:1px solid rgba(201,168,76,.4);color:var(--gold);font-family:'Space Grotesk',sans-serif}
-.cover-img{position:absolute;inset:0;object-fit:cover;opacity:.15;border-radius:inherit}
+/* ═══ PAGE TOOLS (speaker + mic) ═══ */
+.page-tools {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; padding: 8px 16px;
+  border-top: 1px solid rgba(44,24,16,.08);
+  background: rgba(245,230,200,.5);
+  flex-shrink: 0;
+}
+
+.tool-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1.5px solid var(--gold-dark);
+  background: var(--parchment-light);
+  color: var(--ink);
+  font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+  position: relative;
+}
+.tool-btn:hover {
+  background: var(--gold);
+  color: #fff;
+  box-shadow: 0 2px 12px var(--gold-glow);
+  transform: scale(1.08);
+}
+.tool-btn.active {
+  background: var(--gold);
+  color: #fff;
+  animation: pulse-glow 1.5s infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--gold-glow); }
+  50% { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+}
+
+.tool-btn .tool-label {
+  position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+  font-size: .6rem; white-space: nowrap; color: var(--ink-faded);
+  font-family: 'Space Grotesk', sans-serif; opacity: 0; transition: .2s;
+}
+.tool-btn:hover .tool-label { opacity: 1; }
+
+/* Voice selector mini-dropdown */
+.voice-select {
+  font-size: .72rem; padding: 3px 8px; border-radius: 6px;
+  border: 1px solid rgba(44,24,16,.2); background: var(--parchment-light);
+  color: var(--ink); font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+}
+
+/* Recording indicator */
+.rec-indicator {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #d32f2f; display: none;
+  animation: rec-blink 1s infinite;
+}
+.rec-indicator.on { display: inline-block; }
+@keyframes rec-blink {
+  0%, 100% { opacity: 1; } 50% { opacity: .3; }
+}
+
+/* ═══ COVER PAGE ═══ */
+.codex.is-cover .codex-left { display: none; }
+.codex.is-cover .codex-right { width: 100%; }
+
+.cover-inner {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 3rem 2rem; text-align: center;
+  background: linear-gradient(145deg, #2c1810 0%, #4a2c1a 40%, #2c1810 100%);
+  position: relative; overflow: hidden;
+}
+.cover-inner::before {
+  content: ''; position: absolute; inset: 16px;
+  border: 2px solid rgba(201,168,76,.35); border-radius: 4px;
+  pointer-events: none;
+}
+.cover-inner::after {
+  content: ''; position: absolute; inset: 20px;
+  border: 1px solid rgba(201,168,76,.15); border-radius: 3px;
+  pointer-events: none;
+}
+.cover-bg {
+  position: absolute; inset: 0; object-fit: cover; opacity: .12;
+}
+.cover-ornament {
+  font-size: 2rem; color: var(--gold); opacity: .6; margin-bottom: 1rem;
+  letter-spacing: 12px;
+}
+.cover-title {
+  font-family: 'Uncial Antiqua', 'MedievalSharp', cursive;
+  font-size: 2.8rem; font-weight: 400; color: var(--parchment);
+  line-height: 1.2; margin-bottom: .5rem;
+  text-shadow: 0 2px 12px rgba(0,0,0,.5);
+  animation: fadeUp .8s ease-out both;
+}
+.cover-author {
+  font-family: 'MedievalSharp', serif;
+  font-size: 1.1rem; color: var(--gold); font-style: italic;
+  margin-bottom: 2rem; animation: fadeUp .8s .2s ease-out both;
+}
+.cover-open {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: var(--parchment); border: none;
+  padding: 16px 48px; border-radius: 12px;
+  font-size: 1.15rem; font-weight: 700; cursor: pointer;
+  font-family: 'Uncial Antiqua', serif;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 24px var(--gold-glow);
+  transition: .25s; animation: fadeUp .8s .4s ease-out both;
+}
+.cover-open:hover { transform: scale(1.06); box-shadow: 0 6px 36px var(--gold-glow); }
+.cover-badges {
+  display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap;
+  justify-content: center; animation: fadeUp .8s .6s ease-out both;
+}
+.cover-badge {
+  font-size: .7rem; padding: 4px 12px; border-radius: 12px;
+  border: 1px solid rgba(201,168,76,.35); color: var(--gold);
+  font-family: 'Space Grotesk', sans-serif;
+}
 
 /* ═══ NAVIGATION ═══ */
-.nav-arrows{position:absolute;inset:0;display:flex;pointer-events:none;z-index:10}
-.nav-prev,.nav-next{flex:1;display:flex;align-items:center;pointer-events:auto;cursor:pointer;
-  padding:0 8px;opacity:0;transition:opacity .2s}
-.nav-prev:hover,.nav-next:hover{opacity:1}
-.nav-prev{justify-content:flex-start}.nav-next{justify-content:flex-end}
-.nav-arrow{width:40px;height:40px;background:rgba(0,0,0,.5);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;
-  backdrop-filter:blur(4px)}
+.nav-arrows {
+  position: absolute; inset: 0; display: flex;
+  pointer-events: none; z-index: 10;
+}
+.nav-prev, .nav-next {
+  flex: 1; display: flex; align-items: center; pointer-events: auto;
+  cursor: pointer; padding: 0 8px; opacity: 0; transition: opacity .25s;
+}
+.nav-prev:hover, .nav-next:hover { opacity: 1; }
+.nav-prev { justify-content: flex-start; }
+.nav-next { justify-content: flex-end; }
+.nav-arrow {
+  width: 44px; height: 44px;
+  background: rgba(0,0,0,.55); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 1.4rem;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(201,168,76,.2);
+  transition: .2s;
+}
+.nav-arrow:hover {
+  background: rgba(0,0,0,.7); border-color: var(--gold);
+}
 
-/* ═══ PROGRESS ═══ */
-.progress-bar{height:3px;background:rgba(201,168,76,.15);flex-shrink:0}
-.progress-fill{height:100%;background:var(--gold);transition:width .5s}
+/* ═══ AUDIO BAR (global story audio) ═══ */
+.audio-bar {
+  display: flex; align-items: center; gap: 10px; padding: 8px 16px;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(10px); flex-shrink: 0;
+}
+.audio-btn {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: var(--parchment); border: none;
+  width: 36px; height: 36px; border-radius: 50%;
+  font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: .15s;
+}
+.audio-btn:hover { transform: scale(1.08); }
+.audio-progress {
+  flex: 1; height: 4px; background: rgba(255,255,255,.1);
+  border-radius: 2px; cursor: pointer; position: relative;
+}
+.audio-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width .1s; }
+.audio-time { font-size: .72rem; color: #999; font-family: 'Space Grotesk', sans-serif; min-width: 60px; text-align: right; }
+.audio-narrator { font-size: .72rem; color: var(--gold); font-family: 'Space Grotesk', sans-serif; }
+.audio-bar.hidden { display: none; }
 
-/* ═══ AUDIO ═══ */
-.audio-bar{display:flex;align-items:center;gap:10px;padding:8px 16px;
-  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);flex-shrink:0}
-.audio-btn{background:var(--gold);color:var(--ink);border:none;width:36px;height:36px;
-  border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;transition:.15s}
-.audio-btn:hover{transform:scale(1.08)}
-.audio-progress{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;
-  cursor:pointer;position:relative}
-.audio-progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .1s}
-.audio-time{font-size:.72rem;color:#999;font-family:'Space Grotesk',sans-serif;min-width:60px;text-align:right}
-.audio-narrator{font-size:.72rem;color:var(--gold);font-family:'Space Grotesk',sans-serif}
-.audio-bar.hidden{display:none}
+/* ═══ PAGE TRANSITION ═══ */
+.codex.page-turning { opacity: 0; transition: opacity .25s; }
+.codex.page-entering { opacity: 0; animation: codexEnter .4s .05s ease-out forwards; }
+@keyframes codexEnter {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: none; }
+}
 
 /* ═══ FULLSCREEN ═══ */
-.fullscreen-active .top{position:absolute;top:0;left:0;right:0;opacity:0;transition:opacity .3s}
-.fullscreen-active .top:hover{opacity:1}
-.fullscreen-active .book-wrap{padding:0}
-.fullscreen-active .book{width:100vw;height:100dvh;border-radius:0}
-.fullscreen-active .page{border-radius:0}
+.fullscreen-active .top { position: absolute; top: 0; left: 0; right: 0; opacity: 0; transition: opacity .3s; z-index: 50; }
+.fullscreen-active .top:hover { opacity: 1; }
+.fullscreen-active .codex { width: 100vw; height: 100dvh; border-radius: 0; }
 
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:600px){
-  :root{--page-w:100vw;--page-h:calc(100dvh - 100px)}
-  .book-wrap{padding:0}
-  .page-text p{font-size:1.1rem;line-height:1.6}
-  .cover-front .cover-title{font-size:1.8rem}
-  .nav-prev,.nav-next{opacity:.5}
-  .lay-split_50_50{flex-direction:column!important}
-  .lay-split_50_50 .page-img-wrap{width:100%;height:40%}
-  .lay-split_50_50 .page-text{width:100%;padding:1rem}
+/* ═══ RESPONSIVE — Mobile ═══ */
+@media (max-width: 768px) {
+  .codex {
+    flex-direction: column;
+    width: 100vw; height: calc(100dvh - 90px);
+    border-radius: 0;
+  }
+  .codex::after { display: none; }
+  .codex-left {
+    width: 100%; height: 38%;
+    border-right: none; border-bottom: 1px solid rgba(44,24,16,.1);
+  }
+  .codex-left::after { inset: 6px; }
+  .codex-right { width: 100%; height: 62%; }
+  .codex-right::before { display: none; }
+  .codex-text {
+    padding: 1.5rem 1.2rem .8rem 1.4rem;
+  }
+  .codex-text p {
+    font-size: 1.2rem;
+    line-height: 1.85;
+  }
+  .codex-text p:first-child::first-letter {
+    font-size: 3.5rem;
+  }
+  .cover-title { font-size: 2rem; }
+  .codex.is-cover .codex-left { display: none; }
+  .codex.is-cover .codex-right { width: 100%; height: 100%; }
+  .nav-prev, .nav-next { opacity: .4; }
+  .codex-wrap { padding: 0; }
+  .page-tools { gap: 8px; padding: 6px 12px; }
+  .tool-btn { width: 36px; height: 36px; font-size: .95rem; }
 }
 
 /* ═══ ANIMATIONS ═══ */
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.anim-fade-up{animation:fadeUp .8s ease-out both}
-.anim-delay-1{animation-delay:.2s}
-.anim-delay-2{animation-delay:.4s}
-.anim-delay-3{animation-delay:.6s}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
 </style>
 </head>
 <body id="bookBody">
@@ -173,17 +417,51 @@ body{background:#1a120a;color:var(--ink);font-family:'Cormorant Garamond',Georgi
       {{ lc|upper }}
     </button>
     {% endfor %}
-    <button class="btn btn-fs" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+    <button class="btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
   </div>
 </div>
 
 <!-- Progress -->
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 
-<!-- Book -->
-<div class="book-wrap" id="bookWrap">
-  <div class="book" id="book">
-    <!-- Pages injected by JS -->
+<!-- Codex (open book) -->
+<div class="codex-wrap" id="codexWrap">
+  <div class="codex" id="codex">
+    <!-- Left page: illustration -->
+    <div class="codex-left" id="codexLeft">
+      <div class="placeholder" id="imgPlaceholder">
+        <span>🖼</span>
+        <span class="pl-label">{% trans "Ilustracija uskoro" %}</span>
+      </div>
+      <img id="codexImg" src="" alt="" style="display:none;" loading="eager">
+    </div>
+    <!-- Right page: text -->
+    <div class="codex-right" id="codexRight">
+      <div class="codex-text" id="codexText"></div>
+      <div class="codex-page-num" id="pageNum"></div>
+      <div class="page-tools" id="pageTools">
+        <button class="tool-btn" id="btnSpeak" onclick="speakPage()" title="{% trans 'Čitaj naglas' %}">
+          🔊
+          <span class="tool-label">{% trans "Čitaj" %}</span>
+        </button>
+        <button class="tool-btn" id="btnMic" onclick="toggleRecording()" title="{% trans 'Snimi svoj glas' %}">
+          🎤
+          <span class="tool-label">{% trans "Snimi" %}</span>
+        </button>
+        <span class="rec-indicator" id="recDot"></span>
+        <button class="tool-btn" id="btnPlayRec" onclick="playRecording()" title="{% trans 'Preslušaj snimku' %}" style="display:none;">
+          🔁
+          <span class="tool-label">{% trans "Preslušaj" %}</span>
+        </button>
+        <select class="voice-select" id="voiceSelect" onchange="onVoiceChange()">
+          <option value="tts">{% trans "Generički glas" %}</option>
+          <option value="baka">{% trans "Baka čita" %} 👵</option>
+          <option value="djed">{% trans "Djed čita" %} 👴</option>
+          <option value="mama">{% trans "Mama čita" %} 👩</option>
+          <option value="tata">{% trans "Tata čita" %} 👨</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <!-- Navigation arrows -->
@@ -193,20 +471,23 @@ body{background:#1a120a;color:var(--ink);font-family:'Cormorant Garamond',Georgi
   </div>
 </div>
 
-<!-- Audio Player -->
+<!-- Global Audio Player (for pre-recorded full narration) -->
 <div class="audio-bar {% if not has_audio %}hidden{% endif %}" id="audioBar">
-  <button class="audio-btn" id="audioPlayBtn" onclick="toggleAudio()">▶</button>
-  <div class="audio-progress" onclick="seekAudio(event)">
+  <button class="audio-btn" id="audioPlayBtn" onclick="toggleGlobalAudio()">▶</button>
+  <div class="audio-progress" onclick="seekGlobalAudio(event)">
     <div class="audio-progress-fill" id="audioFill" style="width:0%"></div>
   </div>
   <span class="audio-time" id="audioTime">0:00</span>
-  <span class="audio-narrator">{% trans "Baka čita" %}</span>
+  <span class="audio-narrator">🎙 {% trans "Baka čita" %}</span>
 </div>
 
 <audio id="audioEl" preload="auto" {% if audio_url %}src="{{ audio_url }}"{% endif %}></audio>
 
 <script>
-// ═══ DATA ═══
+/* ═══════════════════════════════════════════════════════════════
+   PLAY.EU Codex Engine v2
+   ═══════════════════════════════════════════════════════════════ */
+
 var PAGES = {{ pages_json|safe }};
 var LANG = '{{ lang }}';
 var LANGS_DATA = {{ langs_data|safe }};
@@ -214,86 +495,98 @@ var TOTAL = PAGES.length;
 var currentPage = 0;
 var isFullscreen = false;
 
-// ═══ RENDER BOOK ═══
-function renderBook() {
-  var book = document.getElementById('book');
-  book.innerHTML = '';
+/* ═══ PAGE ILLUSTRATION PLACEHOLDERS (by story section) ═══ */
+var SECTION_ICONS = [
+  '🏰', '👶', '🌿', '🥬', '🧙‍♀️', '😨', '👧', '💇‍♀️', '🗼', '🔒',
+  '🎵', '🐴', '🤴', '🌙', '❤️', '🪡', '✂️', '😈', '🌿', '😢',
+  '💧', '👁️', '🌳', '👫', '😭', '✨', '👀', '🏇', '👨‍👩‍👧‍👦', '🏰'
+];
 
-  PAGES.forEach(function(pg, i) {
-    var page = document.createElement('div');
-    page.className = 'page';
-    page.dataset.index = i;
-    page.style.zIndex = TOTAL - i;
+/* ═══ RENDER CURRENT PAGE ═══ */
+function renderPage() {
+  var pg = PAGES[currentPage];
+  var codex = document.getElementById('codex');
+  var codexLeft = document.getElementById('codexLeft');
+  var codexRight = document.getElementById('codexRight');
+  var codexText = document.getElementById('codexText');
+  var pageNum = document.getElementById('pageNum');
+  var imgEl = document.getElementById('codexImg');
+  var placeholder = document.getElementById('imgPlaceholder');
+  var pageTools = document.getElementById('pageTools');
 
-    var front = document.createElement('div');
-    front.className = 'page-front';
+  // Animate transition
+  codex.classList.remove('page-entering');
+  codex.classList.add('page-turning');
 
+  setTimeout(function() {
     if (pg.type === 'cover') {
-      front.className += ' cover-front';
-      front.innerHTML =
-        (pg.cover_img ? '<img class="cover-img" src="' + pg.cover_img + '" alt="">' : '') +
-        '<div class="cover-title anim-fade-up">' + esc(pg.title) + '</div>' +
-        (pg.author ? '<div class="cover-author anim-fade-up anim-delay-1">' + esc(pg.author) + '</div>' : '') +
-        '<button class="cover-open anim-fade-up anim-delay-2" onclick="nextPage()">{% trans "Otvori" %} →</button>' +
-        '<div class="cover-badge anim-fade-up anim-delay-3">' +
-          (pg.type_label ? '<span class="badge">' + esc(pg.type_label) + '</span>' : '') +
-          (pg.country ? '<span class="badge">' + esc(pg.country) + '</span>' : '') +
-          (pg.reading_time ? '<span class="badge">' + pg.reading_time + ' min</span>' : '') +
-        '</div>';
-    } else {
-      var layout = pg.layout || 'text_only';
-      front.className += ' lay-' + layout;
+      /* ═══ COVER ═══ */
+      codex.classList.add('is-cover');
+      pageTools.style.display = 'none';
 
-      var html = '';
-      if (pg.image && layout !== 'text_only') {
-        if (layout === 'full_bleed' || layout === 'text_overlay' || layout === 'image_only') {
-          html += '<img class="page-img" src="' + pg.image + '" alt="" loading="lazy">';
-        } else {
-          html += '<div class="page-img-wrap"><img class="page-img" src="' + pg.image + '" alt="" loading="lazy"></div>';
-        }
+      codexText.innerHTML =
+        '<div class="cover-inner">' +
+          (pg.cover_img ? '<img class="cover-bg" src="' + pg.cover_img + '" alt="">' : '') +
+          '<div class="cover-ornament">✦ ✦ ✦</div>' +
+          '<div class="cover-title">' + esc(pg.title) + '</div>' +
+          (pg.author ? '<div class="cover-author">' + esc(pg.author) + '</div>' : '') +
+          '<button class="cover-open" onclick="nextPage()">{% trans "Otvori knjigu" %} →</button>' +
+          '<div class="cover-badges">' +
+            (pg.type_label ? '<span class="cover-badge">' + esc(pg.type_label) + '</span>' : '') +
+            (pg.country ? '<span class="cover-badge">' + esc(pg.country) + '</span>' : '') +
+            (pg.reading_time ? '<span class="cover-badge">' + pg.reading_time + ' min</span>' : '') +
+          '</div>' +
+        '</div>';
+      pageNum.textContent = '';
+    } else {
+      /* ═══ CONTENT PAGE ═══ */
+      codex.classList.remove('is-cover');
+      pageTools.style.display = 'flex';
+
+      // Left: illustration or placeholder
+      if (pg.image) {
+        imgEl.src = pg.image;
+        imgEl.style.display = 'block';
+        placeholder.style.display = 'none';
+      } else {
+        imgEl.style.display = 'none';
+        placeholder.style.display = 'flex';
+        var icon = SECTION_ICONS[(currentPage - 1) % SECTION_ICONS.length] || '📖';
+        placeholder.innerHTML = '<span>' + icon + '</span>' +
+          '<span class="pl-label">{% trans "Ilustracija uskoro" %}</span>';
       }
-      if (layout !== 'image_only') {
-        html += '<div class="page-text">';
-        if (pg.text) html += pg.text;
-        html += '<div class="page-num">' + (pg.page_num || '') + '</div>';
-        html += '</div>';
-      }
-      front.innerHTML = html;
+
+      // Right: text with manuscript styling
+      codexText.innerHTML = pg.text || '';
+      pageNum.innerHTML = '— ' + (pg.page_num || currentPage) + ' —';
+
+      // Check for saved recording
+      checkRecording();
     }
 
-    page.appendChild(front);
-    book.appendChild(page);
-  });
+    codex.classList.remove('page-turning');
+    codex.classList.add('page-entering');
+
+    // Scroll text to top
+    codexText.scrollTop = 0;
+  }, 200);
 
   updateProgress();
 }
 
-// ═══ NAVIGATION ═══
+/* ═══ NAVIGATION ═══ */
 function nextPage() {
   if (currentPage >= TOTAL - 1) return;
-  var pages = document.querySelectorAll('.page');
-  pages[currentPage].classList.add('flipped');
+  stopSpeaking();
   currentPage++;
-  updateProgress();
+  renderPage();
 }
 
 function prevPage() {
   if (currentPage <= 0) return;
+  stopSpeaking();
   currentPage--;
-  var pages = document.querySelectorAll('.page');
-  pages[currentPage].classList.remove('flipped');
-  updateProgress();
-}
-
-function goToPage(n) {
-  var pages = document.querySelectorAll('.page');
-  // Reset all
-  pages.forEach(function(p, i) {
-    if (i < n) p.classList.add('flipped');
-    else p.classList.remove('flipped');
-  });
-  currentPage = n;
-  updateProgress();
+  renderPage();
 }
 
 function updateProgress() {
@@ -301,14 +594,13 @@ function updateProgress() {
   document.getElementById('progressFill').style.width = pct + '%';
 }
 
-// ═══ SWIPE ═══
-var touchStartX = 0;
-var touchStartY = 0;
-document.getElementById('bookWrap').addEventListener('touchstart', function(e) {
+/* ═══ SWIPE ═══ */
+var touchStartX = 0, touchStartY = 0;
+document.getElementById('codexWrap').addEventListener('touchstart', function(e) {
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
 }, {passive: true});
-document.getElementById('bookWrap').addEventListener('touchend', function(e) {
+document.getElementById('codexWrap').addEventListener('touchend', function(e) {
   var dx = e.changedTouches[0].clientX - touchStartX;
   var dy = e.changedTouches[0].clientY - touchStartY;
   if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
@@ -316,7 +608,7 @@ document.getElementById('bookWrap').addEventListener('touchend', function(e) {
   }
 });
 
-// Keyboard
+/* Keyboard */
 document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextPage(); }
   if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
@@ -324,22 +616,19 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && isFullscreen) toggleFullscreen();
 });
 
-// ═══ LANGUAGE SWITCH (no reload) ═══
+/* ═══ LANGUAGE SWITCH ═══ */
 function switchLang(lc) {
   LANG = lc;
-  // Update pages data
   if (LANGS_DATA[lc]) {
     PAGES = LANGS_DATA[lc];
     TOTAL = PAGES.length;
-    var savedPage = currentPage;
-    renderBook();
-    goToPage(Math.min(savedPage, TOTAL - 1));
+    currentPage = Math.min(currentPage, TOTAL - 1);
+    renderPage();
   }
-  // Update active button
   document.querySelectorAll('.lang-btn').forEach(function(b) {
     b.classList.toggle('active', b.dataset.lang === lc);
   });
-  // Update audio
+  // Update global audio
   var audioEl = document.getElementById('audioEl');
   var newSrc = LANGS_DATA['audio_' + lc] || '';
   if (newSrc && newSrc !== audioEl.src) {
@@ -349,7 +638,174 @@ function switchLang(lc) {
   document.documentElement.lang = lc;
 }
 
-// ═══ FULLSCREEN ═══
+/* ═══ PER-PAGE TTS (zvučnik) ═══ */
+var currentUtterance = null;
+
+function getPlainText() {
+  /* Extract plain text from current page HTML */
+  var div = document.createElement('div');
+  div.innerHTML = PAGES[currentPage].text || '';
+  return div.textContent || div.innerText || '';
+}
+
+function speakPage() {
+  var btn = document.getElementById('btnSpeak');
+  if (speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    btn.classList.remove('active');
+    return;
+  }
+
+  var text = getPlainText();
+  if (!text) return;
+
+  var utter = new SpeechSynthesisUtterance(text);
+  var langMap = {'hr': 'hr-HR', 'de': 'de-DE', 'en': 'en-GB', 'fr': 'fr-FR', 'it': 'it-IT'};
+  utter.lang = langMap[LANG] || 'en-GB';
+  utter.rate = 0.82;
+  utter.pitch = 1.05;
+
+  btn.classList.add('active');
+  utter.onend = function() { btn.classList.remove('active'); };
+  utter.onerror = function() { btn.classList.remove('active'); };
+
+  currentUtterance = utter;
+  speechSynthesis.speak(utter);
+}
+
+function stopSpeaking() {
+  if (speechSynthesis.speaking) speechSynthesis.cancel();
+  document.getElementById('btnSpeak').classList.remove('active');
+}
+
+/* ═══ PER-PAGE MICROPHONE (snimanje) ═══ */
+var mediaRecorder = null;
+var recordedChunks = [];
+var isRecording = false;
+var recordings = {}; /* key: "slug_lang_pagenum" -> Blob */
+
+function getRecKey() {
+  return '{{ story.slug }}_' + LANG + '_' + currentPage;
+}
+
+async function toggleRecording() {
+  var btn = document.getElementById('btnMic');
+  var dot = document.getElementById('recDot');
+
+  if (isRecording) {
+    /* Stop */
+    mediaRecorder.stop();
+    isRecording = false;
+    btn.classList.remove('active');
+    dot.classList.remove('on');
+    return;
+  }
+
+  /* Start */
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    mediaRecorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+    recordedChunks = [];
+
+    mediaRecorder.ondataavailable = function(e) {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+    mediaRecorder.onstop = function() {
+      var blob = new Blob(recordedChunks, {type: 'audio/webm'});
+      var key = getRecKey();
+      recordings[key] = blob;
+      /* Save to IndexedDB */
+      saveRecordingToDB(key, blob);
+      /* Show playback button */
+      document.getElementById('btnPlayRec').style.display = 'flex';
+      /* Stop mic access */
+      stream.getTracks().forEach(function(t) { t.stop(); });
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    btn.classList.add('active');
+    dot.classList.add('on');
+  } catch(err) {
+    console.warn('Mic access denied:', err);
+  }
+}
+
+function playRecording() {
+  var key = getRecKey();
+  var blob = recordings[key];
+  if (!blob) {
+    /* Try loading from IndexedDB */
+    loadRecordingFromDB(key, function(b) {
+      if (b) { recordings[key] = b; _playBlob(b); }
+    });
+    return;
+  }
+  _playBlob(blob);
+}
+
+function _playBlob(blob) {
+  var url = URL.createObjectURL(blob);
+  var a = new Audio(url);
+  var btn = document.getElementById('btnPlayRec');
+  btn.classList.add('active');
+  a.onended = function() { btn.classList.remove('active'); URL.revokeObjectURL(url); };
+  a.play();
+}
+
+function checkRecording() {
+  var key = getRecKey();
+  var btn = document.getElementById('btnPlayRec');
+  if (recordings[key]) {
+    btn.style.display = 'flex';
+  } else {
+    btn.style.display = 'none';
+    loadRecordingFromDB(key, function(b) {
+      if (b) { recordings[key] = b; btn.style.display = 'flex'; }
+    });
+  }
+}
+
+/* ═══ IndexedDB for recordings ═══ */
+var dbReady = false;
+var db = null;
+
+function openDB(cb) {
+  if (db) { cb(db); return; }
+  var req = indexedDB.open('PlayEU_Recordings', 1);
+  req.onupgradeneeded = function(e) {
+    e.target.result.createObjectStore('recordings');
+  };
+  req.onsuccess = function(e) { db = e.target.result; cb(db); };
+  req.onerror = function() { cb(null); };
+}
+
+function saveRecordingToDB(key, blob) {
+  openDB(function(db) {
+    if (!db) return;
+    var tx = db.transaction('recordings', 'readwrite');
+    tx.objectStore('recordings').put(blob, key);
+  });
+}
+
+function loadRecordingFromDB(key, cb) {
+  openDB(function(db) {
+    if (!db) { cb(null); return; }
+    var tx = db.transaction('recordings', 'readonly');
+    var req = tx.objectStore('recordings').get(key);
+    req.onsuccess = function() { cb(req.result || null); };
+    req.onerror = function() { cb(null); };
+  });
+}
+
+/* ═══ Voice change (placeholder for Voice Legacy) ═══ */
+function onVoiceChange() {
+  var voice = document.getElementById('voiceSelect').value;
+  /* TODO: When Voice Legacy recordings exist, load per-page audio for this voice */
+  console.log('Voice selected:', voice);
+}
+
+/* ═══ FULLSCREEN ═══ */
 function toggleFullscreen() {
   var body = document.getElementById('bookBody');
   if (!isFullscreen) {
@@ -364,13 +820,12 @@ function toggleFullscreen() {
   isFullscreen = !isFullscreen;
 }
 
-// ═══ AUDIO ═══
+/* ═══ GLOBAL AUDIO ═══ */
 var audioEl = document.getElementById('audioEl');
 var audioPlaying = false;
 
-function toggleAudio() {
-  if (audioPlaying) { audioEl.pause(); }
-  else { audioEl.play(); }
+function toggleGlobalAudio() {
+  if (audioPlaying) audioEl.pause(); else audioEl.play();
 }
 audioEl.addEventListener('play', function() {
   audioPlaying = true;
@@ -387,17 +842,17 @@ audioEl.addEventListener('timeupdate', function() {
   var s = Math.floor(audioEl.currentTime % 60);
   document.getElementById('audioTime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
 });
-function seekAudio(e) {
+function seekGlobalAudio(e) {
   var rect = e.currentTarget.getBoundingClientRect();
   var pct = (e.clientX - rect.left) / rect.width;
   audioEl.currentTime = pct * audioEl.duration;
 }
 
-// ═══ UTILS ═══
+/* ═══ UTILS ═══ */
 function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// ═══ INIT ═══
-renderBook();
+/* ═══ INIT ═══ */
+renderPage();
 </script>
 </body>
 </html>

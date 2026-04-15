@@ -112,7 +112,7 @@ def story_detail(request, slug):
     text = getattr(story, f"text_{lang}", "") or story.text_hr
     paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
 
-    # Book reader mode (default)
+    # Simple mode (legacy flat view)
     if request.GET.get("mode") == "simple":
         return render(
             request,
@@ -127,7 +127,7 @@ def story_detail(request, slug):
             },
         )
 
-    # Build book pages for flip engine
+    # Build book pages for Codex engine
     pages_data = _build_book_pages(story, lang)
     langs_data = {}
     for lc in languages:
@@ -148,8 +148,6 @@ def story_detail(request, slug):
         except ValueError:
             pass
 
-    import json
-
     return render(
         request,
         "memio_world/book_reader.html",
@@ -166,17 +164,14 @@ def story_detail(request, slug):
     )
 
 
-# Layout cycle for pages
-_LAYOUTS = ["top_image", "text_only", "split_50_50", "text_overlay", "top_image", "text_only"]
-
-
 def _build_book_pages(story, lang):
-    """Build page list for book flip engine."""
+    """Build page list for the book flip engine."""
+    import html as _html
+
     title = getattr(story, f"title_{lang}", "") or story.title_hr
     text = getattr(story, f"text_{lang}", "") or story.text_hr
     paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
 
-    # Cover image
     cover_img = ""
     if story.cover_image:
         try:
@@ -184,18 +179,19 @@ def _build_book_pages(story, lang):
         except Exception:
             pass
 
-    # Illustration images
     illustrations = []
     try:
-        for item in story.illustrations.all():
-            if item.image_url:
-                illustrations.append(item.image_url)
+        for item in story.illustrations.using("memio_world").all():
+            url = getattr(item, "thumbnail_url", "") or getattr(item, "media_url", "")
+            if url:
+                illustrations.append(url)
     except Exception:
         pass
 
     pages = []
+    layout_cycle = ["topimg", "text", "split", "overlay", "text", "topimg"]
 
-    # Page 0: Cover
+    # Cover
     pages.append(
         {
             "type": "cover",
@@ -208,27 +204,33 @@ def _build_book_pages(story, lang):
         }
     )
 
-    # Content pages — 2-3 paragraphs per page
-    per_page = 2
+    # Content — 2 paragraphs per page
     page_num = 1
-    for i in range(0, len(paragraphs), per_page):
-        chunk = paragraphs[i : i + per_page]
-        text_html = "".join(f"<p>{p}</p>" for p in chunk)
-        layout_idx = (page_num - 1) % len(_LAYOUTS)
-        layout = _LAYOUTS[layout_idx]
+    first_text = True
+    for i in range(0, len(paragraphs), 2):
+        chunk = paragraphs[i : i + 2]
+        parts = []
+        for j, p in enumerate(chunk):
+            escaped = _html.escape(p)
+            if first_text and j == 0:
+                parts.append(f'<p class="drop-cap">{escaped}</p>')
+                first_text = False
+            else:
+                parts.append(f"<p>{escaped}</p>")
+        text_html = "".join(parts)
 
-        # Use illustration if available
+        lay_idx = (page_num - 1) % len(layout_cycle)
+        layout = layout_cycle[lay_idx]
+
         img = ""
-        img_idx = page_num - 1
-        if img_idx < len(illustrations):
-            img = illustrations[img_idx]
+        if page_num - 1 < len(illustrations):
+            img = illustrations[page_num - 1]
         elif cover_img and page_num == 1:
             img = cover_img
-            layout = "full_bleed"
+            layout = "fullbleed"
 
-        # No image? Force text_only
         if not img:
-            layout = "text_only"
+            layout = "text"
 
         pages.append(
             {
@@ -241,17 +243,12 @@ def _build_book_pages(story, lang):
         )
         page_num += 1
 
-    # Moral lesson page
+    # Moral
     if story.moral_lesson:
         pages.append(
             {
-                "type": "page",
-                "layout": "text_only",
-                "text": '<p style="text-align:center;font-size:1.4rem;font-style:italic;color:var(--gold)">\U0001f4a1 '
-                + story.moral_lesson.replace('"', "&quot;")
-                + "</p>",
-                "image": "",
-                "page_num": "\u2022",
+                "type": "moral",
+                "text": _html.escape(story.moral_lesson),
             }
         )
 
