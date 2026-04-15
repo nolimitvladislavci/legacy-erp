@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-15 (Dan 49), commit f0526b0a — PLAY.EU 5 kategorija + Slikovnice plan
+> Zadnji update: 2026-04-15 (Dan 49), commit 033e02e3 — GLAVA 1 StoryPage + 90 stranica + Book API
 
 ---
 
