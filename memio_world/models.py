@@ -883,3 +883,5 @@ class HeritageOracle(models.Model):
 # PLAY.EU — Dječja Digitalna Baština Europe (Sprint 1)
 # ════════════════════════════════════════════════════════════════
 from memio_world.play_eu_models import EuropeanaItem, HeritageCard, ParallelStory  # noqa: F401, E402
+
+from memio_world.quiz_models import Quiz, QuizAnswer, QuizAttempt, QuizQuestion  # noqa: F401, E402
