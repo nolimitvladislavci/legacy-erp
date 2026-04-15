@@ -62,7 +62,7 @@
       </div>
       <p class="fx-fs-sm fx-text-muted fx-m-0">
         {% if arhiva_managed_by %}
-          {{ arhiva_managed_by }} {% trans "čuva" %} <strong class="fx-text-gold">{{ arhiva_count }}</strong> {% trans "vaših dokumenata" %}
+          {% trans "Vaše knjigovodstvo čuva" %} <strong class="fx-text-gold">{{ arhiva_count }}</strong> {% trans "vaših dokumenata" %}
         {% else %}
           <strong class="fx-text-gold">{{ arhiva_count }}</strong> {% trans "dokumenata u arhivi" %}
         {% endif %}
