@@ -404,9 +404,70 @@ body {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: none; }
 }
+
+/* ═══ PhD UPGRADE — ambijent, particles, drop-cap, shadows ═══ */
+
+/* Ambient glow */
+.ambient-glow {
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 30%, rgba(201,168,76,.04) 0%, transparent 70%);
+}
+.ambient-glow::after {
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 80%, rgba(139,97,20,.03) 0%, transparent 50%);
+  animation:ambPulse 8s ease-in-out infinite alternate;
+}
+@keyframes ambPulse { 0%{opacity:.3} 100%{opacity:.8} }
+
+/* Floating particles — fireflies */
+.firefly {
+  position:fixed;width:3px;height:3px;border-radius:50%;
+  background:var(--gold);opacity:0;pointer-events:none;z-index:1;
+  animation:flyUp linear infinite;
+}
+@keyframes flyUp {
+  0%{opacity:0;transform:translateY(0) scale(.5)}
+  15%{opacity:.5}
+  85%{opacity:.3}
+  100%{opacity:0;transform:translateY(-35vh) scale(0)}
+}
+
+/* Drop cap */
+.drop-cap::first-letter {
+  float:left;font-size:3.4em;line-height:.78;font-weight:700;
+  color:var(--gold);margin:.04em .14em 0 0;
+  font-family:"Cormorant Garamond",serif;
+  text-shadow:1px 1px 0 rgba(201,168,76,.15);
+}
+
+/* Paper grain overlay */
+.codex::after {
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:50;
+  background:url("data:image/svg+xml,%3Csvg xmlns=\x27http://www.w3.org/2000/svg\x27 width=\x274\x27 height=\x274\x27%3E%3Ccircle cx=\x272\x27 cy=\x272\x27 r=\x27.3\x27 fill=\x27%232c1810\x27 fill-opacity=\x27.015\x27/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;border-radius:inherit;
+}
+
+/* Book spine highlight */
+.codex-spine::after {
+  content:"";position:absolute;top:5%;bottom:5%;left:50%;width:1px;
+  background:linear-gradient(180deg,transparent,var(--gold-dark),transparent);
+  opacity:.15;
+}
+
+/* Night mode */
+body.night-mode { --parchment:#1e1a14;--parchment-light:#252018;--parchment-dark:#151210;--ink:#d4c4a0;--ink-light:#b8a888 }
+body.night-mode .codex { box-shadow:0 0 40px rgba(0,0,0,.8) }
+
+/* Print */
+@media print {
+  body{background:#fff}
+  .top,.audio-bar,.progress-bar,.ambient-glow,.firefly,.codex-spine{display:none!important}
+  .codex{box-shadow:none;width:100%;height:auto}
+}
 </style>
 </head>
 <body id="bookBody">
+<div class="ambient-glow"></div>
 
 <!-- Top Bar -->
 <div class="top" id="topBar">
@@ -417,6 +478,7 @@ body {
       {{ lc|upper }}
     </button>
     {% endfor %}
+    <button class="btn" onclick="toggleNight()" title="Noćni mod">☽</button>
     <button class="btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
   </div>
 </div>
@@ -853,6 +915,73 @@ function esc(s) { var d = document.createElement('div'); d.textContent = s; retu
 
 /* ═══ INIT ═══ */
 renderPage();
+
+/* ═══ PhD ADDITIONS ═══ */
+
+/* Page turn sound — synthesized paper rustle */
+var _audioCtx;
+function playPageTurn() {
+  try {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    var buf = _audioCtx.createBuffer(1, _audioCtx.sampleRate * 0.12, _audioCtx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i=0; i<d.length; i++) d[i] = (Math.random()*2-1) * Math.exp(-i/(d.length*0.25)) * 0.06;
+    var s = _audioCtx.createBufferSource(); s.buffer = buf;
+    var f = _audioCtx.createBiquadFilter(); f.type="lowpass"; f.frequency.value=1800;
+    s.connect(f); f.connect(_audioCtx.destination); s.start();
+  } catch(e){}
+}
+
+/* Haptic */
+function haptic(ms) { if(navigator.vibrate) navigator.vibrate(ms||6); }
+
+/* Particles — fireflies */
+function spawnFireflies() {
+  for (var i=0; i<6; i++) {
+    var p = document.createElement("div"); p.className="firefly";
+    p.style.left = (Math.random()*100)+"vw";
+    p.style.top = (55+Math.random()*40)+"vh";
+    p.style.animationDuration = (7+Math.random()*9)+"s";
+    p.style.animationDelay = (Math.random()*8)+"s";
+    p.style.width = p.style.height = (2+Math.random()*2)+"px";
+    document.body.appendChild(p);
+    setTimeout(function(el){el.remove()}.bind(null,p), 20000);
+  }
+}
+spawnFireflies(); setInterval(spawnFireflies, 16000);
+
+/* Night mode */
+function toggleNight() { document.body.classList.toggle("night-mode"); }
+
+/* Keyboard: N for night */
+document.addEventListener("keydown", function(e) {
+  if (e.key==="n"||e.key==="N") toggleNight();
+});
+
+/* Drop-cap: add class to first paragraph */
+var _origShowPage = typeof showPage === "function" ? showPage : null;
+if (_origShowPage) {
+  var _realShow = showPage;
+  showPage = function(n) {
+    _realShow(n);
+    setTimeout(function(){
+      var firstP = document.querySelector(".codex-right p:first-of-type");
+      if (firstP && n === 1) firstP.classList.add("drop-cap");
+    }, 50);
+  };
+}
+
+/* Inject page turn + haptic into navigation */
+var _origNext = typeof nextPage === "function" ? nextPage : null;
+var _origPrev = typeof prevPage === "function" ? prevPage : null;
+if (_origNext) {
+  var _rn = nextPage;
+  nextPage = function() { playPageTurn(); haptic(8); _rn(); };
+}
+if (_origPrev) {
+  var _rp = prevPage;
+  prevPage = function() { playPageTurn(); haptic(5); _rp(); };
+}
 </script>
 </body>
 </html>
