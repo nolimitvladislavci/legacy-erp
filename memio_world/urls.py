@@ -32,6 +32,10 @@ urlpatterns = [
     path("play/night/", views_play.dreamguard, name="dreamguard"),
     path("play/joke/", views_play.joke_box, name="joke_box"),
     path("play/quests/", views_play.family_quests, name="family_quests"),
+    # ── Rage Engine (Upravljanje bijesom) ─────────────────────
+    path("play/emotions/", views_play.emotion_checkin, name="emotion_checkin"),
+    path("play/calm/<str:technique>/", views_play.calming_exercise, name="calming_exercise"),
+    path("play/conflict/", views_play.conflict_simulator, name="conflict_simulator"),
     # ── Book API (JSON za flip engine) ────────────────────────
     path("play/book/<slug:slug>/", views_play.book_api, name="book_api"),
 ]

@@ -27,6 +27,17 @@
 </div>
 {% endif %}
 
+<!-- Rage Engine links -->
+<div class="play-card mt-16" style="border-left:3px solid var(--gold,#c9a84c)">
+  <h3 style="font-family:var(--serif);font-size:1.1rem;margin-bottom:.5rem">🌋 {% trans "Upravljanje bijesom" %}</h3>
+  <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:.8rem">{% trans "Nauči prepoznati, zaustaviti i razumjeti bijes." %}</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="{% url 'memio_world:emotion_checkin' %}" class="play-btn play-btn-gold" style="font-size:.85rem">{% trans "Kako se osjećaš?" %}</a>
+    <a href="{% url 'memio_world:conflict_simulator' %}" class="play-btn play-btn-outline" style="font-size:.85rem">{% trans "Kako bih reagirao?" %}</a>
+    <a href="{% url 'memio_world:story_detail' slug='zmaj-koji-je-naucio-disati' %}" class="play-btn play-btn-outline" style="font-size:.85rem">{% trans "Zmaj koji je naučio disati" %} 🐉</a>
+  </div>
+</div>
+
 <div class="play-disclaimer mt-24">
   {% trans "Ovaj sadržaj je edukativnog karaktera i ne zamjenjuje profesionalni savjet. Ako se dijete loše osjeća duže vrijeme, razgovarajte s pedijatrom ili dječjim psihologom." %}
 </div>

@@ -11,7 +11,14 @@ from collections import OrderedDict
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page
 
-from memio_world.comfort_models import ComfortCard, DreamGuard, JokeEntry
+from memio_world.comfort_models import (
+    CalmingExercise,
+    ComfortCard,
+    ConflictScenario,
+    DreamGuard,
+    EmotionCheckIn,
+    JokeEntry,
+)
 from memio_world.growth_models import FamilyQuest
 from memio_world.kurikulum_models import LearningPath, SafetyTopic, WisdomEntry
 from memio_world.play_eu_models import EuropeanaItem, HeritageCard, ParallelStory
@@ -656,4 +663,102 @@ def book_api(request, slug):
             "total_pages": len(pages_data),
             "pages": pages_data,
         }
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
+# RAGE ENGINE — Upravljanje bijesom
+# ═══════════════════════════════════════════════════════════════
+
+
+def emotion_checkin(request):
+    """Emotion check-in — semafor emocija."""
+    lang = _lang(request)
+
+    if request.method == "POST":
+        emotion = request.POST.get("emotion", "neutral")
+        trigger = request.POST.get("trigger", "")
+        action = request.POST.get("action_taken", "")
+        felt_better = request.POST.get("felt_better")
+        body_zones = request.POST.getlist("body_zone")
+        other_feeling = request.POST.get("other_person_feeling", "")
+        technique = request.POST.get("calming_technique", "")
+
+        checkin = EmotionCheckIn(
+            emotion=emotion,
+            trigger=trigger,
+            action_taken=action,
+            calming_technique_used=technique,
+            felt_better_after=felt_better == "yes" if felt_better else None,
+            body_zones=body_zones,
+            other_person_feeling=other_feeling,
+            session_id=request.session.session_key or "",
+        )
+        checkin.save(using=DB)
+
+        # If angry/furious → redirect to calming
+        if emotion in ("furious", "angry", "anxious"):
+            from django.shortcuts import redirect
+
+            return redirect("memio_world:calming_exercise", technique=technique or "breathing")
+
+        from django.http import JsonResponse
+
+        return JsonResponse({"ok": True, "emotion": emotion, "id": str(checkin.pk)})
+
+    exercises = CalmingExercise.objects.using(DB).filter(is_published=True).order_by("sort_order")
+
+    return render(
+        request,
+        "memio_world/emotion_checkin.html",
+        {
+            "nav": "family",
+            "lang": lang,
+            "exercises": exercises,
+        },
+    )
+
+
+def calming_exercise(request, technique):
+    """Animated calming exercise — breathing, volcano, jellyfish etc."""
+    lang = _lang(request)
+    exercise = get_object_or_404(
+        CalmingExercise.objects.using(DB),
+        technique=technique,
+        is_published=True,
+    )
+    # Increment usage
+    CalmingExercise.objects.using(DB).filter(pk=exercise.pk).update(times_used=exercise.times_used + 1)
+
+    title = exercise.get_title(lang)
+    instruction = getattr(exercise, f"instruction_text_{lang}", "") or exercise.instruction_text
+    grandma = getattr(exercise, f"grandma_voice_{lang}", "") or exercise.grandma_voice
+
+    return render(
+        request,
+        "memio_world/calming_exercise.html",
+        {
+            "nav": "family",
+            "lang": lang,
+            "exercise": exercise,
+            "title": title,
+            "instruction": instruction,
+            "grandma_voice": grandma,
+            "animation": exercise.animation_data,
+        },
+    )
+
+
+def conflict_simulator(request):
+    """Budućnost #2 — Interaktivni scenariji rješavanja konflikta."""
+    lang = _lang(request)
+    scenarios = ConflictScenario.objects.using(DB).filter(is_published=True).order_by("sort_order")
+    return render(
+        request,
+        "memio_world/conflict_simulator.html",
+        {
+            "nav": "family",
+            "lang": lang,
+            "scenarios": scenarios,
+        },
     )

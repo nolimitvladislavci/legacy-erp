@@ -1,0 +1,240 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Kako se osjećaš?" %} — PLAY.EU{% endblock %}
+{% block body_class %}emotion-page{% endblock %}
+
+{% block extra_head %}
+<style>
+.emo-hero{text-align:center;padding:2rem 1rem .5rem}
+.emo-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:600;color:var(--ink,#2c1810);margin-bottom:.3rem}
+.emo-hero p{color:var(--ink-light,#6b5a4e);font-size:.95rem;font-style:italic}
+
+/* Emotion circle */
+.emo-circle{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:1.5rem 1rem;max-width:480px;margin:0 auto}
+.emo-btn{width:72px;height:72px;border-radius:50%;border:3px solid transparent;background:var(--parchment-dark,#e8d4a8);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:1.8rem;position:relative}
+.emo-btn:hover{transform:scale(1.12);border-color:var(--gold)}
+.emo-btn.selected{border-color:var(--gold);background:rgba(201,168,76,.15);transform:scale(1.15);box-shadow:0 0 20px rgba(201,168,76,.3)}
+.emo-btn .emo-label{font-size:.55rem;font-family:'Space Grotesk',sans-serif;color:var(--ink-light);margin-top:2px;position:absolute;bottom:-18px;white-space:nowrap}
+
+/* Phases — fade in sequence */
+.phase{display:none;animation:fadeUp .5s ease both;padding:1rem;max-width:500px;margin:0 auto}
+.phase.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* Trigger grid */
+.trigger-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:1rem 0}
+.trigger-btn{background:var(--parchment-dark);border:2px solid transparent;border-radius:12px;padding:12px;cursor:pointer;font-size:.9rem;text-align:center;transition:all .2s;color:var(--ink)}
+.trigger-btn:hover,.trigger-btn.selected{border-color:var(--gold);background:rgba(201,168,76,.1)}
+.trigger-btn .t-emoji{font-size:1.4rem;display:block;margin-bottom:4px}
+
+/* Body map — budućnost #1 */
+.body-map{position:relative;width:160px;height:280px;margin:1rem auto;user-select:none}
+.body-outline{width:100%;height:100%;opacity:.3}
+.body-zone{position:absolute;width:40px;height:40px;border-radius:50%;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--ink-light);border:2px dashed rgba(201,168,76,.3)}
+.body-zone:hover,.body-zone.active{background:rgba(220,38,38,.15);border-color:#dc2626;color:#dc2626}
+.body-zone.active::after{content:'🔥';position:absolute;font-size:1rem}
+.bz-head{top:5px;left:60px}
+.bz-throat{top:55px;left:60px}
+.bz-chest{top:95px;left:60px}
+.bz-stomach{top:140px;left:60px}
+.bz-fists{top:160px;left:10px}
+.bz-fists-r{top:160px;right:10px}
+
+/* Calming CTA */
+.calm-cta{text-align:center;padding:1.5rem;border-radius:16px;background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.02));border:1px solid rgba(201,168,76,.2);margin:1rem 0}
+.calm-cta h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;margin-bottom:.5rem}
+.calm-cta p{color:var(--ink-light);font-size:.88rem;font-style:italic;margin-bottom:1rem}
+.calm-btn{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--ink);border:none;padding:14px 28px;border-radius:50px;font-size:1rem;font-family:'Cormorant Garamond',serif;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.calm-btn:hover{transform:scale(1.04);box-shadow:0 4px 20px rgba(201,168,76,.3)}
+
+/* Exercise cards */
+.exercise-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:1rem 0}
+.ex-card{background:var(--parchment-dark);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;border:2px solid transparent;text-decoration:none;color:var(--ink)}
+.ex-card:hover,.ex-card.selected{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 12px var(--page-shadow)}
+.ex-card .ex-emoji{font-size:2rem;margin-bottom:6px}
+.ex-card .ex-name{font-size:.82rem;font-weight:600}
+.ex-card .ex-dur{font-size:.68rem;color:var(--ink-light);font-family:'Space Grotesk',sans-serif}
+
+/* Empathy mirror — budućnost #3 */
+.empathy-section{margin:1.5rem 0;text-align:center}
+.empathy-section h3{font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:.8rem}
+.empathy-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.empathy-btn{width:48px;height:48px;border-radius:50%;border:2px solid transparent;background:var(--parchment-dark);font-size:1.4rem;cursor:pointer;transition:all .2s}
+.empathy-btn:hover,.empathy-btn.selected{border-color:var(--gold);background:rgba(201,168,76,.1)}
+
+/* Grandma message */
+.grandma{background:var(--parchment-dark);border-radius:16px;padding:1.2rem 1.5rem;margin:1rem 0;border-left:3px solid var(--gold);font-style:italic;font-size:1rem;line-height:1.6;color:var(--ink-soft,#4a3728)}
+.grandma::before{content:'👵 ';font-style:normal}
+
+/* Disclaimer */
+.disclaimer{font-size:.68rem;color:var(--ink-faded,#9c8a7a);text-align:center;padding:1rem;line-height:1.5;margin-top:1rem;border-top:1px solid rgba(201,168,76,.1)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="emo-hero">
+  <h1>{% trans "Kako se danas osjećaš?" %}</h1>
+  <p>{% trans "Dodirnite emoji koji opisuje kako se osjećate" %}</p>
+</div>
+
+<!-- Phase 1: Emotion Selection -->
+<div class="phase active" id="phase1">
+  <div class="emo-circle">
+    <div class="emo-btn" data-emo="furious" onclick="selectEmo(this)">😡<span class="emo-label">{% trans "Jako ljut" %}</span></div>
+    <div class="emo-btn" data-emo="angry" onclick="selectEmo(this)">😤<span class="emo-label">{% trans "Ljut" %}</span></div>
+    <div class="emo-btn" data-emo="frustrated" onclick="selectEmo(this)">😣<span class="emo-label">{% trans "Frustriran" %}</span></div>
+    <div class="emo-btn" data-emo="anxious" onclick="selectEmo(this)">😰<span class="emo-label">{% trans "Zabrinut" %}</span></div>
+    <div class="emo-btn" data-emo="sad" onclick="selectEmo(this)">😢<span class="emo-label">{% trans "Tužan" %}</span></div>
+    <div class="emo-btn" data-emo="neutral" onclick="selectEmo(this)">😐<span class="emo-label">{% trans "Ok" %}</span></div>
+    <div class="emo-btn" data-emo="happy" onclick="selectEmo(this)">🙂<span class="emo-label">{% trans "Veseo" %}</span></div>
+    <div class="emo-btn" data-emo="very_happy" onclick="selectEmo(this)">😊<span class="emo-label">{% trans "Jako veseo" %}</span></div>
+    <div class="emo-btn" data-emo="ecstatic" onclick="selectEmo(this)">😄<span class="emo-label">{% trans "Presretan" %}</span></div>
+  </div>
+</div>
+
+<!-- Phase 2: Trigger (only for negative emotions) -->
+<div class="phase" id="phase2">
+  <h2 style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-bottom:.5rem">{% trans "Što se dogodilo?" %}</h2>
+  <div class="trigger-grid">
+    <div class="trigger-btn" data-trigger="sibling" onclick="selectTrigger(this)"><span class="t-emoji">👫</span>{% trans "Svađa s bratom/sestrom" %}</div>
+    <div class="trigger-btn" data-trigger="school" onclick="selectTrigger(this)"><span class="t-emoji">📚</span>{% trans "Škola / zadaća" %}</div>
+    <div class="trigger-btn" data-trigger="friend" onclick="selectTrigger(this)"><span class="t-emoji">🤝</span>{% trans "Prijatelj" %}</div>
+    <div class="trigger-btn" data-trigger="unfair" onclick="selectTrigger(this)"><span class="t-emoji">⚖️</span>{% trans "Nepravda" %}</div>
+    <div class="trigger-btn" data-trigger="tired" onclick="selectTrigger(this)"><span class="t-emoji">😴</span>{% trans "Umor" %}</div>
+    <div class="trigger-btn" data-trigger="hungry" onclick="selectTrigger(this)"><span class="t-emoji">🍽️</span>{% trans "Glad" %}</div>
+    <div class="trigger-btn" data-trigger="lost_game" onclick="selectTrigger(this)"><span class="t-emoji">🎮</span>{% trans "Izgubio igru" %}</div>
+    <div class="trigger-btn" data-trigger="scared" onclick="selectTrigger(this)"><span class="t-emoji">👻</span>{% trans "Strah" %}</div>
+  </div>
+
+  <!-- Body Map — budućnost #1 -->
+  <h3 style="text-align:center;font-family:'Cormorant Garamond',serif;margin-top:1.5rem">{% trans "Gdje osjećaš u tijelu?" %}</h3>
+  <p style="text-align:center;font-size:.8rem;color:var(--ink-light)">{% trans "Dodirni dijelove tijela gdje osjetiš toplinu, stiskanje ili bol" %}</p>
+  <div class="body-map">
+    <svg class="body-outline" viewBox="0 0 100 180">
+      <ellipse cx="50" cy="18" rx="14" ry="16" fill="none" stroke="var(--ink-faded)" stroke-width="1.5"/>
+      <line x1="50" y1="34" x2="50" y2="100" stroke="var(--ink-faded)" stroke-width="1.5"/>
+      <line x1="50" y1="50" x2="20" y2="85" stroke="var(--ink-faded)" stroke-width="1.5"/>
+      <line x1="50" y1="50" x2="80" y2="85" stroke="var(--ink-faded)" stroke-width="1.5"/>
+      <line x1="50" y1="100" x2="30" y2="170" stroke="var(--ink-faded)" stroke-width="1.5"/>
+      <line x1="50" y1="100" x2="70" y2="170" stroke="var(--ink-faded)" stroke-width="1.5"/>
+    </svg>
+    <div class="body-zone bz-head" data-zone="head" onclick="toggleZone(this)">🧠</div>
+    <div class="body-zone bz-throat" data-zone="throat" onclick="toggleZone(this)">💬</div>
+    <div class="body-zone bz-chest" data-zone="chest" onclick="toggleZone(this)">💗</div>
+    <div class="body-zone bz-stomach" data-zone="stomach" onclick="toggleZone(this)">🔥</div>
+    <div class="body-zone bz-fists" data-zone="fists" onclick="toggleZone(this)">✊</div>
+  </div>
+</div>
+
+<!-- Phase 3: Calming -->
+<div class="phase" id="phase3">
+  <div class="grandma">
+    {% trans "Dušo, razumijem. Osjećaš nešto jako. To je potpuno normalno. Svi se ponekad osjećamo tako. Hajde da zajedno napravimo nešto lijepo — da se smirimo." %}
+  </div>
+
+  <div class="calm-cta">
+    <h3>{% trans "Odaberimo vježbu" %}</h3>
+    <p>{% trans "Koja ti se čini dobra?" %}</p>
+    <div class="exercise-grid">
+      {% for ex in exercises %}
+      <a href="{% url 'memio_world:calming_exercise' ex.technique %}" class="ex-card">
+        <div class="ex-emoji">{{ ex.emoji }}</div>
+        <div class="ex-name">{{ ex.title }}</div>
+        <div class="ex-dur">{{ ex.duration_seconds }}s</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Phase 4: Empathy Mirror (budućnost #3) — after calming -->
+<div class="phase" id="phase4">
+  <div class="empathy-section">
+    <h3>{% trans "A kako misliš da se osjećala druga osoba?" %}</h3>
+    <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:1rem">{% trans "Razmisli malo..." %}</p>
+    <div class="empathy-row">
+      <div class="empathy-btn" data-emo="sad" onclick="selectEmpathy(this)">😢</div>
+      <div class="empathy-btn" data-emo="angry" onclick="selectEmpathy(this)">😤</div>
+      <div class="empathy-btn" data-emo="scared" onclick="selectEmpathy(this)">😰</div>
+      <div class="empathy-btn" data-emo="neutral" onclick="selectEmpathy(this)">😐</div>
+      <div class="empathy-btn" data-emo="happy" onclick="selectEmpathy(this)">🙂</div>
+    </div>
+  </div>
+  <div class="grandma" style="margin-top:1rem">
+    {% trans "Kad pomislimo kako se drugi osjećaju, bolje razumijemo cijelu priču. Ti si pametno dijete." %}
+  </div>
+  <div style="text-align:center;margin-top:1rem">
+    <a href="{% url 'memio_world:play_home' %}" class="calm-btn">{% trans "Nastavi dalje" %} →</a>
+  </div>
+</div>
+
+<!-- Phase 5: Happy path — positive emotions -->
+<div class="phase" id="phase5">
+  <div style="text-align:center;padding:2rem 1rem">
+    <div style="font-size:4rem;margin-bottom:1rem" id="happyEmoji">🌟</div>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold);margin-bottom:.5rem">{% trans "Divno!" %}</h2>
+    <p style="color:var(--ink-light);font-size:1rem;font-style:italic;margin-bottom:1.5rem">{% trans "Lijepo je čuti da se dobro osjećaš." %}</p>
+    <a href="{% url 'memio_world:play_home' %}" class="calm-btn">{% trans "Što ćemo raditi danas?" %} →</a>
+  </div>
+</div>
+
+<div class="disclaimer">
+  {% trans "Ova platforma ne zamjenjuje stručnu pomoć. Ako primjećujete ponavljajuće ili intenzivne ispade bijesa, razgovarajte s pedijatrom ili dječjim psihologom." %}
+</div>
+
+<script>
+var _emo = '', _trigger = '', _zones = [];
+
+function selectEmo(btn) {
+  document.querySelectorAll('.emo-btn').forEach(function(b){b.classList.remove('selected')});
+  btn.classList.add('selected');
+  _emo = btn.dataset.emo;
+
+  setTimeout(function() {
+    document.getElementById('phase1').classList.remove('active');
+    if (['furious','angry','frustrated','anxious','sad'].includes(_emo)) {
+      document.getElementById('phase2').classList.add('active');
+    } else {
+      document.getElementById('phase5').classList.add('active');
+      // Save positive check-in
+      saveCheckin(_emo, '', '', []);
+    }
+  }, 400);
+}
+
+function selectTrigger(btn) {
+  document.querySelectorAll('.trigger-btn').forEach(function(b){b.classList.remove('selected')});
+  btn.classList.add('selected');
+  _trigger = btn.dataset.trigger;
+
+  setTimeout(function() {
+    document.getElementById('phase2').classList.remove('active');
+    document.getElementById('phase3').classList.add('active');
+  }, 300);
+}
+
+function toggleZone(el) {
+  el.classList.toggle('active');
+  var z = el.dataset.zone;
+  var idx = _zones.indexOf(z);
+  if (idx > -1) _zones.splice(idx,1); else _zones.push(z);
+}
+
+function selectEmpathy(btn) {
+  document.querySelectorAll('.empathy-btn').forEach(function(b){b.classList.remove('selected')});
+  btn.classList.add('selected');
+}
+
+function saveCheckin(emo, trigger, technique, zones) {
+  var fd = new FormData();
+  fd.append('emotion', emo);
+  fd.append('trigger', trigger);
+  fd.append('calming_technique', technique);
+  zones.forEach(function(z){ fd.append('body_zone', z) });
+  var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+  if (csrf) fd.append('csrfmiddlewaretoken', csrf[1]);
+  fetch('{% url "memio_world:emotion_checkin" %}', {method:'POST', body:fd}).catch(function(){});
+}
+</script>
+{% endblock %}

@@ -344,3 +344,230 @@ class JokeEntry(models.Model):
 
     def __str__(self):
         return f"[{self.get_joke_type_display()}] {self.setup[:50]}"
+
+
+# ════════════════════════════════════════════════════════════════
+# RAGE ENGINE — Upravljanje bijesom (Magistar pedagogije)
+# ════════════════════════════════════════════════════════════════
+
+
+class EmotionCheckIn(models.Model):
+    """
+    Dnevni check-in emocija djeteta.
+
+    Pedagoški temelj:
+    - Zones of Regulation (Leah Kuypers, 2011)
+    - RULER Approach (Yale Center for Emotional Intelligence)
+    - CASEL SEL Framework — Self-Awareness pillar
+
+    Dijete NE MOŽE kontrolirati emocije koje NE PREPOZNAJE.
+    Prvo imenujemo. Onda dišemo. Onda razmišljamo.
+    """
+
+    EMOTION_CHOICES = [
+        ("furious", "Jako ljut 😡"),
+        ("angry", "Ljut 😤"),
+        ("frustrated", "Frustriran 😣"),
+        ("anxious", "Zabrinut 😰"),
+        ("sad", "Tužan 😢"),
+        ("neutral", "Ok 😐"),
+        ("happy", "Veseo 🙂"),
+        ("very_happy", "Jako veseo 😊"),
+        ("ecstatic", "Presretan 😄"),
+    ]
+    TRIGGER_CHOICES = [
+        ("sibling", "Svađa s bratom/sestrom"),
+        ("school", "Škola / zadaća"),
+        ("friend", "Prijatelj"),
+        ("tired", "Umor"),
+        ("hungry", "Glad"),
+        ("unfair", "Nepravda"),
+        ("lost_game", "Izgubio igru"),
+        ("scared", "Strah"),
+        ("lonely", "Usamljenost"),
+        ("other", "Nešto drugo"),
+    ]
+    ACTION_CHOICES = [
+        ("breathing", "Disao/la duboko"),
+        ("counting", "Brojao/la do 10"),
+        ("walked_away", "Odšetao/la se"),
+        ("talked", "Pričao/la s nekim"),
+        ("cried", "Plakao/la"),
+        ("yelled", "Vikao/la"),
+        ("hit", "Udario/la"),
+        ("pillow", "Stisnuo/la jastuk"),
+        ("drew", "Nacrtao/la bijes"),
+        ("music", "Slušao/la glazbu"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(
+        "memio_world.ChildProfile",
+        on_delete=models.CASCADE,
+        related_name="emotion_checkins",
+        null=True,
+        blank=True,
+    )
+    session_id = models.CharField(
+        max_length=64,
+        blank=True,
+        db_index=True,
+        help_text="Za anonimne check-ine bez ChildProfile",
+    )
+    emotion = models.CharField(max_length=20, choices=EMOTION_CHOICES)
+    intensity = models.PositiveSmallIntegerField(
+        default=5,
+        help_text="1-10 intenzitet emocije",
+    )
+    trigger = models.CharField(max_length=30, choices=TRIGGER_CHOICES, blank=True)
+    action_taken = models.CharField(max_length=30, choices=ACTION_CHOICES, blank=True)
+    reflection_text = models.TextField(blank=True)
+    reflection_audio = models.FileField(upload_to="play_eu/emotions/", blank=True)
+    calming_technique_used = models.CharField(max_length=30, blank=True)
+    felt_better_after = models.BooleanField(null=True)
+    # Body Map — gdje u tijelu osjeti emociju (budućnost #1)
+    body_zones = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='["chest","stomach","fists","head","throat"] — gdje pecka/gori',
+    )
+    # Empathy Mirror — kako se drugi osjeća (budućnost #3)
+    other_person_feeling = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=EMOTION_CHOICES,
+        help_text="Kako misliš da se druga osoba osjeća?",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    date = models.DateField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "play_emotion_checkin"
+        ordering = ["-created_at"]
+        verbose_name = _("Emotion Check-In")
+        verbose_name_plural = _("Emotion Check-Ins")
+
+    def __str__(self):
+        return f"{self.get_emotion_display()} — {self.date}"
+
+    @property
+    def needs_calming(self):
+        return self.emotion in ("furious", "angry", "anxious")
+
+
+class CalmingExercise(models.Model):
+    """
+    Tehnika smirivanja — svaka ima animaciju, bakine riječi, i timer.
+
+    Izvori:
+    - Square Breathing (US Navy SEALs — 4-4-4-4)
+    - Progressive Muscle Relaxation (Jacobson, 1938)
+    - Mindfulness for Children (Kabat-Zinn adapted)
+    - STOP Technique (DBT for adolescents)
+    """
+
+    TECHNIQUE_CHOICES = [
+        ("breathing", "Duboko disanje"),
+        ("counting", "Brojanje unatrag"),
+        ("volcano", "Vulkan vježba"),
+        ("balloon", "Balon se napuhuje"),
+        ("jellyfish", "Meduza plutanje"),
+        ("turtle", "Kornjačina ljuska"),
+        ("traffic_light", "Semafor"),
+        ("body_scan", "Skeniranje tijela"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    technique = models.CharField(max_length=30, choices=TECHNIQUE_CHOICES, unique=True)
+    title = models.CharField(max_length=200)
+    title_de = models.CharField(max_length=200, blank=True)
+    title_en = models.CharField(max_length=200, blank=True)
+    instruction_text = models.TextField(help_text="Korak-po-korak upute (HR)")
+    instruction_text_de = models.TextField(blank=True)
+    instruction_text_en = models.TextField(blank=True)
+    grandma_voice = models.TextField(
+        blank=True,
+        help_text="Bakine riječi — toplo, nježno, sigurno",
+    )
+    grandma_voice_de = models.TextField(blank=True)
+    grandma_voice_en = models.TextField(blank=True)
+    duration_seconds = models.PositiveSmallIntegerField(default=60)
+    animation_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='{"type":"balloon","inhale_sec":4,"exhale_sec":4,"cycles":5,"color":"#87CEEB"}',
+    )
+    emoji = models.CharField(max_length=10, default="🎈")
+    age_min = models.PositiveSmallIntegerField(default=3)
+    age_max = models.PositiveSmallIntegerField(default=12)
+    sort_order = models.PositiveSmallIntegerField(default=10)
+    is_published = models.BooleanField(default=False)
+    times_used = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "play_calming_exercise"
+        ordering = ["sort_order"]
+        verbose_name = _("Vježba smirivanja")
+        verbose_name_plural = _("Vježbe smirivanja")
+
+    def __str__(self):
+        return f"{self.emoji} {self.title}"
+
+    def get_title(self, lang="hr"):
+        if lang == "de" and self.title_de:
+            return self.title_de
+        if lang == "en" and self.title_en:
+            return self.title_en
+        return self.title
+
+
+class ConflictScenario(models.Model):
+    """
+    Budućnost #2 — Interaktivni scenariji rješavanja konflikata.
+
+    Pedagoški temelj:
+    - Second Step Program (Committee for Children)
+    - PATHS curriculum (Promoting Alternative THinking Strategies)
+    - Collaborative Problem Solving (Dr. Ross Greene)
+
+    Dijete čita situaciju → bira odgovor → vidi posljedice.
+    Nema "krivog" odgovora — ali svaki ima RAZLIČITE posljedice.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    title_de = models.CharField(max_length=200, blank=True)
+    title_en = models.CharField(max_length=200, blank=True)
+    situation = models.TextField(help_text="Opis situacije (HR)")
+    situation_de = models.TextField(blank=True)
+    situation_en = models.TextField(blank=True)
+    emoji = models.CharField(max_length=10, default="🤔")
+    # Opcije i posljedice kao JSON
+    choices = models.JSONField(
+        default=list,
+        help_text="""[
+            {"text":"Viknem na njega","emoji":"😡","consequence":"Prijatelj se rasplače i ode.","score":-1,"skill":"impulse_control"},
+            {"text":"Kažem: Ljut sam jer...","emoji":"💬","consequence":"Prijatelj sluša i kaže oprosti.","score":2,"skill":"i_message"},
+            {"text":"Odšetam se","emoji":"🚶","consequence":"Smiriš se, ali problem ostaje.","score":1,"skill":"self_regulation"}
+        ]""",
+    )
+    choices_de = models.JSONField(default=list, blank=True)
+    choices_en = models.JSONField(default=list, blank=True)
+    age_min = models.PositiveSmallIntegerField(default=5)
+    age_max = models.PositiveSmallIntegerField(default=12)
+    is_published = models.BooleanField(default=False)
+    sort_order = models.PositiveSmallIntegerField(default=10)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "memio_world"
+        db_table = "play_conflict_scenario"
+        ordering = ["sort_order"]
+        verbose_name = _("Scenarij konflikta")
+        verbose_name_plural = _("Scenariji konflikata")
+
+    def __str__(self):
+        return f"{self.emoji} {self.title}"

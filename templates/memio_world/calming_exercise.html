@@ -1,0 +1,217 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} — PLAY.EU{% endblock %}
+{% block body_class %}calming-page{% endblock %}
+
+{% block extra_head %}
+<style>
+.calm-full{min-height:calc(100dvh - 100px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;background:linear-gradient(180deg,var(--parchment-light,#faf3e3),var(--parchment,#f5e6c8))}
+
+/* Breathing circle */
+.breath-circle{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(135,206,235,.3),rgba(135,206,235,.05));border:3px solid rgba(135,206,235,.4);display:flex;align-items:center;justify-content:center;margin:2rem auto;position:relative}
+.breath-circle.inhaling{animation:inhale 4s ease-in-out forwards}
+.breath-circle.exhaling{animation:exhale 4s ease-in-out forwards}
+.breath-circle.holding{animation:hold 4s linear forwards}
+@keyframes inhale{0%{transform:scale(.6);border-color:rgba(135,206,235,.3)}100%{transform:scale(1.2);border-color:rgba(135,206,235,.8);background:radial-gradient(circle,rgba(135,206,235,.4),rgba(135,206,235,.1))}}
+@keyframes exhale{0%{transform:scale(1.2);border-color:rgba(135,206,235,.8)}100%{transform:scale(.6);border-color:rgba(135,206,235,.3);background:radial-gradient(circle,rgba(135,206,235,.15),rgba(135,206,235,.02))}}
+@keyframes hold{0%,100%{transform:scale(1.2);border-color:rgba(201,168,76,.6)}}
+.breath-text{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--ink);font-weight:600;z-index:2}
+.breath-count{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;color:var(--gold);font-weight:700;margin-top:.5rem}
+
+/* Volcano */
+.volcano-wrap{width:200px;height:200px;position:relative;margin:2rem auto}
+.volcano-body{width:100%;height:100%;position:relative}
+.volcano-body svg{width:100%;height:100%}
+.lava{fill:var(--gold);transition:height 2s,opacity 2s}
+.lava.cooling{fill:#87CEEB;opacity:.3}
+
+/* Grandma */
+.grandma-say{background:rgba(201,168,76,.08);border-radius:16px;padding:1.2rem 1.5rem;margin:1.5rem 0;font-style:italic;font-size:1.1rem;line-height:1.7;color:var(--ink-soft,#4a3728);max-width:400px;border-left:3px solid var(--gold)}
+.grandma-say::before{content:'👵 ';font-style:normal}
+
+/* Instruction steps */
+.steps{text-align:left;max-width:380px;margin:1rem auto}
+.step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;font-size:.95rem;color:var(--ink-soft)}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+.step.active .step-num{box-shadow:0 0 12px var(--gold-glow)}
+
+/* Result */
+.result-area{margin-top:2rem}
+.result-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+.res-btn{padding:14px 28px;border-radius:50px;border:2px solid var(--gold);background:none;color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none}
+.res-btn:hover,.res-btn.primary{background:var(--gold);color:var(--ink)}
+
+.disclaimer{font-size:.65rem;color:var(--ink-faded);text-align:center;padding:1rem;margin-top:auto}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calm-full">
+  <div style="font-size:3rem;margin-bottom:.5rem">{{ exercise.emoji }}</div>
+  <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--ink);margin-bottom:.3rem">{{ title }}</h1>
+  <p style="color:var(--ink-light);font-size:.9rem;font-style:italic">{{ exercise.duration_seconds }}{% trans "s" %}</p>
+
+  <!-- Breathing Animation -->
+  {% if exercise.technique == "breathing" or exercise.technique == "balloon" %}
+  <div class="breath-circle" id="breathCircle">
+    <div>
+      <div class="breath-text" id="breathText">{% trans "Spremni?" %}</div>
+      <div class="breath-count" id="breathCount"></div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if exercise.technique == "volcano" %}
+  <div class="volcano-wrap">
+    <svg viewBox="0 0 200 200">
+      <polygon points="100,20 160,180 40,180" fill="var(--ink-faded)" opacity=".3"/>
+      <rect class="lava" id="lava" x="70" y="60" width="60" height="100" rx="8" opacity=".7"/>
+    </svg>
+  </div>
+  {% endif %}
+
+  <!-- Grandma's voice -->
+  {% if grandma_voice %}
+  <div class="grandma-say">{{ grandma_voice }}</div>
+  {% endif %}
+
+  <!-- Steps -->
+  <div class="steps" id="steps">
+    {% for line in instruction.splitlines %}
+    {% if line.strip %}
+    <div class="step" data-step="{{ forloop.counter0 }}">
+      <span class="step-num">{{ forloop.counter }}</span>
+      <span>{{ line }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Start button -->
+  <button class="res-btn primary" id="startBtn" onclick="startExercise()" style="margin-top:1.5rem">
+    {% trans "Počnimo" %} →
+  </button>
+
+  <!-- Result (hidden until done) -->
+  <div class="result-area" id="resultArea" style="display:none">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:.5rem">{% trans "Osjećaš li se bolje?" %}</h2>
+    <div class="result-btns">
+      <a href="{% url 'memio_world:play_home' %}" class="res-btn primary">{% trans "Da, bolje mi je" %} ☀️</a>
+      <a href="{% url 'memio_world:calming_exercise' exercise.technique %}" class="res-btn">{% trans "Još jednom" %} 🔄</a>
+      <a href="{% url 'memio_world:emotion_checkin' %}" class="res-btn">{% trans "Probam drugu vježbu" %}</a>
+    </div>
+  </div>
+</div>
+
+<div class="disclaimer">
+  {% trans "Ova platforma ne zamjenjuje stručnu pomoć. Ako primjećujete ponavljajuće ili intenzivne ispade bijesa, razgovarajte s pedijatrom ili dječjim psihologom." %}
+</div>
+
+<script>
+var INHALE = {{ animation.inhale_sec|default:4 }};
+var EXHALE = {{ animation.exhale_sec|default:4 }};
+var HOLD   = {{ animation.hold_sec|default:0 }};
+var CYCLES = {{ animation.cycles|default:5 }};
+var cycle = 0;
+
+function startExercise() {
+  document.getElementById('startBtn').style.display = 'none';
+  {% if exercise.technique == "breathing" or exercise.technique == "balloon" %}
+  breathCycle();
+  {% elif exercise.technique == "counting" %}
+  countDown();
+  {% elif exercise.technique == "volcano" %}
+  volcanoCool();
+  {% else %}
+  stepByStep();
+  {% endif %}
+}
+
+function breathCycle() {
+  if (cycle >= CYCLES) { finish(); return; }
+  var circle = document.getElementById('breathCircle');
+  var text = document.getElementById('breathText');
+  var count = document.getElementById('breathCount');
+
+  // Inhale
+  circle.className = 'breath-circle inhaling';
+  text.textContent = '{% trans "Udahni..." %}';
+  animateCount(count, INHALE, function() {
+    // Hold (if any)
+    if (HOLD > 0) {
+      circle.className = 'breath-circle holding';
+      text.textContent = '{% trans "Drži..." %}';
+      animateCount(count, HOLD, doExhale);
+    } else { doExhale(); }
+  });
+
+  function doExhale() {
+    circle.className = 'breath-circle exhaling';
+    text.textContent = '{% trans "Izdahni..." %}';
+    animateCount(count, EXHALE, function() {
+      cycle++;
+      count.textContent = '';
+      text.textContent = (CYCLES - cycle) + ' {% trans "još" %}';
+      setTimeout(breathCycle, 500);
+    });
+  }
+}
+
+function countDown() {
+  var text = document.getElementById('breathText') || document.querySelector('.calm-full h1');
+  var n = 10;
+  var iv = setInterval(function() {
+    text.textContent = n;
+    text.style.fontSize = (2 + (10-n)*0.15) + 'rem';
+    n--;
+    if (n < 0) { clearInterval(iv); finish(); }
+  }, 1200);
+}
+
+function volcanoCool() {
+  var lava = document.getElementById('lava');
+  var steps = 5;
+  var i = 0;
+  var iv = setInterval(function() {
+    i++;
+    lava.setAttribute('height', Math.max(10, 100 - i*18));
+    lava.setAttribute('y', 60 + i*18);
+    if (i >= steps) {
+      clearInterval(iv);
+      lava.classList.add('cooling');
+      setTimeout(finish, 1500);
+    }
+  }, 2000);
+}
+
+function stepByStep() {
+  var steps = document.querySelectorAll('.step');
+  var i = 0;
+  var iv = setInterval(function() {
+    if (i > 0) steps[i-1].classList.remove('active');
+    if (i >= steps.length) { clearInterval(iv); finish(); return; }
+    steps[i].classList.add('active');
+    steps[i].scrollIntoView({behavior:'smooth', block:'center'});
+    i++;
+  }, 4000);
+}
+
+function animateCount(el, seconds, cb) {
+  var n = seconds;
+  el.textContent = n;
+  var iv = setInterval(function() {
+    n--;
+    el.textContent = n > 0 ? n : '';
+    if (n <= 0) { clearInterval(iv); if(cb) cb(); }
+  }, 1000);
+}
+
+function finish() {
+  var text = document.getElementById('breathText');
+  if (text) text.textContent = '✨';
+  document.getElementById('resultArea').style.display = 'block';
+  document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
+}
+</script>
+{% endblock %}
