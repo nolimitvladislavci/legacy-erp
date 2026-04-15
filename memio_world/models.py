@@ -9,9 +9,9 @@ GDPR kontekst: osobni podaci obitelji, ne ljubimci — zasebna izolacija.
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from memio_world.encrypted_fields import WorldEncryptedField
-from django.utils.translation import gettext_lazy as _
 
 
 class WaitlistEntry(models.Model):
@@ -882,4 +882,4 @@ class HeritageOracle(models.Model):
 # ════════════════════════════════════════════════════════════════
 # PLAY.EU — Dječja Digitalna Baština Europe (Sprint 1)
 # ════════════════════════════════════════════════════════════════
-from memio_world.play_eu_models import EuropeanaItem, ParallelStory, HeritageCard  # noqa: F401, E402
+from memio_world.play_eu_models import EuropeanaItem, HeritageCard, ParallelStory  # noqa: F401, E402
