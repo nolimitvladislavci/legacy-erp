@@ -435,7 +435,7 @@
             </div>
             {% endif %}
             {% if user.is_authenticated %}
-            {% with trikey=user.trikeyprofile %}
+            {% with trikey=user.trikey %}
             {% if not trikey.pin_hash and not request.session.pin_banner_dismissed %}
             <div class="fx-rounded" id="pinBanner" style="background:linear-gradient(135deg,rgba(34,197,94,.04),transparent);border:1px solid rgba(34,197,94,.15);padding:10px 16px;margin-bottom:12px">
               <div class="d-flex fx-flex-wrap fx-gap-3 align-items-center justify-content-between">
