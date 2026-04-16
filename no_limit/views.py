@@ -91,7 +91,10 @@ def ambasador_prijava(request):
         country = request.POST.get("country", "").strip()
         city = request.POST.get("city", "").strip()
         organization = request.POST.get("organization", "").strip()
+        organization_type = request.POST.get("organization_type", "").strip()
+        desired_role = request.POST.get("desired_role", "national_coordinator").strip()
         motivation = request.POST.get("motivation", "").strip()
+        experience = request.POST.get("experience", "").strip()
         languages = request.POST.get("languages", "").strip()
         phone = request.POST.get("phone", "").strip()
 
@@ -102,7 +105,10 @@ def ambasador_prijava(request):
                 country=country,
                 city=city,
                 organization=organization,
+                organization_type=organization_type,
+                desired_role=desired_role,
                 motivation=motivation,
+                experience=experience,
                 languages=languages,
                 phone=phone,
             )
@@ -113,15 +119,51 @@ def ambasador_prijava(request):
                 wa_number = getattr(settings, "IVAN_WHATSAPP_NUMBER", "")
                 if wa_number:
                     country_display = dict(AmbassadorApplication.COUNTRY_CHOICES).get(country, country)
+                    role_display = dict(AmbassadorApplication.ROLE_CHOICES).get(desired_role, desired_role)
                     send_whatsapp(
                         wa_number,
-                        f"Nova ambasadorska prijava!\n{full_name} iz {country_display}\nOrg: {organization or 'N/A'}\nEmail: {email}",
+                        f"Nova ambasadorska prijava!\n{full_name} iz {country_display}\nUloga: {role_display}\nOrg: {organization or 'N/A'}\nEmail: {email}",
                     )
             except Exception:
                 logger.exception("WA notification failed for ambassador application")
-            return redirect("/?prijava=ok")
+            return redirect("/ambasadori/hvala/")
 
     return render(request, "no_limit/ambasador_prijava.html")
+
+
+def ambasador_hvala(request):
+    """Thank you stranica nakon prijave."""
+    return render(request, "no_limit/ambasador_hvala.html")
+
+
+def ambasador_ugovor_pdf(request):
+    """PDF: Ambasadorski ugovor (A1) s evalidator pečatom."""
+    import weasyprint
+
+    ctx = {
+        "doc_id": "A1",
+        "doc_version": "1.0.0",
+        "doc_date": "16.04.2026.",
+        "doc_issuer": "No-limit udruga",
+        "doc_url": "https://no-limit.world/dokumenti/",
+        "doc_hash": "",
+        "doc_hash_short": "",
+        "amb_name": request.GET.get("name", "[Ime i prezime ambasadora]"),
+        "amb_country": request.GET.get("country", "[država]"),
+        "amb_email": request.GET.get("email", "[email]"),
+        "amb_role": request.GET.get("role", "nacionalni koordinator"),
+    }
+    html = render_to_string("no_limit/pdf/ambasadorski_ugovor.html", ctx)
+    content_hash = hashlib.sha256(html.encode()).hexdigest()
+    ctx["doc_hash"] = content_hash
+    ctx["doc_hash_short"] = content_hash[:16]
+    html_final = render_to_string("no_limit/pdf/ambasadorski_ugovor.html", ctx)
+
+    pdf_bytes = weasyprint.HTML(string=html_final).write_pdf()
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="ambasadorski_ugovor_A1.pdf"'
+    response["X-Document-Hash"] = hashlib.sha256(pdf_bytes).hexdigest()
+    return response
 
 
 # ═══════════════════════════════════════════════════════════════

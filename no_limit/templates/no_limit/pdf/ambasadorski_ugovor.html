@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ugovor o ambasadorskoj suradnji — No Limit</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-center {
+                content: "A1 v{{ doc_version }} — Stranica " counter(page) " od " counter(pages);
+                font-size: 7pt;
+                color: #999;
+            }
+        }
+        body { font-family: 'DejaVu Sans', 'Arial', sans-serif; font-size: 10pt; line-height: 1.6; color: #222; }
+        h1 { text-align: center; font-size: 14pt; margin-bottom: 3mm; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { font-size: 11pt; margin-top: 8mm; margin-bottom: 3mm; color: #333; border-bottom: 0.5pt solid #c9a84c; padding-bottom: 1mm; }
+        .subtitle { text-align: center; font-size: 9pt; color: #666; margin-bottom: 10mm; }
+        .doc-id { text-align: center; font-family: 'DejaVu Sans Mono', monospace; font-size: 8pt; color: #c9a84c; margin-bottom: 8mm; }
+        ol, ul { margin-left: 5mm; margin-top: 2mm; }
+        li { margin-bottom: 2mm; }
+        p { margin-bottom: 4mm; }
+        .placeholder { color: #c9a84c; font-style: italic; }
+        .highlight { background: #fef9c3; padding: 1mm 2mm; border-left: 2pt solid #c9a84c; margin: 3mm 0; font-size: 9pt; }
+    </style>
+</head>
+<body>
+
+    <div style="text-align: center; margin-bottom: 5mm;">
+        <span style="font-size: 18pt; color: #c9a84c;">&#x2B21;</span>
+    </div>
+
+    <h1>UGOVOR O AMBASADORSKOJ SURADNJI</h1>
+    <p class="subtitle">Dokument A1 — Nacionalni koordinator / Regionalni ambasador</p>
+    <p class="doc-id">Dokument: A1 | Verzija: {{ doc_version|default:"1.0.0" }} | {{ doc_date|default:"16.04.2026." }}</p>
+
+    <!-- STRANE -->
+    <h2>1. Ugovorne strane</h2>
+    <p>Ovaj ugovor sklapaju:</p>
+    <ol>
+        <li><strong>NO LIMIT udruga</strong>, OIB: <span class="placeholder">[___________]</span>,
+            sa sjedištem u <span class="placeholder">[Čepin/Osijek]</span>,
+            zastupana po predsjedniku <strong>Ivanu Brtanu</strong> (u daljnjem tekstu: <strong>Udruga</strong>)</li>
+        <li><strong>{{ amb_name|default:"[Ime i prezime ambasadora]" }}</strong>,
+            iz države <strong>{{ amb_country|default:"[država]" }}</strong>,
+            email: {{ amb_email|default:"[email]" }}
+            (u daljnjem tekstu: <strong>Ambasador</strong>)</li>
+    </ol>
+
+    <!-- PREDMET -->
+    <h2>2. Predmet ugovora</h2>
+    <p>Ambasador postaje <strong>{{ amb_role|default:"nacionalni koordinator" }}</strong> No-limit projekata
+    u {{ amb_country|default:"[državi]" }} za period od <strong>1 (jedne) godine</strong> uz automatski produžetak.</p>
+    <p>Ambasador predstavlja sljedeće platforme u svojoj zemlji:</p>
+    <ul>
+        <li><strong>PLAY.EU</strong> (memio.world) — dječja obrazovna platforma</li>
+        <li><strong>memio.pet</strong> — digitalni identitet ljubimaca</li>
+        <li><strong>eValidator</strong> (evalidator.eu) — javni validacijski servis</li>
+    </ul>
+
+    <!-- PRAVA -->
+    <h2>3. Prava ambasadora</h2>
+    <ol>
+        <li>Besplatan pristup svim premium sadržajima platforme</li>
+        <li><strong>20% prihoda</strong> od pretplata korisnika iz svoje zemlje</li>
+        <li>Podrška u pisanju EU grant prijava za svoju zemlju</li>
+        <li>Korištenje naziva <strong>"PLAY.EU National Coordinator — {{ amb_country|default:"[država]" }}"</strong></li>
+        <li>Pedagoška i tehnička podrška Udruge</li>
+        <li>Pristup internim alatima za koordinaciju (LIMIT Connect workspace)</li>
+    </ol>
+
+    <!-- OBVEZE -->
+    <h2>4. Obveze ambasadora</h2>
+    <ol>
+        <li>Promovirati platformu u svojoj zemlji putem odgovarajućih kanala</li>
+        <li>Validirati pedagoški sadržaj za svoju kulturnu sredinu</li>
+        <li>Prevesti minimum <strong>3 sadržaja godišnje</strong> na lokalni jezik</li>
+        <li>Sudjelovati na minimalno <strong>4 online susreta godišnje</strong></li>
+        <li>Potpisati Letter of Intent za EU projekt prijave kad je primjenjivo</li>
+        <li>Pridržavati se <strong>GDPR-Kids politike</strong> (dokument G1) — nula podataka o djeci</li>
+    </ol>
+
+    <!-- IP -->
+    <h2>5. Intelektualno vlasništvo</h2>
+    <ol>
+        <li>Sav sadržaj na platformi ostaje vlasništvo Udruge (vidi dokument L1).</li>
+        <li>Lokalni sadržaj koji kreira Ambasador postaje <strong>zajedničko vlasništvo</strong> — Ambasador zadržava pravo korištenja, Udruga dobiva neekskluzivnu licencu za platformu.</li>
+        <li>Ambasador NE smije koristiti branding platforme za vlastite komercijalne svrhe bez pisanog odobrenja.</li>
+    </ol>
+
+    <!-- POVJERLJIVOST -->
+    <h2>6. Povjerljivost</h2>
+    <ol>
+        <li>Ambasador se obvezuje na povjerljivost poslovnih informacija, interne komunikacije i neobjavljenih sadržaja.</li>
+        <li>Ova obveza traje <strong>1 (jednu) godinu</strong> nakon prestanka suradnje.</li>
+        <li>Izuzeci: javno dostupne informacije, zahtjevi suda ili regulatora.</li>
+    </ol>
+
+    <!-- ZAŠTITA DJECE -->
+    <h2>7. Zaštita djece</h2>
+    <div class="highlight">
+        <strong>KRITIČNO:</strong> Ambasador potpisuje GDPR-Kids politiku (dokument G1) kao sastavni dio ovog ugovora.
+        Kršenje politike zaštite djece = automatski raskid bez otkaznog roka.
+    </div>
+    <ol>
+        <li>NE prikupljati podatke djece prilikom lokalizacije sadržaja</li>
+        <li>NE fotografirati djecu bez pisanog pristanka roditelja</li>
+        <li>Koristiti samo odobrene ilustracije i generički sadržaj</li>
+    </ol>
+
+    <!-- TRAJANJE -->
+    <h2>8. Trajanje i raskid</h2>
+    <ol>
+        <li>Ugovor se sklapa na <strong>1 godinu</strong> uz automatski produžetak.</li>
+        <li>Svaka strana može raskinuti uz <strong>30 dana</strong> pisane obavijesti.</li>
+        <li>Automatski raskid nastupa u slučaju:
+            <ul>
+                <li>Kršenja GDPR-Kids politike (članak 7)</li>
+                <li>Neaktivnosti duže od 6 mjeseci bez najave</li>
+                <li>Zlouporabe branding-a platforme</li>
+            </ul>
+        </li>
+        <li>Kod raskida, Ambasador zadržava pravo na svoj lokalni sadržaj.</li>
+    </ol>
+
+    <!-- FINANCIJE -->
+    <h2>9. Financijski uvjeti</h2>
+    <ol>
+        <li><strong>Nema uplate za ulazak</strong> — ambasadorstvo je besplatno.</li>
+        <li><strong>Nema nivoa, nema regrutiranja</strong> — ovo NIJE MLM model.</li>
+        <li>20% prihoda se obračunava kvartalno i isplaćuje na IBAN Ambasadora.</li>
+        <li>Minimalni prag za isplatu: <strong>50 EUR</strong> (ispod praga se prenosi u sljedeći kvartal).</li>
+    </ol>
+
+    <!-- SPOROVI -->
+    <h2>10. Rješavanje sporova</h2>
+    <ol>
+        <li>Sporove rješavamo pregovorima u dobroj vjeri.</li>
+        <li>Ako pregovori ne uspiju u roku 30 dana, nadležan je <strong>Općinski sud u Osijeku</strong>.</li>
+        <li>Primjenjuje se pravo Republike Hrvatske.</li>
+    </ol>
+
+    <!-- POTPISI -->
+    <div style="margin-top: 20mm; page-break-inside: avoid;">
+        <p style="text-align: right; margin-bottom: 15mm;">
+            U _________________, dana _________________ 2026. godine.
+        </p>
+        <div style="width: 45%; display: inline-block; text-align: center; vertical-align: top; margin: 0 2%;">
+            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
+                <strong>Za Udrugu:</strong><br>
+                No-limit udruga<br>
+                Ivan Brtan, Predsjednik
+            </div>
+        </div>
+        <div style="width: 45%; display: inline-block; text-align: center; vertical-align: top; margin: 0 2%;">
+            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
+                <strong>Ambasador:</strong><br>
+                {{ amb_name|default:"[Ime i prezime]" }}<br>
+                {{ amb_country|default:"[Država]" }}
+            </div>
+        </div>
+    </div>
+
+    {% include "notariat/pdf/evalidator_seal.html" %}
+
+</body>
+</html>
