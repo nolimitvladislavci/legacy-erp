@@ -41,6 +41,7 @@ urlpatterns = [
     path("sesija/<int:session_id>/foto-mjere/", views.photo_measure, name="photo_measure"),
     path("sesija/<int:session_id>/foto-spremi/", views.save_photo_measure, name="save_photo_measure"),
     path("ai-mjere/", views.ai_measure, name="ai_measure"),
+    path("mjerenje/<int:pk>/verify/", views.verify_measurement, name="verify_measurement"),
     path("ponuda/<int:offer_id>/sign/", views.sign_offer, name="sign_offer"),
     path("sesija/<int:session_id>/primopredaja/", views.session_handover, name="session_handover"),
 ]

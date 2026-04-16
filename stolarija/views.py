@@ -1498,6 +1498,8 @@ def save_photo_measure(request, session_id):
         location_note=location,
         photo_annotations=annotations_data,
         measurement_source=source,
+        measured_by=request.user,
+        device_info=request.META.get("HTTP_USER_AGENT", "")[:255],
     )
 
     if request.FILES.get("photo_before"):
@@ -1579,3 +1581,46 @@ def ai_measure(request):
     except Exception as e:
         logger.warning("ai_measure failed: %s", e)
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def verify_measurement(request, pk):
+    """Verify integrity hash of a measurement — tamper detection."""
+    company = _company(request)
+    m = get_object_or_404(Measurement, pk=pk, session__company=company)
+
+    is_valid = m.verify_integrity()
+    chain_valid = True
+
+    # Verify chain
+    if m.previous_hash:
+        prev = (
+            Measurement.objects.filter(session=m.session, position_number__lt=m.position_number)
+            .order_by("-position_number")
+            .first()
+        )
+        if prev:
+            chain_valid = prev.integrity_hash == m.previous_hash
+
+    return JsonResponse(
+        {
+            "measurement_id": m.pk,
+            "position": m.position_number,
+            "integrity_hash": m.integrity_hash,
+            "photo_hash": m.photo_hash,
+            "previous_hash": m.previous_hash,
+            "is_valid": is_valid,
+            "chain_valid": chain_valid,
+            "is_tampered": m.is_tampered,
+            "measured_by": m.measured_by.get_full_name() if m.measured_by else None,
+            "device": m.device_info[:80] if m.device_info else None,
+            "created_at": m.created_at.isoformat(),
+            "gps": {
+                "lat": m.session.latitude,
+                "lng": m.session.longitude,
+                "accuracy": m.session.gps_accuracy,
+            }
+            if m.session.latitude
+            else None,
+        }
+    )

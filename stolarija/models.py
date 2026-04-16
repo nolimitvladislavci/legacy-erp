@@ -238,6 +238,41 @@ class Measurement(models.Model):
         help_text="manual / photo_draw / ai_vision / voice",
     )
 
+    # ── Forensic Integrity (sudski neoboriv dokaz) ──
+    integrity_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        db_index=True,
+        verbose_name="SHA-256 hash",
+        help_text="Hash od dimenzija + GPS + timestamp + photo hash",
+    )
+    photo_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        verbose_name="SHA-256 foto",
+        help_text="Hash originalne fotografije — dokaz da nije mijenjana",
+    )
+    previous_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        verbose_name="Hash prethodnog mjerenja",
+        help_text="Chain: svaka mjera referencira prethodnu (blockchain-like)",
+    )
+    measured_by = models.ForeignKey(
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="stolarija_measurements",
+        verbose_name="Mjerio",
+    )
+    device_info = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Uređaj",
+        help_text="User-Agent mobitela koji je mjerio",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -251,6 +286,84 @@ class Measurement(models.Model):
             f"{self.width_mm}×{self.height_mm}mm "
             f"×{self.quantity}kom"
         )
+
+    def compute_integrity_hash(self):
+        """SHA-256 od ključnih polja — sudski neoboriv dokaz."""
+        import hashlib
+
+        data = "|".join(
+            [
+                str(self.session_id),
+                str(self.position_number),
+                str(self.width_mm),
+                str(self.height_mm),
+                str(self.depth_mm),
+                self.element_type,
+                self.wing_config,
+                str(self.quantity),
+                self.location_note,
+                str(self.floor),
+                self.photo_hash,
+                str(self.created_at or ""),
+                # GPS from session
+                str(getattr(self.session, "latitude", "") or ""),
+                str(getattr(self.session, "longitude", "") or ""),
+            ]
+        )
+        return hashlib.sha256(data.encode("utf-8")).hexdigest()
+
+    def compute_photo_hash(self):
+        """SHA-256 originalne fotografije."""
+        import hashlib
+
+        if self.photo_before and hasattr(self.photo_before, "read"):
+            try:
+                self.photo_before.seek(0)
+                h = hashlib.sha256()
+                for chunk in iter(lambda: self.photo_before.read(8192), b""):
+                    h.update(chunk)
+                self.photo_before.seek(0)
+                return h.hexdigest()
+            except Exception:
+                pass
+        return ""
+
+    def save(self, *args, **kwargs):
+        is_new = not self.pk
+
+        # Photo hash
+        if is_new and self.photo_before and not self.photo_hash:
+            self.photo_hash = self.compute_photo_hash()
+
+        # Chain: get previous measurement hash
+        if is_new and not self.previous_hash:
+            prev = (
+                Measurement.objects.filter(session=self.session)
+                .exclude(pk=self.pk)
+                .order_by("-position_number")
+                .values_list("integrity_hash", flat=True)
+                .first()
+            )
+            if prev:
+                self.previous_hash = prev
+
+        super().save(*args, **kwargs)
+
+        # Compute integrity hash (needs pk/created_at)
+        if is_new or not self.integrity_hash:
+            self.integrity_hash = self.compute_integrity_hash()
+            Measurement.objects.filter(pk=self.pk).update(integrity_hash=self.integrity_hash)
+
+    def verify_integrity(self):
+        """Provjeri da hash odgovara podacima — tamper detection."""
+        expected = self.compute_integrity_hash()
+        return self.integrity_hash == expected
+
+    @property
+    def is_tampered(self):
+        if not self.integrity_hash:
+            return None  # nikad hashiran
+        return not self.verify_integrity()
 
     @property
     def area_m2(self):
@@ -631,6 +744,13 @@ class HandoverProtocol(models.Model):
         WindowWarranty, on_delete=models.SET_NULL, null=True, blank=True, related_name="handover"
     )
 
+    # ── Forensic Integrity ──
+    integrity_hash = models.CharField(max_length=64, blank=True, verbose_name="SHA-256")
+    signature_hash = models.CharField(max_length=64, blank=True, verbose_name="SHA-256 potpisa")
+    latitude = models.FloatField(null=True, blank=True, verbose_name="GPS lat (potpis)")
+    longitude = models.FloatField(null=True, blank=True, verbose_name="GPS lng (potpis)")
+    device_info = models.CharField(max_length=255, blank=True, verbose_name="Uređaj kupca")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -639,6 +759,21 @@ class HandoverProtocol(models.Model):
 
     def __str__(self):
         return f"Primopredaja — {self.client_name} ({self.signed_at or 'nepotpisano'})"
+
+    def compute_integrity_hash(self):
+        import hashlib
+
+        data = "|".join(
+            [
+                str(self.installation_id),
+                self.client_name,
+                str(self.signed_at or ""),
+                str(self.accepted),
+                self.remarks[:200],
+                self.signature_hash,
+            ]
+        )
+        return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
