@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 """
 rental/ai_assistant.py — AI dnevni sažetak + upozorenja za iznajmljivača
 

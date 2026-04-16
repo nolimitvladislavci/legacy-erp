@@ -1,0 +1,186 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🏆 {% trans "Natječaj" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.contest{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.contest h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.contest .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem}
+.cat-card{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);
+  transition:.2s;cursor:pointer;text-align:center}
+.cat-card:hover{border-color:#c9a84c;transform:translateY(-3px);box-shadow:0 6px 20px rgba(201,168,76,.15)}
+.cat-icon{font-size:3rem;margin-bottom:.5rem}
+.cat-title{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.3rem}
+.cat-desc{font-family:'MedievalSharp',serif;font-size:.85rem;color:#6b5a4e;line-height:1.5}
+
+.submit-section{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;
+  padding:1.5rem;border:2px solid #c9a84c;margin-bottom:1.5rem}
+.submit-section h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:1rem;text-align:center}
+.form-group{margin-bottom:1rem}
+.form-group label{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;display:block;margin-bottom:.3rem}
+.form-input{width:100%;padding:10px;border:2px solid rgba(201,168,76,.3);border-radius:10px;
+  font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;background:#fff;outline:none;transition:.2s}
+.form-input:focus{border-color:#c9a84c}
+textarea.form-input{min-height:150px;resize:vertical;line-height:1.7}
+select.form-input{cursor:pointer}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:12px 28px;border-radius:12px;font-family:'Uncial Antiqua',serif;font-size:1.05rem;
+  cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.gbtn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(201,168,76,.4)}
+
+.hall-of-fame{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:16px;
+  padding:1.5rem;color:#f5e6c8;border:2px solid #c9a84c;margin-bottom:1.5rem}
+.hall-of-fame h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#c9a84c;margin-bottom:1rem;text-align:center}
+.fame-item{display:flex;align-items:center;gap:1rem;padding:.8rem;border-bottom:1px solid rgba(201,168,76,.15)}
+.fame-item:last-child{border-bottom:none}
+.fame-medal{font-size:2rem;flex-shrink:0}
+.fame-info{flex:1}
+.fame-title{font-family:'MedievalSharp',serif;font-size:1rem;color:#c9a84c}
+.fame-author{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#e8d4a8}
+.fame-desc{font-family:'MedievalSharp',serif;font-size:.85rem;color:#9c8a7a;margin-top:.2rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contest">
+  <h1>🏆 {% trans "Natječaj" %}</h1>
+  <p class="sub">{% trans "Pošalji svoju priču, igru, recept — glasaj za najbolje!" %}</p>
+
+  <!-- Categories -->
+  <div class="cat-grid">
+    <div class="cat-card">
+      <div class="cat-icon">📖</div>
+      <div class="cat-title">{% trans "Naj priča" %}</div>
+      <div class="cat-desc">{% trans "Napiši svoju bajku ili priču iz obitelji. Može biti na bilo kojem jeziku!" %}</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">👵</div>
+      <div class="cat-title">{% trans "Najstarija priča" %}</div>
+      <div class="cat-desc">{% trans "Pitaj baku ili djeda za priču iz njihovog djetinjstva. Snimi je!" %}</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🏰</div>
+      <div class="cat-title">{% trans "Najautohtonija priča" %}</div>
+      <div class="cat-desc">{% trans "Priča iz tvog sela, grada ili regije koju nitko drugi ne poznaje." %}</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🧠</div>
+      <div class="cat-title">{% trans "Najpametnija priča" %}</div>
+      <div class="cat-desc">{% trans "Priča koja uči nešto važno — mudrost, sigurnost, dobrotu." %}</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🎮</div>
+      <div class="cat-title">{% trans "Naj igra" %}</div>
+      <div class="cat-desc">{% trans "Imaš ideju za igru koju djeca mogu igrati? Opiši pravila!" %}</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🍳</div>
+      <div class="cat-title">{% trans "Naj recept" %}</div>
+      <div class="cat-desc">{% trans "Bakin recept koji tvoja obitelj čuva generacijama." %}</div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-section">
+    <h2>✍️ {% trans "Pošalji svoj rad" %}</h2>
+    <div class="form-group">
+      <label>{% trans "Kategorija" %}:</label>
+      <select class="form-input" id="contestCat">
+        <option value="story">📖 {% trans "Naj priča" %}</option>
+        <option value="oldest">👵 {% trans "Najstarija priča" %}</option>
+        <option value="local">🏰 {% trans "Najautohtonija" %}</option>
+        <option value="smart">🧠 {% trans "Najpametnija" %}</option>
+        <option value="game">🎮 {% trans "Naj igra" %}</option>
+        <option value="recipe">🍳 {% trans "Naj recept" %}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>{% trans "Naslov" %}:</label>
+      <input type="text" class="form-input" id="contestTitle" placeholder="{% trans 'Naslov tvog rada...' %}">
+    </div>
+    <div class="form-group">
+      <label>{% trans "Tvoje ime" %} ({% trans "ili nadimak" %}):</label>
+      <input type="text" class="form-input" id="contestName" placeholder="{% trans 'Marija, 8 god.' %}">
+    </div>
+    <div class="form-group">
+      <label>{% trans "Tvoj rad" %}:</label>
+      <textarea class="form-input" id="contestText" placeholder="{% trans 'Napiši svoju priču, opiši igru ili recept...' %}"></textarea>
+    </div>
+    <div style="text-align:center">
+      <button class="gbtn" onclick="submitContest()">🏆 {% trans "Pošalji na natječaj" %}</button>
+    </div>
+    <div id="submitMsg" style="text-align:center;margin-top:.5rem;font-family:'MedievalSharp',serif;min-height:1.5rem"></div>
+  </div>
+
+  <!-- Hall of Fame (placeholder) -->
+  <div class="hall-of-fame">
+    <h2>🏆 {% trans "Kuća slavnih" %}</h2>
+    <div class="fame-item">
+      <div class="fame-medal">🥇</div>
+      <div class="fame-info">
+        <div class="fame-title">{% trans "Baka i čarobni ključ" %}</div>
+        <div class="fame-author">Ana, 9 god. — Zagreb, 🇭🇷</div>
+        <div class="fame-desc">{% trans "Priča o baki koja ima ključ koji otvara bilo koja vrata — ali samo ako kažeš čarobnu riječ: 'Molim'." %}</div>
+      </div>
+    </div>
+    <div class="fame-item">
+      <div class="fame-medal">🥈</div>
+      <div class="fame-info">
+        <div class="fame-title">{% trans "Djedov šah" %}</div>
+        <div class="fame-author">Marko, 11 god. — München, 🇩🇪</div>
+        <div class="fame-desc">{% trans "Djedova priča o tome kako je kao dijete igrao šah sa susjedom koji je bio iz potpuno druge zemlje — i kako ih je šah spojio bez riječi." %}</div>
+      </div>
+    </div>
+    <div class="fame-item">
+      <div class="fame-medal">🥉</div>
+      <div class="fame-info">
+        <div class="fame-title">{% trans "Nasreddinov magarac leti" %}</div>
+        <div class="fame-author">Emina, 7 god. — Sarajevo, 🇧🇦</div>
+        <div class="fame-desc">{% trans "Nastavak Nasreddinove priče u kojem magarac nauči letjeti — ali samo kad nitko ne gleda." %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+    font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Svaka priča je vrijedna. Najvažnija priča je ona koja još nije ispričana — tvoja." %}
+  </div>
+</div>
+
+<script>
+function submitContest() {
+  var title = document.getElementById('contestTitle').value.trim();
+  var name = document.getElementById('contestName').value.trim();
+  var text = document.getElementById('contestText').value.trim();
+
+  if (!title || !name || !text) {
+    document.getElementById('submitMsg').textContent = '{% trans "Popuni sva polja!" %}';
+    document.getElementById('submitMsg').style.color = '#c62828';
+    return;
+  }
+
+  // Save to localStorage for now
+  var entries = JSON.parse(localStorage.getItem('playeu_contest') || '[]');
+  entries.push({
+    cat: document.getElementById('contestCat').value,
+    title: title, name: name, text: text,
+    date: new Date().toISOString()
+  });
+  localStorage.setItem('playeu_contest', JSON.stringify(entries));
+
+  document.getElementById('submitMsg').innerHTML = '🎉 {% trans "Hvala! Tvoj rad je poslan na natječaj." %}<br>{% trans "Rezultati se objavljuju svaki mjesec!" %}';
+  document.getElementById('submitMsg').style.color = '#2e7d32';
+
+  // Clear form
+  document.getElementById('contestTitle').value = '';
+  document.getElementById('contestText').value = '';
+
+  // TTS
+  var u = new SpeechSynthesisUtterance('{% trans "Hvala! Tvoj rad je poslan!" %}');
+  u.lang = 'hr-HR'; speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+</script>
+{% endblock %}

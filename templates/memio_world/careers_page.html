@@ -1,0 +1,198 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}👷 {% trans "Zanimanja" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.careers{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.careers h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.careers .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+.career-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.career-card{background:#fff;border-radius:16px;padding:1rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);cursor:pointer;transition:.2s}
+.career-card:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.career-card.active{border-color:#8b6914;background:rgba(201,168,76,.1)}
+.career-icon{font-size:2.5rem;margin-bottom:.3rem}
+.career-name{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;font-weight:bold}
+
+.career-detail{display:none;background:#fff;border-radius:16px;padding:1.5rem;border:2px solid #c9a84c}
+.career-detail.show{display:block;animation:fadeUp .4s}
+.cd-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.cd-icon{font-size:3rem}.cd-title{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#2c1810}
+.cd-what{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;line-height:1.7;margin-bottom:.8rem}
+.cd-section{margin-bottom:.8rem;padding:.8rem;background:rgba(245,230,200,.3);border-radius:10px}
+.cd-section h3{font-family:'MedievalSharp',serif;font-size:.95rem;color:#c9a84c;margin-bottom:.3rem}
+.cd-section ul{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;line-height:1.7;padding-left:1rem}
+.cd-quiz{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:12px;padding:1rem;text-align:center;margin-top:1rem}
+.cd-quiz p{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810}
+.match-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:.5rem}
+.match-btn{padding:8px 16px;border-radius:8px;background:#fff;border:2px solid rgba(201,168,76,.3);
+  font-family:'MedievalSharp',serif;font-size:.9rem;cursor:pointer;transition:.2s}
+.match-btn:hover{border-color:#c9a84c}.match-btn.correct{background:#c8e6c9;border-color:#66bb6a}
+.match-btn.wrong{background:#ffcdd2;border-color:#e53935}
+.match-msg{font-family:'MedievalSharp',serif;font-size:1rem;min-height:1.5rem;margin-top:.5rem}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="careers">
+  <h1>👷 {% trans "Zanimanja" %}</h1>
+  <p class="sub">{% trans "Što želiš biti kad odrasteš? Istraži zanimanja!" %}</p>
+
+  <div class="career-grid" id="careerGrid"></div>
+  <div class="career-detail" id="careerDetail"></div>
+
+  <!-- Career quiz -->
+  <div class="cd-quiz">
+    <p>🎯 {% trans "Tko koristi ovaj alat?" %}</p>
+    <div style="font-size:3rem;margin:.5rem 0" id="quizTool"></div>
+    <div class="match-btns" id="quizBtns"></div>
+    <div class="match-msg" id="quizMsg"></div>
+  </div>
+
+  <div style="margin-top:1.5rem;background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+    font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Nije važno ŠTO ćeš biti — važno je da to radiš s ljubavlju. Najsretniji su oni koji rade ono što vole." %}
+  </div>
+</div>
+
+<script>
+var CAREERS = [
+  {icon:'👨‍⚕️',name:'{% trans "Liječnik/ca" %}',tool:'🩺',
+    what:'{% trans "Liječnik pomaže ljudima kad su bolesni. Pregleda, postavlja dijagnozu i propisuje lijek." %}',
+    skills:['{% trans "Strpljivost" %}','{% trans "Znanje biologije" %}','{% trans "Empatija" %}','{% trans "Mirne ruke" %}'],
+    school:'{% trans "Medicinski fakultet — 6 godina + specijalizacija" %}',
+    fun:'{% trans "Liječnici u prosjeku peru ruke 100 puta dnevno!" %}'},
+  {icon:'👩‍🏫',name:'{% trans "Učitelj/ica" %}',tool:'📚',
+    what:'{% trans "Učitelj pomaže djeci učiti, rasti i postati pametni. Najvažnije zanimanje na svijetu!" %}',
+    skills:['{% trans "Strpljivost (puno!)" %}','{% trans "Kreativnost" %}','{% trans "Ljubav prema djeci" %}','{% trans "Sposobnost objašnjavanja" %}'],
+    school:'{% trans "Učiteljski fakultet — 5 godina" %}',
+    fun:'{% trans "Prosječni učitelj postavi 400 pitanja dnevno!" %}'},
+  {icon:'👨‍🚒',name:'{% trans "Vatrogasac" %}',tool:'🧯',
+    what:'{% trans "Vatrogasac gasi požare, spašava ljude iz opasnih situacija i pomaže u nesrećama." %}',
+    skills:['{% trans "Hrabrost" %}','{% trans "Fizička snaga" %}','{% trans "Brzo razmišljanje" %}','{% trans "Timski rad" %}'],
+    school:'{% trans "Vatrogasna škola + tjelesna priprema" %}',
+    fun:'{% trans "Vatrogasni psi (dalmatinci) su tradicionalne maskote vatrogasaca!" %}'},
+  {icon:'👩‍🍳',name:'{% trans "Kuhar/ica" %}',tool:'🍳',
+    what:'{% trans "Kuhar priprema hranu u restoranima, hotelima ili na brodovima. Stvara jela koja razveseluju ljude." %}',
+    skills:['{% trans "Kreativnost" %}','{% trans "Osjećaj za okuse" %}','{% trans "Organiziranost" %}','{% trans "Brze ruke" %}'],
+    school:'{% trans "Kulinarski fakultet ili škola + praksa" %}',
+    fun:'{% trans "Najskuplji obrok na svijetu košta 35.000 eura!" %}'},
+  {icon:'👨‍🚀',name:'{% trans "Astronaut" %}',tool:'🚀',
+    what:'{% trans "Astronaut putuje u svemir, istražuje planete i radi eksperimente u bestežinskom stanju." %}',
+    skills:['{% trans "Odlično zdravlje" %}','{% trans "Znanje fizike" %}','{% trans "Hrabrost" %}','{% trans "Jezici (ruski + engleski)" %}'],
+    school:'{% trans "Inženjerstvo ili znanost + letačka obuka + 2 godine treninga" %}',
+    fun:'{% trans "U svemiru naraste 5 cm jer se kralježnica rasteže bez gravitacije!" %}'},
+  {icon:'👩‍🔬',name:'{% trans "Znanstvenik/ca" %}',tool:'🔬',
+    what:'{% trans "Znanstvenik istražuje kako svijet funkcionira — od atoma do svemira." %}',
+    skills:['{% trans "Znatiželja" %}','{% trans "Strpljivost" %}','{% trans "Logičko razmišljanje" %}','{% trans "Preciznost" %}'],
+    school:'{% trans "Fakultet + doktorat (8-10 godina)" %}',
+    fun:'{% trans "Marie Curie je jedina osoba koja je dobila Nobelovu nagradu iz DVA različita područja!" %}'},
+  {icon:'👨‍🌾',name:'{% trans "Farmer" %}',tool:'🌾',
+    what:'{% trans "Farmer uzgaja hranu — voće, povrće, žitarice. Brine o životinjama na farmi." %}',
+    skills:['{% trans "Ljubav prema prirodi" %}','{% trans "Rano ustajanje" %}','{% trans "Fizička snaga" %}','{% trans "Strpljivost" %}'],
+    school:'{% trans "Agronomski fakultet ili obiteljska tradicija" %}',
+    fun:'{% trans "Jedan farmer hrani oko 155 ljudi!" %}'},
+  {icon:'👩‍💻',name:'{% trans "Programer/ka" %}',tool:'💻',
+    what:'{% trans "Programer stvara aplikacije, igre i web stranice. Govori jezikom koji računalo razumije." %}',
+    skills:['{% trans "Logičko razmišljanje" %}','{% trans "Matematika" %}','{% trans "Kreativnost" %}','{% trans "Upornost" %}'],
+    school:'{% trans "Informatički fakultet ili samoučenje" %}',
+    fun:'{% trans "Ova platforma (PLAY.EU) napravljena je programiranjem!" %}'},
+  {icon:'🎨',name:'{% trans "Umjetnik/ca" %}',tool:'🖌️',
+    what:'{% trans "Umjetnik stvara lijepe stvari — slike, skulpture, glazbu, filmove." %}',
+    skills:['{% trans "Kreativnost" %}','{% trans "Mašta" %}','{% trans "Strpljivost" %}','{% trans "Hrabrost biti drugačiji" %}'],
+    school:'{% trans "Akademija likovnih umjetnosti ili samoučenje" %}',
+    fun:'{% trans "Leonardo da Vinci je i slikao i izumljivao — pravi renesansni čovjek!" %}'},
+  {icon:'👨‍✈️',name:'{% trans "Pilot" %}',tool:'✈️',
+    what:'{% trans "Pilot upravlja avionom i sigurno prevozi putnike na odredište." %}',
+    skills:['{% trans "Koncentracija" %}','{% trans "Hladnokrvnost" %}','{% trans "Matematika" %}','{% trans "Engleski jezik" %}'],
+    school:'{% trans "Pilotska škola + 1500 sati letenja" %}',
+    fun:'{% trans "Piloti i kopiloti jedu različite obroke — za slučaj da jedan bude loš!" %}'},
+  {icon:'🏗️',name:'{% trans "Građevinar" %}',tool:'🔨',
+    what:'{% trans "Građevinar gradi kuće, mostove, ceste — sve oko nas." %}',
+    skills:['{% trans "Fizička snaga" %}','{% trans "Matematika" %}','{% trans "Timski rad" %}','{% trans "Preciznost" %}'],
+    school:'{% trans "Građevinski fakultet ili stručna škola" %}',
+    fun:'{% trans "Velika kineska zid je dugačka 21.196 km — gradila se 2000 godina!" %}'},
+  {icon:'🐕‍🦺',name:'{% trans "Veterinar/ka" %}',tool:'💉',
+    what:'{% trans "Veterinar liječi životinje — od hrčaka do konja. Pomaže i životinjama u azilima." %}',
+    skills:['{% trans "Ljubav prema životinjama" %}','{% trans "Znanje biologije" %}','{% trans "Hrabrost" %}','{% trans "Nježne ruke" %}'],
+    school:'{% trans "Veterinarski fakultet — 6 godina" %}',
+    fun:'{% trans "Povezano s Memio.pet! Veterinari koriste istu tehnologiju kao i liječnici za ljude." %}'},
+];
+
+// Build grid
+var grid = document.getElementById('careerGrid');
+CAREERS.forEach(function(c, idx) {
+  var card = document.createElement('div');
+  card.className = 'career-card';
+  card.innerHTML = '<div class="career-icon">' + c.icon + '</div><div class="career-name">' + c.name + '</div>';
+  card.onclick = function() {
+    document.querySelectorAll('.career-card').forEach(function(cc){cc.classList.remove('active')});
+    card.classList.add('active');
+    showCareer(idx);
+  };
+  grid.appendChild(card);
+});
+
+function showCareer(idx) {
+  var c = CAREERS[idx];
+  var detail = document.getElementById('careerDetail');
+  detail.className = 'career-detail show';
+
+  var skillsHtml = c.skills.map(function(s){return '<li>'+s+'</li>';}).join('');
+
+  detail.innerHTML = '<div class="cd-header"><div class="cd-icon">' + c.icon + '</div><div class="cd-title">' + c.name + '</div></div>' +
+    '<div class="cd-what">' + c.what + '</div>' +
+    '<div class="cd-section"><h3>🎯 {% trans "Vještine" %}:</h3><ul>' + skillsHtml + '</ul></div>' +
+    '<div class="cd-section"><h3>🎓 {% trans "Školovanje" %}:</h3><p style="font-family:MedievalSharp,serif;font-size:.9rem;color:#2c1810">' + c.school + '</p></div>' +
+    '<div class="cd-section"><h3>🧠 {% trans "Zanimljivost" %}:</h3><p style="font-family:MedievalSharp,serif;font-size:.9rem;color:#2c1810">' + c.fun + '</p></div>';
+
+  // TTS
+  var u = new SpeechSynthesisUtterance(c.name + '. ' + c.what);
+  u.lang = 'hr-HR'; u.rate = 0.85;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+
+  detail.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// Tool quiz
+function newToolQuiz() {
+  var c = CAREERS[Math.floor(Math.random() * CAREERS.length)];
+  document.getElementById('quizTool').textContent = c.tool;
+  document.getElementById('quizMsg').textContent = '';
+
+  var opts = [c];
+  while (opts.length < 4) {
+    var r = CAREERS[Math.floor(Math.random() * CAREERS.length)];
+    if (opts.indexOf(r) === -1) opts.push(r);
+  }
+  for (var i = opts.length-1;i>0;i--) {var j=Math.floor(Math.random()*(i+1));var t=opts[i];opts[i]=opts[j];opts[j]=t;}
+
+  var container = document.getElementById('quizBtns');
+  container.innerHTML = '';
+  opts.forEach(function(o) {
+    var btn = document.createElement('div');
+    btn.className = 'match-btn';
+    btn.textContent = o.icon + ' ' + o.name;
+    btn.onclick = function() {
+      container.querySelectorAll('.match-btn').forEach(function(b){b.style.pointerEvents='none'});
+      if (o === c) {
+        btn.classList.add('correct');
+        document.getElementById('quizMsg').textContent = '🎉 {% trans "Točno!" %}';
+        document.getElementById('quizMsg').style.color = '#2e7d32';
+      } else {
+        btn.classList.add('wrong');
+        container.querySelectorAll('.match-btn').forEach(function(b){if(b.textContent.indexOf(c.icon)===0)b.classList.add('correct')});
+        document.getElementById('quizMsg').textContent = '❌ ' + c.icon + ' = ' + c.name;
+        document.getElementById('quizMsg').style.color = '#c62828';
+      }
+      setTimeout(newToolQuiz, 2000);
+    };
+    container.appendChild(btn);
+  });
+}
+newToolQuiz();
+</script>
+{% endblock %}

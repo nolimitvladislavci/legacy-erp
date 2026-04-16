@@ -16,6 +16,7 @@ import logging
 from datetime import datetime
 
 from celery import shared_task
+from celery.exceptions import SoftTimeLimitExceeded
 from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger("trojstvo")
@@ -35,7 +36,8 @@ def trojstvo_rijesi(self, suggestion_id):
         with transaction.atomic():
             s = ImprovementSuggestion.objects.select_for_update().get(pk=suggestion_id)
             s.trojstvo_status = "pending"
-            s.save(update_fields=["trojstvo_status"])
+            s.status = "reviewed"  # Odmah makni iz Beat "new" poola
+            s.save(update_fields=["trojstvo_status", "status"])
     except ImprovementSuggestion.DoesNotExist:
         logger.error("Trojstvo: suggestion %s ne postoji", suggestion_id)
         return
@@ -129,15 +131,28 @@ def trojstvo_rijesi(self, suggestion_id):
             _whatsapp_ivan(s, postotak, haiku_result, gemini_result)
             logger.info("Trojstvo CONFLICT %s%%: %s → WhatsApp poslan", postotak, s.title)
 
+    except SoftTimeLimitExceeded:
+        from pos.models import ImprovementSuggestion
+        ImprovementSuggestion.objects.filter(pk=suggestion_id).update(
+            status="reviewed",
+            trojstvo_status="error",
+            ai_resolution="Timeout: AI odgovor nije stigao na vrijeme (>180s)."[:500],
+        )
+        logger.warning("Trojstvo SoftTimeLimit za %s — ne retryam", suggestion_id)
+        return
+
     except Exception as exc:
         from pos.models import ImprovementSuggestion
 
         ImprovementSuggestion.objects.filter(pk=suggestion_id).update(
+            status="reviewed",
             trojstvo_status="error",
             ai_resolution=f"Greška: {exc}"[:500],
         )
         logger.error("Trojstvo greška za %s: %s", suggestion_id, exc)
-        raise self.retry(exc=exc)
+        # Ne retry — Beat bi opet pokupio 'new' i napravio petlju.
+        # Status='error' sprječava re-pickup.
+        return
 
 
 # ── Haiku analiza ─────────────────────────────────────────────────────────────

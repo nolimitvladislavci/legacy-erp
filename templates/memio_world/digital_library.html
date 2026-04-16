@@ -1,0 +1,157 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}📚 {% trans "Digitalna knjižnica" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.library{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.library h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.library .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.lib-stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
+.lib-stat{background:#fff;border-radius:12px;padding:1rem 1.5rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);min-width:100px}
+.lib-stat-num{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:#c9a84c}
+.lib-stat-label{font-family:'MedievalSharp',serif;font-size:.8rem;color:#6b5a4e}
+
+.search-bar{display:flex;gap:8px;margin-bottom:1.5rem}
+.search-bar input{flex:1;padding:12px 16px;border:2px solid rgba(201,168,76,.3);border-radius:12px;
+  font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;outline:none;background:#fff}
+.search-bar input:focus{border-color:#c9a84c}
+
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.filter-btn{padding:6px 12px;border-radius:8px;border:2px solid rgba(201,168,76,.2);background:#fff;
+  font-size:.8rem;cursor:pointer;transition:.15s;font-family:'MedievalSharp',serif;color:#2c1810}
+.filter-btn:hover{border-color:#c9a84c}.filter-btn.active{background:#c9a84c;color:#fff}
+
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem}
+.book-card{background:#fff;border-radius:14px;overflow:hidden;border:2px solid rgba(201,168,76,.2);
+  transition:.2s;text-decoration:none;color:#2c1810;display:block}
+.book-card:hover{border-color:#c9a84c;transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.book-cover{height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;
+  background:linear-gradient(135deg,#2c1810,#4a2c1a);color:#c9a84c;position:relative}
+.book-cover .book-flag{position:absolute;top:8px;right:8px;font-size:1.2rem}
+.book-info{padding:.8rem}
+.book-title{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;font-weight:bold;
+  line-height:1.3;margin-bottom:.3rem}
+.book-meta{font-family:'Space Grotesk',sans-serif;font-size:.72rem;color:#6b5a4e;display:flex;gap:8px;flex-wrap:wrap}
+.book-badge{padding:1px 6px;border-radius:4px;background:rgba(201,168,76,.1);font-size:.65rem;color:#8b6914}
+
+.partner-section{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.5rem;
+  border:2px solid #66bb6a;margin:1.5rem 0;text-align:center}
+.partner-section h2{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#1b5e20;margin-bottom:.5rem}
+.partner-logos{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.partner-logo{background:#fff;border-radius:12px;padding:.8rem 1.5rem;border:2px solid rgba(102,187,106,.3);
+  font-family:'MedievalSharp',serif;font-size:.9rem;color:#2e7d32;display:flex;align-items:center;gap:8px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="library">
+  <h1>📚 {% trans "Digitalna knjižnica" %}</h1>
+  <p class="sub">{% trans "Sve knjige na jednom mjestu — PLAY.EU + NO LIMIT knjižnica" %}</p>
+
+  <!-- Stats -->
+  <div class="lib-stats">
+    <div class="lib-stat"><div class="lib-stat-num">{{ stories|length }}</div><div class="lib-stat-label">{% trans "bajki" %}</div></div>
+    <div class="lib-stat"><div class="lib-stat-num">3</div><div class="lib-stat-label">{% trans "jezika" %}</div></div>
+    <div class="lib-stat"><div class="lib-stat-num">8</div><div class="lib-stat-label">{% trans "regija" %}</div></div>
+    <div class="lib-stat"><div class="lib-stat-num">~508</div><div class="lib-stat-label">{% trans "stranica" %}</div></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 {% trans 'Pretraži po naslovu, autoru ili zemlji...' %}" oninput="filterBooks()">
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all',this)">🌍 {% trans "Sve" %}</button>
+    <button class="filter-btn" onclick="setFilter('Hrvatska',this)">🇭🇷</button>
+    <button class="filter-btn" onclick="setFilter('Srbija',this)">🇷🇸</button>
+    <button class="filter-btn" onclick="setFilter('Bosna',this)">🇧🇦</button>
+    <button class="filter-btn" onclick="setFilter('Germany',this)">🇩🇪</button>
+    <button class="filter-btn" onclick="setFilter('Danska',this)">🇩🇰</button>
+    <button class="filter-btn" onclick="setFilter('Turska',this)">🇹🇷</button>
+    <button class="filter-btn" onclick="setFilter('Francuska',this)">🇫🇷</button>
+  </div>
+
+  <!-- Book grid -->
+  <div class="book-grid" id="bookGrid">
+    {% for story in stories %}
+    <a href="{% url 'memio_world:story_detail' story.slug %}" class="book-card" data-country="{{ story.country_of_origin }}" data-title="{{ story.title_hr|lower }}" data-author="{{ story.attribution|lower }}">
+      <div class="book-cover">
+        📖
+        <div class="book-flag">
+          {% if "Hrvatska" in story.country_of_origin %}🇭🇷
+          {% elif "Srbija" in story.country_of_origin and "Bosna" in story.country_of_origin %}🇧🇦🇷🇸
+          {% elif "Srbija" in story.country_of_origin %}🇷🇸
+          {% elif "Bosna" in story.country_of_origin %}🇧🇦
+          {% elif "Germany" in story.country_of_origin %}🇩🇪
+          {% elif "Danska" in story.country_of_origin %}🇩🇰
+          {% elif "Turska" in story.country_of_origin %}🇹🇷
+          {% elif "Francuska" in story.country_of_origin %}🇫🇷
+          {% else %}🌍{% endif %}
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-title">{{ story.title_hr }}</div>
+        <div class="book-meta">
+          <span>{{ story.country_of_origin }}</span>
+          <span>{{ story.reading_time_minutes }} min</span>
+        </div>
+        <div style="margin-top:.3rem">
+          {% for lc in story.available_languages %}
+          <span class="book-badge">{{ lc|upper }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Partner section -->
+  <div class="partner-section">
+    <h2>🤝 {% trans "Partneri knjižnice" %}</h2>
+    <p style="font-family:'MedievalSharp',serif;font-size:.9rem;color:#2e7d32;margin-bottom:1rem">
+      {% trans "PLAY.EU surađuje s knjižnicama i školama diljem Europe. Što PLAY.EU nema — ima naša partnerska knjižnica!" %}
+    </p>
+    <div class="partner-logos">
+      <div class="partner-logo">🏛️ NO LIMIT {% trans "Digitalna knjižnica" %}</div>
+      <div class="partner-logo">📚 {% trans "Gradska knjižnica" %}</div>
+      <div class="partner-logo">🏫 {% trans "Školska knjižnica" %}</div>
+    </div>
+    <p style="font-family:'MedievalSharp',serif;font-size:.85rem;color:#1b5e20;margin-top:1rem">
+      {% trans "Knjižničarko Marija, verificirajte naš sadržaj i postanite dio priče!" %} 📧 <strong>knjiznica@play.eu</strong>
+    </p>
+  </div>
+
+  <div style="background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+    font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Knjiga je prijatelj koji nikad ne izda. Čitaj svaki dan!" %}
+  </div>
+</div>
+
+<script>
+var currentFilter = 'all';
+
+function setFilter(country, btn) {
+  currentFilter = country;
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  filterBooks();
+}
+
+function filterBooks() {
+  var search = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.book-card').forEach(function(card) {
+    var title = card.dataset.title || '';
+    var author = card.dataset.author || '';
+    var country = card.dataset.country || '';
+    var matchSearch = !search || title.indexOf(search) >= 0 || author.indexOf(search) >= 0 || country.toLowerCase().indexOf(search) >= 0;
+    var matchFilter = currentFilter === 'all' || country.indexOf(currentFilter) >= 0;
+    card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
+  });
+}
+</script>
+{% endblock %}

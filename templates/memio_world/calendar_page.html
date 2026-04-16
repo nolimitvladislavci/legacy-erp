@@ -1,0 +1,215 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}📅 {% trans "Kalendar" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.cal{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.cal h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.cal .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.seasons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:1.5rem}
+.season{border-radius:16px;padding:1.2rem;text-align:center;cursor:pointer;transition:.2s;border:3px solid transparent}
+.season:hover{transform:translateY(-3px)}.season.active{border-color:#2c1810}
+.season-spring{background:linear-gradient(135deg,#c8e6c9,#a5d6a7)}
+.season-summer{background:linear-gradient(135deg,#fff9c4,#fff176)}
+.season-autumn{background:linear-gradient(135deg,#ffe0b2,#ffcc80)}
+.season-winter{background:linear-gradient(135deg,#bbdefb,#90caf9)}
+.season-icon{font-size:2.5rem;margin-bottom:.3rem}
+.season-name{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810}
+.season-months{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#6b5a4e;margin-top:.2rem}
+
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.month-card{background:#fff;border-radius:12px;padding:.8rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);cursor:pointer;transition:.2s;font-family:'MedievalSharp',serif}
+.month-card:hover{border-color:#c9a84c}
+.month-card.current{border-color:#8b6914;background:rgba(201,168,76,.15)}
+.month-icon{font-size:1.5rem}.month-name{font-size:.85rem;color:#2c1810;font-weight:bold;margin-top:.2rem}
+
+.month-detail{display:none;background:#fff;border-radius:16px;padding:1.5rem;border:2px solid #c9a84c;margin-bottom:1.5rem}
+.month-detail.show{display:block;animation:fadeUp .4s}
+.md-title{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#2c1810;margin-bottom:.5rem}
+.md-info{font-family:'MedievalSharp',serif;font-size:.95rem;color:#6b5a4e;line-height:1.7}
+.holiday-list{margin-top:.8rem}
+.holiday{display:flex;align-items:center;gap:8px;padding:.4rem 0;font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810}
+.holiday-date{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#c9a84c;min-width:50px}
+
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:1rem 0}
+.day-header{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:.7rem;color:#c9a84c;font-weight:bold;padding:4px}
+.day-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;
+  font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#2c1810;cursor:pointer;transition:.15s}
+.day-cell:hover{background:rgba(201,168,76,.2)}
+.day-cell.today{background:#c9a84c;color:#fff;font-weight:bold;border-radius:50%}
+.day-cell.holiday-day{background:rgba(139,37,0,.1);color:#8b2500}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cal">
+  <h1>📅 {% trans "Kalendar" %}</h1>
+  <p class="sub">{% trans "Mjeseci, godišnja doba, praznici — nauči vrijeme!" %}</p>
+
+  <!-- Seasons -->
+  <div class="seasons">
+    <div class="season season-spring" onclick="showSeason('spring',this)">
+      <div class="season-icon">🌸</div>
+      <div class="season-name">{% trans "Proljeće" %}</div>
+      <div class="season-months">{% trans "Ožujak · Travanj · Svibanj" %}</div>
+    </div>
+    <div class="season season-summer" onclick="showSeason('summer',this)">
+      <div class="season-icon">☀️</div>
+      <div class="season-name">{% trans "Ljeto" %}</div>
+      <div class="season-months">{% trans "Lipanj · Srpanj · Kolovoz" %}</div>
+    </div>
+    <div class="season season-autumn" onclick="showSeason('autumn',this)">
+      <div class="season-icon">🍂</div>
+      <div class="season-name">{% trans "Jesen" %}</div>
+      <div class="season-months">{% trans "Rujan · Listopad · Studeni" %}</div>
+    </div>
+    <div class="season season-winter" onclick="showSeason('winter',this)">
+      <div class="season-icon">❄️</div>
+      <div class="season-name">{% trans "Zima" %}</div>
+      <div class="season-months">{% trans "Prosinac · Siječanj · Veljača" %}</div>
+    </div>
+  </div>
+
+  <!-- Month grid -->
+  <div class="month-grid" id="monthGrid"></div>
+
+  <!-- Month detail -->
+  <div class="month-detail" id="monthDetail"></div>
+
+  <!-- Today's calendar -->
+  <div style="background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);margin-bottom:1rem">
+    <div style="font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.5rem;text-align:center" id="calTitle"></div>
+    <div class="days-grid" id="calGrid"></div>
+  </div>
+
+  <div style="background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+    font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Svaki dan je poklon — zato se zove 'sadašnjost' (present)!" %}
+  </div>
+</div>
+
+<script>
+var MONTHS = [
+  {name:'{% trans "Siječanj" %}',icon:'❄️',season:'winter',days:31,holidays:[{d:1,name:'{% trans "Nova godina" %}',icon:'🎆'},{d:6,name:'{% trans "Sveta tri kralja" %}',icon:'👑'}],
+    info:'{% trans "Najhladniji mjesec. Snijeg pokriva polja. Dani su kratki ali se polako produljuju." %}'},
+  {name:'{% trans "Veljača" %}',icon:'💝',season:'winter',days:28,holidays:[{d:14,name:'{% trans "Valentinovo" %}',icon:'💕'}],
+    info:'{% trans "Najkraći mjesec. Karneval i maske! Zima se polako povlači." %}'},
+  {name:'{% trans "Ožujak" %}',icon:'🌱',season:'spring',days:31,holidays:[{d:21,name:'{% trans "Prvi dan proljeća" %}',icon:'🌸'}],
+    info:'{% trans "Proljeće počinje! Ptice se vraćaju, cvijeće niče, dani su duži." %}'},
+  {name:'{% trans "Travanj" %}',icon:'🌷',season:'spring',days:30,holidays:[{d:22,name:'{% trans "Dan planeta Zemlje" %}',icon:'🌍'}],
+    info:'{% trans "Kiša donosi cvijeće. Uskrs pada u travanj ili ožujak." %}'},
+  {name:'{% trans "Svibanj" %}',icon:'🌺',season:'spring',days:31,holidays:[{d:1,name:'{% trans "Praznik rada" %}',icon:'💪'},{d:9,name:'{% trans "Dan Europe" %}',icon:'🇪🇺'}],
+    info:'{% trans "Sve cvjeta! Majčin dan je u svibnju. Škola se bliži kraju." %}'},
+  {name:'{% trans "Lipanj" %}',icon:'☀️',season:'summer',days:30,holidays:[{d:21,name:'{% trans "Najduži dan" %}',icon:'☀️'}],
+    info:'{% trans "Ljeto počinje! Škola završava. Kupanje, sladoledi, igra vani!" %}'},
+  {name:'{% trans "Srpanj" %}',icon:'🏖️',season:'summer',days:31,holidays:[],
+    info:'{% trans "Najvreliji mjesec. More, planine, kampiranje. Duge večeri." %}'},
+  {name:'{% trans "Kolovoz" %}',icon:'🌻',season:'summer',days:31,holidays:[{d:5,name:'{% trans "Dan pobjede" %}',icon:'🎗️'}],
+    info:'{% trans "Zadnji ljetni mjesec. Zvijezde padalice u kolovozu! Priprema za školu." %}'},
+  {name:'{% trans "Rujan" %}',icon:'📚',season:'autumn',days:30,holidays:[{d:1,name:'{% trans "Početak škole" %}',icon:'🎒'}],
+    info:'{% trans "Škola počinje! Lišće se počinje bojiti. Berba grožđa i jabuka." %}'},
+  {name:'{% trans "Listopad" %}',icon:'🍁',season:'autumn',days:31,holidays:[{d:31,name:'{% trans "Noć vještica" %}',icon:'🎃'}],
+    info:'{% trans "Lišće pada — zato se zove LISTOPAD! Boje jeseni su prekrasne." %}'},
+  {name:'{% trans "Studeni" %}',icon:'🌫️',season:'autumn',days:30,holidays:[{d:1,name:'{% trans "Svi sveti" %}',icon:'🕯️'}],
+    info:'{% trans "Hladno i maglovito. Palimo svijeće za blagdan Svi sveti." %}'},
+  {name:'{% trans "Prosinac" %}',icon:'🎄',season:'winter',days:31,holidays:[{d:6,name:'{% trans "Sveti Nikola" %}',icon:'🎁'},{d:25,name:'{% trans "Božić" %}',icon:'🎄'},{d:31,name:'{% trans "Stara godina" %}',icon:'🎆'}],
+    info:'{% trans "Advent, Božić, darovi! Najčarobniji mjesec. Snijeg, kuhano vino za odrasle, vrući čokolada za djecu." %}'},
+];
+
+var currentMonth = new Date().getMonth();
+
+// Build month grid
+var grid = document.getElementById('monthGrid');
+MONTHS.forEach(function(m, i) {
+  var card = document.createElement('div');
+  card.className = 'month-card' + (i === currentMonth ? ' current' : '');
+  card.innerHTML = '<div class="month-icon">' + m.icon + '</div><div class="month-name">' + m.name + '</div>';
+  card.onclick = function() { showMonth(i); };
+  grid.appendChild(card);
+});
+
+function showMonth(idx) {
+  var m = MONTHS[idx];
+  var detail = document.getElementById('monthDetail');
+  detail.className = 'month-detail show';
+
+  var holidaysHtml = '';
+  m.holidays.forEach(function(h) {
+    holidaysHtml += '<div class="holiday"><span class="holiday-date">' + h.d + '.</span> ' + h.icon + ' ' + h.name + '</div>';
+  });
+
+  detail.innerHTML = '<div class="md-title">' + m.icon + ' ' + m.name + '</div>' +
+    '<div class="md-info">' + m.info + '</div>' +
+    (holidaysHtml ? '<div class="holiday-list"><strong>{% trans "Praznici" %}:</strong>' + holidaysHtml + '</div>' : '');
+
+  // TTS
+  var u = new SpeechSynthesisUtterance(m.name + '. ' + m.info);
+  u.lang = 'hr-HR'; u.rate = 0.85;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+function showSeason(season, el) {
+  document.querySelectorAll('.season').forEach(function(s){s.classList.remove('active')});
+  el.classList.add('active');
+  // Highlight months of this season
+  document.querySelectorAll('.month-card').forEach(function(c, i) {
+    c.style.opacity = MONTHS[i].season === season ? '1' : '.3';
+  });
+}
+
+// Build today's calendar
+function buildCalendar() {
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  var today = now.getDate();
+
+  document.getElementById('calTitle').textContent = MONTHS[month].icon + ' ' + MONTHS[month].name + ' ' + year;
+
+  var grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Day headers
+  var dayNames = ['{% trans "Po" %}','{% trans "Ut" %}','{% trans "Sr" %}','{% trans "Če" %}','{% trans "Pe" %}','{% trans "Su" %}','{% trans "Ne" %}'];
+  dayNames.forEach(function(d) {
+    var h = document.createElement('div');
+    h.className = 'day-header';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  // First day of month (0=Sun, adjust to Mon=0)
+  var firstDay = new Date(year, month, 1).getDay();
+  firstDay = firstDay === 0 ? 6 : firstDay - 1;
+
+  // Empty cells before first day
+  for (var i = 0; i < firstDay; i++) {
+    var empty = document.createElement('div');
+    empty.className = 'day-cell';
+    grid.appendChild(empty);
+  }
+
+  // Holiday dates for current month
+  var holidays = MONTHS[month].holidays.map(function(h) { return h.d; });
+
+  // Days
+  var daysInMonth = MONTHS[month].days;
+  if (month === 1 && year % 4 === 0) daysInMonth = 29; // leap year
+  for (var d = 1; d <= daysInMonth; d++) {
+    var cell = document.createElement('div');
+    cell.className = 'day-cell';
+    if (d === today) cell.classList.add('today');
+    if (holidays.indexOf(d) >= 0) cell.classList.add('holiday-day');
+    cell.textContent = d;
+    grid.appendChild(cell);
+  }
+}
+
+buildCalendar();
+</script>
+{% endblock %}

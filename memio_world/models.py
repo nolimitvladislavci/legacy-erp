@@ -903,3 +903,5 @@ from memio_world.kurikulum_models import (  # noqa: F401, E402
 from memio_world.play_eu_models import EuropeanaItem, HeritageCard, ParallelStory  # noqa: F401, E402
 from memio_world.quiz_models import Quiz, QuizAnswer, QuizAttempt, QuizQuestion  # noqa: F401, E402
 from memio_world.book_models import StoryBookStyle, StoryPage  # noqa: F401, E402
+
+from memio_world.parent_models import ChildProgress, ParentAccount, SessionToken  # noqa: F401, E402

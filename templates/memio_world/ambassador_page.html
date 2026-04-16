@@ -1,0 +1,327 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🌍 {% trans "Ambasadorski program" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.amb{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.amb h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;text-align:center;margin-bottom:.3rem}
+.amb .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:2rem;font-size:1rem}
+
+.hero-banner{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:20px;padding:2.5rem;
+  text-align:center;color:#f5e6c8;border:3px solid #c9a84c;margin-bottom:2rem;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 50%,rgba(201,168,76,.08),transparent 60%)}
+.hero-banner h2{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#c9a84c;margin-bottom:.5rem;position:relative}
+.hero-banner p{font-family:'MedievalSharp',serif;font-size:1.1rem;line-height:1.7;opacity:.9;position:relative;max-width:600px;margin:0 auto}
+.hero-flags{font-size:2rem;letter-spacing:8px;margin-top:1rem;position:relative}
+
+.section{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;border:2px solid rgba(201,168,76,.2)}
+.section h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:1rem;
+  padding-bottom:.5rem;border-bottom:2px solid rgba(201,168,76,.15);display:flex;align-items:center;gap:8px}
+.section p,.section li{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;line-height:1.8}
+.section ul{padding-left:1.2rem;margin:.5rem 0}
+
+.role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:1rem 0}
+.role-card{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:14px;padding:1.2rem;
+  border:2px solid rgba(201,168,76,.3);text-align:center}
+.role-icon{font-size:2.5rem;margin-bottom:.5rem}
+.role-title{font-family:'Uncial Antiqua',serif;font-size:1rem;color:#2c1810;margin-bottom:.3rem}
+.role-desc{font-family:'MedievalSharp',serif;font-size:.85rem;color:#6b5a4e;line-height:1.5}
+
+.benefit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:1rem 0}
+.benefit{display:flex;gap:10px;align-items:flex-start;padding:.8rem;background:rgba(245,230,200,.3);border-radius:10px}
+.benefit-icon{font-size:1.5rem;flex-shrink:0}
+.benefit-text{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;line-height:1.5}
+
+.license-box{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;padding:2rem;
+  border:2px solid #c9a84c;margin:1.5rem 0;font-family:'MedievalSharp',serif}
+.license-box h2{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#2c1810;text-align:center;margin-bottom:1rem}
+.license-box h3{font-size:1rem;color:#8b6914;margin:1rem 0 .5rem;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:.3rem}
+.license-box p,.license-box li{font-size:.9rem;color:#2c1810;line-height:1.7}
+.license-box ul{padding-left:1rem}
+.license-id{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#9c8a7a;text-align:center;margin-top:1rem}
+
+.apply-section{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:20px;padding:2rem;
+  color:#f5e6c8;border:3px solid #c9a84c;margin:2rem 0}
+.apply-section h2{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#c9a84c;text-align:center;margin-bottom:1rem}
+.form-g{margin-bottom:1rem}
+.form-g label{font-family:'MedievalSharp',serif;font-size:.9rem;color:#e8d4a8;display:block;margin-bottom:.3rem}
+.form-g input,.form-g select,.form-g textarea{width:100%;padding:10px;border:2px solid rgba(201,168,76,.3);
+  border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;background:#fff;outline:none}
+.form-g input:focus,.form-g textarea:focus{border-color:#c9a84c}
+.form-g textarea{min-height:100px;resize:vertical}
+.apply-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:14px 32px;border-radius:14px;font-family:'Uncial Antiqua',serif;font-size:1.1rem;
+  cursor:pointer;width:100%;transition:.2s;margin-top:.5rem}
+.apply-btn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(201,168,76,.4)}
+
+.map-section{margin:1.5rem 0}
+.map-section h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;text-align:center;margin-bottom:1rem}
+.country-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.country-card{background:#fff;border-radius:12px;padding:1rem;text-align:center;
+  border:2px solid rgba(201,168,76,.15);transition:.2s}
+.country-card:hover{border-color:#c9a84c;transform:translateY(-2px)}
+.country-card.active{border-color:#66bb6a;background:rgba(200,230,201,.15)}
+.country-card.wanted{border-color:#c9a84c;border-style:dashed}
+.cc-flag{font-size:2rem;margin-bottom:.3rem}
+.cc-name{font-family:'MedievalSharp',serif;font-size:.85rem;color:#2c1810}
+.cc-status{font-family:'Space Grotesk',sans-serif;font-size:.7rem;margin-top:.2rem}
+.cc-status.live{color:#2e7d32}.cc-status.wanted{color:#c9a84c}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="amb">
+  <!-- Hero -->
+  <div class="hero-banner">
+    <h2>{% trans "Postani PLAY.EU ambasador" %}</h2>
+    <p>{% trans "Donesi digitalno obrazovanje budućnosti u svoju zemlju. Besplatno za škole i knjižnice. Zajednički gradimo EU standard dječje edukacije." %}</p>
+    <div class="hero-flags">🇭🇷 🇩🇪 🇦🇹 🇷🇸 🇧🇦 🇸🇮 🇹🇷 🇩🇰 🇫🇷 🇮🇹 🇪🇸 🇵🇱</div>
+  </div>
+
+  <!-- Što je ambasador -->
+  <div class="section">
+    <h2>🌟 {% trans "Što je PLAY.EU ambasador?" %}</h2>
+    <p>{% trans "Ambasador je učitelj, knjižničar, pedagog ili roditelj koji vjeruje da djeca zaslužuju bolje od YouTubea i TikToka. Ambasador donosi PLAY.EU u svoju školu, knjižnicu ili zajednicu — i postaje dio europskog pokreta za kvalitetno digitalno obrazovanje." %}</p>
+  </div>
+
+  <!-- Roles -->
+  <div class="section">
+    <h2>👥 {% trans "Uloge ambasadora" %}</h2>
+    <div class="role-grid">
+      <div class="role-card">
+        <div class="role-icon">👩‍🏫</div>
+        <div class="role-title">{% trans "Učitelj ambasador" %}</div>
+        <div class="role-desc">{% trans "Koristi PLAY.EU u nastavi. Kreira kvizove. Prati napredak učenika. Daje povratnu informaciju za poboljšanje sadržaja." %}</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">📚</div>
+        <div class="role-title">{% trans "Knjižničar ambasador" %}</div>
+        <div class="role-desc">{% trans "Organizira digitalne čitaonice. Povezuje PLAY.EU s knjižničnim fondom. Vodi radionice za roditelje." %}</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">👨‍👩‍👧</div>
+        <div class="role-title">{% trans "Roditelj ambasador" %}</div>
+        <div class="role-desc">{% trans "Testira platformu s vlastitom djecom. Preporučuje drugim roditeljima. Daje povratnu informaciju iz perspektive obitelji." %}</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">🏛️</div>
+        <div class="role-title">{% trans "Institucijski ambasador" %}</div>
+        <div class="role-desc">{% trans "Predstavlja PLAY.EU prema ministarstvima, općinama, EU institucijama. Aplicira za fondove. Gradi partnerstva." %}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Što dobivaš -->
+  <div class="section">
+    <h2>🎁 {% trans "Što ambasador dobiva?" %}</h2>
+    <div class="benefit-grid">
+      <div class="benefit"><span class="benefit-icon">🆓</span><span class="benefit-text">{% trans "Besplatan Premium pristup — zauvijek" %}</span></div>
+      <div class="benefit"><span class="benefit-icon">👤</span><span class="benefit-text">{% trans "Admin račun na portalu" %}</span></div>
+      <div class="benefit"><span class="benefit-icon">📜</span><span class="benefit-text">{% trans "Certifikat PLAY.EU ambasadora" %}</span></div>
+      <div class="benefit"><span class="benefit-icon">🎓</span><span class="benefit-text">{% trans "Edukacija i webinari za ambasadore" %}</span></div>
+      <div class="benefit"><span class="benefit-icon">🏆</span><span class="benefit-text">{% trans "Ime na stranici Partneri" %}</span></div>
+      <div class="benefit"><span class="benefit-icon">💰</span><span class="benefit-text">{% trans "20% provizija od preporuka (referral)" %}</span></div>
+      <div class="benefit"><span class="benefit-icon">🇪🇺</span><span class="benefit-text">{% trans "Pristup EU projektima i fondovima" %}</span></div>
+      <div class="benefit"><span class="benefit-icon">🤝</span><span class="benefit-text">{% trans "Mreža ambasadora iz cijele Europe" %}</span></div>
+    </div>
+  </div>
+
+  <!-- Karta ambasadora -->
+  <div class="map-section">
+    <h2>🗺️ {% trans "Mreža ambasadora" %}</h2>
+    <div class="country-grid">
+      <div class="country-card active"><div class="cc-flag">🇭🇷</div><div class="cc-name">Hrvatska</div><div class="cc-status live">✅ AKTIVNO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇩🇪</div><div class="cc-name">Njemačka</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇦🇹</div><div class="cc-name">Austrija</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇷🇸</div><div class="cc-name">Srbija</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇧🇦</div><div class="cc-name">Bosna i Hercegovina</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇸🇮</div><div class="cc-name">Slovenija</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇹🇷</div><div class="cc-name">Turska</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇮🇹</div><div class="cc-name">Italija</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇫🇷</div><div class="cc-name">Francuska</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇪🇸</div><div class="cc-name">Španjolska</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇵🇱</div><div class="cc-name">Poljska</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+      <div class="country-card wanted"><div class="cc-flag">🇬🇷</div><div class="cc-name">Grčka</div><div class="cc-status wanted">🔍 TRAŽIMO</div></div>
+    </div>
+  </div>
+
+  <!-- LICENCNI UGOVOR -->
+  <div class="license-box" id="licenseDoc">
+    <h2>📜 {% trans "Licencni ugovor — PLAY.EU Ambasadorski program" %}</h2>
+    <p style="text-align:center;font-size:.85rem;color:#6b5a4e">{% trans "Verzija 1.0 — 16. travnja 2026." %}</p>
+
+    <h3>{% trans "Članak 1 — Stranke" %}</h3>
+    <p>{% trans "DAVATELJ LICENCE: NO LIMIT d.o.o. (u osnivanju), Republika Hrvatska, vlasnik platforme PLAY.EU (u nastavku: Davatelj)." %}</p>
+    <p>{% trans "PRIMATELJ LICENCE: Ambasador — fizička ili pravna osoba koja potpisuje ovaj ugovor (u nastavku: Ambasador)." %}</p>
+
+    <h3>{% trans "Članak 2 — Predmet ugovora" %}</h3>
+    <p>{% trans "Davatelj daje Ambasadoru neekskluzivnu, neprenosivu licencu za korištenje platforme PLAY.EU u edukativne svrhe unutar obrazovnih institucija, knjižnica i zajednica na području djelovanja Ambasadora." %}</p>
+
+    <h3>{% trans "Članak 3 — Prava Ambasadora" %}</h3>
+    <ul>
+      <li>{% trans "Besplatni Premium pristup platformi za sve učenike/članove institucije." %}</li>
+      <li>{% trans "Korištenje PLAY.EU materijala u nastavi i radionicama." %}</li>
+      <li>{% trans "Admin pristup za praćenje napretka učenika." %}</li>
+      <li>{% trans "Referral provizija: 20% od svake privatne pretplate generirane putem Ambasadorovog koda." %}</li>
+      <li>{% trans "Pravo na sudjelovanje u EU projektima kao partner." %}</li>
+    </ul>
+
+    <h3>{% trans "Članak 4 — Obveze Ambasadora" %}</h3>
+    <ul>
+      <li>{% trans "Korištenje platforme isključivo u edukativne svrhe." %}</li>
+      <li>{% trans "Poštivanje pedagoških smjernica PLAY.EU." %}</li>
+      <li>{% trans "Zaštita privatnosti djece sukladno GDPR-u." %}</li>
+      <li>{% trans "Prikupljanje roditeljskog pristanka za svako dijete." %}</li>
+      <li>{% trans "Redovito izvještavanje o korištenju (kvartalno)." %}</li>
+      <li>{% trans "Neovlašteno kopiranje, distribucija ili modifikacija sadržaja je ZABRANJENA." %}</li>
+    </ul>
+
+    <h3>{% trans "Članak 5 — Intelektualno vlasništvo" %}</h3>
+    <p>{% trans "Sva prava intelektualnog vlasništva nad platformom PLAY.EU, uključujući kod, dizajn, sadržaj i brand, ISKLJUČIVO pripadaju NO LIMIT d.o.o. Ovaj ugovor NE prenosi vlasništvo niti equity." %}</p>
+
+    <h3>{% trans "Članak 6 — Trajanje i raskid" %}</h3>
+    <ul>
+      <li>{% trans "Ugovor se sklapa na razdoblje od 12 mjeseci s automatskim produljenjem." %}</li>
+      <li>{% trans "Svaka strana može raskinuti ugovor s 30 dana pisanog otkaznog roka." %}</li>
+      <li>{% trans "U slučaju kršenja članka 4, Davatelj može raskinuti ugovor odmah." %}</li>
+    </ul>
+
+    <h3>{% trans "Članak 7 — Financijski uvjeti" %}</h3>
+    <ul>
+      <li>{% trans "Licenca za edukativnu upotrebu: BESPLATNA." %}</li>
+      <li>{% trans "Referral provizija: 20% od neto prihoda pretplata." %}</li>
+      <li>{% trans "Isplata provizije: kvartalno, na IBAN Ambasadora." %}</li>
+      <li>{% trans "EU projekti: raspodjela prema projektnom budžetu (definira se zasebnim ugovorom)." %}</li>
+    </ul>
+
+    <h3>{% trans "Članak 8 — Primjenjivo pravo" %}</h3>
+    <p>{% trans "Na ovaj ugovor primjenjuje se pravo Republike Hrvatske. Za sporove je nadležan sud u Zagrebu." %}</p>
+
+    <div style="display:flex;justify-content:space-around;margin-top:2rem;padding-top:1rem;border-top:2px solid rgba(201,168,76,.3)">
+      <div style="text-align:center;width:40%">
+        <div style="border-bottom:1px solid #2c1810;margin-bottom:.3rem;height:40px"></div>
+        <div style="font-size:.85rem;color:#2c1810">NO LIMIT d.o.o.</div>
+        <div style="font-size:.75rem;color:#6b5a4e">{% trans "Davatelj licence" %}</div>
+      </div>
+      <div style="text-align:center;width:40%">
+        <div style="border-bottom:1px solid #2c1810;margin-bottom:.3rem;height:40px"></div>
+        <div style="font-size:.85rem;color:#2c1810">{% trans "Ambasador" %}</div>
+        <div style="font-size:.75rem;color:#6b5a4e">{% trans "Primatelj licence" %}</div>
+      </div>
+    </div>
+    <div class="license-id">PLAY-EU-LIC-2026-001</div>
+  </div>
+
+  <div style="text-align:center;margin:1rem 0">
+    <button onclick="window.print()" style="background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+      padding:12px 24px;border-radius:10px;font-family:'MedievalSharp',serif;cursor:pointer;margin:4px">🖨️ {% trans "Ispiši ugovor" %}</button>
+  </div>
+
+  <!-- Prijava -->
+  <div class="apply-section">
+    <h2>🚀 {% trans "Prijavi se kao ambasador" %}</h2>
+    <div class="form-g">
+      <label>{% trans "Ime i prezime" %}:</label>
+      <input type="text" id="ambName" placeholder="{% trans 'Vaše puno ime' %}">
+    </div>
+    <div class="form-g">
+      <label>{% trans "Email" %}:</label>
+      <input type="email" id="ambEmail" placeholder="vas@email.com">
+    </div>
+    <div class="form-g">
+      <label>{% trans "Zemlja" %}:</label>
+      <select id="ambCountry">
+        <option value="HR">🇭🇷 Hrvatska</option>
+        <option value="DE">🇩🇪 Deutschland</option>
+        <option value="AT">🇦🇹 Österreich</option>
+        <option value="RS">🇷🇸 Srbija</option>
+        <option value="BA">🇧🇦 Bosna i Hercegovina</option>
+        <option value="SI">🇸🇮 Slovenija</option>
+        <option value="TR">🇹🇷 Türkiye</option>
+        <option value="IT">🇮🇹 Italia</option>
+        <option value="FR">🇫🇷 France</option>
+        <option value="ES">🇪🇸 España</option>
+        <option value="PL">🇵🇱 Polska</option>
+        <option value="OTHER">🌍 {% trans "Druga zemlja" %}</option>
+      </select>
+    </div>
+    <div class="form-g">
+      <label>{% trans "Uloga" %}:</label>
+      <select id="ambRole">
+        <option value="teacher">👩‍🏫 {% trans "Učitelj/ica" %}</option>
+        <option value="librarian">📚 {% trans "Knjižničar/ka" %}</option>
+        <option value="parent">👨‍👩‍👧 {% trans "Roditelj" %}</option>
+        <option value="institution">🏛️ {% trans "Institucija" %}</option>
+      </select>
+    </div>
+    <div class="form-g">
+      <label>{% trans "Institucija" %} ({% trans "opcionalno" %}):</label>
+      <input type="text" id="ambInst" placeholder="{% trans 'Naziv škole, knjižnice ili organizacije' %}">
+    </div>
+    <div class="form-g">
+      <label>{% trans "Motivacija — zašto želite biti ambasador?" %}:</label>
+      <textarea id="ambMotivation" placeholder="{% trans 'Kratko opišite zašto želite donijeti PLAY.EU u svoju zajednicu...' %}"></textarea>
+    </div>
+    <div class="form-g">
+      <label style="display:flex;gap:8px;align-items:flex-start">
+        <input type="checkbox" id="ambConsent" style="width:auto;margin-top:4px">
+        <span>{% trans "Prihvaćam Licencni ugovor i Uvjete korištenja PLAY.EU platforme. Obavezujem se poštivati pedagoške smjernice i GDPR." %}</span>
+      </label>
+    </div>
+    <button class="apply-btn" onclick="submitAmbassador()">🌍 {% trans "Prijavi se kao ambasador" %}</button>
+    <div id="ambMsg" style="text-align:center;margin-top:.5rem;font-family:'MedievalSharp',serif;min-height:1.5rem"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:1.5rem;font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Jedan učitelj mijenja tisuću života. Budi taj učitelj." %}
+  </div>
+</div>
+
+<script>
+function submitAmbassador() {
+  var name = document.getElementById('ambName').value.trim();
+  var email = document.getElementById('ambEmail').value.trim();
+  var consent = document.getElementById('ambConsent').checked;
+
+  if (!name || !email) {
+    document.getElementById('ambMsg').textContent = '{% trans "Popunite ime i email." %}';
+    document.getElementById('ambMsg').style.color = '#c62828';
+    return;
+  }
+  if (!consent) {
+    document.getElementById('ambMsg').textContent = '{% trans "Morate prihvatiti uvjete." %}';
+    document.getElementById('ambMsg').style.color = '#c62828';
+    return;
+  }
+
+  // Save locally + prepare email
+  var data = {
+    name: name, email: email,
+    country: document.getElementById('ambCountry').value,
+    role: document.getElementById('ambRole').value,
+    institution: document.getElementById('ambInst').value,
+    motivation: document.getElementById('ambMotivation').value,
+    date: new Date().toISOString()
+  };
+  var entries = JSON.parse(localStorage.getItem('playeu_ambassadors') || '[]');
+  entries.push(data);
+  localStorage.setItem('playeu_ambassadors', JSON.stringify(entries));
+
+  document.getElementById('ambMsg').innerHTML = '🎉 {% trans "Hvala! Prijava primljena. Javit ćemo vam se u roku 48 sati." %}<br>📧 ambassador@play.eu';
+  document.getElementById('ambMsg').style.color = '#2e7d32';
+
+  // TTS
+  var u = new SpeechSynthesisUtterance('{% trans "Hvala! Dobrodošao u PLAY EU obitelj!" %}');
+  u.lang = 'hr-HR'; speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+</script>
+
+<style>
+@media print {
+  .hero-banner,.section,.map-section,.apply-section,.play-top,.play-bottom,.play-footer{display:none!important}
+  .license-box{border:2px solid #000;box-shadow:none;page-break-inside:avoid}
+}
+</style>
+{% endblock %}

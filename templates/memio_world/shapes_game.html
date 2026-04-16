@@ -1,0 +1,378 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}📐 {% trans "Geometrijski oblici" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<style>
+.shapes-app{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.shapes-app h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.shapes-app .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.tab-row{display:flex;gap:8px;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:8px 18px;border-radius:10px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.95rem;cursor:pointer;transition:.2s;color:#2c1810}
+.tab-btn:hover{border-color:#c9a84c}.tab-btn.active{background:#c9a84c;color:#fff;border-color:#8b6914}
+
+.panel{display:none;animation:fadeIn .3s}.panel.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Shape grid */
+.shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.5rem}
+@media(max-width:480px){.shape-grid{grid-template-columns:repeat(2,1fr)}}
+.shape-card{display:flex;flex-direction:column;align-items:center;padding:16px 8px;
+  background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border:2px solid rgba(201,168,76,.3);
+  border-radius:14px;cursor:pointer;transition:.2s}
+.shape-card:hover{border-color:#c9a84c;transform:scale(1.04)}
+.shape-card.active{border-color:#2c1810;border-width:3px;background:linear-gradient(135deg,#f0daa0,#e0c880)}
+.shape-svg{width:70px;height:70px;margin-bottom:6px}
+.shape-name{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;font-weight:600}
+.shape-info{font-family:'Space Grotesk',sans-serif;font-size:.72rem;color:#6b5a4e;margin-top:3px;text-align:center}
+.shape-fact{font-family:'MedievalSharp',serif;font-size:.82rem;color:#5c3d1a;
+  background:rgba(201,168,76,.12);border-radius:10px;padding:10px 14px;margin-top:1rem;
+  text-align:center;min-height:2.5rem;line-height:1.4}
+
+/* Quiz */
+.quiz-area{text-align:center}
+.quiz-obj-display{font-size:4rem;margin:1rem 0}
+.quiz-q{font-family:'MedievalSharp',serif;font-size:1.15rem;color:#2c1810;margin-bottom:1rem}
+.quiz-opts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.quiz-opt{padding:10px 22px;border-radius:10px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:1rem;cursor:pointer;transition:.2s;color:#2c1810;
+  display:flex;align-items:center;gap:8px}
+.quiz-opt:hover{border-color:#c9a84c;background:rgba(201,168,76,.1)}
+.quiz-opt.correct{background:#c8e6c9;border-color:#66bb6a}
+.quiz-opt.wrong{background:#ffcdd2;border-color:#e53935}
+.quiz-opt svg{width:24px;height:24px}
+
+.msg-box{font-family:'MedievalSharp',serif;font-size:1.1rem;min-height:1.8rem;margin-top:.5rem}
+.score-box{font-family:'Space Grotesk',sans-serif;font-size:.9rem;color:#6b5a4e;margin-top:.3rem}
+.btn-row{display:flex;gap:10px;justify-content:center;margin-top:1rem}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+
+/* Builder */
+.builder-area{text-align:center}
+.builder-canvas{width:100%;max-width:500px;height:350px;margin:0 auto;background:#f5f0e0;
+  border:2px solid rgba(201,168,76,.3);border-radius:14px;position:relative;overflow:hidden;
+  touch-action:none}
+.builder-palette{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.palette-item{width:50px;height:50px;background:linear-gradient(135deg,#f5e6c8,#e8d4a8);
+  border:2px solid rgba(201,168,76,.3);border-radius:10px;cursor:grab;display:flex;
+  align-items:center;justify-content:center;transition:.2s;user-select:none}
+.palette-item:hover{border-color:#c9a84c;transform:scale(1.08)}
+.palette-item svg{width:34px;height:34px;pointer-events:none}
+.builder-hint{font-family:'MedievalSharp',serif;font-size:.9rem;color:#6b5a4e;margin-bottom:.5rem}
+.placed-shape{position:absolute;cursor:move;touch-action:none;user-select:none}
+.placed-shape svg{pointer-events:none}
+.builder-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.preset-btn{padding:6px 16px;border-radius:8px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.85rem;cursor:pointer;transition:.2s;color:#2c1810}
+.preset-btn:hover{border-color:#c9a84c}.preset-btn.active{background:rgba(201,168,76,.2);border-color:#c9a84c}
+
+.baka-box{background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;margin-top:1.5rem;
+  text-align:center;font-family:'MedievalSharp',serif;color:#5c3d1a;font-size:.9rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shapes-app">
+  <h1>📐 {% trans "Geometrijski oblici" %}</h1>
+  <p class="sub">{% trans "Upoznaj oblike, pronađi ih oko sebe i gradi!" %}</p>
+
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="showTab('learn')">{% trans "Nauči oblike" %} 🔷</button>
+    <button class="tab-btn" onclick="showTab('quiz')">{% trans "Pronađi oblik" %} 🔍</button>
+    <button class="tab-btn" onclick="showTab('build')">{% trans "Gradi" %} 🏗️</button>
+  </div>
+
+  <!-- TAB 1: Learn shapes -->
+  <div id="tab-learn" class="panel show">
+    <div class="shape-grid" id="shapeGrid"></div>
+    <div class="shape-fact" id="shapeFact">{% trans "Klikni na oblik da saznaš više!" %}</div>
+  </div>
+
+  <!-- TAB 2: Find the shape quiz -->
+  <div id="tab-quiz" class="panel">
+    <div class="quiz-area">
+      <div class="quiz-q" id="sqQ"></div>
+      <div class="quiz-obj-display" id="sqObj"></div>
+      <div class="quiz-opts" id="sqOpts"></div>
+      <div class="msg-box" id="sqMsg"></div>
+      <div class="score-box">{% trans "Točno" %}: <span id="sqCorrect">0</span> / <span id="sqTotal">0</span></div>
+      <div class="btn-row">
+        <button class="gbtn" onclick="nextShapeQuiz()">{% trans "Sljedeći" %} →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Shape builder -->
+  <div id="tab-build" class="panel">
+    <div class="builder-area">
+      <div class="builder-hint">{% trans "Povuci oblike na platno i napravi sliku!" %}</div>
+      <div class="builder-presets">
+        <button class="preset-btn" onclick="loadPreset('house')">🏠 {% trans "Kuća" %}</button>
+        <button class="preset-btn" onclick="loadPreset('tree')">🌳 {% trans "Drvo" %}</button>
+        <button class="preset-btn" onclick="loadPreset('car')">🚗 {% trans "Auto" %}</button>
+        <button class="preset-btn" onclick="clearCanvas()">🗑️ {% trans "Očisti" %}</button>
+      </div>
+      <div class="builder-canvas" id="builderCanvas"></div>
+      <div class="builder-palette" id="builderPalette"></div>
+    </div>
+  </div>
+
+  <div class="baka-box">
+    👵 {% trans "Baka kaže: Sve na svijetu je napravljeno od oblika. Pogledaj oko sebe!" %}
+  </div>
+</div>
+
+<script>
+// SVG generators for shapes
+function svgCircle(w,h,fill){return '<svg viewBox="0 0 70 70" width="'+(w||70)+'" height="'+(h||70)+'"><circle cx="35" cy="35" r="30" fill="'+(fill||'#1e88e5')+'" stroke="#1565c0" stroke-width="2"/></svg>';}
+function svgSquare(w,h,fill){return '<svg viewBox="0 0 70 70" width="'+(w||70)+'" height="'+(h||70)+'"><rect x="8" y="8" width="54" height="54" rx="3" fill="'+(fill||'#e53935')+'" stroke="#c62828" stroke-width="2"/></svg>';}
+function svgTriangle(w,h,fill){return '<svg viewBox="0 0 70 70" width="'+(w||70)+'" height="'+(h||70)+'"><polygon points="35,5 65,62 5,62" fill="'+(fill||'#43a047')+'" stroke="#2e7d32" stroke-width="2"/></svg>';}
+function svgRect(w,h,fill){return '<svg viewBox="0 0 90 60" width="'+(w||90)+'" height="'+(h||60)+'"><rect x="5" y="5" width="80" height="50" rx="3" fill="'+(fill||'#fb8c00')+'" stroke="#e65100" stroke-width="2"/></svg>';}
+function svgStar(w,h,fill){return '<svg viewBox="0 0 70 70" width="'+(w||70)+'" height="'+(h||70)+'"><polygon points="35,3 43,27 68,27 48,42 55,67 35,52 15,67 22,42 2,27 27,27" fill="'+(fill||'#fdd835')+'" stroke="#f9a825" stroke-width="2"/></svg>';}
+function svgHeart(w,h,fill){return '<svg viewBox="0 0 70 70" width="'+(w||70)+'" height="'+(h||70)+'"><path d="M35,60 C15,45 2,30 2,18 A16,16,0,0,1,35,14 A16,16,0,0,1,68,18 C68,30 55,45 35,60Z" fill="'+(fill||'#ec407a')+'" stroke="#c2185b" stroke-width="2"/></svg>';}
+function svgDiamond(w,h,fill){return '<svg viewBox="0 0 70 70" width="'+(w||70)+'" height="'+(h||70)+'"><polygon points="35,3 65,35 35,67 5,35" fill="'+(fill||'#8e24aa')+'" stroke="#6a1b9a" stroke-width="2"/></svg>';}
+function svgOval(w,h,fill){return '<svg viewBox="0 0 80 60" width="'+(w||80)+'" height="'+(h||60)+'"><ellipse cx="40" cy="30" rx="35" ry="24" fill="'+(fill||'#26c6da')+'" stroke="#00acc1" stroke-width="2"/></svg>';}
+
+var SHAPES = [
+  {id:'circle',name:'krug',sides:'0 stranica, 0 kutova',color:'#1e88e5',svg:svgCircle,
+   fact:'Krug nema nijedan kut — zato se kotač okreće!'},
+  {id:'square',name:'kvadrat',sides:'4 stranice, 4 kuta',color:'#e53935',svg:svgSquare,
+   fact:'Kvadrat ima sve stranice jednake. Šahovska polja su kvadrati!'},
+  {id:'triangle',name:'trokut',sides:'3 stranice, 3 kuta',color:'#43a047',svg:svgTriangle,
+   fact:'Piramide u Egiptu su trokuti! Trokut je najstabilniji oblik.'},
+  {id:'rectangle',name:'pravokutnik',sides:'4 stranice, 4 kuta',color:'#fb8c00',svg:svgRect,
+   fact:'Pravokutnik je poput kvadrata, ali sa 2 duže i 2 kraće stranice. Vrata su pravokutnik!'},
+  {id:'star',name:'zvijezda',sides:'10 stranica, 5 krakova',color:'#fdd835',svg:svgStar,
+   fact:'Zvijezda ima 5 krakova. Pogledaj nebo — zvijezde trepere!'},
+  {id:'heart',name:'srce',sides:'zakrivljene linije',color:'#ec407a',svg:svgHeart,
+   fact:'Srce je simbol ljubavi. Tvoje pravo srce kuca 100.000 puta dnevno!'},
+  {id:'diamond',name:'dijamant',sides:'4 stranice, 4 kuta',color:'#8e24aa',svg:svgDiamond,
+   fact:'Dijamant je zapravo romb — kvadrat okrenut na vrh!'},
+  {id:'oval',name:'ovalni',sides:'0 stranica, 0 kutova',color:'#26c6da',svg:svgOval,
+   fact:'Ovalni oblik je poput rastegnutog kruga. Jaje je ovalno!'}
+];
+
+var svgFns = {circle:svgCircle,square:svgSquare,triangle:svgTriangle,rectangle:svgRect,
+  star:svgStar,heart:svgHeart,diamond:svgDiamond,oval:svgOval};
+
+// Build shape grid
+var grid = document.getElementById('shapeGrid');
+SHAPES.forEach(function(s) {
+  var card = document.createElement('div');
+  card.className = 'shape-card';
+  card.innerHTML = '<div class="shape-svg">' + s.svg(70,70) + '</div>'
+    + '<div class="shape-name">' + s.name + '</div>'
+    + '<div class="shape-info">' + s.sides + '</div>';
+  card.onclick = function() {
+    document.querySelectorAll('.shape-card').forEach(function(el){el.classList.remove('active')});
+    card.classList.add('active');
+    document.getElementById('shapeFact').innerHTML = '💡 ' + s.fact;
+    speakShape(s.name + '. ' + s.sides);
+  };
+  grid.appendChild(card);
+});
+
+function speakShape(text) {
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'hr-HR'; u.rate = 0.75; u.pitch = 1.1;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+// Tabs
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){
+    b.classList.toggle('active', ['learn','quiz','build'][i] === name);
+  });
+  ['learn','quiz','build'].forEach(function(t){
+    document.getElementById('tab-' + t).classList.toggle('show', t === name);
+  });
+  if (name === 'quiz') nextShapeQuiz();
+  if (name === 'build') initBuilder();
+}
+
+// ── Shape Quiz ──
+var QUIZ_ITEMS = [
+  {obj:'🕐', name:'sat', answer:'circle', aname:'krug'},
+  {obj:'🪟', name:'prozor', answer:'rectangle', aname:'pravokutnik'},
+  {obj:'🏠', name:'krov kuće', answer:'triangle', aname:'trokut'},
+  {obj:'⭐', name:'zvijezda na nebu', answer:'star', aname:'zvijezda'},
+  {obj:'❤️', name:'srce', answer:'heart', aname:'srce'},
+  {obj:'💎', name:'dragi kamen', answer:'diamond', aname:'dijamant'},
+  {obj:'🥚', name:'jaje', answer:'oval', aname:'ovalni'},
+  {obj:'🧊', name:'kocka leda', answer:'square', aname:'kvadrat'},
+  {obj:'🎱', name:'biljarska kugla', answer:'circle', aname:'krug'},
+  {obj:'📱', name:'mobitel', answer:'rectangle', aname:'pravokutnik'},
+  {obj:'🔺', name:'prometni znak', answer:'triangle', aname:'trokut'},
+  {obj:'🏀', name:'košarkaška lopta', answer:'circle', aname:'krug'}
+];
+var sqIdx = 0, sqCorrectN = 0, sqTotalN = 0;
+
+function shuffleArr(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function nextShapeQuiz() {
+  var q = QUIZ_ITEMS[sqIdx % QUIZ_ITEMS.length];
+  document.getElementById('sqObj').textContent = q.obj;
+  document.getElementById('sqQ').textContent = '{% trans "Koji oblik je" %} ' + q.name + '?';
+  document.getElementById('sqMsg').textContent = '';
+
+  var options = [q.answer];
+  var others = SHAPES.map(function(s){return s.id}).filter(function(n){return n !== q.answer});
+  others = shuffleArr(others);
+  for (var i = 0; i < 3; i++) options.push(others[i]);
+  options = shuffleArr(options);
+
+  var container = document.getElementById('sqOpts');
+  container.innerHTML = '';
+  options.forEach(function(opt) {
+    var s = SHAPES.find(function(x){return x.id === opt});
+    var btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.innerHTML = s.svg(24,24) + ' ' + s.name;
+    btn.onclick = function() {
+      sqTotalN++;
+      if (opt === q.answer) {
+        sqCorrectN++;
+        btn.classList.add('correct');
+        document.getElementById('sqMsg').innerHTML = '🎉 {% trans "Bravo!" %} ' + q.name + ' = ' + q.aname + '!';
+        document.getElementById('sqMsg').style.color = '#2e7d32';
+        speakShape(q.aname);
+      } else {
+        btn.classList.add('wrong');
+        document.getElementById('sqMsg').innerHTML = '❌ {% trans "To je" %} ' + s.name + '. {% trans "Točan odgovor je" %} ' + q.aname + '!';
+        document.getElementById('sqMsg').style.color = '#c62828';
+        container.querySelectorAll('.quiz-opt').forEach(function(b){
+          if (b.textContent.indexOf(q.aname) > -1) b.classList.add('correct');
+        });
+      }
+      document.getElementById('sqCorrect').textContent = sqCorrectN;
+      document.getElementById('sqTotal').textContent = sqTotalN;
+      container.querySelectorAll('.quiz-opt').forEach(function(b){b.style.pointerEvents='none'});
+    };
+    container.appendChild(btn);
+  });
+  sqIdx++;
+}
+
+// ── Shape Builder ──
+var builderInited = false;
+function initBuilder() {
+  if (builderInited) return;
+  builderInited = true;
+  var palette = document.getElementById('builderPalette');
+  SHAPES.forEach(function(s) {
+    var item = document.createElement('div');
+    item.className = 'palette-item';
+    item.innerHTML = s.svg(34,34);
+    item.setAttribute('data-shape', s.id);
+    item.draggable = true;
+    item.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text/plain', s.id);
+    });
+    // Touch support
+    item.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      var touch = e.touches[0];
+      createPlacedShape(s.id, touch.clientX, touch.clientY);
+    }, {passive:false});
+    palette.appendChild(item);
+  });
+
+  var canvas = document.getElementById('builderCanvas');
+  canvas.addEventListener('dragover', function(e){e.preventDefault();});
+  canvas.addEventListener('drop', function(e){
+    e.preventDefault();
+    var shapeId = e.dataTransfer.getData('text/plain');
+    var rect = canvas.getBoundingClientRect();
+    createPlacedShape(shapeId, e.clientX - rect.left, e.clientY - rect.top, true);
+  });
+}
+
+function createPlacedShape(shapeId, x, y, isRelative) {
+  var canvas = document.getElementById('builderCanvas');
+  var rect = canvas.getBoundingClientRect();
+  var fn = svgFns[shapeId];
+  if (!fn) return;
+
+  var el = document.createElement('div');
+  el.className = 'placed-shape';
+  el.innerHTML = fn(50, 50);
+  var px = isRelative ? x - 25 : x - rect.left - 25;
+  var py = isRelative ? y - 25 : y - rect.top - 25;
+  px = Math.max(0, Math.min(px, rect.width - 50));
+  py = Math.max(0, Math.min(py, rect.height - 50));
+  el.style.left = px + 'px';
+  el.style.top = py + 'px';
+  canvas.appendChild(el);
+
+  // Make draggable
+  var dragging = false, offX = 0, offY = 0;
+  function onDown(ex, ey) {
+    dragging = true;
+    var elRect = el.getBoundingClientRect();
+    offX = ex - elRect.left;
+    offY = ey - elRect.top;
+  }
+  function onMove(ex, ey) {
+    if (!dragging) return;
+    var cr = canvas.getBoundingClientRect();
+    el.style.left = Math.max(0, Math.min(ex - cr.left - offX, cr.width - 50)) + 'px';
+    el.style.top = Math.max(0, Math.min(ey - cr.top - offY, cr.height - 50)) + 'px';
+  }
+  function onUp() { dragging = false; }
+
+  el.addEventListener('mousedown', function(e){onDown(e.clientX, e.clientY);});
+  document.addEventListener('mousemove', function(e){onMove(e.clientX, e.clientY);});
+  document.addEventListener('mouseup', onUp);
+  el.addEventListener('touchstart', function(e){e.preventDefault();onDown(e.touches[0].clientX, e.touches[0].clientY);},{passive:false});
+  document.addEventListener('touchmove', function(e){if(dragging){e.preventDefault();onMove(e.touches[0].clientX, e.touches[0].clientY);}},{passive:false});
+  document.addEventListener('touchend', onUp);
+
+  // Double-click to remove
+  el.addEventListener('dblclick', function(){el.remove();});
+}
+
+function clearCanvas() {
+  document.getElementById('builderCanvas').innerHTML = '';
+}
+
+function loadPreset(type) {
+  clearCanvas();
+  var canvas = document.getElementById('builderCanvas');
+  var w = canvas.offsetWidth, h = canvas.offsetHeight;
+
+  if (type === 'house') {
+    // Square body
+    createPlacedShape('square', w*0.35, h*0.55, true);
+    createPlacedShape('square', w*0.55, h*0.55, true);
+    createPlacedShape('square', w*0.35, h*0.75, true);
+    createPlacedShape('square', w*0.55, h*0.75, true);
+    // Triangle roof
+    createPlacedShape('triangle', w*0.45, h*0.28, true);
+    // Rectangle door
+    createPlacedShape('rectangle', w*0.45, h*0.78, true);
+    // Circle window
+    createPlacedShape('circle', w*0.38, h*0.55, true);
+  } else if (type === 'tree') {
+    // Triangle top layers
+    createPlacedShape('triangle', w*0.5, h*0.12, true);
+    createPlacedShape('triangle', w*0.5, h*0.3, true);
+    createPlacedShape('triangle', w*0.5, h*0.48, true);
+    // Rectangle trunk
+    createPlacedShape('rectangle', w*0.5, h*0.72, true);
+  } else if (type === 'car') {
+    // Rectangle body
+    createPlacedShape('rectangle', w*0.35, h*0.5, true);
+    createPlacedShape('rectangle', w*0.55, h*0.5, true);
+    // Square top
+    createPlacedShape('square', w*0.45, h*0.35, true);
+    // Circle wheels
+    createPlacedShape('circle', w*0.35, h*0.68, true);
+    createPlacedShape('circle', w*0.58, h*0.68, true);
+  }
+}
+</script>
+{% endblock %}

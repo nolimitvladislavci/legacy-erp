@@ -1,0 +1,167 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🎓 {% trans "Diploma" %} — Memio {% trans "Škola" %}{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+.diploma-wrap{max-width:800px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.diploma-wrap h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;margin-bottom:1.5rem}
+
+.diploma{background:#fff;border-radius:4px;padding:3rem 2rem;position:relative;
+  border:4px double #c9a84c;box-shadow:0 8px 40px rgba(0,0,0,.1);max-width:700px;margin:0 auto 2rem}
+.diploma::before{content:'';position:absolute;inset:8px;border:2px solid rgba(201,168,76,.3);border-radius:2px;pointer-events:none}
+.diploma::after{content:'';position:absolute;inset:14px;border:1px solid rgba(201,168,76,.15);border-radius:1px;pointer-events:none}
+
+.dip-ornament{color:#c9a84c;font-size:1.5rem;letter-spacing:16px;margin-bottom:1rem;opacity:.6}
+.dip-school{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;margin-bottom:.3rem}
+.dip-subtitle{font-family:'MedievalSharp',serif;font-size:1rem;color:#c9a84c;margin-bottom:1.5rem}
+
+.dip-certify{font-family:'MedievalSharp',serif;font-size:1rem;color:#6b5a4e;margin-bottom:.5rem}
+.dip-name{font-family:'Great Vibes',cursive;font-size:3rem;color:#2c1810;margin:.5rem 0;
+  border-bottom:2px solid #c9a84c;display:inline-block;padding:0 2rem .3rem}
+
+.dip-level{font-family:'MedievalSharp',serif;font-size:1.2rem;color:#2c1810;margin:1rem 0 .3rem}
+.dip-desc{font-family:'MedievalSharp',serif;font-size:.9rem;color:#6b5a4e;line-height:1.6;margin-bottom:1.5rem}
+
+.dip-skills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:1rem 0}
+.dip-skill{padding:4px 12px;border-radius:8px;background:rgba(201,168,76,.1);
+  font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#8b6914;border:1px solid rgba(201,168,76,.2)}
+
+.dip-date{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#9c8a7a;margin-top:1rem}
+.dip-seal{font-size:3rem;margin:1rem 0;opacity:.7}
+.dip-id{font-family:'Space Grotesk',sans-serif;font-size:.7rem;color:#ccc;margin-top:.5rem}
+
+.dip-signatures{display:flex;justify-content:space-around;margin-top:1.5rem;padding-top:1rem;
+  border-top:1px solid rgba(201,168,76,.15)}
+.dip-sig{text-align:center}
+.sig-line{width:120px;border-bottom:1px solid #2c1810;margin:0 auto .3rem}
+.sig-name{font-family:'MedievalSharp',serif;font-size:.8rem;color:#6b5a4e}
+.sig-title{font-family:'Space Grotesk',sans-serif;font-size:.65rem;color:#9c8a7a}
+
+.print-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:14px 32px;border-radius:12px;font-family:'Uncial Antiqua',serif;font-size:1.1rem;
+  cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.print-btn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(201,168,76,.4)}
+
+.name-input{font-family:'Great Vibes',cursive;font-size:2rem;text-align:center;border:none;
+  border-bottom:2px solid #c9a84c;padding:8px 16px;color:#2c1810;background:transparent;
+  outline:none;width:300px;max-width:90%}
+
+.legal-note{max-width:600px;margin:2rem auto 0;background:rgba(201,168,76,.08);border-radius:12px;
+  padding:1rem;font-family:'MedievalSharp',serif;font-size:.85rem;color:#5c3d1a;text-align:left;line-height:1.6}
+
+@media print{
+  .play-top,.play-bottom,.play-footer,.print-btn,.legal-note,.diploma-wrap>h1{display:none!important}
+  .diploma-wrap{padding:0}.diploma{box-shadow:none;border:4px double #c9a84c}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="diploma-wrap">
+  <h1>🎓 {% trans "Memio Diploma" %}</h1>
+
+  <div style="margin-bottom:1.5rem">
+    <label style="font-family:'MedievalSharp',serif;color:#6b5a4e">{% trans "Ime učenika/ce:" %}</label><br>
+    <input type="text" class="name-input" id="studentName" placeholder="{% trans 'Tvoje ime' %}" oninput="updateDiploma()">
+  </div>
+
+  <div class="diploma" id="diplomaDoc">
+    <div class="dip-ornament">✦ ✦ ✦ ✦ ✦</div>
+    <div class="dip-school">🏰 PLAY.EU</div>
+    <div class="dip-subtitle">Memio {% trans "Škola" %} — {% trans "Digitalna Baština Europe" %}</div>
+
+    <div class="dip-certify">{% trans "Ovim se potvrđuje da je" %}</div>
+    <div class="dip-name" id="dipName">_________________</div>
+
+    <div class="dip-level">{% trans "uspješno završio/la program" %}</div>
+    <div class="dip-desc">
+      {% trans "ZNALAC — Digitalni Roditelj Program" %}<br>
+      {% trans "i stekao/la znanja i vještine u sljedećim područjima:" %}
+    </div>
+
+    <div class="dip-skills">
+      <span class="dip-skill">📖 {% trans "Čitanje i razumijevanje" %}</span>
+      <span class="dip-skill">🔤 {% trans "Slovarica A-Ž" %}</span>
+      <span class="dip-skill">🔢 {% trans "Brojevi i računanje" %}</span>
+      <span class="dip-skill">♟ {% trans "Šahovsko razmišljanje" %}</span>
+      <span class="dip-skill">🎵 {% trans "Glazbena osnova" %}</span>
+      <span class="dip-skill">🛡️ {% trans "Sigurnost" %}</span>
+      <span class="dip-skill">🧘 {% trans "Emocionalna inteligencija" %}</span>
+      <span class="dip-skill">🌍 {% trans "Kulturna baština" %}</span>
+      <span class="dip-skill">💰 {% trans "Financijska pismenost" %}</span>
+      <span class="dip-skill">🤝 {% trans "Rješavanje sukoba" %}</span>
+      <span class="dip-skill">🐾 {% trans "Briga o životinjama" %}</span>
+      <span class="dip-skill">✍️ {% trans "Kreativno izražavanje" %}</span>
+    </div>
+
+    <div class="dip-seal">🏆</div>
+
+    <div class="dip-date" id="dipDate"></div>
+    <div class="dip-id" id="dipId"></div>
+
+    <div class="dip-signatures">
+      <div class="dip-sig">
+        <div class="sig-line"></div>
+        <div class="sig-name">👵 {% trans "Baka Mudrost" %}</div>
+        <div class="sig-title">{% trans "Počasna mentorica" %}</div>
+      </div>
+      <div class="dip-sig">
+        <div class="sig-line"></div>
+        <div class="sig-name">🏰 PLAY.EU</div>
+        <div class="sig-title">{% trans "Ravnatelj digitalne škole" %}</div>
+      </div>
+      <div class="dip-sig">
+        <div class="sig-line"></div>
+        <div class="sig-name">👴 {% trans "Djed Znanje" %}</div>
+        <div class="sig-title">{% trans "Počasni profesor" %}</div>
+      </div>
+    </div>
+
+    <div class="dip-ornament" style="margin-top:1rem">✦ ✦ ✦ ✦ ✦</div>
+  </div>
+
+  <button class="print-btn" onclick="window.print()">🖨️ {% trans "Ispiši diplomu" %}</button>
+
+  <!-- Legal note about digital school -->
+  <div class="legal-note">
+    <strong>📋 {% trans "Pravni status Memio diplome:" %}</strong><br><br>
+    {% trans "Memio Škola diploma je <strong>motivacijski certifikat</strong> koji potvrđuje da je dijete uspješno prošlo edukativni program na PLAY.EU platformi." %}<br><br>
+    {% trans "Za <strong>pravno priznatu diplomu</strong> potrebna je akreditacija od strane nacionalnog ministarstva obrazovanja. Koraci prema tome:" %}<br>
+    <br>
+    ✅ {% trans "<strong>Faza 1 (trenutno)</strong>: Motivacijski certifikat — potvrda o završenom programu" %}<br>
+    🔜 {% trans "<strong>Faza 2</strong>: Partnerstvo s akreditiranom obrazovnom institucijom (škola ili učilište)" %}<br>
+    🔜 {% trans "<strong>Faza 3</strong>: Akreditacija programa pri Agenciji za odgoj i obrazovanje (AZOO) ili ekvivalentu u EU" %}<br>
+    🔜 {% trans "<strong>Faza 4</strong>: ECTS bodovi za roditelje (cjeloživotno učenje) kroz partnerstvo s fakultetom" %}<br>
+    <br>
+    {% trans "Model koji funkcionira u EU: <strong>Open Badges</strong> (Mozilla) — digitalni certifikati koji se mogu verificirati online. Kompatibilni s EU Digital Credentials za učenje." %}<br>
+    <br>
+    {% trans "Reference: Europski okvir kvalifikacija (EQF), EU Digital Credentials for Learning, Open Badges 2.0 standard." %}
+  </div>
+</div>
+
+<script>
+// Load name from school progress
+var progress = JSON.parse(localStorage.getItem('memio_school') || '{}');
+if (progress.name && progress.name !== '{% trans "Mali Znalac" %}') {
+  document.getElementById('studentName').value = progress.name;
+  document.getElementById('dipName').textContent = progress.name;
+}
+
+// Date
+var now = new Date();
+var months = ['{% trans "siječnja" %}','{% trans "veljače" %}','{% trans "ožujka" %}','{% trans "travnja" %}',
+  '{% trans "svibnja" %}','{% trans "lipnja" %}','{% trans "srpnja" %}','{% trans "kolovoza" %}',
+  '{% trans "rujna" %}','{% trans "listopada" %}','{% trans "studenog" %}','{% trans "prosinca" %}'];
+document.getElementById('dipDate').textContent = now.getDate() + '. ' + months[now.getMonth()] + ' ' + now.getFullYear() + '.';
+
+// Unique ID
+var dipId = 'PLAY-EU-' + now.getFullYear() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+document.getElementById('dipId').textContent = 'ID: ' + dipId;
+
+function updateDiploma() {
+  var name = document.getElementById('studentName').value.trim();
+  document.getElementById('dipName').textContent = name || '_________________';
+}
+</script>
+{% endblock %}

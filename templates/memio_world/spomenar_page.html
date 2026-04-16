@@ -1,0 +1,353 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}📔 Digitalni Spomenar — PLAY.EU{% endblock %}
+{% block extra_head %}
+<style>
+.spomenar{max-width:780px;margin:0 auto;padding:1.5rem 1rem}
+.spomenar h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.spomenar .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.sp-card{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);margin-bottom:1.2rem;
+  animation:fadeUp .4s ease-out}
+.sp-card h2{font-family:'Uncial Antiqua',serif;font-size:1.25rem;color:#2c1810;margin-bottom:.8rem;display:flex;align-items:center;gap:8px}
+.sp-card h2 .icon{font-size:1.5rem}
+
+.sp-field{display:flex;flex-direction:column;gap:4px;margin-bottom:.8rem}
+.sp-field label{font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a;font-weight:bold}
+.sp-field input,.sp-field select{font-family:'MedievalSharp',serif;font-size:.95rem;padding:8px 12px;
+  border:2px solid rgba(201,168,76,.3);border-radius:10px;background:#fffef5;color:#2c1810;outline:none;transition:.2s}
+.sp-field input:focus,.sp-field select:focus{border-color:#c9a84c}
+
+.sp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.sp-row{grid-template-columns:1fr}}
+
+.sp-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.sp-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(139,105,20,.3)}
+.sp-btn.secondary{background:linear-gradient(135deg,#6b5a4e,#4a3b30)}
+.sp-btn.danger{background:linear-gradient(135deg,#c0392b,#96281b);font-size:.8rem;padding:6px 12px}
+.sp-btn.print-btn{background:linear-gradient(135deg,#2e7d32,#1b5e20)}
+
+/* Friends */
+.friend-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:.5rem}
+.friend-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(201,168,76,.15);
+  padding:6px 12px;border-radius:20px;font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810}
+.friend-tag .remove{cursor:pointer;opacity:.5;font-size:.8rem}
+.friend-tag .remove:hover{opacity:1}
+.friend-input-row{display:flex;gap:8px;margin-top:.5rem}
+.friend-input-row input{flex:1}
+
+/* Emoji picker */
+.emoji-picker{display:flex;flex-wrap:wrap;gap:4px;margin:.5rem 0}
+.emoji-opt{font-size:1.5rem;cursor:pointer;padding:4px;border-radius:8px;transition:.15s;border:2px solid transparent}
+.emoji-opt:hover,.emoji-opt.selected{border-color:#c9a84c;background:rgba(201,168,76,.15);transform:scale(1.15)}
+
+/* Timeline */
+.timeline{position:relative;padding-left:30px;margin-top:1rem}
+.timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:3px;
+  background:linear-gradient(to bottom,#c9a84c,#8b6914);border-radius:3px}
+.tl-item{position:relative;margin-bottom:1.2rem;animation:fadeUp .3s ease-out}
+.tl-dot{position:absolute;left:-24px;top:4px;width:14px;height:14px;border-radius:50%;
+  background:#c9a84c;border:3px solid #fff;box-shadow:0 0 0 2px #c9a84c}
+.tl-date{font-family:'MedievalSharp',serif;font-size:.75rem;color:#8b6914;margin-bottom:2px}
+.tl-text{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;
+  background:#fff;padding:8px 12px;border-radius:10px;border:1px solid rgba(201,168,76,.2)}
+.tl-text .tl-emoji{font-size:1.3rem;margin-right:6px}
+.tl-remove{font-size:.7rem;cursor:pointer;opacity:.4;float:right}
+.tl-remove:hover{opacity:1}
+
+/* Messages */
+.msg-list{display:flex;flex-direction:column;gap:8px;margin-top:.5rem}
+.msg-item{background:rgba(245,230,200,.3);border-radius:12px;padding:10px 14px;
+  border:1px solid rgba(201,168,76,.2);font-family:'MedievalSharp',serif}
+.msg-sticker{font-size:2rem;float:right}
+.msg-text{font-size:.95rem;color:#2c1810;line-height:1.5}
+.msg-author{font-size:.8rem;color:#8b6914;margin-top:4px}
+.msg-remove{font-size:.7rem;cursor:pointer;opacity:.4;float:right}
+.msg-remove:hover{opacity:1}
+
+.baka-box{text-align:center;font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a;
+  background:rgba(201,168,76,.1);padding:1rem;border-radius:12px;margin-top:1rem;
+  border:1px dashed rgba(201,168,76,.4)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+/* Print styles */
+@media print{
+  .play-top,.play-bottom,.play-footer,.sp-btn,.friend-input-row,.emoji-picker,
+  .moment-form,.msg-form,.remove,.tl-remove,.msg-remove,.no-print{display:none!important}
+  .spomenar{padding:0}
+  .sp-card{break-inside:avoid;border:1px solid #ccc;box-shadow:none}
+  body{background:#fff!important}
+  .tl-dot{background:#333!important;border-color:#fff!important;box-shadow:0 0 0 1px #333!important}
+  .timeline::before{background:#333!important}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="spomenar">
+  <h1>📔 Digitalni Spomenar</h1>
+  <p class="sub">Knjiga mojih najljepših uspomena</p>
+
+  <!-- O MENI -->
+  <div class="sp-card" id="aboutMe">
+    <h2><span class="icon">🌟</span> O meni</h2>
+    <div class="sp-row">
+      <div class="sp-field">
+        <label>Moje ime</label>
+        <input type="text" id="myName" placeholder="Upiši ime..." data-key="name">
+      </div>
+      <div class="sp-field">
+        <label>Rođendan</label>
+        <input type="date" id="myBirthday" data-key="birthday">
+      </div>
+    </div>
+    <div class="sp-row">
+      <div class="sp-field">
+        <label>Grad</label>
+        <input type="text" id="myCity" placeholder="Odakle si?" data-key="city">
+      </div>
+      <div class="sp-field">
+        <label>Najdraža boja</label>
+        <input type="text" id="myColor" placeholder="Tvoja boja..." data-key="color">
+      </div>
+    </div>
+    <div class="sp-row">
+      <div class="sp-field">
+        <label>Najdraža hrana</label>
+        <input type="text" id="myFood" placeholder="Što najradije jedeš?" data-key="food">
+      </div>
+      <div class="sp-field">
+        <label>Najdraža životinja</label>
+        <input type="text" id="myAnimal" placeholder="Koja životinja?" data-key="animal">
+      </div>
+    </div>
+    <div class="sp-field">
+      <label>Najdraža pjesma</label>
+      <input type="text" id="mySong" placeholder="Koja pjesma ti je najdraža?" data-key="song">
+    </div>
+    <button class="sp-btn" onclick="saveAboutMe()">💾 Spremi o meni</button>
+  </div>
+
+  <!-- MOJI PRIJATELJI -->
+  <div class="sp-card">
+    <h2><span class="icon">👫</span> Moji prijatelji</h2>
+    <div class="friend-input-row no-print">
+      <input type="text" id="friendName" placeholder="Ime prijatelja/ice...">
+      <div class="emoji-picker" id="friendEmoji" style="display:none"></div>
+      <button class="sp-btn" onclick="toggleFriendEmoji()" id="friendEmojiBtn">😊</button>
+      <button class="sp-btn" onclick="addFriend()">+ Dodaj</button>
+    </div>
+    <div class="emoji-picker no-print" id="friendEmojiPicker" style="display:none"></div>
+    <div class="friend-list" id="friendList"></div>
+  </div>
+
+  <!-- MOJI NAJDRAŽI TRENUCI -->
+  <div class="sp-card">
+    <h2><span class="icon">✨</span> Moji najdraži trenuci</h2>
+    <div class="moment-form no-print">
+      <div class="sp-row">
+        <div class="sp-field">
+          <label>Datum</label>
+          <input type="date" id="momentDate">
+        </div>
+        <div class="sp-field">
+          <label>Emoji</label>
+          <div class="emoji-picker" id="momentEmojiPicker"></div>
+        </div>
+      </div>
+      <div class="sp-field">
+        <label>Što se dogodilo?</label>
+        <input type="text" id="momentText" placeholder="Opiši svoj trenutak...">
+      </div>
+      <button class="sp-btn" onclick="addMoment()">🌈 Dodaj trenutak</button>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <!-- PORUKE ZA MENE -->
+  <div class="sp-card">
+    <h2><span class="icon">💌</span> Poruke za mene</h2>
+    <p style="font-family:'MedievalSharp',serif;font-size:.85rem;color:#6b5a4e;margin-bottom:.8rem">
+      Prijatelji i obitelj ti mogu ostaviti poruku!
+    </p>
+    <div class="msg-form no-print">
+      <div class="sp-row">
+        <div class="sp-field">
+          <label>Tko piše?</label>
+          <input type="text" id="msgAuthor" placeholder="Ime...">
+        </div>
+        <div class="sp-field">
+          <label>Naljepnica</label>
+          <div class="emoji-picker" id="msgStickerPicker"></div>
+        </div>
+      </div>
+      <div class="sp-field">
+        <label>Poruka</label>
+        <input type="text" id="msgText" placeholder="Napiši poruku...">
+      </div>
+      <button class="sp-btn secondary" onclick="addMessage()">💌 Ostavi poruku</button>
+    </div>
+    <div class="msg-list" id="msgList"></div>
+  </div>
+
+  <!-- PRINT -->
+  <div class="sp-card no-print" style="text-align:center">
+    <button class="sp-btn print-btn" onclick="window.print()">🖨️ Ispiši Spomenar</button>
+    <button class="sp-btn danger" onclick="clearAll()" style="margin-left:10px">🗑️ Obriši sve</button>
+  </div>
+
+  <!-- BAKA -->
+  <div class="baka-box">
+    👵 Baka kaže: „Spomenar je knjiga sjećanja. Svaki zapis je blago koje ne stari."
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const LS_KEY = 'playeu_spomenar';
+const FRIEND_EMOJIS = ['😊','😎','🤗','💪','🌟','🎈','🦋','🐶','🐱','🌻','⚽','🎵','🎨','📚','🦄'];
+const MOMENT_EMOJIS = ['🎂','🎄','🌊','🏆','⭐','🎁','🎪','✈️','🚲','🎓','🎹','🌈','❤️','🏅','🎯'];
+const STICKER_EMOJIS = ['❤️','🌟','🤗','😍','💪','🎉','🦋','🌻','🌈','💎','👑','🧸','🎈','🍀','🦄'];
+
+let data = {about:{},friends:[],moments:[],messages:[]};
+let selectedFriendEmoji = '😊';
+let selectedMomentEmoji = '🎂';
+let selectedSticker = '❤️';
+
+function loadData(){
+  try{const s=localStorage.getItem(LS_KEY);if(s)data=JSON.parse(s)}catch(e){}
+}
+function saveData(){localStorage.setItem(LS_KEY,JSON.stringify(data))}
+
+function initEmojiPicker(containerId,emojis,selected,onSelect){
+  const c=document.getElementById(containerId);if(!c)return;
+  c.innerHTML=emojis.map(e=>`<span class="emoji-opt${e===selected?' selected':''}" data-e="${e}">${e}</span>`).join('');
+  c.addEventListener('click',ev=>{
+    const t=ev.target.closest('.emoji-opt');if(!t)return;
+    c.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('selected'));
+    t.classList.add('selected');
+    onSelect(t.dataset.e);
+  });
+}
+
+function saveAboutMe(){
+  document.querySelectorAll('#aboutMe input[data-key]').forEach(inp=>{
+    data.about[inp.dataset.key]=inp.value;
+  });
+  saveData();
+  showToast('Spremljeno!');
+}
+
+function loadAboutMe(){
+  if(!data.about)return;
+  document.querySelectorAll('#aboutMe input[data-key]').forEach(inp=>{
+    if(data.about[inp.dataset.key])inp.value=data.about[inp.dataset.key];
+  });
+}
+
+function toggleFriendEmoji(){
+  const p=document.getElementById('friendEmojiPicker');
+  p.style.display=p.style.display==='none'?'flex':'none';
+}
+
+function addFriend(){
+  const name=document.getElementById('friendName').value.trim();
+  if(!name)return;
+  data.friends.push({name,emoji:selectedFriendEmoji});
+  document.getElementById('friendName').value='';
+  document.getElementById('friendEmojiPicker').style.display='none';
+  saveData();renderFriends();
+}
+
+function removeFriend(i){data.friends.splice(i,1);saveData();renderFriends();}
+
+function renderFriends(){
+  const c=document.getElementById('friendList');
+  c.innerHTML=data.friends.map((f,i)=>
+    `<span class="friend-tag">${f.emoji} ${f.name} <span class="remove no-print" onclick="removeFriend(${i})">✕</span></span>`
+  ).join('');
+}
+
+function addMoment(){
+  const date=document.getElementById('momentDate').value;
+  const text=document.getElementById('momentText').value.trim();
+  if(!text)return;
+  data.moments.push({date:date||new Date().toISOString().slice(0,10),text,emoji:selectedMomentEmoji});
+  data.moments.sort((a,b)=>a.date.localeCompare(b.date));
+  document.getElementById('momentText').value='';
+  saveData();renderTimeline();
+}
+
+function removeMoment(i){data.moments.splice(i,1);saveData();renderTimeline();}
+
+function renderTimeline(){
+  const c=document.getElementById('timeline');
+  if(!data.moments.length){c.innerHTML='<p style="font-family:MedievalSharp,serif;color:#6b5a4e;font-size:.9rem;padding-left:10px">Još nema trenutaka. Dodaj prvi!</p>';return;}
+  c.innerHTML=data.moments.map((m,i)=>
+    `<div class="tl-item"><div class="tl-dot"></div><div class="tl-date">${formatDate(m.date)}</div><div class="tl-text"><span class="tl-emoji">${m.emoji}</span>${esc(m.text)}<span class="tl-remove no-print" onclick="removeMoment(${i})">✕</span></div></div>`
+  ).join('');
+}
+
+function addMessage(){
+  const author=document.getElementById('msgAuthor').value.trim();
+  const text=document.getElementById('msgText').value.trim();
+  if(!text)return;
+  data.messages.push({author:author||'Anonimno',text,sticker:selectedSticker,ts:Date.now()});
+  document.getElementById('msgAuthor').value='';
+  document.getElementById('msgText').value='';
+  saveData();renderMessages();
+}
+
+function removeMessage(i){data.messages.splice(i,1);saveData();renderMessages();}
+
+function renderMessages(){
+  const c=document.getElementById('msgList');
+  if(!data.messages.length){c.innerHTML='<p style="font-family:MedievalSharp,serif;color:#6b5a4e;font-size:.9rem">Još nema poruka.</p>';return;}
+  c.innerHTML=data.messages.map((m,i)=>
+    `<div class="msg-item"><span class="msg-sticker">${m.sticker}</span><span class="msg-remove no-print" onclick="removeMessage(${i})">✕</span><div class="msg-text">${esc(m.text)}</div><div class="msg-author">— ${esc(m.author)}</div></div>`
+  ).join('');
+}
+
+function formatDate(d){
+  if(!d)return '';
+  const[y,m,day]=d.split('-');
+  const months=['sij','velj','ožu','tra','svi','lip','srp','kol','ruj','lis','stu','pro'];
+  return `${parseInt(day)}. ${months[parseInt(m)-1]} ${y}`;
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',bottom:'80px',left:'50%',transform:'translateX(-50%)',
+    background:'#2c1810',color:'#fff',padding:'10px 24px',borderRadius:'10px',
+    fontFamily:'MedievalSharp,serif',fontSize:'.95rem',zIndex:'9999',animation:'fadeUp .3s'});
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1800);
+}
+
+function clearAll(){
+  if(!confirm('Obrisati sve podatke iz spomenara?'))return;
+  data={about:{},friends:[],moments:[],messages:[]};
+  saveData();loadAboutMe();renderFriends();renderTimeline();renderMessages();
+  showToast('Sve obrisano.');
+}
+
+// Init
+loadData();
+loadAboutMe();
+initEmojiPicker('friendEmojiPicker',FRIEND_EMOJIS,selectedFriendEmoji,e=>{selectedFriendEmoji=e});
+initEmojiPicker('momentEmojiPicker',MOMENT_EMOJIS,selectedMomentEmoji,e=>{selectedMomentEmoji=e});
+initEmojiPicker('msgStickerPicker',STICKER_EMOJIS,selectedSticker,e=>{selectedSticker=e});
+renderFriends();
+renderTimeline();
+renderMessages();
+// Set default date
+document.getElementById('momentDate').valueAsDate=new Date();
+</script>
+{% endblock %}

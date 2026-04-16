@@ -1,0 +1,211 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}📅 {% trans "Događaji" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.events{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.events h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.events .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.event-card{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:1rem;
+  border:2px solid rgba(201,168,76,.2);transition:.2s;position:relative;overflow:hidden}
+.event-card:hover{border-color:#c9a84c;transform:translateY(-2px)}
+.event-card.featured{border-color:#c9a84c;background:linear-gradient(135deg,#fff,rgba(201,168,76,.05))}
+.event-badge{position:absolute;top:12px;right:12px;background:#c9a84c;color:#fff;padding:3px 10px;
+  border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:bold}
+.event-header{display:flex;align-items:flex-start;gap:1rem;margin-bottom:.5rem}
+.event-icon{font-size:2.5rem;flex-shrink:0}
+.event-info{flex:1}
+.event-title{font-family:'Uncial Antiqua',serif;font-size:1.15rem;color:#2c1810}
+.event-meta{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#c9a84c;margin-top:.2rem}
+.event-desc{font-family:'MedievalSharp',serif;font-size:.95rem;color:#6b5a4e;line-height:1.6;margin-top:.5rem}
+.event-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:.5rem}
+.event-tag{font-size:.7rem;padding:2px 8px;border-radius:6px;background:rgba(201,168,76,.1);
+  color:#8b6914;font-family:'Space Grotesk',sans-serif}
+
+.event-types{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
+.type-btn{padding:6px 14px;border-radius:8px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.85rem;cursor:pointer;transition:.2s;color:#2c1810}
+.type-btn:hover{border-color:#c9a84c}.type-btn.active{background:#c9a84c;color:#fff}
+
+.countdown{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:16px;padding:1.5rem;
+  color:#f5e6c8;text-align:center;margin-bottom:1.5rem;border:2px solid #c9a84c}
+.countdown h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#c9a84c;margin-bottom:.5rem}
+.countdown-timer{display:flex;gap:16px;justify-content:center;margin:.8rem 0}
+.countdown-item{text-align:center}
+.cd-num{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;color:#c9a84c}
+.cd-label{font-family:'MedievalSharp',serif;font-size:.75rem;color:#e8d4a8}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="events">
+  <h1>📅 {% trans "Virtualni događaji" %}</h1>
+  <p class="sub">{% trans "Čitaonice, kviz noći, talent show — zajedno, online!" %}</p>
+
+  <!-- Countdown to next event -->
+  <div class="countdown">
+    <h2>⏰ {% trans "Sljedeći događaj" %}</h2>
+    <div style="font-family:'MedievalSharp',serif;font-size:1.1rem;color:#e8d4a8">
+      📖 {% trans "Čitaonica uživo — Rapunzel na 3 jezika" %}
+    </div>
+    <div class="countdown-timer" id="countdown"></div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#9c8a7a">
+      {% trans "Svaki petak u 18:00 CET" %}
+    </div>
+  </div>
+
+  <!-- Event types -->
+  <div class="event-types">
+    <button class="type-btn active" onclick="filterEvents('all',this)">🌟 {% trans "Sve" %}</button>
+    <button class="type-btn" onclick="filterEvents('reading',this)">📖 {% trans "Čitaonice" %}</button>
+    <button class="type-btn" onclick="filterEvents('quiz',this)">🧩 {% trans "Kviz noći" %}</button>
+    <button class="type-btn" onclick="filterEvents('talent',this)">🎤 {% trans "Talent show" %}</button>
+    <button class="type-btn" onclick="filterEvents('workshop',this)">🎨 {% trans "Radionice" %}</button>
+  </div>
+
+  <!-- Events list -->
+  <div id="eventsList">
+    <!-- Reading -->
+    <div class="event-card featured" data-type="reading">
+      <div class="event-badge">{% trans "OVAJ PETAK" %}</div>
+      <div class="event-header">
+        <div class="event-icon">📖</div>
+        <div class="event-info">
+          <div class="event-title">{% trans "Čitaonica uživo — Rapunzel" %}</div>
+          <div class="event-meta">📅 {% trans "Petak 18:00 CET" %} · ⏱ 30 min · 🌍 HR/DE/EN</div>
+        </div>
+      </div>
+      <div class="event-desc">{% trans "Čitamo Rapunzel zajedno — svako dijete čita jednu stranicu naglas! Baka iz Zagreba čita na HR, baka iz Münchena na DE. Poslije kviz o priči." %}</div>
+      <div class="event-tags">
+        <span class="event-tag">📖 {% trans "čitanje" %}</span>
+        <span class="event-tag">🎤 {% trans "naglas" %}</span>
+        <span class="event-tag">🌍 {% trans "multilingual" %}</span>
+        <span class="event-tag">👶 5+</span>
+      </div>
+    </div>
+
+    <div class="event-card" data-type="quiz">
+      <div class="event-header">
+        <div class="event-icon">🧩</div>
+        <div class="event-info">
+          <div class="event-title">{% trans "Kviz noć — Tko zna, zna!" %}</div>
+          <div class="event-meta">📅 {% trans "Svake srijede 17:00 CET" %} · ⏱ 45 min</div>
+        </div>
+      </div>
+      <div class="event-desc">{% trans "20 pitanja iz bajki, životinja, sporta i znanosti. Timovi po 3 djece. Pobjednički tim osvaja zlatnu krunu! 👑" %}</div>
+      <div class="event-tags">
+        <span class="event-tag">🧠 {% trans "znanje" %}</span>
+        <span class="event-tag">👥 {% trans "timovi" %}</span>
+        <span class="event-tag">👶 7+</span>
+      </div>
+    </div>
+
+    <div class="event-card" data-type="talent">
+      <div class="event-header">
+        <div class="event-icon">🎤</div>
+        <div class="event-info">
+          <div class="event-title">{% trans "PLAY.EU Talent Show" %}</div>
+          <div class="event-meta">📅 {% trans "Zadnja subota u mjesecu 15:00 CET" %} · ⏱ 60 min</div>
+        </div>
+      </div>
+      <div class="event-desc">{% trans "Pjevaj, recituj, sviraj, pleši — pokaži svoj talent! Svako dijete ima 3 minute. Publika glasuje. Nema gubitnika — svi su zvijezde! ⭐" %}</div>
+      <div class="event-tags">
+        <span class="event-tag">🎵 {% trans "glazba" %}</span>
+        <span class="event-tag">💃 {% trans "ples" %}</span>
+        <span class="event-tag">📜 {% trans "recitacija" %}</span>
+        <span class="event-tag">👶 4+</span>
+      </div>
+    </div>
+
+    <div class="event-card" data-type="workshop">
+      <div class="event-header">
+        <div class="event-icon">🎨</div>
+        <div class="event-info">
+          <div class="event-title">{% trans "Radionica — Nacrtaj svog lika" %}</div>
+          <div class="event-meta">📅 {% trans "Svaki drugi utorak 16:00 CET" %} · ⏱ 40 min</div>
+        </div>
+      </div>
+      <div class="event-desc">{% trans "Umjetnica Maja vodi radionicu crtanja. Ovaj put: nacrtaj lika iz tvoje omiljene bajke! Materijali: papir + olovka + bojice." %}</div>
+      <div class="event-tags">
+        <span class="event-tag">🎨 {% trans "crtanje" %}</span>
+        <span class="event-tag">👩‍🎨 {% trans "voditeljica" %}</span>
+        <span class="event-tag">👶 5+</span>
+      </div>
+    </div>
+
+    <div class="event-card" data-type="workshop">
+      <div class="event-header">
+        <div class="event-icon">♟</div>
+        <div class="event-info">
+          <div class="event-title">{% trans "Šah turnir za početnike" %}</div>
+          <div class="event-meta">📅 {% trans "Svake nedjelje 14:00 CET" %} · ⏱ 90 min</div>
+        </div>
+      </div>
+      <div class="event-desc">{% trans "Turnir za djecu koja su tek naučila pravila. Svatko igra 3 partije. Nema eliminacije — svi igraju do kraja! Trofej za fair play." %}</div>
+      <div class="event-tags">
+        <span class="event-tag">♟ {% trans "šah" %}</span>
+        <span class="event-tag">🏆 {% trans "turnir" %}</span>
+        <span class="event-tag">👶 6+</span>
+      </div>
+    </div>
+
+    <div class="event-card" data-type="reading">
+      <div class="event-header">
+        <div class="event-icon">👵</div>
+        <div class="event-info">
+          <div class="event-title">{% trans "Bakina večer — Priče za laku noć" %}</div>
+          <div class="event-meta">📅 {% trans "Svaki dan 19:30 CET" %} · ⏱ 15 min</div>
+        </div>
+      </div>
+      <div class="event-desc">{% trans "Baka čita priču za laku noć. Svaki dan druga bajka. Djeca slušaju u pidžamama. Nakon priče — tehnika disanja za miran san." %}</div>
+      <div class="event-tags">
+        <span class="event-tag">🌙 {% trans "laku noć" %}</span>
+        <span class="event-tag">👵 {% trans "baka" %}</span>
+        <span class="event-tag">👶 3+</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+    font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Kad sam ja bila mala, djeca su se zajedno igrala na ulici. Danas se igraju online — ali prijateljstvo je isto." %}
+  </div>
+</div>
+
+<script>
+function filterEvents(type, btn) {
+  document.querySelectorAll('.type-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  document.querySelectorAll('.event-card').forEach(function(c) {
+    c.style.display = (type === 'all' || c.dataset.type === type) ? 'block' : 'none';
+  });
+}
+
+// Countdown to next Friday 18:00 CET
+function updateCountdown() {
+  var now = new Date();
+  var target = new Date();
+  target.setHours(18, 0, 0, 0);
+  // Find next Friday
+  var daysUntilFriday = (5 - now.getDay() + 7) % 7;
+  if (daysUntilFriday === 0 && now.getHours() >= 18) daysUntilFriday = 7;
+  target.setDate(now.getDate() + daysUntilFriday);
+
+  var diff = target - now;
+  var days = Math.floor(diff / 86400000);
+  var hours = Math.floor((diff % 86400000) / 3600000);
+  var mins = Math.floor((diff % 3600000) / 60000);
+  var secs = Math.floor((diff % 60000) / 1000);
+
+  document.getElementById('countdown').innerHTML =
+    '<div class="countdown-item"><div class="cd-num">' + days + '</div><div class="cd-label">{% trans "dana" %}</div></div>' +
+    '<div class="countdown-item"><div class="cd-num">' + hours + '</div><div class="cd-label">{% trans "sati" %}</div></div>' +
+    '<div class="countdown-item"><div class="cd-num">' + mins + '</div><div class="cd-label">{% trans "min" %}</div></div>' +
+    '<div class="countdown-item"><div class="cd-num">' + secs + '</div><div class="cd-label">{% trans "sek" %}</div></div>';
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+</script>
+{% endblock %}

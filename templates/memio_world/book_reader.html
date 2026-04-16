@@ -712,27 +712,66 @@ function getPlainText() {
 
 function speakPage() {
   var btn = document.getElementById('btnSpeak');
-  if (speechSynthesis.speaking) {
-    speechSynthesis.cancel();
+
+  /* Chrome bug fix: cancel any stuck speech first */
+  speechSynthesis.cancel();
+
+  if (btn.classList.contains('active')) {
     btn.classList.remove('active');
     return;
   }
 
   var text = getPlainText();
-  if (!text) return;
+  if (!text) { console.warn('TTS: no text on page', currentPage); return; }
 
-  var utter = new SpeechSynthesisUtterance(text);
-  var langMap = {'hr': 'hr-HR', 'de': 'de-DE', 'en': 'en-GB', 'fr': 'fr-FR', 'it': 'it-IT'};
-  utter.lang = langMap[LANG] || 'en-GB';
-  utter.rate = 0.82;
-  utter.pitch = 1.05;
+  /* Chrome requires voices to be loaded — wait if needed */
+  function doSpeak() {
+    var utter = new SpeechSynthesisUtterance(text);
+    var langMap = {'hr': 'hr-HR', 'de': 'de-DE', 'en': 'en-GB', 'fr': 'fr-FR', 'it': 'it-IT'};
+    utter.lang = langMap[LANG] || 'en-GB';
+    utter.rate = 0.82;
+    utter.pitch = 1.05;
+    utter.volume = 1.0;
 
-  btn.classList.add('active');
-  utter.onend = function() { btn.classList.remove('active'); };
-  utter.onerror = function() { btn.classList.remove('active'); };
+    /* Try to find a matching voice */
+    var voices = speechSynthesis.getVoices();
+    var targetLang = langMap[LANG] || 'en-GB';
+    for (var i = 0; i < voices.length; i++) {
+      if (voices[i].lang === targetLang || voices[i].lang.startsWith(LANG)) {
+        utter.voice = voices[i];
+        break;
+      }
+    }
 
-  currentUtterance = utter;
-  speechSynthesis.speak(utter);
+    btn.classList.add('active');
+
+    utter.onend = function() {
+      btn.classList.remove('active');
+    };
+    utter.onerror = function(e) {
+      console.warn('TTS error:', e.error);
+      btn.classList.remove('active');
+    };
+
+    /* Chrome bug: must cancel before speak */
+    speechSynthesis.cancel();
+    /* Small delay after cancel for Chrome */
+    setTimeout(function() {
+      speechSynthesis.speak(utter);
+    }, 50);
+  }
+
+  /* Ensure voices are loaded (async in Chrome) */
+  if (speechSynthesis.getVoices().length > 0) {
+    doSpeak();
+  } else {
+    speechSynthesis.onvoiceschanged = function() {
+      speechSynthesis.onvoiceschanged = null;
+      doSpeak();
+    };
+    /* Fallback if onvoiceschanged never fires */
+    setTimeout(doSpeak, 200);
+  }
 }
 
 function stopSpeaking() {
@@ -982,6 +1021,62 @@ if (_origPrev) {
   var _rp = prevPage;
   prevPage = function() { playPageTurn(); haptic(5); _rp(); };
 }
+
+/* ═══ GLOBAL AUDIO INIT — preload voices ═══ */
+(function() {
+  /* Chrome needs a user gesture to unlock audio context */
+  /* Pre-load voices on page load */
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.getVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = function() {
+        var v = speechSynthesis.getVoices();
+        console.log('TTS voices loaded:', v.length);
+      };
+    }
+  }
+
+  /* Chrome workaround: speechSynthesis can get "stuck" */
+  /* Periodically check and unstick it */
+  setInterval(function() {
+    if (speechSynthesis.speaking && !speechSynthesis.pending) {
+      /* Might be stuck - the user will need to click again */
+    }
+  }, 5000);
+
+  /* Auto-read toggle */
+  var autoRead = localStorage.getItem('playeu_autoread') === 'true';
+  window._playeu_autoRead = autoRead;
+
+  /* If auto-read is on, speak page on navigation */
+  var origRenderPage = renderPage;
+  renderPage = function() {
+    origRenderPage();
+    if (window._playeu_autoRead && currentPage > 0) {
+      setTimeout(function() { speakPage(); }, 600);
+    }
+  };
+})();
+
+/* Night mode toggle */
+function toggleNight() {
+  document.body.classList.toggle('night-mode');
+  localStorage.setItem('playeu_night', document.body.classList.contains('night-mode'));
+}
+if (localStorage.getItem('playeu_night') === 'true') document.body.classList.add('night-mode');
+
+/* ═══ FIREFLIES ═══ */
+(function() {
+  for (var i = 0; i < 6; i++) {
+    var f = document.createElement('div');
+    f.className = 'firefly';
+    f.style.left = Math.random() * 100 + '%';
+    f.style.animationDuration = (8 + Math.random() * 12) + 's';
+    f.style.animationDelay = Math.random() * 10 + 's';
+    document.body.appendChild(f);
+  }
+})();
+
 </script>
 </body>
 </html>

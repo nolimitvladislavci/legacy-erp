@@ -114,7 +114,7 @@ def is_gateway_healthy():
         return False
 
 
-def _wa_rate_ok(daily_limit=500):
+def _wa_rate_ok(daily_limit=1000):
     """Redis daily rate limit za WhatsApp poruke (globalni)."""
     try:
         from datetime import date

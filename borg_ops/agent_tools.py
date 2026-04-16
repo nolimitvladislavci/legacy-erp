@@ -8,7 +8,6 @@ Tri razine sigurnosti:
 """
 
 import difflib
-import json
 import logging
 import shutil
 import subprocess

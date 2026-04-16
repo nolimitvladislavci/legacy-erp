@@ -1,0 +1,325 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🏠 {% trans "Azili + Djeca" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.shelter{max-width:780px;margin:0 auto;padding:1.5rem 1rem}
+.shelter h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.shelter .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.info-section{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);margin-bottom:1.2rem}
+.info-section h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.8rem;display:flex;align-items:center;gap:8px}
+.info-section p,.info-section li{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;line-height:1.7}
+.info-section ul{padding-left:1.2rem;margin-top:.5rem}
+.info-section li{margin-bottom:.4rem}
+
+.help-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:.8rem}
+.help-card{background:rgba(245,230,200,.3);border-radius:12px;padding:1rem;text-align:center}
+.help-icon{font-size:2rem;margin-bottom:.3rem}
+.help-title{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;font-weight:bold;margin-bottom:.3rem}
+.help-desc{font-family:'MedievalSharp',serif;font-size:.82rem;color:#6b5a4e}
+
+.animal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem}
+.animal-card{background:#fff;border-radius:16px;padding:1.2rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);cursor:pointer;transition:.2s}
+.animal-card:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.animal-card.active{border-color:#8b6914;background:rgba(201,168,76,.1)}
+.animal-emoji{font-size:3rem;margin-bottom:.3rem}
+.animal-name{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;font-weight:bold}
+.animal-short{font-family:'MedievalSharp',serif;font-size:.75rem;color:#6b5a4e;margin-top:.2rem}
+
+.animal-detail{display:none;background:#fff;border-radius:16px;padding:1.5rem;border:2px solid #c9a84c;margin-bottom:1.5rem}
+.animal-detail.show{display:block;animation:fadeUp .4s ease-out}
+.animal-detail h2{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#2c1810;margin-bottom:.5rem;display:flex;align-items:center;gap:10px}
+.detail-row{margin-bottom:.8rem;padding:.8rem;background:rgba(245,230,200,.3);border-radius:10px}
+.detail-row h3{font-family:'MedievalSharp',serif;font-size:.95rem;color:#c9a84c;margin-bottom:.3rem}
+.detail-row p{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;line-height:1.6}
+.help-btn{display:inline-block;background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;margin-top:.5rem;transition:.2s;text-decoration:none}
+.help-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(201,168,76,.3)}
+.help-actions{display:none;margin-top:.8rem;background:rgba(200,230,201,.3);border-radius:10px;padding:1rem}
+.help-actions.show{display:block;animation:fadeUp .3s ease-out}
+.help-actions li{font-family:'MedievalSharp',serif;font-size:.9rem;color:#1b5e20;line-height:1.8}
+
+.quiz-section{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;
+  padding:1.5rem;border:2px solid #c9a84c;text-align:center;margin-bottom:1.5rem}
+.quiz-q{font-family:'MedievalSharp',serif;font-size:1.1rem;color:#2c1810;margin:.8rem 0}
+.quiz-opts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.quiz-opt{padding:10px 18px;border-radius:10px;background:#fff;border:2px solid rgba(201,168,76,.3);
+  font-family:'MedievalSharp',serif;cursor:pointer;transition:.2s;font-size:.95rem}
+.quiz-opt:hover{border-color:#c9a84c}.quiz-opt.correct{background:#c8e6c9;border-color:#66bb6a}
+.quiz-opt.wrong{background:#ffcdd2;border-color:#e53935}
+.quiz-msg{font-family:'MedievalSharp',serif;font-size:1rem;min-height:1.5rem;margin-top:.5rem}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;margin-top:.5rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+
+.bridge-banner{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.2rem;
+  border:2px solid #66bb6a;display:flex;align-items:center;gap:1rem;margin-bottom:1rem;
+  text-decoration:none;color:#1b5e20;transition:.2s}
+.bridge-banner:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(76,175,80,.2)}
+.nolimit-banner{background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #42a5f5}
+.nolimit-banner,.nolimit-banner:hover{color:#0d47a1}
+
+.safety-box{background:#fff3e0;border-radius:12px;padding:1rem;margin-bottom:1rem;border:2px solid #ffe0b2;
+  font-family:'MedievalSharp',serif;font-size:.9rem;color:#e65100;text-align:center}
+.baka-box{text-align:center;font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a;
+  background:rgba(201,168,76,.1);padding:.8rem;border-radius:10px;margin-top:1rem}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shelter">
+  <h1>🏠 {% trans "Azili + Djeca" %}</h1>
+  <p class="sub">{% trans "NO LIMIT Projekt — Povezujemo djecu i azile za životinje" %}</p>
+
+  <!-- Što je azil? -->
+  <div class="info-section">
+    <h2>🏠 {% trans "Što je azil za životinje?" %}</h2>
+    <p>{% trans "Azil je siguran dom za životinje koje nemaju obitelj. To je mjesto gdje brižni ljudi hrane, liječe i čuvaju životinje dok ne pronađu novi dom. Svaki azil ima veterinara, volontere i puno ljubavi." %}</p>
+  </div>
+
+  <!-- Zašto životinje završe u azilu? -->
+  <div class="info-section">
+    <h2>😢 {% trans "Zašto životinje završe u azilu?" %}</h2>
+    <ul>
+      <li>🚶 {% trans "Napuštene — vlasnik ih je ostavio jer ih više nije htio ili mogao brinuti" %}</li>
+      <li>🔍 {% trans "Izgubljene — pobjegle su i nitko ih nije tražio" %}</li>
+      <li>💔 {% trans "Zlostavljane — netko ih je povrijedio i trebale su zaštitu" %}</li>
+      <li>👶 {% trans "Rođene na ulici — nikad nisu imale dom" %}</li>
+      <li>👴 {% trans "Vlasnik se razbolio ili umro — životinja je ostala sama" %}</li>
+    </ul>
+  </div>
+
+  <!-- Kako djeca mogu pomoći? -->
+  <div class="info-section">
+    <h2>🤝 {% trans "Kako ti možeš pomoći?" %}</h2>
+    <div class="help-grid">
+      <div class="help-card">
+        <div class="help-icon">🙋</div>
+        <div class="help-title">{% trans "Volontiranje" %}</div>
+        <div class="help-desc">{% trans "Od 8 godina možeš volontirati u azilu — šetati pse, češljati mačke, čistiti." %}</div>
+      </div>
+      <div class="help-card">
+        <div class="help-icon">🥫</div>
+        <div class="help-title">{% trans "Donacije hrane" %}</div>
+        <div class="help-desc">{% trans "Organiziraj skupljanje hrane u školi ili kvartu. Azili uvijek trebaju hranu!" %}</div>
+      </div>
+      <div class="help-card">
+        <div class="help-icon">💻</div>
+        <div class="help-title">{% trans "Virtualno udomljavanje" %}</div>
+        <div class="help-desc">{% trans "Ne možeš udomiti? Možeš 'sponzorirati' životinju — pratiti njenu priču online." %}</div>
+      </div>
+      <div class="help-card">
+        <div class="help-icon">📢</div>
+        <div class="help-title">{% trans "Širi riječ" %}</div>
+        <div class="help-desc">{% trans "Pričaj prijateljima o azilima. Svaka udomljena životinja je pobjeda!" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Safety -->
+  <div class="safety-box">
+    ⚠️ {% trans "Nikad ne prilazi nepoznatom psu ili mačku bez odrasle osobe!" %}
+  </div>
+
+  <!-- Kviz odgovornosti -->
+  <div class="quiz-section">
+    <h2 style="font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.5rem">
+      🎯 {% trans "Kviz odgovornosti — Jesi li spreman/na za ljubimca?" %}
+    </h2>
+    <div class="quiz-q" id="shelterQuizQ"></div>
+    <div class="quiz-opts" id="shelterQuizOpts"></div>
+    <div class="quiz-msg" id="shelterQuizMsg"></div>
+    <button class="gbtn" onclick="newShelterQuiz()">{% trans "Sljedeće" %} →</button>
+  </div>
+
+  <!-- Virtualni azil -->
+  <div class="info-section" style="border-color:#c9a84c">
+    <h2>🐾 {% trans "Virtualni azil — Upoznaj naše životinje" %}</h2>
+    <p style="font-family:'MedievalSharp',serif;font-size:.9rem;color:#6b5a4e;margin-bottom:1rem">
+      {% trans "Svaka od ovih životinja čeka svoj dom. Klikni na karticu i upoznaj ih." %}
+    </p>
+  </div>
+
+  <div class="animal-grid" id="animalGrid"></div>
+  <div class="animal-detail" id="animalDetail"></div>
+
+  <!-- Bridge banners -->
+  <a href="https://memio.pet" target="_blank" class="bridge-banner">
+    <div style="font-size:2.5rem">🐕</div>
+    <div>
+      <div style="font-family:'Uncial Antiqua',serif;font-size:1.1rem;font-weight:bold">memio.pet</div>
+      <div style="font-family:'MedievalSharp',serif;font-size:.85rem;opacity:.8">
+        {% trans "Memio.pet pomaže azilima diljem Europe — pronađi azil u blizini i pomozi!" %}
+      </div>
+    </div>
+    <div style="margin-left:auto;font-size:1.5rem">→</div>
+  </a>
+
+  <div class="bridge-banner nolimit-banner" style="cursor:default">
+    <div style="font-size:2.5rem">🌍</div>
+    <div>
+      <div style="font-family:'Uncial Antiqua',serif;font-size:1.1rem;font-weight:bold">NO LIMIT projekt</div>
+      <div style="font-family:'MedievalSharp',serif;font-size:.85rem;opacity:.8">
+        {% trans "NO LIMIT projekt — povezujemo djecu i azile za životinje diljem Europe" %}
+      </div>
+    </div>
+  </div>
+
+  <div class="baka-box">
+    👵 {% trans "Baka kaže: Životinja iz azila voli dvostruko — jer zna kako je biti sam." %}
+  </div>
+</div>
+
+<script>
+var ANIMALS = [
+  {
+    emoji:'🐕', name:'Rex', age:'10 godina', trait:'Star, miran',
+    story:'Rex je star pas koji je cijeli život čuvao jedno dvorište. Kad je vlasnik umro, obitelj ga nije htjela. Sad tiho sjedi u kutu azila i čeka da ga netko pogladi.',
+    needs:'Tihi dom bez male djece, mekani krevet, kratke šetnje, puno maženja.',
+    personality:'Miran, strpljiv, ne laje, voli ležati pored nogu. Savršen za mirnu obitelj.',
+    actions:['Donesi mu mekanu deku','Posjeti ga i čitaj mu priču','Napravi mu igračku od čarape','Nacrtaj mu sliku i objesi na njegov boks']
+  },
+  {
+    emoji:'🐱', name:'Luna', age:'4 godine', trait:'Slijepa na jedno oko',
+    story:'Luna je pronađena kao mačić s ozlijeđenim okom. Veterinar joj je spasio život, ali jedno oko nije mogao spasiti. Luna je najnježnija mačka u azilu.',
+    needs:'Siguran zatvoreni prostor (ne vidi s jedne strane), strpljiv vlasnik, redoviti pregledi.',
+    personality:'Nježna, prede glasno, voli se maziti, malo plašljiva u novim prostorima.',
+    actions:['Skupi stare ručnike za njezin krevet','Napravi joj igračku od kartona','Pričaj prijateljima o njoj','Nacrtaj njezin portret']
+  },
+  {
+    emoji:'🐰', name:'Pufna', age:'2 godine', trait:'Napušten nakon Uskrsa',
+    story:'Pufna je bio uskršnji poklon. Obitelj ga je kupila jer je bio "sladak", ali nakon mjesec dana nitko se nije htio brinuti o njemu. Ostavili su ga u parku.',
+    needs:'Prostrani kavez sa sijenom, svakodnevno druženje, zeleno povrće, strpljenje.',
+    personality:'Plašljiv na početku, ali kad te upozna — traži maženje. Obožava peršin.',
+    actions:['Donesi sijeno ili peršin u azil','Napravi edukativni plakat: "Kunić NIJE igračka!"','Reci svima: ne kupuj životinju za poklon','Volontiraj u kuniću dijelu azila']
+  },
+  {
+    emoji:'🐕‍🦺', name:'Bella', age:'3 godine', trait:'Bojažljiva',
+    story:'Bella je odrasla u kući gdje su vikali i bacali stvari. Sad se boji svake glasne buke. Trese se kad netko podigne ruku — čak i da je pomazi.',
+    needs:'Tih dom, strpljiv vlasnik koji neće vikati, dugo vrijeme prilagodbe, ljubav bez pritiska.',
+    personality:'Jako plašljiva, ali kad joj povjeruješ — postaje najodaniji pas na svijetu.',
+    actions:['Sjedni tiho pokraj nje i čitaj','Govori joj tihim glasom','Donesi joj posebnu poslasticu','Budi strpljiv — povjerenje se gradi polako']
+  },
+  {
+    emoji:'🐈', name:'Žuti', age:'5 godina', trait:'Ulični mačak',
+    story:'Žuti je živio na ulici od malih nogu. Hranile su ga bake iz kvarta. Jednog dana ga je auto udario — preživio je, ali ima šepavi hod. Sad je u azilu.',
+    needs:'Toplina, redoviti obroci (navikao je na glad), veterinarski pregledi za nogu.',
+    personality:'Nezavisan, ponosan, ali tajno voli kad ga se češka iza uha. Glasno prede.',
+    actions:['Donesi mu hranu za mačke','Napravi mu kućicu od kutije','Posjećuj ga redovito da se navikne na ljude','Pomozi pronaći dom s vrtom']
+  },
+  {
+    emoji:'🐕', name:'Medo', age:'6 godina', trait:'Veliki mješanac',
+    story:'Medo je velik pas — 40 kila. Vlasnik ga je nabavio kad je bio štenac i bio je sladak. Ali Medo je rastao. Stan je bio premalen. Vlasnik ga je doveo u azil.',
+    needs:'Kuća s dvorištem (NE stan!), aktivna obitelj, puno šetnji, prostora za trčanje.',
+    personality:'Veseo, energičan, voli djecu, voli loptu. Zna "sjedni" i "daj šapu".',
+    actions:['Dođi ga prošetati (s volonterom)','Donesi mu loptu ili igračku','Pitaj prijatelje s dvorištem žele li ga udomiti','Napravi oglas za njega s lijepom slikom']
+  },
+  {
+    emoji:'🐱', name:'Šapa', age:'3 godine', trait:'S mačićima',
+    story:'Šapa je došla u azil trudna. Rodila je 4 mačića. Sad ih sve treba udomiti — ali Šapu nitko ne želi jer "nije mačić". A ona je najbolja mama.',
+    needs:'Dom s dovoljno prostora, kastracija nakon mačića, ljubav i za nju — ne samo za mačiće!',
+    personality:'Zaštitnica, nježna, oprezna, ali kad vidi da si dobar — prede kao traktor.',
+    actions:['Pomozi pronaći dom za svako mače','Reci ljudima: i odrasle mačke zaslužuju dom!','Donesi hranu za mačiće','Napravi "udomiteljske" letke za školu']
+  },
+  {
+    emoji:'🐕', name:'Srećko', age:'4 godine', trait:'Tri noge',
+    story:'Srećko je izgubio nogu u prometnoj nesreći. Ali to ga ne usporava! Trči, skače, igra se — samo na tri noge. Zove se Srećko jer je preživio.',
+    needs:'Vlasnik koji ga neće sažalijevati, redoviti pregledi, prilagođene šetnje.',
+    personality:'Najsretniji pas u azilu! Maše repom svima, voli sve ljude, nikad ne odustaje.',
+    actions:['Dođi se igrati s njim — on ne zna da mu fali noga!','Snimi video za društvene mreže','Budi inspiriran — Srećko nikad ne odustaje','Pomozi mu pronaći obitelj koja voli trčati']
+  }
+];
+
+var QUIZ = [
+  {q:'Što napraviš kad vidiš psa lutalicu na ulici?',
+    opts:['Potrčim prema njemu','Zovem odraslu osobu za pomoć','Bacim mu hranu iz ruke','Ignoriram ga'], correct:1},
+  {q:'Koliko godina živi pas u prosjeku?',
+    opts:['3-5','5-8','10-15','25+'], correct:2},
+  {q:'Što je NAJVAŽNIJE kad udomljavaš životinju?',
+    opts:['Da je slatka','Da je besplatna','Da imaš vremena i uvjeta za nju','Da je mlada'], correct:2},
+  {q:'Smije li se kupiti životinja kao iznenađenje za nekoga?',
+    opts:['Da, bit će sretan!','NE — životinja nije poklon, to je odgovornost','Samo za djecu','Samo za Božić'], correct:1},
+  {q:'Što je "virtualno udomljavanje"?',
+    opts:['Udomljavaš životinju u videoigri','Sponzoriraš životinju u azilu i pratiš njenu priču','Šalješ životinji poruku','Gledaš životinju na kameri'], correct:1},
+  {q:'Zašto ne treba kupovati životinje u dućanu?',
+    opts:['Jer su skupe','Jer u azilima čekaju životinje kojima treba dom','Jer su bolesne','Jer su ružne'], correct:1},
+  {q:'Što napraviti ako tvoja mačka oguli namještaj?',
+    opts:['Vikati na nju','Kupiti joj grebalicu — to je njena priroda','Baciti je van','Zatvoriti je u sobu'], correct:1},
+  {q:'S koliko godina možeš volontirati u azilu?',
+    opts:['5','8','12','18'], correct:1},
+];
+
+// Build animal grid
+var grid = document.getElementById('animalGrid');
+ANIMALS.forEach(function(a, idx) {
+  var card = document.createElement('div');
+  card.className = 'animal-card';
+  card.innerHTML = '<div class="animal-emoji">' + a.emoji + '</div>' +
+    '<div class="animal-name">' + a.name + '</div>' +
+    '<div class="animal-short">' + a.trait + '</div>';
+  card.onclick = function() {
+    document.querySelectorAll('.animal-card').forEach(function(c){c.classList.remove('active')});
+    card.classList.add('active');
+    showAnimal(idx);
+  };
+  grid.appendChild(card);
+});
+
+function showAnimal(idx) {
+  var a = ANIMALS[idx];
+  var detail = document.getElementById('animalDetail');
+  detail.className = 'animal-detail show';
+
+  var actionsHtml = a.actions.map(function(act){return '<li>✅ '+act+'</li>';}).join('');
+  var actId = 'actions_' + idx;
+
+  detail.innerHTML =
+    '<h2>' + a.emoji + ' ' + a.name + ' <span style="font-family:MedievalSharp,serif;font-size:.85rem;color:#6b5a4e;font-weight:normal">(' + a.age + ')</span></h2>' +
+    '<div class="detail-row"><h3>📖 {% trans "Priča" %}</h3><p>' + a.story + '</p></div>' +
+    '<div class="detail-row"><h3>🏠 {% trans "Što treba" %}</h3><p>' + a.needs + '</p></div>' +
+    '<div class="detail-row"><h3>💛 {% trans "Osobnost" %}</h3><p>' + a.personality + '</p></div>' +
+    '<div style="text-align:center"><button class="help-btn" onclick="document.getElementById(\'' + actId + '\').classList.toggle(\'show\')">🤝 {% trans "Što mogu napraviti?" %}</button></div>' +
+    '<div class="help-actions" id="' + actId + '"><ul style="list-style:none;padding:0">' + actionsHtml + '</ul></div>';
+
+  detail.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// Quiz
+var quizIdx = 0;
+function newShelterQuiz() {
+  quizIdx = Math.floor(Math.random() * QUIZ.length);
+  var q = QUIZ[quizIdx];
+  document.getElementById('shelterQuizQ').textContent = q.q;
+  document.getElementById('shelterQuizMsg').textContent = '';
+  var container = document.getElementById('shelterQuizOpts');
+  container.innerHTML = '';
+  q.opts.forEach(function(opt, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt;
+    btn.onclick = function() {
+      container.querySelectorAll('.quiz-opt').forEach(function(b){b.style.pointerEvents='none'});
+      if (i === q.correct) {
+        btn.classList.add('correct');
+        document.getElementById('shelterQuizMsg').textContent = '🎉 {% trans "Točno! Bravo!" %}';
+        document.getElementById('shelterQuizMsg').style.color = '#2e7d32';
+      } else {
+        btn.classList.add('wrong');
+        container.querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');
+        document.getElementById('shelterQuizMsg').textContent = '❌ {% trans "Točan odgovor" %}: ' + q.opts[q.correct];
+        document.getElementById('shelterQuizMsg').style.color = '#c62828';
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+newShelterQuiz();
+</script>
+{% endblock %}

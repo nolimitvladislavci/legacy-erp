@@ -81,6 +81,7 @@ def _debug_session(request):
 
 
 urlpatterns = [
+    path('evalidator/', include('evalidator.urls', namespace='evalidator')),
     path("_shell_test/", _shell_test),
     path("_debug_session/", _debug_session),
     # Smart Entry — /pocni/ jedina ulazna točka

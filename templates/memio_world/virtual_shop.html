@@ -1,0 +1,234 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}💰 {% trans "Virtualna trgovina" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.shop{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.shop h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.shop .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.wallet{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:16px;padding:1.2rem;
+  color:#f5e6c8;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;
+  border:2px solid #c9a84c}
+.wallet-label{font-family:'MedievalSharp',serif;font-size:1rem}
+.wallet-amount{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:#c9a84c}
+
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.product{background:#fff;border-radius:14px;padding:1rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);transition:.2s;cursor:pointer}
+.product:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.product.bought{opacity:.5;border-color:#66bb6a;background:#e8f5e9}
+.prod-emoji{font-size:2.5rem;margin-bottom:.3rem}
+.prod-name{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;font-weight:bold}
+.prod-price{font-family:'Space Grotesk',sans-serif;font-size:.95rem;color:#c9a84c;font-weight:bold;margin-top:.2rem}
+
+.change-game{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;padding:1.5rem;
+  border:2px solid #c9a84c;text-align:center;margin-bottom:1.5rem}
+.change-game h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.8rem}
+.change-problem{font-family:'MedievalSharp',serif;font-size:1.3rem;color:#2c1810;margin:.8rem 0}
+.change-coins{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:.8rem 0}
+.coin{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:bold;cursor:pointer;transition:.2s;
+  border:2px solid transparent}
+.coin:hover{transform:scale(1.1)}.coin.selected{border-color:#2c1810;transform:scale(1.15)}
+.coin-1{background:linear-gradient(135deg,#fdd835,#f9a825);color:#5d4037}
+.coin-2{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff}
+.coin-5{background:linear-gradient(135deg,#78909c,#455a64);color:#fff}
+.coin-10{background:linear-gradient(135deg,#a1887f,#6d4c41);color:#fff}
+.change-msg{font-family:'MedievalSharp',serif;font-size:1.1rem;min-height:1.5rem;margin-top:.5rem}
+
+.receipt{background:#fff;border-radius:12px;padding:1rem;margin-top:1rem;border:1px dashed #c9a84c;
+  font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#2c1810;display:none}
+.receipt.show{display:block}
+.receipt h3{font-family:'MedievalSharp',serif;text-align:center;margin-bottom:.5rem}
+
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;margin-top:.5rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shop">
+  <h1>💰 {% trans "Virtualna trgovina" %}</h1>
+  <p class="sub">{% trans "Nauči kupovati, brojati novac i vraćati kusur!" %}</p>
+
+  <!-- Wallet -->
+  <div class="wallet">
+    <div class="wallet-label">💰 {% trans "Tvoj novčanik" %}:</div>
+    <div class="wallet-amount" id="walletAmount">20.00 €</div>
+  </div>
+
+  <!-- Products -->
+  <div class="product-grid" id="productGrid"></div>
+
+  <!-- Receipt -->
+  <div class="receipt" id="receipt">
+    <h3>🧾 {% trans "Račun" %}</h3>
+    <div id="receiptItems"></div>
+    <div style="border-top:1px dashed #c9a84c;margin-top:.5rem;padding-top:.5rem;font-weight:bold;text-align:right">
+      {% trans "Ukupno" %}: <span id="receiptTotal">0.00</span> €
+    </div>
+  </div>
+
+  <!-- Change game -->
+  <div class="change-game">
+    <h2>🪙 {% trans "Igra s kusurom" %}</h2>
+    <div class="change-problem" id="changeProblem"></div>
+    <div class="change-coins" id="changeCoins"></div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#6b5a4e">
+      {% trans "Tvoj kusur" %}: <span id="yourChange" style="font-weight:bold;color:#c9a84c">0.00</span> €
+    </div>
+    <div class="change-msg" id="changeMsg"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:.5rem">
+      <button class="gbtn" onclick="checkChange()">{% trans "Provjeri" %} ✓</button>
+      <button class="gbtn" onclick="newChangeGame()" style="background:transparent;border:2px solid #c9a84c;color:#2c1810">{% trans "Novo" %} 🔄</button>
+    </div>
+  </div>
+
+  <div style="background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+    font-family:'MedievalSharp',serif;color:#5c3d1a;font-size:.9rem">
+    👵 {% trans "Baka kaže: Tko čuva lipe, dočeka kune! Štedi danas, uživaj sutra." %}<br>
+    <span style="font-size:.8rem;color:#9c8a7a">{% trans "(Ili u eurima: tko čuva cente, dočeka eure!)" %}</span>
+  </div>
+</div>
+
+<script>
+var PRODUCTS = [
+  {emoji:'🍎',name:'{% trans "Jabuka" %}',price:0.50},
+  {emoji:'🥛',name:'{% trans "Mlijeko" %}',price:1.20},
+  {emoji:'🍞',name:'{% trans "Kruh" %}',price:1.50},
+  {emoji:'🧁',name:'{% trans "Muffin" %}',price:2.00},
+  {emoji:'🍕',name:'{% trans "Pizza" %}',price:3.50},
+  {emoji:'📖',name:'{% trans "Knjiga" %}',price:5.00},
+  {emoji:'🧸',name:'{% trans "Igračka" %}',price:7.00},
+  {emoji:'⚽',name:'{% trans "Lopta" %}',price:4.50},
+  {emoji:'🎨',name:'{% trans "Bojice" %}',price:3.00},
+  {emoji:'🍫',name:'{% trans "Čokolada" %}',price:1.80},
+  {emoji:'🧃',name:'{% trans "Sok" %}',price:0.80},
+  {emoji:'🍌',name:'{% trans "Banana" %}',price:0.30},
+];
+
+var wallet = 20.00;
+var cart = [];
+
+// Build product grid
+var grid = document.getElementById('productGrid');
+PRODUCTS.forEach(function(p, idx) {
+  var card = document.createElement('div');
+  card.className = 'product';
+  card.id = 'prod-' + idx;
+  card.innerHTML = '<div class="prod-emoji">' + p.emoji + '</div>' +
+    '<div class="prod-name">' + p.name + '</div>' +
+    '<div class="prod-price">' + p.price.toFixed(2) + ' €</div>';
+  card.onclick = function() { buyProduct(idx); };
+  grid.appendChild(card);
+});
+
+function buyProduct(idx) {
+  var p = PRODUCTS[idx];
+  if (wallet < p.price) {
+    var u = new SpeechSynthesisUtterance('{% trans "Nemaš dovoljno novca!" %}');
+    u.lang = 'hr-HR'; speechSynthesis.cancel(); speechSynthesis.speak(u);
+    return;
+  }
+  wallet -= p.price;
+  wallet = Math.round(wallet * 100) / 100;
+  cart.push(p);
+  document.getElementById('walletAmount').textContent = wallet.toFixed(2) + ' €';
+
+  // Show receipt
+  var receipt = document.getElementById('receipt');
+  receipt.classList.add('show');
+  var items = '';
+  var total = 0;
+  cart.forEach(function(c) { items += '<div>' + c.emoji + ' ' + c.name + ' — ' + c.price.toFixed(2) + ' €</div>'; total += c.price; });
+  document.getElementById('receiptItems').innerHTML = items;
+  document.getElementById('receiptTotal').textContent = total.toFixed(2);
+
+  // TTS
+  var u = new SpeechSynthesisUtterance(p.name + '. ' + p.price.toFixed(2) + ' eura. Ostalo: ' + wallet.toFixed(2));
+  u.lang = 'hr-HR'; u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+// ═══ CHANGE GAME ═══
+var changeTarget = 0;
+var selectedCoins = [];
+var COINS = [
+  {value:0.10,label:'10c',cls:'coin-1'},
+  {value:0.20,label:'20c',cls:'coin-1'},
+  {value:0.50,label:'50c',cls:'coin-2'},
+  {value:1.00,label:'1€',cls:'coin-5'},
+  {value:2.00,label:'2€',cls:'coin-10'},
+  {value:5.00,label:'5€',cls:'coin-10'},
+];
+
+function newChangeGame() {
+  // Random purchase
+  var paid = [5, 10, 20][Math.floor(Math.random() * 3)];
+  var item = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+  while (item.price >= paid) item = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+  changeTarget = Math.round((paid - item.price) * 100) / 100;
+
+  document.getElementById('changeProblem').innerHTML =
+    '{% trans "Kupio/la si" %} ' + item.emoji + ' ' + item.name + ' (' + item.price.toFixed(2) + ' €)<br>' +
+    '{% trans "Platio/la si" %} <strong>' + paid + '.00 €</strong><br>' +
+    '{% trans "Koliki je kusur?" %} 🤔';
+
+  selectedCoins = [];
+  updateChangeDisplay();
+  document.getElementById('changeMsg').textContent = '';
+
+  // Build coins
+  var container = document.getElementById('changeCoins');
+  container.innerHTML = '';
+  // Offer multiple of each coin
+  COINS.forEach(function(c) {
+    for (var i = 0; i < 3; i++) {
+      var el = document.createElement('div');
+      el.className = 'coin ' + c.cls;
+      el.textContent = c.label;
+      el.dataset.value = c.value;
+      el.onclick = function() {
+        if (this.classList.contains('selected')) {
+          this.classList.remove('selected');
+          var idx = selectedCoins.indexOf(+this.dataset.value);
+          if (idx >= 0) selectedCoins.splice(idx, 1);
+        } else {
+          this.classList.add('selected');
+          selectedCoins.push(+this.dataset.value);
+        }
+        updateChangeDisplay();
+      };
+      container.appendChild(el);
+    }
+  });
+}
+
+function updateChangeDisplay() {
+  var sum = selectedCoins.reduce(function(a, b) { return a + b; }, 0);
+  sum = Math.round(sum * 100) / 100;
+  document.getElementById('yourChange').textContent = sum.toFixed(2);
+}
+
+function checkChange() {
+  var sum = Math.round(selectedCoins.reduce(function(a, b) { return a + b; }, 0) * 100) / 100;
+  if (Math.abs(sum - changeTarget) < 0.01) {
+    document.getElementById('changeMsg').textContent = '🎉 {% trans "Točno! Kusur je" %} ' + changeTarget.toFixed(2) + ' €!';
+    document.getElementById('changeMsg').style.color = '#2e7d32';
+    var u = new SpeechSynthesisUtterance('Bravo! Točan kusur!');
+    u.lang = 'hr-HR'; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } else if (sum < changeTarget) {
+    document.getElementById('changeMsg').textContent = '{% trans "Premalo! Treba još." %}';
+    document.getElementById('changeMsg').style.color = '#e65100';
+  } else {
+    document.getElementById('changeMsg').textContent = '{% trans "Previše! Vrati jednu kovanicu." %}';
+    document.getElementById('changeMsg').style.color = '#c62828';
+  }
+}
+
+newChangeGame();
+</script>
+{% endblock %}

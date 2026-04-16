@@ -1,0 +1,11 @@
+{% if valid %}
+<div class="result-valid">
+  <span style="font-size:1.3rem">✓</span>
+  <span>{{ message }}</span>
+</div>
+{% elif message %}
+<div class="result-invalid">
+  <div><span style="font-size:1.1rem">✗</span> {{ message }}</div>
+  {% if suggestion %}<div class="suggestion">💡 {{ suggestion }}</div>{% endif %}
+</div>
+{% endif %}

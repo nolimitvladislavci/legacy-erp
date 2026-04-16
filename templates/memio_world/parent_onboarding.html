@@ -1,0 +1,206 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🚀 {% trans "Počni ovdje" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.onboard{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.onboard h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;text-align:center;margin-bottom:.3rem}
+.onboard .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:2rem;font-size:1rem}
+
+.step{display:flex;gap:1.5rem;margin-bottom:2rem;align-items:flex-start}
+.step-num{width:56px;height:56px;background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Uncial Antiqua',serif;font-size:1.5rem;flex-shrink:0}
+.step-content{flex:1}
+.step-title{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.3rem}
+.step-desc{font-family:'MedievalSharp',serif;font-size:.95rem;color:#6b5a4e;line-height:1.7}
+.step-time{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#c9a84c;margin-top:.3rem}
+
+.model-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:2rem 0}
+.model-card{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);
+  text-align:center;transition:.2s;position:relative}
+.model-card:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.model-card.recommended{border-color:#c9a84c;background:linear-gradient(135deg,#fff,rgba(201,168,76,.05))}
+.model-badge{position:absolute;top:-10px;right:16px;background:#c9a84c;color:#fff;padding:3px 12px;
+  border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:bold}
+.model-price{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;color:#c9a84c;margin:.5rem 0}
+.model-price .period{font-size:.9rem;font-weight:400;color:#6b5a4e}
+.model-name{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.5rem}
+.model-features{text-align:left;font-family:'MedievalSharp',serif;font-size:.85rem;color:#6b5a4e;line-height:1.8}
+.model-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:12px 24px;border-radius:10px;font-family:'Uncial Antiqua',serif;font-size:1rem;
+  cursor:pointer;margin-top:1rem;transition:.2s;width:100%}
+.model-btn:hover{transform:translateY(-2px)}
+.model-btn.free{background:#fff;color:#2c1810;border:2px solid #c9a84c}
+
+.why-section{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:16px;padding:2rem;
+  color:#f5e6c8;margin:2rem 0;border:2px solid #c9a84c}
+.why-section h2{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#c9a84c;margin-bottom:1rem;text-align:center}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.why-item{display:flex;gap:10px;align-items:flex-start}
+.why-icon{font-size:1.5rem;flex-shrink:0}
+.why-text{font-family:'MedievalSharp',serif;font-size:.9rem;line-height:1.5}
+
+.testimonial{background:rgba(201,168,76,.08);border-radius:16px;padding:1.5rem;margin:1.5rem 0;
+  border-left:4px solid #c9a84c}
+.test-text{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;font-style:italic;line-height:1.6}
+.test-author{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#6b5a4e;margin-top:.5rem}
+
+.faq{margin:2rem 0}
+.faq h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:1rem}
+.faq-item{margin-bottom:1rem}
+.faq-q{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;cursor:pointer;padding:.8rem;
+  background:rgba(245,230,200,.3);border-radius:10px;transition:.2s;display:flex;align-items:center;gap:8px}
+.faq-q:hover{background:rgba(201,168,76,.15)}
+.faq-a{display:none;font-family:'MedievalSharp',serif;font-size:.9rem;color:#6b5a4e;padding:.8rem 1rem;line-height:1.6}
+.faq-a.show{display:block}
+
+@media(max-width:600px){.step{flex-direction:column;align-items:center;text-align:center}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboard">
+  <h1>🚀 {% trans "Počnite ovdje" %}</h1>
+  <p class="sub">{% trans "3 koraka do digitalnog roditelja za vaše dijete" %}</p>
+
+  <!-- Steps -->
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <div class="step-title">{% trans "Otvorite PLAY.EU s djetetom" %}</div>
+      <div class="step-desc">{% trans "Sjednite zajedno i pokažite djetetu platformu. Neka samo odabere što ga zanima. Nema pritiska, nema moraš. Dijete istražuje — vi gledate." %}</div>
+      <div class="step-time">⏱ 10 min</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <div class="step-title">{% trans "Uđite u Memio Školu" %}</div>
+      <div class="step-desc">{% trans "Dijete unese svoje ime i krene od Razine 1. Svaki zadatak nosi XP bodove. Dijete samo bira tempo. Vi pratite napredak." %}</div>
+      <div class="step-time">⏱ 5 min</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <div class="step-title">{% trans "Pustite dijete da istražuje — samo 30 min dnevno" %}</div>
+      <div class="step-desc">{% trans "Platforma sama potiče fizičku aktivnost nakon 3 digitalne aktivnosti. Nema push notifikacija. Dijete dolazi kad želi. Vi pregledavate Parent Dashboard jednom tjedno." %}</div>
+      <div class="step-time">⏱ 30 min/{% trans "dan" %}</div>
+    </div>
+  </div>
+
+  <!-- Why -->
+  <div class="why-section">
+    <h2>{% trans "Zašto PLAY.EU?" %}</h2>
+    <div class="why-grid">
+      <div class="why-item"><div class="why-icon">🚫</div><div class="why-text">{% trans "NEMA reklama. Nikad. Dijete NIJE proizvod." %}</div></div>
+      <div class="why-item"><div class="why-icon">🧠</div><div class="why-text">{% trans "22 bajke, šah, matematika, glazba — sve na jednom mjestu." %}</div></div>
+      <div class="why-item"><div class="why-icon">🧘</div><div class="why-text">{% trans "Rage Engine — dijete uči upravljati bijesom." %}</div></div>
+      <div class="why-item"><div class="why-icon">🎓</div><div class="why-text">{% trans "Memio Škola s diplomom — motivacija i napredak." %}</div></div>
+      <div class="why-item"><div class="why-icon">🌍</div><div class="why-text">{% trans "8 regija, 3 jezika — dijete u dijaspori ostaje povezano." %}</div></div>
+      <div class="why-item"><div class="why-icon">👵</div><div class="why-text">{% trans "Bakin glas — Voice Legacy čuva glas obitelji." %}</div></div>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="testimonial">
+    <div class="test-text">{% trans "Moja kći (7) od kad koristi PLAY.EU, sama traži da čita bajke. Prije sam je morala nagovarati. A kad je dobila prvu 'Znalac' razinu — stavili smo diplomu na hladnjak!" %}</div>
+    <div class="test-author">— Ivana M., Zagreb 🇭🇷</div>
+  </div>
+  <div class="testimonial">
+    <div class="test-text">{% trans "Sin (9) živi u Münchenu i polako je gubio hrvatski. Od kad čita bajke na PLAY.EU — prebacuje između HR i DE jednim klikom. Čak je naučio 'matovilac' i 'čarobnica'!" %}</div>
+    <div class="test-author">— Damir K., München 🇩🇪</div>
+  </div>
+  <div class="testimonial">
+    <div class="test-text">{% trans "Rage Engine je spasio naše večeri. Kad se naljuti — umjesto vikanja, kaže: 'Mama, trebam vulkan vježbu.' To je najljepša rečenica koju sam čula od svog 5-godišnjaka." %}</div>
+    <div class="test-author">— Amela H., Sarajevo 🇧🇦</div>
+  </div>
+
+  <!-- Pricing -->
+  <h2 style="font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#2c1810;text-align:center;margin:2rem 0 1rem">
+    💰 {% trans "Odaberite plan" %}
+  </h2>
+
+  <div class="model-cards">
+    <div class="model-card">
+      <div class="model-name">{% trans "Besplatno" %}</div>
+      <div class="model-price">€0 <span class="period">/{% trans "zauvijek" %}</span></div>
+      <div class="model-features">
+        ✅ 5 {% trans "bajki" %}<br>
+        ✅ 2 {% trans "kviza" %}<br>
+        ✅ {% trans "Slovarica + Brojevi" %}<br>
+        ✅ {% trans "Čovječe ne ljuti se" %}<br>
+        ✅ {% trans "Boje + Oblici" %}<br>
+        ❌ {% trans "Šah škola" %}<br>
+        ❌ {% trans "Memio Škola + diploma" %}<br>
+        ❌ {% trans "Voice Legacy" %}<br>
+        ❌ {% trans "Parent Dashboard" %}<br>
+        ❌ {% trans "BuddyPair" %}
+      </div>
+      <button class="model-btn free" onclick="alert("Vec ste na besplatnom planu!")">{% trans "Trenutni plan" %}</button>
+    </div>
+
+    <div class="model-card recommended">
+      <div class="model-badge">{% trans "PREPORUČENO" %}</div>
+      <div class="model-name">{% trans "Obitelj" %}</div>
+      <div class="model-price">€4.99 <span class="period">/{% trans "mj" %}</span></div>
+      <div class="model-features">
+        ✅ {% trans "SVE bajke (22+)" %}<br>
+        ✅ {% trans "SVE igre (12+)" %}<br>
+        ✅ {% trans "Šah škola" %}<br>
+        ✅ {% trans "Memio Škola + diploma" %}<br>
+        ✅ {% trans "Memio maskota (pitaj me!)" %}<br>
+        ✅ {% trans "Voice Legacy" %}<br>
+        ✅ {% trans "Parent Dashboard" %}<br>
+        ✅ {% trans "BuddyPair" %}<br>
+        ✅ {% trans "Natječaji" %}<br>
+        ✅ {% trans "Do 3 djece" %}
+      </div>
+      <button class="model-btn" onclick="alert("Uskoro! Radimo na placanju.")">{% trans "Započni 7 dana besplatno" %} →</button>
+    </div>
+
+    <div class="model-card">
+      <div class="model-name">{% trans "Godišnji" %}</div>
+      <div class="model-price">€39.99 <span class="period">/{% trans "god" %}</span></div>
+      <div class="model-features">
+        ✅ {% trans "Sve iz Obitelj plana" %}<br>
+        ✅ {% trans "2 mjeseca GRATIS" %}<br>
+        ✅ {% trans "Do 5 djece" %}<br>
+        ✅ {% trans "Prioritetna podrška" %}<br>
+        ✅ {% trans "Rani pristup novim sadržajima" %}<br>
+        ✅ {% trans "Fizička diploma poštom" %}<br>
+      </div>
+      <button class="model-btn" onclick="alert("Uskoro!")">{% trans "Uštedi 33%" %} →</button>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <h2>❓ {% trans "Česta pitanja" %}</h2>
+
+    <div class="faq-item"><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">❓ {% trans "Je li PLAY.EU siguran za moje dijete?" %}</div>
+    <div class="faq-a">{% trans "DA. Nema reklama, nema praćenja, nema profiliranja. Sav sadržaj je edukativni i pregledan. Nema komentara od nepoznatih. BuddyPair zahtijeva odobrenje roditelja. Svi razgovori su vidljivi roditeljima." %}</div></div>
+
+    <div class="faq-item"><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">❓ {% trans "Koliko vremena dijete treba provoditi na platformi?" %}</div>
+    <div class="faq-a">{% trans "Preporučamo 20-30 minuta dnevno. Platforma potiče fizičku aktivnost nakon svake 3. digitalne aktivnosti. Nema push notifikacija — dijete dolazi kad želi." %}</div></div>
+
+    <div class="faq-item"><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">❓ {% trans "Može li dijete koristiti PLAY.EU bez roditelja?" %}</div>
+    <div class="faq-a">{% trans "DA, nakon što roditelj napravi početnu postavu. Platforma je dizajnirana da dijete samostalno istražuje. Ali preporučamo da roditelj jednom tjedno pogleda Parent Dashboard." %}</div></div>
+
+    <div class="faq-item"><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">❓ {% trans "Moje dijete živi u Njemačkoj i gubi hrvatski. Može li pomoći?" %}</div>
+    <div class="faq-a">{% trans "APSOLUTNO. PLAY.EU ima 22 bajke na HR/DE/EN. Dijete čita na hrvatskom, jednim klikom prebaci na njemački. Uči jezik A NE ZNA da uči — jer čita bajku, ne udžbenik." %}</div></div>
+
+    <div class="faq-item"><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">❓ {% trans "Je li diploma pravno priznata?" %}</div>
+    <div class="faq-a">{% trans "Trenutno je Memio diploma motivacijski certifikat. Radimo na akreditaciji kroz Open Badges standard (EU Digital Credentials). Faza 2 uključuje partnerstvo s obrazovnom institucijom." %}</div></div>
+
+    <div class="faq-item"><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('show')">❓ {% trans "Mogu li otkazati pretplatu?" %}</div>
+    <div class="faq-a">{% trans "DA, u bilo kojem trenutku. Bez pitanja. Bez penala. Vaši podaci ostaju 30 dana nakon otkazivanja." %}</div></div>
+  </div>
+
+  <div style="text-align:center;margin-top:2rem;font-family:'MedievalSharp',serif;color:#5c3d1a;font-size:.9rem">
+    👵 {% trans "Baka kaže: Cijena jednog cappuccina mjesečno. Za digitalnog roditelja koji nikad ne gubi strpljenje." %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,253 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}💡 Dječji Portal Ideja — PLAY.EU{% endblock %}
+{% block extra_head %}
+<style>
+.ideas-page{max-width:780px;margin:0 auto;padding:1.5rem 1rem}
+.ideas-page h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.ideas-page .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.idea-card{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);
+  margin-bottom:1.2rem;animation:fadeUp .4s ease-out}
+.idea-card h2{font-family:'Uncial Antiqua',serif;font-size:1.25rem;color:#2c1810;margin-bottom:.8rem;
+  display:flex;align-items:center;gap:8px}
+.idea-card h2 .icon{font-size:1.5rem}
+
+.idea-field{display:flex;flex-direction:column;gap:4px;margin-bottom:.8rem}
+.idea-field label{font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a;font-weight:bold}
+.idea-field input,.idea-field select,.idea-field textarea{font-family:'MedievalSharp',serif;font-size:.95rem;
+  padding:8px 12px;border:2px solid rgba(201,168,76,.3);border-radius:10px;background:#fffef5;color:#2c1810;
+  outline:none;transition:.2s}
+.idea-field input:focus,.idea-field select:focus,.idea-field textarea:focus{border-color:#c9a84c}
+
+.idea-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.idea-row{grid-template-columns:1fr}}
+
+.idea-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.idea-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(139,105,20,.3)}
+
+/* Ideas list */
+.ideas-list{display:flex;flex-direction:column;gap:10px;margin-top:1rem}
+.idea-item{background:#fff;border-radius:14px;padding:1rem 1.2rem;
+  border:2px solid rgba(201,168,76,.2);transition:.2s;position:relative}
+.idea-item:hover{border-color:#c9a84c}
+.idea-item.idea-of-month{border:3px solid #c9a84c;background:linear-gradient(135deg,#fffef5,#f5e6c8);
+  box-shadow:0 4px 16px rgba(201,168,76,.25)}
+.idea-of-month-badge{position:absolute;top:-10px;right:12px;background:linear-gradient(135deg,#c9a84c,#8b6914);
+  color:#fff;font-family:'MedievalSharp',serif;font-size:.7rem;padding:3px 10px;border-radius:8px;
+  box-shadow:0 2px 8px rgba(139,105,20,.3)}
+
+.idea-cat{display:inline-block;font-family:'MedievalSharp',serif;font-size:.7rem;
+  padding:2px 10px;border-radius:12px;margin-bottom:4px;color:#fff;font-weight:bold}
+.cat-igra{background:#e53935}
+.cat-prica{background:#7b1fa2}
+.cat-alat{background:#1565c0}
+.cat-drugo{background:#2e7d32}
+
+.idea-title{font-family:'MedievalSharp',serif;font-size:1.05rem;color:#2c1810;margin-bottom:2px}
+.idea-author{font-family:'MedievalSharp',serif;font-size:.8rem;color:#8b6914}
+.idea-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+
+.vote-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.12);
+  border:2px solid rgba(201,168,76,.3);border-radius:10px;padding:6px 14px;cursor:pointer;
+  font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;transition:.2s}
+.vote-btn:hover{border-color:#c9a84c;background:rgba(201,168,76,.25)}
+.vote-btn.voted{border-color:#c9a84c;background:rgba(201,168,76,.3);pointer-events:none}
+.vote-count{font-weight:bold;color:#8b6914}
+
+.sort-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.sort-btn{padding:6px 14px;border-radius:10px;background:rgba(245,230,200,.3);
+  border:2px solid rgba(201,168,76,.2);font-family:'MedievalSharp',serif;font-size:.8rem;
+  cursor:pointer;transition:.2s;color:#2c1810}
+.sort-btn:hover,.sort-btn.active{border-color:#c9a84c;background:rgba(201,168,76,.2)}
+
+.baka-box{text-align:center;font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a;
+  background:rgba(201,168,76,.1);padding:1rem;border-radius:12px;margin-top:1rem;
+  border:1px dashed rgba(201,168,76,.4)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ideas-page">
+  <h1>💡 Dječji Portal — Ideje</h1>
+  <p class="sub">Što bi TI dodao/la na PLAY.EU?</p>
+
+  <!-- Submit idea -->
+  <div class="idea-card">
+    <h2><span class="icon">🚀</span> Predloži ideju</h2>
+    <div class="idea-field">
+      <label>Tvoja ideja</label>
+      <input type="text" id="ideaTitle" placeholder="Opiši svoju ideju..." maxlength="100">
+    </div>
+    <div class="idea-row">
+      <div class="idea-field">
+        <label>Tvoje ime</label>
+        <input type="text" id="ideaAuthor" placeholder="Kako se zoveš?">
+      </div>
+      <div class="idea-field">
+        <label>Koliko imaš godina?</label>
+        <input type="number" id="ideaAge" placeholder="Dob" min="3" max="15">
+      </div>
+    </div>
+    <div class="idea-field">
+      <label>Kategorija</label>
+      <select id="ideaCat">
+        <option value="igra">🎮 Igra</option>
+        <option value="prica">📖 Priča</option>
+        <option value="alat">🔧 Alat</option>
+        <option value="drugo">🌟 Drugo</option>
+      </select>
+    </div>
+    <button class="idea-btn" onclick="submitIdea()">✨ Pošalji ideju</button>
+  </div>
+
+  <!-- Filter / Sort -->
+  <div class="idea-card">
+    <h2><span class="icon">📋</span> Sve ideje</h2>
+    <div class="sort-bar">
+      <button class="sort-btn active" data-sort="votes" onclick="sortIdeas('votes',this)">🏆 Najpopularnije</button>
+      <button class="sort-btn" data-sort="newest" onclick="sortIdeas('newest',this)">🆕 Najnovije</button>
+      <button class="sort-btn" data-sort="igra" onclick="sortIdeas('igra',this)">🎮 Igre</button>
+      <button class="sort-btn" data-sort="prica" onclick="sortIdeas('prica',this)">📖 Priče</button>
+      <button class="sort-btn" data-sort="alat" onclick="sortIdeas('alat',this)">🔧 Alati</button>
+    </div>
+    <div class="ideas-list" id="ideasList"></div>
+  </div>
+
+  <!-- Baka -->
+  <div class="baka-box">
+    👵 Baka kaže: „Najbolje ideje dolaze od djece — jer djeca još nisu zaboravila sanjati."
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const LS_KEY = 'playeu_kids_ideas';
+const VOTED_KEY = 'playeu_kids_ideas_voted';
+
+const SEED_IDEAS = [
+  {id:'s1',title:'Igra s dinosaurima',author:'Luka',age:7,cat:'igra',votes:12,ts:1},
+  {id:'s2',title:'Priča o konju koji govori',author:'Ana',age:9,cat:'prica',votes:8,ts:2},
+  {id:'s3',title:'Kviz o svemiru',author:'Marko',age:6,cat:'igra',votes:15,ts:3},
+  {id:'s4',title:'Bojanka s unicornima',author:'Petra',age:5,cat:'alat',votes:11,ts:4},
+  {id:'s5',title:'Igra tko je brži u matematici',author:'Ema',age:10,cat:'igra',votes:9,ts:5}
+];
+
+const CAT_LABELS = {igra:'🎮 Igra',prica:'📖 Priča',alat:'🔧 Alat',drugo:'🌟 Drugo'};
+
+let ideas = [];
+let votedIds = new Set();
+let currentSort = 'votes';
+
+function loadIdeas(){
+  try{
+    const s = localStorage.getItem(LS_KEY);
+    if(s){ideas=JSON.parse(s);}
+    else{ideas=[...SEED_IDEAS];saveIdeas();}
+    const v = localStorage.getItem(VOTED_KEY);
+    if(v) votedIds = new Set(JSON.parse(v));
+  }catch(e){ideas=[...SEED_IDEAS];}
+}
+
+function saveIdeas(){localStorage.setItem(LS_KEY,JSON.stringify(ideas));}
+function saveVoted(){localStorage.setItem(VOTED_KEY,JSON.stringify([...votedIds]));}
+
+function getTopIdea(){
+  return ideas.reduce((max,i)=>i.votes>max.votes?i:max,ideas[0]);
+}
+
+function renderIdeas(){
+  const list = document.getElementById('ideasList');
+  let sorted = [...ideas];
+  const topIdea = getTopIdea();
+
+  if(currentSort==='votes') sorted.sort((a,b)=>b.votes-a.votes);
+  else if(currentSort==='newest') sorted.sort((a,b)=>b.ts-a.ts);
+  else sorted = sorted.filter(i=>i.cat===currentSort).sort((a,b)=>b.votes-a.votes);
+
+  if(!sorted.length){
+    list.innerHTML='<p style="font-family:MedievalSharp,serif;color:#6b5a4e">Nema ideja u ovoj kategoriji.</p>';
+    return;
+  }
+
+  list.innerHTML = sorted.map(idea => {
+    const isTop = idea.id === topIdea.id;
+    const hasVoted = votedIds.has(idea.id);
+    return `<div class="idea-item${isTop?' idea-of-month':''}">
+      ${isTop?'<div class="idea-of-month-badge">⭐ Ideja mjeseca</div>':''}
+      <span class="idea-cat cat-${idea.cat}">${CAT_LABELS[idea.cat]||idea.cat}</span>
+      <div class="idea-title">${esc(idea.title)}</div>
+      <div class="idea-author">${esc(idea.author)}, ${idea.age} god.</div>
+      <div class="idea-bottom">
+        <button class="vote-btn${hasVoted?' voted':''}" onclick="vote('${idea.id}')" ${hasVoted?'disabled':''}>
+          👍 <span class="vote-count">${idea.votes}</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function vote(id){
+  if(votedIds.has(id))return;
+  const idea = ideas.find(i=>i.id===id);
+  if(!idea)return;
+  idea.votes++;
+  votedIds.add(id);
+  saveIdeas();saveVoted();renderIdeas();
+  showToast('Hvala na glasu! 👍');
+}
+
+function submitIdea(){
+  const title = document.getElementById('ideaTitle').value.trim();
+  const author = document.getElementById('ideaAuthor').value.trim();
+  const age = parseInt(document.getElementById('ideaAge').value)||0;
+  const cat = document.getElementById('ideaCat').value;
+
+  if(!title){showToast('Upiši svoju ideju!');return;}
+  if(!author){showToast('Upiši svoje ime!');return;}
+  if(age<3||age>15){showToast('Upiši koliko imaš godina (3-15)!');return;}
+
+  const idea = {
+    id: 'u'+Date.now(),
+    title, author, age, cat,
+    votes: 0,
+    ts: Date.now()
+  };
+  ideas.push(idea);
+  saveIdeas();
+  document.getElementById('ideaTitle').value='';
+  document.getElementById('ideaAuthor').value='';
+  document.getElementById('ideaAge').value='';
+  renderIdeas();
+  showToast('Tvoja ideja je poslana! 🚀');
+}
+
+function sortIdeas(sort,btn){
+  currentSort = sort;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIdeas();
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',bottom:'80px',left:'50%',transform:'translateX(-50%)',
+    background:'#2c1810',color:'#fff',padding:'10px 24px',borderRadius:'10px',
+    fontFamily:'MedievalSharp,serif',fontSize:'.95rem',zIndex:'9999',animation:'fadeUp .3s'});
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1800);
+}
+
+// Init
+loadIdeas();
+renderIdeas();
+</script>
+{% endblock %}

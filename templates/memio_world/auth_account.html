@@ -1,0 +1,90 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}👤 {% trans "Moj račun" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.account{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.account h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:1.5rem}
+
+.acc-card{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);margin-bottom:1.5rem}
+.acc-card h2{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:1rem;
+  border-bottom:2px solid rgba(201,168,76,.15);padding-bottom:.3rem}
+
+.acc-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;
+  border-bottom:1px solid rgba(201,168,76,.08);font-family:'MedievalSharp',serif;font-size:.95rem}
+.acc-row:last-child{border-bottom:none}
+.acc-label{color:#6b5a4e}
+.acc-value{color:#2c1810;font-weight:bold}
+
+.child-card{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:14px;padding:1.2rem;
+  margin-bottom:.8rem;display:flex;align-items:center;gap:1rem;border:2px solid rgba(201,168,76,.3)}
+.child-avatar{font-size:2.5rem;width:50px;text-align:center}
+.child-info{flex:1}
+.child-name{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810}
+.child-meta{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#6b5a4e}
+.child-xp{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#c9a84c;font-weight:bold}
+.xp-bar{height:6px;background:rgba(201,168,76,.2);border-radius:3px;margin-top:.3rem;overflow:hidden}
+.xp-fill{height:100%;background:#c9a84c;border-radius:3px}
+
+.acc-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:1rem}
+.acc-btn{padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.9rem;
+  cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.acc-btn:hover{transform:translateY(-2px)}
+.acc-btn-gold{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none}
+.acc-btn-outline{background:#fff;color:#2c1810;border:2px solid #c9a84c}
+.acc-btn-red{background:#fff;color:#c62828;border:2px solid #ef9a9a}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="account">
+  <h1>👤 {% trans "Moj račun" %}</h1>
+
+  <!-- Parent info -->
+  <div class="acc-card">
+    <h2>👨‍👩‍👧 {% trans "Informacije" %}</h2>
+    <div class="acc-row"><span class="acc-label">{% trans "Ime" %}:</span><span class="acc-value">{{ parent.name|default:"—" }}</span></div>
+    <div class="acc-row"><span class="acc-label">{% trans "Email" %}:</span><span class="acc-value">{{ parent.email }}</span></div>
+    <div class="acc-row"><span class="acc-label">{% trans "Plan" %}:</span><span class="acc-value">{{ parent.get_plan_display }}</span></div>
+    <div class="acc-row"><span class="acc-label">{% trans "Referral kod" %}:</span><span class="acc-value">{{ parent.referral_code }}</span></div>
+    <div class="acc-row"><span class="acc-label">{% trans "Preporuke" %}:</span><span class="acc-value">{{ parent.referral_count }}</span></div>
+    <div class="acc-row"><span class="acc-label">{% trans "Jezik" %}:</span><span class="acc-value">{{ parent.preferred_language|upper }}</span></div>
+  </div>
+
+  <!-- Children -->
+  <div class="acc-card">
+    <h2>👶 {% trans "Djeca" %} ({{ children|length }})</h2>
+    {% for cp in children %}
+    <div class="child-card">
+      <div class="child-avatar">🧒</div>
+      <div class="child-info">
+        <div class="child-name">{{ cp.child.name }}</div>
+        <div class="child-meta">{{ cp.child.date_of_birth }} · {% trans "Razina" %} {{ cp.level }}</div>
+        <div class="child-xp">{{ cp.total_xp }} XP · {{ cp.stories_read|length }} {% trans "priča" %} · {{ cp.streak_days }}🔥</div>
+        <div class="xp-bar"><div class="xp-fill" style="width:{% widthratio cp.xp 100 100 %}%"></div></div>
+      </div>
+    </div>
+    {% empty %}
+    <p style="font-family:'MedievalSharp',serif;color:#6b5a4e;text-align:center">
+      {% trans "Još niste dodali dijete." %}
+    </p>
+    {% endfor %}
+    <div style="text-align:center;margin-top:1rem">
+      <a href="{% url 'memio_world:setup_page' %}" class="acc-btn acc-btn-gold">➕ {% trans "Dodaj dijete" %}</a>
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <div class="acc-card">
+    <h2>🔗 {% trans "Brzi linkovi" %}</h2>
+    <div class="acc-actions">
+      <a href="{% url 'memio_world:parent_dashboard' %}" class="acc-btn acc-btn-outline">📊 {% trans "Dashboard" %}</a>
+      <a href="{% url 'memio_world:memio_school' %}" class="acc-btn acc-btn-outline">🎓 {% trans "Škola" %}</a>
+      <a href="{% url 'memio_world:payment_page' %}" class="acc-btn acc-btn-outline">💳 {% trans "Pretplata" %}</a>
+      <a href="{% url 'memio_world:referral_page' %}" class="acc-btn acc-btn-outline">🎁 {% trans "Preporuči" %}</a>
+      <a href="{% url 'memio_world:logout_action' %}" class="acc-btn acc-btn-red">🚪 {% trans "Odjava" %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

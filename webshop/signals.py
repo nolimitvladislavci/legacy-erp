@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 """
 Webshop Signals — order lifecycle integrations.
 

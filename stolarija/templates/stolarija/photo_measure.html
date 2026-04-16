@@ -137,11 +137,20 @@ if (navigator.geolocation) {
 // Photo capture
 document.getElementById('photoInput').addEventListener('change', function() {
   if (!this.files[0]) return;
+  var captureBtn = document.querySelector('.pm-capture-btn');
+  if (captureBtn) { captureBtn.disabled = true; captureBtn.textContent = '⏳ Učitavam sliku...'; }
   img = new Image();
   img.onload = function() {
     initCanvas();
     document.getElementById('capturePhase').style.display = 'none';
     document.getElementById('drawPhase').style.display = 'block';
+    // Auto-trigger AI analysis
+    setTimeout(function() { requestAI(); }, 300);
+  };
+  img.onerror = function() {
+    if (captureBtn) { captureBtn.disabled = false; captureBtn.textContent = '📸 Uslikaj otvor'; }
+    document.getElementById('drawStatus') && (document.getElementById('drawStatus').textContent = '❌ Greška pri učitavanju slike. Pokušajte ponovo.');
+    alert('Slika se ne može učitati. Pokušajte ponovo ili koristite drugu sliku.');
   };
   img.src = URL.createObjectURL(this.files[0]);
 });

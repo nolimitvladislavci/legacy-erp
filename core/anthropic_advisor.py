@@ -1,3 +1,4 @@
+
 """
 Anthropic Advisor Strategy — LIMIT Connect integracija
 ======================================================
@@ -79,7 +80,7 @@ def haiku_with_advisor(
         resp = client.beta.messages.create(**kwargs)
 
         # Prikupi sve text blokove
-        text_parts = [block.text for block in resp.content if hasattr(block, "text")]
+        text_parts = [block.text for block in resp.content if hasattr(block, "text") and block.text]
         result = "\n".join(text_parts).strip()
 
         # Log advisor usage
@@ -96,6 +97,6 @@ def haiku_with_advisor(
 
         return result
 
-    except (IntegrityError, DatabaseError) as e:
+    except Exception as e:
         logger.error("haiku_with_advisor greška: %s", e)
         raise

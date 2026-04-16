@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eValidator — Infrastruktura Povjerenja | EU</title>
+<meta name="description" content="Besplatna provjera OIB, IBAN i VAT ID za cijelu EU. ISO 7064 · MOD97 · EN 16931">
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<style>
+  :root{--gold:#c9a84c;--gold-light:#e8c97e;--dark:#0d0d0d;--dark2:#161616;--dark3:#1f1f1f;--text:#e8e8e8;--text-muted:#888;--valid:#22c55e;--invalid:#ef4444;--radius:8px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--dark);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  a{color:var(--gold);text-decoration:none}
+  .container{max-width:900px;margin:0 auto;padding:0 20px}
+  /* Header */
+  header{border-bottom:1px solid #222;padding:16px 0}
+  .header-inner{display:flex;justify-content:space-between;align-items:center}
+  .logo{font-size:1.4rem;font-weight:700;letter-spacing:2px;color:var(--gold)}
+  .logo span{color:var(--text-muted);font-size:.9rem;font-weight:400;margin-left:8px}
+  nav a{margin-left:20px;color:var(--text-muted);font-size:.9rem}
+  nav a:hover{color:var(--gold)}
+  /* Hero */
+  .hero{text-align:center;padding:60px 0 40px}
+  .hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;letter-spacing:1px;margin-bottom:12px}
+  .hero h1 em{color:var(--gold);font-style:normal}
+  .hero p{color:var(--text-muted);font-size:1.1rem;max-width:600px;margin:0 auto 30px}
+  .badge-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+  .badge{background:var(--dark3);border:1px solid #2a2a2a;border-radius:20px;padding:5px 14px;font-size:.8rem;color:var(--text-muted)}
+  .badge.gold{border-color:var(--gold);color:var(--gold)}
+  /* Stats */
+  .stats{display:flex;gap:20px;justify-content:center;margin-bottom:50px}
+  .stat{text-align:center}
+  .stat .n{font-size:1.8rem;font-weight:700;color:var(--gold)}
+  .stat .l{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
+  /* Validator card */
+  .validator-card{background:var(--dark2);border:1px solid #2a2a2a;border-radius:12px;padding:32px;margin-bottom:24px}
+  /* Tabs */
+  .tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--dark3);padding:4px;border-radius:8px}
+  .tab{flex:1;padding:10px;text-align:center;border-radius:6px;cursor:pointer;font-size:.9rem;color:var(--text-muted);border:none;background:transparent;transition:.2s}
+  .tab.active{background:var(--gold);color:#000;font-weight:600}
+  .tab:hover:not(.active){color:var(--text)}
+  /* Input */
+  .input-group{position:relative}
+  .input-group input{width:100%;padding:14px 18px;background:var(--dark3);border:1px solid #333;border-radius:var(--radius);color:var(--text);font-size:1.1rem;font-family:monospace;letter-spacing:1px;outline:none;transition:.2s}
+  .input-group input:focus{border-color:var(--gold)}
+  .input-group input.valid{border-color:var(--valid)}
+  .input-group input.invalid{border-color:var(--invalid)}
+  .input-hint{font-size:.8rem;color:var(--text-muted);margin-top:6px}
+  /* Result */
+  .result-area{min-height:60px;margin-top:16px}
+  .result-valid{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#0f2d1a;border:1px solid var(--valid);border-radius:var(--radius);color:var(--valid)}
+  .result-invalid{display:flex;flex-direction:column;gap:6px;padding:14px 18px;background:#2d0f0f;border:1px solid var(--invalid);border-radius:var(--radius);color:var(--invalid)}
+  .result-invalid .suggestion{color:var(--gold);font-size:.9rem}
+  .result-loading{color:var(--text-muted);font-size:.9rem;padding:14px 0}
+  /* Tab panels */
+  .tab-panel{display:none}.tab-panel.active{display:block}
+  /* API section */
+  .api-section{background:var(--dark2);border:1px solid #2a2a2a;border-radius:12px;padding:28px;margin-bottom:24px}
+  .api-section h2{color:var(--gold);margin-bottom:12px;font-size:1.1rem}
+  pre{background:var(--dark3);padding:14px;border-radius:6px;font-size:.85rem;overflow-x:auto;color:#a8d8a8}
+  /* Footer */
+  footer{border-top:1px solid #222;padding:24px 0;text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:40px}
+  /* Spinner */
+  .htmx-indicator{display:none}.htmx-request .htmx-indicator{display:inline}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--text-muted);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">e<em style="color:var(--gold)">VALIDATOR</em><span>.eu</span></div>
+      <nav>
+        <a href="/evalidator/docs/">API Docs</a>
+        <a href="/evalidator/pricing/">Pricing</a>
+        <a href="https://no-limit.world/">No-limit</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <h1>Infrastruktura <em>Povjerenja</em></h1>
+    <p>Besplatna provjera OIB, IBAN i VAT ID za cijelu EU.<br>ISO 7064 · MOD 97 · 27 EU zemalja</p>
+    <div class="badge-row">
+      <span class="badge gold">✓ ISO 7064 MOD 11,10</span>
+      <span class="badge gold">✓ ISO 13616 MOD 97</span>
+      <span class="badge">27 EU zemalja</span>
+      <span class="badge">GDPR compliant</span>
+      <span class="badge">REST API</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">{{ stats.total|default:"0" }}</div><div class="l">Ukupno provjera</div></div>
+      <div class="stat"><div class="n">{{ stats.today|default:"0" }}</div><div class="l">Danas</div></div>
+      <div class="stat"><div class="n">27</div><div class="l">EU zemalja</div></div>
+    </div>
+  </section>
+
+  <div class="validator-card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('oib',this)">🇭🇷 OIB</button>
+      <button class="tab" onclick="switchTab('iban',this)">🏦 IBAN</button>
+      <button class="tab" onclick="switchTab('vat',this)">🇪🇺 VAT ID</button>
+    </div>
+
+    <!-- OIB -->
+    <div id="panel-oib" class="tab-panel active">
+      <div class="input-group">
+        <input type="text" name="oib" maxlength="11" placeholder="Unesite OIB (11 znamenki)"
+          hx-post="/evalidator/validate/oib/"
+          hx-trigger="keyup changed delay:400ms"
+          hx-target="#result-oib"
+          hx-indicator="#spin-oib"
+          oninput="this.value=this.value.replace(/\D/g,'')">
+        <div class="input-hint">Osobni identifikacijski broj — ISO 7064 MOD 11,10</div>
+      </div>
+      <div class="result-area">
+        <span id="spin-oib" class="htmx-indicator result-loading"><span class="spinner"></span> Provjera…</span>
+        <div id="result-oib"></div>
+      </div>
+    </div>
+
+    <!-- IBAN -->
+    <div id="panel-iban" class="tab-panel">
+      <div class="input-group">
+        <input type="text" name="iban" maxlength="34" placeholder="HR1234567890123456789"
+          hx-post="/evalidator/validate/iban/"
+          hx-trigger="keyup changed delay:400ms"
+          hx-target="#result-iban"
+          hx-indicator="#spin-iban"
+          style="text-transform:uppercase">
+        <div class="input-hint">Međunarodni broj bankovnog računa — ISO 13616 MOD 97</div>
+      </div>
+      <div class="result-area">
+        <span id="spin-iban" class="htmx-indicator result-loading"><span class="spinner"></span> Provjera…</span>
+        <div id="result-iban"></div>
+      </div>
+    </div>
+
+    <!-- VAT -->
+    <div id="panel-vat" class="tab-panel">
+      <div class="input-group" style="display:flex;gap:10px">
+        <select name="country" id="vat-country" style="background:var(--dark3);border:1px solid #333;border-radius:var(--radius);color:var(--text);padding:14px 12px;font-size:.95rem">
+          <option value="HR">🇭🇷 HR</option><option value="DE">🇩🇪 DE</option>
+          <option value="AT">🇦🇹 AT</option><option value="SI">🇸🇮 SI</option>
+          <option value="IT">🇮🇹 IT</option><option value="FR">🇫🇷 FR</option>
+          <option value="NL">🇳🇱 NL</option><option value="BE">🇧🇪 BE</option>
+          <option value="PL">🇵🇱 PL</option><option value="CZ">🇨🇿 CZ</option>
+        </select>
+        <input type="text" name="vat" placeholder="VAT ID broj" style="flex:1"
+          hx-post="/evalidator/validate/vat/"
+          hx-trigger="keyup changed delay:400ms"
+          hx-target="#result-vat"
+          hx-indicator="#spin-vat"
+          hx-include="#vat-country"
+          style="text-transform:uppercase">
+      </div>
+      <div class="input-hint">EU VAT / PDV identifikacijski broj</div>
+      <div class="result-area">
+        <span id="spin-vat" class="htmx-indicator result-loading"><span class="spinner"></span> Provjera…</span>
+        <div id="result-vat"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="api-section">
+    <h2>⚡ REST API — besplatno</h2>
+    <p style="color:var(--text-muted);margin-bottom:12px;font-size:.9rem">Integriraj eValidator u svoju aplikaciju. 100 provjera/dan besplatno, bez registracije.</p>
+    <pre>GET https://evalidator.eu/api/v1/oib/?oib=12345678901
+
+{"oib":"12345678901","valid":true,"algorithm":"ISO 7064 MOD 11,10","country":"HR"}</pre>
+    <div style="margin-top:12px"><a href="/evalidator/docs/" style="color:var(--gold)">→ Puna API dokumentacija</a></div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>© 2026 <a href="https://no-limit.world/">No-limit udruga</a> · 
+    <a href="/notariat/docs/T1/">Uvjeti korištenja</a> · 
+    <a href="/notariat/docs/G1/">Privatnost</a> · 
+    GDPR: hash-only, nula osobnih podataka</p>
+  </div>
+</footer>
+
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

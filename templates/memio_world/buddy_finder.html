@@ -1,0 +1,198 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🤝 {% trans "Pronađi prijatelja" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.buddy{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.buddy h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.buddy .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+/* Interest picker */
+.interest-section{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);margin-bottom:1.5rem}
+.interest-section h2{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:1rem;text-align:center}
+.interest-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.int-btn{padding:8px 16px;border-radius:20px;border:2px solid rgba(201,168,76,.2);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.9rem;cursor:pointer;transition:.2s;color:#2c1810}
+.int-btn:hover{border-color:#c9a84c;background:rgba(201,168,76,.1)}
+.int-btn.selected{background:#c9a84c;color:#fff;border-color:#8b6914}
+
+/* Match results */
+.match-section{display:none;margin-bottom:1.5rem}
+.match-section.show{display:block}
+.match-card{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:1rem;
+  border:2px solid rgba(201,168,76,.2);transition:.2s;animation:fadeUp .4s ease-out}
+.match-card:hover{border-color:#c9a84c;transform:translateY(-2px)}
+.match-header{display:flex;align-items:center;gap:1rem;margin-bottom:.8rem}
+.match-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:2rem;flex-shrink:0;border:2px solid #c9a84c}
+.match-info{flex:1}
+.match-name{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810}
+.match-meta{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#6b5a4e}
+.match-common{font-family:'MedievalSharp',serif;font-size:.9rem;color:#c9a84c;margin:.3rem 0}
+.match-reason{font-family:'MedievalSharp',serif;font-size:.9rem;color:#6b5a4e;line-height:1.5}
+.match-pct{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;color:#c9a84c;flex-shrink:0}
+
+.connect-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.9rem;
+  cursor:pointer;transition:.2s;margin-top:.5rem}
+.connect-btn:hover{transform:translateY(-2px)}
+.connect-btn.sent{background:#66bb6a;cursor:default}
+
+.find-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:14px 32px;border-radius:14px;font-family:'Uncial Antiqua',serif;font-size:1.1rem;
+  cursor:pointer;transition:.2s;display:block;margin:1rem auto}
+.find-btn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(201,168,76,.4)}
+
+.safety-box{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.2rem;
+  margin-bottom:1.5rem;border:2px solid #66bb6a;font-family:'MedievalSharp',serif;font-size:.85rem;
+  color:#1b5e20;line-height:1.6}
+.safety-box h3{font-family:'Uncial Antiqua',serif;font-size:1rem;color:#1b5e20;margin-bottom:.5rem}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="buddy">
+  <h1>🤝 {% trans "Pronađi prijatelja" %}</h1>
+  <p class="sub">{% trans "Spajamo djecu po KOMPLEMENTARNIM interesima — da uče jedno od drugog!" %}</p>
+
+  <!-- Safety first -->
+  <div class="safety-box">
+    <h3>🛡️ {% trans "Sigurnost na prvom mjestu" %}</h3>
+    ✅ {% trans "SVE razgovore vide roditelji" %}<br>
+    ✅ {% trans "Samo tekst — bez slika, videa ili poziva" %}<br>
+    ✅ {% trans "Roditelj MORA odobriti svako prijateljstvo" %}<br>
+    ✅ {% trans "AI moderator prati neprimjerene sadržaje" %}<br>
+    ✅ {% trans "Dijete može prijaviti neugodnost jednim klikom" %}<br>
+    🚫 {% trans "NIKAD ne dijeliš: ime škole, adresu, telefon, slike" %}
+  </div>
+
+  <!-- Pick interests -->
+  <div class="interest-section">
+    <h2>{% trans "Odaberi što te zanima (3-5 interesa)" %}</h2>
+    <div class="interest-grid" id="interestGrid"></div>
+    <button class="find-btn" onclick="findMatches()">🔍 {% trans "Pronađi prijatelja!" %}</button>
+  </div>
+
+  <!-- Match results -->
+  <div class="match-section" id="matchSection"></div>
+
+  <div style="background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+    font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Pravi prijatelj nije onaj koji je isti kao ti — nego onaj od kojeg možeš naučiti nešto novo." %}<br>
+    👴 {% trans "Djed kaže: Ja sam najboljeg prijatelja upoznao jer smo se SVAĐALI oko šaha. I dan danas igramo!" %}
+  </div>
+</div>
+
+<script>
+var INTERESTS = [
+  {id:'reading',icon:'📖',name:'{% trans "Čitanje" %}'},
+  {id:'chess',icon:'♟',name:'{% trans "Šah" %}'},
+  {id:'art',icon:'🎨',name:'{% trans "Crtanje" %}'},
+  {id:'music',icon:'🎵',name:'{% trans "Glazba" %}'},
+  {id:'sports',icon:'⚽',name:'{% trans "Sport" %}'},
+  {id:'animals',icon:'🐾',name:'{% trans "Životinje" %}'},
+  {id:'science',icon:'🔬',name:'{% trans "Znanost" %}'},
+  {id:'math',icon:'🔢',name:'{% trans "Matematika" %}'},
+  {id:'cooking',icon:'🍳',name:'{% trans "Kuhanje" %}'},
+  {id:'nature',icon:'🌿',name:'{% trans "Priroda" %}'},
+  {id:'tech',icon:'💻',name:'{% trans "Tehnologija" %}'},
+  {id:'languages',icon:'🌍',name:'{% trans "Jezici" %}'},
+  {id:'dance',icon:'💃',name:'{% trans "Ples" %}'},
+  {id:'stories',icon:'✍️',name:'{% trans "Pisanje priča" %}'},
+  {id:'space',icon:'🚀',name:'{% trans "Svemir" %}'},
+  {id:'history',icon:'🏰',name:'{% trans "Povijest" %}'},
+];
+
+var selectedInterests = [];
+
+var grid = document.getElementById('interestGrid');
+INTERESTS.forEach(function(int) {
+  var btn = document.createElement('button');
+  btn.className = 'int-btn';
+  btn.textContent = int.icon + ' ' + int.name;
+  btn.onclick = function() {
+    if (btn.classList.contains('selected')) {
+      btn.classList.remove('selected');
+      selectedInterests = selectedInterests.filter(function(i){return i!==int.id;});
+    } else if (selectedInterests.length < 5) {
+      btn.classList.add('selected');
+      selectedInterests.push(int.id);
+    }
+  };
+  grid.appendChild(btn);
+});
+
+// Simulated buddy profiles
+var BUDDIES = [
+  {name:'Luka',age:8,city:'Zagreb',flag:'🇭🇷',avatar:'🧑',interests:['chess','math','science','reading'],
+    reason:'{% trans "Luka voli šah i matematiku. Traži nekoga tko voli čitati — da zajedno istražuju priče o šahovskim strategijama!" %}'},
+  {name:'Anna',age:9,city:'München',flag:'🇩🇪',avatar:'👧',interests:['music','dance','art','languages'],
+    reason:'{% trans "Anna svira klavir i uči hrvatski jer joj je mama iz Splita. Traži prijatelja s kim može vježbati jezik!" %}'},
+  {name:'Emir',age:7,city:'Sarajevo',flag:'🇧🇦',avatar:'👦',interests:['sports','animals','cooking','nature'],
+    reason:'{% trans "Emir trenira fudbal i brine o mački. Htio bi naučiti kuhati — traži nekoga tko ima recepte!" %}'},
+  {name:'Sara',age:10,city:'Beograd',flag:'🇷🇸',avatar:'👩',interests:['reading','stories','art','history'],
+    reason:'{% trans "Sara piše vlastite priče i crta ilustracije. Traži nekoga tko bi čitao njezine priče i davao povratnu informaciju!" %}'},
+  {name:'Max',age:8,city:'Berlin',flag:'🇩🇪',avatar:'🧒',interests:['tech','science','space','chess'],
+    reason:'{% trans "Max gradi robote od Lego kockica i sanja o odlasku na Mars. Traži nekoga za online šah!" %}'},
+  {name:'Iva',age:6,city:'Split',flag:'🇭🇷',avatar:'👧',interests:['animals','nature','dance','cooking'],
+    reason:'{% trans "Iva voli more, dupine i ples. Njezina baka ima najbolje recepte — Iva ih zapisuje!" %}'},
+  {name:'Kerem',age:9,city:'Istanbul',flag:'🇹🇷',avatar:'👦',interests:['chess','math','sports','history'],
+    reason:'{% trans "Kerem je šahovski prvak svoje škole. Voli nogomet i tursku povijest. Govori turski i engleski." %}'},
+  {name:'Mia',age:7,city:'Wien',flag:'🇦🇹',avatar:'👧',interests:['music','reading','languages','art'],
+    reason:'{% trans "Mia svira violinu i čita bajke na tri jezika (DE/HR/EN). Traži prijatelja za razmjenu knjiga!" %}'},
+];
+
+function findMatches() {
+  if (selectedInterests.length < 2) {
+    alert('{% trans "Odaberi barem 2 interesa!" %}');
+    return;
+  }
+
+  var section = document.getElementById('matchSection');
+  section.innerHTML = '<h2 style="font-family:Uncial Antiqua,serif;font-size:1.2rem;color:#2c1810;text-align:center;margin-bottom:1rem">🎯 {% trans "Pronašli smo prijatelje za tebe!" %}</h2>';
+  section.classList.add('show');
+
+  // Score buddies by complementary interests
+  var scored = BUDDIES.map(function(b) {
+    var common = b.interests.filter(function(i){return selectedInterests.indexOf(i)>=0;}).length;
+    var complementary = b.interests.filter(function(i){return selectedInterests.indexOf(i)<0;}).length;
+    var score = common * 20 + complementary * 10;
+    return {buddy:b, common:common, score:score};
+  });
+
+  scored.sort(function(a,b){return b.score - a.score;});
+
+  scored.slice(0, 4).forEach(function(s) {
+    var b = s.buddy;
+    var commonInterests = b.interests.filter(function(i){return selectedInterests.indexOf(i)>=0;});
+    var commonNames = commonInterests.map(function(i) {
+      var found = INTERESTS.find(function(x){return x.id===i;});
+      return found ? found.icon + ' ' + found.name : i;
+    }).join(', ');
+
+    var card = document.createElement('div');
+    card.className = 'match-card';
+    card.innerHTML = '<div class="match-header">' +
+      '<div class="match-avatar" style="background:rgba(201,168,76,.1)">' + b.avatar + '</div>' +
+      '<div class="match-info"><div class="match-name">' + b.name + ', ' + b.age + '</div>' +
+      '<div class="match-meta">' + b.flag + ' ' + b.city + '</div></div>' +
+      '<div class="match-pct">' + Math.min(95, s.score) + '%</div></div>' +
+      '<div class="match-common">{% trans "Zajednički interesi" %}: ' + (commonNames || '{% trans "Komplementarni!" %}') + '</div>' +
+      '<div class="match-reason">' + b.reason + '</div>' +
+      '<button class="connect-btn" onclick="sendRequest(this)">🤝 {% trans "Pošalji zahtjev za prijateljstvo" %}</button>';
+    section.appendChild(card);
+  });
+
+  section.scrollIntoView({behavior:'smooth'});
+}
+
+function sendRequest(btn) {
+  btn.classList.add('sent');
+  btn.textContent = '✅ {% trans "Zahtjev poslan! Čekamo odobrenje roditelja." %}';
+  btn.disabled = true;
+}
+</script>
+{% endblock %}

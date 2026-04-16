@@ -1,0 +1,318 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🎓 Memio {% trans "Škola" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.school{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.school-header{text-align:center;margin-bottom:2rem}
+.school-header h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;margin-bottom:.3rem}
+.school-header .motto{font-family:'MedievalSharp',serif;font-size:1.2rem;color:#c9a84c;font-style:italic}
+.school-header .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;font-size:.9rem;margin-top:.3rem}
+
+/* Student card */
+.student-card{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:20px;padding:1.5rem;
+  color:#f5e6c8;margin-bottom:2rem;border:3px solid #c9a84c;position:relative;overflow:hidden}
+.student-card::before{content:'';position:absolute;top:0;right:0;width:150px;height:150px;
+  background:radial-gradient(circle,rgba(201,168,76,.15),transparent);border-radius:50%}
+.sc-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.sc-avatar{width:80px;height:80px;background:linear-gradient(135deg,#c9a84c,#8b6914);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0;
+  border:3px solid rgba(255,255,255,.2)}
+.sc-info{flex:1}
+.sc-name{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#c9a84c}
+.sc-level{font-family:'MedievalSharp',serif;font-size:.9rem;color:#e8d4a8}
+.sc-xp-bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:.5rem;overflow:hidden}
+.sc-xp-fill{height:100%;background:linear-gradient(90deg,#c9a84c,#ffd54f);border-radius:4px;transition:.5s}
+.sc-xp-text{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#9c8a7a;margin-top:.2rem}
+
+/* Badges */
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:.8rem}
+.badge{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;background:rgba(255,255,255,.1);border:2px solid rgba(201,168,76,.3);transition:.2s}
+.badge.earned{background:rgba(201,168,76,.2);border-color:#c9a84c}
+.badge.locked{opacity:.3;filter:grayscale(1)}
+
+/* Level path */
+.level-path{margin-bottom:2rem}
+.level-path h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:1rem;text-align:center}
+
+.level{background:#fff;border-radius:16px;padding:1.2rem;margin-bottom:.8rem;
+  border:2px solid rgba(201,168,76,.2);transition:.2s;cursor:pointer}
+.level:hover{border-color:#c9a84c;transform:translateX(4px)}
+.level.current{border-color:#c9a84c;background:linear-gradient(135deg,#fff,rgba(201,168,76,.08));
+  box-shadow:0 4px 16px rgba(201,168,76,.15)}
+.level.completed{border-color:#66bb6a;background:rgba(200,230,201,.15)}
+.level.locked{opacity:.5;cursor:default}
+.level.locked:hover{transform:none}
+
+.level-header{display:flex;align-items:center;gap:1rem}
+.level-icon{font-size:2rem;width:50px;height:50px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;flex-shrink:0}
+.level.completed .level-icon{background:#c8e6c9}
+.level.current .level-icon{background:rgba(201,168,76,.2)}
+.level.locked .level-icon{background:#eee}
+.level-info{flex:1}
+.level-title{font-family:'MedievalSharp',serif;font-size:1.05rem;color:#2c1810;font-weight:bold}
+.level-desc{font-family:'MedievalSharp',serif;font-size:.8rem;color:#6b5a4e;margin-top:.2rem}
+.level-tasks{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#c9a84c;margin-top:.3rem}
+.level-check{font-size:1.5rem;flex-shrink:0}
+
+/* Tasks within level */
+.task-list{display:none;margin-top:.8rem;padding-top:.8rem;border-top:1px solid rgba(201,168,76,.15)}
+.level.current .task-list{display:block}
+.task{display:flex;align-items:center;gap:10px;padding:.5rem;border-radius:8px;margin-bottom:.4rem;
+  font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;text-decoration:none;transition:.15s}
+.task:hover{background:rgba(201,168,76,.1)}
+.task-check{width:24px;height:24px;border-radius:50%;border:2px solid #c9a84c;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;font-size:.8rem}
+.task.done .task-check{background:#66bb6a;border-color:#66bb6a;color:#fff}
+.task-label{flex:1}.task-xp{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#c9a84c}
+
+.diploma-banner{background:linear-gradient(135deg,#c9a84c,#8b6914);border-radius:16px;padding:1.5rem;
+  text-align:center;margin-top:2rem;cursor:pointer;transition:.2s;border:3px solid #8b6914}
+.diploma-banner:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(201,168,76,.4)}
+.diploma-banner h2{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#fff;margin-bottom:.3rem}
+.diploma-banner p{font-family:'MedievalSharp',serif;font-size:.95rem;color:rgba(255,255,255,.8)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="school">
+  <div class="school-header">
+    <h1>🎓 Memio {% trans "Škola" %}</h1>
+    <div class="motto">{% trans "Postani ZNALAC, a ne mulac!" %}</div>
+    <div class="sub">{% trans "Svaka razina = nova vještina. Svaki zadatak = novi bodovi. Na kraju = DIPLOMA!" %}</div>
+  </div>
+
+  <!-- Student card -->
+  <div class="student-card">
+    <div class="sc-row">
+      <div class="sc-avatar" id="scAvatar">🧒</div>
+      <div class="sc-info">
+        <div class="sc-name" id="scName">{% trans "Mali Znalac" %}</div>
+        <div class="sc-level" id="scLevel">{% trans "Razina" %} 1 — {% trans "Početnik" %}</div>
+        <div class="sc-xp-bar"><div class="sc-xp-fill" id="scXpFill" style="width:0%"></div></div>
+        <div class="sc-xp-text"><span id="scXp">0</span> / <span id="scXpMax">100</span> XP</div>
+      </div>
+    </div>
+    <div class="badges" id="badgeRow"></div>
+  </div>
+
+  <!-- Level path -->
+  <div class="level-path">
+    <h2>🛤️ {% trans "Put do diplome" %}</h2>
+    <div id="levelPath"></div>
+  </div>
+
+  <!-- Diploma banner -->
+  <a href="{% url 'memio_world:diploma_page' %}" class="diploma-banner" style="text-decoration:none;display:block">
+    <h2>🎓 {% trans "Diploma čeka!" %}</h2>
+    <p>{% trans "Završi sve razine i preuzmi svoju Memio diplomu — dokaz da si pravi ZNALAC!" %}</p>
+  </a>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MEMIO ŠKOLA — Progression system
+   Locally stored in localStorage (no login required for demo)
+   ═══════════════════════════════════════════════════════════════ */
+
+var LEVELS = [
+  {
+    title:'{% trans "Razina 1 — Početnik" %}', icon:'🌱', xpNeeded:100,
+    desc:'{% trans "Nauči osnove: slova, brojeve, boje i oblike." %}',
+    tasks:[
+      {id:'alpha',label:'🔤 {% trans "Prođi slovaricu (10 slova)" %}',url:'/api/memio-world/play/alphabet/',xp:15},
+      {id:'nums',label:'🔢 {% trans "Nauči brojeve do 10" %}',url:'/api/memio-world/play/numbers/',xp:15},
+      {id:'colors',label:'🎨 {% trans "Prepoznaj 6 boja" %}',url:'/api/memio-world/play/colors/',xp:10},
+      {id:'shapes',label:'📐 {% trans "Nauči 4 oblika" %}',url:'/api/memio-world/play/shapes/',xp:10},
+      {id:'story1',label:'📖 {% trans "Pročitaj prvu bajku" %}',url:'/api/memio-world/play/stories/',xp:20},
+      {id:'animals',label:'🐾 {% trans "Upoznaj 5 životinja" %}',url:'/api/memio-world/play/animals/',xp:10},
+      {id:'emotion1',label:'😊 {% trans "Napravi emotion check-in" %}',url:'/api/memio-world/play/emotions/',xp:10},
+      {id:'draw1',label:'🎨 {% trans "Nacrtaj nešto u bojanci" %}',url:'/api/memio-world/play/coloring/',xp:10},
+    ]
+  },
+  {
+    title:'{% trans "Razina 2 — Istraživač" %}', icon:'🔍', xpNeeded:200,
+    desc:'{% trans "Čitaj priče, igraj igre, uči sat." %}',
+    tasks:[
+      {id:'story3',label:'📖 {% trans "Pročitaj 3 bajke" %}',url:'/api/memio-world/play/stories/',xp:30},
+      {id:'chess1',label:'♟ {% trans "Nauči sve šahovske figure" %}',url:'/api/memio-world/play/chess/',xp:25},
+      {id:'clock1',label:'🕐 {% trans "Nauči pune sate" %}',url:'/api/memio-world/play/clock/',xp:15},
+      {id:'memory1',label:'🧠 {% trans "Pobijedi Memory igru" %}',url:'/api/memio-world/play/memory/',xp:15},
+      {id:'quiz1',label:'📝 {% trans "Riješi kviz s 60%+" %}',url:'/api/memio-world/play/quiz/',xp:20},
+      {id:'music1',label:'🎵 {% trans "Nauči Do-Re-Mi" %}',url:'/api/memio-world/play/music/',xp:15},
+      {id:'hangman1',label:'🔠 {% trans "Pogodi 3 riječi u vješalici" %}',url:'/api/memio-world/play/hangman/',xp:15},
+      {id:'safety1',label:'🛡️ {% trans "Prođi sigurnosnu temu" %}',url:'/api/memio-world/play/safety/',xp:15},
+      {id:'cook1',label:'🍳 {% trans "Napravi recept s mamom/tatom" %}',url:'/api/memio-world/play/cooking/',xp:20},
+      {id:'sport1',label:'🏃 {% trans "Napravi jutarnju gimnastiku" %}',url:'/api/memio-world/play/sports/',xp:10},
+    ]
+  },
+  {
+    title:'{% trans "Razina 3 — Znalac" %}', icon:'⭐', xpNeeded:350,
+    desc:'{% trans "Šah, matematika, kreativno pisanje, obiteljski izazovi." %}',
+    tasks:[
+      {id:'story7',label:'📖 {% trans "Pročitaj 7 bajki iz raznih zemalja" %}',url:'/api/memio-world/play/map/',xp:35},
+      {id:'chess2',label:'♟ {% trans "Riješi 3 šah puzzla" %}',url:'/api/memio-world/play/chess/puzzle/',xp:30},
+      {id:'write1',label:'✍️ {% trans "Napiši svoju priču (50+ riječi)" %}',url:'/api/memio-world/play/write/',xp:30},
+      {id:'math10',label:'🔢 {% trans "Riješi 10 matematičkih zadataka" %}',url:'/api/memio-world/play/numbers/',xp:25},
+      {id:'battle1',label:'🚢 {% trans "Potopi 3 broda" %}',url:'/api/memio-world/play/battleship/',xp:20},
+      {id:'shop1',label:'💰 {% trans "Vrati točan kusur 3 puta" %}',url:'/api/memio-world/play/shop/',xp:25},
+      {id:'quest1',label:'🏡 {% trans "Završi obiteljski izazov" %}',url:'/api/memio-world/play/quests/',xp:30},
+      {id:'family1',label:'🌳 {% trans "Nacrtaj obiteljsko stablo" %}',url:'/api/memio-world/play/family-tree/',xp:25},
+      {id:'flash10',label:'📦 {% trans "Riješi 10 flashcardova" %}',url:'/api/memio-world/play/flashcards/',xp:20},
+      {id:'calm1',label:'🧘 {% trans "Savladaj tehniku disanja" %}',url:'/api/memio-world/play/calm/breathing/',xp:15},
+      {id:'ludo1',label:'🎲 {% trans "Odigraj Čovječe bez ljutnje!" %}',url:'/api/memio-world/play/ludo/',xp:20},
+      {id:'career1',label:'👷 {% trans "Istraži 5 zanimanja" %}',url:'/api/memio-world/play/careers/',xp:15},
+    ]
+  },
+  {
+    title:'{% trans "Razina 4 — Majstor" %}', icon:'🏅', xpNeeded:500,
+    desc:'{% trans "Napredni sadržaji, natječaji, pomaganje drugima." %}',
+    tasks:[
+      {id:'story15',label:'📖 {% trans "Pročitaj 15 bajki" %}',url:'/api/memio-world/play/stories/',xp:40},
+      {id:'chess3',label:'♟ {% trans "Riješi svih 5 šah puzzla" %}',url:'/api/memio-world/play/chess/puzzle/',xp:35},
+      {id:'write2',label:'✍️ {% trans "Napiši priču za natječaj" %}',url:'/api/memio-world/play/contest/',xp:40},
+      {id:'quiz5',label:'📝 {% trans "Riješi 5 kvizova s 80%+" %}',url:'/api/memio-world/play/quiz/',xp:35},
+      {id:'clock2',label:'🕐 {% trans "Nauči četvrt sata" %}',url:'/api/memio-world/play/clock/',xp:20},
+      {id:'shelter1',label:'🏠 {% trans "Nauči o azilima" %}',url:'/api/memio-world/play/shelter/',xp:25},
+      {id:'pet1',label:'🐾 {% trans "Prođi kviz o ljubimcima" %}',url:'/api/memio-world/play/pets/',xp:20},
+      {id:'conflict1',label:'🤝 {% trans "Riješi 3 konflikta" %}',url:'/api/memio-world/play/conflict/',xp:25},
+      {id:'record5',label:'🎤 {% trans "Snimi se kako čitaš 5 stranica" %}',url:'/api/memio-world/play/stories/rapunzel/',xp:30},
+      {id:'calendar1',label:'📅 {% trans "Nauči sve mjesece" %}',url:'/api/memio-world/play/calendar/',xp:20},
+    ]
+  },
+  {
+    title:'{% trans "Razina 5 — DIPLOMA" %}', icon:'🎓', xpNeeded:0,
+    desc:'{% trans "Čestitamo! Završio/la si Memio Školu. Ti si pravi ZNALAC!" %}',
+    tasks:[
+      {id:'diploma',label:'🎓 {% trans "Preuzmi svoju diplomu!" %}',url:'/api/memio-world/play/diploma/',xp:100},
+    ]
+  },
+];
+
+var BADGES = [
+  {id:'reader',icon:'📖',name:'{% trans "Čitač" %}',desc:'{% trans "Pročitao 5 bajki" %}'},
+  {id:'chess',icon:'♟',name:'{% trans "Šahist" %}',desc:'{% trans "Naučio sve figure" %}'},
+  {id:'writer',icon:'✍️',name:'{% trans "Pisac" %}',desc:'{% trans "Napisao priču" %}'},
+  {id:'math',icon:'🔢',name:'{% trans "Matematičar" %}',desc:'{% trans "Riješio 20 zadataka" %}'},
+  {id:'music',icon:'🎵',name:'{% trans "Glazbenik" %}',desc:'{% trans "Naučio Do-Re-Mi" %}'},
+  {id:'helper',icon:'💛',name:'{% trans "Pomagač" %}',desc:'{% trans "Pomogao u azilu" %}'},
+  {id:'brave',icon:'🦁',name:'{% trans "Hrabrost" %}',desc:'{% trans "Savladao bijes" %}'},
+  {id:'chef',icon:'🍳',name:'{% trans "Kuhar" %}',desc:'{% trans "Napravio recept" %}'},
+  {id:'sport',icon:'🏃',name:'{% trans "Sportaš" %}',desc:'{% trans "5 treninga" %}'},
+  {id:'friend',icon:'🤝',name:'{% trans "Prijatelj" %}',desc:'{% trans "Riješio konflikt" %}'},
+];
+
+// Load progress from localStorage
+var progress = JSON.parse(localStorage.getItem('memio_school') || '{}');
+if (!progress.name) progress.name = '{% trans "Mali Znalac" %}';
+if (!progress.xp) progress.xp = 0;
+if (!progress.level) progress.level = 0;
+if (!progress.tasks) progress.tasks = {};
+if (!progress.badges) progress.badges = {};
+
+function saveProgress() {
+  localStorage.setItem('memio_school', JSON.stringify(progress));
+}
+
+function render() {
+  // Student card
+  var levelData = LEVELS[Math.min(progress.level, LEVELS.length - 1)];
+  var xpInLevel = progress.xp;
+  var xpMax = levelData.xpNeeded || 100;
+  var pct = Math.min(100, Math.round((xpInLevel / xpMax) * 100));
+
+  document.getElementById('scName').textContent = progress.name;
+  document.getElementById('scLevel').textContent = levelData.title;
+  document.getElementById('scXp').textContent = progress.xp;
+  document.getElementById('scXpMax').textContent = xpMax;
+  document.getElementById('scXpFill').style.width = pct + '%';
+
+  var avatars = ['🧒','🔍','⭐','🏅','🎓'];
+  document.getElementById('scAvatar').textContent = avatars[Math.min(progress.level, avatars.length - 1)];
+
+  // Badges
+  var badgeRow = document.getElementById('badgeRow');
+  badgeRow.innerHTML = '';
+  BADGES.forEach(function(b) {
+    var el = document.createElement('div');
+    el.className = 'badge ' + (progress.badges[b.id] ? 'earned' : 'locked');
+    el.textContent = b.icon;
+    el.title = b.name + ': ' + b.desc;
+    badgeRow.appendChild(el);
+  });
+
+  // Level path
+  var pathEl = document.getElementById('levelPath');
+  pathEl.innerHTML = '';
+  LEVELS.forEach(function(lvl, i) {
+    var levelEl = document.createElement('div');
+    var cls = 'level';
+    if (i < progress.level) cls += ' completed';
+    else if (i === progress.level) cls += ' current';
+    else cls += ' locked';
+    levelEl.className = cls;
+
+    var completedTasks = 0;
+    lvl.tasks.forEach(function(t) { if (progress.tasks[t.id]) completedTasks++; });
+
+    levelEl.innerHTML =
+      '<div class="level-header">' +
+        '<div class="level-icon">' + lvl.icon + '</div>' +
+        '<div class="level-info">' +
+          '<div class="level-title">' + lvl.title + '</div>' +
+          '<div class="level-desc">' + lvl.desc + '</div>' +
+          '<div class="level-tasks">' + completedTasks + '/' + lvl.tasks.length + ' {% trans "zadataka" %}</div>' +
+        '</div>' +
+        '<div class="level-check">' + (i < progress.level ? '✅' : i === progress.level ? '📍' : '🔒') + '</div>' +
+      '</div>';
+
+    // Tasks for current level
+    if (i === progress.level) {
+      var taskList = document.createElement('div');
+      taskList.className = 'task-list';
+      lvl.tasks.forEach(function(t) {
+        var taskEl = document.createElement('a');
+        taskEl.className = 'task' + (progress.tasks[t.id] ? ' done' : '');
+        taskEl.href = t.url;
+        taskEl.innerHTML =
+          '<div class="task-check">' + (progress.tasks[t.id] ? '✓' : '') + '</div>' +
+          '<div class="task-label">' + t.label + '</div>' +
+          '<div class="task-xp">+' + t.xp + ' XP</div>';
+        taskEl.onclick = function(e) {
+          if (!progress.tasks[t.id]) {
+            progress.tasks[t.id] = true;
+            progress.xp += t.xp;
+            // Check level up
+            if (completedTasks + 1 >= lvl.tasks.length && progress.level < LEVELS.length - 1) {
+              progress.level++;
+              progress.xp = 0;
+              alert('🎉 {% trans "Čestitamo! Prešao/la si na" %} ' + LEVELS[progress.level].title + '!');
+            }
+            saveProgress();
+          }
+        };
+        taskList.appendChild(taskEl);
+      });
+      levelEl.appendChild(taskList);
+    }
+
+    pathEl.appendChild(levelEl);
+  });
+}
+
+// Name input
+var nameSet = progress.name !== '{% trans "Mali Znalac" %}';
+if (!nameSet) {
+  var name = prompt('{% trans "Kako se zoveš, mali znalče?" %}');
+  if (name && name.trim()) {
+    progress.name = name.trim();
+    saveProgress();
+  }
+}
+
+render();
+</script>
+{% endblock %}

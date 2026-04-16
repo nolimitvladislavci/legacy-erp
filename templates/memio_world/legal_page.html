@@ -1,0 +1,180 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}⚖️ {% trans "Pravni dokumenti" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.legal{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.legal h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:1.5rem}
+.tab-row{display:flex;gap:8px;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:8px 18px;border-radius:10px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.9rem;cursor:pointer;transition:.2s;color:#2c1810}
+.tab-btn:hover{border-color:#c9a84c}.tab-btn.active{background:#c9a84c;color:#fff}
+.doc{display:none;background:#fff;border-radius:16px;padding:2rem;border:2px solid rgba(201,168,76,.2)}
+.doc.show{display:block}
+.doc h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin:1.5rem 0 .5rem;
+  border-bottom:2px solid rgba(201,168,76,.15);padding-bottom:.3rem}
+.doc h2:first-child{margin-top:0}
+.doc p,.doc li{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;line-height:1.7;margin-bottom:.5rem}
+.doc ul{padding-left:1.2rem}
+.doc .date{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#6b5a4e;margin-bottom:1rem}
+.doc strong{color:#8b2500}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal">
+  <h1>⚖️ {% trans "Pravni dokumenti" %}</h1>
+
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="showDoc('tos',this)">📜 {% trans "Uvjeti korištenja" %}</button>
+    <button class="tab-btn" onclick="showDoc('privacy',this)">🔒 {% trans "Privatnost" %}</button>
+    <button class="tab-btn" onclick="showDoc('gdpr',this)">🇪🇺 GDPR</button>
+    <button class="tab-btn" onclick="showDoc('children',this)">👶 {% trans "Zaštita djece" %}</button>
+  </div>
+
+  <!-- ToS -->
+  <div class="doc show" id="doc-tos">
+    <div class="date">{% trans "Zadnja izmjena" %}: 16.04.2026.</div>
+
+    <h2>1. {% trans "O platformi" %}</h2>
+    <p>PLAY.EU ({% trans "u nastavku: Platforma" %}) {% trans "je edukativna platforma za djecu u vlasništvu NO LIMIT d.o.o. (u postupku registracije), sa sjedištem u Republici Hrvatskoj." %}</p>
+
+    <h2>2. {% trans "Prihvaćanje uvjeta" %}</h2>
+    <p>{% trans "Registracijom na Platformi prihvaćate ove Uvjete korištenja. Ako se ne slažete, nemojte koristiti Platformu." %}</p>
+    <p>{% trans "Platformu smiju koristiti djeca ISKLJUČIVO uz pristanak i nadzor roditelja/skrbnika." %}</p>
+
+    <h2>3. {% trans "Korisnički račun" %}</h2>
+    <p>{% trans "Račun kreira RODITELJ/SKRBNIK (osoba starija od 18 godina). Roditelj dodaje profile djece i odgovoran je za korištenje Platforme." %}</p>
+
+    <h2>4. {% trans "Pretplata i plaćanje" %}</h2>
+    <ul>
+      <li>{% trans "Besplatni plan: ograničen pristup sadržaju." %}</li>
+      <li>{% trans "Obitelj plan: €4.99/mjesečno ili €39.99/godišnje." %}</li>
+      <li>{% trans "7 dana besplatnog probnog perioda." %}</li>
+      <li>{% trans "Pretplata se može otkazati u bilo kojem trenutku bez penala." %}</li>
+      <li>{% trans "Povrat novca: 14 dana od prve uplate (pravo povlačenja po EU direktivi)." %}</li>
+    </ul>
+
+    <h2>5. {% trans "Sadržaj platforme" %}</h2>
+    <p>{% trans "Sav sadržaj je edukativnog karaktera. Bajke su public domain ili CC licencirane. Platforma NE zamjenjuje školu, terapeuta ili liječnika." %}</p>
+
+    <h2>6. {% trans "Zabranjeno ponašanje" %}</h2>
+    <ul>
+      <li>{% trans "Dijeljenje osobnih podataka djeteta s trećim stranama." %}</li>
+      <li>{% trans "Korištenje Platforme u komercijalne svrhe bez dozvole." %}</li>
+      <li>{% trans "Bilo kakvo ponašanje koje ugrožava sigurnost djece." %}</li>
+    </ul>
+
+    <h2>7. {% trans "Ograničenje odgovornosti" %}</h2>
+    <p>{% trans "Platforma se pruža 'kakva jest'. Ne garantiramo neprekidnu dostupnost. Nismo odgovorni za štetu nastalu korištenjem Platforme izvan predviđene namjene." %}</p>
+
+    <h2>8. {% trans "Primjenjivo pravo" %}</h2>
+    <p>{% trans "Na ove Uvjete primjenjuje se pravo Republike Hrvatske. Za sporove je nadležan sud u Zagrebu." %}</p>
+  </div>
+
+  <!-- Privacy -->
+  <div class="doc" id="doc-privacy">
+    <div class="date">{% trans "Zadnja izmjena" %}: 16.04.2026.</div>
+
+    <h2>{% trans "Koje podatke prikupljamo" %}</h2>
+    <ul>
+      <li><strong>{% trans "Roditelj" %}:</strong> {% trans "email, ime, lozinka (hashirana), jezik, plan pretplate." %}</li>
+      <li><strong>{% trans "Dijete" %}:</strong> {% trans "ime (može biti nadimak), datum rođenja, jezik, napredak u učenju." %}</li>
+      <li><strong>{% trans "NE prikupljamo" %}:</strong> {% trans "adresu, školu, telefon, fotografije, lokaciju, JMBG/OIB djeteta." %}</li>
+    </ul>
+
+    <h2>{% trans "Kako koristimo podatke" %}</h2>
+    <ul>
+      <li>{% trans "Personalizacija sadržaja prema dobi i jeziku djeteta." %}</li>
+      <li>{% trans "Praćenje napretka (Memio Škola, XP, razine)." %}</li>
+      <li>{% trans "Slanje izvještaja roditelju (ako je uključeno)." %}</li>
+      <li>{% trans "NE prodajemo podatke. NE dijelimo s oglašivačima. NIKAD." %}</li>
+    </ul>
+
+    <h2>{% trans "Kolačići" %}</h2>
+    <p>{% trans "Koristimo samo funkcionalne kolačiće za prijavu (session cookie). Nema tracking kolačića, nema Google Analyticsa, nema Facebooka." %}</p>
+
+    <h2>{% trans "Brisanje podataka" %}</h2>
+    <p>{% trans "Roditelj može zatražiti brisanje svih podataka u postavkama računa. Brisanje se izvršava u roku od 72 sata." %}</p>
+  </div>
+
+  <!-- GDPR -->
+  <div class="doc" id="doc-gdpr">
+    <div class="date">{% trans "Zadnja izmjena" %}: 16.04.2026.</div>
+
+    <h2>{% trans "GDPR usklađenost" %}</h2>
+    <p>{% trans "PLAY.EU je u potpunosti usklađen s Općom uredbom o zaštiti podataka (GDPR, Uredba EU 2016/679)." %}</p>
+
+    <h2>{% trans "Temelj obrade" %}</h2>
+    <ul>
+      <li><strong>{% trans "Članak 6(1)(a)" %}:</strong> {% trans "Privola — roditelj daje eksplicitnu privolu pri registraciji." %}</li>
+      <li><strong>{% trans "Članak 6(1)(b)" %}:</strong> {% trans "Izvršenje ugovora — pružanje usluge pretplate." %}</li>
+      <li><strong>{% trans "Članak 8" %}:</strong> {% trans "Privola djeteta — sva obrada podataka djeteta zahtijeva privolu roditelja/skrbnika." %}</li>
+    </ul>
+
+    <h2>{% trans "Prava korisnika" %}</h2>
+    <ul>
+      <li>{% trans "Pravo pristupa (čl. 15) — pregledajte sve podatke u postavkama računa." %}</li>
+      <li>{% trans "Pravo na ispravak (čl. 16) — izmijenite podatke u bilo kojem trenutku." %}</li>
+      <li>{% trans "Pravo na brisanje (čl. 17) — zatražite brisanje svih podataka." %}</li>
+      <li>{% trans "Pravo na prenosivost (čl. 20) — izvoz podataka u JSON formatu." %}</li>
+      <li>{% trans "Pravo na prigovor (čl. 21) — kontaktirajte DPO@play.eu." %}</li>
+    </ul>
+
+    <h2>{% trans "Služba za zaštitu podataka (DPO)" %}</h2>
+    <p>{% trans "Kontakt" %}: dpo@play.eu<br>
+    {% trans "NO LIMIT d.o.o., Hrvatska" %}</p>
+
+    <h2>{% trans "Prijenos podataka" %}</h2>
+    <p>{% trans "Podaci se pohranjuju na serverima unutar EU (Hetzner, Finska). Nema prijenosa podataka izvan EEA." %}</p>
+  </div>
+
+  <!-- Children protection -->
+  <div class="doc" id="doc-children">
+    <div class="date">{% trans "Zadnja izmjena" %}: 16.04.2026.</div>
+
+    <h2>{% trans "Zaštita djece na internetu" %}</h2>
+    <p>{% trans "PLAY.EU se pridržava sljedećih propisa i standarda za zaštitu djece:" %}</p>
+
+    <h2>{% trans "EU Digital Services Act (DSA) — čl. 28" %}</h2>
+    <ul>
+      <li>{% trans "NEMA profiliranja djece u reklamne svrhe." %}</li>
+      <li>{% trans "NEMA ciljanih reklama prema djeci." %}</li>
+      <li>{% trans "NEMA dark patternsa koji manipuliraju djetetovim ponašanjem." %}</li>
+    </ul>
+
+    <h2>{% trans "AVMSD (Audiovizualna direktiva)" %}</h2>
+    <ul>
+      <li>{% trans "Sav audio i vizualni sadržaj je primjeren za djecu." %}</li>
+      <li>{% trans "Nema nasilja, straha, neprimjerenog jezika." %}</li>
+      <li>{% trans "Samoclassification: bez dobnog ograničenja." %}</li>
+    </ul>
+
+    <h2>{% trans "Naše dodatne mjere" %}</h2>
+    <ul>
+      <li>{% trans "Memio maskota NIKAD ne traži osobne podatke od djeteta." %}</li>
+      <li>{% trans "BuddyPair zahtijeva odobrenje OBA roditelja." %}</li>
+      <li>{% trans "Svi korisnički sadržaji (natječaj, ideje) su moderirani." %}</li>
+      <li>{% trans "Noćni protokol: nakon 20h samo audio, toplo svjetlo." %}</li>
+      <li>{% trans "Nema push notifikacija — dijete dolazi kad želi." %}</li>
+      <li>{% trans "Etički algoritam: max 30 min/dan, fizička aktivnost svaka 3. aktivnost." %}</li>
+    </ul>
+
+    <h2>{% trans "Prijava neprimjerenog sadržaja" %}</h2>
+    <p>{% trans "Ako primijetite bilo kakav neprimjeren sadržaj ili ponašanje, kontaktirajte nas odmah:" %}<br>
+    📧 safety@play.eu<br>
+    {% trans "Odgovaramo u roku od 24 sata." %}</p>
+  </div>
+
+</div>
+
+<script>
+function showDoc(name, btn) {
+  document.querySelectorAll('.doc').forEach(function(d){d.classList.remove('show')});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('doc-' + name).classList.add('show');
+  btn.classList.add('active');
+}
+</script>
+{% endblock %}

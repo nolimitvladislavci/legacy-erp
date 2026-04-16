@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 """
 core/smart_import_pdf_patch.py
 Vision fallback za skenirane PDF-ove u smart_import.

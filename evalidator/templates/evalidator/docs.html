@@ -1,0 +1,17 @@
+{% load static %}<!DOCTYPE html><html lang="hr"><head><meta charset="UTF-8"><title>API Docs — eValidator</title>
+<style>body{background:#0d0d0d;color:#e8e8e8;font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:40px 20px}
+h1{color:#c9a84c;margin-bottom:8px}h2{color:#c9a84c;margin:28px 0 10px}
+pre{background:#161616;padding:16px;border-radius:8px;overflow-x:auto;color:#a8d8a8;font-size:.9rem}
+p,li{color:#aaa;line-height:1.7}a{color:#c9a84c}</style></head>
+<body><a href="/evalidator/">← Natrag</a><br><br>
+<h1>eValidator API Dokumentacija</h1>
+<p>REST API za provjeru OIB, IBAN i VAT ID. Besplatno 100 req/dan bez API ključa.</p>
+<h2>OIB provjera</h2>
+<pre>GET /api/v1/oib/?oib={11_znamenki}
+POST /api/v1/oib/ Content-Type: application/json {"oib":"12345678901"}
+
+Response: {"oib":"...","valid":true,"algorithm":"ISO 7064 MOD 11,10","country":"HR"}</pre>
+<h2>Rate limiting</h2>
+<p>Free: 30 req/min, 100/dan · API key: po planu (Starter 1k, Pro 10k, Enterprise unlimited)</p>
+<h2>Kontakt</h2><p>api@evalidator.eu · <a href="https://no-limit.world/">No-limit udruga</a></p>
+</body></html>

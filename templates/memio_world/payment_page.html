@@ -1,0 +1,208 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}💳 {% trans "Pretplata" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.pay{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.pay h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.pay .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.plan-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:2rem}
+.plan{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid rgba(201,168,76,.2);
+  text-align:center;transition:.2s;cursor:pointer;position:relative}
+.plan:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.plan.selected{border-color:#8b6914;background:linear-gradient(135deg,#fff,rgba(201,168,76,.08));
+  box-shadow:0 4px 20px rgba(201,168,76,.2)}
+.plan-badge{position:absolute;top:-10px;right:16px;background:#c9a84c;color:#fff;padding:3px 12px;
+  border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:bold}
+.plan-name{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.3rem}
+.plan-price{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;color:#c9a84c}
+.plan-period{font-size:.85rem;color:#6b5a4e;font-family:'Space Grotesk',sans-serif}
+.plan-save{font-size:.8rem;color:#2e7d32;font-family:'MedievalSharp',serif;margin-top:.3rem}
+
+/* Payment methods */
+.pay-methods{margin:2rem 0}
+.pay-methods h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:1rem;text-align:center}
+.method-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.method{background:#fff;border-radius:12px;padding:1rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);cursor:pointer;transition:.2s}
+.method:hover{border-color:#c9a84c;transform:translateY(-2px)}
+.method.selected{border-color:#8b6914;background:rgba(201,168,76,.08)}
+.method-icon{font-size:2rem;margin-bottom:.3rem}
+.method-name{font-family:'MedievalSharp',serif;font-size:.85rem;color:#2c1810}
+
+/* Checkout form */
+.checkout{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;padding:1.5rem;
+  border:2px solid #c9a84c;margin:1.5rem 0}
+.checkout h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:1rem;text-align:center}
+.form-row{margin-bottom:1rem}
+.form-row label{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;display:block;margin-bottom:.3rem}
+.form-row input{width:100%;padding:10px;border:2px solid rgba(201,168,76,.3);border-radius:10px;
+  font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;background:#fff;outline:none}
+.form-row input:focus{border-color:#c9a84c}
+.pay-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:16px 32px;border-radius:14px;font-family:'Uncial Antiqua',serif;font-size:1.1rem;
+  cursor:pointer;width:100%;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.pay-btn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(201,168,76,.4)}
+
+.security-badges{display:flex;gap:12px;justify-content:center;margin:1.5rem 0;flex-wrap:wrap}
+.sec-badge{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#6b5a4e;display:flex;align-items:center;gap:4px}
+
+.company-info{background:#fff;border-radius:12px;padding:1rem;margin-top:1rem;
+  font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#6b5a4e;text-align:center;line-height:1.6}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pay">
+  <h1>💳 {% trans "Pretplata" %}</h1>
+  <p class="sub">{% trans "Odaberi plan, odaberi način plaćanja — gotovo za 2 minute." %}</p>
+
+  <!-- Plans -->
+  <div class="plan-cards">
+    <div class="plan" onclick="selectPlan('monthly',this)">
+      <div class="plan-name">{% trans "Mjesečno" %}</div>
+      <div class="plan-price">€4.99</div>
+      <div class="plan-period">/{% trans "mjesečno" %}</div>
+    </div>
+    <div class="plan selected" onclick="selectPlan('yearly',this)">
+      <div class="plan-badge">{% trans "NAJBOLJA VRIJEDNOST" %}</div>
+      <div class="plan-name">{% trans "Godišnje" %}</div>
+      <div class="plan-price">€39.99</div>
+      <div class="plan-period">/{% trans "godišnje" %}</div>
+      <div class="plan-save">{% trans "Uštedi 33% — 2 mjeseca GRATIS" %}</div>
+    </div>
+  </div>
+
+  <!-- Payment Methods -->
+  <div class="pay-methods">
+    <h2>{% trans "Način plaćanja" %}</h2>
+    <div class="method-grid">
+      <div class="method selected" onclick="selectMethod('card',this)">
+        <div class="method-icon">💳</div>
+        <div class="method-name">{% trans "Kartica" %}<br><small>Visa / Mastercard</small></div>
+      </div>
+      <div class="method" onclick="selectMethod('paypal',this)">
+        <div class="method-icon">🅿️</div>
+        <div class="method-name">PayPal</div>
+      </div>
+      <div class="method" onclick="selectMethod('googlepay',this)">
+        <div class="method-icon">🟢</div>
+        <div class="method-name">Google Pay</div>
+      </div>
+      <div class="method" onclick="selectMethod('applepay',this)">
+        <div class="method-icon">🍎</div>
+        <div class="method-name">Apple Pay</div>
+      </div>
+      <div class="method" onclick="selectMethod('revolut',this)">
+        <div class="method-icon">🔄</div>
+        <div class="method-name">Revolut</div>
+      </div>
+      <div class="method" onclick="selectMethod('aircash',this)">
+        <div class="method-icon">💨</div>
+        <div class="method-name">Aircash</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout -->
+  <div class="checkout" id="checkoutForm">
+    <h2>🔒 {% trans "Sigurno plaćanje" %}</h2>
+    <div class="form-row">
+      <label>{% trans "Email" %}:</label>
+      <input type="email" id="payEmail" placeholder="vas@email.com">
+    </div>
+    <div class="form-row" id="cardFields">
+      <label>{% trans "Broj kartice" %}:</label>
+      <input type="text" id="payCard" placeholder="•••• •••• •••• ••••" maxlength="19" oninput="formatCard(this)">
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="form-row" style="flex:1">
+        <label>{% trans "Rok" %}:</label>
+        <input type="text" placeholder="MM/YY" maxlength="5">
+      </div>
+      <div class="form-row" style="flex:1">
+        <label>CVV:</label>
+        <input type="text" placeholder="•••" maxlength="3">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>{% trans "Referral kod" %} ({% trans "opcionalno" %}):</label>
+      <input type="text" id="refCode" placeholder="PLAY-XXXXX" style="text-transform:uppercase">
+    </div>
+    <button class="pay-btn" onclick="processPayment()">
+      🔒 {% trans "Plati" %} <span id="payAmount">€39.99</span>
+    </button>
+    <div id="payMsg" style="text-align:center;margin-top:.5rem;font-family:'MedievalSharp',serif;min-height:1.5rem"></div>
+  </div>
+
+  <!-- Security badges -->
+  <div class="security-badges">
+    <span class="sec-badge">🔒 SSL 256-bit</span>
+    <span class="sec-badge">🛡️ PCI DSS</span>
+    <span class="sec-badge">✅ GDPR</span>
+    <span class="sec-badge">🔄 {% trans "Otkaz bilo kad" %}</span>
+    <span class="sec-badge">💰 {% trans "7 dana besplatno" %}</span>
+  </div>
+
+  <!-- Company info -->
+  <div class="company-info">
+    <strong>NO LIMIT d.o.o.</strong><br>
+    {% trans "Žiro račun u postupku registracije" %}<br>
+    OIB: {% trans "u postupku" %} · {% trans "Sjedište: Hrvatska" %}<br>
+    {% trans "Sva plaćanja su sigurna i enkriptirana." %}<br>
+    {% trans "Pretplata se može otkazati u bilo kojem trenutku bez penala." %}
+  </div>
+</div>
+
+<script>
+var selectedPlan = 'yearly';
+var selectedMethod = 'card';
+
+function selectPlan(plan, el) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan').forEach(function(p){p.classList.remove('selected')});
+  el.classList.add('selected');
+  document.getElementById('payAmount').textContent = plan === 'monthly' ? '€4.99' : '€39.99';
+}
+
+function selectMethod(method, el) {
+  selectedMethod = method;
+  document.querySelectorAll('.method').forEach(function(m){m.classList.remove('selected')});
+  el.classList.add('selected');
+  // Show/hide card fields
+  document.getElementById('cardFields').style.display = (method === 'card') ? 'block' : 'none';
+}
+
+function formatCard(input) {
+  var val = input.value.replace(/\D/g, '').substring(0, 16);
+  var formatted = val.replace(/(\d{4})/g, '$1 ').trim();
+  input.value = formatted;
+}
+
+function processPayment() {
+  var email = document.getElementById('payEmail').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('payMsg').textContent = '{% trans "Unesite email adresu." %}';
+    document.getElementById('payMsg').style.color = '#c62828';
+    return;
+  }
+
+  var refCode = document.getElementById('refCode').value.trim().toUpperCase();
+
+  // Save subscription locally (demo mode)
+  localStorage.setItem('playeu_subscription', JSON.stringify({
+    plan: selectedPlan,
+    method: selectedMethod,
+    email: email,
+    refCode: refCode,
+    startDate: new Date().toISOString(),
+    status: 'trial'
+  }));
+
+  document.getElementById('payMsg').innerHTML = '🎉 {% trans "Hvala! 7-dnevni besplatni trial aktiviran." %}<br>{% trans "Kad NO LIMIT žiro račun bude aktivan, aktivirat ćemo naplatu." %}';
+  document.getElementById('payMsg').style.color = '#2e7d32';
+}
+</script>
+{% endblock %}

@@ -131,8 +131,8 @@ function buildSongList(songs, containerId) {
     card.innerHTML = '<div class="song-title">' + s.emoji + ' ' + s.title + '</div>' +
       '<div class="song-lyrics">' + s.lyrics + '</div>' +
       '<div class="song-btns">' +
-        '<button class="sbtn" onclick="speakSong(this,\'' + s.lyrics.replace(/'/g,"\\'").replace(/\n/g,' ') + '\')" title="{% trans \'Čitaj\' %}">🔊</button>' +
-        '<button class="sbtn" onclick="singAlong(this,\'' + s.lyrics.replace(/'/g,"\\'").replace(/\n/g,' ') + '\')" title="{% trans \'Pjevaj uz\' %}">🎤</button>' +
+        '<button class="sbtn" onclick="speakSong(this,\'' + s.lyrics.replace(/'/g,"\\'").replace(/\n/g,' ') + '\')" title="Čitaj">🔊</button>' +
+        '<button class="sbtn" onclick="singAlong(this,\'' + s.lyrics.replace(/'/g,"\\'").replace(/\n/g,' ') + '\')" title="{% trans "Pjevaj uz" %}">🎤</button>' +
       '</div>';
     c.appendChild(card);
   });

@@ -1,0 +1,253 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}📦 {% trans "Kartice za učenje" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.flash{max-width:650px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.flash h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;margin-bottom:.2rem}
+.flash .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+/* Leitner boxes */
+.boxes{display:flex;gap:8px;justify-content:center;margin-bottom:1.5rem}
+.box{padding:6px 14px;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.8rem;
+  cursor:pointer;transition:.2s;border:2px solid transparent}
+.box:hover{transform:translateY(-2px)}
+.box-1{background:#ffcdd2;color:#c62828;border-color:#ef9a9a}
+.box-2{background:#ffe0b2;color:#e65100;border-color:#ffcc80}
+.box-3{background:#fff9c4;color:#f9a825;border-color:#fff176}
+.box-4{background:#c8e6c9;color:#2e7d32;border-color:#a5d6a7}
+.box-5{background:#b3e5fc;color:#0277bd;border-color:#81d4fa}
+.box.active{transform:scale(1.1);box-shadow:0 3px 12px rgba(0,0,0,.15)}
+
+/* Flashcard */
+.card-container{perspective:1000px;margin:0 auto 1.5rem;width:min(400px,90vw);height:250px}
+.flashcard{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:.5s;cursor:pointer}
+.flashcard.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;
+  box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.card-front{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border:3px solid #c9a84c}
+.card-back{background:linear-gradient(135deg,#2c1810,#4a2c1a);border:3px solid #c9a84c;
+  transform:rotateY(180deg);color:#f5e6c8}
+.card-emoji{font-size:3rem;margin-bottom:.5rem}
+.card-q{font-family:'MedievalSharp',serif;font-size:1.4rem;color:#2c1810}
+.card-a{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#c9a84c;margin-bottom:.3rem}
+.card-detail{font-family:'MedievalSharp',serif;font-size:.95rem;color:#e8d4a8;line-height:1.5}
+.card-hint{font-size:.8rem;color:#9c8a7a;font-family:'Space Grotesk',sans-serif;margin-top:.5rem}
+
+/* Buttons */
+.rate-btns{display:flex;gap:10px;justify-content:center;margin:1rem 0}
+.rate-btn{padding:12px 20px;border-radius:12px;border:2px solid;font-family:'MedievalSharp',serif;
+  font-size:1rem;cursor:pointer;transition:.2s;flex:1;max-width:120px}
+.rate-btn:hover{transform:translateY(-2px)}
+.rate-easy{border-color:#66bb6a;background:#e8f5e9;color:#2e7d32}
+.rate-medium{border-color:#ffa726;background:#fff3e0;color:#e65100}
+.rate-hard{border-color:#ef5350;background:#ffebee;color:#c62828}
+
+.progress{display:flex;gap:4px;justify-content:center;margin:1rem 0}
+.progress-dot{width:12px;height:12px;border-radius:50%;background:#e0e0e0;transition:.3s}
+.progress-dot.done-easy{background:#66bb6a}
+.progress-dot.done-medium{background:#ffa726}
+.progress-dot.done-hard{background:#ef5350}
+.progress-dot.current{background:#c9a84c;transform:scale(1.3)}
+
+.stats{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#6b5a4e;margin:.5rem 0}
+
+.topic-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.topic-btn{padding:6px 14px;border-radius:8px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.85rem;cursor:pointer;transition:.2s;color:#2c1810}
+.topic-btn:hover{border-color:#c9a84c}.topic-btn.active{background:#c9a84c;color:#fff}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flash">
+  <h1>📦 {% trans "Kartice za učenje" %}</h1>
+  <p class="sub">{% trans "Leitner sustav — ponavljaj pametno, pamti zauvijek!" %}</p>
+
+  <!-- Topics -->
+  <div class="topic-btns">
+    <button class="topic-btn active" onclick="setTopic('fairy',this)">🏰 {% trans "Bajke" %}</button>
+    <button class="topic-btn" onclick="setTopic('animals',this)">🐾 {% trans "Životinje" %}</button>
+    <button class="topic-btn" onclick="setTopic('geography',this)">🌍 {% trans "Zemlje" %}</button>
+    <button class="topic-btn" onclick="setTopic('math',this)">🔢 {% trans "Matematika" %}</button>
+    <button class="topic-btn" onclick="setTopic('safety',this)">🛡️ {% trans "Sigurnost" %}</button>
+  </div>
+
+  <!-- Leitner boxes -->
+  <div class="boxes">
+    <div class="box box-1" title="{% trans 'Novo / Teško' %}">📦1 <span id="box1">0</span></div>
+    <div class="box box-2" title="{% trans 'Ponoviti' %}">📦2 <span id="box2">0</span></div>
+    <div class="box box-3" title="{% trans 'Učim' %}">📦3 <span id="box3">0</span></div>
+    <div class="box box-4" title="{% trans 'Znam' %}">📦4 <span id="box4">0</span></div>
+    <div class="box box-5" title="{% trans 'Naučeno!' %}">📦5 <span id="box5">0</span></div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="progress" id="progressDots"></div>
+
+  <!-- Flashcard -->
+  <div class="card-container">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="card-face card-front">
+        <div class="card-emoji" id="cardEmoji">🏰</div>
+        <div class="card-q" id="cardQ">{% trans "Pitanje" %}</div>
+        <div class="card-hint">{% trans "Klikni za odgovor" %} 👆</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-a" id="cardA">{% trans "Odgovor" %}</div>
+        <div class="card-detail" id="cardDetail"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating buttons -->
+  <div class="rate-btns">
+    <button class="rate-btn rate-hard" onclick="rateCard('hard')">😣 {% trans "Teško" %}</button>
+    <button class="rate-btn rate-medium" onclick="rateCard('medium')">🤔 {% trans "Hmm" %}</button>
+    <button class="rate-btn rate-easy" onclick="rateCard('easy')">😊 {% trans "Lako!" %}</button>
+  </div>
+
+  <div class="stats">
+    {% trans "Sesija" %}: <span id="sessionDone">0</span> {% trans "kartica" %} ·
+    {% trans "Naučeno" %}: <span id="sessionLearned">0</span>
+  </div>
+
+  <div style="margin-top:1rem;background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;
+    font-family:'MedievalSharp',serif;font-size:.85rem;color:#5c3d1a">
+    📚 {% trans "Leitner sustav: Točan odgovor → kartica ide kutiju gore. Krivi → natrag u Kutiju 1. Kutija 5 = naučeno! 3× efikasnije od klasičnog ponavljanja." %}
+  </div>
+</div>
+
+<script>
+var TOPICS = {
+  fairy: [
+    {q:'Kako se zove djevojka sa zlatnom kosom u tornju?',a:'Rapunzel',detail:'Grimm bajka iz Njemačke',emoji:'👸'},
+    {q:'Koliko je patuljaka čuvalo Snjeguljicu?',a:'7',detail:'Radili su u rudniku zlata',emoji:'⛏️'},
+    {q:'Što je Crvenkapica nosila baki?',a:'Kolač i vino',detail:'Baka je bila bolesna',emoji:'🧁'},
+    {q:'Tko je napisao Šumu Striborovu?',a:'Ivana Brlić-Mažuranić',detail:'Hrvatska spisateljica, 1916.',emoji:'🇭🇷'},
+    {q:'Kako se zove srpski junak koji je pobijedio Baš-Čelika?',a:'Svetozar',detail:'Srpska narodna bajka',emoji:'⚔️'},
+    {q:'Na čemu Trnoružica spava 100 godina?',a:'Ubola se na vreteno',detail:'13. mudra žena je bacila kletvu',emoji:'🌹'},
+    {q:'Koliko životinja ide u Bremen svirati?',a:'4 (magarac, pas, mačka, pijetao)',detail:'Bremenski gradski muzikanti',emoji:'🎵'},
+    {q:'Tko je Nasreddin-hodža?',a:'Mudar čovjek iz narodnih priča',detail:'Zajedničko nasljeđe BA/RS/TR',emoji:'🧙'},
+  ],
+  animals: [
+    {q:'Koliko nogu ima pauk?',a:'8',detail:'Pauci NISU kukci — kukci imaju 6 nogu',emoji:'🕷️'},
+    {q:'Kako se zove skupina lavova?',a:'Čopor (pride)',detail:'Lavice love, lav čuva teritorij',emoji:'🦁'},
+    {q:'Koja životinja spava do 22 sata dnevno?',a:'Koala',detail:'Eucaliptus ih uspavljuje!',emoji:'🐨'},
+    {q:'Koji je najbrži kopneni životinja?',a:'Gepard (120 km/h)',detail:'Ali samo 60 sekundi — brzo se umori',emoji:'🐆'},
+    {q:'Koliko sati spava mačka?',a:'12-16 sati',detail:'Više od pola dana!',emoji:'🐱'},
+    {q:'Smije li pas jesti čokoladu?',a:'NE! Otrovna je za pse',detail:'Teobromin u čokoladi je opasan',emoji:'🐶'},
+  ],
+  geography: [
+    {q:'Glavni grad Hrvatske?',a:'Zagreb',detail:'Ima oko 800.000 stanovnika',emoji:'🇭🇷'},
+    {q:'Glavni grad Njemačke?',a:'Berlin',detail:'Berlinski zid pao je 1989.',emoji:'🇩🇪'},
+    {q:'Koja je najveća zemlja u Europi?',a:'Ukrajina (po površini)',detail:'603.628 km²',emoji:'🇺🇦'},
+    {q:'Koji ocean je najveći?',a:'Tihi ocean (Pacifik)',detail:'Veći je od svih kopna zajedno!',emoji:'🌊'},
+    {q:'Koliko država ima EU?',a:'27',detail:'Od 2020. (nakon Brexita)',emoji:'🇪🇺'},
+    {q:'Koja rijeka teče kroz Zagreb?',a:'Sava',detail:'Sava je pritoka Dunava',emoji:'🏞️'},
+  ],
+  math: [
+    {q:'7 × 8 = ?',a:'56',detail:'Trik: 5-6-7-8 → 56 = 7×8',emoji:'✖️'},
+    {q:'Koliko minuta ima 1 sat?',a:'60',detail:'A sekundi? 3600!',emoji:'⏰'},
+    {q:'Koliko centimetara ima 1 metar?',a:'100',detail:'A milimetara? 1000!',emoji:'📏'},
+    {q:'12 × 12 = ?',a:'144',detail:'Ovo se zove "tucet na tucet"',emoji:'🔢'},
+    {q:'Koliko strana ima trokut?',a:'3',detail:'Tri + kut = trokut!',emoji:'📐'},
+    {q:'Koliko je pola od pola?',a:'Četvrtina (1/4)',detail:'1/2 × 1/2 = 1/4',emoji:'🧮'},
+  ],
+  safety: [
+    {q:'Koji broj zoveš u hitnom slučaju?',a:'112',detail:'Radi u cijeloj Europi!',emoji:'📞'},
+    {q:'Smiješ li ići s nepoznatim osobama?',a:'NE! Nikad.',detail:'Čak i ako kažu da poznaju tvoje roditelje',emoji:'🚫'},
+    {q:'Što radiš na crvenom svjetlu?',a:'STOJIŠ i čekaš zeleno',detail:'Čak i kad nema auta — pravila su pravila',emoji:'🚦'},
+    {q:'Trebaš li nositi kacigu na biciklu?',a:'DA, uvijek!',detail:'Kaciga štiti mozak — nemaš rezervni',emoji:'⛑️'},
+    {q:'Što nikad ne dijeliš na internetu?',a:'Ime, adresu, školu, slike',detail:'Nepoznati ljudi nisu prijatelji',emoji:'🔒'},
+    {q:'Što radiš ako se izgubiš u trgovini?',a:'Stani, traži zaštitara ili blagajnicu',detail:'NE idi van tražiti roditelje',emoji:'🏬'},
+  ]
+};
+
+var currentTopic = 'fairy';
+var cards = [];
+var cardIdx = 0;
+var sessionDone = 0, sessionLearned = 0;
+var boxes = [0,0,0,0,0]; // count per box
+
+function setTopic(topic, btn) {
+  currentTopic = topic;
+  document.querySelectorAll('.topic-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  initCards();
+}
+
+function initCards() {
+  cards = TOPICS[currentTopic].map(function(c, i) {
+    return {q:c.q, a:c.a, detail:c.detail, emoji:c.emoji, box:1, idx:i};
+  });
+  cardIdx = 0;
+  sessionDone = 0; sessionLearned = 0;
+  updateBoxCounts();
+  showCard();
+  buildProgress();
+}
+
+function showCard() {
+  if (cardIdx >= cards.length) cardIdx = 0;
+  var c = cards[cardIdx];
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('cardEmoji').textContent = c.emoji;
+  document.getElementById('cardQ').textContent = c.q;
+  document.getElementById('cardA').textContent = c.a;
+  document.getElementById('cardDetail').textContent = c.detail;
+  updateProgress();
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function rateCard(rating) {
+  var c = cards[cardIdx];
+  if (rating === 'easy') { c.box = Math.min(5, c.box + 1); }
+  else if (rating === 'hard') { c.box = 1; }
+  // medium stays same
+
+  sessionDone++;
+  if (c.box >= 5) sessionLearned++;
+  document.getElementById('sessionDone').textContent = sessionDone;
+  document.getElementById('sessionLearned').textContent = sessionLearned;
+
+  updateBoxCounts();
+  cardIdx++;
+  showCard();
+}
+
+function updateBoxCounts() {
+  boxes = [0,0,0,0,0];
+  cards.forEach(function(c) { boxes[c.box - 1]++; });
+  for (var i = 0; i < 5; i++) document.getElementById('box' + (i+1)).textContent = boxes[i];
+}
+
+function buildProgress() {
+  var dots = document.getElementById('progressDots');
+  dots.innerHTML = '';
+  cards.forEach(function(c, i) {
+    var dot = document.createElement('div');
+    dot.className = 'progress-dot';
+    dots.appendChild(dot);
+  });
+}
+
+function updateProgress() {
+  var dots = document.querySelectorAll('.progress-dot');
+  cards.forEach(function(c, i) {
+    dots[i].className = 'progress-dot';
+    if (i === cardIdx) dots[i].classList.add('current');
+    else if (c.box >= 4) dots[i].classList.add('done-easy');
+    else if (c.box >= 2) dots[i].classList.add('done-medium');
+    else dots[i].classList.add('done-hard');
+  });
+}
+
+initCards();
+</script>
+{% endblock %}

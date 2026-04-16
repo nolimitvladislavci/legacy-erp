@@ -1,0 +1,158 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}❓ {% trans "Upute" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.help{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.help h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:1.5rem}
+
+.help-section{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:1rem;
+  border:2px solid rgba(201,168,76,.2)}
+.help-section h2{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.8rem;
+  display:flex;align-items:center;gap:8px}
+.help-section p,.help-section li{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;line-height:1.7}
+.help-section ul{padding-left:1rem;margin:.5rem 0}
+
+.voice-guide{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.5rem;
+  margin-bottom:1rem;border:2px solid #66bb6a}
+.voice-guide h2{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#1b5e20;margin-bottom:.8rem}
+.voice-guide p{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2e7d32;line-height:1.7}
+
+.guide-step{display:flex;gap:12px;padding:.8rem;background:rgba(245,230,200,.3);border-radius:10px;
+  margin-bottom:.5rem;align-items:flex-start}
+.guide-num{width:32px;height:32px;background:#c9a84c;color:#fff;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-family:'Uncial Antiqua',serif;font-size:.9rem;flex-shrink:0}
+.guide-text{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;line-height:1.6;flex:1}
+
+.tts-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:8px 16px;border-radius:8px;font-family:'MedievalSharp',serif;font-size:.85rem;
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.2s;margin:.5rem 0}
+.tts-btn:hover{transform:translateY(-1px)}
+
+.shortcut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.shortcut{background:rgba(245,230,200,.3);border-radius:8px;padding:.6rem;display:flex;gap:8px;align-items:center}
+.shortcut-key{background:#2c1810;color:#f5e6c8;padding:2px 8px;border-radius:4px;
+  font-family:'Space Grotesk',sans-serif;font-size:.8rem;flex-shrink:0}
+.shortcut-desc{font-family:'MedievalSharp',serif;font-size:.8rem;color:#6b5a4e}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="help">
+  <h1>❓ {% trans "Kako koristiti PLAY.EU" %}</h1>
+
+  <!-- Voice guide -->
+  <div class="voice-guide">
+    <h2>🔊 {% trans "Glasovne upute" %}</h2>
+    <p>{% trans "Klikni gumb ispod da čuješ upute naglas — korisno za djecu koja još ne čitaju!" %}</p>
+    <button class="tts-btn" onclick="speakGuide('intro')">🔊 {% trans "Slušaj uvod" %}</button>
+    <button class="tts-btn" onclick="speakGuide('reading')">📖 {% trans "Kako čitati bajku" %}</button>
+    <button class="tts-btn" onclick="speakGuide('games')">🎮 {% trans "Kako igrati igre" %}</button>
+    <button class="tts-btn" onclick="speakGuide('school')">🎓 {% trans "Kako radi Škola" %}</button>
+  </div>
+
+  <!-- Za roditelje -->
+  <div class="help-section">
+    <h2>👨‍👩‍👧 {% trans "Za roditelje — Prvi koraci" %}</h2>
+    <div class="guide-step">
+      <div class="guide-num">1</div>
+      <div class="guide-text">{% trans "Registrirajte se na /play/register/ — trebate samo email i lozinku." %}</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-num">2</div>
+      <div class="guide-text">{% trans "Dodajte profil djeteta — ime, datum rođenja, maternji jezik." %}</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-num">3</div>
+      <div class="guide-text">{% trans "Pokažite djetetu homepage i pustite ga da sam bira. Ne forsirati." %}</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-num">4</div>
+      <div class="guide-text">{% trans "Pregledajte Parent Dashboard jednom tjedno za izvještaj." %}</div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-num">5</div>
+      <div class="guide-text">{% trans "Max 30 min dnevno. Platforma sama potiče pokret." %}</div>
+    </div>
+  </div>
+
+  <!-- Book Reader -->
+  <div class="help-section">
+    <h2>📖 {% trans "Kako čitati bajku" %}</h2>
+    <ul>
+      <li>{% trans "Otvori bajku → vidiš Codex (otvorenu knjigu): slika lijevo, tekst desno." %}</li>
+      <li>🔊 {% trans "Zvučnik — klikni da ti platforma čita tekst naglas." %}</li>
+      <li>🎤 {% trans "Mikrofon — snimi SEBE kako čitaš. Preslušaj s 🔁." %}</li>
+      <li>🇭🇷🇩🇪🇬🇧 {% trans "Zastave — prebaci jezik jednim klikom." %}</li>
+      <li>← → {% trans "Strelice ili swipe za listanje stranica." %}</li>
+      <li>⛶ {% trans "Fullscreen za najbolje iskustvo." %}</li>
+      <li>☽ {% trans "Noćni mod — tamna pozadina za čitanje prije spavanja." %}</li>
+    </ul>
+  </div>
+
+  <!-- Igre -->
+  <div class="help-section">
+    <h2>🎮 {% trans "Igre" %}</h2>
+    <ul>
+      <li>♟ {% trans "Šah — klikni na figuru na ploči da vidiš kamo može ići. Puzzle = nađi mat u 1 potezu." %}</li>
+      <li>🎲 {% trans "Čovječe — baci kocku (klik), klikni na pijuna za pomak. Trebaš 6 za izlaz." %}</li>
+      <li>🔠 {% trans "Vješalica — klikaj slova. Imaš 7 pokušaja. Hint ti pomaže." %}</li>
+      <li>🚢 {% trans "Brodovi — klikni na polje (A1-H8). Pogodak = crveno. Promašaj = sivo." %}</li>
+      <li>🎨 {% trans "Bojanka — odaberi boju, veličinu kista, crtaj prstom ili mišem." %}</li>
+    </ul>
+  </div>
+
+  <!-- Škola -->
+  <div class="help-section">
+    <h2>🎓 {% trans "Memio Škola" %}</h2>
+    <ul>
+      <li>{% trans "5 razina: Početnik → Istraživač → Znalac → Majstor → Diploma." %}</li>
+      <li>{% trans "Svaka razina ima zadatke. Klikni zadatak → otvori se aktivnost." %}</li>
+      <li>{% trans "Završi aktivnost → dobij XP bodove." %}</li>
+      <li>{% trans "Dovoljno XP-a → prijelaz na sljedeću razinu." %}</li>
+      <li>{% trans "Razina 5 = Diploma! Ispiši je i stavi na hladnjak." %}</li>
+    </ul>
+  </div>
+
+  <!-- Keyboard shortcuts -->
+  <div class="help-section">
+    <h2>⌨️ {% trans "Prečice na tipkovnici (Book Reader)" %}</h2>
+    <div class="shortcut-grid">
+      <div class="shortcut"><span class="shortcut-key">→</span><span class="shortcut-desc">{% trans "Sljedeća stranica" %}</span></div>
+      <div class="shortcut"><span class="shortcut-key">←</span><span class="shortcut-desc">{% trans "Prethodna stranica" %}</span></div>
+      <div class="shortcut"><span class="shortcut-key">Space</span><span class="shortcut-desc">{% trans "Sljedeća stranica" %}</span></div>
+      <div class="shortcut"><span class="shortcut-key">F</span><span class="shortcut-desc">{% trans "Fullscreen" %}</span></div>
+      <div class="shortcut"><span class="shortcut-key">Esc</span><span class="shortcut-desc">{% trans "Izlaz iz fullscreena" %}</span></div>
+    </div>
+  </div>
+
+  <!-- Kontakt -->
+  <div class="help-section">
+    <h2>📧 {% trans "Kontakt i podrška" %}</h2>
+    <p>{% trans "Imate pitanje? Trebate pomoć?" %}</p>
+    <ul>
+      <li>📧 {% trans "Email" %}: support@play.eu</li>
+      <li>📚 <a href="{% url 'memio_world:pedagogy_page' %}">{% trans "Pedagoške smjernice" %}</a></li>
+      <li>⚖️ <a href="{% url 'memio_world:legal_page' %}">{% trans "Pravni dokumenti" %}</a></li>
+      <li>👨‍👩‍👧 <a href="{% url 'memio_world:parent_dashboard' %}">{% trans "Parent Dashboard" %}</a></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+var GUIDES = {
+  intro: '{% trans "Dobrodošao na Play E U! Ovo je platforma koja te uči kroz igru. Možeš čitati bajke, igrati šah, učiti brojeve, crtati, kuhati s bakom — i još puno toga! Svaki put kad nešto naučiš, dobiješ bodove. Kad sakupiš dovoljno bodova — dobiješ diplomu! Hajde, kreni!" %}',
+  reading: '{% trans "Da čitaš bajku: otvori bajku i vidiš stranicu. Lijevo je slika, desno tekst. Klikni zvučnik da ti platforma čita naglas. Klikni mikrofon da se snimiš dok čitaš. Zastave gore mijenjaju jezik. Strelice ili swipe okretaju stranice." %}',
+  games: '{% trans "Imamo puno igara! Šah te uči logici. Čovječe te uči strpljivosti. Vješalica te uči riječima. Brodovi te uče koordinatama. Bojanka te uči kreativnosti. Sve igre daju bodove za tvoju školu!" %}',
+  school: '{% trans "Memio Škola ima pet razina. Počinješ kao Početnik. Svaki zadatak daje bodove. Kad sakupiš dovoljno — prelaziš na sljedeću razinu. Na kraju dobiješ diplomu koju možeš isprintati! Postani znalac, a ne mulac!" %}',
+};
+
+function speakGuide(key) {
+  var text = GUIDES[key] || '';
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'hr-HR'; u.rate = 0.82; u.pitch = 1.05;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+</script>
+{% endblock %}

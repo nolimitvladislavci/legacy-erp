@@ -1,0 +1,55 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🔑 {% trans "Prijava" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.auth{max-width:450px;margin:2rem auto;padding:1.5rem}
+.auth h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.5rem}
+.auth .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+.auth-card{background:#fff;border-radius:20px;padding:2rem;border:2px solid #c9a84c;box-shadow:0 8px 40px rgba(0,0,0,.08)}
+.form-g{margin-bottom:1rem}
+.form-g label{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;display:block;margin-bottom:.3rem}
+.form-g input{width:100%;padding:12px;border:2px solid rgba(201,168,76,.3);border-radius:10px;
+  font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;outline:none;background:#fff}
+.form-g input:focus{border-color:#c9a84c}
+.auth-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:14px;border-radius:12px;font-family:'Uncial Antiqua',serif;font-size:1.05rem;
+  cursor:pointer;width:100%;transition:.2s}
+.auth-btn:hover{transform:translateY(-2px)}
+.auth-msg{text-align:center;margin-top:.5rem;font-family:'MedievalSharp',serif;min-height:1.5rem;font-size:.9rem}
+.auth-link{text-align:center;margin-top:1rem;font-family:'MedievalSharp',serif;font-size:.9rem;color:#6b5a4e}
+.auth-link a{color:#c9a84c;text-decoration:none;font-weight:bold}
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth">
+  <div style="text-align:center;font-size:3rem;margin-bottom:.5rem">🔑</div>
+  <h1>{% trans "Prijava" %}</h1>
+  <p class="sub">{% trans "Dobrodošao/la natrag!" %}</p>
+  <div class="auth-card">
+    <div class="form-g">
+      <label>{% trans "Email" %}:</label>
+      <input type="email" id="loginEmail" placeholder="vas@email.com">
+    </div>
+    <div class="form-g">
+      <label>{% trans "Lozinka" %}:</label>
+      <input type="password" id="loginPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="auth-btn" onclick="doLogin()">🔑 {% trans "Prijavi se" %}</button>
+    <div class="auth-msg" id="loginMsg"></div>
+  </div>
+  <div class="auth-link">{% trans "Nemaš račun?" %} <a href="{% url 'memio_world:register_page' %}">{% trans "Registriraj se" %}</a></div>
+</div>
+<script>
+function doLogin() {
+  fetch('{% url "memio_world:login_action" %}', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value})
+  }).then(function(r){return r.json()}).then(function(d) {
+    if (d.ok) window.location.href = d.redirect;
+    else { document.getElementById('loginMsg').textContent = d.error; document.getElementById('loginMsg').style.color = '#c62828'; }
+  });
+}
+</script>
+{% endblock %}

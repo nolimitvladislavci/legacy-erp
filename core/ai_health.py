@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 """
 AI Infrastruktura Health Check — BORG Čuvar
 ============================================

@@ -38,6 +38,21 @@
   </a>
 </div>
 
+<!-- ═══ MEMIO MASKOTA ═══ -->
+<a href="{% url 'memio_world:memio_mascot' %}" style="text-decoration:none;display:block">
+  <div style="background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;padding:1rem 1.5rem;margin-bottom:1rem;
+    display:flex;align-items:center;gap:1rem;border:2px solid #c9a84c;transition:.2s"
+    onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+    <div style="font-size:3rem;animation:float 3s ease-in-out infinite">🦉</div>
+    <div>
+      <div style="font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810">{% trans "Pitaj Memia!" %}</div>
+      <div style="font-size:.8rem;color:#6b5a4e;font-family:'MedievalSharp',serif">{% trans "Zašto je nebo plavo? Kako nastaje kiša? Pitaj me bilo što!" %}</div>
+    </div>
+    <div style="margin-left:auto;font-size:1.5rem;color:#c9a84c">→</div>
+  </div>
+</a>
+<style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}</style>
+
 <!-- ═══ DAILY DISCOVERY BANNER ═══ -->
 <a href="{% url 'memio_world:daily_discovery' %}" style="text-decoration:none;display:block">
   <div style="background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:16px;padding:1rem 1.5rem;margin-bottom:1rem;
@@ -204,6 +219,20 @@
         <div class="meta">{% trans "Koliko je sati?" %}</div>
       </div>
     </a>
+    <a href="{% url 'memio_world:virtual_shop' %}" class="play-grid-item">
+      <div class="thumb">💰</div>
+      <div class="info">
+        <h3>{% trans "Trgovina" %}</h3>
+        <div class="meta">{% trans "Nauči novac i kusur!" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:flashcards' %}" class="play-grid-item">
+      <div class="thumb">📦</div>
+      <div class="info">
+        <h3>{% trans "Kartice" %}</h3>
+        <div class="meta">{% trans "Leitner sustav ponavljanja" %}</div>
+      </div>
+    </a>
     <a href="{% url 'memio_world:safety_list' %}" class="play-grid-item">
       <div class="thumb">🛡️</div>
       <div class="info">
@@ -290,6 +319,20 @@
         <div class="meta">{% trans "Briga, hrana, odgovornost + memio.pet" %}</div>
       </div>
     </a>
+    <a href="{% url 'memio_world:shelter_program' %}" class="play-grid-item">
+      <div class="thumb">🏠</div>
+      <div class="info">
+        <h3>{% trans "Azili + Djeca" %}</h3>
+        <div class="meta">{% trans "NO LIMIT projekt — pomaži životinjama" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:family_tree' %}" class="play-grid-item">
+      <div class="thumb">🌳</div>
+      <div class="info">
+        <h3>{% trans "Obiteljsko stablo" %}</h3>
+        <div class="meta">{% trans "Tko je tko? Intervjuiraj baku!" %}</div>
+      </div>
+    </a>
     <a href="{% url 'memio_world:cooking_recipes' %}" class="play-grid-item">
       <div class="thumb">🍳</div>
       <div class="info">
@@ -320,6 +363,91 @@
     <div style="margin-left:auto;font-size:1.2rem;color:#c9a84c">→</div>
   </div>
 </a>
+
+<!-- ═══ MEMIO ŠKOLA + SOCIJALNO ═══ -->
+<section class="mb-16">
+  <div class="flex-between mb-16">
+    <h2 style="font-family:var(--serif);font-size:1.3rem">🎓 {% trans "Memio Škola" %}</h2>
+  </div>
+  <div class="play-grid">
+    <a href="{% url 'memio_world:memio_school' %}" class="play-grid-item">
+      <div class="thumb">🎓</div>
+      <div class="info">
+        <h3>{% trans "Memio Škola" %}</h3>
+        <div class="meta">{% trans "Od mulca do znalca — 5 razina" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:buddy_finder' %}" class="play-grid-item">
+      <div class="thumb">🤝</div>
+      <div class="info">
+        <h3>{% trans "Pronađi prijatelja" %}</h3>
+        <div class="meta">{% trans "Spajamo djecu po interesima" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:spomenar_page' %}" class="play-grid-item">
+      <div class="thumb">📔</div>
+      <div class="info">
+        <h3>{% trans "Spomenar" %}</h3>
+        <div class="meta">{% trans "Digitalna knjiga sjećanja" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:kids_ideas' %}" class="play-grid-item">
+      <div class="thumb">💡</div>
+      <div class="info">
+        <h3>{% trans "Dječje ideje" %}</h3>
+        <div class="meta">{% trans "Ti gradiš portal!" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:contest_page' %}" class="play-grid-item">
+      <div class="thumb">🏆</div>
+      <div class="info">
+        <h3>{% trans "Natječaj" %}</h3>
+        <div class="meta">{% trans "Pošalji svoju naj priču!" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:events_page' %}" class="play-grid-item">
+      <div class="thumb">📅</div>
+      <div class="info">
+        <h3>{% trans "Događaji" %}</h3>
+        <div class="meta">{% trans "Čitaonice, kviz noći, talent show" %}</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ═══ PRETPLATA + KNJIŽNICA ═══ -->
+<section class="mb-16">
+  <div class="play-grid">
+    <a href="{% url 'memio_world:digital_library' %}" class="play-grid-item">
+      <div class="thumb">📚</div>
+      <div class="info">
+        <h3>{% trans "Knjižnica" %}</h3>
+        <div class="meta">{% trans "Sve knjige na jednom mjestu" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:payment_page' %}" class="play-grid-item">
+      <div class="thumb">💳</div>
+      <div class="info">
+        <h3>{% trans "Pretplata" %}</h3>
+        <div class="meta">{% trans "€4.99/mj — svi načini plaćanja" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:referral_page' %}" class="play-grid-item">
+      <div class="thumb">🎁</div>
+      <div class="info">
+        <h3>{% trans "Preporuči" %}</h3>
+        <div class="meta">{% trans "Oboje dobijete mjesec gratis!" %}</div>
+      </div>
+    </a>
+    <a href="{% url 'memio_world:parent_onboarding' %}" class="play-grid-item">
+      <div class="thumb">🚀</div>
+      <div class="info">
+        <h3>{% trans "Počni ovdje" %}</h3>
+        <div class="meta">{% trans "3 koraka za roditelje" %}</div>
+      </div>
+    </a>
+  </div>
+</section>
 
 <!-- Stats -->
 <div class="play-card text-center">

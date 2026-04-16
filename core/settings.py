@@ -22,6 +22,8 @@ FERNET_KEY = os.environ["FERNET_KEY"]
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [
+    "evalidator.eu",
+    "www.evalidator.eu",
     "limit-connect.com",
     "www.limit-connect.com",
     # ".limit-connect.com",  # wildcard uklonjen — koristiti eksplicitnu listu
@@ -182,6 +184,7 @@ INSTALLED_APPS = [
     "memio_world",  # Memio.world — digitalna baština
     "memio_farm",  # Memio.farm — farmske životinje
     "no_limit",  # NO LIMIT udruga
+    "evalidator",  # evalidator.eu — javni validacijski servis
     "intelligence",
     "einvoice",
     "limit_connect_ai",
@@ -209,6 +212,7 @@ CHANNEL_LAYERS = {
 }
 
 MIDDLEWARE = [
+    "evalidator.middleware.EValidatorHostMiddleware",  # hostname routing
     "core.middleware.GracefulErrorMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "core.middleware.WhiteLabelMiddleware",
@@ -1439,7 +1443,8 @@ CELERY_BEAT_SCHEDULE["notifications-purge-old"] = {
 # UI: /silk/ (admin pristup)
 if DEBUG:
     INSTALLED_APPS = list(INSTALLED_APPS) + ["silk"]
-    MIDDLEWARE = ["silk.middleware.SilkyMiddleware"] + list(MIDDLEWARE)
+    MIDDLEWARE = [
+    "silk.middleware.SilkyMiddleware"] + list(MIDDLEWARE)
     SILKY_PYTHON_PROFILER = True
     SILKY_MAX_RECORDED_REQUESTS = 100
     SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10

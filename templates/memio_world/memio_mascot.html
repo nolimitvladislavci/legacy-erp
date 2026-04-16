@@ -1,0 +1,175 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🦉 Memio — {% trans "Pitaj me bilo što!" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.mascot{max-width:650px;margin:0 auto;padding:1.5rem 1rem}
+.mascot-header{text-align:center;margin-bottom:1.5rem}
+.mascot-avatar{font-size:5rem;margin-bottom:.5rem;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.mascot-header h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810}
+.mascot-header .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;font-size:.95rem}
+
+.chat-area{background:#fff;border-radius:20px;border:2px solid rgba(201,168,76,.2);
+  min-height:400px;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.06)}
+
+.chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.8rem}
+
+.msg{max-width:85%;padding:.8rem 1rem;border-radius:16px;font-family:'MedievalSharp',serif;
+  font-size:.95rem;line-height:1.6;animation:msgIn .3s ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.msg-memio{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);color:#2c1810;align-self:flex-start;
+  border-bottom-left-radius:4px}
+.msg-memio::before{content:'🦉 ';font-size:1.1rem}
+.msg-child{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;align-self:flex-end;
+  border-bottom-right-radius:4px}
+.msg-parent{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);color:#1b5e20;align-self:flex-start;
+  border-bottom-left-radius:4px;font-size:.85rem;border:1px solid #a5d6a7}
+.msg-parent::before{content:'👨‍👩‍👧 ';}
+
+.chat-input{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(201,168,76,.15);background:rgba(245,230,200,.2)}
+.chat-input input{flex:1;padding:10px 16px;border:2px solid rgba(201,168,76,.3);border-radius:24px;
+  font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;outline:none;background:#fff}
+.chat-input input:focus{border-color:#c9a84c}
+.chat-input button{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#c9a84c,#8b6914);
+  border:none;color:#fff;font-size:1.2rem;cursor:pointer;flex-shrink:0;transition:.2s}
+.chat-input button:hover{transform:scale(1.08)}
+
+.quick-btns{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid rgba(201,168,76,.1)}
+.qbtn{padding:6px 12px;border-radius:16px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);
+  font-family:'MedievalSharp',serif;font-size:.8rem;cursor:pointer;transition:.15s;color:#2c1810;white-space:nowrap}
+.qbtn:hover{background:rgba(201,168,76,.25);border-color:#c9a84c}
+
+.safety-note{margin-top:1rem;background:rgba(201,168,76,.08);border-radius:12px;padding:1rem;
+  font-family:'MedievalSharp',serif;font-size:.8rem;color:#5c3d1a;text-align:center;line-height:1.6}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mascot">
+  <div class="mascot-header">
+    <div class="mascot-avatar">🦉</div>
+    <h1>{% trans "Ja sam Memio!" %}</h1>
+    <div class="sub">{% trans "Pitaj me bilo što! Ali prvo pitaj mamu ili tatu — ako oni ne znaju, ja znam!" %} 😉</div>
+  </div>
+
+  <div class="chat-area">
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div class="quick-btns">
+      <button class="qbtn" onclick="askQuick('Zašto je nebo plavo?')">🌤️ {% trans "Zašto je nebo plavo?" %}</button>
+      <button class="qbtn" onclick="askQuick('Zašto moram spavati?')">😴 {% trans "Zašto moram spavati?" %}</button>
+      <button class="qbtn" onclick="askQuick('Kako nastaje kiša?')">🌧️ {% trans "Kako nastaje kiša?" %}</button>
+      <button class="qbtn" onclick="askQuick('Zašto imamo 10 prstiju?')">🖐️ {% trans "Zašto 10 prstiju?" %}</button>
+      <button class="qbtn" onclick="askQuick('Ispričaj mi vic!')">😄 {% trans "Ispričaj vic!" %}</button>
+      <button class="qbtn" onclick="askQuick('Ispričaj mi bajku!')">📖 {% trans "Ispričaj bajku!" %}</button>
+      <button class="qbtn" onclick="askQuick('Tužan/na sam')">😢 {% trans "Tužan/na sam" %}</button>
+      <button class="qbtn" onclick="askQuick('Dosadno mi je')">😑 {% trans "Dosadno mi je" %}</button>
+    </div>
+
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="{% trans 'Pitaj Memia...' %}" onkeydown="if(event.key==='Enter')sendMsg()">
+      <button onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+
+  <div class="safety-note">
+    🛡️ {% trans "Memio NIKAD ne traži osobne podatke (adresu, školu, telefon). Ako te itko na internetu traži takve podatke — reci NE i obavijesti roditelje." %}<br>
+    👨‍👩‍👧 {% trans "Prvo pitaj roditelja. Memio je pomoćnik, ne zamjena za mamu i tatu." %}
+  </div>
+</div>
+
+<script>
+var RESPONSES = {
+  'nebo plavo': '{% trans "Nebo je plavo jer sunčeva svjetlost udara u molekule zraka i raspršuje se. Plava boja se raspršuje NAJVIŠE jer ima kratku valnu duljinu. Zato vidimo plavo nebo! A kad je zalazak — vidimo crveno jer tada svjetlost putuje duže kroz atmosferu." %}',
+  'moram spavati': '{% trans "Dok spavaš, tvoj mozak radi najvažniji posao! Sortira sve što si naučio preko dana i sprema u memoriju. Tvoje tijelo raste dok spavaš — hormon rasta izlučuje se najviše noću. Dakle: više spavaš = brže rasteš + pametniji si ujutro!" %}',
+  'nastaje kiša': '{% trans "Sunce zagrijava vodu u rijekama, morima i jezerima. Voda isparava i diže se u nebo kao nevidljiva para. Gore je hladno, pa se para pretvara u sitne kapljice — to su oblaci! Kad kapljice postanu preteške, padaju dolje kao kiša. I sve počinje ispočetka — to se zove KRUŽENJE VODE." %}',
+  '10 prstiju': '{% trans "Jako dobro pitanje! Naši davni preci (ljudi koji su živjeli prije milijune godina) razvili su 5 prstiju po ruci jer je to bio savršen broj za hvatanje grana na drveću. S 5 prstiju možeš držati štap, brati voće i raditi alate. Da imamo 6, bili bi nespretni. Da imamo 4, ne bismo mogli dobro držati stvari. 5 je SAVRŠEN broj!" %}',
+  'vic': '{% trans "Zašto mravi nikad ne idu k doktoru? Jer su uvijek zdravi — imaju anti-tijela! 🐜😂 Hoćeš još jedan? Što kaže riba kad udari u zid? — DAM! 🐟" %}',
+  'bajku': '{% trans "Bilo jednom jedno malo drvo koje nije htjelo rasti. Sva ostala stabla su bila visoka, ali ovo drvo je reklo: Ne želim rasti, hoću ostati malen! Mudra sova ga pitala: Zašto? Drvo je reklo: Jer kad budem veliko, neću moći vidjeti mrave. I sova se nasmijala: Ali kad budeš veliko, vidjet ćeš zvijezde! I drvo je počelo rasti." %}',
+  'tužan': '{% trans "Razumijem da si tužan/na. To je normalno i OK je biti tužan. 💛 Evo što možeš napraviti: 1) Reci nekome kako se osjećaš — mami, tati, baki. 2) Zagrli nekoga. 3) Nacrtaj kako se osjećaš. 4) Pusti omiljenu pjesmu. Tuga prolazi — kao oblak koji zakloni sunce. Sunce je uvijek iza oblaka. ☀️" %}',
+  'dosadno': '{% trans "Dosadno ti je? SUPER! 🎉 Dosada je izum koji tjera mozak da SMISLI nešto novo! Evo ideja: 1) Idi van i prebroji sve ptice koje vidiš 🐦 2) Nacrtaj mapu svog kvarta 🗺️ 3) Napravi origami avion ✈️ 4) Nauči novi trik s kartama 🃏 5) Pozovi prijatelja 📞 6) Pročitaj bajku na PLAY.EU 📖 Ili — samo sjedi i razmišljaj. Najveće ideje nastaju iz dosade!" %}',
+};
+
+var FALLBACK_RESPONSES = [
+  '{% trans "Hmm, to je odlično pitanje! Ne znam točan odgovor, ali znam tko zna — tvoji roditelji! Pitaj ih i javi mi što su rekli. 😊" %}',
+  '{% trans "Wow, to me nitko nikad nije pitao! Moram malo razmisliti... A dok ja razmišljam, pitaj mamu ili tatu — oni znaju SVE! 🤔" %}',
+  '{% trans "To je pitanje za pravu enciklopediju! Idemo zajedno istražiti — potraži s roditeljima na sigurnoj web stranici. 📚" %}',
+  '{% trans "Odlično pitanje, mali znalče! Za ovo trebamo stručnjaka. Pitaj učiteljicu u školi — sigurno zna! 👩‍🏫" %}',
+];
+
+var GREETINGS = [
+  '{% trans "Bok! Ja sam Memio — tvoja mudra sova! 🦉 Pitaj me što god želiš. Ali zapamti: prvo pitaj mamu ili tatu!" %}',
+  '{% trans "Dobrodošao/la! Spreman sam na sva tvoja pitanja. Ali pazi — ponekad ću te pitati: A ti što misliš? Jer tvoj odgovor je jednako važan kao moj! 🧠" %}',
+];
+
+// Init
+var messages = document.getElementById('chatMessages');
+addMsg('memio', GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
+addMsg('parent', '{% trans "⚠️ Napomena: Memio je edukativni asistent, ne AI chatbot. Odgovori su unaprijed pripremljeni i sigurni za djecu." %}');
+
+function addMsg(type, text) {
+  var div = document.createElement('div');
+  div.className = 'msg msg-' + type;
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+
+  // TTS for Memio responses
+  if (type === 'memio') {
+    var u = new SpeechSynthesisUtterance(text.replace(/[🦉👨‍👩‍👧⚠️💛☀️🎉🤔📚👩‍🏫🐜😂🐟🐦🗺️✈️🃏📞📖😊🧠]/g, ''));
+    u.lang = 'hr-HR'; u.rate = 0.85; u.pitch = 1.05;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
+}
+
+function findResponse(text) {
+  text = text.toLowerCase();
+
+  // Check keywords
+  for (var key in RESPONSES) {
+    if (text.indexOf(key) >= 0) return RESPONSES[key];
+  }
+
+  // Additional keyword matching
+  if (text.indexOf('zašto') >= 0 || text.indexOf('kako') >= 0 || text.indexOf('što') >= 0) {
+    // Generic "why/how/what" questions
+    if (text.indexOf('sunce') >= 0) return '{% trans "Sunce je ogromna zvijezda — lopta vrućeg plina koja gori već 4.6 milijardi godina! Toliko je veliko da bi u njega stalo MILLION Zemlja. I sve zahvaljujući suncu — biljke rastu, mi smo topli, i vidimo dan." %}';
+    if (text.indexOf('mjesec') >= 0 || text.indexOf('luna') >= 0) return '{% trans "Mjesec je naš susjed u svemiru — udaljen samo 384.000 km. Nema vlastitu svjetlost, nego reflektira sunčevu. Zato se mijenja oblik — pun mjesec, polumjesec, mladi mjesec. Ljudi su prvi put stali na Mjesec 1969. godine!" %}';
+    if (text.indexOf('dinosaur') >= 0) return '{% trans "Dinosauri su živjeli prije 66 milijuna godina! Najpoznatiji je T-Rex, ali postojalo ih je preko 1000 vrsta. Izumrli su kad je veliki asteroid udario u Zemlju. Ali njihovi potomci žive i danas — ptice su zapravo mali dinosauri! 🦕" %}';
+    if (text.indexOf('zvijezd') >= 0) return '{% trans "Zvijezde su ogromne kugle vrućeg plina, poput našeg Sunca. Na nebu vidimo oko 2500 zvijezda golim okom, ali u svemiru ih ima više od zrnaca pijeska na svim plažama Zemlje! Kad vidiš zvijezdu — vidiš prošlost, jer je njezinoj svjetlosti trebalo godinama da stigne do nas." %}';
+    if (text.indexOf('more') >= 0 || text.indexOf('ocean') >= 0) return '{% trans "More pokriva 71% Zemlje! Najdublji dio je Marijanski jarak — 11 km dubok. U moru živi više vrsta nego na kopnu, a istražili smo tek 5% oceana. Više znamo o površini Marsa nego o dnu našeg oceana!" %}';
+  }
+
+  if (text.indexOf('hvala') >= 0 || text.indexOf('fala') >= 0) return '{% trans "Nema na čemu, mali znalče! Uvijek sam tu za tebe. 🦉💛" %}';
+  if (text.indexOf('bok') >= 0 || text.indexOf('hej') >= 0 || text.indexOf('zdravo') >= 0) return '{% trans "Bok! Drago mi je da si tu! Što te zanima danas? 🦉" %}';
+  if (text.indexOf('volim te') >= 0) return '{% trans "I ja tebe volim, mali znalče! Ali znaš tko te voli NAJVIŠE? Mama i tata. Idi im reci da ih voliš. Odmah. Čekam. 💛" %}';
+  if (text.indexOf('ljut') >= 0 || text.indexOf('bijes') >= 0) return '{% trans "Osjećaš bijes? To je normalno! Hajde da zajedno dišemo: Udahni... 1... 2... 3... 4... Izdahni... 1... 2... 3... 4... Bolje? Idemo na vježbu smirivanja!" %}';
+  if (text.indexOf('strah') >= 0 || text.indexOf('bojim') >= 0) return '{% trans "Strah je normalan — čak je i koristan jer te čuva od opasnosti! Ali ako te strah nečega što nije opasno, reci roditelju. Zajedno ćete ga pobijediti. Hrabrost NIJE biti bez straha — hrabrost je raditi unatoč strahu. 🦁" %}';
+
+  return FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
+}
+
+function sendMsg() {
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if (!text) return;
+
+  addMsg('child', text);
+  input.value = '';
+
+  // Typing indicator
+  setTimeout(function() {
+    var response = findResponse(text);
+    addMsg('memio', response);
+  }, 800);
+}
+
+function askQuick(text) {
+  document.getElementById('chatInput').value = text;
+  sendMsg();
+}
+</script>
+{% endblock %}

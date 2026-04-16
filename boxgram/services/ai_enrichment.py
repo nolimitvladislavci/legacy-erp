@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 """
 Boxgram AI Enrichment — Haiku auto-opisi za LifeEvent
 Model: claude-haiku-4-5-20251001
