@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontakt — No Limit</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:#111;--border:#222;--gold:#c9a84c;--text:#e0e0e0;--muted:#888;--font:'Space Grotesk',system-ui,sans-serif}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.8}
+a{color:var(--gold);text-decoration:none}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:1px}
+.nav-brand span{color:var(--gold)}
+.content{max-width:600px;margin:40px auto;padding:0 24px}
+h1{font-size:1.8rem;color:#fff;margin-bottom:32px;text-align:center}
+.contact-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:12px;display:flex;align-items:center;gap:16px}
+.contact-icon{font-size:1.5rem;color:var(--gold);min-width:40px;text-align:center}
+.contact-label{font-size:.85rem;color:var(--muted)}
+.contact-value{font-weight:600;color:#fff}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--muted);font-size:.85rem;margin-top:60px}
+</style>
+</head>
+<body>
+<nav>
+    <a href="/no-limit/" class="nav-brand"><span>No</span> Limit</a>
+    <a href="/no-limit/" style="color:var(--muted);font-size:.9rem">← Natrag</a>
+</nav>
+<div class="content">
+    <h1><i class="fas fa-envelope" style="color:var(--gold)"></i> Kontakt</h1>
+    <div class="contact-item">
+        <div class="contact-icon"><i class="fas fa-user"></i></div>
+        <div>
+            <div class="contact-label">Predsjednik udruge</div>
+            <div class="contact-value">Ivan Brtan</div>
+        </div>
+    </div>
+    <div class="contact-item">
+        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+        <div>
+            <div class="contact-label">Email</div>
+            <div class="contact-value">info@no-limit.world</div>
+        </div>
+    </div>
+    <div class="contact-item">
+        <div class="contact-icon"><i class="fas fa-globe"></i></div>
+        <div>
+            <div class="contact-label">Web</div>
+            <div class="contact-value"><a href="https://no-limit.world">no-limit.world</a></div>
+        </div>
+    </div>
+    <div class="contact-item">
+        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <div>
+            <div class="contact-label">Sjedište</div>
+            <div class="contact-value">Osječko-baranjska županija, Hrvatska</div>
+        </div>
+    </div>
+    <div style="text-align:center;margin-top:32px;color:var(--muted);font-size:.9rem">
+        <p>Za ambasadorske prijave: <a href="/no-limit/ambasadori/prijava/">prijavite se ovdje</a></p>
+        <p>Za partnerstva: pišite na info@no-limit.world</p>
+    </div>
+</div>
+<footer><p>© 2026 No-limit udruga | <a href="/no-limit/">no-limit.world</a></p></footer>
+</body>
+</html>

@@ -1,13 +1,153 @@
+import hashlib
 import logging
 
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
-from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET
 
 logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  LANDING
+# ═══════════════════════════════════════════════════════════════
+
+
+def landing(request):
+    """Landing page — no-limit.world."""
+    from no_limit.models import AmbassadorApplication
+
+    prijava_ok = request.GET.get("prijava") == "ok"
+    ambasadori = AmbassadorApplication.objects.filter(status__in=["approved", "active"])
+    return render(
+        request,
+        "no_limit/landing.html",
+        {
+            "prijava_ok": prijava_ok,
+            "ambasadori": ambasadori,
+            "ambasador_count": ambasadori.count(),
+        },
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
+#  STATUT
+# ═══════════════════════════════════════════════════════════════
+
+
+def statut(request):
+    """Online čitanje statuta."""
+    return render(request, "no_limit/statut.html")
+
+
+def statut_pdf(request):
+    """PDF download statuta s evalidator pečatom."""
+    import weasyprint
+
+    ctx = {
+        "doc_id": "STATUT-NL",
+        "doc_version": "1.0.0",
+        "doc_date": "16.04.2026.",
+        "doc_issuer": "No-limit udruga",
+        "doc_url": "https://no-limit.world/statut/",
+        "doc_hash": "",
+        "doc_hash_short": "",
+    }
+    html = render_to_string("no_limit/pdf/statut_no_limit.html", ctx)
+    content_hash = hashlib.sha256(html.encode()).hexdigest()
+    ctx["doc_hash"] = content_hash
+    ctx["doc_hash_short"] = content_hash[:16]
+    html_final = render_to_string("no_limit/pdf/statut_no_limit.html", ctx)
+
+    pdf_bytes = weasyprint.HTML(string=html_final).write_pdf()
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="statut_no_limit_v1.0.0.pdf"'
+    response["X-Document-Hash"] = hashlib.sha256(pdf_bytes).hexdigest()
+    return response
+
+
+# ═══════════════════════════════════════════════════════════════
+#  AMBASADORI
+# ═══════════════════════════════════════════════════════════════
+
+
+def ambasadori(request):
+    """Pregled ambasadorske mreže."""
+    from no_limit.models import AmbassadorApplication
+
+    active = AmbassadorApplication.objects.filter(status__in=["approved", "active"])
+    return render(request, "no_limit/ambasadori.html", {"ambasadori": active})
+
+
+def ambasador_prijava(request):
+    """Forma za prijavu ambasadora + WA notifikacija."""
+    from no_limit.models import AmbassadorApplication
+
+    if request.method == "POST":
+        full_name = request.POST.get("full_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        country = request.POST.get("country", "").strip()
+        city = request.POST.get("city", "").strip()
+        organization = request.POST.get("organization", "").strip()
+        motivation = request.POST.get("motivation", "").strip()
+        languages = request.POST.get("languages", "").strip()
+        phone = request.POST.get("phone", "").strip()
+
+        if full_name and email and country and motivation:
+            AmbassadorApplication.objects.create(
+                full_name=full_name,
+                email=email,
+                country=country,
+                city=city,
+                organization=organization,
+                motivation=motivation,
+                languages=languages,
+                phone=phone,
+            )
+            # WA notifikacija Ivanu
+            try:
+                from core.whatsapp import send_whatsapp
+
+                wa_number = getattr(settings, "IVAN_WHATSAPP_NUMBER", "")
+                if wa_number:
+                    country_display = dict(AmbassadorApplication.COUNTRY_CHOICES).get(country, country)
+                    send_whatsapp(
+                        wa_number,
+                        f"Nova ambasadorska prijava!\n{full_name} iz {country_display}\nOrg: {organization or 'N/A'}\nEmail: {email}",
+                    )
+            except Exception:
+                logger.exception("WA notification failed for ambassador application")
+            return redirect("/no-limit/?prijava=ok")
+
+    return render(request, "no_limit/ambasador_prijava.html")
+
+
+# ═══════════════════════════════════════════════════════════════
+#  OSTALE STRANICE
+# ═══════════════════════════════════════════════════════════════
+
+
+def o_nama(request):
+    return render(request, "no_limit/o_nama.html")
+
+
+def partneri(request):
+    return render(request, "no_limit/partneri.html")
+
+
+def kontakt(request):
+    return render(request, "no_limit/kontakt.html")
+
+
+def projekti(request):
+    return render(request, "no_limit/projekti.html")
+
+
+# ═══════════════════════════════════════════════════════════════
+#  STARE VIEWS (backward compat)
+# ═══════════════════════════════════════════════════════════════
 
 
 @require_GET
@@ -57,9 +197,3 @@ def prijava_azila(request):
                 pass
             return redirect("/no-limit/?prijava=ok")
     return redirect("/no-limit/")
-
-
-@cache_page(300)
-def azil_landing(request):
-    """Landing page za azil program — /no-limit/."""
-    return render(request, "no_limit/azil_landing.html")

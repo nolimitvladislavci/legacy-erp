@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambasadori — No Limit</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:#111;--border:#222;--gold:#c9a84c;--text:#e0e0e0;--muted:#888;--font:'Space Grotesk',system-ui,sans-serif}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.8}
+a{color:var(--gold);text-decoration:none}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:1px}
+.nav-brand span{color:var(--gold)}
+.content{max-width:800px;margin:40px auto;padding:0 24px}
+h1{font-size:1.8rem;color:#fff;margin-bottom:8px;text-align:center}
+.sub{text-align:center;color:var(--muted);margin-bottom:40px}
+.amb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:40px}
+.amb-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;text-align:center}
+.amb-flag{font-size:2.5rem;margin-bottom:8px}
+.amb-name{font-weight:600;color:#fff;font-size:1.05rem}
+.amb-role{font-size:.85rem;color:var(--gold);margin-top:4px}
+.amb-org{font-size:.8rem;color:var(--muted);margin-top:4px}
+.cta{text-align:center;margin-top:40px}
+.btn{display:inline-block;padding:14px 32px;background:var(--gold);color:#000;border-radius:8px;font-weight:600;font-size:1rem}
+.btn:hover{background:#d4af37;color:#000}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--muted);font-size:.85rem;margin-top:60px}
+</style>
+</head>
+<body>
+<nav>
+    <a href="/no-limit/" class="nav-brand"><span>No</span> Limit</a>
+    <a href="/no-limit/" style="color:var(--muted);font-size:.9rem">← Natrag</a>
+</nav>
+<div class="content">
+    <h1><i class="fas fa-globe-europe" style="color:var(--gold)"></i> Ambasadorska mreža</h1>
+    <p class="sub">Nacionalni koordinatori No Limit projekata u EU državama.</p>
+
+    <div class="amb-grid">
+        <div class="amb-card" style="border-color:var(--gold)">
+            <div class="amb-flag">🇭🇷</div>
+            <div class="amb-name">Marija Čačić</div>
+            <div class="amb-role">HR Ambasador</div>
+            <div class="amb-org">Pedagog, magistra pedagogije</div>
+        </div>
+        {% for amb in ambasadori %}
+        <div class="amb-card">
+            <div class="amb-flag">🇪🇺</div>
+            <div class="amb-name">{{ amb.full_name }}</div>
+            <div class="amb-role">{{ amb.get_country_display }} Ambasador</div>
+            {% if amb.organization %}<div class="amb-org">{{ amb.organization }}</div>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cta">
+        <p style="color:var(--muted);margin-bottom:16px">Tražimo koordinatore u svim EU državama.</p>
+        <a href="/no-limit/ambasadori/prijava/" class="btn">
+            <i class="fas fa-paper-plane"></i> Postani ambasador
+        </a>
+    </div>
+</div>
+<footer><p>© 2026 No-limit udruga | <a href="/no-limit/">no-limit.world</a></p></footer>
+</body>
+</html>

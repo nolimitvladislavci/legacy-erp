@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projekti — No Limit</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:#111;--border:#222;--gold:#c9a84c;--text:#e0e0e0;--muted:#888;--font:'Space Grotesk',system-ui,sans-serif}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.8}
+a{color:var(--gold);text-decoration:none}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:1px}
+.nav-brand span{color:var(--gold)}
+.content{max-width:800px;margin:40px auto;padding:0 24px}
+h1{font-size:1.8rem;color:#fff;margin-bottom:32px;text-align:center}
+.project{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:20px}
+.project-icon{font-size:2rem;margin-bottom:12px}
+.project h3{font-size:1.2rem;color:#fff;margin-bottom:8px}
+.project p{color:var(--muted);font-size:.95rem;margin-bottom:12px}
+.project-link{color:var(--gold);font-weight:600;font-size:.9rem}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--muted);font-size:.85rem;margin-top:60px}
+</style>
+</head>
+<body>
+<nav>
+    <a href="/no-limit/" class="nav-brand"><span>No</span> Limit</a>
+    <a href="/no-limit/" style="color:var(--muted);font-size:.9rem">← Natrag</a>
+</nav>
+<div class="content">
+    <h1>Naši projekti</h1>
+
+    <div class="project">
+        <div class="project-icon">🎓</div>
+        <h3>PLAY.EU — Multikulturalna dječja obrazovna platforma</h3>
+        <p>22 bajke iz 8 europskih regija na 3 jezika. Digitalna baština za djecu — bez prikupljanja podataka (GDPR-Kids). Interaktivne igre, glazba, likovi iz europskih kultura.</p>
+        <a href="https://memio.world" class="project-link">memio.world →</a>
+    </div>
+
+    <div class="project">
+        <div class="project-icon">🐾</div>
+        <h3>memio.pet — Digitalni identitet ljubimaca</h3>
+        <p>QR profil za svakog ljubimca. Uzgajivači, veterinari, azili — svi na jednom mjestu. Besplatan digitalni putovni list za pse, mačke, konje i egzotične životinje.</p>
+        <a href="https://memio.pet" class="project-link">memio.pet →</a>
+    </div>
+
+    <div class="project">
+        <div class="project-icon">✅</div>
+        <h3>eValidator — Javni EU validacijski servis</h3>
+        <p>Besplatna provjera OIB, IBAN i VAT ID za cijelu EU. Infrastruktura povjerenja — ISO 7064 algoritam, SHA-256 logiranje, bez čuvanja osobnih podataka.</p>
+        <a href="https://evalidator.eu" class="project-link">evalidator.eu →</a>
+    </div>
+
+    <div class="project">
+        <div class="project-icon">💼</div>
+        <h3>LIMIT Connect — ERP/POS sustav</h3>
+        <p>Kompletan poslovni sustav za hrvatska i EU poduzeća. Fakturiranje, knjigovodstvo, plaće, POS blagajna, vertikale (stolarija, turizam, stočarstvo).</p>
+        <a href="https://limit-connect.com" class="project-link">limit-connect.com →</a>
+    </div>
+</div>
+<footer><p>© 2026 No-limit udruga | <a href="/no-limit/">no-limit.world</a></p></footer>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Statut udruge No Limit</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-center {
+                content: "Statut No Limit v{{ doc_version }} — Stranica " counter(page) " od " counter(pages);
+                font-size: 7pt;
+                color: #999;
+            }
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #222;
+        }
+        h1 {
+            text-align: center;
+            font-size: 16pt;
+            margin-bottom: 3mm;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        h2 {
+            font-size: 11pt;
+            margin-top: 8mm;
+            margin-bottom: 3mm;
+            color: #333;
+            border-bottom: 0.5pt solid #c9a84c;
+            padding-bottom: 1mm;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 10mm;
+        }
+        .doc-id {
+            text-align: center;
+            font-family: 'DejaVu Sans Mono', monospace;
+            font-size: 8pt;
+            color: #c9a84c;
+            margin-bottom: 8mm;
+        }
+        ol, ul { margin-left: 5mm; margin-top: 2mm; }
+        li { margin-bottom: 2mm; }
+        .placeholder { color: #c9a84c; font-style: italic; }
+        p { margin-bottom: 4mm; }
+    </style>
+</head>
+<body>
+
+    <div style="text-align: center; margin-bottom: 5mm;">
+        <span style="font-size: 18pt; color: #c9a84c;">&#x2B21;</span>
+    </div>
+
+    <h1>STATUT UDRUGE "NO LIMIT"</h1>
+    <p class="subtitle">Neprofitna udruga za digitalno djetinjstvo i inovacije</p>
+    <p class="doc-id">Dokument: STATUT-NL | Verzija: {{ doc_version|default:"1.0.0" }} | {{ doc_date|default:"16.04.2026." }}</p>
+
+    <h2>Članak 1 — Naziv, sjedište i OIB</h2>
+    <p>Naziv udruge: <strong>NO LIMIT</strong></p>
+    <p>Skraćeni naziv: <strong>NL</strong></p>
+    <p>Sjedište: <span class="placeholder">[Čepin ili Osijek — Ivan popunjava]</span></p>
+    <p>OIB: <span class="placeholder">[popunjava se nakon registracije]</span></p>
+    <p>Web: no-limit.world</p>
+
+    <h2>Članak 2 — Misija</h2>
+    <p>No Limit je neprofitna udruga koja razvija otvorene digitalne platforme
+    za djecu, životinje i institucije u Europskoj uniji.</p>
+    <p>Filozofija: "Bez papira. Bez granica. Bez ograničenja."</p>
+
+    <h2>Članak 3 — Ciljevi</h2>
+    <ol>
+        <li>Razvoj digitalnih obrazovnih sadržaja za djecu u EU</li>
+        <li>Zaštita životinja kroz digitalne identifikacijske sustave</li>
+        <li>Javni digitalni servisi — eValidator infrastruktura povjerenja</li>
+        <li>Podrška diaspora zajednicama (HR u DE, AT, SI)</li>
+        <li>EU projekt prijave (Creative Europe, Interreg, Erasmus+)</li>
+        <li>Ambasadorska mreža u svim EU državama</li>
+        <li>Digitalna baština i kulturno pamćenje</li>
+        <li>Podrška NGO-ima i azilima (No Limit azil program)</li>
+    </ol>
+
+    <h2>Članak 4 — Djelatnosti</h2>
+    <ul>
+        <li>Razvoj i održavanje digitalnih platformi</li>
+        <li>Organizacija edukacija, radionica i EU događanja</li>
+        <li>EU projekt menadžment i provedba</li>
+        <li>Licenciranje sadržaja institucijama</li>
+        <li>Ambasadorska mreža u EU</li>
+        <li>Podrška azilima digitalnim alatima</li>
+    </ul>
+
+    <h2>Članak 5 — Financiranje</h2>
+    <p>Udruga se financira iz:</p>
+    <ul>
+        <li>Članarina</li>
+        <li>Donacija i sponzorstava (Viskovic Bau, Konjik d.o.o.)</li>
+        <li>EU grantova (Creative Europe, Interreg, Erasmus+)</li>
+        <li>Licencnih prihoda od poslovnih partnera</li>
+    </ul>
+
+    <h2>Članak 6 — Tijela udruge</h2>
+    <ul>
+        <li><strong>Skupština</strong> — svi članovi</li>
+        <li><strong>Predsjednik:</strong> Ivan Brtan</li>
+        <li><strong>Tajnik:</strong> <span class="placeholder">[ime]</span></li>
+        <li><strong>Nadzorni odbor</strong></li>
+    </ul>
+
+    <h2>Članak 7 — Ambasadorska mreža EU</h2>
+    <p>Udruga osniva mrežu nacionalnih ambasadora u svim EU državama.
+    Svaki ambasador potpisuje Ugovor o ambasadorskoj suradnji (dokument A1).</p>
+    <p>Uvjeti ambasadorske suradnje:</p>
+    <ul>
+        <li>Besplatan pristup svim premium sadržajima</li>
+        <li>20% prihoda od pretplata iz svoje zemlje</li>
+        <li>Podrška u EU grant prijavama</li>
+        <li>Bez uplate za ulazak, bez nivoa, bez regrutiranja</li>
+    </ul>
+
+    <h2>Članak 8 — Partnerstva</h2>
+    <p>Udruga sklapa licencne i partnerske ugovore s poslovnim subjektima.
+    Aktivni partneri:</p>
+    <ul>
+        <li><strong>Konjik d.o.o.</strong>, Osijek (HR) — Tehnološki partner (dokument L1)</li>
+        <li><strong>Viskovic Bau</strong>, Nufringen (DE) — Poslovni partner i pokrovitelj</li>
+    </ul>
+
+    <h2>Članak 9 — Zaštita djece</h2>
+    <p>Svi sadržaji za djecu usklađeni su s <strong>GDPR-Kids politikom</strong> (dokument G1).
+    Temeljno načelo: nula podataka o djeci — nikad ne prikupljamo,
+    ne pohranjujemo i ne obrađujemo osobne podatke djece.</p>
+
+    <h2>Članak 10 — Prijelazne odredbe</h2>
+    <p>Ovaj statut stupa na snagu danom osnivačke skupštine.</p>
+    <p>Sve izmjene statuta bilježe se u povijesti dokumenta.</p>
+
+    <!-- POTPISI -->
+    <div style="margin-top: 20mm; page-break-inside: avoid;">
+        <p style="text-align: right; margin-bottom: 15mm;">
+            U _________________, dana _________________ 2026. godine.
+        </p>
+        <div style="width: 45%; display: inline-block; text-align: center; vertical-align: top; margin: 0 2%;">
+            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
+                <strong>Predsjednik</strong><br>Ivan Brtan
+            </div>
+        </div>
+        <div style="width: 45%; display: inline-block; text-align: center; vertical-align: top; margin: 0 2%;">
+            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
+                <strong>Tajnik</strong><br><span class="placeholder">[ime]</span>
+            </div>
+        </div>
+    </div>
+
+    {% include "notariat/pdf/evalidator_seal.html" %}
+
+</body>
+</html>
