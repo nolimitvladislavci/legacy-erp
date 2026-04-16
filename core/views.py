@@ -547,6 +547,22 @@ def superadmin_dashboard(request):
         context["ai_pending_count"] = 0
         context["ai_pending_by_module"] = []
 
+    # ── No-Limit Ecosystem data ──
+    try:
+        from no_limit.models import AmbassadorApplication, CountryChapter, PartnershipLead
+
+        nl_ambassadors = AmbassadorApplication.objects.all()[:10]
+        context["nl_ambassadors"] = nl_ambassadors
+        context["nl_stats"] = {
+            "amb_pending": AmbassadorApplication.objects.filter(status="pending").count(),
+            "amb_approved": AmbassadorApplication.objects.filter(status__in=["approved", "active"]).count(),
+            "leads_total": PartnershipLead.objects.count(),
+            "chapters_active": CountryChapter.objects.filter(is_active=True).count(),
+        }
+    except Exception:
+        context["nl_ambassadors"] = []
+        context["nl_stats"] = {}
+
     return render(request, "dashboards/superadmin.html", context)
 
 
