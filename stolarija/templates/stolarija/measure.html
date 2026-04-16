@@ -117,6 +117,7 @@
   <div class="fx-card fx-mb-3">
     <div class="fx-card-header">
       <i class="fas fa-plus-circle me-2 fx-text-gold"></i> Dodaj mjerenje
+      <a href="{% url 'stolarija:photo_measure' session.pk %}" class="btn-ghost fx-fs-sm" style="float:right"><i class="fas fa-camera fx-text-gold"></i> Foto mjere</a>
     </div>
     <div class="fx-card-body">
       <form method="post" id="measureForm" enctype="multipart/form-data">

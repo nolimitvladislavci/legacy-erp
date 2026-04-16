@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+{% block shell_mode %}focus{% endblock %}
+{% load i18n %}
+
+{% block title %}📸 {% trans "Foto mjerenje" %}{% endblock %}
+{% block page_title %}📸 {% trans "Foto mjerenje" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.pm-wrap{position:relative;width:100%;max-width:800px;margin:0 auto;touch-action:none}
+.pm-canvas{width:100%;display:block;border-radius:12px;border:2px solid var(--border,#333)}
+.pm-tools{display:flex;gap:6px;padding:8px;flex-wrap:wrap;align-items:center;justify-content:center}
+.pm-btn{background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333);color:var(--text,#e0e0e0);padding:8px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.pm-btn:hover,.pm-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.pm-btn.danger{color:#ef4444;border-color:#ef4444}
+.pm-btn.danger:hover{background:rgba(239,68,68,.1)}
+.pm-btn.primary{background:var(--gold);color:#0a0a0a;border-color:var(--gold);font-weight:700}
+.pm-status{text-align:center;font-size:.78rem;color:var(--text-muted);padding:6px;font-family:'Space Grotesk',sans-serif}
+.pm-measures{padding:12px;display:flex;flex-direction:column;gap:8px}
+.pm-line{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333);border-radius:8px;font-size:.88rem}
+.pm-line .color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.pm-line .label{flex:1;font-weight:600}
+.pm-line .length{color:var(--gold);font-weight:700;font-family:'Space Grotesk',sans-serif}
+.pm-line .delete{background:none;border:none;color:#ef4444;cursor:pointer;font-size:.85rem;padding:4px}
+.pm-dims{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+.pm-dim{background:var(--card-bg,#1a1a1a);border:1px solid var(--border,#333);border-radius:8px;padding:12px;text-align:center}
+.pm-dim label{font-size:.72rem;color:var(--text-muted);display:block;margin-bottom:4px;font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px}
+.pm-dim input{width:100%;background:none;border:none;color:var(--gold);font-size:1.4rem;font-weight:700;text-align:center;font-family:'Space Grotesk',sans-serif;outline:none}
+.pm-dim input::placeholder{color:var(--text-muted);font-size:1rem}
+.pm-dim.ai-filled{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
+.pm-dim.ai-filled label::after{content:' 🤖';font-size:.7rem}
+.pm-capture{text-align:center;padding:2rem}
+.pm-capture-btn{background:var(--gold);color:#0a0a0a;border:none;padding:20px 40px;border-radius:16px;font-size:1.2rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:10px}
+.pm-gps{font-size:.72rem;color:var(--text-muted);padding:8px 12px;text-align:center;font-family:'Space Grotesk',sans-serif}
+.pm-gps .coord{color:var(--gold)}
+.pm-ai-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(201,168,76,.05);border-radius:8px;margin:8px 12px;font-size:.82rem;color:var(--text-muted)}
+.pm-ai-bar .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+input[type=file]{display:none}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pm-wrap" id="pmWrap">
+
+  <!-- Phase 1: Capture photo -->
+  <div id="capturePhase">
+    <div class="pm-capture">
+      <p style="color:var(--text-muted);margin-bottom:1rem;font-size:.9rem">{% trans "Uslikajte otvor (prozor, vrata) s mobilnog telefona" %}</p>
+      <button class="pm-capture-btn" onclick="document.getElementById('photoInput').click()">
+        📸 {% trans "Uslikaj otvor" %}
+      </button>
+      <input type="file" id="photoInput" accept="image/*" capture="environment">
+    </div>
+    <div class="pm-gps" id="gpsInfo">📍 {% trans "Dohvaćam lokaciju..." %}</div>
+  </div>
+
+  <!-- Phase 2: Draw on photo -->
+  <div id="drawPhase" style="display:none">
+    <canvas id="canvas" class="pm-canvas"></canvas>
+
+    <div class="pm-tools">
+      <button class="pm-btn active" id="toolLine" onclick="setTool('line')">📏 {% trans "Linija" %}</button>
+      <button class="pm-btn" id="toolRect" onclick="setTool('rect')">⬜ {% trans "Pravokutnik" %}</button>
+      <button class="pm-btn danger" onclick="undoLast()">↩ {% trans "Poništi" %}</button>
+      <button class="pm-btn danger" onclick="clearAll()">🗑 {% trans "Očisti" %}</button>
+      <button class="pm-btn primary" onclick="requestAI()">🤖 {% trans "AI mjere" %}</button>
+    </div>
+
+    <div class="pm-status" id="drawStatus">{% trans "Povucite liniju od ruba do ruba otvora" %}</div>
+
+    <!-- AI progress -->
+    <div class="pm-ai-bar" id="aiBar" style="display:none">
+      <div class="spinner"></div>
+      <span id="aiStatus">{% trans "AI analizira fotografiju..." %}</span>
+    </div>
+
+    <!-- Drawn measurements list -->
+    <div class="pm-measures" id="measureList"></div>
+
+    <!-- Final dimensions -->
+    <div class="pm-dims">
+      <div class="pm-dim" id="dimW">
+        <label>{% trans "Širina" %} (mm)</label>
+        <input type="number" id="widthInput" placeholder="—" name="width_mm">
+      </div>
+      <div class="pm-dim" id="dimH">
+        <label>{% trans "Visina" %} (mm)</label>
+        <input type="number" id="heightInput" placeholder="—" name="height_mm">
+      </div>
+      <div class="pm-dim">
+        <label>{% trans "Dubina zida" %} (mm)</label>
+        <input type="number" id="depthInput" placeholder="—" name="depth_mm">
+      </div>
+      <div class="pm-dim">
+        <label>{% trans "Pozicija" %}</label>
+        <input type="text" id="posInput" placeholder="npr. Kuhinja L" name="location_note" style="font-size:1rem">
+      </div>
+    </div>
+
+    <div class="pm-gps" id="gpsDisplay"></div>
+
+    <div style="padding:12px;display:flex;gap:8px;justify-content:center">
+      <button class="pm-btn primary" onclick="saveMeasurement()" style="padding:14px 28px;font-size:1rem">
+        ✅ {% trans "Spremi mjerenje" %}
+      </button>
+      <button class="pm-btn" onclick="resetCapture()">📸 {% trans "Nova slika" %}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var canvas, ctx, img;
+var tool = 'line';
+var drawing = false;
+var startX, startY;
+var annotations = []; // [{type, x1, y1, x2, y2, label, color, px_length}]
+var COLORS = ['#ef4444','#3b82f6','#22c55e','#f59e0b','#8b5cf6','#ec4899'];
+var colorIdx = 0;
+var imgW, imgH, scale;
+var gpsLat = null, gpsLng = null, gpsAcc = null;
+
+// GPS
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    gpsLat = pos.coords.latitude;
+    gpsLng = pos.coords.longitude;
+    gpsAcc = pos.coords.accuracy;
+    document.getElementById('gpsInfo').innerHTML =
+      '📍 <span class="coord">' + gpsLat.toFixed(6) + ', ' + gpsLng.toFixed(6) + '</span> (±' + Math.round(gpsAcc) + 'm)';
+    document.getElementById('gpsDisplay').innerHTML = document.getElementById('gpsInfo').innerHTML;
+  }, function() {
+    document.getElementById('gpsInfo').textContent = '📍 GPS nedostupan';
+  }, {enableHighAccuracy: true, timeout: 10000});
+}
+
+// Photo capture
+document.getElementById('photoInput').addEventListener('change', function() {
+  if (!this.files[0]) return;
+  img = new Image();
+  img.onload = function() {
+    initCanvas();
+    document.getElementById('capturePhase').style.display = 'none';
+    document.getElementById('drawPhase').style.display = 'block';
+  };
+  img.src = URL.createObjectURL(this.files[0]);
+});
+
+function initCanvas() {
+  canvas = document.getElementById('canvas');
+  ctx = canvas.getContext('2d');
+  var wrap = document.getElementById('pmWrap');
+  var maxW = wrap.clientWidth;
+  scale = maxW / img.naturalWidth;
+  canvas.width = maxW;
+  canvas.height = img.naturalHeight * scale;
+  imgW = canvas.width;
+  imgH = canvas.height;
+  redraw();
+
+  // Touch/mouse events
+  canvas.addEventListener('mousedown', onStart);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onEnd);
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); onStart(tEvent(e)); }, {passive:false});
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); onMove(tEvent(e)); }, {passive:false});
+  canvas.addEventListener('touchend', function(e) { e.preventDefault(); onEnd(tEvent(e)); }, {passive:false});
+}
+
+function tEvent(e) {
+  var r = canvas.getBoundingClientRect();
+  var t = e.changedTouches[0];
+  return {offsetX: t.clientX - r.left, offsetY: t.clientY - r.top};
+}
+
+function setTool(t) {
+  tool = t;
+  document.getElementById('toolLine').classList.toggle('active', t==='line');
+  document.getElementById('toolRect').classList.toggle('active', t==='rect');
+}
+
+function onStart(e) {
+  drawing = true;
+  startX = e.offsetX;
+  startY = e.offsetY;
+}
+
+function onMove(e) {
+  if (!drawing) return;
+  redraw();
+  ctx.strokeStyle = COLORS[colorIdx % COLORS.length];
+  ctx.lineWidth = 3;
+  ctx.setLineDash([6,4]);
+  if (tool === 'line') {
+    ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
+    // Show px length live
+    var px = Math.sqrt(Math.pow(e.offsetX-startX,2) + Math.pow(e.offsetY-startY,2));
+    ctx.setLineDash([]);
+    ctx.fillStyle = COLORS[colorIdx % COLORS.length];
+    ctx.font = '14px Space Grotesk, sans-serif';
+    ctx.fillText(Math.round(px) + 'px', (startX+e.offsetX)/2, (startY+e.offsetY)/2 - 8);
+  } else {
+    var w = e.offsetX - startX, h = e.offsetY - startY;
+    ctx.strokeRect(startX, startY, w, h);
+  }
+  ctx.setLineDash([]);
+}
+
+function onEnd(e) {
+  if (!drawing) return;
+  drawing = false;
+  var color = COLORS[colorIdx % COLORS.length];
+  colorIdx++;
+
+  if (tool === 'line') {
+    var px = Math.sqrt(Math.pow(e.offsetX-startX,2) + Math.pow(e.offsetY-startY,2));
+    if (px < 10) return; // too short
+    annotations.push({
+      type: 'line', x1: startX, y1: startY, x2: e.offsetX, y2: e.offsetY,
+      color: color, px_length: Math.round(px), label: ''
+    });
+  } else {
+    var w = Math.abs(e.offsetX - startX), h = Math.abs(e.offsetY - startY);
+    if (w < 10 || h < 10) return;
+    annotations.push({
+      type: 'rect', x1: Math.min(startX,e.offsetX), y1: Math.min(startY,e.offsetY),
+      x2: Math.max(startX,e.offsetX), y2: Math.max(startY,e.offsetY),
+      color: color, px_length: Math.round(w) + '×' + Math.round(h), label: ''
+    });
+  }
+
+  redraw();
+  updateMeasureList();
+
+  // Prompt for mm value
+  var last = annotations[annotations.length-1];
+  var mm = prompt('Koliko mm? (px=' + last.px_length + ')', '');
+  if (mm) {
+    last.label = mm + 'mm';
+    // Auto-fill width/height
+    if (annotations.length === 1) document.getElementById('widthInput').value = mm;
+    else if (annotations.length === 2) document.getElementById('heightInput').value = mm;
+    redraw();
+    updateMeasureList();
+  }
+}
+
+function redraw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  annotations.forEach(function(a) {
+    ctx.strokeStyle = a.color;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([]);
+
+    if (a.type === 'line') {
+      ctx.beginPath(); ctx.moveTo(a.x1, a.y1); ctx.lineTo(a.x2, a.y2); ctx.stroke();
+      // End markers
+      drawMarker(a.x1, a.y1, a.color);
+      drawMarker(a.x2, a.y2, a.color);
+    } else {
+      ctx.strokeRect(a.x1, a.y1, a.x2-a.x1, a.y2-a.y1);
+    }
+
+    // Label
+    if (a.label) {
+      var lx = (a.x1+a.x2)/2, ly = (a.y1+a.y2)/2 - 10;
+      ctx.fillStyle = 'rgba(0,0,0,.7)';
+      ctx.font = 'bold 16px Space Grotesk, sans-serif';
+      var tw = ctx.measureText(a.label).width;
+      ctx.fillRect(lx - tw/2 - 6, ly - 14, tw + 12, 22);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(a.label, lx - tw/2, ly);
+    }
+  });
+}
+
+function drawMarker(x, y, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2); ctx.fill();
+}
+
+function updateMeasureList() {
+  var html = '';
+  annotations.forEach(function(a, i) {
+    html += '<div class="pm-line">' +
+      '<span class="color-dot" style="background:'+a.color+'"></span>' +
+      '<span class="label">'+(a.label || a.type+' '+(i+1))+'</span>' +
+      '<span class="length">'+a.px_length+(a.label?'':'px')+'</span>' +
+      '<button class="delete" onclick="deleteAnnotation('+i+')">✕</button>' +
+      '</div>';
+  });
+  document.getElementById('measureList').innerHTML = html;
+}
+
+function deleteAnnotation(i) {
+  annotations.splice(i, 1);
+  redraw();
+  updateMeasureList();
+}
+
+function undoLast() {
+  annotations.pop();
+  redraw();
+  updateMeasureList();
+}
+
+function clearAll() {
+  annotations = [];
+  colorIdx = 0;
+  redraw();
+  updateMeasureList();
+}
+
+// AI Vision — send photo for dimension extraction
+function requestAI() {
+  document.getElementById('aiBar').style.display = 'flex';
+  document.getElementById('aiStatus').textContent = '{% trans "AI analizira fotografiju..." %}';
+
+  // Get base64 of original photo
+  var tempCanvas = document.createElement('canvas');
+  tempCanvas.width = img.naturalWidth;
+  tempCanvas.height = img.naturalHeight;
+  var tCtx = tempCanvas.getContext('2d');
+  tCtx.drawImage(img, 0, 0);
+  var b64 = tempCanvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+  // Send to backend
+  var fd = new FormData();
+  fd.append('image_b64', b64);
+  var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+  if (csrf) fd.append('csrfmiddlewaretoken', csrf[1]);
+
+  fetch('{% url "stolarija:ai_measure" %}', {method:'POST', body:fd})
+  .then(function(r){return r.json()})
+  .then(function(d) {
+    document.getElementById('aiBar').style.display = 'none';
+    if (d.width_mm) {
+      document.getElementById('widthInput').value = d.width_mm;
+      document.getElementById('dimW').classList.add('ai-filled');
+    }
+    if (d.height_mm) {
+      document.getElementById('heightInput').value = d.height_mm;
+      document.getElementById('dimH').classList.add('ai-filled');
+    }
+    if (d.depth_mm) {
+      document.getElementById('depthInput').value = d.depth_mm;
+    }
+    document.getElementById('drawStatus').textContent =
+      '🤖 AI: ' + (d.width_mm||'?') + ' × ' + (d.height_mm||'?') + ' mm (pouzdanost: ' + Math.round((d.confidence||0)*100) + '%)';
+  })
+  .catch(function(e) {
+    document.getElementById('aiBar').style.display = 'none';
+    document.getElementById('drawStatus').textContent = '❌ AI greška: ' + e.message;
+  });
+}
+
+function saveMeasurement() {
+  var fd = new FormData();
+  fd.append('width_mm', document.getElementById('widthInput').value || 0);
+  fd.append('height_mm', document.getElementById('heightInput').value || 0);
+  fd.append('depth_mm', document.getElementById('depthInput').value || 0);
+  fd.append('location_note', document.getElementById('posInput').value || '');
+  fd.append('annotations', JSON.stringify(annotations));
+  fd.append('measurement_source', annotations.length > 0 ? 'photo_draw' : 'manual');
+  if (gpsLat) { fd.append('lat', gpsLat); fd.append('lng', gpsLng); fd.append('gps_acc', gpsAcc); }
+
+  // Annotated image as blob
+  canvas.toBlob(function(blob) {
+    fd.append('photo_annotated', blob, 'annotated.jpg');
+    // Original photo
+    var photoFile = document.getElementById('photoInput').files[0];
+    if (photoFile) fd.append('photo_before', photoFile);
+
+    var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+    if (csrf) fd.append('csrfmiddlewaretoken', csrf[1]);
+
+    fetch('{% url "stolarija:save_photo_measure" session_id=session.pk %}', {method:'POST', body:fd})
+    .then(function(r){return r.json()})
+    .then(function(d) {
+      if (d.ok) {
+        if (typeof fenixToast !== 'undefined') fenixToast('Mjerenje spremljeno!','success');
+        resetCapture();
+        // Refresh measure list
+        if (d.redirect) window.location.href = d.redirect;
+      } else {
+        alert(d.error || 'Greška');
+      }
+    });
+  }, 'image/jpeg', 0.85);
+}
+
+function resetCapture() {
+  annotations = [];
+  colorIdx = 0;
+  document.getElementById('photoInput').value = '';
+  document.getElementById('widthInput').value = '';
+  document.getElementById('heightInput').value = '';
+  document.getElementById('depthInput').value = '';
+  document.getElementById('posInput').value = '';
+  document.getElementById('measureList').innerHTML = '';
+  document.getElementById('dimW').classList.remove('ai-filled');
+  document.getElementById('dimH').classList.remove('ai-filled');
+  document.getElementById('capturePhase').style.display = 'block';
+  document.getElementById('drawPhase').style.display = 'none';
+}
+</script>
+{% endblock %}

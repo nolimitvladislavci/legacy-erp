@@ -60,6 +60,9 @@ class MeasurementSession(models.Model):
     notes = models.TextField(blank=True)
     latitude = models.FloatField(null=True, blank=True, verbose_name="GPS lat")
     longitude = models.FloatField(null=True, blank=True, verbose_name="GPS lng")
+    gps_accuracy = models.FloatField(null=True, blank=True, verbose_name="GPS točnost (m)")
+    gps_altitude = models.FloatField(null=True, blank=True, verbose_name="GPS nadmorska visina (m)")
+    gps_captured_at = models.DateTimeField(null=True, blank=True, verbose_name="GPS vrijeme snimanja")
 
     class Meta:
         ordering = ["-created_at"]
@@ -204,6 +207,35 @@ class Measurement(models.Model):
 
     photo_before = models.ImageField(
         upload_to="stolarija/photos/%Y/%m/", null=True, blank=True, verbose_name="Foto prije"
+    )
+    photo_annotated = models.ImageField(
+        upload_to="stolarija/annotated/%Y/%m/",
+        null=True,
+        blank=True,
+        verbose_name="Foto s mjerama",
+    )
+    photo_annotations = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="Anotacije na fotografiji",
+        help_text='[{"type":"line","x1":10,"y1":20,"x2":300,"y2":20,"label":"1200mm","color":"#ff0000"}]',
+    )
+    ai_dimensions = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="AI očitane dimenzije",
+        help_text='{"width_mm":1200,"height_mm":1400,"confidence":0.92,"source":"anthropic_vision"}',
+    )
+    ai_confidence = models.FloatField(
+        default=0,
+        verbose_name="AI pouzdanost (0-1)",
+    )
+    measurement_source = models.CharField(
+        max_length=20,
+        default="manual",
+        blank=True,
+        verbose_name="Izvor mjerenja",
+        help_text="manual / photo_draw / ai_vision / voice",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -494,6 +526,35 @@ class InstallationOrder(models.Model):
     notes_before = models.TextField(blank=True, verbose_name="Napomene prije ugradnje")
     notes_after = models.TextField(blank=True, verbose_name="Napomene nakon ugradnje")
     photo_before = models.ImageField(upload_to="stolarija/install/before/%Y/%m/", null=True, blank=True)
+    photo_annotated = models.ImageField(
+        upload_to="stolarija/annotated/%Y/%m/",
+        null=True,
+        blank=True,
+        verbose_name="Foto s mjerama",
+    )
+    photo_annotations = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="Anotacije na fotografiji",
+        help_text='[{"type":"line","x1":10,"y1":20,"x2":300,"y2":20,"label":"1200mm","color":"#ff0000"}]',
+    )
+    ai_dimensions = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="AI očitane dimenzije",
+        help_text='{"width_mm":1200,"height_mm":1400,"confidence":0.92,"source":"anthropic_vision"}',
+    )
+    ai_confidence = models.FloatField(
+        default=0,
+        verbose_name="AI pouzdanost (0-1)",
+    )
+    measurement_source = models.CharField(
+        max_length=20,
+        default="manual",
+        blank=True,
+        verbose_name="Izvor mjerenja",
+        help_text="manual / photo_draw / ai_vision / voice",
+    )
     photo_after = models.ImageField(upload_to="stolarija/install/after/%Y/%m/", null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

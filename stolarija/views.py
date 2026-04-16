@@ -1437,3 +1437,145 @@ def ai_simulate_inbound(request):
         request, f"Simulirana poruka procesirana. Sentiment: {msg.ai_sentiment}, Status: {msg.get_status_display()}"
     )
     return redirect("stolarija:ai_message_detail", msg_id=msg.pk)
+
+
+# ════════════════════════════════════════════════════════════════
+# PHOTO MEASURE — Mobile foto mjerenje + AI Vision
+# ════════════════════════════════════════════════════════════════
+
+
+@login_required
+def photo_measure(request, session_id):
+    """Photo measurement UI — Canvas crtanje po slici."""
+    company = _company(request)
+    session = get_object_or_404(MeasurementSession, pk=session_id, company=company)
+    return render(request, "stolarija/photo_measure.html", {"session": session})
+
+
+@login_required
+@require_POST
+def save_photo_measure(request, session_id):
+    """Save measurement from photo annotation."""
+    import json
+
+    company = _company(request)
+    session = get_object_or_404(MeasurementSession, pk=session_id, company=company)
+
+    width = int(request.POST.get("width_mm") or 0)
+    height = int(request.POST.get("height_mm") or 0)
+    depth = int(request.POST.get("depth_mm") or 0)
+    location = request.POST.get("location_note", "")
+    source = request.POST.get("measurement_source", "photo_draw")
+    annotations = request.POST.get("annotations", "[]")
+
+    try:
+        annotations_data = json.loads(annotations)
+    except (json.JSONDecodeError, TypeError):
+        annotations_data = []
+
+    # GPS
+    lat = request.POST.get("lat")
+    lng = request.POST.get("lng")
+    acc = request.POST.get("gps_acc")
+    if lat and not session.latitude:
+        from django.utils import timezone
+
+        session.latitude = float(lat)
+        session.longitude = float(lng)
+        session.gps_accuracy = float(acc) if acc else None
+        session.gps_captured_at = timezone.now()
+        session.save(update_fields=["latitude", "longitude", "gps_accuracy", "gps_captured_at"])
+
+    # Auto position number
+    pos = session.measurements.count() + 1
+
+    m = Measurement(
+        session=session,
+        position_number=pos,
+        width_mm=width or 1,  # min 1 to pass validation
+        height_mm=height or 1,
+        depth_mm=depth,
+        location_note=location,
+        photo_annotations=annotations_data,
+        measurement_source=source,
+    )
+
+    if request.FILES.get("photo_before"):
+        m.photo_before = request.FILES["photo_before"]
+    if request.FILES.get("photo_annotated"):
+        m.photo_annotated = request.FILES["photo_annotated"]
+
+    m.save()
+
+    from django.urls import reverse
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "measurement_id": m.pk,
+            "position": pos,
+            "redirect": reverse("stolarija:measure", args=[session_id]),
+        }
+    )
+
+
+@login_required
+@require_POST
+def ai_measure(request):
+    """AI Vision — extract dimensions from photo using Anthropic."""
+    import json
+    import logging
+
+    logger = logging.getLogger(__name__)
+    image_b64 = request.POST.get("image_b64", "")
+
+    if not image_b64:
+        return JsonResponse({"error": "Nema slike"}, status=400)
+
+    # Truncate if too large (max ~4MB base64)
+    if len(image_b64) > 5_000_000:
+        return JsonResponse({"error": "Slika prevelika (max 4MB)"}, status=400)
+
+    try:
+        from core.views_scan import _call_anthropic
+
+        prompt_text = (
+            "You are measuring a window or door opening in this photo. "
+            "Extract the approximate dimensions in millimeters. "
+            "Look for: width (horizontal), height (vertical), and depth (wall thickness) if visible. "
+            "If there's a measuring tape, ruler, or reference object, use it for scale. "
+            "If no reference, estimate based on standard construction elements. "
+            "Respond ONLY with JSON: "
+            '{"width_mm": NUMBER, "height_mm": NUMBER, "depth_mm": NUMBER_OR_NULL, '
+            '"confidence": 0.0_TO_1.0, "notes": "brief description"}'
+        )
+
+        content = [
+            {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": image_b64}},
+            {"type": "text", "text": prompt_text},
+        ]
+
+        raw = _call_anthropic(content, max_tokens=200)
+
+        # Parse JSON from response
+        import re
+
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if match:
+            data = json.loads(match.group())
+            return JsonResponse(
+                {
+                    "width_mm": data.get("width_mm"),
+                    "height_mm": data.get("height_mm"),
+                    "depth_mm": data.get("depth_mm"),
+                    "confidence": data.get("confidence", 0),
+                    "notes": data.get("notes", ""),
+                    "source": "anthropic_vision",
+                }
+            )
+        else:
+            return JsonResponse({"error": "AI nije mogao parsirati dimenzije", "raw": raw[:200]})
+
+    except Exception as e:
+        logger.warning("ai_measure failed: %s", e)
+        return JsonResponse({"error": str(e)}, status=500)
