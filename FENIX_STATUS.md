@@ -521,3 +521,12 @@ CP3 (02.05): 99 slika + HR audio, reader kompletiran
 CP4 (05.05): 3 jezika, fullscreen, mobile
 CP5 (07.05): Creative Europe demo spreman
 ```
+
+---
+
+## POSLOVNI LEADOVI — evalidator.eu API partneri
+
+| Datum | Firma | Zemlja | Kontakt | Tip | Status | Napomena |
+|-------|-------|--------|---------|-----|--------|---------|
+| 2026-04-16 | JUPUS GmbH | DE (Köln) | hello@jupus.de | API korisnik | 📋 Na čekanju — pismo namjere kad batch API bude gotov | AI LegalTech platforma za odvjetnike u DE. Trebaju validaciju OIB/IBAN za HR klijente. HTGF-financirani, 15 zaposlenih, 200+ upita/dan. Kontakt inicirati Q3 2026 kad evalidator.eu ima batch API. |
+
