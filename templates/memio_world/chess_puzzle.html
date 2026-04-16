@@ -1,0 +1,176 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}♟ {% trans "Šah-mat u 1 potezu" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.puzzle-page{max-width:700px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.puzzle-page h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;margin-bottom:.3rem}
+.puzzle-page .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+.board{display:grid;grid-template-columns:repeat(8,1fr);width:min(420px,92vw);aspect-ratio:1;
+  margin:0 auto;border:3px solid #2c1810;border-radius:4px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.cell{display:flex;align-items:center;justify-content:center;font-size:min(5vw,2.8rem);
+  cursor:pointer;position:relative;transition:.15s;user-select:none}
+.cell.light{background:#f0d9b5}.cell.dark{background:#b58863}
+.cell.selected{box-shadow:inset 0 0 0 3px #c9a84c}
+.cell.target{background:rgba(76,175,80,.4)!important}
+.cell.wrong{animation:shake .4s}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.msg{font-family:'MedievalSharp',serif;font-size:1.2rem;margin-top:1rem;min-height:2rem;transition:.3s}
+.msg.success{color:#2e7d32}.msg.hint{color:#c9a84c}
+.puzzle-nav{display:flex;gap:10px;justify-content:center;margin-top:1rem}
+.pbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;padding:10px 20px;
+  border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;cursor:pointer;transition:.2s}
+.pbtn:hover{transform:translateY(-2px)}.pbtn:disabled{opacity:.4}
+.score{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#6b5a4e;margin-top:.5rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="puzzle-page">
+  <h1>♟ {% trans "Šah-mat u 1 potezu" %}</h1>
+  <p class="sub">{% trans "Pronađi potez koji daje mat. Bijeli igra." %}</p>
+
+  <div class="board" id="board"></div>
+  <div class="msg" id="msg"></div>
+  <div class="score" id="score">{% trans "Puzzle" %} <span id="pNum">1</span>/5 · {% trans "Riješeno" %}: <span id="solved">0</span></div>
+
+  <div class="puzzle-nav">
+    <button class="pbtn" onclick="showHint()">💡 {% trans "Pomoć" %}</button>
+    <button class="pbtn" onclick="nextPuzzle()">{% trans "Sljedeći" %} →</button>
+  </div>
+</div>
+
+<script>
+// Simple mate-in-1 puzzles for children
+// Format: {board: 64-char string, from: [r,c], to: [r,c], hint: "text"}
+// Board: uppercase=white, lowercase=black, .=empty
+// Standard: K=king, Q=queen, R=rook, B=bishop, N=knight, P=pawn
+var PUZZLES = [
+  {
+    // White Rook delivers mate on back rank
+    board: '....k..............................R..........................K.......',
+    from_sq: [3,4], to_sq: [0,4],
+    hint: '{% trans "Top može ići ravno do kraja!" %}'
+  },
+  {
+    // White Queen delivers mate
+    board: '.....k.......................Q....................................K..',
+    from_sq: [2,5], to_sq: [0,5],
+    hint: '{% trans "Kraljica može ići ravno gore!" %}'
+  },
+  {
+    // Back rank mate with Rook
+    board: '...k..............................................R.............K....',
+    from_sq: [5,6], to_sq: [0,6],
+    hint: '{% trans "Top juri ravno gore!" %}'
+  },
+  {
+    // Queen + King mate
+    board: '........k.................Q...........................K.............',
+    from_sq: [2,2], to_sq: [1,1],
+    hint: '{% trans "Kraljica dijagonalno!" %}'
+  },
+  {
+    // Knight mate (hardest)
+    board: 'k..............N.....................................K..............',
+    from_sq: [1,3], to_sq: [0,2],
+    hint: '{% trans "Konj skače u obliku L!" %}'
+  }
+];
+
+var currentPuzzle = 0;
+var solvedCount = 0;
+var selected = null;
+
+var PIECE_SYMBOLS = {
+  'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+  'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
+};
+
+function renderBoard() {
+  var b = document.getElementById('board');
+  b.innerHTML = '';
+  var pz = PUZZLES[currentPuzzle];
+  for (var r = 0; r < 8; r++) {
+    for (var c = 0; c < 8; c++) {
+      var cell = document.createElement('div');
+      cell.className = 'cell ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
+      cell.dataset.r = r; cell.dataset.c = c;
+      var ch = pz.board[r * 8 + c];
+      if (ch !== '.') cell.textContent = PIECE_SYMBOLS[ch] || ch;
+      cell.onclick = handleClick;
+      b.appendChild(cell);
+    }
+  }
+  document.getElementById('msg').textContent = '';
+  document.getElementById('msg').className = 'msg';
+  document.getElementById('pNum').textContent = currentPuzzle + 1;
+}
+
+function handleClick() {
+  var r = +this.dataset.r, c = +this.dataset.c;
+  var pz = PUZZLES[currentPuzzle];
+  var ch = pz.board[r * 8 + c];
+
+  // If clicking on a white piece, select it
+  if (ch && ch === ch.toUpperCase() && ch !== '.') {
+    clearSelection();
+    this.classList.add('selected');
+    selected = [r, c];
+    // Show target square
+    var cells = document.querySelectorAll('.cell');
+    cells[pz.to_sq[0] * 8 + pz.to_sq[1]].classList.add('target');
+    return;
+  }
+
+  // If we have a selection and click on target
+  if (selected) {
+    if (r === pz.to_sq[0] && c === pz.to_sq[1] &&
+        selected[0] === pz.from_sq[0] && selected[1] === pz.from_sq[1]) {
+      // CORRECT!
+      solvedCount++;
+      document.getElementById('solved').textContent = solvedCount;
+      document.getElementById('msg').textContent = '🎉 {% trans "Šah-mat! Bravo!" %}';
+      document.getElementById('msg').className = 'msg success';
+      // Move piece visually
+      var cells = document.querySelectorAll('.cell');
+      cells[selected[0] * 8 + selected[1]].textContent = '';
+      this.textContent = PIECE_SYMBOLS[pz.board[selected[0] * 8 + selected[1]]];
+      selected = null;
+    } else {
+      // Wrong move
+      this.classList.add('wrong');
+      document.getElementById('msg').textContent = '{% trans "Pokušaj ponovno!" %}';
+      document.getElementById('msg').className = 'msg hint';
+      setTimeout(function() { document.querySelectorAll('.wrong').forEach(function(c){c.classList.remove('wrong')}); }, 400);
+    }
+  }
+}
+
+function clearSelection() {
+  document.querySelectorAll('.cell').forEach(function(c) {
+    c.classList.remove('selected', 'target');
+  });
+  selected = null;
+}
+
+function showHint() {
+  var pz = PUZZLES[currentPuzzle];
+  document.getElementById('msg').textContent = '💡 ' + pz.hint;
+  document.getElementById('msg').className = 'msg hint';
+  // Highlight the piece to move
+  var cells = document.querySelectorAll('.cell');
+  cells[pz.from_sq[0] * 8 + pz.from_sq[1]].classList.add('selected');
+  cells[pz.to_sq[0] * 8 + pz.to_sq[1]].classList.add('target');
+}
+
+function nextPuzzle() {
+  currentPuzzle = (currentPuzzle + 1) % PUZZLES.length;
+  selected = null;
+  renderBoard();
+}
+
+renderBoard();
+</script>
+{% endblock %}

@@ -391,14 +391,49 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   recognition.onend = function() {
     voiceBtn.classList.remove('recording');
     voiceIcon.className = 'fas fa-microphone';
+    if (isListening) {
+      // auto-restart ako je continuous mode aktivan
+      setTimeout(() => { if (isListening) { try { recognition.start(); } catch(e){} } }, 300);
+    }
   };
 
-  voiceBtn.onclick = function() {
-    if (voiceBtn.classList.contains('recording')) {
-      recognition.stop();
+  recognition.onerror = function(e) {
+    voiceBtn.classList.remove('recording');
+    voiceIcon.className = 'fas fa-microphone';
+    isListening = false;
+    if (e.error === 'not-allowed' || e.error === 'permission-denied') {
+      voiceTranscript.textContent = '⛔ Mikrofon nije dopušten — dozvoli u pregledniku (🔒 ikona u URL baru)';
+    } else if (e.error === 'no-speech') {
+      voiceTranscript.textContent = '🔇 Nisam čuo ništa — pokušaj ponovo';
+    } else if (e.error === 'aborted') {
+      voiceTranscript.textContent = '— Snimanje prekinuto';
     } else {
+      voiceTranscript.textContent = '❌ Greška mikrofona: ' + e.error;
+    }
+    console.warn('SpeechRecognition error:', e.error);
+  };
+
+  recognition.onnomatch = function() {
+    voiceTranscript.textContent = '🤔 Nisam razumio — ponovi mjeru';
+  };
+
+  let isListening = false;
+  recognition.continuous = false; // single-shot, auto-restart u onend
+
+  voiceBtn.onclick = function() {
+    if (isListening) {
+      isListening = false;
+      recognition.stop();
+      voiceTranscript.textContent = '— Zaustavljeno';
+    } else {
+      isListening = true;
       resetVoice();
-      recognition.start();
+      try {
+        recognition.start();
+      } catch(e) {
+        // already started — ignore
+        console.warn('recognition.start():', e.message);
+      }
     }
   };
 } else {

@@ -1,0 +1,159 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🗺️ {% trans "Karta priča" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.smap{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.smap h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.smap .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.map-container{position:relative;width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#bbdefb,#90caf9);
+  border-radius:16px;border:3px solid #2c1810;overflow:hidden;margin-bottom:1.5rem}
+
+/* Simplified Europe map using positioned divs */
+.country{position:absolute;cursor:pointer;transition:.2s;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;border-radius:8px;padding:4px;z-index:2}
+.country:hover{transform:scale(1.15);z-index:10}
+.country .flag{font-size:1.8rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.country .label{font-family:'Space Grotesk',sans-serif;font-size:.6rem;color:#fff;
+  background:rgba(0,0,0,.5);padding:1px 6px;border-radius:4px;margin-top:2px;white-space:nowrap}
+.country .count{font-family:'Space Grotesk',sans-serif;font-size:.65rem;color:#c9a84c;
+  background:rgba(44,24,16,.8);padding:1px 6px;border-radius:4px;margin-top:1px}
+
+/* Land mass (simplified) */
+.land{position:absolute;background:rgba(139,105,20,.15);border-radius:40%;pointer-events:none}
+
+.story-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.story-item{background:#fff;border-radius:12px;padding:.8rem;border:2px solid rgba(201,168,76,.2);
+  text-decoration:none;color:#2c1810;transition:.2s;display:flex;align-items:center;gap:.8rem}
+.story-item:hover{border-color:#c9a84c;transform:translateY(-2px)}
+.story-flag{font-size:1.5rem;flex-shrink:0}
+.story-info .si-title{font-family:'MedievalSharp',serif;font-size:.95rem;font-weight:bold}
+.story-info .si-meta{font-size:.75rem;color:#6b5a4e;font-family:'Space Grotesk',sans-serif}
+
+.filter-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.filter-btn{padding:6px 14px;border-radius:8px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-size:.85rem;cursor:pointer;transition:.2s;font-family:'MedievalSharp',serif;color:#2c1810}
+.filter-btn:hover{border-color:#c9a84c}.filter-btn.active{background:#c9a84c;color:#fff}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="smap">
+  <h1>🗺️ {% trans "Karta priča" %}</h1>
+  <p class="sub">{% trans "Svaka bajka dolazi iz neke zemlje. Klikni na zastavu i otkrij priče!" %}</p>
+
+  <!-- Visual map -->
+  <div class="map-container">
+    <!-- Simplified land masses -->
+    <div class="land" style="left:15%;top:10%;width:70%;height:75%;background:rgba(139,105,20,.08);border-radius:30%"></div>
+
+    <!-- Countries with stories -->
+    <div class="country" style="left:38%;top:25%" onclick="filterCountry('Germany')" title="Njemačka">
+      <div class="flag">🇩🇪</div>
+      <div class="label">Deutschland</div>
+      <div class="count" id="count-Germany"></div>
+    </div>
+    <div class="country" style="left:40%;top:42%" onclick="filterCountry('Hrvatska')" title="Hrvatska">
+      <div class="flag">🇭🇷</div>
+      <div class="label">Hrvatska</div>
+      <div class="count" id="count-Hrvatska"></div>
+    </div>
+    <div class="country" style="left:44%;top:38%" onclick="filterCountry('Srbija')" title="Srbija">
+      <div class="flag">🇷🇸</div>
+      <div class="label">Srbija</div>
+      <div class="count" id="count-Srbija"></div>
+    </div>
+    <div class="country" style="left:37%;top:39%" onclick="filterCountry('Bosna')" title="Bosna">
+      <div class="flag">🇧🇦</div>
+      <div class="label">Bosna</div>
+      <div class="count" id="count-Bosna"></div>
+    </div>
+    <div class="country" style="left:30%;top:15%" onclick="filterCountry('Danska')" title="Danska">
+      <div class="flag">🇩🇰</div>
+      <div class="label">Danmark</div>
+      <div class="count" id="count-Danska"></div>
+    </div>
+    <div class="country" style="left:55%;top:45%" onclick="filterCountry('Turska')" title="Turska">
+      <div class="flag">🇹🇷</div>
+      <div class="label">Türkiye</div>
+      <div class="count" id="count-Turska"></div>
+    </div>
+    <div class="country" style="left:22%;top:30%" onclick="filterCountry('Francuska')" title="Francuska">
+      <div class="flag">🇫🇷</div>
+      <div class="label">France</div>
+      <div class="count" id="count-Francuska"></div>
+    </div>
+  </div>
+
+  <!-- Filter buttons -->
+  <div class="filter-btns">
+    <button class="filter-btn active" onclick="filterCountry('all',this)">🌍 {% trans "Sve" %}</button>
+    <button class="filter-btn" onclick="filterCountry('Hrvatska',this)">🇭🇷</button>
+    <button class="filter-btn" onclick="filterCountry('Srbija',this)">🇷🇸</button>
+    <button class="filter-btn" onclick="filterCountry('Bosna',this)">🇧🇦</button>
+    <button class="filter-btn" onclick="filterCountry('Germany',this)">🇩🇪</button>
+    <button class="filter-btn" onclick="filterCountry('Danska',this)">🇩🇰</button>
+    <button class="filter-btn" onclick="filterCountry('Turska',this)">🇹🇷</button>
+    <button class="filter-btn" onclick="filterCountry('Francuska',this)">🇫🇷</button>
+  </div>
+
+  <!-- Story list -->
+  <div class="story-list" id="storyList">
+    {% for story in stories %}
+    <a href="{% url 'memio_world:story_detail' story.slug %}" class="story-item"
+       data-country="{{ story.country_of_origin }}">
+      <div class="story-flag">
+        {% if "Hrvatska" in story.country_of_origin %}🇭🇷
+        {% elif "Srbija" in story.country_of_origin and "Bosna" in story.country_of_origin %}🇧🇦🇷🇸
+        {% elif "Srbija" in story.country_of_origin %}🇷🇸
+        {% elif "Bosna" in story.country_of_origin %}🇧🇦
+        {% elif "Germany" in story.country_of_origin %}🇩🇪
+        {% elif "Danska" in story.country_of_origin %}🇩🇰
+        {% elif "Turska" in story.country_of_origin %}🇹🇷
+        {% elif "Francuska" in story.country_of_origin %}🇫🇷
+        {% else %}🌍{% endif %}
+      </div>
+      <div class="story-info">
+        <div class="si-title">{{ story.title_hr }}</div>
+        <div class="si-meta">{{ story.country_of_origin }} · {{ story.reading_time_minutes }} min</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+// Count stories per country for map badges
+var counts = {};
+document.querySelectorAll('.story-item').forEach(function(el) {
+  var c = el.dataset.country || '';
+  counts[c] = (counts[c] || 0) + 1;
+});
+['Germany','Hrvatska','Srbija','Danska','Turska','Francuska'].forEach(function(c) {
+  var total = 0;
+  Object.keys(counts).forEach(function(k) { if (k.indexOf(c) >= 0 || (c === 'Bosna' && k.indexOf('Bosna') >= 0)) total += counts[k]; });
+  var el = document.getElementById('count-' + c);
+  if (el) el.textContent = total + ' {% trans "priča" %}';
+});
+// Bosna special
+var bosnaCount = 0;
+Object.keys(counts).forEach(function(k) { if (k.indexOf('Bosna') >= 0) bosnaCount += counts[k]; });
+var bEl = document.getElementById('count-Bosna');
+if (bEl) bEl.textContent = bosnaCount + ' {% trans "priča" %}';
+
+function filterCountry(country, btn) {
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+  if (btn) btn.classList.add('active');
+
+  document.querySelectorAll('.story-item').forEach(function(el) {
+    if (country === 'all' || el.dataset.country.indexOf(country) >= 0) {
+      el.style.display = 'flex';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+</script>
+{% endblock %}

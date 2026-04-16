@@ -1,0 +1,151 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}👨‍👩‍👧 {% trans "Za roditelje" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+.parent{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.parent h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;text-align:center;margin-bottom:.3rem}
+.parent .subtitle{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:2rem;font-size:1rem}
+
+.trust-banner{background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:16px;padding:1.5rem;
+  color:#f5e6c8;margin-bottom:2rem;border:2px solid #c9a84c}
+.trust-banner h2{font-family:'Uncial Antiqua',serif;color:#c9a84c;font-size:1.3rem;margin-bottom:.8rem}
+.trust-points{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.trust-point{display:flex;align-items:flex-start;gap:8px;font-family:'MedievalSharp',serif;font-size:.9rem;line-height:1.4}
+.trust-point .tp-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:2rem}
+.stat-card{background:#fff;border-radius:12px;padding:1rem;text-align:center;border:1px solid rgba(201,168,76,.2);
+  box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.stat-num{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:#c9a84c}
+.stat-label{font-family:'MedievalSharp',serif;font-size:.85rem;color:#6b5a4e;margin-top:.2rem}
+
+.region-section{margin-bottom:2rem}
+.region-section h3{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.8rem;
+  border-bottom:2px solid rgba(201,168,76,.2);padding-bottom:.3rem}
+.region-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.region-card{background:rgba(245,230,200,.3);border-radius:10px;padding:.8rem;
+  border:1px solid rgba(201,168,76,.15)}
+.region-flag{font-size:1.5rem;margin-bottom:.3rem}
+.region-name{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;font-weight:bold}
+.region-stories{font-size:.8rem;color:#6b5a4e;font-family:'Space Grotesk',sans-serif}
+
+.safety-section{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.5rem;
+  margin-bottom:2rem;border:2px solid #66bb6a}
+.safety-section h3{font-family:'Uncial Antiqua',serif;color:#1b5e20;font-size:1.1rem;margin-bottom:.5rem}
+.safety-list{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2e7d32;line-height:1.8}
+
+.pedagogy{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:2rem;
+  border:2px solid rgba(201,168,76,.2)}
+.pedagogy h3{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.8rem}
+.ped-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ped-item{display:flex;align-items:flex-start;gap:8px;font-family:'MedievalSharp',serif;font-size:.85rem;
+  color:#6b5a4e;line-height:1.4;padding:.5rem;background:rgba(245,230,200,.3);border-radius:8px}
+.ped-icon{font-size:1.2rem;flex-shrink:0}
+
+.cta{background:linear-gradient(135deg,#c9a84c,#8b6914);border-radius:16px;padding:2rem;
+  text-align:center;color:#fff;margin-top:2rem}
+.cta h3{font-family:'Uncial Antiqua',serif;font-size:1.5rem;margin-bottom:.5rem}
+.cta p{font-family:'MedievalSharp',serif;font-size:1rem;opacity:.9;margin-bottom:1rem}
+.cta .price{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700}
+.cta .price-sub{font-size:.9rem;opacity:.7}
+.cta-btn{background:#fff;color:#2c1810;border:none;padding:14px 36px;border-radius:12px;
+  font-family:'Uncial Antiqua',serif;font-size:1.1rem;cursor:pointer;margin-top:1rem;transition:.2s}
+.cta-btn:hover{transform:scale(1.05);box-shadow:0 4px 20px rgba(0,0,0,.2)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="parent">
+
+  <h1>👨‍👩‍👧 {% trans "Za roditelje" %}</h1>
+  <p class="subtitle">{% trans "Sve što trebate znati o platformi kojoj povjeravate svoju djecu." %}</p>
+
+  <!-- Trust Banner -->
+  <div class="trust-banner">
+    <h2>{% trans "Naša obećanja" %}</h2>
+    <div class="trust-points">
+      <div class="trust-point"><span class="tp-icon">🚫</span> {% trans "NEMA reklama. Nikad. Vaše dijete NIJE proizvod." %}</div>
+      <div class="trust-point"><span class="tp-icon">🔒</span> {% trans "NEMA praćenja. NEMA profiliranja. GDPR čl. 8." %}</div>
+      <div class="trust-point"><span class="tp-icon">⏰</span> {% trans "Etički algoritam — max 40 min/dan, poticaj na fizičku aktivnost." %}</div>
+      <div class="trust-point"><span class="tp-icon">🔕</span> {% trans "NEMA push notifikacija. Dijete dolazi kad želi." %}</div>
+      <div class="trust-point"><span class="tp-icon">👁️</span> {% trans "SVE je vidljivo roditeljima. Nema skrivenog sadržaja." %}</div>
+      <div class="trust-point"><span class="tp-icon">📜</span> {% trans "Sav sadržaj je public domain ili CC licenciran." %}</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-num">{{ story_count }}</div><div class="stat-label">{% trans "punih bajki" %}</div></div>
+    <div class="stat-card"><div class="stat-num">~{{ total_pages }}</div><div class="stat-label">{% trans "stranica" %}</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">{% trans "jezika" %} 🇭🇷🇩🇪🇬🇧</div></div>
+    <div class="stat-card"><div class="stat-num">{{ quiz_count }}</div><div class="stat-label">{% trans "kvizova" %}</div></div>
+    <div class="stat-card"><div class="stat-num">{{ calming_count }}</div><div class="stat-label">{% trans "vježbi smirivanja" %}</div></div>
+    <div class="stat-card"><div class="stat-num">{{ safety_count }}</div><div class="stat-label">{% trans "sigurnosnih tema" %}</div></div>
+  </div>
+
+  <!-- Stories by region -->
+  <div class="region-section">
+    <h3>📖 {% trans "Priče po regijama" %}</h3>
+    <div class="region-grid">
+      {% for region, stories in regions.items %}
+      <div class="region-card">
+        <div class="region-flag">
+          {% if "Hrvatska" in region %}🇭🇷{% elif "Srbija" in region and "Bosna" in region %}🇧🇦🇷🇸{% elif "Srbija" in region %}🇷🇸{% elif "Bosna" in region %}🇧🇦{% elif "Germany" in region %}🇩🇪{% elif "Danska" in region %}🇩🇰{% elif "Turska" in region %}🇹🇷{% elif "Francuska" in region %}🇫🇷{% else %}🌍{% endif %}
+        </div>
+        <div class="region-name">{{ region }}</div>
+        <div class="region-stories">
+          {% for s in stories %}{{ s.title_hr }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Safety promise -->
+  <div class="safety-section">
+    <h3>🛡️ {% trans "Sigurnost vašeg djeteta" %}</h3>
+    <div class="safety-list">
+      ✅ {% trans "Promet: bicikl, romobil, pješački prijelaz, znakovi" %}<br>
+      ✅ {% trans "Internet: nepoznati, lažni profili, privatnost" %}<br>
+      ✅ {% trans "Emocije: bijes, tuga, strah — prepoznaj, diši, razgovara" %}<br>
+      ✅ {% trans "Nepoznati: scenariji \"Što ako...\" s konkretnim akcijama" %}<br>
+      ✅ {% trans "Noćne more: DreamGuard — baka tješi, tehnika disanja" %}<br>
+      ✅ {% trans "Konflikt: 3 scenarija — svađa, gubitak igre, zadirkivanje" %}<br>
+    </div>
+  </div>
+
+  <!-- Pedagogy -->
+  <div class="pedagogy">
+    <h3>📚 {% trans "Pedagoški temelj" %}</h3>
+    <div class="ped-grid">
+      <div class="ped-item"><span class="ped-icon">🔄</span> {% trans "Spaced Repetition (Leitner) — 3× efikasniji od klasičnog ponavljanja" %}</div>
+      <div class="ped-item"><span class="ped-icon">🧠</span> {% trans "Active Recall — kvizovi nakon svake priče" %}</div>
+      <div class="ped-item"><span class="ped-icon">♟</span> {% trans "Šah — logičko razmišljanje od 5. godine" %}</div>
+      <div class="ped-item"><span class="ped-icon">🎲</span> {% trans "Društvene igre — strpljivost, fair play, pravila" %}</div>
+      <div class="ped-item"><span class="ped-icon">👵</span> {% trans "Baka/Djed perspektiva — generacijska mudrost" %}</div>
+      <div class="ped-item"><span class="ped-icon">🧘</span> {% trans "Rage Engine — upravljanje bijesom (Second Step + CASEL)" %}</div>
+      <div class="ped-item"><span class="ped-icon">🎤</span> {% trans "Mikrofon — dijete čita naglas i čuje sebe" %}</div>
+      <div class="ped-item"><span class="ped-icon">🌍</span> {% trans "Multikulturalnost — HR, DE, EN, RS, BA, TR, DK, FR" %}</div>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div style="background:rgba(255,243,224,.8);border-radius:12px;padding:1rem;margin-bottom:1.5rem;
+    border:1px solid #ffe0b2;font-family:'MedievalSharp',serif;font-size:.85rem;color:#5c3d1a">
+    ⚕️ {% trans "PLAY.EU je edukativna platforma i NE zamjenjuje stručnu pomoć. Za ponavljajuće emocionalne poteškoće razgovarajte s pedijatrom ili dječjim psihologom." %}
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h3>{% trans "Digitalni roditelj za vaše dijete" %}</h3>
+    <p>{% trans "Priče, igre, šah, sigurnost, emocije — sve na jednom mjestu. Bez reklama. Zauvijek." %}</p>
+    <div class="price">€4.99<span class="price-sub">/{% trans "mjesečno" %}</span></div>
+    <div style="font-size:.85rem;opacity:.8;margin-top:.3rem">{% trans "ili €39.99/godišnje (2 mjeseca besplatno)" %}</div>
+    <button class="cta-btn" onclick="alert('{% trans "Uskoro! Radimo na tome." %}')">{% trans "Započni besplatno" %} →</button>
+    <div style="font-size:.75rem;opacity:.6;margin-top:.8rem">{% trans "Cijena jednog cappuccina. Za digitalnog roditelja koji nikad ne gubi strpljenje." %}</div>
+  </div>
+
+</div>
+{% endblock %}

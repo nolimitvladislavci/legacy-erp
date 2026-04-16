@@ -1,0 +1,183 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🕐 {% trans "Nauči sat" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.clock-page{max-width:600px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.clock-page h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;margin-bottom:.2rem}
+.clock-page .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+.clock-canvas{margin:0 auto;display:block}
+.clock-question{font-family:'MedievalSharp',serif;font-size:1.3rem;color:#2c1810;margin:1rem 0}
+.clock-answers{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.clock-ans{padding:12px 24px;border-radius:12px;background:#fff;border:2px solid rgba(201,168,76,.3);
+  font-family:'MedievalSharp',serif;font-size:1.1rem;cursor:pointer;transition:.2s;color:#2c1810}
+.clock-ans:hover{border-color:#c9a84c;transform:scale(1.05)}
+.clock-ans.correct{background:#c8e6c9;border-color:#66bb6a}
+.clock-ans.wrong{background:#ffcdd2;border-color:#e53935}
+.clock-msg{font-family:'MedievalSharp',serif;font-size:1.2rem;min-height:2rem;margin:.5rem 0}
+.clock-score{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#6b5a4e}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;margin-top:.5rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+.mode-btns{display:flex;gap:8px;justify-content:center;margin-bottom:1rem}
+.mode-btn{padding:8px 16px;border-radius:8px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.9rem;cursor:pointer;transition:.2s;color:#2c1810}
+.mode-btn:hover{border-color:#c9a84c}.mode-btn.active{background:#c9a84c;color:#fff}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="clock-page">
+  <h1>🕐 {% trans "Nauči sat" %}</h1>
+  <p class="sub">{% trans "Koliko je sati? Pogledaj kazaljke i odgovori!" %}</p>
+
+  <div class="mode-btns">
+    <button class="mode-btn active" onclick="setMode('full',this)">{% trans "Puni sati" %}</button>
+    <button class="mode-btn" onclick="setMode('half',this)">{% trans "Pola sata" %}</button>
+    <button class="mode-btn" onclick="setMode('quarter',this)">{% trans "Četvrt sata" %}</button>
+  </div>
+
+  <canvas class="clock-canvas" id="clockCanvas" width="280" height="280"></canvas>
+
+  <div class="clock-question" id="clockQ">{% trans "Koliko je sati?" %}</div>
+  <div class="clock-answers" id="clockAnswers"></div>
+  <div class="clock-msg" id="clockMsg"></div>
+  <div class="clock-score">{% trans "Točno" %}: <span id="cCorrect">0</span> / <span id="cTotal">0</span></div>
+  <button class="gbtn" onclick="newClock()">{% trans "Sljedeći" %} →</button>
+
+  <div style="margin-top:1.5rem;background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+    👵 {% trans "Baka kaže: Tko poštuje vrijeme — vrijeme poštuje njega!" %}
+  </div>
+</div>
+
+<script>
+var mode = 'full';
+var correctHour = 0, correctMin = 0;
+var score = 0, total = 0;
+
+function setMode(m, el) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active')});
+  el.classList.add('active');
+  newClock();
+}
+
+function newClock() {
+  correctHour = Math.floor(Math.random() * 12) + 1;
+  if (mode === 'full') correctMin = 0;
+  else if (mode === 'half') correctMin = [0, 30][Math.floor(Math.random() * 2)];
+  else correctMin = [0, 15, 30, 45][Math.floor(Math.random() * 4)];
+
+  drawClock(correctHour, correctMin);
+  generateAnswers();
+  document.getElementById('clockMsg').textContent = '';
+}
+
+function drawClock(h, m) {
+  var c = document.getElementById('clockCanvas');
+  var ctx = c.getContext('2d');
+  var cx = 140, cy = 140, r = 120;
+  ctx.clearRect(0, 0, 280, 280);
+
+  // Face
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  var grad = ctx.createRadialGradient(cx, cy, r * 0.9, cx, cy, r);
+  grad.addColorStop(0, '#f5e6c8'); grad.addColorStop(1, '#e8d4a8');
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.strokeStyle = '#2c1810'; ctx.lineWidth = 4; ctx.stroke();
+
+  // Border decorative
+  ctx.beginPath(); ctx.arc(cx, cy, r - 6, 0, Math.PI * 2);
+  ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Numbers
+  ctx.fillStyle = '#2c1810'; ctx.font = 'bold 22px "Uncial Antiqua"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (var i = 1; i <= 12; i++) {
+    var angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    var nx = cx + Math.cos(angle) * (r - 28);
+    var ny = cy + Math.sin(angle) * (r - 28);
+    ctx.fillText(i, nx, ny);
+  }
+
+  // Minute ticks
+  for (var i = 0; i < 60; i++) {
+    var angle = (i / 60) * Math.PI * 2 - Math.PI / 2;
+    var inner = i % 5 === 0 ? r - 45 : r - 15;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner);
+    ctx.lineTo(cx + Math.cos(angle) * (r - 10), cy + Math.sin(angle) * (r - 10));
+    ctx.strokeStyle = i % 5 === 0 ? '#2c1810' : '#c9a84c';
+    ctx.lineWidth = i % 5 === 0 ? 2 : 1;
+    ctx.stroke();
+  }
+
+  // Hour hand
+  var hAngle = ((h % 12 + m / 60) / 12) * Math.PI * 2 - Math.PI / 2;
+  ctx.beginPath(); ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.cos(hAngle) * 55, cy + Math.sin(hAngle) * 55);
+  ctx.strokeStyle = '#2c1810'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.stroke();
+
+  // Minute hand
+  var mAngle = (m / 60) * Math.PI * 2 - Math.PI / 2;
+  ctx.beginPath(); ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.cos(mAngle) * 80, cy + Math.sin(mAngle) * 80);
+  ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.stroke();
+
+  // Center dot
+  ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+  ctx.fillStyle = '#8b6914'; ctx.fill();
+}
+
+function formatTime(h, m) {
+  return h + ':' + (m < 10 ? '0' : '') + m;
+}
+
+function generateAnswers() {
+  var correct = formatTime(correctHour, correctMin);
+  var answers = [correct];
+
+  while (answers.length < 4) {
+    var fakeH = Math.floor(Math.random() * 12) + 1;
+    var fakeM = mode === 'full' ? 0 : mode === 'half' ? [0,30][Math.floor(Math.random()*2)] : [0,15,30,45][Math.floor(Math.random()*4)];
+    var fake = formatTime(fakeH, fakeM);
+    if (answers.indexOf(fake) === -1) answers.push(fake);
+  }
+
+  // Shuffle
+  for (var i = answers.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = answers[i]; answers[i] = answers[j]; answers[j] = t;
+  }
+
+  var container = document.getElementById('clockAnswers');
+  container.innerHTML = '';
+  answers.forEach(function(ans) {
+    var btn = document.createElement('div');
+    btn.className = 'clock-ans';
+    btn.textContent = ans;
+    btn.onclick = function() {
+      total++;
+      document.querySelectorAll('.clock-ans').forEach(function(b) { b.style.pointerEvents = 'none'; });
+      if (ans === correct) {
+        score++;
+        btn.classList.add('correct');
+        document.getElementById('clockMsg').textContent = '🎉 {% trans "Točno!" %} ' + correct;
+        document.getElementById('clockMsg').style.color = '#2e7d32';
+      } else {
+        btn.classList.add('wrong');
+        container.querySelectorAll('.clock-ans').forEach(function(b) { if (b.textContent === correct) b.classList.add('correct'); });
+        document.getElementById('clockMsg').textContent = '❌ ' + correct;
+        document.getElementById('clockMsg').style.color = '#c62828';
+      }
+      document.getElementById('cCorrect').textContent = score;
+      document.getElementById('cTotal').textContent = total;
+    };
+    container.appendChild(btn);
+  });
+}
+
+newClock();
+</script>
+{% endblock %}

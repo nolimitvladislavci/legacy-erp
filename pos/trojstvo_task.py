@@ -16,7 +16,7 @@ import logging
 from datetime import datetime
 
 from celery import shared_task
-from django.db import DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger("trojstvo")
 

@@ -22,6 +22,7 @@
     <!-- global_themes.css DEPRECATED — all tokens in fenix-tokens.css -->
     <link rel="stylesheet" href="/static/css/fenix-ui.css?v=1775674575">
     <link rel="stylesheet" href="/static/css/wcag-a11y.css?v=1775674575">
+    <link rel="stylesheet" href="/static/css/fenix-protection.css?v={{ STATIC_VERSION|default:'1' }}">
     {% block extra_css %}{% endblock %}
     <!-- BORG Faza 2: HTMX + Sortable.js -->
     <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
@@ -84,7 +85,11 @@
     });
     </script>
 </head>
-<body>
+<body
+  data-protect-enabled="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+  data-protect-level="{% if user.is_superuser %}off{% elif request.path|slice:":6" == "/admin" %}off{% else %}standard{% endif %}"
+  data-protect-user="{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}"
+  data-protect-company="{% if request.company %}{{ request.company.name }}{% endif %}">
 {% if user.is_authenticated %}{% load archive_tags %}{% is_archive_readonly user as is_readonly %}{% if is_readonly %}
 <div style="background:#b91c1c;color:#fff;text-align:center;padding:8px;font-size:.85rem;position:sticky;top:0;z-index:99999">
   {% trans "Vaša pretplata je istekla — podaci su dostupni samo za čitanje." %}
@@ -738,5 +743,6 @@ function toggleShellRight() { FenixShell.toggleRight(); }
 })();
 </script>
 
+  <script src="/static/js/fenix-protection.js?v={{ STATIC_VERSION|default:'1' }}"></script>
 </body>
 </html>

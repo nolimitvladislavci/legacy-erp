@@ -1,0 +1,245 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}{{ piece_data.symbol }} {{ piece_data.name_hr }} — {% trans "Šah škola" %}{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.chess-learn{max-width:900px;margin:0 auto;padding:1.5rem 1rem}
+.chess-top{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.chess-symbol{font-size:4rem;line-height:1;width:80px;height:80px;display:flex;align-items:center;justify-content:center;
+  border-radius:16px;background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border:2px solid var(--pc)}
+.chess-info h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;margin:0}
+.chess-info .fairy{font-family:'MedievalSharp',serif;color:#6b5a4e;font-size:.9rem;font-style:italic}
+
+.chess-story{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:12px;padding:1.2rem;
+  margin-bottom:1.5rem;border-left:4px solid var(--pc);font-family:'MedievalSharp',serif;
+  font-size:1.1rem;line-height:1.7;color:#2c1810}
+.chess-story::first-letter{font-family:'Uncial Antiqua',serif;font-size:2rem;color:var(--pc);float:left;
+  line-height:.8;margin-right:6px}
+
+/* Board */
+.board-wrap{display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.board{display:grid;grid-template-columns:repeat(8,1fr);width:min(400px,90vw);aspect-ratio:1;
+  border:3px solid #2c1810;border-radius:4px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.cell{display:flex;align-items:center;justify-content:center;font-size:min(5vw,2.8rem);
+  cursor:pointer;position:relative;transition:.15s}
+.cell.light{background:#f0d9b5}.cell.dark{background:#b58863}
+.cell.highlight{background:rgba(201,168,76,.5)!important}
+.cell.highlight::after{content:'';position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(201,168,76,.6)}
+.cell.piece-cell{background:rgba(76,175,80,.25)!important}
+.cell:hover{filter:brightness(1.1)}
+
+.instructions{flex:1;min-width:250px}
+.inst-title{font-family:'MedievalSharp',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.5rem}
+.inst-text{font-size:.95rem;color:#6b5a4e;line-height:1.6;font-family:'MedievalSharp',serif}
+.inst-tip{background:rgba(201,168,76,.15);border-radius:8px;padding:.8rem;margin-top:.8rem;
+  font-size:.85rem;color:#5c3d1a;font-family:'MedievalSharp',serif}
+
+.nav-btns{display:flex;gap:10px;margin-top:1.5rem;justify-content:center}
+.nav-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;padding:10px 24px;
+  border-radius:10px;font-family:'Uncial Antiqua',serif;font-size:1rem;cursor:pointer;
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+.nav-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(201,168,76,.4)}
+.nav-btn.outline{background:transparent;border:2px solid #c9a84c;color:#2c1810}
+
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-bottom:1rem}
+.dot{width:10px;height:10px;border-radius:50%;background:#e8d4a8;border:1px solid #c9a84c}
+.dot.active{background:#c9a84c}
+.dot.done{background:#2e7d32}
+
+/* TTS button */
+.speak-btn{background:none;border:1.5px solid #c9a84c;width:36px;height:36px;border-radius:50%;
+  font-size:1rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  transition:.2s;vertical-align:middle;margin-left:8px}
+.speak-btn:hover{background:#c9a84c;color:#fff}
+
+@media(max-width:600px){
+  .chess-top{flex-direction:column;text-align:center}
+  .board{width:min(340px,95vw)}
+  .cell{font-size:min(6vw,2.2rem)}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chess-learn" style="--pc:{{ piece_data.color }}">
+
+  <!-- Progress -->
+  <div class="progress-dots">
+    {% for i in "123456" %}
+    <div class="dot {% if forloop.counter == piece_index %}active{% elif forloop.counter < piece_index %}done{% endif %}"></div>
+    {% endfor %}
+  </div>
+
+  <!-- Header -->
+  <div class="chess-top">
+    <div class="chess-symbol">{{ piece_data.symbol }}</div>
+    <div class="chess-info">
+      <h1>{{ piece_data.name_hr }}</h1>
+      <div class="fairy">{{ piece_data.fairy_char }}</div>
+    </div>
+    <button class="speak-btn" onclick="speakStory()" title="{% trans 'Čitaj naglas' %}">🔊</button>
+  </div>
+
+  <!-- Fairy tale connection -->
+  <div class="chess-story" id="storyText">
+    {{ piece_data.fairy_story }}
+  </div>
+
+  <!-- Interactive board + instructions -->
+  <div class="board-wrap">
+    <div class="board" id="chessBoard"></div>
+    <div class="instructions">
+      <div class="inst-title">{% trans "Kako se kreće?" %}</div>
+      <div class="inst-text" id="moveDesc"></div>
+      <div class="inst-tip">
+        💡 {% trans "Klikni na figuru na ploči da vidiš kamo može ići!" %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-btns">
+    {% if prev_piece %}
+    <a href="{% url 'memio_world:chess_learn' prev_piece %}" class="nav-btn outline">← {% trans "Prethodna" %}</a>
+    {% endif %}
+    {% if next_piece %}
+    <a href="{% url 'memio_world:chess_learn' next_piece %}" class="nav-btn">{% trans "Sljedeća" %} →</a>
+    {% else %}
+    <a href="{% url 'memio_world:chess_puzzle' %}" class="nav-btn">♟ {% trans "Puzzle!" %} →</a>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+var PIECE = '{{ piece }}';
+var MOVES = '{{ piece_data.moves }}';
+var SYMBOL = '{{ piece_data.symbol }}';
+var LANG = '{{ lang }}';
+
+var MOVE_DESCRIPTIONS = {
+  'one_all': {
+    'hr': 'Kralj se kreće JEDNO polje u bilo kojem smjeru — gore, dolje, lijevo, desno, i dijagonalno. Spor ali mudar.',
+    'de': 'Der König bewegt sich EIN Feld in jede Richtung — oben, unten, links, rechts und diagonal. Langsam aber weise.',
+    'en': 'The King moves ONE square in any direction — up, down, left, right, and diagonal. Slow but wise.'
+  },
+  'unlimited_all': {
+    'hr': 'Kraljica se kreće koliko želi u svim smjerovima — ravno i dijagonalno. Najmoćnija figura!',
+    'de': 'Die Dame bewegt sich beliebig weit in alle Richtungen — gerade und diagonal. Die mächtigste Figur!',
+    'en': 'The Queen moves any number of squares in all directions — straight and diagonal. The most powerful piece!'
+  },
+  'unlimited_straight': {
+    'hr': 'Top se kreće ravno — gore, dolje, lijevo, desno — koliko želi. Ne može dijagonalno.',
+    'de': 'Der Turm bewegt sich geradeaus — beliebig weit. Nicht diagonal.',
+    'en': 'The Rook moves in straight lines — any distance. Cannot go diagonally.'
+  },
+  'unlimited_diagonal': {
+    'hr': 'Lovac se kreće dijagonalno — ukoso, koliko želi. Uvijek ostaje na istoj boji polja!',
+    'de': 'Der Läufer bewegt sich diagonal — beliebig weit. Bleibt immer auf derselben Feldfarbe!',
+    'en': 'The Bishop moves diagonally — any distance. Always stays on the same colour square!'
+  },
+  'l_shape': {
+    'hr': 'Konj skače u obliku slova L — 2 polja ravno + 1 u stranu. Jedini može PRESKAKATI druge figure!',
+    'de': 'Der Springer springt in L-Form — 2 Felder gerade + 1 zur Seite. Einziger, der über andere springen kann!',
+    'en': 'The Knight jumps in an L-shape — 2 squares straight + 1 to the side. The only piece that can JUMP over others!'
+  },
+  'pawn_special': {
+    'hr': 'Pješak ide 1 polje naprijed (2 s početne pozicije). Jede dijagonalno! Ako dođe do kraja — postaje kraljica!',
+    'de': 'Der Bauer geht 1 Feld vorwärts (2 von der Startposition). Schlägt diagonal! Am Ende wird er zur Dame!',
+    'en': 'The Pawn moves 1 square forward (2 from start). Captures diagonally! At the end it becomes a Queen!'
+  }
+};
+
+// Build board
+var board = document.getElementById('chessBoard');
+for (var r = 0; r < 8; r++) {
+  for (var c = 0; c < 8; c++) {
+    var cell = document.createElement('div');
+    cell.className = 'cell ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
+    cell.dataset.r = r;
+    cell.dataset.c = c;
+    cell.onclick = function() { handleClick(+this.dataset.r, +this.dataset.c); };
+    board.appendChild(cell);
+  }
+}
+
+// Place piece in center
+var pieceR = 3, pieceC = 3;
+if (PIECE === 'pawn') { pieceR = 5; pieceC = 3; }
+placePiece(pieceR, pieceC);
+
+function placePiece(r, c) {
+  clearHighlights();
+  var cells = board.querySelectorAll('.cell');
+  cells.forEach(function(cell) { cell.textContent = ''; cell.classList.remove('piece-cell'); });
+  var idx = r * 8 + c;
+  cells[idx].textContent = SYMBOL;
+  cells[idx].classList.add('piece-cell');
+  showMoves(r, c);
+}
+
+function handleClick(r, c) {
+  placePiece(r, c);
+}
+
+function clearHighlights() {
+  board.querySelectorAll('.cell').forEach(function(c) { c.classList.remove('highlight'); });
+}
+
+function showMoves(r, c) {
+  clearHighlights();
+  var moves = getMoves(r, c);
+  var cells = board.querySelectorAll('.cell');
+  moves.forEach(function(m) {
+    if (m[0] >= 0 && m[0] < 8 && m[1] >= 0 && m[1] < 8) {
+      cells[m[0] * 8 + m[1]].classList.add('highlight');
+    }
+  });
+  // Update description
+  document.getElementById('moveDesc').textContent = (MOVE_DESCRIPTIONS[MOVES] || {})[LANG] || MOVE_DESCRIPTIONS[MOVES]['hr'] || '';
+}
+
+function getMoves(r, c) {
+  var m = [];
+  var dirs;
+  switch (MOVES) {
+    case 'one_all':
+      for (var dr = -1; dr <= 1; dr++)
+        for (var dc = -1; dc <= 1; dc++)
+          if (dr || dc) m.push([r+dr, c+dc]);
+      break;
+    case 'unlimited_all':
+      dirs = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+      dirs.forEach(function(d) { for (var i=1;i<8;i++) m.push([r+d[0]*i, c+d[1]*i]); });
+      break;
+    case 'unlimited_straight':
+      dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+      dirs.forEach(function(d) { for (var i=1;i<8;i++) m.push([r+d[0]*i, c+d[1]*i]); });
+      break;
+    case 'unlimited_diagonal':
+      dirs = [[-1,-1],[-1,1],[1,-1],[1,1]];
+      dirs.forEach(function(d) { for (var i=1;i<8;i++) m.push([r+d[0]*i, c+d[1]*i]); });
+      break;
+    case 'l_shape':
+      [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(function(d) { m.push([r+d[0],c+d[1]]); });
+      break;
+    case 'pawn_special':
+      m.push([r-1, c]); // forward
+      if (r === 6) m.push([r-2, c]); // double from start
+      m.push([r-1, c-1]); m.push([r-1, c+1]); // diagonal capture
+      break;
+  }
+  return m.filter(function(p) { return p[0]>=0 && p[0]<8 && p[1]>=0 && p[1]<8; });
+}
+
+// TTS
+function speakStory() {
+  var text = document.getElementById('storyText').textContent;
+  var utter = new SpeechSynthesisUtterance(text);
+  utter.lang = LANG === 'de' ? 'de-DE' : LANG === 'en' ? 'en-GB' : 'hr-HR';
+  utter.rate = 0.85; utter.pitch = 1.05;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+</script>
+{% endblock %}

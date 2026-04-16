@@ -966,3 +966,7 @@ urlpatterns += i18n_patterns(
 # ── Django Silk — profiling UI (samo za DEBUG) ────────────────────────────────
 if settings.DEBUG:
     urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
+
+# ── Security Protection — audit log endpoint ──────────────────────────────────
+from django.urls import include as _include
+urlpatterns += [path("api/security/", _include("security_protection.urls"))]

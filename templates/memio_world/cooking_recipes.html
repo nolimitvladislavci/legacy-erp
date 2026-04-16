@@ -1,0 +1,150 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🍳 {% trans "Kuhanje za djecu" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.cook{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.cook h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.cook .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem}
+.recipe-card{background:#fff;border-radius:16px;padding:1rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);cursor:pointer;transition:.2s}
+.recipe-card:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.recipe-card.active{border-color:#8b6914;background:rgba(201,168,76,.1)}
+.recipe-emoji{font-size:3rem;margin-bottom:.3rem}
+.recipe-name{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;font-weight:bold}
+.recipe-age{font-size:.7rem;color:#c9a84c;font-family:'Space Grotesk',sans-serif}
+
+.recipe-detail{display:none;background:#fff;border-radius:16px;padding:1.5rem;border:2px solid #c9a84c}
+.recipe-detail.show{display:block;animation:fadeUp .4s ease-out}
+.rd-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.rd-emoji{font-size:3rem}.rd-title{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#2c1810}
+.rd-meta{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#6b5a4e}
+
+.rd-section{margin-bottom:1rem}
+.rd-section h3{font-family:'MedievalSharp',serif;font-size:1.05rem;color:#c9a84c;margin-bottom:.5rem;
+  border-bottom:1px solid rgba(201,168,76,.2);padding-bottom:.3rem}
+.rd-list{font-family:'MedievalSharp',serif;font-size:.95rem;color:#2c1810;line-height:1.8;padding-left:1.2rem}
+.rd-list li{margin-bottom:.3rem}
+
+.step-list{counter-reset:step;list-style:none;padding:0}
+.step-list li{counter-increment:step;font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;
+  line-height:1.6;padding:.8rem;margin-bottom:.5rem;background:rgba(245,230,200,.3);border-radius:10px;
+  padding-left:3rem;position:relative}
+.step-list li::before{content:counter(step);position:absolute;left:.8rem;top:.8rem;
+  width:28px;height:28px;background:#c9a84c;color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-family:'Uncial Antiqua',serif;font-size:.9rem}
+
+.baka-tip{background:rgba(201,168,76,.1);border-radius:10px;padding:.8rem;margin-top:.8rem;
+  font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a;font-style:italic}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cook">
+  <h1>🍳 {% trans "Kuhanje za djecu" %}</h1>
+  <p class="sub">{% trans "Bakin recept, korak po korak. Uvijek s odraslima!" %}</p>
+
+  <div class="recipe-grid" id="recipeGrid"></div>
+  <div class="recipe-detail" id="recipeDetail"></div>
+
+  <div style="background:#fff3e0;border-radius:12px;padding:1rem;margin-top:1.5rem;border:2px solid #ffe0b2;
+    font-family:'MedievalSharp',serif;font-size:.85rem;color:#e65100;text-align:center">
+    ⚠️ {% trans "UVIJEK kuhaj s mamom, tatom ili bakom! Nikad sam/a ne koristi peć, nož ili vruću vodu." %}
+  </div>
+</div>
+
+<script>
+var RECIPES = [
+  {
+    emoji:'🥪', name:'Sendvič', age:'4+', time:'5 min',
+    ingredients:['2 kriške kruha','Maslac','Sir','Šunka','Zelena salata','Rajčica'],
+    steps:['Namažite maslac na obje kriške kruha.','Stavite list salate na jednu krišku.',
+      'Dodajte sir i šunku.','Narežite rajčicu na kolutiće i stavite gore.',
+      'Poklopite drugom kriškom. Prerežite dijagonalno!'],
+    baka:'Baka kaže: Najbolji sendvič je onaj koji napraviš sam — čak i ako je malo kriv!'
+  },
+  {
+    emoji:'🥗', name:'Voćna salata', age:'3+', time:'10 min',
+    ingredients:['1 banana','1 jabuka','Grožđe','Jogurt','Med (po želji)','Orašasti plodovi'],
+    steps:['Operite voće pod vodom.','Banana: ogulite i narežite na kolutiće.',
+      'Jabuka: mama nareže na kockice (nož!).','Grožđe: prepolovite (ili cijelo za stariju djecu).',
+      'Stavite sve u zdjelicu.','Dodajte žlicu jogurta i malo meda.','Promiješajte i uživajte!'],
+    baka:'Baka kaže: Voće je slatkiš koji je mama priroda napravila za tebe!'
+  },
+  {
+    emoji:'🥞', name:'Palačinke', age:'6+', time:'20 min',
+    ingredients:['2 jaja','1 čaša mlijeka','1 čaša brašna','Prstohvat soli','Ulje za tavu','Nutella ili pekmez'],
+    steps:['Razbijte jaja u zdjelicu (mama pokazuje kako).','Dodajte mlijeko i promiješajte.',
+      'Polako dodajte brašno i miješajte dok ne bude glatko.','Dodajte prstohvat soli.',
+      'MAMA zagrijava tavu i stavlja malo ulja.','MAMA ulijeva tijesto i okreće palačinku.',
+      'Ti biraš: Nutella, pekmez, šećer i limun, ili sir?','Srolajte ili presavijte. Gotovo!'],
+    baka:'Baka kaže: Moja mama je pravila palačinke svake nedjelje. Sad ti nastavljaš tradiciju!'
+  },
+  {
+    emoji:'🍪', name:'Keksići', age:'5+', time:'30 min',
+    ingredients:['200g brašna','100g maslaca','80g šećera','1 jaje','Vanilin šećer','Čokoladne kapljice'],
+    steps:['Izmiješajte maslac i šećer dok ne bude kremasto.','Dodajte jaje i promiješajte.',
+      'Dodajte brašno i vanilin šećer. Miješajte rukama — to je najbolji dio!',
+      'Dodajte čokoladne kapljice.',
+      'Oblikujte kuglice veličine oraha i stavite na papir za pečenje.',
+      'MAMA stavlja u pećnicu na 180°C, 12 minuta.',
+      'Čekajte da se ohlade — to je NAJTEŽI korak!'],
+    baka:'Baka kaže: Miris keksića iz pećnice je miris sreće. Podijeli ih s prijateljima!'
+  },
+  {
+    emoji:'🍕', name:'Mini pizza', age:'6+', time:'25 min',
+    ingredients:['Tortilla ili gotovo tijesto','Rajčica (pasirana)','Sir (naribani)','Šunka','Kukuruz','Masline'],
+    steps:['Stavite tortillu na lim za pečenje.','Namažite 2 žlice pasirane rajčice.',
+      'Pospite naribanim sirom.','Dodajte što volite: šunku, kukuruz, masline!',
+      'MAMA stavlja u pećnicu na 200°C, 10 minuta.',
+      'Kad se sir otopi i zarumeni — gotovo!'],
+    baka:'Baka kaže: Pizza je kao život — bolja je kad dijeliš s drugima!'
+  },
+  {
+    emoji:'🍌', name:'Banana smoothie', age:'4+', time:'5 min',
+    ingredients:['1 banana','1 čaša mlijeka','1 žlica meda','Led (po želji)'],
+    steps:['Ogulite bananu i slomite na komade.','Stavite u blender (MAMA uključuje!).',
+      'Dodajte mlijeko i med.','Blendirajte 30 sekundi.',
+      'Ulijte u čašu. Možete dodati slamku!'],
+    baka:'Baka kaže: Kad sam ja bila mala, banana je bila rijetka. Danas je u svakom smoothieju!'
+  },
+];
+
+var grid = document.getElementById('recipeGrid');
+RECIPES.forEach(function(r, idx) {
+  var card = document.createElement('div');
+  card.className = 'recipe-card';
+  card.innerHTML = '<div class="recipe-emoji">' + r.emoji + '</div>' +
+    '<div class="recipe-name">' + r.name + '</div>' +
+    '<div class="recipe-age">' + r.age + ' · ' + r.time + '</div>';
+  card.onclick = function() {
+    document.querySelectorAll('.recipe-card').forEach(function(c){c.classList.remove('active')});
+    card.classList.add('active');
+    showRecipe(idx);
+  };
+  grid.appendChild(card);
+});
+
+function showRecipe(idx) {
+  var r = RECIPES[idx];
+  var detail = document.getElementById('recipeDetail');
+  detail.className = 'recipe-detail show';
+
+  var ingHtml = r.ingredients.map(function(i){return '<li>'+i+'</li>';}).join('');
+  var stepsHtml = r.steps.map(function(s){return '<li>'+s+'</li>';}).join('');
+
+  detail.innerHTML =
+    '<div class="rd-header"><div class="rd-emoji">' + r.emoji + '</div><div><div class="rd-title">' + r.name + '</div>' +
+    '<div class="rd-meta">' + r.age + ' · ' + r.time + '</div></div></div>' +
+    '<div class="rd-section"><h3>🛒 {% trans "Trebamo" %}:</h3><ul class="rd-list">' + ingHtml + '</ul></div>' +
+    '<div class="rd-section"><h3>👩‍🍳 {% trans "Koraci" %}:</h3><ol class="step-list">' + stepsHtml + '</ol></div>' +
+    '<div class="baka-tip">👵 ' + r.baka + '</div>';
+
+  detail.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+{% endblock %}

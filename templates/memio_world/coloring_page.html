@@ -1,0 +1,198 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🎨 {% trans "Bojanka" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.color-page{max-width:700px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.color-page h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;margin-bottom:.2rem}
+.color-page .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1rem}
+
+.canvas-wrap{position:relative;display:inline-block;margin:0 auto}
+.draw-canvas{border:3px solid #2c1810;border-radius:12px;background:#fff;cursor:crosshair;
+  touch-action:none;max-width:100%;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+
+.tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.color-btn{width:36px;height:36px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.2s}
+.color-btn:hover{transform:scale(1.15)}.color-btn.active{border-color:#2c1810;transform:scale(1.2)}
+.size-btn{width:36px;height:36px;border-radius:50%;background:#f5e6c8;border:2px solid #c9a84c;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:.7rem;
+  font-family:'Space Grotesk',sans-serif;color:#2c1810}
+.size-btn:hover,.size-btn.active{background:#c9a84c;color:#fff}
+
+.tool-row{display:flex;gap:6px;align-items:center;justify-content:center;margin:.5rem 0}
+.tbtn{background:#f5e6c8;border:2px solid #c9a84c;border-radius:10px;padding:6px 14px;
+  font-family:'MedievalSharp',serif;font-size:.85rem;cursor:pointer;transition:.2s;color:#2c1810}
+.tbtn:hover{background:#c9a84c;color:#fff}
+
+.template-grid{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.template-btn{width:80px;height:80px;background:#fff;border:2px solid rgba(201,168,76,.3);
+  border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:2.5rem;transition:.2s}
+.template-btn:hover{border-color:#c9a84c;transform:scale(1.05)}
+.template-btn.active{border-color:#8b6914;background:rgba(201,168,76,.1)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="color-page">
+  <h1>🎨 {% trans "Bojanka" %}</h1>
+  <p class="sub">{% trans "Nacrtaj i oboji likove iz bajki!" %}</p>
+
+  <!-- Templates to draw -->
+  <div class="template-grid">
+    <div class="template-btn" onclick="loadTemplate('castle')" title="{% trans 'Dvorac' %}">🏰</div>
+    <div class="template-btn" onclick="loadTemplate('princess')" title="{% trans 'Princeza' %}">👸</div>
+    <div class="template-btn" onclick="loadTemplate('dragon')" title="{% trans 'Zmaj' %}">🐉</div>
+    <div class="template-btn" onclick="loadTemplate('knight')" title="{% trans 'Vitez' %}">🤴</div>
+    <div class="template-btn" onclick="loadTemplate('forest')" title="{% trans 'Šuma' %}">🌲</div>
+    <div class="template-btn" onclick="loadTemplate('cat')" title="{% trans 'Mačak' %}">🐱</div>
+    <div class="template-btn" onclick="loadTemplate('free')" title="{% trans 'Slobodno' %}">✏️</div>
+  </div>
+
+  <!-- Canvas -->
+  <div class="canvas-wrap">
+    <canvas class="draw-canvas" id="drawCanvas" width="500" height="400"></canvas>
+  </div>
+
+  <!-- Colors -->
+  <div class="tools">
+    <div class="color-btn active" style="background:#2c1810" onclick="setColor('#2c1810',this)"></div>
+    <div class="color-btn" style="background:#e53935" onclick="setColor('#e53935',this)"></div>
+    <div class="color-btn" style="background:#fb8c00" onclick="setColor('#fb8c00',this)"></div>
+    <div class="color-btn" style="background:#fdd835" onclick="setColor('#fdd835',this)"></div>
+    <div class="color-btn" style="background:#43a047" onclick="setColor('#43a047',this)"></div>
+    <div class="color-btn" style="background:#1e88e5" onclick="setColor('#1e88e5',this)"></div>
+    <div class="color-btn" style="background:#7b1fa2" onclick="setColor('#7b1fa2',this)"></div>
+    <div class="color-btn" style="background:#c9a84c" onclick="setColor('#c9a84c',this)"></div>
+    <div class="color-btn" style="background:#795548" onclick="setColor('#795548',this)"></div>
+    <div class="color-btn" style="background:#fff;border:2px solid #ddd" onclick="setColor('#ffffff',this)"></div>
+  </div>
+
+  <!-- Brush size -->
+  <div class="tools">
+    <div class="size-btn" onclick="setSize(2,this)">S</div>
+    <div class="size-btn active" onclick="setSize(5,this)">M</div>
+    <div class="size-btn" onclick="setSize(12,this)">L</div>
+    <div class="size-btn" onclick="setSize(25,this)">XL</div>
+  </div>
+
+  <!-- Tool buttons -->
+  <div class="tool-row">
+    <button class="tbtn" onclick="clearAll()">🧹 {% trans "Obriši" %}</button>
+    <button class="tbtn" onclick="undoLast()">↩️ {% trans "Poništi" %}</button>
+    <button class="tbtn" onclick="saveDrawing()">💾 {% trans "Spremi" %}</button>
+    <button class="tbtn" onclick="speakEncouragement()">🔊 👵</button>
+  </div>
+</div>
+
+<script>
+var canvas = document.getElementById('drawCanvas');
+var ctx = canvas.getContext('2d');
+var currentColor = '#2c1810';
+var currentSize = 5;
+var drawing = false;
+var history = [];
+
+clearAll();
+
+function setColor(c, el) {
+  currentColor = c;
+  document.querySelectorAll('.color-btn').forEach(function(b){b.classList.remove('active')});
+  el.classList.add('active');
+}
+function setSize(s, el) {
+  currentSize = s;
+  document.querySelectorAll('.size-btn').forEach(function(b){b.classList.remove('active')});
+  el.classList.add('active');
+}
+
+function saveState() {
+  history.push(canvas.toDataURL());
+  if (history.length > 30) history.shift();
+}
+
+function clearAll() {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  history = [];
+}
+
+function undoLast() {
+  if (history.length === 0) return;
+  var img = new Image();
+  img.onload = function() { ctx.drawImage(img, 0, 0); };
+  img.src = history.pop();
+}
+
+function saveDrawing() {
+  var link = document.createElement('a');
+  link.download = 'play-eu-bojanka.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+// Drawing events
+function getPos(e) {
+  var rect = canvas.getBoundingClientRect();
+  var sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+  var cx = e.touches ? e.touches[0].clientX : e.clientX;
+  var cy = e.touches ? e.touches[0].clientY : e.clientY;
+  return {x: (cx - rect.left) * sx, y: (cy - rect.top) * sy};
+}
+
+canvas.addEventListener('mousedown', function(e) { saveState(); drawing = true; var p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = getPos(e); ctx.lineWidth = currentSize; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = currentColor; ctx.lineTo(p.x, p.y); ctx.stroke(); });
+canvas.addEventListener('mouseup', function() { drawing = false; });
+canvas.addEventListener('mouseleave', function() { drawing = false; });
+canvas.addEventListener('touchstart', function(e) { e.preventDefault(); saveState(); drawing = true; var p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, {passive:false});
+canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineWidth = currentSize; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = currentColor; ctx.lineTo(p.x, p.y); ctx.stroke(); }, {passive:false});
+canvas.addEventListener('touchend', function() { drawing = false; });
+
+// Templates — draw outlines
+function loadTemplate(name) {
+  clearAll();
+  ctx.strokeStyle = 'rgba(201,168,76,0.3)';
+  ctx.lineWidth = 2;
+  ctx.font = '120px serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(201,168,76,0.12)';
+
+  var templates = {
+    'castle': '🏰', 'princess': '👸', 'dragon': '🐉',
+    'knight': '🤴', 'forest': '🌲', 'cat': '🐱', 'free': ''
+  };
+  var emoji = templates[name] || '';
+  if (emoji) {
+    ctx.font = '200px serif';
+    ctx.fillText(emoji, 250, 280);
+    // Title
+    ctx.font = '18px MedievalSharp';
+    ctx.fillStyle = 'rgba(201,168,76,0.4)';
+    var titles = {
+      'castle': '{% trans "Nacrtaj dvorac" %}', 'princess': '{% trans "Nacrtaj princezu" %}',
+      'dragon': '{% trans "Nacrtaj zmaja" %}', 'knight': '{% trans "Nacrtaj viteza" %}',
+      'forest': '{% trans "Nacrtaj šumu" %}', 'cat': '{% trans "Nacrtaj mačka" %}'
+    };
+    ctx.fillText(titles[name] || '', 250, 380);
+  }
+  document.querySelectorAll('.template-btn').forEach(function(b){b.classList.remove('active')});
+  event.target.classList.add('active');
+}
+
+// Encouragement TTS
+var ENCOURAGEMENTS = [
+  '{% trans "Predivno! Nastavi tako!" %}',
+  '{% trans "Baka bi bila ponosna na ovaj crtež!" %}',
+  '{% trans "Kakve lijepe boje! Svaka čast!" %}',
+  '{% trans "Ti si pravi umjetnik!" %}',
+  '{% trans "Djed kaže: Ovo ide na hladnjak!" %}'
+];
+function speakEncouragement() {
+  var msg = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+  var u = new SpeechSynthesisUtterance(msg);
+  u.lang = 'hr-HR'; u.rate = 0.85; u.pitch = 1.1;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+</script>
+{% endblock %}

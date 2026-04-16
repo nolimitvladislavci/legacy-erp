@@ -1,0 +1,181 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🏃 {% trans "Sport i pokret" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.sports{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.sports h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.sports .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.workout-card{background:#fff;border-radius:16px;padding:1.5rem;margin-bottom:1rem;
+  border:2px solid rgba(201,168,76,.2);transition:.2s}
+.workout-card:hover{border-color:#c9a84c}
+.workout-header{display:flex;align-items:center;gap:1rem;margin-bottom:.8rem}
+.workout-emoji{font-size:2.5rem;flex-shrink:0}
+.workout-title{font-family:'Uncial Antiqua',serif;font-size:1.15rem;color:#2c1810}
+.workout-meta{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#6b5a4e}
+
+.exercise-list{display:grid;gap:8px}
+.exercise{display:flex;align-items:center;gap:10px;padding:.8rem;background:rgba(245,230,200,.3);
+  border-radius:10px;cursor:pointer;transition:.15s}
+.exercise:hover{background:rgba(201,168,76,.15)}
+.exercise .ex-num{width:32px;height:32px;background:#c9a84c;color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-family:'Uncial Antiqua',serif;
+  font-size:.85rem;flex-shrink:0}
+.exercise .ex-info{flex:1}
+.exercise .ex-name{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810}
+.exercise .ex-desc{font-size:.8rem;color:#6b5a4e;font-family:'Space Grotesk',sans-serif}
+.exercise .ex-reps{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#c9a84c;font-weight:bold;flex-shrink:0}
+
+.timer-section{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.5rem;
+  text-align:center;margin-bottom:1.5rem;border:2px solid #66bb6a}
+.timer-display{font-family:'Space Grotesk',sans-serif;font-size:4rem;font-weight:700;color:#1b5e20;margin:.5rem 0}
+.timer-label{font-family:'MedievalSharp',serif;font-size:1.1rem;color:#2e7d32}
+.timer-btns{display:flex;gap:10px;justify-content:center;margin-top:.8rem}
+.tbtn{padding:10px 20px;border-radius:10px;border:none;font-family:'MedievalSharp',serif;
+  font-size:1rem;cursor:pointer;transition:.2s}
+.tbtn-start{background:#43a047;color:#fff}.tbtn-stop{background:#e53935;color:#fff}
+.tbtn-reset{background:#fff;color:#2c1810;border:2px solid #c9a84c}
+.tbtn:hover{transform:translateY(-2px)}
+
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sports">
+  <h1>🏃 {% trans "Sport i pokret" %}</h1>
+  <p class="sub">{% trans "Tijelo koje se kreće — um koji raste. Ustani i pokreni se!" %}</p>
+
+  <!-- Timer -->
+  <div class="timer-section">
+    <div class="timer-label" id="timerLabel">{% trans "Spremni za vježbanje?" %}</div>
+    <div class="timer-display" id="timerDisplay">0:00</div>
+    <div class="timer-btns">
+      <button class="tbtn tbtn-start" onclick="startTimer()">▶ {% trans "Kreni" %}</button>
+      <button class="tbtn tbtn-stop" onclick="stopTimer()">⏸ {% trans "Pauza" %}</button>
+      <button class="tbtn tbtn-reset" onclick="resetTimer()">🔄</button>
+    </div>
+  </div>
+
+  <!-- Workouts -->
+  <div id="workouts"></div>
+
+  <div style="margin-top:1.5rem;background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;
+    text-align:center;font-family:'MedievalSharp',serif;color:#5c3d1a;font-size:.9rem">
+    👵 {% trans "Baka kaže: Ja sam u tvojim godinama trčala brže od svih dječaka u selu!" %}<br>
+    👴 {% trans "Djed kaže: A ja sam plivao preko rijeke i natrag — svaki dan!" %}
+  </div>
+</div>
+
+<script>
+var WORKOUTS = [
+  {
+    emoji:'🌅', title:'{% trans "Jutarnja gimnastika" %}', duration:'5 min', age:'3+',
+    exercises:[
+      {name:'{% trans "Potezanje ruku" %}',desc:'{% trans "Ruke gore, na strane, dolje" %}',reps:'10×'},
+      {name:'{% trans "Čučnjevi" %}',desc:'{% trans "Polako čučni i ustani" %}',reps:'10×'},
+      {name:'{% trans "Skakanje" %}',desc:'{% trans "Skoči na mjestu" %}',reps:'15×'},
+      {name:'{% trans "Rotacija struka" %}',desc:'{% trans "Okreći se lijevo-desno" %}',reps:'10×'},
+      {name:'{% trans "Duboko disanje" %}',desc:'{% trans "Udahni 4, zadrži 4, izdahni 4" %}',reps:'5×'},
+    ]
+  },
+  {
+    emoji:'🧘', title:'{% trans "Yoga za djecu" %}', duration:'8 min', age:'4+',
+    exercises:[
+      {name:'{% trans "Stablo" %}',desc:'{% trans "Stani na jednu nogu, ruke gore kao grane" %}',reps:'30s'},
+      {name:'{% trans "Mačka" %}',desc:'{% trans "Na četiri, izdigni i zaobli leđa" %}',reps:'5×'},
+      {name:'{% trans "Krava" %}',desc:'{% trans "Na četiri, spusti trbuh i podigni glavu" %}',reps:'5×'},
+      {name:'{% trans "Zmija" %}',desc:'{% trans "Legni na trbuh, podigni gornji dio" %}',reps:'5×'},
+      {name:'{% trans "Dijete" %}',desc:'{% trans "Kleči, spusti čelo na pod, ruke naprijed" %}',reps:'30s'},
+      {name:'{% trans "Leptir" %}',desc:'{% trans "Sjedi, spoji stopala, mahni koljenima" %}',reps:'20s'},
+    ]
+  },
+  {
+    emoji:'💃', title:'{% trans "Plesni izazov" %}', duration:'5 min', age:'3+',
+    exercises:[
+      {name:'{% trans "Robot" %}',desc:'{% trans "Kreći se kao robot — ukočeno, korak po korak" %}',reps:'30s'},
+      {name:'{% trans "Meduza" %}',desc:'{% trans "Mlohavo i mekano — kao da plutaš u moru" %}',reps:'30s'},
+      {name:'{% trans "Kengur" %}',desc:'{% trans "Skači! Visoko! S koljenima gore!" %}',reps:'30s'},
+      {name:'{% trans "Ptica" %}',desc:'{% trans "Raširi ruke i leti po sobi" %}',reps:'30s'},
+      {name:'{% trans "Smrzni se!" %}',desc:'{% trans "Pleši — kad viknem STOP, zamrzni!" %}',reps:'1 min'},
+    ]
+  },
+  {
+    emoji:'🏋️', title:'{% trans "Mali heroj trening" %}', duration:'10 min', age:'6+',
+    exercises:[
+      {name:'{% trans "Jumping jacks" %}',desc:'{% trans "Skoči raširenih ruku i nogu" %}',reps:'20×'},
+      {name:'{% trans "Plank" %}',desc:'{% trans "Drži se ravno na laktovima" %}',reps:'20s'},
+      {name:'{% trans "Sklekovi na koljenima" %}',desc:'{% trans "Spusti se i podigni" %}',reps:'10×'},
+      {name:'{% trans "Trčanje u mjestu" %}',desc:'{% trans "Brzo, brzo, brzo!" %}',reps:'30s'},
+      {name:'{% trans "Superman" %}',desc:'{% trans "Legni na trbuh, podigni ruke i noge" %}',reps:'10×'},
+      {name:'{% trans "Mountain climbers" %}',desc:'{% trans "U plank poziciji, koljena prema prsima" %}',reps:'15×'},
+      {name:'{% trans "Istezanje" %}',desc:'{% trans "Dotakni prste nogu, opusti se" %}',reps:'30s'},
+    ]
+  },
+  {
+    emoji:'⚽', title:'{% trans "Sportski izazovi (vani!)" %}', duration:'15 min', age:'5+',
+    exercises:[
+      {name:'{% trans "Trčanje" %}',desc:'{% trans "Trči do drveta i natrag — 5 puta!" %}',reps:'5×'},
+      {name:'{% trans "Preskakanje konopa" %}',desc:'{% trans "Ako imaš konop — preskoči 20 puta" %}',reps:'20×'},
+      {name:'{% trans "Ravnoteža" %}',desc:'{% trans "Hodaj po crti (rubnjaku) bez padanja" %}',reps:'3 min'},
+      {name:'{% trans "Bacanje lopte" %}',desc:'{% trans "Baci loptu u zid i uhvati — 10 puta" %}',reps:'10×'},
+      {name:'{% trans "Školica" %}',desc:'{% trans "Nacrtaj školicu kredom i skači!" %}',reps:'5 min'},
+    ]
+  },
+];
+
+var workoutsDiv = document.getElementById('workouts');
+WORKOUTS.forEach(function(w) {
+  var card = document.createElement('div');
+  card.className = 'workout-card';
+
+  var exHtml = '';
+  w.exercises.forEach(function(ex, i) {
+    exHtml += '<div class="exercise" onclick="speakExercise(\'' + ex.name.replace(/'/g,"\\'") + '. ' + ex.desc.replace(/'/g,"\\'") + '. ' + ex.reps + '\')">' +
+      '<div class="ex-num">' + (i+1) + '</div>' +
+      '<div class="ex-info"><div class="ex-name">' + ex.name + '</div><div class="ex-desc">' + ex.desc + '</div></div>' +
+      '<div class="ex-reps">' + ex.reps + '</div></div>';
+  });
+
+  card.innerHTML = '<div class="workout-header"><div class="workout-emoji">' + w.emoji + '</div><div>' +
+    '<div class="workout-title">' + w.title + '</div>' +
+    '<div class="workout-meta">' + w.duration + ' · ' + w.age + '</div></div></div>' +
+    '<div class="exercise-list">' + exHtml + '</div>';
+
+  workoutsDiv.appendChild(card);
+});
+
+function speakExercise(text) {
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'hr-HR'; u.rate = 0.85; u.pitch = 1.05;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+// Timer
+var timerInterval = null, timerSeconds = 0;
+function startTimer() {
+  if (timerInterval) return;
+  document.getElementById('timerLabel').textContent = '{% trans "Vježbaj!" %} 💪';
+  timerInterval = setInterval(function() {
+    timerSeconds++;
+    var m = Math.floor(timerSeconds / 60);
+    var s = timerSeconds % 60;
+    document.getElementById('timerDisplay').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  }, 1000);
+}
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  document.getElementById('timerLabel').textContent = '{% trans "Pauza" %} ⏸';
+}
+function resetTimer() {
+  stopTimer(); timerSeconds = 0;
+  document.getElementById('timerDisplay').textContent = '0:00';
+  document.getElementById('timerLabel').textContent = '{% trans "Spremni za vježbanje?" %}';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🔢 {% trans "Brojevi" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.nums{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.nums h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.nums .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+/* Tabs */
+.tab-row{display:flex;gap:8px;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:8px 20px;border-radius:10px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:1rem;cursor:pointer;transition:.2s;color:#2c1810}
+.tab-btn:hover{border-color:#c9a84c}.tab-btn.active{background:#c9a84c;color:#fff;border-color:#8b6914}
+
+/* Number grid */
+.num-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem}
+.num-card{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border:2px solid rgba(201,168,76,.3);
+  border-radius:14px;cursor:pointer;transition:.2s}
+.num-card:hover{border-color:#c9a84c;transform:scale(1.05)}
+.num-card .num{font-family:'Uncial Antiqua',serif;font-size:2.2rem;color:#8b2500}
+.num-card .word{font-family:'MedievalSharp',serif;font-size:.7rem;color:#6b5a4e;margin-top:2px}
+.num-card .dots{font-size:.9rem;margin-top:4px}
+
+/* Math game */
+.math-game{display:none;text-align:center}
+.math-game.show{display:block}
+.math-problem{font-family:'Uncial Antiqua',serif;font-size:3rem;color:#2c1810;margin:1rem 0}
+.math-answers{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:1rem 0}
+.math-ans{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Uncial Antiqua',serif;font-size:1.8rem;background:#fff;border:3px solid rgba(201,168,76,.3);
+  cursor:pointer;transition:.2s;color:#2c1810}
+.math-ans:hover{border-color:#c9a84c;transform:scale(1.08)}
+.math-ans.correct{background:#c8e6c9;border-color:#66bb6a;animation:bounce .5s}
+.math-ans.wrong{background:#ffcdd2;border-color:#e53935;animation:shake .4s}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.math-score{font-family:'Space Grotesk',sans-serif;font-size:.9rem;color:#6b5a4e;margin-top:.5rem}
+.math-msg{font-family:'MedievalSharp',serif;font-size:1.2rem;color:#2e7d32;min-height:2rem;margin-top:.5rem}
+
+.btn-row{display:flex;gap:10px;justify-content:center;margin-top:1rem}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+
+/* Count exercise */
+.count-area{display:none;text-align:center}
+.count-area.show{display:block}
+.count-objects{font-size:2.5rem;line-height:1.6;margin:1rem 0;letter-spacing:8px}
+.count-input{font-family:'Uncial Antiqua',serif;font-size:2.5rem;width:80px;text-align:center;
+  border:3px solid #c9a84c;border-radius:12px;padding:8px;color:#2c1810;background:#fff}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nums">
+  <h1>🔢 {% trans "Brojevi" %}</h1>
+  <p class="sub">{% trans "Nauči brojeve, broji predmete, računaj!" %}</p>
+
+  <!-- Tabs -->
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="showTab('learn')">{% trans "Nauči" %} 1-20</button>
+    <button class="tab-btn" onclick="showTab('count')">{% trans "Broji" %} 🔍</button>
+    <button class="tab-btn" onclick="showTab('math')">{% trans "Računaj" %} ➕</button>
+  </div>
+
+  <!-- TAB 1: Learn numbers -->
+  <div id="tab-learn">
+    <div class="num-grid" id="numGrid"></div>
+  </div>
+
+  <!-- TAB 2: Count objects -->
+  <div class="count-area" id="tab-count">
+    <p style="font-family:'MedievalSharp',serif;color:#6b5a4e;font-size:1.1rem">{% trans "Koliko predmeta vidiš?" %}</p>
+    <div class="count-objects" id="countObjects"></div>
+    <input type="number" class="count-input" id="countInput" min="1" max="20" onkeydown="if(event.key==='Enter')checkCount()">
+    <div class="btn-row">
+      <button class="gbtn" onclick="checkCount()">{% trans "Provjeri" %} ✓</button>
+      <button class="gbtn" onclick="newCount()" style="background:transparent;border:2px solid #c9a84c;color:#2c1810">{% trans "Novo" %} 🔄</button>
+    </div>
+    <div class="math-msg" id="countMsg"></div>
+  </div>
+
+  <!-- TAB 3: Math -->
+  <div class="math-game" id="tab-math">
+    <p style="font-family:'MedievalSharp',serif;color:#6b5a4e">{% trans "Koji je točan odgovor?" %}</p>
+    <div class="math-problem" id="mathProblem"></div>
+    <div class="math-answers" id="mathAnswers"></div>
+    <div class="math-msg" id="mathMsg"></div>
+    <div class="math-score">{% trans "Točno" %}: <span id="mathCorrect">0</span> / <span id="mathTotal">0</span></div>
+    <div class="btn-row">
+      <button class="gbtn" onclick="newMath()">{% trans "Sljedeći" %} →</button>
+    </div>
+  </div>
+
+  <!-- Bakina mudrost -->
+  <div style="background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;margin-top:1.5rem;
+    text-align:center;font-family:'MedievalSharp',serif;color:#5c3d1a;font-size:.9rem">
+    👵 {% trans "Baka kaže: Tko zna brojati — zna i štedjeti!" %}
+  </div>
+</div>
+
+<script>
+var NUMBERS_HR = ['','jedan','dva','tri','četiri','pet','šest','sedam','osam','devet','deset',
+  'jedanaest','dvanaest','trinaest','četrnaest','petnaest','šesnaest','sedamnaest','osamnaest','devetnaest','dvadeset'];
+var EMOJIS = ['','🍎','🍎🍎','🍎🍎🍎','🌟🌟🌟🌟','⭐⭐⭐⭐⭐','🐟🐟🐟🐟🐟🐟','🦋🦋🦋🦋🦋🦋🦋',
+  '🌸🌸🌸🌸🌸🌸🌸🌸','🐦🐦🐦🐦🐦🐦🐦🐦🐦','🌳🌳🌳🌳🌳🌳🌳🌳🌳🌳',
+  '💧💧💧💧💧💧💧💧💧💧💧','☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️☀️',
+  '🎈🎈🎈🎈🎈🎈🎈🎈🎈🎈🎈🎈🎈','🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺',
+  '🐝🐝🐝🐝🐝🐝🐝🐝🐝🐝🐝🐝🐝🐝🐝','🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊🍊',
+  '🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻','🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓',
+  '🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞🐞','🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈🌈'];
+var OBJECTS = ['🍎','⭐','🐟','🦋','🌸','🐦','🌳','💧','☀️','🎈','🌺','🐝','🍊','🌻','🍓','🐞','🌈','🍇','🐸','🌹'];
+
+var mathCorrect = 0, mathTotal = 0;
+
+// Build number grid
+var grid = document.getElementById('numGrid');
+for (var i = 1; i <= 20; i++) {
+  var card = document.createElement('div');
+  card.className = 'num-card';
+  card.innerHTML = '<div class="num">' + i + '</div><div class="word">' + NUMBERS_HR[i] + '</div><div class="dots">' + EMOJIS[i].slice(0, Math.min(i*2, 20)) + '</div>';
+  card.onclick = (function(n) { return function() { speakNumber(n); }; })(i);
+  grid.appendChild(card);
+}
+
+function speakNumber(n) {
+  var u = new SpeechSynthesisUtterance(NUMBERS_HR[n]);
+  u.lang = 'hr-HR'; u.rate = 0.75; u.pitch = 1.1;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+// Tabs
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(b,i) {
+    b.classList.toggle('active', ['learn','count','math'][i] === name);
+  });
+  document.getElementById('tab-learn').style.display = name === 'learn' ? 'block' : 'none';
+  var countEl = document.getElementById('tab-count');
+  var mathEl = document.getElementById('tab-math');
+  countEl.classList.toggle('show', name === 'count');
+  mathEl.classList.toggle('show', name === 'math');
+  if (name === 'count') newCount();
+  if (name === 'math') newMath();
+}
+
+// Count game
+var countAnswer = 0;
+function newCount() {
+  countAnswer = Math.floor(Math.random() * 10) + 1;
+  var emoji = OBJECTS[Math.floor(Math.random() * OBJECTS.length)];
+  var display = '';
+  for (var i = 0; i < countAnswer; i++) display += emoji + ' ';
+  document.getElementById('countObjects').textContent = display;
+  document.getElementById('countInput').value = '';
+  document.getElementById('countMsg').textContent = '';
+  document.getElementById('countInput').focus();
+}
+
+function checkCount() {
+  var val = parseInt(document.getElementById('countInput').value);
+  if (val === countAnswer) {
+    document.getElementById('countMsg').textContent = '🎉 {% trans "Bravo! Točno!" %} ' + countAnswer + ' = ' + NUMBERS_HR[countAnswer];
+    document.getElementById('countMsg').style.color = '#2e7d32';
+    speakNumber(countAnswer);
+  } else {
+    document.getElementById('countMsg').textContent = '❌ {% trans "Pokušaj ponovno! Broji pažljivo." %}';
+    document.getElementById('countMsg').style.color = '#c62828';
+  }
+}
+
+// Math game
+function newMath() {
+  var a = Math.floor(Math.random() * 10) + 1;
+  var b = Math.floor(Math.random() * 10) + 1;
+  var op = Math.random() < 0.6 ? '+' : '-';
+  if (op === '-' && b > a) { var t = a; a = b; b = t; }
+  var answer = op === '+' ? a + b : a - b;
+
+  document.getElementById('mathProblem').textContent = a + ' ' + op + ' ' + b + ' = ?';
+  document.getElementById('mathMsg').textContent = '';
+
+  // Generate 4 answers (1 correct, 3 wrong)
+  var answers = [answer];
+  while (answers.length < 4) {
+    var wrong = answer + Math.floor(Math.random() * 7) - 3;
+    if (wrong !== answer && wrong >= 0 && answers.indexOf(wrong) === -1) answers.push(wrong);
+  }
+  // Shuffle
+  for (var i = answers.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = answers[i]; answers[i] = answers[j]; answers[j] = t;
+  }
+
+  var container = document.getElementById('mathAnswers');
+  container.innerHTML = '';
+  answers.forEach(function(ans) {
+    var btn = document.createElement('div');
+    btn.className = 'math-ans';
+    btn.textContent = ans;
+    btn.onclick = function() {
+      mathTotal++;
+      if (ans === answer) {
+        mathCorrect++;
+        btn.classList.add('correct');
+        document.getElementById('mathMsg').textContent = '🎉 {% trans "Točno!" %}';
+        document.getElementById('mathMsg').style.color = '#2e7d32';
+      } else {
+        btn.classList.add('wrong');
+        document.getElementById('mathMsg').textContent = '❌ ' + a + ' ' + op + ' ' + b + ' = ' + answer;
+        document.getElementById('mathMsg').style.color = '#c62828';
+        // Highlight correct
+        container.querySelectorAll('.math-ans').forEach(function(b) { if (+b.textContent === answer) b.classList.add('correct'); });
+      }
+      document.getElementById('mathCorrect').textContent = mathCorrect;
+      document.getElementById('mathTotal').textContent = mathTotal;
+      // Disable all
+      container.querySelectorAll('.math-ans').forEach(function(b) { b.style.pointerEvents = 'none'; });
+    };
+    container.appendChild(btn);
+  });
+}
+</script>
+{% endblock %}

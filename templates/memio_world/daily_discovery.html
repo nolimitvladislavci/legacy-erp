@@ -1,0 +1,179 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🌟 {% trans "Dnevno otkriće" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.daily{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.daily-greeting{text-align:center;margin-bottom:1.5rem}
+.daily-greeting h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;margin:0}
+.daily-greeting .theme{font-family:'MedievalSharp',serif;color:#c9a84c;font-size:1.1rem;margin-top:.3rem}
+.daily-greeting .date{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#6b5a4e;margin-top:.2rem}
+
+.daily-card{background:#fff;border-radius:16px;padding:1.2rem;margin-bottom:1rem;
+  border:2px solid rgba(201,168,76,.2);box-shadow:0 2px 12px rgba(0,0,0,.04);transition:.2s;
+  text-decoration:none;display:block;color:#2c1810}
+.daily-card:hover{border-color:#c9a84c;transform:translateY(-2px);box-shadow:0 4px 20px rgba(201,168,76,.15)}
+.daily-card .card-head{display:flex;align-items:center;gap:12px;margin-bottom:.5rem}
+.daily-card .card-icon{font-size:2rem;width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:12px;flex-shrink:0}
+.daily-card .card-label{font-family:'MedievalSharp',serif;font-size:.75rem;color:#c9a84c;text-transform:uppercase;letter-spacing:1px}
+.daily-card .card-title{font-family:'MedievalSharp',serif;font-size:1.15rem;color:#2c1810;font-weight:bold}
+.daily-card .card-body{font-family:'MedievalSharp',serif;font-size:.95rem;color:#6b5a4e;line-height:1.6}
+.daily-card .card-body p{margin:.3rem 0}
+
+.daily-section{margin-top:1.5rem}
+.daily-section h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.8rem;
+  padding-bottom:.3rem;border-bottom:2px solid rgba(201,168,76,.2)}
+
+.daily-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem}
+.daily-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+.daily-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(201,168,76,.4)}
+.daily-btn.outline{background:transparent;border:2px solid #c9a84c;color:#2c1810}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="daily">
+
+  <!-- Greeting -->
+  <div class="daily-greeting">
+    <h1>{{ greeting }}</h1>
+    <div class="theme">{{ theme.icon }} {{ theme.theme_hr }}</div>
+    <div class="date">{{ today|date:"l, j. F Y." }}</div>
+  </div>
+
+  <!-- Emotion check-in -->
+  <a href="{% url 'memio_world:emotion_checkin' %}" class="daily-card">
+    <div class="card-head">
+      <div class="card-icon">😊</div>
+      <div>
+        <div class="card-label">{% trans "Prvo prvo" %}</div>
+        <div class="card-title">{% trans "Kako se danas osjećaš?" %}</div>
+      </div>
+    </div>
+  </a>
+
+  <!-- Daily Story -->
+  {% if daily_story %}
+  <a href="{% url 'memio_world:story_detail' daily_story.slug %}" class="daily-card">
+    <div class="card-head">
+      <div class="card-icon">📖</div>
+      <div>
+        <div class="card-label">{% trans "Današnja priča" %}</div>
+        <div class="card-title">{{ daily_story.title_hr }}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>{{ daily_story.country_of_origin }} · {{ daily_story.get_story_type_display }} · {{ daily_story.reading_time_minutes }} min</p>
+    </div>
+  </a>
+  {% endif %}
+
+  <!-- Daily Wisdom -->
+  {% if daily_wisdom %}
+  <div class="daily-card">
+    <div class="card-head">
+      <div class="card-icon">👵</div>
+      <div>
+        <div class="card-label">{% trans "Bakina mudrost dana" %}</div>
+        <div class="card-title">{{ daily_wisdom.title }}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>👵 {{ daily_wisdom.grandma_version|truncatewords:30 }}</p>
+      {% if not daily_wisdom.they_agree %}
+      <p>👴 {{ daily_wisdom.grandpa_version|truncatewords:30 }}</p>
+      <p style="color:#c9a84c;font-style:italic;font-size:.85rem">{% trans "Baka i djed se ne slažu! I to je OK — različita mišljenja su zdrava." %}</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Day-specific content -->
+  {% if weekday == 2 and daily_safety %}
+  <!-- Srijeda: Sigurnost -->
+  <a href="{% url 'memio_world:safety_detail' daily_safety.pk %}" class="daily-card">
+    <div class="card-head">
+      <div class="card-icon">🛡️</div>
+      <div>
+        <div class="card-label">{% trans "Sigurnosna tema dana" %}</div>
+        <div class="card-title">{{ daily_safety.title }}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>{{ daily_safety.scenario|truncatewords:25 }}</p>
+    </div>
+  </a>
+  {% endif %}
+
+  {% if weekday == 4 and daily_quest %}
+  <!-- Petak: Obiteljski izazov -->
+  <div class="daily-card">
+    <div class="card-head">
+      <div class="card-icon">🏡</div>
+      <div>
+        <div class="card-label">{% trans "Obiteljski izazov" %}</div>
+        <div class="card-title">{{ daily_quest.title }}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p>{{ daily_quest.description|truncatewords:30 }}</p>
+      {% if daily_quest.grandma_tip %}
+      <p>👵 {{ daily_quest.grandma_tip|truncatewords:20 }}</p>
+      {% endif %}
+      <p style="font-size:.85rem;color:#c9a84c">🏆 {{ daily_quest.family_points }} {% trans "obiteljskih bodova" %}</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Daily Joke -->
+  {% if daily_joke %}
+  <div class="daily-card" onclick="this.querySelector('.punchline').style.display='block'" style="cursor:pointer">
+    <div class="card-head">
+      <div class="card-icon">😄</div>
+      <div>
+        <div class="card-label">{% trans "Šala dana" %}</div>
+        <div class="card-title">{{ daily_joke.setup }}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="punchline" style="display:none;color:#2e7d32;font-size:1.1rem;font-weight:bold;margin-top:.5rem">
+        {{ daily_joke.punchline }}
+      </p>
+      <p style="font-size:.8rem;color:#c9a84c">{% trans "Klikni za odgovor!" %} 👆</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Quick actions -->
+  <div class="daily-section">
+    <h2>{% trans "Što još možeš danas?" %}</h2>
+    <div class="daily-actions">
+      <a href="{% url 'memio_world:chess_home' %}" class="daily-btn">♟ {% trans "Šah" %}</a>
+      <a href="{% url 'memio_world:ludo_game' %}" class="daily-btn">🎲 {% trans "Čovječe" %}</a>
+      <a href="{% url 'memio_world:memory_game' %}" class="daily-btn outline">🧠 Memory</a>
+      <a href="{% url 'memio_world:quiz_list' %}" class="daily-btn outline">📝 {% trans "Kviz" %}</a>
+      <a href="{% url 'memio_world:story_list' %}" class="daily-btn outline">📚 {% trans "Sve priče" %}</a>
+    </div>
+  </div>
+
+  <!-- Physical activity reminder -->
+  <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.2rem;margin-top:1.5rem;
+    border:2px solid #66bb6a;text-align:center">
+    <div style="font-size:2rem;margin-bottom:.3rem">🏃</div>
+    <div style="font-family:'MedievalSharp',serif;font-size:1.1rem;color:#1b5e20;font-weight:bold">
+      {% trans "Vrijeme za pokret!" %}
+    </div>
+    <div style="font-family:'MedievalSharp',serif;font-size:.9rem;color:#2e7d32;margin-top:.3rem">
+      {% trans "Ustani, napravi 5 čučnjeva, 10 skokova, i vrati se!" %}
+    </div>
+    <div style="font-size:.75rem;color:#4caf50;margin-top:.5rem;font-family:'Space Grotesk',sans-serif">
+      👵 {% trans "Baka kaže: Tko se kreće, duže živi!" %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

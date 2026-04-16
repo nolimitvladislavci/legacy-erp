@@ -5,7 +5,7 @@
 {% block page_title %}📄 {{ offer.offer_number }}{% endblock %}
 
 {% block content %}
-<div class="fx-container fx-py-3">
+<div class="fx-container fx-py-3" style="max-width:100%;overflow-x:auto">
 
   <!-- Status ponude -->
   <div class="fx-card fx-mb-3" style="border-top: 3px solid var(--gold)">
@@ -37,7 +37,7 @@
     </div>
     <div class="fx-card-body p-0">
       <div class="table-responsive">
-        <table class="table fx-table fx-mb-0">
+        <div class="table-responsive"><table class="table fx-table fx-mb-0">
           <thead>
             <tr>
               <th>#</th>
@@ -60,7 +60,7 @@
                 {% if m.glass %}<br><small class="fx-text-muted">{{ m.glass }}</small>{% endif %}
                 {% if m.location_note %}<br><small class="fx-text-muted">{{ m.location_note }}</small>{% endif %}
               </td>
-              <td class="text-center fx-text-gold fw-bold">{{ m.width_mm }} × {{ m.height_mm }}</td>
+              <td class="text-center"><a href="{% url 'stolarija:session_detail' offer.session.id %}#m-{{ m.id }}" class="fx-text-gold fw-bold text-decoration-none" title="Otvori detalj mjere">{{ m.width_mm }} × {{ m.height_mm }} <i class="fas fa-external-link-alt" style="font-size:.7rem;opacity:.6"></i></a></td>
               <td class="text-center">{{ m.quantity }}</td>
               <td class="text-center">{{ m.total_area_m2 }} m²</td>
               <td class="text-center">

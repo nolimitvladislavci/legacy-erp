@@ -1,0 +1,146 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}✍️ {% trans "Nastavi priču" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.write{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.write h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.write .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.prompt-card{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;padding:1.5rem;
+  border:2px solid #c9a84c;margin-bottom:1.5rem}
+.prompt-card .starter{font-family:'MedievalSharp',serif;font-size:1.2rem;color:#2c1810;line-height:1.7}
+.prompt-card .starter::first-letter{font-family:'Uncial Antiqua',serif;font-size:2.5rem;color:#8b2500;
+  float:left;line-height:.8;margin-right:8px}
+
+.write-area{position:relative}
+.write-area textarea{width:100%;min-height:250px;border:2px solid rgba(201,168,76,.3);border-radius:12px;
+  padding:1.2rem;font-family:'MedievalSharp',serif;font-size:1.1rem;line-height:1.8;color:#2c1810;
+  background:#fff;resize:vertical;outline:none;transition:.2s}
+.write-area textarea:focus{border-color:#c9a84c;box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+.write-area textarea::placeholder{color:#c9a84c;font-style:italic}
+.word-count{font-family:'Space Grotesk',sans-serif;font-size:.8rem;color:#6b5a4e;text-align:right;margin-top:.3rem}
+
+.prompt-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
+.prompt-btn{padding:8px 16px;border-radius:10px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.9rem;cursor:pointer;transition:.2s;color:#2c1810}
+.prompt-btn:hover{border-color:#c9a84c;background:rgba(201,168,76,.1)}
+.prompt-btn.active{background:#c9a84c;color:#fff;border-color:#8b6914}
+
+.action-btns{display:flex;gap:10px;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+.abtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+.abtn:hover{transform:translateY(-2px)}.abtn.outline{background:transparent;border:2px solid #c9a84c;color:#2c1810}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="write">
+  <h1>✍️ {% trans "Nastavi priču" %}</h1>
+  <p class="sub">{% trans "Čitaš početak — ti pišeš kraj! Tvoja mašta, tvoja priča." %}</p>
+
+  <div class="prompt-btns">
+    <button class="prompt-btn active" onclick="setPrompt(0,this)">🏰 {% trans "Dvorac" %}</button>
+    <button class="prompt-btn" onclick="setPrompt(1,this)">🐉 {% trans "Zmaj" %}</button>
+    <button class="prompt-btn" onclick="setPrompt(2,this)">🌲 {% trans "Šuma" %}</button>
+    <button class="prompt-btn" onclick="setPrompt(3,this)">🚀 {% trans "Svemirsko" %}</button>
+    <button class="prompt-btn" onclick="setPrompt(4,this)">🐾 {% trans "Životinje" %}</button>
+    <button class="prompt-btn" onclick="setPrompt(5,this)">🌊 {% trans "More" %}</button>
+  </div>
+
+  <div class="prompt-card">
+    <div class="starter" id="starterText"></div>
+  </div>
+
+  <div class="write-area">
+    <textarea id="storyText" placeholder="{% trans 'Nastavi priču ovdje... Što se dalje dogodilo?' %}"></textarea>
+    <div class="word-count"><span id="wc">0</span> {% trans "riječi" %}</div>
+  </div>
+
+  <div class="action-btns">
+    <button class="abtn" onclick="readAloud()">🔊 {% trans "Čitaj naglas" %}</button>
+    <button class="abtn" onclick="recordStory()">🎤 {% trans "Snimi" %}</button>
+    <button class="abtn outline" onclick="saveStory()">💾 {% trans "Spremi" %}</button>
+    <button class="abtn outline" onclick="newPrompt()">🔄 {% trans "Novi početak" %}</button>
+  </div>
+
+  <div style="margin-top:1.5rem;background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;
+    text-align:center;font-family:'MedievalSharp',serif;color:#5c3d1a;font-size:.9rem">
+    👵 {% trans "Baka kaže: Svaka priča koju napišeš ostaje zauvijek. Ti si pisac — piši hrabro!" %}
+  </div>
+</div>
+
+<script>
+var PROMPTS = [
+  {title:'Dvorac',text:'U dalekoj zemlji, na vrhu najviše planine, stajao je dvorac od kojeg je svaki kamen sjajio na mjesečini. Nitko nije znao tko u njemu živi jer vrata su bila zatvorena već sto godina. Ali jednog dana, malo dijete pronađe ključ u svom džepu — ključ koji savršeno pristaje u bravu. Dijete okrene ključ, vrata se otvore, i iza njih...'},
+  {title:'Zmaj',text:'Zmaj je živio u pećini iza vodopada. Bio je veliki i zeleni, s krilima širokim poput jedara. Ali ovaj zmaj imao je tajnu — nije znao letjeti. Svake noći pokušavao bi raširiti krila, zatrčati se i skočiti s litice, ali svaki put bi pao u rijeku. Jednog jutra, mala djevojčica koja je brala maline pokraj vodopada čula je plač. Pogledala je iza vodopada i ugledala...'},
+  {title:'Šuma',text:'U šumi gdje su stabla bila tako visoka da im se vrh nije vidio, živio je čuvar šume — stari hrast po imenu Bukvar. Bukvar je znao svaku tajnu šume: gdje lisica skriva mladunce, gdje potok izvire, i gdje raste cvijet koji cvjeta samo jednom u sto godina. Ali danas je Bukvar bio uznemiren. Nešto se promijenilo u šumi. Ptice su utihnule. Vjetar je stao. I tada je čuo...'},
+  {title:'Svemirsko',text:'Svemirski brod "Zvjezdani Skakač" bio je najmanji u cijeloj floti — tek nešto veći od školskog autobusa. Ali imao je nešto što veliki brodovi nisu imali: kapetanicu staru samo deset godina. Zvala se Luna i bila je najmlađa kapetanica u povijesti svemira. Danas je bila na svojoj prvoj misiji: otkriti planet na kojem rastu jabuke od kristala. Luna je pogledala kroz prozor i ugledala...'},
+  {title:'Životinje',text:'U velikoj staroj šumi, svake godine u noći punog mjeseca, životinje su birale svog kralja. Ove godine natjecali su se: lav (koji je mislio da je najjači), sova (koja je mislila da je najpametnija), i mali jež (koji nije mislio ništa posebno o sebi). Glasanje je bilo gotovo i rezultat je iznenadio sve. Novi kralj šume bio je...'},
+  {title:'More',text:'Na dnu mora, tamo gdje sunčeva svjetlost jedva dopire, stajao je grad od koralja. Ulice su bile od pijeska, kuće od školjki, a umjesto automobila — morski konjići su prevozili putnike. U tom gradu živjela je mala hobotnica po imenu Tinta. Tinta je imala osam krakova — ali jedan krak bio je drugačiji od ostalih. Taj krak je mogao...'},
+];
+
+var currentPrompt = 0;
+
+function setPrompt(idx, el) {
+  currentPrompt = idx;
+  document.querySelectorAll('.prompt-btn').forEach(function(b){b.classList.remove('active')});
+  el.classList.add('active');
+  document.getElementById('starterText').textContent = PROMPTS[idx].text;
+}
+
+function newPrompt() {
+  currentPrompt = (currentPrompt + 1) % PROMPTS.length;
+  document.querySelectorAll('.prompt-btn')[currentPrompt].click();
+  document.getElementById('storyText').value = '';
+  document.getElementById('wc').textContent = '0';
+}
+
+// Word count
+document.getElementById('storyText').addEventListener('input', function() {
+  var words = this.value.trim().split(/\s+/).filter(function(w){return w;});
+  document.getElementById('wc').textContent = words.length;
+});
+
+// Read aloud
+function readAloud() {
+  var text = PROMPTS[currentPrompt].text + ' ' + document.getElementById('storyText').value;
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'hr-HR'; u.rate = 0.82; u.pitch = 1.05;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+// Record
+var mediaRec = null, isRec = false;
+function recordStory() {
+  if (isRec) { mediaRec.stop(); isRec = false; return; }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream) {
+    mediaRec = new MediaRecorder(stream);
+    var chunks = [];
+    mediaRec.ondataavailable = function(e){chunks.push(e.data);};
+    mediaRec.onstop = function() {
+      var blob = new Blob(chunks, {type:'audio/webm'});
+      var a = new Audio(URL.createObjectURL(blob));
+      a.play();
+      stream.getTracks().forEach(function(t){t.stop();});
+    };
+    mediaRec.start(); isRec = true;
+  }).catch(function(){});
+}
+
+// Save as text file
+function saveStory() {
+  var text = PROMPTS[currentPrompt].text + '\n\n' + document.getElementById('storyText').value;
+  var blob = new Blob([text], {type:'text/plain'});
+  var a = document.createElement('a');
+  a.download = 'moja-prica.txt';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+}
+
+// Init
+setPrompt(0, document.querySelectorAll('.prompt-btn')[0]);
+</script>
+{% endblock %}

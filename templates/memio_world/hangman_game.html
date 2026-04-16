@@ -1,0 +1,243 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🔠 {% trans "Vješalica" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.hang{max-width:600px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.hang h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;margin-bottom:.2rem}
+.hang .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1rem;font-size:.9rem}
+.hang-word{font-family:'Uncial Antiqua',serif;font-size:2.5rem;letter-spacing:12px;color:#2c1810;margin:1.5rem 0;min-height:3.5rem}
+.hang-hint{font-family:'MedievalSharp',serif;color:#c9a84c;font-size:1rem;margin-bottom:1rem;min-height:1.5rem}
+.hang-lives{font-size:1.5rem;margin-bottom:1rem;min-height:2rem}
+.keyboard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:420px;margin:0 auto}
+.key{width:38px;height:42px;border-radius:8px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:.15s;color:#2c1810}
+.key:hover{border-color:#c9a84c;background:rgba(201,168,76,.1)}
+.key.correct{background:#c8e6c9;border-color:#66bb6a;color:#1b5e20}
+.key.wrong{background:#ffcdd2;border-color:#e53935;color:#c62828;opacity:.5}
+.key.used{pointer-events:none}
+.hang-msg{font-family:'MedievalSharp',serif;font-size:1.3rem;margin-top:1rem;min-height:2rem}
+.hang-msg.win{color:#2e7d32}.hang-msg.lose{color:#c62828}
+.hang-canvas{margin:0 auto 1rem}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;margin-top:1rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+.cat-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.cat-btn{padding:6px 16px;border-radius:8px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.85rem;cursor:pointer;transition:.2s;color:#2c1810}
+.cat-btn:hover{border-color:#c9a84c}.cat-btn.active{background:#c9a84c;color:#fff}
+</style>
+{% endblock %}
+{% block content %}
+<div class="hang">
+  <h1>🔠 {% trans "Vješalica" %}</h1>
+  <p class="sub">{% trans "Pogodi riječ slovo po slovo! Iz bajki, prirode i svakodnevice." %}</p>
+
+  <div class="cat-btns">
+    <button class="cat-btn active" onclick="setCategory('fairy',this)">🏰 {% trans "Bajke" %}</button>
+    <button class="cat-btn" onclick="setCategory('animals',this)">🐾 {% trans "Životinje" %}</button>
+    <button class="cat-btn" onclick="setCategory('nature',this)">🌿 {% trans "Priroda" %}</button>
+    <button class="cat-btn" onclick="setCategory('food',this)">🍎 {% trans "Hrana" %}</button>
+  </div>
+
+  <canvas class="hang-canvas" id="hangCanvas" width="200" height="200"></canvas>
+  <div class="hang-word" id="hangWord"></div>
+  <div class="hang-hint" id="hangHint"></div>
+  <div class="hang-lives" id="hangLives"></div>
+  <div class="keyboard" id="keyboard"></div>
+  <div class="hang-msg" id="hangMsg"></div>
+  <button class="gbtn" onclick="newWord()">🔄 {% trans "Nova riječ" %}</button>
+</div>
+
+<script>
+var WORDS = {
+  fairy: [
+    {word:'RAPUNZEL',hint:'Djevojka sa zlatnom kosom u tornju'},
+    {word:'PATULJAK',hint:'Sedam ih čuva Snjeguljicu'},
+    {word:'PRINCEZA',hint:'Živi u dvorcu i čeka princa'},
+    {word:'ČAROBNICA',hint:'Ima čarobne moći i čarobni štap'},
+    {word:'TORANJ',hint:'Rapunzel živi u njemu'},
+    {word:'VRETENO',hint:'Na ovo se ubola Trnoružica'},
+    {word:'DVORAC',hint:'Gdje žive kraljevi i kraljice'},
+    {word:'KRUNICA',hint:'Nosi je kraljica na glavi'},
+    {word:'MATOVILAC',hint:'Biljka po kojoj je Rapunzel dobila ime'},
+    {word:'BAŠTINA',hint:'Kulturno nasljeđe koje čuvamo'},
+    {word:'HLAPIĆ',hint:'Mali šegrt koji je pobjegao'},
+    {word:'MAGARAC',hint:'Životinja koja ide u Bremen svirati'},
+  ],
+  animals: [
+    {word:'LEPTIR',hint:'Šarena krila, leti s cvijeta na cvijet'},
+    {word:'GOLUB',hint:'Bijeli ptica mira'},
+    {word:'MEDVJED',hint:'Veliki, dlakavi, voli med'},
+    {word:'JELEN',hint:'Ima rogove i živi u šumi'},
+    {word:'KORNJAČA',hint:'Nosi kućicu na leđima'},
+    {word:'PAUN',hint:'Ima najljepši rep od svih ptica'},
+    {word:'ŽIRAFA',hint:'Najviša životinja na svijetu'},
+    {word:'DELFIN',hint:'Pametan, živi u moru, skače'},
+  ],
+  nature: [
+    {word:'SUNCE',hint:'Grije nas i daje svjetlo'},
+    {word:'OBLAK',hint:'Bijeli, plovi nebom'},
+    {word:'RIJEKA',hint:'Voda koja teče kroz krajolj'},
+    {word:'PLANINA',hint:'Visoka, ponekad sa snijegom na vrhu'},
+    {word:'ŠUMA',hint:'Puna drveća, životinja i tajni'},
+    {word:'CVIJET',hint:'Raste u vrtu, miriše lijepo'},
+    {word:'ZVIJEZDA',hint:'Sjaji na noćnom nebu'},
+    {word:'KIŠA',hint:'Pada s neba, hrani biljke'},
+  ],
+  food: [
+    {word:'JABUKA',hint:'Crveni voćka, jedna je otrovana u bajci'},
+    {word:'ČOKOLADA',hint:'Smeđa, slatka, svi je vole'},
+    {word:'KRUH',hint:'Peče se u pećnici, mirise cijela kuća'},
+    {word:'PALAČINKA',hint:'Tanka, okrugla, sa nutellom ili pekmezom'},
+    {word:'JAGODA',hint:'Mala, crvena, raste u vrtu'},
+    {word:'TORTA',hint:'Za rođendan, sa svjećicama'},
+    {word:'MED',hint:'Pčele ga proizvode, sladak je'},
+    {word:'MLIJEKO',hint:'Bijelo, pijemo ga iz čaše'},
+  ]
+};
+
+var category = 'fairy';
+var currentWord = '', guessedLetters = [], wrongCount = 0, maxWrong = 7, gameOver = false;
+var HR_LETTERS = 'ABCČĆDĐEFGHIJKLLJMNNJOPRSŠTUVZŽ';
+
+function setCategory(cat, el) {
+  category = cat;
+  document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('active')});
+  el.classList.add('active');
+  newWord();
+}
+
+function newWord() {
+  var pool = WORDS[category] || WORDS.fairy;
+  var item = pool[Math.floor(Math.random() * pool.length)];
+  currentWord = item.word;
+  document.getElementById('hangHint').textContent = '💡 ' + item.hint;
+  guessedLetters = [];
+  wrongCount = 0;
+  gameOver = false;
+  document.getElementById('hangMsg').textContent = '';
+  document.getElementById('hangMsg').className = 'hang-msg';
+  buildKeyboard();
+  updateDisplay();
+  drawHangman();
+}
+
+function buildKeyboard() {
+  var kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  for (var i = 0; i < HR_LETTERS.length; i++) {
+    var ch = HR_LETTERS[i];
+    // Handle digraphs
+    if (ch === 'L' && i+1 < HR_LETTERS.length && HR_LETTERS[i+1] === 'J') {
+      var key = document.createElement('div');
+      key.className = 'key';
+      key.textContent = 'LJ';
+      key.onclick = (function(c){return function(){guess(c)}})(ch);
+      kb.appendChild(key);
+    } else if (ch === 'N' && i+1 < HR_LETTERS.length && HR_LETTERS[i+1] === 'J') {
+      var key = document.createElement('div');
+      key.className = 'key';
+      key.textContent = 'NJ';
+      key.onclick = (function(c){return function(){guess(c)}})(ch);
+      kb.appendChild(key);
+    } else {
+      var key = document.createElement('div');
+      key.className = 'key';
+      key.textContent = ch;
+      key.onclick = (function(c){return function(){guess(c)}})(ch);
+      kb.appendChild(key);
+    }
+  }
+}
+
+function guess(letter) {
+  if (gameOver || guessedLetters.indexOf(letter) >= 0) return;
+  guessedLetters.push(letter);
+
+  var keys = document.querySelectorAll('.key');
+  keys.forEach(function(k) {
+    if (k.textContent === letter || (k.textContent.length === 2 && k.textContent[0] === letter)) {
+      k.classList.add('used');
+      if (currentWord.indexOf(letter) >= 0) k.classList.add('correct');
+      else { k.classList.add('wrong'); wrongCount++; }
+    }
+  });
+
+  updateDisplay();
+  drawHangman();
+  checkWin();
+}
+
+function updateDisplay() {
+  var display = '';
+  for (var i = 0; i < currentWord.length; i++) {
+    if (guessedLetters.indexOf(currentWord[i]) >= 0) display += currentWord[i] + ' ';
+    else display += '_ ';
+  }
+  document.getElementById('hangWord').textContent = display.trim();
+  var hearts = '';
+  for (var i = 0; i < maxWrong - wrongCount; i++) hearts += '❤️';
+  for (var i = 0; i < wrongCount; i++) hearts += '🖤';
+  document.getElementById('hangLives').textContent = hearts;
+}
+
+function checkWin() {
+  var won = true;
+  for (var i = 0; i < currentWord.length; i++) {
+    if (guessedLetters.indexOf(currentWord[i]) < 0) { won = false; break; }
+  }
+  if (won) {
+    gameOver = true;
+    document.getElementById('hangMsg').textContent = '🎉 Bravo! Riječ je: ' + currentWord;
+    document.getElementById('hangMsg').className = 'hang-msg win';
+    var u = new SpeechSynthesisUtterance('Bravo! Riječ je ' + currentWord);
+    u.lang = 'hr-HR'; u.rate = 0.85;
+    speechSynthesis.speak(u);
+  } else if (wrongCount >= maxWrong) {
+    gameOver = true;
+    document.getElementById('hangMsg').textContent = '😔 Riječ je bila: ' + currentWord;
+    document.getElementById('hangMsg').className = 'hang-msg lose';
+  }
+}
+
+function drawHangman() {
+  var c = document.getElementById('hangCanvas');
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 200, 200);
+  ctx.strokeStyle = '#2c1810'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  // Base
+  if (wrongCount > 0) { ctx.beginPath(); ctx.moveTo(20,180); ctx.lineTo(180,180); ctx.stroke(); }
+  // Pole
+  if (wrongCount > 0) { ctx.beginPath(); ctx.moveTo(60,180); ctx.lineTo(60,20); ctx.stroke(); }
+  // Top
+  if (wrongCount > 1) { ctx.beginPath(); ctx.moveTo(60,20); ctx.lineTo(140,20); ctx.stroke(); }
+  // Rope
+  if (wrongCount > 1) { ctx.beginPath(); ctx.moveTo(140,20); ctx.lineTo(140,45); ctx.stroke(); }
+  // Head
+  if (wrongCount > 2) { ctx.beginPath(); ctx.arc(140,60,15,0,Math.PI*2); ctx.stroke(); }
+  // Body
+  if (wrongCount > 3) { ctx.beginPath(); ctx.moveTo(140,75); ctx.lineTo(140,120); ctx.stroke(); }
+  // Arms
+  if (wrongCount > 4) { ctx.beginPath(); ctx.moveTo(140,85); ctx.lineTo(115,105); ctx.stroke(); ctx.beginPath(); ctx.moveTo(140,85); ctx.lineTo(165,105); ctx.stroke(); }
+  // Legs
+  if (wrongCount > 5) { ctx.beginPath(); ctx.moveTo(140,120); ctx.lineTo(120,155); ctx.stroke(); }
+  if (wrongCount > 6) { ctx.beginPath(); ctx.moveTo(140,120); ctx.lineTo(160,155); ctx.stroke(); }
+  // Face
+  if (wrongCount >= maxWrong) {
+    ctx.fillStyle = '#c62828'; ctx.beginPath(); ctx.arc(134,57,2,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(146,57,2,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(140,68,5,0,Math.PI); ctx.stroke();
+  } else if (wrongCount > 2) {
+    ctx.fillStyle = '#2c1810'; ctx.beginPath(); ctx.arc(134,57,2,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(146,57,2,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(140,66,4,Math.PI,0); ctx.stroke(); // smile
+  }
+}
+
+newWord();
+</script>
+{% endblock %}

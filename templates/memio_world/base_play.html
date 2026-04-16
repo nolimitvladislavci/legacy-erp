@@ -5,11 +5,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{% block title %}PLAY.EU{% endblock %}</title>
-<meta name="description" content="{% block meta_desc %}Digitizing Europe's Intangible Heritage Through Children's Games{% endblock %}">
+<meta name="description" content="{% block meta_desc %}PLAY.EU — Digitalni roditelj. Priče, igre, mudrost za djecu Europe.{% endblock %}">
 <meta name="theme-color" content="#C9A84C">
 <link rel="manifest" href="{% static 'memio_world/manifest.json' %}">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏰</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'memio_world/play-eu.css' %}">
 {% block extra_head %}{% endblock %}
 </head>
@@ -20,10 +20,10 @@
   <a href="{% url 'memio_world:play_home' %}" class="play-top-brand">
     🏰 PLAY.<span>EU</span>
   </a>
-  <div class="play-top-lang">
-    <a href="?lang=hr" class="{% if lang == 'hr' %}active{% endif %}">HR</a>
-    <a href="?lang=de" class="{% if lang == 'de' %}active{% endif %}">DE</a>
-    <a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}">EN</a>
+  <div class="play-top-lang" style="display:flex;gap:6px;align-items:center">
+    <a href="?lang=hr" class="{% if lang == 'hr' %}active{% endif %}" style="font-size:1.4rem;text-decoration:none;padding:2px 4px;border-radius:4px;{% if lang == 'hr' %}border-bottom:2px solid #c9a84c{% endif %}" title="Hrvatski">🇭🇷</a>
+    <a href="?lang=de" class="{% if lang == 'de' %}active{% endif %}" style="font-size:1.4rem;text-decoration:none;padding:2px 4px;border-radius:4px;{% if lang == 'de' %}border-bottom:2px solid #c9a84c{% endif %}" title="Deutsch">🇩🇪</a>
+    <a href="?lang=en" class="{% if lang == 'en' %}active{% endif %}" style="font-size:1.4rem;text-decoration:none;padding:2px 4px;border-radius:4px;{% if lang == 'en' %}border-bottom:2px solid #c9a84c{% endif %}" title="English">🇬🇧</a>
   </div>
 </header>
 
@@ -42,7 +42,7 @@
     <span class="nav-icon">📖</span>
     <span>{% trans "Čitaj" %}</span>
   </a>
-  <a href="{% url 'memio_world:card_list' %}" class="{% if nav == 'play' %}active{% endif %}">
+  <a href="{% url 'memio_world:chess_home' %}" class="{% if nav == 'play' %}active{% endif %}">
     <span class="nav-icon">🎮</span>
     <span>{% trans "Igraj" %}</span>
   </a>
@@ -58,7 +58,7 @@
 
 <!-- Footer -->
 <div class="play-footer">
-  <a href="https://memio.world">memio.world</a> · PLAY.EU · Creative Europe
+  <a href="https://memio.world">memio.world</a> · PLAY.EU · Creative Europe · {% trans "Bez reklama. Zauvijek." %}
 </div>
 
 {% block extra_js %}{% endblock %}

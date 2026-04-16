@@ -1,0 +1,252 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🔤 {% trans "Slovarica" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.alpha{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.alpha h1{font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.alpha .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+/* Letter grid */
+.letter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:1.5rem}
+.letter-btn{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-family:'Uncial Antiqua',serif;font-size:1.8rem;color:#2c1810;
+  background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border:2px solid rgba(201,168,76,.3);
+  border-radius:12px;cursor:pointer;transition:.2s;text-decoration:none}
+.letter-btn:hover{border-color:#c9a84c;transform:scale(1.08);box-shadow:0 4px 16px rgba(201,168,76,.3)}
+.letter-btn.active{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border-color:#8b6914;
+  transform:scale(1.1);box-shadow:0 4px 20px rgba(201,168,76,.5)}
+
+/* Letter detail */
+.letter-detail{display:none;background:#fff;border-radius:20px;padding:2rem;text-align:center;
+  border:3px solid #c9a84c;box-shadow:0 8px 40px rgba(0,0,0,.1);animation:fadeUp .4s ease-out}
+.letter-detail.show{display:block}
+.ld-letter{font-family:'Uncial Antiqua',serif;font-size:8rem;line-height:1;color:#8b2500;
+  text-shadow:2px 2px 0 rgba(201,168,76,.3);margin-bottom:.5rem}
+.ld-word{font-family:'MedievalSharp',serif;font-size:2rem;color:#2c1810;margin-bottom:.3rem}
+.ld-emoji{font-size:4rem;margin-bottom:.5rem}
+.ld-sentence{font-family:'MedievalSharp',serif;font-size:1.1rem;color:#6b5a4e;line-height:1.6;
+  max-width:400px;margin:0 auto .8rem}
+.ld-btns{display:flex;gap:10px;justify-content:center;margin-top:1rem}
+.ld-btn{width:48px;height:48px;border-radius:50%;border:2px solid #c9a84c;background:#f5e6c8;
+  font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.ld-btn:hover{background:#c9a84c;color:#fff;transform:scale(1.1)}
+.ld-btn.active{background:#c9a84c;color:#fff;animation:pulse-glow 1.5s infinite}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 8px rgba(201,168,76,0)}}
+.ld-nav{display:flex;gap:10px;justify-content:center;margin-top:1rem}
+.nav-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;transition:.2s}
+.nav-btn:hover{transform:translateY(-2px)}
+.nav-btn:disabled{opacity:.3}
+
+/* Writing practice canvas */
+.write-area{margin-top:1rem}
+.write-canvas{border:2px dashed #c9a84c;border-radius:12px;background:#fff;cursor:crosshair;
+  touch-action:none;max-width:300px;margin:0 auto}
+.write-label{font-family:'MedievalSharp',serif;font-size:.85rem;color:#c9a84c;margin-top:.3rem}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="alpha">
+  <h1>🔤 {% trans "Slovarica" %}</h1>
+  <p class="sub">{% trans "Klikni slovo — čuj ga, vidi ga, nacrtaj ga!" %}</p>
+
+  <div class="letter-grid" id="letterGrid"></div>
+
+  <div class="letter-detail" id="letterDetail">
+    <div class="ld-letter" id="ldLetter"></div>
+    <div class="ld-emoji" id="ldEmoji"></div>
+    <div class="ld-word" id="ldWord"></div>
+    <div class="ld-sentence" id="ldSentence"></div>
+
+    <div class="ld-btns">
+      <button class="ld-btn" onclick="speakLetter()" title="{% trans 'Čuj slovo' %}">🔊</button>
+      <button class="ld-btn" onclick="speakWord()" title="{% trans 'Čuj riječ' %}">🗣️</button>
+      <button class="ld-btn" id="micBtn" onclick="toggleMic()" title="{% trans 'Snimi se' %}">🎤</button>
+    </div>
+
+    <!-- Writing practice -->
+    <div class="write-area">
+      <canvas class="write-canvas" id="writeCanvas" width="300" height="200"></canvas>
+      <div class="write-label">{% trans "Nacrtaj slovo prstom ili mišem!" %} <button onclick="clearCanvas()" style="background:none;border:1px solid #c9a84c;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:.75rem">🧹</button></div>
+    </div>
+
+    <div class="ld-nav">
+      <button class="nav-btn" id="prevBtn" onclick="prevLetter()">←</button>
+      <button class="nav-btn" id="nextBtn" onclick="nextLetter()">{% trans "Sljedeće" %} →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var LANG = '{{ lang }}';
+
+var ALPHABET = [
+  {letter:'A',word:'Avion',emoji:'✈️',sentence:'Avion leti visoko iznad oblaka.'},
+  {letter:'B',word:'Balon',emoji:'🎈',sentence:'Crveni balon leti prema nebu.'},
+  {letter:'C',word:'Cvijet',emoji:'🌸',sentence:'Lijepi cvijet raste u vrtu.'},
+  {letter:'Č',word:'Čokolada',emoji:'🍫',sentence:'Čokolada je najslađi poklon.'},
+  {letter:'Ć',word:'Ćup',emoji:'🏺',sentence:'U ćupu baka čuva med.'},
+  {letter:'D',word:'Dom',emoji:'🏠',sentence:'Dom je tamo gdje te čeka obitelj.'},
+  {letter:'Đ',word:'Đak',emoji:'👦',sentence:'Đak nosi školsku torbu.'},
+  {letter:'DŽ',word:'Džep',emoji:'👖',sentence:'U džepu imam kamenčić za sreću.'},
+  {letter:'E',word:'Ežić',emoji:'🦔',sentence:'Mali ježić spava pod lišćem.'},
+  {letter:'F',word:'Flauta',emoji:'🎵',sentence:'Flauta svira prekrasnu melodiju.'},
+  {letter:'G',word:'Golub',emoji:'🕊️',sentence:'Bijeli golub nosi poruku mira.'},
+  {letter:'H',word:'Hleb',emoji:'🍞',sentence:'Miris svježeg hleba puni kuću.'},
+  {letter:'I',word:'Igla',emoji:'🪡',sentence:'Iglom i koncem šivamo odjeću.'},
+  {letter:'J',word:'Jabuka',emoji:'🍎',sentence:'Crvena jabuka visi na grani.'},
+  {letter:'K',word:'Knjiga',emoji:'📖',sentence:'Knjiga je prozor u drugi svijet.'},
+  {letter:'L',word:'Leptir',emoji:'🦋',sentence:'Šareni leptir leti s cvijeta na cvijet.'},
+  {letter:'LJ',word:'Ljuljačka',emoji:'🎠',sentence:'Na ljuljački se ljuljam visoko!'},
+  {letter:'M',word:'Mama',emoji:'👩',sentence:'Mama me zagrli kad sam tužan.'},
+  {letter:'N',word:'Nos',emoji:'👃',sentence:'Nosom osjećamo mirise svijeta.'},
+  {letter:'NJ',word:'Njuška',emoji:'🐕',sentence:'Psić njuši trag po travi.'},
+  {letter:'O',word:'Oblak',emoji:'☁️',sentence:'Bijeli oblak plovi nebom.'},
+  {letter:'P',word:'Ptica',emoji:'🐦',sentence:'Ptica pjeva na grani svako jutro.'},
+  {letter:'R',word:'Riba',emoji:'🐟',sentence:'Zlatna riba pliva u bistrom potoku.'},
+  {letter:'S',word:'Sunce',emoji:'☀️',sentence:'Sunce grije i daje nam svjetlo.'},
+  {letter:'Š',word:'Škola',emoji:'🏫',sentence:'U školi učimo i igramo se.'},
+  {letter:'T',word:'Torta',emoji:'🎂',sentence:'Za rođendan jedemo tortu s prijateljima.'},
+  {letter:'U',word:'Ura',emoji:'⌚',sentence:'Ura pokazuje koliko je sati.'},
+  {letter:'V',word:'Voda',emoji:'💧',sentence:'Čista voda je dar prirode.'},
+  {letter:'Z',word:'Zvijezda',emoji:'⭐',sentence:'Zvijezde sjaje na noćnom nebu.'},
+  {letter:'Ž',word:'Žaba',emoji:'🐸',sentence:'Zelena žaba skače pokraj jezera.'}
+];
+
+var currentIdx = -1;
+
+// Build grid
+var grid = document.getElementById('letterGrid');
+ALPHABET.forEach(function(item, i) {
+  var btn = document.createElement('div');
+  btn.className = 'letter-btn';
+  btn.textContent = item.letter;
+  btn.onclick = function() { showLetter(i); };
+  grid.appendChild(btn);
+});
+
+function showLetter(idx) {
+  currentIdx = idx;
+  var item = ALPHABET[idx];
+
+  // Update active button
+  document.querySelectorAll('.letter-btn').forEach(function(b, i) {
+    b.classList.toggle('active', i === idx);
+  });
+
+  // Show detail
+  var detail = document.getElementById('letterDetail');
+  detail.classList.add('show');
+  document.getElementById('ldLetter').textContent = item.letter;
+  document.getElementById('ldEmoji').textContent = item.emoji;
+  document.getElementById('ldWord').textContent = item.word;
+  document.getElementById('ldSentence').textContent = item.sentence;
+
+  // Auto-speak
+  speakLetter();
+
+  // Clear canvas
+  clearCanvas();
+
+  // Draw guide letter
+  var ctx = document.getElementById('writeCanvas').getContext('2d');
+  ctx.fillStyle = 'rgba(201,168,76,0.15)';
+  ctx.font = 'bold 150px "Uncial Antiqua"';
+  ctx.textAlign = 'center';
+  ctx.fillText(item.letter, 150, 160);
+
+  // Scroll into view
+  detail.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+}
+
+function prevLetter() {
+  if (currentIdx > 0) showLetter(currentIdx - 1);
+}
+function nextLetter() {
+  if (currentIdx < ALPHABET.length - 1) showLetter(currentIdx + 1);
+}
+
+// TTS
+function speakLetter() {
+  var item = ALPHABET[currentIdx];
+  if (!item) return;
+  var u = new SpeechSynthesisUtterance(item.letter);
+  u.lang = 'hr-HR'; u.rate = 0.7; u.pitch = 1.1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+function speakWord() {
+  var item = ALPHABET[currentIdx];
+  if (!item) return;
+  var u = new SpeechSynthesisUtterance(item.word + '. ' + item.sentence);
+  u.lang = 'hr-HR'; u.rate = 0.8; u.pitch = 1.05;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+// Microphone
+var mediaRec = null, isRec = false;
+function toggleMic() {
+  var btn = document.getElementById('micBtn');
+  if (isRec) {
+    mediaRec.stop(); isRec = false; btn.classList.remove('active');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream) {
+    mediaRec = new MediaRecorder(stream);
+    var chunks = [];
+    mediaRec.ondataavailable = function(e) { chunks.push(e.data); };
+    mediaRec.onstop = function() {
+      var blob = new Blob(chunks, {type:'audio/webm'});
+      var a = new Audio(URL.createObjectURL(blob));
+      a.play();
+      stream.getTracks().forEach(function(t){t.stop();});
+    };
+    mediaRec.start(); isRec = true; btn.classList.add('active');
+  }).catch(function(){});
+}
+
+// Drawing canvas
+var canvas = document.getElementById('writeCanvas');
+var ctx = canvas.getContext('2d');
+var drawing = false;
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Redraw guide if letter selected
+  if (currentIdx >= 0) {
+    ctx.fillStyle = 'rgba(201,168,76,0.15)';
+    ctx.font = 'bold 150px "Uncial Antiqua"';
+    ctx.textAlign = 'center';
+    ctx.fillText(ALPHABET[currentIdx].letter, 150, 160);
+  }
+}
+
+function getPos(e) {
+  var rect = canvas.getBoundingClientRect();
+  var scaleX = canvas.width / rect.width;
+  var scaleY = canvas.height / rect.height;
+  var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY};
+}
+
+canvas.addEventListener('mousedown', function(e) { drawing = true; var p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', function(e) { if (!drawing) return; var p = getPos(e); ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2c1810'; ctx.lineTo(p.x, p.y); ctx.stroke(); });
+canvas.addEventListener('mouseup', function() { drawing = false; });
+canvas.addEventListener('touchstart', function(e) { e.preventDefault(); drawing = true; var p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, {passive:false});
+canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!drawing) return; var p = getPos(e); ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2c1810'; ctx.lineTo(p.x, p.y); ctx.stroke(); }, {passive:false});
+canvas.addEventListener('touchend', function() { drawing = false; });
+
+clearCanvas();
+</script>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🐾 {% trans "Životinje" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.animals{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
+.animals h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.animals .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.animal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.animal-card{background:#fff;border-radius:16px;padding:1rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);cursor:pointer;transition:.2s;
+  box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.animal-card:hover{border-color:#c9a84c;transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.animal-card:active{transform:scale(.95)}
+.animal-emoji{font-size:3.5rem;line-height:1;margin-bottom:.4rem}
+.animal-name{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;font-weight:bold}
+.animal-sound{font-family:'MedievalSharp',serif;font-size:.8rem;color:#c9a84c;font-style:italic;margin-top:.2rem}
+.animal-fact{font-size:.7rem;color:#6b5a4e;margin-top:.3rem;font-family:'Space Grotesk',sans-serif;line-height:1.3}
+
+.quiz-section{margin-top:2rem;background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;
+  padding:1.5rem;border:2px solid #c9a84c;text-align:center}
+.quiz-section h2{font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:1rem}
+.quiz-q{font-family:'MedievalSharp',serif;font-size:1.3rem;color:#2c1810;margin-bottom:1rem}
+.quiz-opts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.quiz-opt{font-size:3rem;padding:12px;border-radius:16px;background:#fff;border:3px solid transparent;
+  cursor:pointer;transition:.2s}
+.quiz-opt:hover{border-color:#c9a84c;transform:scale(1.1)}
+.quiz-opt.correct{border-color:#66bb6a;background:#c8e6c9}
+.quiz-opt.wrong{border-color:#e53935;background:#ffcdd2;opacity:.5}
+.quiz-msg{font-family:'MedievalSharp',serif;font-size:1.1rem;margin-top:.8rem;min-height:1.5rem}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;margin-top:.8rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animals">
+  <h1>🐾 {% trans "Životinje" %}</h1>
+  <p class="sub">{% trans "Klikni na životinju — čuj kako govori i nauči zanimljivost!" %}</p>
+
+  <div class="animal-grid" id="animalGrid"></div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>🎯 {% trans "Kviz: Koja životinja govori..." %}</h2>
+    <div class="quiz-q" id="quizQ"></div>
+    <div class="quiz-opts" id="quizOpts"></div>
+    <div class="quiz-msg" id="quizMsg"></div>
+    <button class="gbtn" onclick="newQuiz()">{% trans "Sljedeće pitanje" %} →</button>
+  </div>
+</div>
+
+<script>
+var ANIMALS = [
+  {emoji:'🐶',name:'Pas',sound:'Vau vau!',tts:'vau vau',fact:'Psi su najbolji prijatelji čovjeka već 15.000 godina.'},
+  {emoji:'🐱',name:'Mačka',sound:'Mjau!',tts:'mjau mjau',fact:'Mačke spavaju 12-16 sati dnevno.'},
+  {emoji:'🐮',name:'Krava',sound:'Muuu!',tts:'muuu',fact:'Krave imaju najbolje prijateljice i tugu kad se razdvoje.'},
+  {emoji:'🐷',name:'Svinja',sound:'Rok rok!',tts:'rok rok',fact:'Svinje su pametnije od pasa — uče trikove za 5 minuta!'},
+  {emoji:'🐔',name:'Kokoš',sound:'Kokodak!',tts:'kokodak kokodak',fact:'Kokoš zna prepoznati više od 100 različitih lica.'},
+  {emoji:'🐸',name:'Žaba',sound:'Kre kre!',tts:'kre kre',fact:'Žabe progutaju hranu pomoću očiju — guraju je očnim mišićima!'},
+  {emoji:'🦁',name:'Lav',sound:'Rrrr!',tts:'rrrr',fact:'Lavov rikanje čuje se na 8 kilometara udaljenosti.'},
+  {emoji:'🐴',name:'Konj',sound:'Ihaha!',tts:'ihaha',fact:'Konji mogu spavati i stojeći i ležeći.'},
+  {emoji:'🦆',name:'Patka',sound:'Kva kva!',tts:'kva kva',fact:'Pačići prate prvu stvar koju vide kad se izlegnu — čak i čovjeka!'},
+  {emoji:'🐝',name:'Pčela',sound:'Bzzzz!',tts:'bzzzz',fact:'Jedna pčela proizvede samo 1/12 čajne žličice meda u cijelom životu.'},
+  {emoji:'🦉',name:'Sova',sound:'Huhu!',tts:'huhu',fact:'Sove mogu okrenuti glavu skoro potpuno okolo — 270 stupnjeva!'},
+  {emoji:'🐺',name:'Vuk',sound:'Auuuu!',tts:'auuuu',fact:'Vukovi zavijaju da komuniciraju — svaki vuk ima jedinstven glas.'},
+  {emoji:'🐑',name:'Ovca',sound:'Beee!',tts:'beee',fact:'Ovce prepoznaju lica — pamte 50 ovaca i 10 ljudi godinama.'},
+  {emoji:'🦜',name:'Papiga',sound:'Polly!',tts:'halo halo',fact:'Neke papige žive preko 80 godina i znaju 1000 riječi!'},
+  {emoji:'🐋',name:'Kit',sound:'Uuuooo!',tts:'uuuooo',fact:'Plavi kit je najveća životinja ikad — veći od svakog dinosaura!'},
+  {emoji:'🐢',name:'Kornjača',sound:'...',tts:'tiho',fact:'Neke kornjače žive preko 200 godina!'},
+];
+
+var grid = document.getElementById('animalGrid');
+ANIMALS.forEach(function(a) {
+  var card = document.createElement('div');
+  card.className = 'animal-card';
+  card.innerHTML = '<div class="animal-emoji">' + a.emoji + '</div>' +
+    '<div class="animal-name">' + a.name + '</div>' +
+    '<div class="animal-sound">' + a.sound + '</div>' +
+    '<div class="animal-fact">' + a.fact + '</div>';
+  card.onclick = function() {
+    var u = new SpeechSynthesisUtterance(a.name + '. ' + a.tts + '. ' + a.fact);
+    u.lang = 'hr-HR'; u.rate = 0.85; u.pitch = 1.1;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    card.style.transform = 'scale(1.05)';
+    setTimeout(function(){card.style.transform='';}, 300);
+  };
+  grid.appendChild(card);
+});
+
+// Quiz
+function newQuiz() {
+  var correct = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+  var options = [correct];
+  while (options.length < 4) {
+    var r = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+    if (options.indexOf(r) === -1) options.push(r);
+  }
+  // Shuffle
+  for (var i = options.length-1; i > 0; i--) {
+    var j = Math.floor(Math.random()*(i+1)); var t=options[i]; options[i]=options[j]; options[j]=t;
+  }
+
+  document.getElementById('quizQ').textContent = '🔊 "' + correct.sound + '"';
+  document.getElementById('quizMsg').textContent = '';
+
+  // Speak the sound
+  var u = new SpeechSynthesisUtterance(correct.tts);
+  u.lang = 'hr-HR'; u.rate = 0.8;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+
+  var container = document.getElementById('quizOpts');
+  container.innerHTML = '';
+  options.forEach(function(opt) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt.emoji;
+    btn.title = opt.name;
+    btn.onclick = function() {
+      container.querySelectorAll('.quiz-opt').forEach(function(b){b.style.pointerEvents='none';});
+      if (opt === correct) {
+        btn.classList.add('correct');
+        document.getElementById('quizMsg').textContent = '🎉 Točno! ' + correct.name + ' kaže ' + correct.sound;
+        document.getElementById('quizMsg').style.color = '#2e7d32';
+      } else {
+        btn.classList.add('wrong');
+        container.querySelectorAll('.quiz-opt').forEach(function(b){if(b.textContent===correct.emoji)b.classList.add('correct');});
+        document.getElementById('quizMsg').textContent = '❌ To je ' + correct.name + '!';
+        document.getElementById('quizMsg').style.color = '#c62828';
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+
+newQuiz();
+</script>
+{% endblock %}

@@ -1,0 +1,270 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🎵 {% trans "Glazbeni kutak" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.music{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.music h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.music .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.tab-row{display:flex;gap:8px;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:8px 18px;border-radius:10px;border:2px solid rgba(201,168,76,.3);background:#fff;
+  font-family:'MedievalSharp',serif;font-size:.95rem;cursor:pointer;transition:.2s;color:#2c1810}
+.tab-btn:hover{border-color:#c9a84c}.tab-btn.active{background:#c9a84c;color:#fff}
+
+.section{display:none}.section.show{display:block}
+
+/* Songs */
+.song-card{background:#fff;border-radius:16px;padding:1.2rem;margin-bottom:1rem;
+  border:2px solid rgba(201,168,76,.2);transition:.2s}
+.song-card:hover{border-color:#c9a84c}
+.song-title{font-family:'Uncial Antiqua',serif;font-size:1.1rem;color:#2c1810;margin-bottom:.3rem;
+  display:flex;align-items:center;gap:8px}
+.song-lyrics{font-family:'MedievalSharp',serif;font-size:.95rem;color:#6b5a4e;line-height:1.8;
+  white-space:pre-line;padding:.8rem;background:rgba(245,230,200,.3);border-radius:10px;margin:.5rem 0}
+.song-btns{display:flex;gap:8px}
+.sbtn{width:36px;height:36px;border-radius:50%;border:2px solid #c9a84c;background:#f5e6c8;
+  font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.sbtn:hover{background:#c9a84c;color:#fff}
+.sbtn.active{background:#c9a84c;color:#fff;animation:pulse-g 1.5s infinite}
+@keyframes pulse-g{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 6px rgba(201,168,76,0)}}
+
+/* Instruments */
+.inst-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.inst-card{background:#fff;border-radius:14px;padding:1rem;text-align:center;border:2px solid rgba(201,168,76,.2);
+  cursor:pointer;transition:.2s}
+.inst-card:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.inst-emoji{font-size:2.5rem;margin-bottom:.3rem}
+.inst-name{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;font-weight:bold}
+.inst-cat{font-size:.7rem;color:#c9a84c}
+
+/* Kajdanka (staff) */
+.staff-wrap{background:#fff;border-radius:16px;padding:1.5rem;border:2px solid #c9a84c;text-align:center}
+.staff-canvas{border:1px solid #e0e0e0;border-radius:8px;background:#fff;margin:1rem auto;display:block}
+.note-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:.8rem 0}
+.note-btn{padding:8px 16px;border-radius:8px;background:#f5e6c8;border:2px solid #c9a84c;
+  font-family:'MedievalSharp',serif;font-size:1rem;cursor:pointer;transition:.2s;color:#2c1810}
+.note-btn:hover{background:#c9a84c;color:#fff}
+.note-btn.playing{background:#8b2500;color:#fff;border-color:#8b2500}
+
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;margin-top:.5rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="music">
+  <h1>🎵 {% trans "Glazbeni kutak" %}</h1>
+  <p class="sub">{% trans "Pjevaj, sviraj, uči note — glazba je jezik koji svi razumiju!" %}</p>
+
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="showSection('songs',this)">🎶 {% trans "Pjesmice" %}</button>
+    <button class="tab-btn" onclick="showSection('rhymes',this)">🔢 {% trans "Brojalice" %}</button>
+    <button class="tab-btn" onclick="showSection('staff',this)">🎼 {% trans "Kajdanka" %}</button>
+    <button class="tab-btn" onclick="showSection('instruments',this)">🎸 {% trans "Instrumenti" %}</button>
+  </div>
+
+  <!-- PJESMICE -->
+  <div class="section show" id="sec-songs">
+    <div id="songList"></div>
+  </div>
+
+  <!-- BROJALICE -->
+  <div class="section" id="sec-rhymes">
+    <div id="rhymeList"></div>
+  </div>
+
+  <!-- KAJDANKA -->
+  <div class="section" id="sec-staff">
+    <div class="staff-wrap">
+      <h2 style="font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.5rem">
+        🎼 {% trans "Kajdanka — Nauči note" %}
+      </h2>
+      <p style="font-family:'MedievalSharp',serif;color:#6b5a4e;font-size:.9rem;margin-bottom:1rem">
+        {% trans "Klikni na notu da je čuješ! Note idu: DO RE MI FA SOL LA SI DO" %}
+      </p>
+      <canvas class="staff-canvas" id="staffCanvas" width="500" height="200"></canvas>
+      <div class="note-btns" id="noteBtns"></div>
+      <p style="font-family:'MedievalSharp',serif;font-size:.85rem;color:#c9a84c;margin-top:.5rem">
+        👵 {% trans "Baka kaže: Kad sam bila mala, pjevala sam do-re-mi dok sam prala suđe!" %}
+      </p>
+    </div>
+  </div>
+
+  <!-- INSTRUMENTI -->
+  <div class="section" id="sec-instruments">
+    <div class="inst-grid" id="instGrid"></div>
+    <div style="margin-top:1rem;background:rgba(201,168,76,.1);border-radius:12px;padding:1rem;text-align:center;
+      font-family:'MedievalSharp',serif;font-size:.9rem;color:#5c3d1a">
+      {% trans "Svaki instrument ima svoju 'osobnost'. Koji ti se najviše sviđa?" %}
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ SONGS ═══
+var SONGS = [
+  {title:'Ide maca oko tebe',emoji:'🐱',lyrics:'Ide maca oko tebe\ni oko tvojih nogu\nne da maca ništa tebi\nnego meni mnogu.\n\nMjau, mjau, mjau, mjau\nmaca hoće mlijeko\nmjau, mjau, mjau, mjau\nmaca voli svako dijete!'},
+  {title:'Blistaj, blistaj, zvijezdo mala',emoji:'⭐',lyrics:'Blistaj, blistaj, zvijezdo mala\nta mi reci što si znala?\nVisoko si, tako sjajno\nkao dijamant na nebu sjajan.\n\nKad se sunce sakrije\nkad mu svjetla ne bije\ntvoje malo svjetlo sjaji\nblistaj, blistaj, ne prestaji!'},
+  {title:'Bratec Martin',emoji:'🔔',lyrics:'Bratec Martin, bratec Martin\nspavaš li, spavaš li?\nJutarnje zvono zvoni\njutarnje zvono zvoni\ndin dan don\ndin dan don!'},
+  {title:'Kad si sretan',emoji:'😊',lyrics:'Kad si sretan, lupi dlanom! (pljas pljas)\nKad si sretan, lupi dlanom! (pljas pljas)\nKad si sretan i kad želiš\nda to svima pokažeš\nkad si sretan, lupi dlanom! (pljas pljas)\n\nKad si sretan, tupni nogom! (tup tup)\nKad si sretan, vikni hura! (huraaa!)'},
+  {title:'Sveti Nikola',emoji:'🎁',lyrics:'Sveti Nikola putuje\ndjeci darove daruje\ndobrim daje, zlima prut\nsveti Nikola je ljut!\n\nAli šalu na stranu\nsvako dijete ima plan\nbit ću dobar, bit ću vrijedan\nbarem jedan, jedan dan!'},
+];
+
+var RHYMES = [
+  {title:'En ten tini',emoji:'👆',lyrics:'En ten tini\nsavaraka tini\nsavaraka tika taka\nbija baja buf!\n\nTraži miša koji struže\npod ormarom koji služe!'},
+  {title:'Eci peci pec',emoji:'🤚',lyrics:'Eci peci pec\nti si mali zec\na ja mala vjeverica\neci peci pec!'},
+  {title:'Jedan dva tri',emoji:'🔢',lyrics:'Jedan, dva, tri — stanemo u stri!\nČetiri, pet, šest — sjedi na mesto!\nSedam, osam — nisi mi krasan!\nDevet, deset — otiđi tu preš!'},
+  {title:'Čigra migra',emoji:'🌀',lyrics:'Čigra migra puk\nna vuku je buk\na na kozi rog\npa ti idi bog!'},
+  {title:'Iš iš iš',emoji:'🐦',lyrics:'Iš, iš, iš\nna grani sjedi ptič\nptič ne pjeva, ptič ne pije\nneg na grani mirno stoji\niš, iš, iš!'},
+];
+
+function buildSongList(songs, containerId) {
+  var c = document.getElementById(containerId);
+  c.innerHTML = '';
+  songs.forEach(function(s) {
+    var card = document.createElement('div');
+    card.className = 'song-card';
+    card.innerHTML = '<div class="song-title">' + s.emoji + ' ' + s.title + '</div>' +
+      '<div class="song-lyrics">' + s.lyrics + '</div>' +
+      '<div class="song-btns">' +
+        '<button class="sbtn" onclick="speakSong(this,\'' + s.lyrics.replace(/'/g,"\\'").replace(/\n/g,' ') + '\')" title="{% trans \'Čitaj\' %}">🔊</button>' +
+        '<button class="sbtn" onclick="singAlong(this,\'' + s.lyrics.replace(/'/g,"\\'").replace(/\n/g,' ') + '\')" title="{% trans \'Pjevaj uz\' %}">🎤</button>' +
+      '</div>';
+    c.appendChild(card);
+  });
+}
+
+buildSongList(SONGS, 'songList');
+buildSongList(RHYMES, 'rhymeList');
+
+function speakSong(btn, text) {
+  if (speechSynthesis.speaking) { speechSynthesis.cancel(); btn.classList.remove('active'); return; }
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'hr-HR'; u.rate = 0.75; u.pitch = 1.15;
+  btn.classList.add('active');
+  u.onend = function(){btn.classList.remove('active');};
+  speechSynthesis.speak(u);
+}
+
+function singAlong(btn, text) {
+  // Record while TTS plays
+  speakSong(btn, text);
+}
+
+// ═══ INSTRUMENTS ═══
+var INSTRUMENTS = [
+  {emoji:'🎹',name:'Klavir',cat:'Tipke',fact:'Klavir ima 88 tipki — 52 bijele i 36 crnih.'},
+  {emoji:'🎸',name:'Gitara',cat:'Žice',fact:'Gitara ima 6 žica. Klasična gitara ima najlon žice.'},
+  {emoji:'🎻',name:'Violina',cat:'Žice',fact:'Violinu sviramo gudalom — to je štap s konjskom dlakom!'},
+  {emoji:'🥁',name:'Bubanj',cat:'Udaraljke',fact:'Bubnjevi su najstariji instrumenti — stari 8000 godina!'},
+  {emoji:'🎺',name:'Truba',cat:'Puhači',fact:'Truba ima samo 3 ventila ali može svirati sve note!'},
+  {emoji:'🪈',name:'Flauta',cat:'Puhači',fact:'Flauta je jedan od najstarijih instrumenata — 35.000 godina!'},
+  {emoji:'🪗',name:'Harmonika',cat:'Tipke+Mjeh',fact:'Harmonika može svirati melodiju I pratnju istovremeno.'},
+  {emoji:'🎷',name:'Saksofon',cat:'Puhači',fact:'Saksofon je izumio Adolphe Sax 1846. godine u Belgiji.'},
+];
+
+var instGrid = document.getElementById('instGrid');
+INSTRUMENTS.forEach(function(inst) {
+  var card = document.createElement('div');
+  card.className = 'inst-card';
+  card.innerHTML = '<div class="inst-emoji">' + inst.emoji + '</div><div class="inst-name">' + inst.name + '</div><div class="inst-cat">' + inst.cat + '</div>';
+  card.onclick = function() {
+    var u = new SpeechSynthesisUtterance(inst.name + '. ' + inst.fact);
+    u.lang = 'hr-HR'; u.rate = 0.85;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    card.style.transform = 'scale(1.05)';
+    setTimeout(function(){card.style.transform='';},300);
+  };
+  instGrid.appendChild(card);
+});
+
+// ═══ KAJDANKA (Musical Staff + Notes) ═══
+var NOTES = [
+  {name:'DO',freq:261.63,color:'#e53935',y:170},
+  {name:'RE',freq:293.66,color:'#fb8c00',y:155},
+  {name:'MI',freq:329.63,color:'#fdd835',y:140},
+  {name:'FA',freq:349.23,color:'#43a047',y:125},
+  {name:'SOL',freq:392.00,color:'#1e88e5',y:110},
+  {name:'LA',freq:440.00,color:'#7b1fa2',y:95},
+  {name:'SI',freq:493.88,color:'#c9a84c',y:80},
+  {name:'DO²',freq:523.25,color:'#e53935',y:65},
+];
+
+// Draw staff
+function drawStaff() {
+  var c = document.getElementById('staffCanvas');
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 500, 200);
+
+  // 5 lines
+  ctx.strokeStyle = '#2c1810';
+  ctx.lineWidth = 1;
+  for (var i = 0; i < 5; i++) {
+    var y = 80 + i * 20;
+    ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(470, y); ctx.stroke();
+  }
+
+  // Treble clef (simplified text)
+  ctx.font = '60px serif'; ctx.fillStyle = '#2c1810';
+  ctx.fillText('𝄞', 35, 140);
+
+  // Notes on staff
+  NOTES.forEach(function(n, i) {
+    var x = 100 + i * 48;
+    ctx.beginPath();
+    ctx.ellipse(x, n.y, 10, 8, -0.2, 0, Math.PI * 2);
+    ctx.fillStyle = n.color;
+    ctx.fill();
+    ctx.strokeStyle = '#2c1810';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Stem
+    ctx.beginPath(); ctx.moveTo(x + 10, n.y); ctx.lineTo(x + 10, n.y - 35); ctx.stroke();
+    // Label
+    ctx.font = '11px MedievalSharp'; ctx.fillStyle = '#2c1810'; ctx.textAlign = 'center';
+    ctx.fillText(n.name, x, n.y + 22);
+  });
+}
+
+// Build note buttons
+var noteBtns = document.getElementById('noteBtns');
+NOTES.forEach(function(n) {
+  var btn = document.createElement('button');
+  btn.className = 'note-btn';
+  btn.textContent = n.name;
+  btn.style.borderColor = n.color;
+  btn.onclick = function() { playNote(n, btn); };
+  noteBtns.appendChild(btn);
+});
+
+// Play note using Web Audio API
+var audioCtx = null;
+function playNote(note, btn) {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  var osc = audioCtx.createOscillator();
+  var gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.frequency.value = note.freq;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+  btn.classList.add('playing');
+  setTimeout(function(){btn.classList.remove('playing');}, 800);
+}
+
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('show')});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('sec-' + name).classList.add('show');
+  btn.classList.add('active');
+  if (name === 'staff') drawStaff();
+}
+
+drawStaff();
+</script>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}♟ {% trans "Šah Memory" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.chess-mem{max-width:600px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.chess-mem h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;margin-bottom:.3rem}
+.chess-mem .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+.mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:400px;margin:0 auto}
+.mem-card{aspect-ratio:1;background:linear-gradient(135deg,#2c1810,#4a2c1a);border-radius:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:2.5rem;
+  border:2px solid #c9a84c;transition:.3s;transform-style:preserve-3d;position:relative}
+.mem-card.flipped{background:linear-gradient(135deg,#f5e6c8,#e8d4a8);transform:rotateY(180deg)}
+.mem-card.matched{background:linear-gradient(135deg,#c8e6c9,#a5d6a7);border-color:#66bb6a;opacity:.7}
+.mem-card .front{backface-visibility:hidden;transform:rotateY(180deg);position:absolute}
+.mem-card .back{backface-visibility:hidden;color:#c9a84c;font-size:2rem}
+.mem-card.flipped .front{transform:rotateY(0)}.mem-card.flipped .back{transform:rotateY(-180deg)}
+.mem-info{margin-top:1rem;font-family:'MedievalSharp',serif;color:#6b5a4e;font-size:.95rem}
+.mem-score{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#c9a84c;margin-top:.5rem}
+.mem-btn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;margin-top:1rem;transition:.2s}
+.mem-btn:hover{transform:translateY(-2px)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="chess-mem">
+  <h1>♟ {% trans "Šah Memory" %}</h1>
+  <p class="sub">{% trans "Spoji figuru s njezinim imenom!" %}</p>
+  <div class="mem-grid" id="memGrid"></div>
+  <div class="mem-info" id="memInfo">{% trans "Klikni na karticu da je okreneš" %}</div>
+  <div class="mem-score">{% trans "Potezi" %}: <span id="moves">0</span> · {% trans "Parovi" %}: <span id="pairs">0</span>/6</div>
+  <button class="mem-btn" onclick="newGame()">🔄 {% trans "Nova igra" %}</button>
+</div>
+<script>
+var PIECES = [
+  {symbol:'♚',name:'{% trans "Kralj" %}'},
+  {symbol:'♛',name:'{% trans "Kraljica" %}'},
+  {symbol:'♜',name:'{% trans "Top" %}'},
+  {symbol:'♝',name:'{% trans "Lovac" %}'},
+  {symbol:'♞',name:'{% trans "Konj" %}'},
+  {symbol:'♟',name:'{% trans "Pješak" %}'}
+];
+var cards=[], flipped=[], matched=0, moves=0, locked=false;
+
+function newGame(){
+  var grid=document.getElementById('memGrid');
+  grid.innerHTML=''; flipped=[]; matched=0; moves=0; locked=false;
+  document.getElementById('moves').textContent='0';
+  document.getElementById('pairs').textContent='0';
+  document.getElementById('memInfo').textContent='{% trans "Klikni na karticu da je okreneš" %}';
+  // Create pairs: symbol + name
+  cards=[];
+  PIECES.forEach(function(p,i){
+    cards.push({id:i,display:p.symbol,type:'symbol'});
+    cards.push({id:i,display:p.name,type:'name'});
+  });
+  // Shuffle
+  for(var j=cards.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1));var t=cards[j];cards[j]=cards[k];cards[k]=t;}
+  // Render
+  cards.forEach(function(c,idx){
+    var el=document.createElement('div');
+    el.className='mem-card';
+    el.innerHTML='<div class="back">♟</div><div class="front" style="'+(c.type==='symbol'?'font-size:2.5rem':'font-size:1rem;font-family:MedievalSharp,serif;color:#2c1810')+'">'+c.display+'</div>';
+    el.dataset.idx=idx;
+    el.onclick=function(){flipCard(this);};
+    grid.appendChild(el);
+  });
+}
+
+function flipCard(el){
+  if(locked)return;
+  var idx=+el.dataset.idx;
+  if(el.classList.contains('flipped')||el.classList.contains('matched'))return;
+  el.classList.add('flipped');
+  flipped.push({el:el,card:cards[idx]});
+  if(flipped.length===2){
+    moves++; document.getElementById('moves').textContent=moves;
+    locked=true;
+    var a=flipped[0],b=flipped[1];
+    if(a.card.id===b.card.id&&a.card.type!==b.card.type){
+      // Match!
+      setTimeout(function(){
+        a.el.classList.add('matched');b.el.classList.add('matched');
+        matched++;document.getElementById('pairs').textContent=matched;
+        if(matched===6)document.getElementById('memInfo').textContent='🎉 {% trans "Bravo! Sve figure pronađene!" %} ('+moves+' {% trans "poteza" %})';
+        flipped=[];locked=false;
+      },500);
+    } else {
+      setTimeout(function(){
+        a.el.classList.remove('flipped');b.el.classList.remove('flipped');
+        flipped=[];locked=false;
+      },800);
+    }
+  }
+}
+newGame();
+</script>
+{% endblock %}

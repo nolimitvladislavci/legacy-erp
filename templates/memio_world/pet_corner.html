@@ -1,0 +1,231 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🐾 {% trans "Kutak za ljubimce" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.pets{max-width:750px;margin:0 auto;padding:1.5rem 1rem}
+.pets h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;text-align:center;margin-bottom:.2rem}
+.pets .sub{text-align:center;font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1.5rem}
+
+.pet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:1.5rem}
+.pet-card{background:#fff;border-radius:16px;padding:1.2rem;text-align:center;
+  border:2px solid rgba(201,168,76,.2);cursor:pointer;transition:.2s}
+.pet-card:hover{border-color:#c9a84c;transform:translateY(-3px)}
+.pet-card.active{border-color:#8b6914;background:rgba(201,168,76,.1)}
+.pet-icon{font-size:3rem;margin-bottom:.3rem}
+.pet-name{font-family:'MedievalSharp',serif;font-size:1rem;color:#2c1810;font-weight:bold}
+
+.pet-detail{display:none;background:#fff;border-radius:16px;padding:1.5rem;border:2px solid #c9a84c;margin-bottom:1.5rem}
+.pet-detail.show{display:block;animation:fadeUp .4s ease-out}
+.pet-detail h2{font-family:'Uncial Antiqua',serif;font-size:1.3rem;color:#2c1810;margin-bottom:1rem;
+  display:flex;align-items:center;gap:10px}
+
+.care-section{margin-bottom:1rem;padding:1rem;background:rgba(245,230,200,.3);border-radius:12px}
+.care-section h3{font-family:'MedievalSharp',serif;font-size:1rem;color:#c9a84c;margin-bottom:.5rem}
+.care-list{font-family:'MedievalSharp',serif;font-size:.9rem;color:#2c1810;line-height:1.8;padding-left:1rem}
+.care-list li{margin-bottom:.3rem}
+
+.responsibility-meter{display:flex;gap:4px;margin:1rem 0}
+.rm-star{font-size:1.5rem;opacity:.3}.rm-star.filled{opacity:1}
+
+.bridge-banner{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:16px;padding:1.2rem;
+  border:2px solid #66bb6a;display:flex;align-items:center;gap:1rem;margin-top:1.5rem;
+  text-decoration:none;color:#1b5e20;transition:.2s}
+.bridge-banner:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(76,175,80,.2)}
+
+.quiz-section{margin-top:1.5rem;background:linear-gradient(135deg,#f5e6c8,#e8d4a8);border-radius:16px;
+  padding:1.5rem;border:2px solid #c9a84c;text-align:center}
+.quiz-q{font-family:'MedievalSharp',serif;font-size:1.2rem;color:#2c1810;margin:.8rem 0}
+.quiz-opts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.quiz-opt{padding:10px 18px;border-radius:10px;background:#fff;border:2px solid rgba(201,168,76,.3);
+  font-family:'MedievalSharp',serif;cursor:pointer;transition:.2s;font-size:.95rem}
+.quiz-opt:hover{border-color:#c9a84c}.quiz-opt.correct{background:#c8e6c9;border-color:#66bb6a}
+.quiz-opt.wrong{background:#ffcdd2;border-color:#e53935}
+.quiz-msg{font-family:'MedievalSharp',serif;font-size:1rem;min-height:1.5rem;margin-top:.5rem}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 20px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:.95rem;
+  cursor:pointer;margin-top:.5rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pets">
+  <h1>🐾 {% trans "Kutak za ljubimce" %}</h1>
+  <p class="sub">{% trans "Ljubimac nije igračka — ljubimac je prijatelj koji ovisi o tebi." %}</p>
+
+  <!-- Pet selector -->
+  <div class="pet-grid" id="petGrid"></div>
+
+  <!-- Pet detail -->
+  <div class="pet-detail" id="petDetail"></div>
+
+  <!-- Pet quiz -->
+  <div class="quiz-section">
+    <h2 style="font-family:'Uncial Antiqua',serif;font-size:1.2rem;color:#2c1810;margin-bottom:.5rem">
+      🎯 {% trans "Kviz o ljubimcima" %}
+    </h2>
+    <div class="quiz-q" id="petQuizQ"></div>
+    <div class="quiz-opts" id="petQuizOpts"></div>
+    <div class="quiz-msg" id="petQuizMsg"></div>
+    <button class="gbtn" onclick="newPetQuiz()">{% trans "Sljedeće" %} →</button>
+  </div>
+
+  <!-- Bridge to memio.pet -->
+  <a href="https://memio.pet" target="_blank" class="bridge-banner">
+    <div style="font-size:2.5rem">🐕</div>
+    <div>
+      <div style="font-family:'Uncial Antiqua',serif;font-size:1.1rem;font-weight:bold">
+        memio.pet
+      </div>
+      <div style="font-family:'MedievalSharp',serif;font-size:.85rem;opacity:.8">
+        {% trans "Imaš pravog ljubimca? Memio.pet ti pomaže brinuti se o njemu — veterinari, hrana, šetnje, i više." %}
+      </div>
+    </div>
+    <div style="margin-left:auto;font-size:1.5rem">→</div>
+  </a>
+
+  <div style="margin-top:1rem;text-align:center;font-family:'MedievalSharp',serif;font-size:.85rem;color:#5c3d1a;
+    background:rgba(201,168,76,.1);padding:.8rem;border-radius:10px">
+    👵 {% trans "Baka kaže: Tko brine o slabijima od sebe — taj je pravi heroj." %}
+  </div>
+</div>
+
+<script>
+var PETS = [
+  {
+    icon:'🐶', name:'{% trans "Pas" %}', responsibility: 5,
+    needs:['Šetnja 2× dnevno (minimalno!)','Svježa voda uvijek dostupna','Kvalitetna hrana 2× dnevno','Igra i pažnja — pas je društvena životinja','Veterinar — redoviti pregledi i cijepljenja'],
+    food:['Suha hrana (granule) prilagođena dobi','Mokra hrana kao dodatak','NIKAD: čokolada, luk, grožđe, kosti piletine','Svježa voda — mijenjati svaki dan'],
+    funFact:'Psi razumiju oko 250 riječi i mogu brojati do 5!',
+    warning:'Pas nije poklon za Božić. Pas je obaveza za 10-15 godina.',
+    baka:'Baka kaže: Pas te voli bezuvjetno. Zasluži tu ljubav.'
+  },
+  {
+    icon:'🐱', name:'{% trans "Mačka" %}', responsibility: 3,
+    needs:['Čisti pijesak (čistiti svaki dan!)','Svježa voda i hrana','Grebalica — mačke MORAJU grebati','Igra s igračkama — lovačko gnijezdo','Veterinar — kastracija/sterilizacija je odgovornost'],
+    food:['Mačja hrana (NE pseća!)','Mokra + suha u kombinaciji','NIKAD: mlijeko (većina mačaka ne podnosi laktozu!)','Trava za mačke — pomaže probavi'],
+    funFact:'Mačke spavaju 12-16 sati dnevno i imaju 230 kostiju (ljudi 206)!',
+    warning:'Mačka nije "lakši" ljubimac od psa. Samo je drugačija.',
+    baka:'Baka kaže: Mačka te neće slušati. Ali naučit će te strpljivosti.'
+  },
+  {
+    icon:'🐹', name:'{% trans "Hrčak" %}', responsibility: 2,
+    needs:['Kavez s kotačem za trčanje','Podloga od piljevine (čistiti tjedno)','Svježa voda u bočici','Skrovište — hrčak MORA imati gdje se sakriti','Tiha lokacija — hrčci spavaju danju!'],
+    food:['Mješavina sjemenki za hrčke','Svježe povrće: mrkva, krastavac, brokula','Malo voća: jabuka (bez sjemenki!)','NIKAD: citrusi, čokolada, luk'],
+    funFact:'Hrčci mogu trčati do 8 km u jednoj noći na svom kotaču!',
+    warning:'Hrčci žive samo 2-3 godine. Budi spreman/na na tugu.',
+    baka:'Baka kaže: I najmanji ljubimac zaslužuje veliku ljubav.'
+  },
+  {
+    icon:'🐰', name:'{% trans "Kunić" %}', responsibility: 3,
+    needs:['Prostrani kavez ili ograda','Sijeno — mora biti uvijek dostupno!','Vrijeme van kaveza svaki dan','Društvo — kunići su socijalni','Veterinar koji poznaje kuniće (nisu svi!)'],
+    food:['Sijeno, sijeno, sijeno — 80% prehrane!','Zeleno povrće: salata, peršin, kopar','Malo mrkve (previše šećera!)','Granule — samo mala količina dnevno'],
+    funFact:'Kunići mogu naučiti svoje ime i dolaze kad ih pozoveš!',
+    warning:'Kunić NIJE poklon za Uskrs. Živi 8-12 godina.',
+    baka:'Baka kaže: Kunić je tih prijatelj. Nauči slušati tišinu.'
+  },
+  {
+    icon:'🐟', name:'{% trans "Ribica" %}', responsibility: 2,
+    needs:['Akvarij odgovarajuće veličine (NE čaša!)','Filter za vodu','Redovita promjena vode (30% tjedno)','Termometar — temperatura je kritična','Skrovišta i biljke u akvariju'],
+    food:['Hrana za ribice — malo, 2× dnevno','Koliko pojedu za 2 minute — višak zagađuje','Raznolikost: pahuljice, granule, smrznuta','Gladni dan 1× tjedno je zdrav za ribice'],
+    funFact:'Zlatne ribice mogu živjeti 20+ godina u dobrim uvjetima!',
+    warning:'Ribica u čaši = zatvor. Minimalni akvarij je 20 litara.',
+    baka:'Baka kaže: I ribica osjeća. Budi nježan/na prema njoj.'
+  },
+  {
+    icon:'🐦', name:'{% trans "Papiga" %}', responsibility: 4,
+    needs:['Prostrani kavez (veći je uvijek bolji)','Vrijeme van kaveza svaki dan za letenje','Razgovor i pažnja — papige su IZUZETNO socijalne','Igračke za kljucanje i zagrizanje','Redoviti veterinarski pregledi'],
+    food:['Mješavina sjemenki za papige','Svježe voće i povrće svaki dan','Kuhani grah, riža — raznolikost!','NIKAD: avokado, čokolada, kofein'],
+    funFact:'Neke papige žive preko 80 godina — duže od ljudi!',
+    warning:'Papiga u kavezu bez pažnje = usamljena papiga = tužna papiga.',
+    baka:'Baka kaže: Papiga ponavlja tvoje riječi. Govori joj samo lijepe stvari.'
+  },
+];
+
+var PET_QUIZ = [
+  {q:'Smije li pas jesti čokoladu?', opts:['Da, voli je','NE! Otrovna je za pse','Samo bijelu','Samo malo'], correct:1},
+  {q:'Koliko sati dnevno mačka spava?', opts:['4-6','8-10','12-16','20+'], correct:2},
+  {q:'Što je 80% prehrane kunića?', opts:['Mrkva','Granule','Sijeno','Voće'], correct:2},
+  {q:'Smije li ribica živjeti u čaši?', opts:['Da, dovoljno je','NE — minimum 20L akvarij','Samo mala ribica','Samo privremeno'], correct:1},
+  {q:'Što hrčak radi danju?', opts:['Trči na kotaču','Spava','Jede','Igra se'], correct:1},
+  {q:'Smiju li mačke piti mlijeko?', opts:['Da, vole ga','NE — većina ne podnosi laktozu','Samo toplo','Samo kozje'], correct:1},
+  {q:'Koliko godina može živjeti papiga?', opts:['5','15','40','80+'], correct:3},
+  {q:'Što NIKAD ne smiješ dati psu?', opts:['Meso','Rižu','Čokoladu','Mrkvu'], correct:2},
+  {q:'Što kunić najviše treba?', opts:['TV za gledanje','Sijeno za jelo','Igračke','Parfem'], correct:1},
+  {q:'Zašto mačka grebe namještaj?', opts:['Jer je zločesta','Jer MORA grebati — to je priroda','Jer je gladna','Jer je ljuta'], correct:1},
+];
+
+// Build pet grid
+var grid = document.getElementById('petGrid');
+PETS.forEach(function(p, idx) {
+  var card = document.createElement('div');
+  card.className = 'pet-card';
+  card.innerHTML = '<div class="pet-icon">' + p.icon + '</div><div class="pet-name">' + p.name + '</div>';
+  card.onclick = function() {
+    document.querySelectorAll('.pet-card').forEach(function(c){c.classList.remove('active')});
+    card.classList.add('active');
+    showPet(idx);
+  };
+  grid.appendChild(card);
+});
+
+function showPet(idx) {
+  var p = PETS[idx];
+  var detail = document.getElementById('petDetail');
+  detail.className = 'pet-detail show';
+
+  var stars = '';
+  for (var i = 0; i < 5; i++) stars += '<span class="rm-star ' + (i < p.responsibility ? 'filled' : '') + '">⭐</span>';
+
+  var needsHtml = p.needs.map(function(n){return '<li>'+n+'</li>';}).join('');
+  var foodHtml = p.food.map(function(f){return '<li>'+f+'</li>';}).join('');
+
+  detail.innerHTML =
+    '<h2>' + p.icon + ' ' + p.name + '</h2>' +
+    '<div style="font-family:MedievalSharp,serif;font-size:.9rem;color:#6b5a4e;margin-bottom:.5rem">{% trans "Odgovornost" %}:</div>' +
+    '<div class="responsibility-meter">' + stars + '</div>' +
+    '<div class="care-section"><h3>🏠 {% trans "Što treba" %}:</h3><ul class="care-list">' + needsHtml + '</ul></div>' +
+    '<div class="care-section"><h3>🍽️ {% trans "Hrana" %}:</h3><ul class="care-list">' + foodHtml + '</ul></div>' +
+    '<div class="care-section"><h3>🧠 {% trans "Zanimljivost" %}:</h3><p style="font-family:MedievalSharp,serif;font-size:.95rem;color:#2c1810">' + p.funFact + '</p></div>' +
+    '<div style="background:#fff3e0;border-radius:10px;padding:.8rem;margin-top:.5rem;font-family:MedievalSharp,serif;font-size:.85rem;color:#e65100;border:1px solid #ffe0b2">⚠️ ' + p.warning + '</div>' +
+    '<div style="background:rgba(201,168,76,.1);border-radius:10px;padding:.8rem;margin-top:.5rem;font-family:MedievalSharp,serif;font-size:.9rem;color:#5c3d1a;font-style:italic">👵 ' + p.baka + '</div>';
+
+  detail.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// Quiz
+var quizIdx = 0;
+function newPetQuiz() {
+  quizIdx = Math.floor(Math.random() * PET_QUIZ.length);
+  var q = PET_QUIZ[quizIdx];
+  document.getElementById('petQuizQ').textContent = q.q;
+  document.getElementById('petQuizMsg').textContent = '';
+  var container = document.getElementById('petQuizOpts');
+  container.innerHTML = '';
+  q.opts.forEach(function(opt, i) {
+    var btn = document.createElement('div');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt;
+    btn.onclick = function() {
+      container.querySelectorAll('.quiz-opt').forEach(function(b){b.style.pointerEvents='none'});
+      if (i === q.correct) {
+        btn.classList.add('correct');
+        document.getElementById('petQuizMsg').textContent = '🎉 {% trans "Točno!" %}';
+        document.getElementById('petQuizMsg').style.color = '#2e7d32';
+      } else {
+        btn.classList.add('wrong');
+        container.querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');
+        document.getElementById('petQuizMsg').textContent = '❌ {% trans "Točan odgovor" %}: ' + q.opts[q.correct];
+        document.getElementById('petQuizMsg').style.color = '#c62828';
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+newPetQuiz();
+</script>
+{% endblock %}

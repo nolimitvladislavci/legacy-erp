@@ -1,0 +1,241 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+{% block title %}🚢 {% trans "Potapanje brodova" %} — PLAY.EU{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+.battle{max-width:600px;margin:0 auto;padding:1.5rem 1rem;text-align:center}
+.battle h1{font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#2c1810;margin-bottom:.2rem}
+.battle .sub{font-family:'MedievalSharp',serif;color:#6b5a4e;margin-bottom:1rem;font-size:.9rem}
+.grid-wrap{display:inline-block;margin:0 auto}
+.sea-grid{display:grid;grid-template-columns:30px repeat(8,1fr);gap:2px;margin:0 auto}
+.sea-header{font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:#6b5a4e;display:flex;
+  align-items:center;justify-content:center;font-weight:bold}
+.sea-cell{width:38px;height:38px;background:linear-gradient(135deg,#bbdefb,#90caf9);border-radius:4px;
+  cursor:crosshair;display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  transition:.15s;border:1px solid rgba(30,136,229,.2)}
+.sea-cell:hover{background:#64b5f6;transform:scale(1.05)}
+.sea-cell.hit{background:#ef5350!important;cursor:default}
+.sea-cell.miss{background:#e0e0e0!important;cursor:default}
+.sea-cell.sunk{background:#c62828!important}
+.battle-info{font-family:'MedievalSharp',serif;color:#2c1810;margin:1rem 0;font-size:1.1rem;min-height:1.5rem}
+.battle-stats{font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:#6b5a4e;margin:.5rem 0}
+.gbtn{background:linear-gradient(135deg,#c9a84c,#8b6914);color:#fff;border:none;
+  padding:10px 24px;border-radius:10px;font-family:'MedievalSharp',serif;font-size:1rem;
+  cursor:pointer;margin-top:.5rem;transition:.2s}
+.gbtn:hover{transform:translateY(-2px)}
+.coord-label{font-family:'MedievalSharp',serif;font-size:.9rem;color:#c9a84c;margin-top:.5rem}
+@media(max-width:400px){.sea-cell{width:32px;height:32px;font-size:1rem}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="battle">
+  <h1>🚢 {% trans "Potapanje brodova" %}</h1>
+  <p class="sub">{% trans "Pronađi skrivene brodove! Uči koordinate: A1, B3, C5..." %}</p>
+
+  <div class="coord-label" id="coordLabel">{% trans "Klikni na polje da pucaš!" %}</div>
+
+  <div class="grid-wrap">
+    <div class="sea-grid" id="seaGrid"></div>
+  </div>
+
+  <div class="battle-info" id="battleInfo"></div>
+  <div class="battle-stats">
+    {% trans "Pokušaji" %}: <span id="shots">0</span> · {% trans "Pogodci" %}: <span id="hits">0</span> · {% trans "Brodovi" %}: <span id="shipsLeft">3</span>/3
+  </div>
+  <button class="gbtn" onclick="newGame()">🔄 {% trans "Nova igra" %}</button>
+
+  <div style="margin-top:1.5rem;background:rgba(30,136,229,.08);border-radius:12px;padding:1rem;font-family:'MedievalSharp',serif;font-size:.85rem;color:#1565c0">
+    📐 {% trans "Ova igra te uči koordinatni sustav — isti koji koristiš u matematici! Red (A-H) + Stupac (1-8) = pozicija." %}
+  </div>
+</div>
+
+<script>
+var ROWS = 8, COLS = 8;
+var LETTERS = 'ABCDEFGH';
+var grid = []; // 0=empty, 1=ship, 2=hit, 3=miss
+var shots = 0, hits = 0, totalShipCells = 0, shipsAlive = 3;
+
+function newGame() {
+  grid = [];
+  for (var r = 0; r < ROWS; r++) {
+    grid[r] = [];
+    for (var c = 0; c < COLS; c++) grid[r][c] = 0;
+  }
+  shots = 0; hits = 0; shipsAlive = 3;
+  totalShipCells = 0;
+
+  // Place 3 ships: size 4, 3, 2
+  [4, 3, 2].forEach(function(size) { placeShip(size); });
+
+  buildGrid();
+  updateStats();
+  document.getElementById('battleInfo').textContent = '';
+  document.getElementById('coordLabel').textContent = '{% trans "Klikni na polje da pucaš!" %}';
+}
+
+function placeShip(size) {
+  var placed = false;
+  while (!placed) {
+    var horizontal = Math.random() < 0.5;
+    var r = Math.floor(Math.random() * ROWS);
+    var c = Math.floor(Math.random() * COLS);
+    if (horizontal && c + size > COLS) continue;
+    if (!horizontal && r + size > ROWS) continue;
+
+    var ok = true;
+    for (var i = 0; i < size; i++) {
+      var cr = horizontal ? r : r + i;
+      var cc = horizontal ? c + i : c;
+      if (grid[cr][cc] !== 0) { ok = false; break; }
+      // Check neighbors
+      for (var dr = -1; dr <= 1; dr++) {
+        for (var dc = -1; dc <= 1; dc++) {
+          var nr = cr + dr, nc = cc + dc;
+          if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && grid[nr][nc] === 1) { ok = false; break; }
+        }
+        if (!ok) break;
+      }
+      if (!ok) break;
+    }
+    if (!ok) continue;
+
+    for (var i = 0; i < size; i++) {
+      var cr = horizontal ? r : r + i;
+      var cc = horizontal ? c + i : c;
+      grid[cr][cc] = 1;
+      totalShipCells++;
+    }
+    placed = true;
+  }
+}
+
+function buildGrid() {
+  var container = document.getElementById('seaGrid');
+  container.innerHTML = '';
+
+  // Corner
+  var corner = document.createElement('div');
+  corner.className = 'sea-header';
+  container.appendChild(corner);
+  // Column headers
+  for (var c = 0; c < COLS; c++) {
+    var h = document.createElement('div');
+    h.className = 'sea-header';
+    h.textContent = c + 1;
+    container.appendChild(h);
+  }
+
+  for (var r = 0; r < ROWS; r++) {
+    // Row header
+    var rh = document.createElement('div');
+    rh.className = 'sea-header';
+    rh.textContent = LETTERS[r];
+    container.appendChild(rh);
+
+    for (var c = 0; c < COLS; c++) {
+      var cell = document.createElement('div');
+      cell.className = 'sea-cell';
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      cell.onclick = function() { shoot(+this.dataset.r, +this.dataset.c, this); };
+      container.appendChild(cell);
+    }
+  }
+}
+
+function shoot(r, c, el) {
+  if (grid[r][c] === 2 || grid[r][c] === 3) return; // already shot
+  shots++;
+  var coord = LETTERS[r] + (c + 1);
+  document.getElementById('coordLabel').textContent = '🎯 ' + coord;
+
+  if (grid[r][c] === 1) {
+    // HIT!
+    grid[r][c] = 2;
+    hits++;
+    el.classList.add('hit');
+    el.textContent = '💥';
+
+    // Check if ship sunk
+    if (isShipSunk(r, c)) {
+      shipsAlive--;
+      markSunk(r, c);
+      document.getElementById('battleInfo').textContent = '🔥 {% trans "Potopljen!" %} ' + coord;
+      document.getElementById('battleInfo').style.color = '#c62828';
+      var u = new SpeechSynthesisUtterance('Potopljen!');
+      u.lang = 'hr-HR'; speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } else {
+      document.getElementById('battleInfo').textContent = '💥 {% trans "Pogodak!" %} ' + coord;
+      document.getElementById('battleInfo').style.color = '#e65100';
+    }
+
+    if (hits >= totalShipCells) {
+      document.getElementById('battleInfo').textContent = '🎉 {% trans "Bravo! Svi brodovi potopljeni u" %} ' + shots + ' {% trans "pokušaja!" %}';
+      document.getElementById('battleInfo').style.color = '#2e7d32';
+    }
+  } else {
+    // MISS
+    grid[r][c] = 3;
+    el.classList.add('miss');
+    el.textContent = '•';
+    document.getElementById('battleInfo').textContent = '💨 {% trans "Promašaj!" %} ' + coord;
+    document.getElementById('battleInfo').style.color = '#6b5a4e';
+  }
+  updateStats();
+}
+
+function isShipSunk(r, c) {
+  // Check if all connected ship cells are hit
+  var visited = {};
+  var queue = [[r, c]];
+  while (queue.length) {
+    var pos = queue.shift();
+    var key = pos[0] + ',' + pos[1];
+    if (visited[key]) continue;
+    visited[key] = true;
+    if (grid[pos[0]][pos[1]] === 1) return false; // unhit ship cell
+    if (grid[pos[0]][pos[1]] === 2) {
+      [[0,1],[0,-1],[1,0],[-1,0]].forEach(function(d) {
+        var nr = pos[0]+d[0], nc = pos[1]+d[1];
+        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && (grid[nr][nc] === 1 || grid[nr][nc] === 2)) {
+          queue.push([nr, nc]);
+        }
+      });
+    }
+  }
+  return true;
+}
+
+function markSunk(r, c) {
+  var visited = {};
+  var queue = [[r, c]];
+  while (queue.length) {
+    var pos = queue.shift();
+    var key = pos[0] + ',' + pos[1];
+    if (visited[key]) continue;
+    visited[key] = true;
+    if (grid[pos[0]][pos[1]] === 2) {
+      var cells = document.querySelectorAll('.sea-cell');
+      cells[pos[0] * COLS + pos[1]].classList.add('sunk');
+      cells[pos[0] * COLS + pos[1]].textContent = '🔥';
+      [[0,1],[0,-1],[1,0],[-1,0]].forEach(function(d) {
+        var nr = pos[0]+d[0], nc = pos[1]+d[1];
+        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && grid[nr][nc] === 2) {
+          queue.push([nr, nc]);
+        }
+      });
+    }
+  }
+}
+
+function updateStats() {
+  document.getElementById('shots').textContent = shots;
+  document.getElementById('hits').textContent = hits;
+  document.getElementById('shipsLeft').textContent = shipsAlive;
+}
+
+newGame();
+</script>
+{% endblock %}
