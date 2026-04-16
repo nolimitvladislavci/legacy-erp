@@ -46,6 +46,7 @@ ROUTE_REGISTRY: dict = {
     "api_validate": AccessLevel.PUBLIC,
     "brochure_croxmlverify": AccessLevel.PUBLIC,
     "no_limit_web": AccessLevel.PUBLIC,
+    "evalidator": AccessLevel.PUBLIC,  # evalidator.eu — javni servis
     "brosura_posrednik": AccessLevel.PUBLIC,
     "panic_button": AccessLevel.AUTHENTICATED,
     "panic_revoke": AccessLevel.AUTHENTICATED,

@@ -37,6 +37,7 @@ def landing(request):
         cache.set('ev_stats', stats, 300)
     return render(request, 'evalidator/landing.html', {'stats': stats})
 
+@csrf_exempt
 @require_POST
 def validate_oib(request):
     t0 = time.monotonic()
@@ -55,6 +56,7 @@ def validate_oib(request):
     if oib: _log('oib_hr', oib, r['valid'], ms=int((time.monotonic()-t0)*1000))
     return render(request, 'evalidator/partials/result.html', r)
 
+@csrf_exempt
 @require_POST
 def validate_iban_view(request):
     t0 = time.monotonic()
@@ -68,6 +70,7 @@ def validate_iban_view(request):
     if iban: _log('iban', iban, r['valid'], ms=int((time.monotonic()-t0)*1000))
     return render(request, 'evalidator/partials/result.html', r)
 
+@csrf_exempt
 @require_POST
 def validate_vat_view(request):
     t0 = time.monotonic()
