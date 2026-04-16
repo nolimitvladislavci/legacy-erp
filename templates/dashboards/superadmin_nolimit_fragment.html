@@ -1,38 +1,68 @@
 <!-- ═══════════════════════════════════════════════════════════════════
-     NO-LIMIT ECOSYSTEM — Portali, ambasadori, partneri
+     NO-LIMIT ECOSYSTEM — Svi portali, ambasadori, partneri
      ═══════════════════════════════════════════════════════════════════ -->
 <div class="stat-card mt-4" style="border-left:3px solid var(--gold)">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h6 class="fx-fw-bold fx-fs-base fx-m-0">
-      <i class="fas fa-globe-europe fx-text-gold"></i> No-Limit Ecosystem
+      <i class="fas fa-globe-europe fx-text-gold"></i> No-Limit Ecosystem — Svi portali
     </h6>
   </div>
-  <div class="row g-2 mb-3">
-    <div class="col-6 col-md-3">
-      <a href="https://no-limit.world" target="_blank" class="action-card" style="text-decoration:none">
-        <i class="f-stat-icon fx-text-gold" style="background:rgba(201,168,76,.1)"><i class="fas fa-globe"></i></i>
-        <div>no-limit.world<div class="desc">EU Umbrella portal</div></div>
+
+  <!-- ROW 1: Komercijalni portali -->
+  <div class="row g-2 mb-2">
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="https://limit-connect.com" target="_blank" class="action-card" style="text-decoration:none">
+        <i class="f-stat-icon fx-text-gold" style="background:rgba(201,168,76,.1)"><i class="fas fa-briefcase"></i></i>
+        <div>LIMIT Connect<div class="desc">ERP/POS platforma</div></div>
       </a>
     </div>
-    <div class="col-6 col-md-3">
-      <a href="https://memio.world" target="_blank" class="action-card" style="text-decoration:none">
-        <i class="f-stat-icon fx-text-blue fx-bg-blue-dim"><i class="fas fa-graduation-cap"></i></i>
-        <div>PLAY.EU<div class="desc">memio.world</div></div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="https://viskovic-bau.de" target="_blank" class="action-card" style="text-decoration:none">
+        <i class="f-stat-icon" style="background:rgba(59,130,246,.1);color:#3b82f6"><i class="fas fa-hard-hat"></i></i>
+        <div>Viskovic Bau<div class="desc">viskovic-bau.de</div></div>
       </a>
     </div>
-    <div class="col-6 col-md-3">
-      <a href="https://memio.pet" target="_blank" class="action-card" style="text-decoration:none">
-        <i class="f-stat-icon fx-text-green fx-bg-green-dim"><i class="fas fa-paw"></i></i>
-        <div>memio.pet<div class="desc">Ljubimci</div></div>
-      </a>
-    </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4 col-lg-2">
       <a href="https://evalidator.eu" target="_blank" class="action-card" style="text-decoration:none">
         <i class="f-stat-icon fx-text-amber fx-bg-amber-dim"><i class="fas fa-check-double"></i></i>
         <div>eValidator<div class="desc">evalidator.eu</div></div>
       </a>
     </div>
   </div>
+
+  <!-- ROW 2: No-Limit udruga portali -->
+  <div class="row g-2 mb-2">
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="https://no-limit.world" target="_blank" class="action-card" style="text-decoration:none">
+        <i class="f-stat-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6"><i class="fas fa-globe"></i></i>
+        <div>No-Limit<div class="desc">no-limit.world</div></div>
+      </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="https://memio.world" target="_blank" class="action-card" style="text-decoration:none">
+        <i class="f-stat-icon fx-text-blue fx-bg-blue-dim"><i class="fas fa-graduation-cap"></i></i>
+        <div>PLAY.EU<div class="desc">memio.world</div></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ROW 3: Memio životinjski portali -->
+  <div class="row g-2 mb-3">
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="https://memio.pet" target="_blank" class="action-card" style="text-decoration:none">
+        <i class="f-stat-icon fx-text-green fx-bg-green-dim"><i class="fas fa-paw"></i></i>
+        <div>memio.pet<div class="desc">Ljubimci</div></div>
+      </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <a href="https://memio.farm" target="_blank" class="action-card" style="text-decoration:none">
+        <i class="f-stat-icon" style="background:rgba(234,179,8,.1);color:#eab308"><i class="fas fa-tractor"></i></i>
+        <div>memio.farm<div class="desc">Stočarstvo / OPG</div></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Statistike -->
   <div class="row g-2 mb-3">
     <div class="col-4 col-md-2">
       <div class="text-center fx-p-2 fx-rounded-md" style="background:var(--surface2)">
@@ -52,7 +82,21 @@
         <div class="fx-fs-xs fx-text-muted">Leadovi</div>
       </div>
     </div>
+    <div class="col-4 col-md-2">
+      <div class="text-center fx-p-2 fx-rounded-md" style="background:var(--surface2)">
+        <div class="fx-fs-lg fx-fw-bold fx-text-gold">{{ nl_stats.chapters_active|default:"0" }}</div>
+        <div class="fx-fs-xs fx-text-muted">Ogranci</div>
+      </div>
+    </div>
+    <div class="col-4 col-md-2">
+      <div class="text-center fx-p-2 fx-rounded-md" style="background:var(--surface2)">
+        <div class="fx-fs-lg fx-fw-bold" style="color:#8b5cf6">7</div>
+        <div class="fx-fs-xs fx-text-muted">Domena</div>
+      </div>
+    </div>
   </div>
+
+  <!-- Ambasadori tablica -->
   {% if nl_ambassadors %}
   <h6 class="fx-fw-bold fx-fs-sm fx-text-gold mb-2"><i class="fas fa-users"></i> Nedavne prijave ambasadora</h6>
   <div class="table-responsive">
@@ -73,6 +117,8 @@
     </table>
   </div>
   {% endif %}
+
+  <!-- Brzi linkovi -->
   <div class="d-flex flex-wrap gap-2 mt-3">
     <a href="/no-limit/admin/" class="fx-rounded-sm fx-pointer fx-fs-sm fx-fw-bold fx-text-gold fx-no-underline" style="padding:6px 14px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3)"><i class="fas fa-tachometer-alt me-1"></i>Command Center</a>
     <a href="/notariat/docs/" class="fx-rounded-sm fx-pointer fx-fs-sm fx-fw-bold fx-text-gold fx-no-underline" style="padding:6px 14px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3)"><i class="fas fa-file-contract me-1"></i>Dokumenti (L1, G1, T1)</a>
