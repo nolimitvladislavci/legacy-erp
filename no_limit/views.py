@@ -119,7 +119,7 @@ def ambasador_prijava(request):
                     )
             except Exception:
                 logger.exception("WA notification failed for ambassador application")
-            return redirect("/no-limit/?prijava=ok")
+            return redirect("/?prijava=ok")
 
     return render(request, "no_limit/ambasador_prijava.html")
 
@@ -195,5 +195,5 @@ def prijava_azila(request):
                     send_whatsapp(wa_number, f"Nov azil: {naziv}, {grad} ({email})")
             except ImportError:
                 pass
-            return redirect("/no-limit/?prijava=ok")
-    return redirect("/no-limit/")
+            return redirect("/?prijava=ok")
+    return redirect("/")

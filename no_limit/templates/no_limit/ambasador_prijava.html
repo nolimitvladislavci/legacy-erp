@@ -47,8 +47,8 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:24px
 <body>
 
 <nav>
-    <a href="/no-limit/" class="nav-brand"><span>No</span> Limit</a>
-    <a href="/no-limit/#ambasadori" style="color:var(--muted);font-size:.9rem">
+    <a href="/" class="nav-brand"><span>No</span> Limit</a>
+    <a href="/#ambasadori" style="color:var(--muted);font-size:.9rem">
         <i class="fas fa-arrow-left"></i> Natrag
     </a>
 </nav>
@@ -68,7 +68,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:24px
         </ul>
     </div>
 
-    <form method="POST" action="/no-limit/ambasadori/prijava/">
+    <form method="POST" action="/ambasadori/prijava/">
         {% csrf_token %}
 
         <div class="row">
@@ -137,7 +137,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:24px
 </div>
 
 <footer>
-    <p>© 2026 No-limit udruga | <a href="/no-limit/">no-limit.world</a> | GDPR-Kids politika aktivna</p>
+    <p>© 2026 No-limit udruga | <a href="/">no-limit.world</a> | GDPR-Kids politika aktivna</p>
 </footer>
 
 </body>
