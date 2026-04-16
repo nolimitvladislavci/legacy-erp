@@ -7,6 +7,7 @@
 
 | Datum | Agent | Fokus | Rezultat | Commit |
 |-------|-------|-------|----------|--------|
+| 2026-04-16 | Sonnet | Security+Bugfixes | Print/copy/screenshot zaštita LIVE. Marija login fix. Mikrofon fix. Trojstvo IntegrityError fix. CC task Stolarija V2 zapisan. | b297a85d |
 | 2026-04-14 | Sonnet+CC | Korak 1-7 | Inventura, audit, standardi, test coverage | 5ea4e6f1 |
 | 2026-04-14 | Sonnet+CC | Korak 8 | Load test: 50VU, P95=850ms, 0 failures | f46bd567 |
 | 2026-04-14 | Sonnet+CC | Umbrella patch | CompanyMiddleware — 30+ modula popravljeno | a5e021e2 |
@@ -122,6 +123,8 @@ Blokeri:  ARHIVA-1 mora biti live
 | ARHIVA-8 Porezna Prijava DE | ⏳ | — |
 | ARHIVA-9 Synesis Retroaktiv | ⏳ | — |
 | ARHIVA-10 Billing | ⏳ | — |
+| Globalna zaštita print/copy/screenshot | ✅ LIVE | 100% |
+| Stolarija Voice V2 | ⏳ CC Task | — |
 | **POS free tier** (Marija Čačić) | ⏳ | — |
 | **PLAY.EU Sprint 1** | ✅ DONE | 100% (23 modela, 237 sadrzaja) |
 | PLAY.EU Frontend (Faza E) | ✅ DONE | 100% (11 views, 12 templates) |
