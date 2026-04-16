@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ogranci — Command Center</title>
+<link rel="stylesheet" href="/static/css/nolimit-portal.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>(function(){var t=localStorage.getItem('nl-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+<style>
+.admin-nav{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.admin-nav a{padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-dim);font-size:.9rem;font-weight:500;transition:all .2s}
+.admin-nav a:hover,.admin-nav a.active{border-color:var(--gold);color:var(--gold)}
+.chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-bottom:32px}
+.chapter-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px}
+.chapter-card.active{border-color:var(--gold)}
+.chapter-flag{font-size:2rem;margin-bottom:8px}
+.chapter-name{font-size:1.1rem;font-weight:600;color:var(--white)}
+.chapter-coord{font-size:.85rem;color:var(--text-dim);margin-top:4px}
+.chapter-stats{display:flex;gap:16px;margin-top:12px;font-size:.85rem;color:var(--text-muted)}
+.new-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;margin-bottom:24px}
+.new-form h3{color:var(--gold);margin-bottom:12px;font-size:1rem}
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px}
+.form-row input{width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.9rem}
+.form-row input:focus{outline:none;border-color:var(--gold)}
+.inactive-dot{color:#ef4444}
+.active-dot{color:#10b981}
+</style>
+</head>
+<body>
+
+<nav class="nl-nav">
+    <a href="/admin/" class="nl-nav-brand" style="text-decoration:none"><span>No Limit</span> Command Center</a>
+    <a href="/" style="color:var(--text-dim);font-size:.9rem">← Portal</a>
+</nav>
+
+<div style="max-width:1100px;margin:0 auto;padding:24px">
+
+    <div class="admin-nav">
+        <a href="/admin/"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/ambasadori/"><i class="fas fa-globe-europe"></i> Ambasadori</a>
+        <a href="/admin/partneri/"><i class="fas fa-handshake"></i> Partneri</a>
+        <a href="/admin/ogranci/" class="active"><i class="fas fa-flag"></i> Ogranci</a>
+    </div>
+
+    <h1 style="font-size:1.4rem;color:var(--white);margin-bottom:16px">
+        <i class="fas fa-flag" style="color:var(--gold)"></i> Nacionalni ogranci
+    </h1>
+
+    <!-- NOVI OGRANAK -->
+    <div class="new-form">
+        <h3><i class="fas fa-plus"></i> Novi ogranak</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <input type="text" name="country" placeholder="ISO kod (HR, DE...)" required maxlength="5">
+                <input type="text" name="country_name" placeholder="Naziv države" required>
+                <input type="text" name="coordinator_name" placeholder="Ime koordinatora">
+                <input type="email" name="coordinator_email" placeholder="Email koordinatora">
+            </div>
+            <div style="display:flex;gap:12px;align-items:center">
+                <label style="color:var(--text-dim);font-size:.9rem;display:flex;align-items:center;gap:6px">
+                    <input type="checkbox" name="is_active"> Aktivan
+                </label>
+                <button type="submit" class="nl-btn nl-btn-gold" style="padding:8px 24px;font-size:.9rem">
+                    <i class="fas fa-plus"></i> Dodaj
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- KARTICE -->
+    <div class="chapter-grid">
+        {% for ch in chapters %}
+        <div class="chapter-card {% if ch.is_active %}active{% endif %}">
+            <div class="chapter-flag">
+                {% if ch.is_active %}<span class="active-dot">●</span>{% else %}<span class="inactive-dot">○</span>{% endif %}
+            </div>
+            <div class="chapter-name">{{ ch.country_name }} ({{ ch.country }})</div>
+            <div class="chapter-coord">
+                {% if ch.coordinator_name %}
+                    <i class="fas fa-user"></i> {{ ch.coordinator_name }}
+                    {% if ch.coordinator_email %}<br><a href="mailto:{{ ch.coordinator_email }}">{{ ch.coordinator_email }}</a>{% endif %}
+                {% else %}
+                    <span style="color:var(--text-muted)">Bez koordinatora</span>
+                {% endif %}
+            </div>
+            <div class="chapter-stats">
+                <span><i class="fas fa-users"></i> {{ ch.ambassador_count }} amb.</span>
+                <span><i class="fas fa-user"></i> {{ ch.user_count }} kor.</span>
+                {% if ch.launch_date %}<span><i class="fas fa-calendar"></i> {{ ch.launch_date|date:"d.m.Y." }}</span>{% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:32px">
+            Nema ogranaka. Dodajte prvi gore.
+        </p>
+        {% endfor %}
+    </div>
+
+</div>
+</body>
+</html>

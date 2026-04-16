@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ amb.full_name }} — Command Center</title>
+<link rel="stylesheet" href="/static/css/nolimit-portal.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>(function(){var t=localStorage.getItem('nl-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+<style>
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr}}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px}
+.detail-card h3{color:var(--gold);font-size:.9rem;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.field{margin-bottom:12px}
+.field-label{font-size:.8rem;color:var(--text-muted);margin-bottom:2px}
+.field-value{color:var(--white);font-size:1rem}
+.action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.btn-sm{padding:10px 20px;border-radius:var(--radius-sm);font-weight:600;font-size:.9rem;cursor:pointer;border:none;transition:all .2s}
+.btn-approve{background:#10b981;color:#fff}
+.btn-approve:hover{background:#059669}
+.btn-decline{background:#ef4444;color:#fff}
+.btn-decline:hover{background:#dc2626}
+.btn-activate{background:#3b82f6;color:#fff}
+.btn-activate:hover{background:#2563eb}
+.btn-save{background:var(--gold);color:#000}
+.btn-save:hover{background:var(--gold-hover)}
+.badge{display:inline-block;padding:4px 12px;border-radius:var(--radius-sm);font-size:.85rem;font-weight:600}
+.badge-pending{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-approved{background:rgba(16,185,129,.15);color:#10b981}
+.badge-active{background:rgba(59,130,246,.15);color:#3b82f6}
+.badge-declined{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-review{background:rgba(139,92,246,.15);color:#8b5cf6}
+textarea{width:100%;min-height:100px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:.9rem;resize:vertical}
+textarea:focus{outline:none;border-color:var(--gold)}
+.admin-nav{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.admin-nav a{padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-dim);font-size:.9rem;font-weight:500;transition:all .2s}
+.admin-nav a:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+
+<nav class="nl-nav">
+    <a href="/admin/" class="nl-nav-brand" style="text-decoration:none">
+        <span>No Limit</span> Command Center
+    </a>
+    <a href="/admin/ambasadori/" style="color:var(--text-dim);font-size:.9rem">← Svi ambasadori</a>
+</nav>
+
+<div style="max-width:900px;margin:0 auto;padding:24px">
+
+    <div class="admin-nav">
+        <a href="/admin/"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/ambasadori/"><i class="fas fa-globe-europe"></i> Ambasadori</a>
+    </div>
+
+    <!-- HEADER -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <div>
+            <h1 style="font-size:1.6rem;color:var(--white);margin-bottom:4px">{{ amb.full_name }}</h1>
+            <p style="color:var(--text-dim)">{{ amb.get_country_display }} · {{ amb.email }}</p>
+        </div>
+        <span class="badge badge-{{ amb.status }}" style="font-size:1rem;padding:6px 16px">
+            {{ amb.get_status_display }}
+        </span>
+    </div>
+
+    <div class="detail-grid">
+        <!-- OSOBNI PODACI -->
+        <div class="detail-card">
+            <h3><i class="fas fa-user"></i> Osobni podaci</h3>
+            <div class="field">
+                <div class="field-label">Ime</div>
+                <div class="field-value">{{ amb.full_name }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Email</div>
+                <div class="field-value"><a href="mailto:{{ amb.email }}">{{ amb.email }}</a></div>
+            </div>
+            <div class="field">
+                <div class="field-label">Telefon</div>
+                <div class="field-value">{{ amb.phone|default:"—" }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Grad</div>
+                <div class="field-value">{{ amb.city|default:"—" }}, {{ amb.get_country_display }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Jezici</div>
+                <div class="field-value">{{ amb.languages|default:"—" }}</div>
+            </div>
+        </div>
+
+        <!-- ORGANIZACIJA I ULOGA -->
+        <div class="detail-card">
+            <h3><i class="fas fa-building"></i> Organizacija i uloga</h3>
+            <div class="field">
+                <div class="field-label">Organizacija</div>
+                <div class="field-value">{{ amb.organization|default:"—" }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Vrsta organizacije</div>
+                <div class="field-value">{{ amb.organization_type|default:"—" }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Željena uloga</div>
+                <div class="field-value">{{ amb.get_desired_role_display }}</div>
+            </div>
+            <div class="field">
+                <div class="field-label">Prijavljeno</div>
+                <div class="field-value">{{ amb.created_at|date:"d.m.Y. H:i" }}</div>
+            </div>
+            {% if amb.approved_at %}
+            <div class="field">
+                <div class="field-label">Odobreno</div>
+                <div class="field-value">{{ amb.approved_at|date:"d.m.Y. H:i" }} ({{ amb.reviewed_by }})</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- MOTIVACIJA -->
+        <div class="detail-card" style="grid-column:1/-1">
+            <h3><i class="fas fa-heart"></i> Motivacija</h3>
+            <p style="color:var(--text);line-height:1.7">{{ amb.motivation }}</p>
+            {% if amb.experience %}
+            <h3 style="margin-top:16px"><i class="fas fa-briefcase"></i> Iskustvo</h3>
+            <p style="color:var(--text);line-height:1.7">{{ amb.experience }}</p>
+            {% endif %}
+        </div>
+
+        <!-- BILJEŠKE + AKCIJE -->
+        <div class="detail-card" style="grid-column:1/-1">
+            <h3><i class="fas fa-sticky-note"></i> Bilješke (interne)</h3>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_notes">
+                <textarea name="review_notes" placeholder="Interne bilješke o ovom kandidatu...">{{ amb.review_notes }}</textarea>
+                <div class="action-bar">
+                    <button type="submit" class="btn-sm btn-save"><i class="fas fa-save"></i> Spremi bilješke</button>
+                </div>
+            </form>
+
+            <div class="action-bar" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+                {% if amb.status == "pending" or amb.status == "review" %}
+                <form method="POST" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit" class="btn-sm btn-approve"><i class="fas fa-check"></i> Odobri</button>
+                </form>
+                <form method="POST" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="decline">
+                    <button type="submit" class="btn-sm btn-decline"><i class="fas fa-times"></i> Odbij</button>
+                </form>
+                {% endif %}
+                {% if amb.status == "approved" %}
+                <form method="POST" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="activate">
+                    <button type="submit" class="btn-sm btn-activate"><i class="fas fa-star"></i> Aktiviraj</button>
+                </form>
+                {% endif %}
+                <a href="/dokumenti/ambasadorski-ugovor.pdf?name={{ amb.full_name|urlencode }}&country={{ amb.get_country_display|urlencode }}&email={{ amb.email|urlencode }}"
+                   class="btn-sm" style="background:var(--surface2);color:var(--gold);border:1px solid var(--gold);text-decoration:none">
+                    <i class="fas fa-file-pdf"></i> Generiraj ugovor A1
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

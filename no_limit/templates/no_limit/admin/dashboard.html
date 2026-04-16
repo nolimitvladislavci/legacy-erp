@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Center — No Limit</title>
+<link rel="stylesheet" href="/static/css/nolimit-portal.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>(function(){var t=localStorage.getItem('nl-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+<style>
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;text-align:center}
+.stat-num{font-size:2rem;font-weight:700;color:var(--gold)}
+.stat-label{font-size:.85rem;color:var(--text-dim);margin-top:4px}
+.stat-card.pending .stat-num{color:#f59e0b}
+.stat-card.success .stat-num{color:#10b981}
+.stat-card.danger .stat-num{color:#ef4444}
+.admin-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.admin-table th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--gold);color:var(--gold);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px}
+.admin-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.admin-table tr:hover{background:var(--surface2)}
+.badge{display:inline-block;padding:3px 10px;border-radius:var(--radius-sm);font-size:.75rem;font-weight:600}
+.badge-pending{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-approved{background:rgba(16,185,129,.15);color:#10b981}
+.badge-active{background:rgba(59,130,246,.15);color:#3b82f6}
+.badge-declined{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-new{background:rgba(201,168,76,.15);color:#c9a84c}
+.badge-signed{background:rgba(16,185,129,.15);color:#10b981}
+.admin-nav{display:flex;gap:4px;margin-bottom:32px;flex-wrap:wrap}
+.admin-nav a{padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-dim);font-size:.9rem;font-weight:500;transition:all .2s}
+.admin-nav a:hover,.admin-nav a.active{border-color:var(--gold);color:var(--gold);background:var(--surface2)}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-header h2{font-size:1.2rem;color:var(--white);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nl-nav">
+    <a href="/admin/" class="nl-nav-brand" style="text-decoration:none">
+        <span>No Limit</span> Command Center
+    </a>
+    <div class="nl-nav-links">
+        <a href="/">← Portal</a>
+        <button id="nl-theme-btn" class="nl-theme-toggle" onclick="nlToggleTheme()"><i class="fas fa-sun"></i></button>
+    </div>
+</nav>
+
+<div style="max-width:1100px;margin:0 auto;padding:24px">
+
+    <!-- ADMIN NAV -->
+    <div class="admin-nav">
+        <a href="/admin/" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/ambasadori/"><i class="fas fa-globe-europe"></i> Ambasadori ({{ stats.amb_total }})</a>
+        <a href="/admin/partneri/"><i class="fas fa-handshake"></i> Partneri ({{ stats.leads_total }})</a>
+        <a href="/admin/ogranci/"><i class="fas fa-flag"></i> Ogranci ({{ stats.chapters_total }})</a>
+    </div>
+
+    <!-- STAT KARTICE -->
+    <div class="stat-grid">
+        <div class="stat-card pending">
+            <div class="stat-num">{{ stats.amb_pending }}</div>
+            <div class="stat-label"><i class="fas fa-clock"></i> Na čekanju</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-num">{{ stats.amb_approved }}</div>
+            <div class="stat-label"><i class="fas fa-check"></i> Odobreni ambasadori</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">{{ stats.chapters_active }}</div>
+            <div class="stat-label"><i class="fas fa-flag"></i> Aktivni ogranci</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">{{ stats.leads_new }}</div>
+            <div class="stat-label"><i class="fas fa-handshake"></i> Novi leadovi</div>
+        </div>
+    </div>
+
+    <!-- NEDAVNE PRIJAVE -->
+    <div class="section-header">
+        <h2><i class="fas fa-globe-europe" style="color:var(--gold)"></i> Nedavne prijave ambasadora</h2>
+        <a href="/admin/ambasadori/" style="font-size:.85rem">Vidi sve →</a>
+    </div>
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Ime</th>
+                <th>Država</th>
+                <th>Organizacija</th>
+                <th>Uloga</th>
+                <th>Status</th>
+                <th>Datum</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for amb in recent_ambassadors %}
+            <tr>
+                <td><strong>{{ amb.full_name }}</strong><br><span style="font-size:.8rem;color:var(--text-dim)">{{ amb.email }}</span></td>
+                <td>{{ amb.get_country_display }}</td>
+                <td>{{ amb.organization|default:"-" }}</td>
+                <td>{{ amb.get_desired_role_display }}</td>
+                <td>
+                    <span class="badge badge-{{ amb.status }}">{{ amb.get_status_display }}</span>
+                </td>
+                <td style="font-size:.85rem;color:var(--text-dim)">{{ amb.created_at|date:"d.m.Y. H:i" }}</td>
+                <td><a href="/admin/ambasadori/{{ amb.pk }}/" style="font-size:.85rem">Otvori →</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px">Nema prijava</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if recent_leads %}
+    <!-- LEADOVI -->
+    <div class="section-header" style="margin-top:40px">
+        <h2><i class="fas fa-handshake" style="color:var(--gold)"></i> Partnership leadovi</h2>
+        <a href="/admin/partneri/" style="font-size:.85rem">Vidi sve →</a>
+    </div>
+    <table class="admin-table">
+        <thead>
+            <tr><th>Ime</th><th>Organizacija</th><th>Tip</th><th>Status</th><th>Datum</th></tr>
+        </thead>
+        <tbody>
+            {% for lead in recent_leads %}
+            <tr>
+                <td><strong>{{ lead.name }}</strong></td>
+                <td>{{ lead.organization|default:"-" }}</td>
+                <td>{{ lead.get_partnership_type_display }}</td>
+                <td><span class="badge badge-{{ lead.status }}">{{ lead.get_status_display }}</span></td>
+                <td style="font-size:.85rem;color:var(--text-dim)">{{ lead.created_at|date:"d.m.Y." }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+</div>
+
+<script>
+window.nlToggleTheme=function(){var h=document.documentElement,c=h.getAttribute('data-theme'),n=c==='light'?'dark':'light';h.setAttribute('data-theme',n);localStorage.setItem('nl-theme',n);var b=document.getElementById('nl-theme-btn');if(b)b.innerHTML=n==='light'?'<i class="fas fa-moon"></i>':'<i class="fas fa-sun"></i>';};
+(function(){var t=localStorage.getItem('nl-theme')||'dark';var b=document.getElementById('nl-theme-btn');if(b)b.innerHTML=t==='light'?'<i class="fas fa-moon"></i>':'<i class="fas fa-sun"></i>';})();
+</script>
+</body>
+</html>
