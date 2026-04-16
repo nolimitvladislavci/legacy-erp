@@ -534,3 +534,53 @@ function previewPhoto(input) {
 }
 </script>
 {% endblock %}
+<!-- FenixVoice — continuous voice integration -->
+<script src="/static/js/fenix-voice.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (!window.FenixVoice || !FenixVoice.supported) return;
+
+  FenixVoice.start({
+    lang: '{{ LANGUAGE_CODE|default:"hr" }}',
+    autoStart: true,
+    silenceMs: 2000,
+    onResult: function(text) {
+      console.log('FenixVoice result:', text);
+
+      // Parse dimensions
+      var dims = FenixVoice.parseDimensions(text);
+      if (dims) {
+        var wField = document.querySelector('[name="width_mm"]');
+        var hField = document.querySelector('[name="height_mm"]');
+        if (wField && !wField.value) wField.value = dims.width;
+        if (hField && !hField.value) hField.value = dims.height;
+        if (typeof fenixToast !== 'undefined') {
+          fenixToast('🎙 ' + dims.width + ' × ' + dims.height + ' mm', 'success');
+        }
+      }
+
+      // Store raw voice
+      var voiceField = document.querySelector('[name="voice_raw"]');
+      if (voiceField) {
+        voiceField.value = (voiceField.value ? voiceField.value + '\n' : '') + text;
+      }
+
+      // Separator keywords → submit current form and start new
+      var lower = text.toLowerCase();
+      if (lower.includes('sljedeć') || lower.includes('nova pozicija') || lower.includes('a između')) {
+        var submitBtn = document.querySelector('[type="submit"]');
+        if (submitBtn && dims) {
+          submitBtn.click();
+        }
+      }
+    },
+    onInterim: function(text) {
+      // Live preview in voice field
+      var voiceField = document.querySelector('[name="voice_raw"]');
+      if (voiceField) {
+        voiceField.placeholder = text;
+      }
+    }
+  });
+});
+</script>

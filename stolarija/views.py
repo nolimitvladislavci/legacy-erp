@@ -126,7 +126,9 @@ def session_new(request):
 @login_required
 def measure(request, session_id):
     company = _company(request)
-    session = get_object_or_404(MeasurementSession, pk=session_id, company=company)
+    session = get_object_or_404(
+        MeasurementSession.objects.select_related("work_order", "created_by"), pk=session_id, company=company
+    )
     profiles = WindowProfile.objects.filter(company=company, is_active=True).select_related("company")
     glasses = GlassType.objects.filter(company=company, is_active=True).select_related("company")
 
@@ -341,39 +343,51 @@ def generate_offer(request, session_id):
 def offer_detail(request, offer_id):
     company = _company(request)
     offer = get_object_or_404(WindowOffer, pk=offer_id, company=company)
-    measurements = list(offer.session.measurements.filter(confirmed=True))
+    measurements = list(offer.session.measurements.filter(confirmed=True).select_related("profile"))
 
     # Generate SVG visualization for each measurement
-    from .svg_window import generate_door_svg, generate_mosquito_svg, generate_window_svg
+    try:
+        from .svg_window import generate_door_svg, generate_mosquito_svg, generate_window_svg
+    except ImportError:
+        generate_door_svg = generate_mosquito_svg = generate_window_svg = None
 
     for m in measurements:
-        if m.element_type == "interior_door" or m.element_type == "door":
-            m.svg = generate_door_svg(
-                m.width_mm,
-                m.height_mm,
-                wing_config=m.wing_config,
-                swing_direction=m.swing_direction or "inward",
-                element_type=m.element_type,
-            )
-        elif m.element_type == "mosquito":
-            m.svg = generate_mosquito_svg(
-                m.width_mm,
-                m.height_mm,
-                mounting_type=m.mounting_type or "fixed_frame",
-            )
-        else:
-            profile_color = "#4a5568"
-            if m.profile:
-                profile_color = {"alu": "#94a3b8", "pvc": "#e2e8f0", "wood": "#a16207"}.get(
-                    m.profile.material, "#4a5568"
+        m.svg = ""
+        if not generate_window_svg:
+            continue
+        try:
+            if m.element_type in ("interior_door", "door"):
+                m.svg = generate_door_svg(
+                    m.width_mm,
+                    m.height_mm,
+                    wing_config=m.wing_config,
+                    swing_direction=m.swing_direction or "inward",
+                    element_type=m.element_type,
                 )
-            m.svg = generate_window_svg(
-                m.width_mm,
-                m.height_mm,
-                wing_config=m.wing_config,
-                element_type=m.element_type,
-                profile_color=profile_color,
-            )
+            elif m.element_type == "mosquito":
+                m.svg = generate_mosquito_svg(
+                    m.width_mm,
+                    m.height_mm,
+                    mounting_type=m.mounting_type or "fixed_frame",
+                )
+            else:
+                profile_color = "#4a5568"
+                if m.profile:
+                    profile_color = {"alu": "#94a3b8", "pvc": "#e2e8f0", "wood": "#a16207"}.get(
+                        m.profile.material, "#4a5568"
+                    )
+                m.svg = generate_window_svg(
+                    m.width_mm,
+                    m.height_mm,
+                    wing_config=m.wing_config,
+                    element_type=m.element_type,
+                    profile_color=profile_color,
+                )
+        except Exception as svg_err:
+            import logging
+
+            logging.getLogger(__name__).warning("SVG generation failed for measurement %s: %s", m.pk, svg_err)
+            m.svg = ""
 
     return render(
         request,

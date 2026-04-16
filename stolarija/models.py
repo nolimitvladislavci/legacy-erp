@@ -191,7 +191,9 @@ class Measurement(models.Model):
     height_mm = models.PositiveIntegerField(verbose_name="Visina (mm)")
     depth_mm = models.PositiveIntegerField(default=0, blank=True, verbose_name="Dubina zida (mm)")
 
-    element_type = models.CharField(max_length=20, choices=ELEMENT_TYPES, default="window", verbose_name="Tip")
+    element_type = models.CharField(
+        max_length=20, choices=ELEMENT_TYPES, default="window", db_index=True, verbose_name="Tip"
+    )
     wing_config = models.CharField(max_length=20, choices=WING_CONFIGS, default="double", verbose_name="Konfiguracija")
     quantity = models.PositiveSmallIntegerField(default=1, verbose_name="Količina")
 
@@ -203,7 +205,7 @@ class Measurement(models.Model):
     ai_parsed = models.JSONField(default=dict, blank=True, verbose_name="AI parsiranje")
 
     # KRITIČNO: Zdenko mora potvrditi prije generiranja ponude
-    confirmed = models.BooleanField(default=False, verbose_name="Potvrđeno ✓")
+    confirmed = models.BooleanField(default=False, db_index=True, verbose_name="Potvrđeno ✓")
 
     photo_before = models.ImageField(
         upload_to="stolarija/photos/%Y/%m/", null=True, blank=True, verbose_name="Foto prije"
