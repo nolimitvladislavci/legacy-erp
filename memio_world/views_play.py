@@ -172,7 +172,95 @@ def story_detail(request, slug):
 
 
 def _build_book_pages(story, lang):
-    """Build page list for the book flip engine."""
+    """Build page list for the book flip engine — uses StoryPage if available."""
+
+    from memio_world.book_models import StoryPage
+
+    # Try StoryPage first (Sprint 1 quality base)
+    story_pages = list(
+        StoryPage.objects.using("memio_world").filter(story=story, is_published=True).order_by("page_number")
+    )
+
+    if story_pages:
+        return _build_from_story_pages(story, story_pages, lang)
+
+    # Fallback: ad-hoc paragraph split
+    return _build_from_paragraphs(story, lang)
+
+
+def _build_from_story_pages(story, story_pages, lang):
+    """Build pages from StoryPage model (quality base)."""
+    import html as _html
+
+    pages = []
+    for sp in story_pages:
+        text = getattr(sp, f"text_{lang}", "") or sp.text_hr
+        image = sp.image.url if sp.image else ""
+        audio_field = getattr(sp, f"audio_{lang}", None)
+        audio = ""
+        if audio_field:
+            try:
+                audio = audio_field.url
+            except ValueError:
+                pass
+
+        if sp.page_type == "cover":
+            pages.append(
+                {
+                    "type": "cover",
+                    "title": getattr(story, f"title_{lang}", "") or story.title_hr,
+                    "author": story.attribution
+                    or (story.get_source_display() if hasattr(story, "get_source_display") else ""),
+                    "cover_img": image,
+                    "type_label": story.get_story_type_display() if hasattr(story, "get_story_type_display") else "",
+                    "country": story.country_of_origin or "",
+                    "reading_time": story.reading_time_minutes,
+                    "audio": audio,
+                }
+            )
+        elif sp.page_type == "back":
+            pages.append(
+                {
+                    "type": "moral",
+                    "text": _html.escape(text)
+                    if text
+                    else (_html.escape(story.moral_lesson) if story.moral_lesson else ""),
+                    "audio": audio,
+                }
+            )
+        else:
+            layout_map = {
+                "full_bleed": "fullbleed",
+                "top_image": "topimg",
+                "left_image": "split",
+                "split_50_50": "split",
+                "text_overlay": "overlay",
+                "bottom_image": "topimg",
+            }
+            layout = layout_map.get(sp.layout, "text")
+            if not image:
+                layout = "text"
+
+            escaped = _html.escape(text) if text else ""
+            text_html = "".join(f"<p>{p}</p>" for p in escaped.split("\n") if p.strip())
+
+            pages.append(
+                {
+                    "type": "page",
+                    "layout": layout,
+                    "text": text_html,
+                    "image": image,
+                    "page_num": str(sp.page_number),
+                    "audio": audio,
+                    "scene": sp.scene_description[:100] if sp.scene_description else "",
+                }
+            )
+
+    return pages
+
+
+def _build_from_paragraphs(story, lang):
+    """Fallback: build pages from raw paragraph text."""
     import html as _html
 
     title = getattr(story, f"title_{lang}", "") or story.title_hr
@@ -198,7 +286,6 @@ def _build_book_pages(story, lang):
     pages = []
     layout_cycle = ["topimg", "text", "split", "overlay", "text", "topimg"]
 
-    # Cover
     pages.append(
         {
             "type": "cover",
@@ -211,7 +298,6 @@ def _build_book_pages(story, lang):
         }
     )
 
-    # Content — 2 paragraphs per page
     page_num = 1
     first_text = True
     for i in range(0, len(paragraphs), 2):
@@ -235,7 +321,6 @@ def _build_book_pages(story, lang):
         elif cover_img and page_num == 1:
             img = cover_img
             layout = "fullbleed"
-
         if not img:
             layout = "text"
 
@@ -250,21 +335,10 @@ def _build_book_pages(story, lang):
         )
         page_num += 1
 
-    # Moral
     if story.moral_lesson:
-        pages.append(
-            {
-                "type": "moral",
-                "text": _html.escape(story.moral_lesson),
-            }
-        )
+        pages.append({"type": "moral", "text": _html.escape(story.moral_lesson)})
 
     return pages
-
-
-# ═══════════════════════════════════════════════════════════════
-# WISDOM
-# ═══════════════════════════════════════════════════════════════
 
 
 @cache_page(120)
