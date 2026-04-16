@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Javni dokumenti — evalidator pečat{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="color: #c9a84c;">
+            <i class="fas fa-file-contract me-2"></i>
+            Javni dokumenti
+        </h1>
+        <p class="text-muted">
+            Svi dokumenti su javno dostupni, verzionorani i zaštićeni evalidator digitalnim pečatom.
+        </p>
+    </div>
+
+    <!-- Dokument kartice -->
+    <div class="row g-4 justify-content-center">
+        {% for doc in docs %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm" style="border-top: 3px solid #c9a84c !important;">
+                <div class="card-body">
+                    <!-- ID badge -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-dark text-warning fw-bold px-3 py-2" style="font-size: 1rem;">
+                            {{ doc.id }}
+                        </span>
+                        <span class="badge bg-light text-muted">
+                            v{{ doc.version }}
+                        </span>
+                    </div>
+
+                    <!-- Title -->
+                    <h5 class="card-title fw-bold">{{ doc.title }}</h5>
+
+                    <!-- Meta -->
+                    <div class="small text-muted mb-3">
+                        <i class="fas fa-calendar-alt me-1"></i> {{ doc.date }}
+                    </div>
+
+                    <!-- Hash -->
+                    <div class="p-2 rounded mb-3" style="background: #111; font-family: monospace; font-size: 0.75rem;">
+                        <span style="color: #c9a84c;">SHA-256:</span>
+                        <span style="color: #4ade80;">{{ doc.hash_short }}...</span>
+                    </div>
+
+                    <!-- Akcije -->
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'notariat:public_doc_view' doc.id %}"
+                           class="btn btn-outline-warning btn-sm flex-fill">
+                            <i class="fas fa-eye me-1"></i> Čitaj
+                        </a>
+                        <a href="{% url 'notariat:public_doc_pdf' doc.id %}"
+                           class="btn btn-warning btn-sm flex-fill text-dark">
+                            <i class="fas fa-file-pdf me-1"></i> PDF
+                        </a>
+                        <a href="{% url 'notariat:public_doc_verify' doc.id %}"
+                           class="btn btn-outline-secondary btn-sm"
+                           title="Verificiraj integritet">
+                            <i class="fas fa-shield-alt"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Footer — pečat -->
+                <div class="card-footer bg-dark text-center py-2" style="border-top: 1px solid #c9a84c;">
+                    <small style="color: #c9a84c; font-family: monospace; letter-spacing: 1px;">
+                        ⬡ eValidator DIGITALNI PEČAT ⬡
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Info sekcija -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-8">
+            <div class="card border-0" style="background: #0a0a0a; color: #ccc;">
+                <div class="card-body p-4">
+                    <h5 style="color: #c9a84c;" class="mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Kako funkcionira digitalni pečat?
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-4 text-center">
+                            <div style="font-size: 2rem; color: #c9a84c;">1</div>
+                            <p class="small"><strong>Dokument se hashira</strong><br>
+                            SHA-256 algoritam — svaka promjena u dokumentu mijenja hash</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div style="font-size: 2rem; color: #c9a84c;">2</div>
+                            <p class="small"><strong>Hash se objavljuje</strong><br>
+                            Javno dostupan na evalidator.eu/verify/ — svatko može provjeriti</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div style="font-size: 2rem; color: #c9a84c;">3</div>
+                            <p class="small"><strong>Bilježnik ovjerava</strong><br>
+                            AES (integritet) + bilježnik (identitet) = neprobojno</p>
+                        </div>
+                    </div>
+                    <hr style="border-color: #333;">
+                    <p class="small text-center mb-0" style="color: #888;">
+                        Pečat je Advanced Electronic Signature (AES) prema EU Uredbi 910/2014 (eIDAS).<br>
+                        Za kvalificirani elektronički potpis (QES) potrebna je ovjera kod javnog bilježnika.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

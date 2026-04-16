@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>L1 — Licencni ugovor Konjik d.o.o. ↔ No-limit udruga</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-center {
+                content: "L1 v{{ doc_version }} — Stranica " counter(page) " od " counter(pages);
+                font-size: 7pt;
+                color: #999;
+            }
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #222;
+        }
+        h1 {
+            text-align: center;
+            font-size: 14pt;
+            margin-bottom: 3mm;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #111;
+        }
+        h2 {
+            font-size: 11pt;
+            margin-top: 8mm;
+            margin-bottom: 3mm;
+            color: #333;
+            border-bottom: 0.5pt solid #c9a84c;
+            padding-bottom: 1mm;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 10mm;
+        }
+        .doc-id {
+            text-align: center;
+            font-family: 'DejaVu Sans Mono', monospace;
+            font-size: 8pt;
+            color: #c9a84c;
+            margin-bottom: 8mm;
+        }
+        .article {
+            margin-bottom: 5mm;
+        }
+        .article-title {
+            font-weight: bold;
+            color: #111;
+        }
+        ol, ul {
+            margin-left: 5mm;
+            margin-top: 2mm;
+        }
+        li {
+            margin-bottom: 2mm;
+        }
+        .highlight {
+            background: #fef9c3;
+            padding: 1mm 2mm;
+            border-left: 2pt solid #c9a84c;
+            margin: 3mm 0;
+            font-size: 9pt;
+        }
+        .signature-block {
+            margin-top: 20mm;
+            page-break-inside: avoid;
+        }
+        .sig-line {
+            width: 45%;
+            display: inline-block;
+            text-align: center;
+            vertical-align: top;
+            margin: 0 2%;
+        }
+        .sig-line-inner {
+            border-top: 1px solid #000;
+            padding-top: 3mm;
+            margin-top: 20mm;
+            font-size: 9pt;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin-top: 5mm;
+        }
+        .history-table th, .history-table td {
+            border: 0.5pt solid #ccc;
+            padding: 2mm;
+            text-align: left;
+        }
+        .history-table th {
+            background: #f5f5f5;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ZAGLAVLJE -->
+    <div style="text-align: center; margin-bottom: 5mm;">
+        <span style="font-size: 18pt; color: #c9a84c;">⬡</span>
+    </div>
+
+    <h1>LICENCNI UGOVOR</h1>
+    <p class="subtitle">o korištenju i razvoju softverske platforme</p>
+    <p class="doc-id">Dokument: L1 | Verzija: {{ doc_version|default:"1.0.0" }} | {{ doc_date|default:"16.04.2026." }}</p>
+
+    <!-- UGOVORNE STRANE -->
+    <h2>Članak 1 — Ugovorne strane</h2>
+    <div class="article">
+        <p>Ovaj ugovor sklapaju:</p>
+        <ol>
+            <li>
+                <strong>Konjik d.o.o.</strong>, OIB: _____________, sa sjedištem u _____________,
+                zastupano po direktoru _____________ (u daljnjem tekstu: <strong>Razvijač</strong>)
+            </li>
+            <li>
+                <strong>No-limit udruga</strong>, OIB: _____________, sa sjedištem u _____________,
+                zastupana po predsjedniku Ivanu Brtanu (u daljnjem tekstu: <strong>Korisnik</strong>)
+            </li>
+        </ol>
+    </div>
+
+    <!-- PREDMET -->
+    <h2>Članak 2 — Predmet ugovora</h2>
+    <div class="article">
+        <p>Predmet ovog ugovora je razgraničenje prava intelektualnog vlasništva (IP)
+        nad softverskom platformom i digitalnim sadržajima koji se razvijaju u okviru
+        zajedničke suradnje ugovornih strana.</p>
+    </div>
+
+    <!-- IP RAZGRANIČENJE -->
+    <h2>Članak 3 — Vlasništvo nad izvornim kodom</h2>
+    <div class="article">
+        <table style="width: 100%; border-collapse: collapse; font-size: 9pt;">
+            <tr style="background: #f9f9f9; font-weight: bold;">
+                <td style="border: 0.5pt solid #ccc; padding: 2mm; width: 35%;">Komponenta</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm; width: 30%;">Vlasnik IP-a</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm; width: 35%;">Licenca</td>
+            </tr>
+            <tr>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">LIMIT Connect ERP<br>(core platforma)</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;"><strong>Konjik d.o.o.</strong></td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">Komercijalna licenca. Korisnik dobiva neekskluzivno pravo korištenja za potrebe udruge.</td>
+            </tr>
+            <tr>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">evalidator.eu<br>(validacijski servis)</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;"><strong>Zajednički</strong></td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">Algoritmi su javni standardi (ISO 7064). Implementacija: Konjik. Branding i domena: Korisnik. Oboje zadržavaju pravo korištenja.</td>
+            </tr>
+            <tr>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">PLAY.EU / memio.world<br>(edukativni sadržaj)</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;"><strong>No-limit udruga</strong></td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">Sav pedagoški, kulturni i multimedijalni sadržaj je vlasništvo Korisnika. Tehnička infrastruktura: Konjik.</td>
+            </tr>
+            <tr>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">memio.pet / memio.farm<br>(životinjski profili)</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;"><strong>Zajednički</strong></td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">Platforma: Konjik. Podaci o životinjama: vlasnik životinje. Branding: Korisnik.</td>
+            </tr>
+            <tr>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">Lokalni sadržaj<br>(ambasadorski doprinos)</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;"><strong>Zajednički</strong><br>(Korisnik + Ambasador)</td>
+                <td style="border: 0.5pt solid #ccc; padding: 2mm;">Ambasador zadržava pravo na svoj lokalni sadržaj. Korisnik dobiva neekskluzivnu licencu za platformu.</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- FINANCIJE -->
+    <h2>Članak 4 — Financijski odnosi</h2>
+    <div class="article">
+        <ol>
+            <li>Razvijač pruža tehničku infrastrukturu (server, održavanje, razvoj) po dogovorenoj
+            mjesečnoj/godišnjoj naknadi koju ugovorne strane definiraju zasebnim aneksom.</li>
+            <li>Korisnik može koristiti platformu za EU grant prijave. Prihodi od grantova
+            pripadaju Korisniku, osim stavki eksplicitno namijenjenih tehničkom razvoju.</li>
+            <li>Prihodi od komercijalnih licenci LIMIT Connect ERP-a pripadaju isključivo Razvijaču.</li>
+            <li>Prihodi od pretplata krajnjih korisnika na platformama Korisnika (PLAY.EU, memio.pet)
+            dijele se prema dogovoru u zasebnom aneksu.</li>
+        </ol>
+    </div>
+
+    <!-- TRAJANJE -->
+    <h2>Članak 5 — Trajanje i raskid</h2>
+    <div class="article">
+        <ol>
+            <li>Ovaj ugovor sklapa se na neodređeno vrijeme.</li>
+            <li>Svaka strana može raskinuti ugovor uz pisanu obavijest od <strong>90 (devedeset) dana</strong>.</li>
+            <li>U slučaju raskida:
+                <ul>
+                    <li>Konjik d.o.o. zadržava sav izvorni kod LIMIT Connect ERP-a.</li>
+                    <li>No-limit udruga zadržava sav edukativni sadržaj, korisničke podatke (uz GDPR), i pravo na domene.</li>
+                    <li>Zajednički IP (evalidator, memio.pet) — obje strane zadržavaju pravo na fork i samostalni razvoj.</li>
+                    <li>Konjik d.o.o. pruža <strong>export podataka</strong> u standardnom formatu (JSON/CSV) u roku 30 dana od raskida.</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- POVJERLJIVOST -->
+    <h2>Članak 6 — Povjerljivost</h2>
+    <div class="article">
+        <ol>
+            <li>Ugovorne strane se obvezuju na povjerljivost poslovnih informacija, izvornog koda,
+            korisničkih podataka i financijskih detalja.</li>
+            <li>Ova obveza traje <strong>2 (dvije) godine</strong> nakon prestanka ugovora.</li>
+            <li>Izuzeci: informacije koje su javno dostupne, zahtjevi suda ili regulatora,
+            informacije koje je primatelj zakonito stekao od treće strane.</li>
+        </ol>
+    </div>
+
+    <!-- GDPR -->
+    <h2>Članak 7 — Zaštita osobnih podataka</h2>
+    <div class="article">
+        <ol>
+            <li>Razvijač je <strong>Izvršitelj obrade</strong> prema GDPR-u (Uredba EU 2016/679).</li>
+            <li>Korisnik je <strong>Voditelj obrade</strong> za podatke prikupljene putem platformi Korisnika.</li>
+            <li>Razvijač se obvezuje da neće pristupati, kopirati, ili distribuirati osobne podatke
+            korisnika platforme osim u svrhu tehničkog održavanja.</li>
+            <li>Podaci se čuvaju na serverima unutar EU (Hetzner, Finska).</li>
+        </ol>
+    </div>
+
+    <!-- ODGOVORNOST -->
+    <h2>Članak 8 — Ograničenje odgovornosti</h2>
+    <div class="article">
+        <ol>
+            <li>Razvijač se obvezuje na razumnu dostupnost platforme (99% uptime na godišnjoj razini).</li>
+            <li>Razvijač ne odgovara za štetu nastalu uslijed:
+                <ul>
+                    <li>Više sile (nestanak struje, DDoS napadi, odluke pružatelja infrastrukture)</li>
+                    <li>Neovlaštenog pristupa uzrokovanog propustom Korisnika</li>
+                    <li>Sadržaja koji je kreirao Korisnik ili njegovi ambasadori</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- RJEŠAVANJE SPOROVA -->
+    <h2>Članak 9 — Rješavanje sporova</h2>
+    <div class="article">
+        <ol>
+            <li>Ugovorne strane će sporove rješavati pregovorima u dobroj vjeri.</li>
+            <li>Ako pregovori ne uspiju u roku 30 dana, nadležan je <strong>Općinski sud u Osijeku</strong>.</li>
+            <li>Primjenjuje se pravo Republike Hrvatske.</li>
+        </ol>
+    </div>
+
+    <!-- ZAVRŠNE ODREDBE -->
+    <h2>Članak 10 — Završne odredbe</h2>
+    <div class="article">
+        <ol>
+            <li>Ovaj ugovor je sastavljen u 2 (dva) jednaka primjerka, po jedan za svaku ugovornu stranu.</li>
+            <li>Digitalna verzija s evalidator pečatom ima jednaku dokaznu snagu kao tiskani primjerak
+            ovjeren kod javnog bilježnika.</li>
+            <li>Sve izmjene ovog ugovora moraju biti u pisanom obliku i potpisane od obje strane.</li>
+            <li>Izmjene se evidentiraju u povijesti dokumenta (Dodatak A).</li>
+        </ol>
+    </div>
+
+    <div class="highlight">
+        <strong>NAPOMENA:</strong> Ovaj ugovor stupa na snagu danom potpisa obje ugovorne strane
+        i ovjere kod javnog bilježnika. Digitalni pečat evalidator.eu služi kao dodatni
+        dokaz integriteta — bilježnička ovjera daje punu pravnu težinu.
+    </div>
+
+    <!-- POTPISI -->
+    <div class="signature-block">
+        <p style="text-align: right; margin-bottom: 15mm;">
+            U _________________, dana _________________ 2026. godine.
+        </p>
+
+        <div class="sig-line">
+            <div class="sig-line-inner">
+                <strong>Za Razvijača:</strong><br>
+                Konjik d.o.o.<br>
+                _____________<br>
+                Direktor
+            </div>
+        </div>
+        <div class="sig-line">
+            <div class="sig-line-inner">
+                <strong>Za Korisnika:</strong><br>
+                No-limit udruga<br>
+                Ivan Brtan<br>
+                Predsjednik
+            </div>
+        </div>
+    </div>
+
+    <!-- DODATAK A — POVIJEST DOKUMENTA -->
+    <div style="page-break-before: always;"></div>
+    <h2>Dodatak A — Povijest dokumenta</h2>
+    <p style="font-size: 8pt; color: #666;">
+        Sve izmjene ovog dokumenta bilježe se ispod. Svaka verzija ima vlastiti SHA-256 hash
+        i može se verificirati na evalidator.eu/verify/.
+    </p>
+    <table class="history-table">
+        <tr>
+            <th>Verzija</th>
+            <th>Datum</th>
+            <th>Opis promjene</th>
+            <th>SHA-256 (prvih 16)</th>
+            <th>Potpisao</th>
+        </tr>
+        <tr>
+            <td>1.0.0</td>
+            <td>{{ doc_date|default:"16.04.2026." }}</td>
+            <td>Inicijalna verzija — usvojena od obje strane</td>
+            <td style="font-family: monospace; font-size: 7pt;">{{ doc_hash_short|default:"________________" }}</td>
+            <td>Ivan Brtan</td>
+        </tr>
+        <tr>
+            <td colspan="5" style="color: #999; text-align: center; font-style: italic;">
+                — buduće izmjene se dodaju ovdje —
+            </td>
+        </tr>
+    </table>
+
+    <!-- EVALIDATOR DIGITALNI PEČAT -->
+    {% include "notariat/pdf/evalidator_seal.html" %}
+
+</body>
+</html>

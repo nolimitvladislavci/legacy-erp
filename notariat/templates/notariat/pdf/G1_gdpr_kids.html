@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>G1 — GDPR-Kids politika zaštite djece</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-center {
+                content: "G1 v{{ doc_version }} — Stranica " counter(page) " od " counter(pages);
+                font-size: 7pt;
+                color: #999;
+            }
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #222;
+        }
+        h1 {
+            text-align: center;
+            font-size: 14pt;
+            margin-bottom: 3mm;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        h2 {
+            font-size: 11pt;
+            margin-top: 8mm;
+            margin-bottom: 3mm;
+            color: #1e40af;
+            border-bottom: 0.5pt solid #3b82f6;
+            padding-bottom: 1mm;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 10mm;
+        }
+        .doc-id {
+            text-align: center;
+            font-family: 'DejaVu Sans Mono', monospace;
+            font-size: 8pt;
+            color: #c9a84c;
+            margin-bottom: 8mm;
+        }
+        ol, ul { margin-left: 5mm; margin-top: 2mm; }
+        li { margin-bottom: 2mm; }
+        .zero-box {
+            background: #fef2f2;
+            border: 2pt solid #dc2626;
+            border-radius: 3mm;
+            padding: 5mm;
+            margin: 5mm 0;
+            text-align: center;
+        }
+        .zero-box .big {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #dc2626;
+        }
+        .zero-box .sub {
+            font-size: 9pt;
+            color: #666;
+            margin-top: 2mm;
+        }
+        .principle-box {
+            background: #eff6ff;
+            border-left: 3pt solid #3b82f6;
+            padding: 4mm;
+            margin: 3mm 0;
+            font-size: 9pt;
+        }
+        .check-item {
+            margin-bottom: 2mm;
+        }
+        .check-item:before {
+            content: "☐ ";
+            color: #3b82f6;
+        }
+        .highlight {
+            background: #fef9c3;
+            padding: 1mm 2mm;
+            border-left: 2pt solid #c9a84c;
+            margin: 3mm 0;
+            font-size: 9pt;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin-top: 5mm;
+        }
+        .history-table th, .history-table td {
+            border: 0.5pt solid #ccc;
+            padding: 2mm;
+            text-align: left;
+        }
+        .history-table th {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ZAGLAVLJE -->
+    <div style="text-align: center; margin-bottom: 5mm;">
+        <span style="font-size: 18pt; color: #3b82f6;">🛡</span>
+    </div>
+
+    <h1>POLITIKA ZAŠTITE DJECE</h1>
+    <p class="subtitle">GDPR-Kids — Zero-Data Policy za sve platforme</p>
+    <p class="doc-id">Dokument: G1 | Verzija: {{ doc_version|default:"1.0.0" }} | {{ doc_date|default:"16.04.2026." }}</p>
+
+    <!-- TEMELJNO NAČELO -->
+    <div class="zero-box">
+        <div class="big">NULA PODATAKA O DJECI</div>
+        <div class="sub">
+            Nikad ne prikupljamo, ne pohranjujemo i ne obrađujemo osobne podatke djece.<br>
+            Ovo je nepovredivo načelo — nema iznimaka, nema "posebnih slučajeva".
+        </div>
+    </div>
+
+    <!-- PRAVNA OSNOVA -->
+    <h2>Članak 1 — Pravna osnova</h2>
+    <div class="article">
+        <p>Ova politika temelji se na:</p>
+        <ol>
+            <li><strong>GDPR Članak 8</strong> — Uvjeti primjenjivi na pristanak djeteta u vezi usluga informacijskog društva</li>
+            <li><strong>GDPR Članak 6(1)(f)</strong> — Legitimni interes voditelja obrade, uzimajući u obzir interese djeteta</li>
+            <li><strong>UN Konvencija o pravima djeteta</strong> — Članak 16 (pravo na privatnost)</li>
+            <li><strong>EU Strategija za prava djeteta 2021-2024</strong> — Digitalna sigurnost</li>
+            <li><strong>Zakon o provedbi Opće uredbe o zaštiti podataka</strong> (NN 42/18) — Članak 19</li>
+        </ol>
+    </div>
+
+    <!-- DEFINICIJA -->
+    <h2>Članak 2 — Definicije</h2>
+    <div class="article">
+        <ol>
+            <li><strong>"Dijete"</strong> — svaka fizička osoba mlađa od 16 godina (čl. 8 GDPR, primjenjivo u HR, DE, AT, SI)</li>
+            <li><strong>"Osobni podatak"</strong> — ime, prezime, dob, email, fotografija, lokacija, IP adresa, cookie identifikator, ili bilo koji podatak koji može identificirati dijete</li>
+            <li><strong>"Platforme"</strong> — PLAY.EU, memio.world, memio.pet, evalidator.eu, i sve buduće platforme u ekosustavu No-limit udruge</li>
+            <li><strong>"Anonimni profil"</strong> — identifikator koji ne sadrži osobne podatke (npr. "Lisica-42", "Zvijezda-7")</li>
+        </ol>
+    </div>
+
+    <!-- ŠTO NE RADIMO -->
+    <h2>Članak 3 — Što NIKAD ne radimo</h2>
+    <div class="article">
+        <div class="principle-box">
+            <strong>3.1 NULA prikupljanja</strong><br>
+            Ne tražimo i ne pohranjujemo: ime djeteta, prezime, datum rođenja, email,
+            fotografiju, lokaciju, školski razred, ili bilo koji identifikacijski podatak.
+        </div>
+        <div class="principle-box">
+            <strong>3.2 NULA praćenja</strong><br>
+            Nema Google Analyticsa, Facebook Pixela, reklamnih trackera, ili bilo kojeg alata
+            za praćenje koji može identificirati dijete. Nema cookieja osim tehničkih (session).
+        </div>
+        <div class="principle-box">
+            <strong>3.3 NULA profiliranja</strong><br>
+            Ne kreiramo bihevioralne profile djece. Ne koristimo AI za analizu ponašanja djece.
+            Ne prodajemo, ne dijelimo, ne licenciramo podatke o djeci — jer ih nemamo.
+        </div>
+        <div class="principle-box">
+            <strong>3.4 NULA komunikacije</strong><br>
+            Ne šaljemo email, push notifikacije, SMS, ili bilo kakvu izravnu komunikaciju djeci.
+            Sva komunikacija ide isključivo na odraslu osobu (učitelj, roditelj, skrbnik).
+        </div>
+    </div>
+
+    <!-- KAKO PLATFORMA RADI BEZ PODATAKA -->
+    <h2>Članak 4 — Kako platforma radi bez podataka djece</h2>
+    <div class="article">
+        <p>PLAY.EU i memio.world su dizajnirani po principu <strong>"Privacy by Design"</strong> (GDPR čl. 25):</p>
+        <ol>
+            <li><strong>Pristup putem učitelja/roditelja:</strong> Odrasla osoba kreira račun i pristupa sadržaju.
+            Dijete koristi sadržaj putem uređaja odrasle osobe — bez vlastite registracije.</li>
+            <li><strong>Anonimni profili:</strong> Ako personalizacija postane potrebna (faza 2+),
+            koristimo generirane nadimke ("Lisica-42") bez ikakve veze s stvarnim identitetom.</li>
+            <li><strong>Lokalna pohrana:</strong> Napredak djeteta (bodovi, završene lekcije)
+            pohranjuje se LOKALNO na uređaju — ne šalje se na server.</li>
+            <li><strong>Grupna statistika:</strong> Učitelj vidi agregirane podatke razreda
+            (npr. "75% učenika završilo modul 3"), ne individualne profile.</li>
+        </ol>
+    </div>
+
+    <!-- TREĆE STRANE -->
+    <h2>Članak 5 — Treće strane i pod-izvršitelji</h2>
+    <div class="article">
+        <ol>
+            <li>Platforme NE koriste servise trećih strana koji prikupljaju podatke djece.</li>
+            <li>Dopušteni servisi:
+                <ul>
+                    <li><strong>Hetzner</strong> (hosting, Finska) — ne prima osobne podatke djece</li>
+                    <li><strong>Let's Encrypt</strong> (SSL) — ne prima osobne podatke</li>
+                    <li><strong>Europeana API</strong> (kulturni sadržaj) — javni API, nema autentikacije korisnika</li>
+                </ul>
+            </li>
+            <li>Zabranjeni servisi na stranicama koje koriste djeca:
+                <ul>
+                    <li>Google Analytics, Google Fonts (GDPR DE presuda)</li>
+                    <li>Facebook/Meta Pixel, TikTok Pixel</li>
+                    <li>Reklamne mreže (AdSense, AdMob)</li>
+                    <li>Social login (Google Sign-In, Apple Sign-In za dijete)</li>
+                    <li>YouTube embed (koristi YouTube-nocookie.com ako ikad treba)</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- ODGOVORNOST AMBASADORA -->
+    <h2>Članak 6 — Odgovornost ambasadora i partnera</h2>
+    <div class="article">
+        <ol>
+            <li>Svaki ambasador i partner potpisuje ovu politiku kao sastavni dio ambasadorskog ugovora.</li>
+            <li>Ambasador se obvezuje:
+                <ul>
+                    <li>NE prikupljati podatke djece prilikom lokalizacije sadržaja</li>
+                    <li>NE fotografirati djecu bez pisanog pristanka roditelja (izvan platforme)</li>
+                    <li>Koristiti samo odobrene ilustracije i generički sadržaj</li>
+                </ul>
+            </li>
+            <li>Kršenje ove politike = automatski raskid ambasadorskog ugovora bez otkaznog roka.</li>
+        </ol>
+    </div>
+
+    <!-- INCIDENTNI PLAN -->
+    <h2>Članak 7 — Incidentni plan</h2>
+    <div class="article">
+        <p>U slučaju da se bilo koji osobni podatak djeteta slučajno prikupi ili otkrije:</p>
+        <ol>
+            <li><strong>0-1 sat:</strong> Podatak se briše sa svih servera, backup-a i logova</li>
+            <li><strong>0-24 sata:</strong> AZOP (HR) ili nadležni DPA se obavještava ako je incident značajan (GDPR čl. 33)</li>
+            <li><strong>0-72 sata:</strong> Roditelj/skrbnik se obavještava (GDPR čl. 34)</li>
+            <li><strong>0-7 dana:</strong> Root cause analiza i implementacija mjera za sprječavanje ponavljanja</li>
+        </ol>
+        <div class="highlight">
+            <strong>Kontakt za prijavu:</strong> privacy@no-limit.world | +385 __ ___ ____ (DPO)
+        </div>
+    </div>
+
+    <!-- REVIZIJA -->
+    <h2>Članak 8 — Godišnja revizija</h2>
+    <div class="article">
+        <ol>
+            <li>Ova politika se revidira minimalno jednom godišnje.</li>
+            <li>Svaka revizija se bilježi u povijesti dokumenta (Dodatak A).</li>
+            <li>Revizija uključuje:
+                <ul>
+                    <li>Audit svih servisa trećih strana</li>
+                    <li>Provjeru server logova za slučajno prikupljene podatke</li>
+                    <li>Pregled novih EU regulativa (Digital Services Act, AI Act)</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- JAVNA DOSTUPNOST -->
+    <h2>Članak 9 — Javna dostupnost i transparentnost</h2>
+    <div class="article">
+        <ol>
+            <li>Ovaj dokument je <strong>javno dostupan</strong> na:
+                <ul>
+                    <li>https://no-limit.world/dokumenti/gdpr-kids/</li>
+                    <li>https://evalidator.eu/verify/G1/</li>
+                </ul>
+            </li>
+            <li>Svaka izmjena je vidljiva u povijesti dokumenta s hashom prethodne verzije.</li>
+            <li>Bilo tko može verificirati integritet dokumenta putem evalidator.eu.</li>
+        </ol>
+    </div>
+
+    <div class="highlight">
+        <strong>IZJAVA:</strong> No-limit udruga i Konjik d.o.o. potvrđuju da je zaštita djece
+        nepovredivo načelo svih platformi u ekosustavu. Ova politika nije formalnost —
+        ona je moralna tvrđava na kojoj gradimo povjerenje roditelja, učitelja i institucija
+        diljem Europske unije.
+    </div>
+
+    <!-- POTPISI -->
+    <div style="margin-top: 15mm; page-break-inside: avoid;">
+        <p style="text-align: right; margin-bottom: 10mm;">
+            U _________________, dana _________________ 2026. godine.
+        </p>
+
+        <div style="width: 30%; display: inline-block; text-align: center; vertical-align: top; margin: 0 1%;">
+            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 15mm; font-size: 9pt;">
+                <strong>No-limit udruga</strong><br>
+                Ivan Brtan, Predsjednik
+            </div>
+        </div>
+        <div style="width: 30%; display: inline-block; text-align: center; vertical-align: top; margin: 0 1%;">
+            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 15mm; font-size: 9pt;">
+                <strong>Konjik d.o.o.</strong><br>
+                _____________, Direktor
+            </div>
+        </div>
+        <div style="width: 30%; display: inline-block; text-align: center; vertical-align: top; margin: 0 1%;">
+            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 15mm; font-size: 9pt;">
+                <strong>DPO</strong><br>
+                _____________, Službenik za zaštitu podataka
+            </div>
+        </div>
+    </div>
+
+    <!-- DODATAK A — POVIJEST DOKUMENTA -->
+    <div style="page-break-before: always;"></div>
+    <h2>Dodatak A — Povijest dokumenta</h2>
+    <table class="history-table">
+        <tr>
+            <th>Verzija</th>
+            <th>Datum</th>
+            <th>Opis promjene</th>
+            <th>SHA-256 (prvih 16)</th>
+            <th>Potpisao</th>
+        </tr>
+        <tr>
+            <td>1.0.0</td>
+            <td>{{ doc_date|default:"16.04.2026." }}</td>
+            <td>Inicijalna verzija — Zero-Data politika usvojena</td>
+            <td style="font-family: monospace; font-size: 7pt;">{{ doc_hash_short|default:"________________" }}</td>
+            <td>Ivan Brtan</td>
+        </tr>
+        <tr>
+            <td colspan="5" style="color: #999; text-align: center; font-style: italic;">
+                — buduće izmjene se dodaju ovdje —
+            </td>
+        </tr>
+    </table>
+
+    <!-- EVALIDATOR DIGITALNI PEČAT -->
+    {% include "notariat/pdf/evalidator_seal.html" %}
+
+</body>
+</html>

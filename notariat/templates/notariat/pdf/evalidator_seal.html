@@ -1,0 +1,120 @@
+{% comment %}
+evalidator_seal.html — Digitalni pečat za sve javne dokumente
+Kontekst: doc_id, doc_version, doc_hash, doc_date, doc_url, history_entries
+{% endcomment %}
+<div class="evalidator-seal" style="
+    margin-top: 20mm;
+    padding: 8mm;
+    border: 2px solid #c9a84c;
+    border-radius: 4mm;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #e0e0e0;
+    font-family: 'DejaVu Sans Mono', 'Courier New', monospace;
+    font-size: 7.5pt;
+    page-break-inside: avoid;
+">
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 5mm; border-bottom: 1px solid #c9a84c; padding-bottom: 3mm;">
+        <span style="font-size: 14pt; color: #c9a84c; font-weight: bold;">&#x2B21;</span>
+        <span style="font-size: 11pt; color: #c9a84c; font-weight: bold; letter-spacing: 2px;">
+            eValidator DIGITALNI PECAT
+        </span>
+        <span style="font-size: 14pt; color: #c9a84c; font-weight: bold;">&#x2B21;</span>
+    </div>
+
+    <!-- Dokument info -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 4mm;">
+        <tr>
+            <td style="width: 30%; color: #c9a84c; padding: 1mm 0;">Dokument ID:</td>
+            <td style="color: #fff;">{{ doc_id }}</td>
+        </tr>
+        <tr>
+            <td style="color: #c9a84c; padding: 1mm 0;">Verzija:</td>
+            <td style="color: #fff;">{{ doc_version }}</td>
+        </tr>
+        <tr>
+            <td style="color: #c9a84c; padding: 1mm 0;">Datum izdavanja:</td>
+            <td style="color: #fff;">{{ doc_date }}</td>
+        </tr>
+        <tr>
+            <td style="color: #c9a84c; padding: 1mm 0;">Izdavac:</td>
+            <td style="color: #fff;">{{ doc_issuer|default:"No-limit udruga / Konjik d.o.o." }}</td>
+        </tr>
+    </table>
+
+    <!-- SHA-256 hash -->
+    <div style="
+        background: #111;
+        border: 1px solid #333;
+        padding: 3mm;
+        margin: 3mm 0;
+        border-radius: 2mm;
+        word-break: break-all;
+    ">
+        <span style="color: #c9a84c;">SHA-256:</span>
+        <span style="color: #4ade80; font-size: 7pt;">{{ doc_hash }}</span>
+    </div>
+
+    <!-- Verifikacija -->
+    <div style="margin-top: 4mm; padding-top: 3mm; border-top: 1px solid #333;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="vertical-align: top;">
+                    <p style="color: #c9a84c; margin: 0 0 2mm 0;">Verifikacija:</p>
+                    <p style="color: #fff; margin: 0; font-size: 8pt;">
+                        {{ doc_url|default:"https://evalidator.eu/verify/" }}{{ doc_id }}/
+                    </p>
+                    <p style="color: #888; margin: 2mm 0 0 0; font-size: 6.5pt;">
+                        Skenirajte QR kod ili posjetite URL za provjeru integriteta dokumenta.
+                        Ovaj pecat je Advanced Electronic Signature (AES) prema EU Uredbi 910/2014 (eIDAS).
+                        Za kvalificirani elektronicki potpis (QES) potrebna je ovjera kod javnog biljeznika.
+                    </p>
+                </td>
+                <td style="width: 22mm; vertical-align: top; padding-left: 5mm;">
+                    <div style="width: 22mm; height: 22mm; border: 1px solid #c9a84c; text-align: center; line-height: 22mm;">
+                        <span style="font-size: 6pt; color: #888;">QR KOD</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Biljeznicki sloj -->
+    <div style="margin-top: 4mm; padding-top: 3mm; border-top: 1px dashed #555;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 50%; vertical-align: top;">
+                    <p style="color: #c9a84c; margin: 0; font-size: 7pt;">BILJEZNIČKA OVJERA:</p>
+                    <div style="
+                        min-height: 15mm;
+                        border: 1px dashed #555;
+                        margin-top: 2mm;
+                        padding: 2mm;
+                        color: #555;
+                        font-size: 6.5pt;
+                    ">
+                        {{ biljeznik_ovjera|default:"Prostor za ovjeru javnog biljeznika" }}
+                    </div>
+                </td>
+                <td style="width: 50%; vertical-align: top; padding-left: 5mm;">
+                    <p style="color: #c9a84c; margin: 0; font-size: 7pt;">PRAVNI PREGLED:</p>
+                    <div style="
+                        min-height: 15mm;
+                        border: 1px dashed #555;
+                        margin-top: 2mm;
+                        padding: 2mm;
+                        color: #555;
+                        font-size: 6.5pt;
+                    ">
+                        {{ pravni_pregled|default:"Prostor za potpis odvjetnika" }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 3mm; font-size: 6pt; color: #666;">
+        evalidator.eu — Infrastruktura Povjerenja | Verificirano {{ doc_date }}
+    </div>
+</div>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>T1 — Uvjeti korištenja evalidator.eu</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-center {
+                content: "T1 v{{ doc_version }} — Stranica " counter(page) " od " counter(pages);
+                font-size: 7pt;
+                color: #999;
+            }
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #222;
+        }
+        h1 {
+            text-align: center;
+            font-size: 14pt;
+            margin-bottom: 3mm;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        h2 {
+            font-size: 11pt;
+            margin-top: 8mm;
+            margin-bottom: 3mm;
+            color: #333;
+            border-bottom: 0.5pt solid #c9a84c;
+            padding-bottom: 1mm;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 10mm;
+        }
+        .doc-id {
+            text-align: center;
+            font-family: 'DejaVu Sans Mono', monospace;
+            font-size: 8pt;
+            color: #c9a84c;
+            margin-bottom: 8mm;
+        }
+        ol, ul { margin-left: 5mm; margin-top: 2mm; }
+        li { margin-bottom: 2mm; }
+        .shield-box {
+            background: #0a0a0a;
+            border: 2pt solid #c9a84c;
+            border-radius: 3mm;
+            padding: 5mm;
+            margin: 5mm 0;
+            text-align: center;
+            color: #fff;
+        }
+        .shield-box .big {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #c9a84c;
+        }
+        .shield-box .sub {
+            font-size: 9pt;
+            color: #ccc;
+            margin-top: 2mm;
+        }
+        .tier-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin: 3mm 0;
+        }
+        .tier-table th, .tier-table td {
+            border: 0.5pt solid #ccc;
+            padding: 2mm;
+        }
+        .tier-table th {
+            background: #f9f9f9;
+            text-align: left;
+        }
+        .highlight {
+            background: #fef9c3;
+            padding: 1mm 2mm;
+            border-left: 2pt solid #c9a84c;
+            margin: 3mm 0;
+            font-size: 9pt;
+        }
+        .disclaimer-box {
+            background: #fef2f2;
+            border: 1.5pt solid #dc2626;
+            border-radius: 3mm;
+            padding: 5mm;
+            margin: 5mm 0;
+            font-size: 9pt;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin-top: 5mm;
+        }
+        .history-table th, .history-table td {
+            border: 0.5pt solid #ccc;
+            padding: 2mm;
+            text-align: left;
+        }
+        .history-table th { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+
+    <!-- ZAGLAVLJE -->
+    <div style="text-align: center; margin-bottom: 5mm;">
+        <span style="font-size: 18pt; color: #c9a84c;">⬡</span>
+    </div>
+
+    <h1>UVJETI KORIŠTENJA</h1>
+    <p class="subtitle">evalidator.eu — Infrastruktura Povjerenja</p>
+    <p class="doc-id">Dokument: T1 | Verzija: {{ doc_version|default:"1.0.0" }} | {{ doc_date|default:"16.04.2026." }}</p>
+
+    <!-- AS IS ŠTIT -->
+    <div class="shield-box">
+        <div class="big">BESPLATNO — "AS IS" — BEZ GARANCIJE</div>
+        <div class="sub">
+            evalidator.eu je besplatan javni servis za tehničku provjeru identifikatora.<br>
+            Rezultat validacije NIJE pravni savjet, pravna potvrda identiteta, niti zamjena za službeni registar.
+        </div>
+    </div>
+
+    <!-- PRUŽATELJ -->
+    <h2>Članak 1 — Pružatelj usluge</h2>
+    <div class="article">
+        <p>evalidator.eu je javni servis kojeg pružaju:</p>
+        <ul>
+            <li><strong>No-limit udruga</strong> — vlasnik domene i branding</li>
+            <li><strong>Konjik d.o.o.</strong> — tehnička infrastruktura i razvoj</li>
+        </ul>
+        <p>Kontakt: info@evalidator.eu</p>
+        <p>Sjedište: _____________, Republika Hrvatska</p>
+    </div>
+
+    <!-- ŠTO JE EVALIDATOR -->
+    <h2>Članak 2 — Opis usluge</h2>
+    <div class="article">
+        <p>evalidator.eu pruža tehničku provjeru ispravnosti sljedećih identifikatora:</p>
+        <table class="tier-table">
+            <tr>
+                <th>Identifikator</th>
+                <th>Algoritam</th>
+                <th>Standard</th>
+                <th>Status</th>
+            </tr>
+            <tr>
+                <td>OIB (Hrvatska)</td>
+                <td>MOD 11,10</td>
+                <td>ISO 7064</td>
+                <td>Aktivan</td>
+            </tr>
+            <tr>
+                <td>VAT ID (EU 27)</td>
+                <td>Po zemlji + VIES</td>
+                <td>EU Uredba 904/2010</td>
+                <td>Aktivan</td>
+            </tr>
+            <tr>
+                <td>IBAN</td>
+                <td>MOD 97</td>
+                <td>ISO 13616</td>
+                <td>Aktivan</td>
+            </tr>
+            <tr>
+                <td>MBS</td>
+                <td>Format provjera</td>
+                <td>Zakon o sudskom registru</td>
+                <td>Aktivan</td>
+            </tr>
+            <tr>
+                <td>Unakrsna provjera</td>
+                <td>OIB + IBAN + VAT</td>
+                <td>evalidator interno</td>
+                <td>Aktivan</td>
+            </tr>
+            <tr>
+                <td>Batch API</td>
+                <td>Višestruka provjera</td>
+                <td>REST JSON</td>
+                <td>Q3 2026</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <h2>Članak 3 — Ograničenje odgovornosti (AS IS)</h2>
+    <div class="disclaimer-box">
+        <p><strong>VAŽNO — PROČITAJTE PAŽLJIVO:</strong></p>
+        <ol>
+            <li>evalidator.eu pruža <strong>tehničku provjeru algoritma</strong> — provjerava ispravnost
+            kontrolne znamenke prema objavljenom ISO/EU standardu. To NIJE:
+                <ul>
+                    <li>Potvrda da osoba s tim OIB-om postoji</li>
+                    <li>Potvrda da je IBAN aktivan ili da račun ima sredstva</li>
+                    <li>Potvrda da je tvrtka s tim VAT ID-om registrirana ili solventna</li>
+                    <li>Pravni savjet ili zamjena za odvjetnički pregled</li>
+                </ul>
+            </li>
+            <li>Usluga se pruža <strong>"AS IS" i "AS AVAILABLE"</strong> — bez ikakve garancije,
+            izričite ili implicirane, uključujući garancije trgovačke sposobnosti ili
+            prikladnosti za određenu svrhu.</li>
+            <li>Pružatelj <strong>ne odgovara</strong> za bilo kakvu štetu (izravnu, neizravnu, posljedičnu)
+            nastalu korištenjem rezultata validacije, uključujući ali ne ograničavajući se na:
+                <ul>
+                    <li>Poslovne odluke donesene na temelju rezultata</li>
+                    <li>Pogrešne podatke u izvornim registrima (Porezna uprava, FINA, VIES)</li>
+                    <li>Nedostupnost servisa</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- PRIVATNOST -->
+    <h2>Članak 4 — Zaštita privatnosti (GDPR)</h2>
+    <div class="article">
+        <p>evalidator.eu obrađuje osobne podatke prema Uredbi EU 2016/679 (GDPR):</p>
+        <ol>
+            <li><strong>Što NE pohranjujemo:</strong>
+                <ul>
+                    <li>Sirovi OIB, IBAN, ili VAT ID — NIKAD</li>
+                    <li>IP adresu korisnika u bazi — NIKAD</li>
+                    <li>Kolačiće za praćenje — NIKAD</li>
+                </ul>
+            </li>
+            <li><strong>Što pohranjujemo:</strong>
+                <ul>
+                    <li>SHA-256 hash unesenog identifikatora (nepovratni, ne može se dekriptirati)</li>
+                    <li>Rezultat validacije (true/false)</li>
+                    <li>Timestamp i trajanje provjere (milisekunde)</li>
+                    <li>Tip validacije (OIB/IBAN/VAT)</li>
+                </ul>
+            </li>
+            <li><strong>Svrha pohrane:</strong> Agregirane statistike (koliko provjera dnevno, postotak ispravnih),
+            detekcija zlouporabe (rate limiting), poboljšanje servisa.</li>
+            <li><strong>Nginx logovi:</strong> Access logovi za /validate/ i /api/ putanje imaju isključen
+            zapis query parametara. Error logovi se brišu nakon 7 dana.</li>
+        </ol>
+    </div>
+
+    <!-- KORIŠTENJE -->
+    <h2>Članak 5 — Dopušteno korištenje</h2>
+    <div class="article">
+        <ol>
+            <li><strong>Dopušteno:</strong>
+                <ul>
+                    <li>Provjera OIB/IBAN/VAT za vlastite poslovne potrebe</li>
+                    <li>Integracija putem API-ja u vlastite sustave (unutar rate limita)</li>
+                    <li>Korištenje u obrazovne svrhe</li>
+                    <li>Embedding rezultata u vlastite dokumente uz navođenje izvora</li>
+                </ul>
+            </li>
+            <li><strong>Zabranjeno:</strong>
+                <ul>
+                    <li>Masovno prikupljanje (scraping) podataka s web sučelja</li>
+                    <li>Korištenje za spam, phishing, ili bilo koju nezakonitu aktivnost</li>
+                    <li>Pokušaj deanonimizacije logova ili reverse engineering hasha</li>
+                    <li>Preopterećivanje servisa namjernim DDoS-om</li>
+                    <li>Preprodaja rezultata kao vlastitog servisa bez dogovora</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- API I RATE LIMIT -->
+    <h2>Članak 6 — API uvjeti i razine pristupa</h2>
+    <div class="article">
+        <table class="tier-table">
+            <tr>
+                <th>Plan</th>
+                <th>Limit</th>
+                <th>Cijena</th>
+                <th>SLA</th>
+            </tr>
+            <tr>
+                <td><strong>Free</strong></td>
+                <td>100 provjera/dan, 30/min</td>
+                <td>Besplatno zauvijek</td>
+                <td>Best effort</td>
+            </tr>
+            <tr>
+                <td><strong>Starter</strong></td>
+                <td>1,000 provjera/dan</td>
+                <td>Kontaktirajte nas</td>
+                <td>99% uptime</td>
+            </tr>
+            <tr>
+                <td><strong>Pro</strong></td>
+                <td>10,000 provjera/dan</td>
+                <td>Kontaktirajte nas</td>
+                <td>99.5% uptime</td>
+            </tr>
+            <tr>
+                <td><strong>Enterprise</strong></td>
+                <td>Neograničeno</td>
+                <td>Po dogovoru</td>
+                <td>99.9% + SLA ugovor</td>
+            </tr>
+        </table>
+        <p style="font-size: 8pt; color: #666;">
+            Free plan je i ostaje besplatan. Nema "freemium trap" — 100 provjera dnevno pokriva
+            99% korisnika. Plaćeni planovi su za enterprise integracije s visokim volumenom.
+        </p>
+    </div>
+
+    <!-- EVALIDATOR PEČAT -->
+    <h2>Članak 7 — evalidator digitalni pečat</h2>
+    <div class="article">
+        <ol>
+            <li>evalidator.eu pruža uslugu <strong>digitalnog pečata</strong> za dokumente:
+                <ul>
+                    <li>SHA-256 hash sadržaja dokumenta</li>
+                    <li>Timestamp izdavanja</li>
+                    <li>QR kod za verifikaciju</li>
+                    <li>Javno dostupna povijest verzija</li>
+                </ul>
+            </li>
+            <li>Digitalni pečat ima snagu <strong>Advanced Electronic Signature (AES)</strong>
+            prema EU Uredbi 910/2014 (eIDAS) — dokazuje integritet i autorstvo.</li>
+            <li>Za <strong>Qualified Electronic Signature (QES)</strong> — pravnu jednakost s
+            vlastoručnim potpisom — potrebna je dodatna ovjera kod javnog bilježnika.</li>
+            <li>evalidator.eu NIJE kvalificirani pružatelj usluga povjerenja (QTSP).
+            Ne tvrdimo pravnu jednakost s vlastoručnim potpisom bez bilježničke ovjere.</li>
+        </ol>
+    </div>
+
+    <!-- INTELEKTUALNO VLASNIŠTVO -->
+    <h2>Članak 8 — Intelektualno vlasništvo</h2>
+    <div class="article">
+        <ol>
+            <li>Algoritmi validacije su javni standardi (ISO 7064, ISO 13616, EU 904/2010) — ne mogu se patentirati.</li>
+            <li>Implementacija, dizajn, i API su vlasništvo Konjik d.o.o. i No-limit udruge (vidi dokument L1).</li>
+            <li>Naziv "evalidator" i logo su zaštićeni žig No-limit udruge.</li>
+        </ol>
+    </div>
+
+    <!-- IZMJENE -->
+    <h2>Članak 9 — Izmjene uvjeta</h2>
+    <div class="article">
+        <ol>
+            <li>Ovi uvjeti mogu se izmijeniti uz prethodnu objavu na evalidator.eu/tos/.</li>
+            <li>Svaka izmjena se bilježi u povijesti dokumenta s hashom prethodne verzije.</li>
+            <li>Nastavak korištenja servisa nakon objave izmjena smatra se prihvaćanjem novih uvjeta.</li>
+            <li>Za API korisnike s plaćenim planom: izmjene stupaju na snagu 30 dana nakon objave.</li>
+        </ol>
+    </div>
+
+    <!-- NADLEŽNOST -->
+    <h2>Članak 10 — Mjerodavno pravo</h2>
+    <div class="article">
+        <ol>
+            <li>Na ove uvjete primjenjuje se pravo Republike Hrvatske.</li>
+            <li>Za sporove je nadležan Općinski sud u Osijeku.</li>
+            <li>Ako bilo koja odredba ovih uvjeta bude proglašena nevažećom, ostale odredbe ostaju na snazi.</li>
+        </ol>
+    </div>
+
+    <div class="highlight">
+        <strong>REZIME ZA KORISNIKE:</strong> Koristite evalidator.eu besplatno za tehničku provjeru
+        OIB/IBAN/VAT. Ne čuvamo vaše podatke — samo hash. Ne odgovaramo za odluke donesene
+        na temelju rezultata. Ovo nije pravni savjet. Ako trebate pravnu potvrdu identiteta,
+        obratite se javnom bilježniku ili odvjetniku.
+    </div>
+
+    <!-- DODATAK A — POVIJEST DOKUMENTA -->
+    <div style="page-break-before: always;"></div>
+    <h2>Dodatak A — Povijest dokumenta</h2>
+    <table class="history-table">
+        <tr>
+            <th>Verzija</th>
+            <th>Datum</th>
+            <th>Opis promjene</th>
+            <th>SHA-256 (prvih 16)</th>
+            <th>Odobrio</th>
+        </tr>
+        <tr>
+            <td>1.0.0</td>
+            <td>{{ doc_date|default:"16.04.2026." }}</td>
+            <td>Inicijalna verzija — ToS za MVP launch</td>
+            <td style="font-family: monospace; font-size: 7pt;">{{ doc_hash_short|default:"________________" }}</td>
+            <td>Ivan Brtan</td>
+        </tr>
+        <tr>
+            <td colspan="5" style="color: #999; text-align: center; font-style: italic;">
+                — buduće izmjene se dodaju ovdje —
+            </td>
+        </tr>
+    </table>
+
+    <!-- EVALIDATOR DIGITALNI PEČAT -->
+    {% include "notariat/pdf/evalidator_seal.html" %}
+
+</body>
+</html>
