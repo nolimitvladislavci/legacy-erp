@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Pristup platformi{% endblock %}
+
+{% block content %}
+<div class="fx-container fx-py-4" style="max-width:640px;margin:0 auto">
+
+  <!-- Hero -->
+  <div class="fx-card fx-mb-4 text-center" style="border-top:4px solid var(--gold);padding:2rem">
+    <div style="font-size:3rem;margin-bottom:1rem">🔐</div>
+    <h2 class="fx-fw-bold fx-text-gold">Dobrodošli, {{ user.first_name|default:user.username }}!</h2>
+    <p class="fx-text-muted">Vaš račun je verificiran, ali još nije vezan za tvrtku.<br>
+    Odaberite kako želite nastaviti:</p>
+  </div>
+
+  <!-- AI sugestije -->
+  {% if suggestions %}
+  <div class="fx-card fx-mb-3" style="border-left:4px solid #10b981">
+    <div class="fx-card-body">
+      <h5 class="fx-fw-bold" style="color:#10b981">🤖 Prepoznali smo vašu tvrtku</h5>
+      {% for s in suggestions %}
+      <div class="d-flex justify-content-between align-items-center fx-py-2" style="border-bottom:1px solid var(--border-color)">
+        <div>
+          <strong>{{ s.company.name }}</strong><br>
+          <small class="fx-text-muted">{{ s.reason }}</small>
+          {% if s.confidence == 'very_high' %}
+          <span class="badge bg-success ms-2">Visoka pouzdanost</span>
+          {% endif %}
+        </div>
+        <form method="post" action="{% url 'identity:request_join' %}">
+          {% csrf_token %}
+          <input type="hidden" name="company_id" value="{{ s.company.id }}">
+          <input type="hidden" name="role" value="worker">
+          <button type="submit" class="btn btn-sm fx-btn-gold">
+            Pridruži se
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Pending zahtjevi -->
+  {% if pending_requests %}
+  <div class="fx-card fx-mb-3" style="border-left:4px solid #f59e0b">
+    <div class="fx-card-body">
+      <h5 class="fx-fw-bold" style="color:#f59e0b">⏳ Čekate odobrenje</h5>
+      {% for jr in pending_requests %}
+      <div class="fx-py-1">
+        <strong>{{ jr.company.name }}</strong>
+        <span class="badge bg-warning text-dark ms-2">Čeka odobrenje</span>
+        <small class="fx-text-muted d-block">Zahtjev poslan {{ jr.created_at|timesince }} temu</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Opcije -->
+  <div class="row g-3 fx-mb-3">
+
+    <!-- A: Unesi OIB firme -->
+    <div class="col-12">
+      <div class="fx-card">
+        <div class="fx-card-body">
+          <h5>🏢 Pridruži se postojećoj tvrtki</h5>
+          <p class="fx-text-muted small">Unesite OIB tvrtke ili pozivni kod koji ste primili od administratora.</p>
+          <form id="joinForm">
+            {% csrf_token %}
+            <div class="row g-2">
+              <div class="col-8">
+                <input type="text" name="oib" class="form-control" placeholder="OIB tvrtke (11 znamenki)" maxlength="11" pattern="\d{11}">
+              </div>
+              <div class="col-4">
+                <button type="submit" class="btn w-100 fx-btn-gold">Traži</button>
+              </div>
+            </div>
+          </form>
+          <div id="joinResult" class="mt-2" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: Kreiraj novu tvrtku -->
+    <div class="col-md-6">
+      <div class="fx-card h-100">
+        <div class="fx-card-body text-center">
+          <div style="font-size:2rem">🚀</div>
+          <h6 class="fx-fw-bold fx-mt-2">Kreiraj novu tvrtku</h6>
+          <p class="fx-text-muted small">Registrirajte svoju tvrtku na platformi.</p>
+          <a href="{% url 'registration:register_step1' %}" class="btn btn-outline-secondary w-100">
+            Registriraj tvrtku
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- C: Podrška -->
+    <div class="col-md-6">
+      <div class="fx-card h-100">
+        <div class="fx-card-body text-center">
+          <div style="font-size:2rem">💬</div>
+          <h6 class="fx-fw-bold fx-mt-2">Trebate pomoć?</h6>
+          <p class="fx-text-muted small">Kontaktirajte naš tim za podršku.</p>
+          <a href="mailto:support@limit-connect.com" class="btn btn-outline-secondary w-100">
+            Kontaktiraj podršku
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('joinForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const oib = this.querySelector('[name=oib]').value.trim();
+  const result = document.getElementById('joinResult');
+
+  fetch("{% url 'identity:request_join' %}", {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': '{{ csrf_token }}'},
+    body: `oib=${oib}&role=worker`
+  })
+  .then(r => r.json())
+  .then(data => {
+    result.style.display = 'block';
+    result.className = data.ok ? 'alert alert-success' : 'alert alert-danger';
+    result.textContent = data.message || data.error;
+    if (data.redirect) setTimeout(() => window.location = data.redirect, 1500);
+  });
+});
+</script>
+{% endblock %}

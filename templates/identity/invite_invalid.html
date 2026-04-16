@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="fx-container fx-py-5 text-center" style="max-width:480px;margin:0 auto">
+  <div style="font-size:4rem">⚠️</div>
+  <h3 class="fx-text-gold fx-mt-3">Pozivnica nije važeća</h3>
+  <p class="fx-text-muted">{{ reason }}</p>
+  <a href="/pristup/" class="btn fx-btn-gold mt-3">Natrag na pristup</a>
+</div>
+{% endblock %}

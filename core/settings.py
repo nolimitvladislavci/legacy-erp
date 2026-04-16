@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     "payroll",
     "tracking",
     "registration",
+    "identity",  # Identity Orchestration — Ghost State + Join Requests
     "interventions",
     "fiskalizacija",
     "gov_export",
@@ -230,6 +231,7 @@ MIDDLEWARE = [
     "core.middleware.ForcePasswordChangeMiddleware",
     "core.middleware.Force2FAMiddleware",
     "core.middleware.ForceTCMiddleware",
+    "identity.middleware.GhostStateMiddleware",
     "registration.middleware.SubscriptionMiddleware",
     "core.middleware.archive_readonly.ArchiveReadonlyMiddleware",
     "core.image_compression.ImageQuotaMiddleware",

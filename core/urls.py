@@ -970,3 +970,6 @@ if settings.DEBUG:
 # ── Security Protection — audit log endpoint ──────────────────────────────────
 from django.urls import include as _include
 urlpatterns += [path("api/security/", _include("security_protection.urls"))]
+
+# ── Identity Orchestration — /pristup/ ───────────────────────────────────────
+urlpatterns += [path("pristup/", include("identity.urls", namespace="identity"))]
