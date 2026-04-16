@@ -302,7 +302,7 @@ class ImageQuotaMiddleware:
             company = getattr(request, "company", None)
             if not company:
                 try:
-                    company = request.user.userprofile.company
+                    company = request.user.profile.company
                 except AttributeError:
                     company = None
 

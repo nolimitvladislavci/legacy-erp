@@ -15,7 +15,7 @@ from .models import AssessmentPhoto, FieldAssessment
 
 def _get_company(request):
     try:
-        return request.user.userprofile.company
+        return request.user.profile.company
     except AttributeError:
         pass
     try:

@@ -43,7 +43,7 @@ class GDPRExportService:
 
         # UserProfile
         try:
-            up = user.userprofile
+            up = user.profile
             data["profile"] = {
                 "role": up.role,
                 "phone": up.phone,
@@ -127,7 +127,7 @@ class GDPRAnonymizationService:
 
         # 1. UserProfile
         try:
-            up = user.userprofile
+            up = user.profile
             up.phone = ""
             up.profile_image = ""
             up.totp_secret = ""

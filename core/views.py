@@ -607,7 +607,7 @@ def umbrella_dashboard(request):
 
     is_admin = request.user.is_superuser or (
         hasattr(request.user, "userprofile")
-        and request.user.userprofile.role in ("company_admin", "tenant_admin", "superadmin")
+        and request.user.profile.role in ("company_admin", "tenant_admin", "superadmin")
     )
 
     # Selected workspace filter (from query param or auto-detect)
@@ -3114,7 +3114,7 @@ def tc_consent(request):
 
     company = None
     try:
-        company = request.user.userprofile.company
+        company = request.user.profile.company
     except AttributeError:
         pass
 

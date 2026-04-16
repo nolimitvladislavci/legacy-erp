@@ -157,7 +157,7 @@ def _gather_company_context(company):
 
         low = InventoryItem.objects.filter(
             company=company,
-            quantity__lte=F("reorder_level"),
+            quantity__lte=F("min_quantity"),
         ).count()
         ctx["low_stock_count"] = low
     except DatabaseError:

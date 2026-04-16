@@ -109,7 +109,7 @@ def capture_error_for_borg(request, exc_info=None):
         try:
             company = getattr(request, "current_company", None)
             if not company and hasattr(request, "user") and hasattr(request.user, "userprofile"):
-                company = request.user.userprofile.company
+                company = request.user.profile.company
             if company:
                 company_id = str(company.pk)
                 company_name = company.name

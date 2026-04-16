@@ -68,8 +68,8 @@ def get_dashboard_insights(company):
 
         low_stock = InventoryItem.objects.filter(
             company=company,
-            quantity__lte=F("reorder_level"),
-            reorder_level__gt=0,
+            quantity__lte=F("min_quantity"),
+            min_quantity__gt=0,
         ).count()
         if low_stock > 0:
             alerts.append(

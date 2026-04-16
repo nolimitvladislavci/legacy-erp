@@ -1392,7 +1392,7 @@ def _quick_pos_legacy(request, terminal_id):
     # Knjigovođa (role=bookkeeper/superadmin) može svugdje bez limita
     is_bookkeeper = False
     try:
-        role = request.user.userprofile.role if hasattr(request.user, "userprofile") else ""
+        role = request.user.profile.role if hasattr(request.user, "userprofile") else ""
         is_bookkeeper = role in ("superadmin", "bookkeeper", "company_admin", "accountant") or request.user.is_superuser
     except AttributeError:
         pass
@@ -1559,7 +1559,7 @@ def pos_joker(request, terminal_id):
     # ── STROGA PROVJERA: samo N aktivnih POS-ova po planu ──
     is_bookkeeper = False
     try:
-        role = request.user.userprofile.role if hasattr(request.user, "userprofile") else ""
+        role = request.user.profile.role if hasattr(request.user, "userprofile") else ""
         is_bookkeeper = role in ("superadmin", "bookkeeper", "company_admin", "accountant") or request.user.is_superuser
     except AttributeError:
         pass

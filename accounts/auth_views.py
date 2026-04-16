@@ -128,7 +128,7 @@ def get_client_ip(request):
 def get_dashboard_url(user):
     """Smart redirect - vrati URL dashboarda prema roli"""
     try:
-        profile = user.userprofile
+        profile = user.profile
         role = profile.role
 
         # Umbrella admin → umbrella dashboard (ne POS)
@@ -196,7 +196,7 @@ def smart_login(request):
 
             # Provjeri 2FA za admins
             try:
-                profile = user.userprofile
+                profile = user.profile
                 if profile.role in ("superadmin", "company_admin") and profile.totp_enabled:
                     # Spremi user_id u session, preusmjeri na 2FA
                     request.session["pending_2fa_user"] = user.pk
@@ -249,7 +249,7 @@ def send_magic_link(request):
             return redirect("login")
 
         try:
-            profile = user.userprofile
+            profile = user.profile
             token_type = {
                 "investor": "investor",
                 "partner": "partner",
@@ -356,7 +356,7 @@ def setup_2fa(request):
     import pyotp
 
     try:
-        profile = request.user.userprofile
+        profile = request.user.profile
     except Exception:
         messages.error(request, _("Korisnički profil nije pronađen. Obratite se administratoru."))
         return redirect("/")
@@ -424,7 +424,7 @@ def verify_2fa(request):
             return render(request, "accounts/verify_2fa.html")
         try:
             user = User.objects.get(pk=user_id)
-            profile = user.userprofile
+            profile = user.profile
             totp = pyotp.TOTP(profile.totp_secret)
             if totp.verify(code):
                 LoginAttempt.objects.create(email=attempt_key, ip_address=ip, success=True, method="2fa")

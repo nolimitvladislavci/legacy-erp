@@ -9,7 +9,7 @@ from .models import DimnjacarskaInspekcija, PravniPredmet
 
 @login_required
 def pravnik_dashboard(request):
-    company = request.user.userprofile.company
+    company = request.user.profile.company
     predmeti = PravniPredmet.objects.filter(company=company, status="aktivan")
     pred_s_rokom = predmeti.filter(rok__gte=date.today(), rok__lte=date.today() + timedelta(days=7))
     return render(
@@ -25,7 +25,7 @@ def pravnik_dashboard(request):
 
 @login_required
 def dimnjacari_dashboard(request):
-    company = request.user.userprofile.company
+    company = request.user.profile.company
     inspekcije = DimnjacarskaInspekcija.objects.filter(company=company)
     sljedeci = inspekcije.filter(
         sljedeci_pregled__gte=date.today(), sljedeci_pregled__lte=date.today() + timedelta(days=30)
@@ -79,7 +79,7 @@ def potvrda_dimnjaka_pdf(request, pk):
 
     from .models import DimnjacarskaInspekcija
 
-    insp = get_object_or_404(DimnjacarskaInspekcija, pk=pk, company=request.user.userprofile.company)
+    insp = get_object_or_404(DimnjacarskaInspekcija, pk=pk, company=request.user.profile.company)
 
     ctx = {"insp": insp, "company": insp.company}
     response, pdf_bytes, sha = _generate_notariat_pdf(
@@ -119,7 +119,7 @@ def potvrda_dimnjaka_pdf(request, pk):
 @login_required
 def punomoc_pdf(request):
     """Generira PDF: Opunomoćenje (punomoć)."""
-    company = request.user.userprofile.company
+    company = request.user.profile.company
     ctx = {
         "company": company,
         "opunomocitelj": request.GET.get("opunomocitelj", ""),
@@ -135,7 +135,7 @@ def punomoc_pdf(request):
 @login_required
 def osnivanje_jdoo_pdf(request):
     """Generira PDF: Osnivački akt j.d.o.o."""
-    company = request.user.userprofile.company
+    company = request.user.profile.company
     ctx = {
         "company": company,
         "naziv_tvrtke": request.GET.get("naziv", ""),
@@ -153,7 +153,7 @@ def osnivanje_jdoo_pdf(request):
 @login_required
 def kupoprodaja_pdf(request):
     """Generira PDF: Ugovor o kupoprodaji nekretnine."""
-    company = request.user.userprofile.company
+    company = request.user.profile.company
     ctx = {
         "company": company,
         "prodavatelj": request.GET.get("prodavatelj", ""),
@@ -170,7 +170,7 @@ def kupoprodaja_pdf(request):
 @login_required
 def zaduznica_pdf(request):
     """Generira PDF: Zadužnica (solemnizirana)."""
-    company = request.user.userprofile.company
+    company = request.user.profile.company
     ctx = {
         "company": company,
         "duznik": request.GET.get("duznik", ""),

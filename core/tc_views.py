@@ -14,7 +14,7 @@ def tc_accept_view(request):
     if request.method == "POST" and request.POST.get("tc_accept"):
         company = None
         try:
-            company = request.user.userprofile.company
+            company = request.user.profile.company
         except AttributeError:
             logger.exception("Profile access failed")
         if company:
