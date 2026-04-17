@@ -479,6 +479,7 @@ body.night-mode .codex { box-shadow:0 0 40px rgba(0,0,0,.8) }
     </button>
     {% endfor %}
     <button class="btn" onclick="toggleNight()" title="Noćni mod">☽</button>
+    <button class="btn" onclick="toggleAutoNext()" id="btnAuto" title="Auto-čitanje">▶▶</button>
     <button class="btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
   </div>
 </div>
@@ -702,81 +703,184 @@ function switchLang(lc) {
 
 /* ═══ PER-PAGE TTS (zvučnik) ═══ */
 var currentUtterance = null;
+var ttsVoices = [];
+var ttsAutoNext = false;
+
+/* Profili glasova — rate i pitch */
+var VOICE_PROFILES = {
+  'tts':  { rate: 0.85, pitch: 1.05, label: 'Glas' },
+  'baka': { rate: 0.72, pitch: 1.25, label: 'Baka' },
+  'djed': { rate: 0.75, pitch: 0.75, label: 'Djed' },
+  'mama': { rate: 0.85, pitch: 1.15, label: 'Mama' },
+  'tata': { rate: 0.80, pitch: 0.88, label: 'Tata' }
+};
+
+/* Predloži jezik → preferirani jezici za glas (od najboljeg prema fallbacku) */
+var LANG_PREFERENCE = {
+  'hr': ['hr', 'hr-HR', 'hr-BA', 'bs', 'sr', 'cs', 'sk', 'pl', 'en'],
+  'de': ['de', 'de-DE', 'de-AT', 'de-CH', 'en'],
+  'en': ['en', 'en-GB', 'en-US', 'en-AU', 'en-IE', 'de', 'fr'],
+  'fr': ['fr', 'fr-FR', 'fr-BE', 'fr-CA', 'en'],
+  'it': ['it', 'it-IT', 'en'],
+  'es': ['es', 'es-ES', 'es-MX', 'en'],
+  'tr': ['tr', 'tr-TR', 'en']
+};
+
+/* Učitaj glasove čim su dostupni */
+function loadTTSVoices() {
+  ttsVoices = speechSynthesis.getVoices();
+}
+if (typeof speechSynthesis !== 'undefined') {
+  loadTTSVoices();
+  speechSynthesis.addEventListener('voiceschanged', loadTTSVoices);
+}
 
 function getPlainText() {
   /* Extract plain text from current page HTML */
   var div = document.createElement('div');
-  div.innerHTML = PAGES[currentPage].text || '';
-  return div.textContent || div.innerText || '';
+  var pg = PAGES[currentPage] || {};
+  /* Cover page: combine title + author */
+  if (pg.type === 'cover') {
+    return [pg.title || '', pg.author || ''].filter(Boolean).join('. ');
+  }
+  /* Moral page */
+  if (pg.type === 'moral') {
+    var d2 = document.createElement('div');
+    d2.innerHTML = pg.text || '';
+    return 'Pouka: ' + (d2.textContent || d2.innerText || '');
+  }
+  div.innerHTML = pg.text || '';
+  return (div.textContent || div.innerText || '').trim();
+}
+
+function pickVoice(preferredLang) {
+  if (!ttsVoices.length) ttsVoices = speechSynthesis.getVoices();
+  var prefs = LANG_PREFERENCE[preferredLang] || ['en'];
+
+  /* 1. Exact match */
+  for (var p = 0; p < prefs.length; p++) {
+    var pref = prefs[p].toLowerCase();
+    for (var i = 0; i < ttsVoices.length; i++) {
+      if (ttsVoices[i].lang.toLowerCase() === pref) return ttsVoices[i];
+    }
+  }
+  /* 2. Prefix match */
+  for (var p = 0; p < prefs.length; p++) {
+    var pref = prefs[p].toLowerCase();
+    for (var i = 0; i < ttsVoices.length; i++) {
+      if (ttsVoices[i].lang.toLowerCase().startsWith(pref)) return ttsVoices[i];
+    }
+  }
+  /* 3. Any available voice (never return null) */
+  return ttsVoices[0] || null;
 }
 
 function speakPage() {
   var btn = document.getElementById('btnSpeak');
+  if (!('speechSynthesis' in window)) {
+    btn.title = 'Vaš preglednik ne podržava čitanje naglas';
+    btn.textContent = '🔇';
+    return;
+  }
 
-  /* Chrome bug fix: cancel any stuck speech first */
-  speechSynthesis.cancel();
-
+  /* Toggle off */
   if (btn.classList.contains('active')) {
+    speechSynthesis.cancel();
     btn.classList.remove('active');
+    btn.textContent = '🔊';
     return;
   }
 
   var text = getPlainText();
-  if (!text) { console.warn('TTS: no text on page', currentPage); return; }
+  if (!text) { nextPage(); return; } /* Skip cover/empty pages */
 
-  /* Chrome requires voices to be loaded — wait if needed */
+  var profile = VOICE_PROFILES[document.getElementById('voiceSelect').value] || VOICE_PROFILES['tts'];
+
   function doSpeak() {
     var utter = new SpeechSynthesisUtterance(text);
-    var langMap = {'hr': 'hr-HR', 'de': 'de-DE', 'en': 'en-GB', 'fr': 'fr-FR', 'it': 'it-IT'};
-    utter.lang = langMap[LANG] || 'en-GB';
-    utter.rate = 0.82;
-    utter.pitch = 1.05;
+    var voice = pickVoice(LANG);
+    if (voice) {
+      utter.voice = voice;
+      utter.lang = voice.lang;
+    } else {
+      /* Last resort: set lang without voice object */
+      var langMap = {'hr':'hr-HR','de':'de-DE','en':'en-GB','fr':'fr-FR','it':'it-IT'};
+      utter.lang = langMap[LANG] || 'en-GB';
+    }
+    utter.rate   = profile.rate;
+    utter.pitch  = profile.pitch;
     utter.volume = 1.0;
 
-    /* Try to find a matching voice */
-    var voices = speechSynthesis.getVoices();
-    var targetLang = langMap[LANG] || 'en-GB';
-    for (var i = 0; i < voices.length; i++) {
-      if (voices[i].lang === targetLang || voices[i].lang.startsWith(LANG)) {
-        utter.voice = voices[i];
-        break;
-      }
-    }
-
     btn.classList.add('active');
+    btn.textContent = '⏸';
 
     utter.onend = function() {
       btn.classList.remove('active');
+      btn.textContent = '🔊';
+      /* Auto-nastavak na sljedeću stranicu */
+      if (ttsAutoNext && currentPage < TOTAL - 1) {
+        setTimeout(function() { nextPage(); setTimeout(speakPage, 600); }, 300);
+      }
     };
     utter.onerror = function(e) {
-      console.warn('TTS error:', e.error);
+      if (e.error === 'canceled' || e.error === 'interrupted') return;
+      console.warn('TTS error:', e.error, '| voice:', voice && voice.name, '| lang:', utter.lang);
       btn.classList.remove('active');
+      btn.textContent = '🔊';
+      /* Pokušaj bez specifičnog glasa */
+      if (voice) {
+        var u2 = new SpeechSynthesisUtterance(text);
+        u2.rate = profile.rate; u2.pitch = profile.pitch; u2.volume = 1.0;
+        u2.onend = function() { btn.classList.remove('active'); btn.textContent = '🔊'; };
+        speechSynthesis.speak(u2);
+      }
     };
 
-    /* Chrome bug: must cancel before speak */
+    /* Chrome stabilizacija: cancel → wait → speak */
     speechSynthesis.cancel();
-    /* Small delay after cancel for Chrome */
-    setTimeout(function() {
-      speechSynthesis.speak(utter);
-    }, 50);
+    setTimeout(function() { speechSynthesis.speak(utter); }, 80);
   }
 
-  /* Ensure voices are loaded (async in Chrome) */
-  if (speechSynthesis.getVoices().length > 0) {
+  /* Čekaj glasove ako još nisu učitani */
+  if (ttsVoices.length > 0) {
+    doSpeak();
+  } else if (speechSynthesis.getVoices().length > 0) {
+    ttsVoices = speechSynthesis.getVoices();
     doSpeak();
   } else {
     speechSynthesis.onvoiceschanged = function() {
+      ttsVoices = speechSynthesis.getVoices();
       speechSynthesis.onvoiceschanged = null;
       doSpeak();
     };
-    /* Fallback if onvoiceschanged never fires */
-    setTimeout(doSpeak, 200);
+    setTimeout(function() {
+      if (!speechSynthesis.speaking && btn.classList.contains('active')) {
+        ttsVoices = speechSynthesis.getVoices();
+        doSpeak();
+      }
+    }, 500);
   }
 }
 
 function stopSpeaking() {
-  if (speechSynthesis.speaking) speechSynthesis.cancel();
-  document.getElementById('btnSpeak').classList.remove('active');
+  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) speechSynthesis.cancel();
+  var btn = document.getElementById('btnSpeak');
+  if (btn) { btn.classList.remove('active'); btn.textContent = '🔊'; }
+}
+
+function toggleAutoNext() {
+  ttsAutoNext = !ttsAutoNext;
+  var btn = document.getElementById('btnAuto');
+  if (!btn) return;
+  if (ttsAutoNext) {
+    btn.classList.add('active');
+    btn.title = 'Auto-čitanje: UKLJUČENO — klikni za isključivanje';
+    if (!speechSynthesis.speaking) speakPage();
+  } else {
+    btn.classList.remove('active');
+    btn.title = 'Auto-čitanje: ISKLJUČENO';
+    stopSpeaking();
+  }
 }
 
 /* ═══ PER-PAGE MICROPHONE (snimanje) ═══ */
@@ -899,11 +1003,14 @@ function loadRecordingFromDB(key, cb) {
   });
 }
 
-/* ═══ Voice change (placeholder for Voice Legacy) ═══ */
+/* ═══ Voice change ═══ */
 function onVoiceChange() {
-  var voice = document.getElementById('voiceSelect').value;
-  /* TODO: When Voice Legacy recordings exist, load per-page audio for this voice */
-  console.log('Voice selected:', voice);
+  var val = document.getElementById('voiceSelect').value;
+  /* Ako govori, ponovo pokreni s novim glasom */
+  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    setTimeout(speakPage, 150);
+  }
 }
 
 /* ═══ FULLSCREEN ═══ */
