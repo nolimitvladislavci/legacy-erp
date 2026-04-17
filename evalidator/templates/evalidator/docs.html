@@ -1,17 +1,180 @@
-{% load static %}<!DOCTYPE html><html lang="hr"><head><meta charset="UTF-8"><title>API Docs — eValidator</title>
-<style>body{background:#0d0d0d;color:#e8e8e8;font-family:'Segoe UI',sans-serif;max-width:800px;margin:0 auto;padding:40px 20px}
-h1{color:#c9a84c;margin-bottom:8px}h2{color:#c9a84c;margin:28px 0 10px}
-pre{background:#161616;padding:16px;border-radius:8px;overflow-x:auto;color:#a8d8a8;font-size:.9rem}
-p,li{color:#aaa;line-height:1.7}a{color:#c9a84c}</style></head>
-<body><a href="/evalidator/">← Natrag</a><br><br>
-<h1>eValidator API Dokumentacija</h1>
-<p>REST API za provjeru OIB, IBAN i VAT ID. Besplatno 100 req/dan bez API ključa.</p>
-<h2>OIB provjera</h2>
-<pre>GET /api/v1/oib/?oib={11_znamenki}
-POST /api/v1/oib/ Content-Type: application/json {"oib":"12345678901"}
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% trans "API Dokumentacija" %} — eValidator.eu</title>
+<meta name="description" content="{% trans "REST API dokumentacija za eValidator — OIB, IBAN, VAT ID provjera. Besplatno 100 req/dan." %}">
+<link rel="canonical" href="https://evalidator.eu/docs/">
+<script>(function(){var t=localStorage.getItem('ev-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')})();</script>
+<link rel="stylesheet" href="{% static 'evalidator/css/main.css' %}">
+</head>
+<body>
 
-Response: {"oib":"...","valid":true,"algorithm":"ISO 7064 MOD 11,10","country":"HR"}</pre>
-<h2>Rate limiting</h2>
-<p>Free: 30 req/min, 100/dan · API key: po planu (Starter 1k, Pro 10k, Enterprise unlimited)</p>
-<h2>Kontakt</h2><p>api@evalidator.eu · <a href="https://no-limit.world/">No-limit udruga</a></p>
-</body></html>
+<header class="ev-header">
+  <div class="container">
+    <div class="ev-header-inner">
+      <a href="{% url 'evalidator:home' %}" class="ev-logo">eVALIDATOR<span class="ev-logo-sub">.eu</span></a>
+      <nav class="ev-nav">
+        <a href="{% url 'evalidator:home' %}" class="ev-nav-link">{% trans "Validator" %}</a>
+        <a href="{% url 'evalidator:pricing' %}" class="ev-nav-link">{% trans "Pricing" %}</a>
+        <button class="ev-theme-toggle" onclick="evToggleTheme()" title="{% trans "Tamna/Svijetla tema" %}">
+          <span class="ev-theme-icon">☀️</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <a href="{% url 'evalidator:home' %}" class="ev-back-link">← {% trans "Natrag na validator" %}</a>
+
+  <div class="ev-page-header">
+    <h1>{% trans "API Dokumentacija" %}</h1>
+    <p>{% trans "REST API za provjeru OIB, IBAN i VAT ID. Besplatno 100 req/dan bez API ključa." %}</p>
+  </div>
+
+  <!-- Authentication -->
+  <h2 class="ev-section-title">{% trans "Autentikacija" %}</h2>
+  <div class="ev-prose">
+    <p>{% trans "Javni endpointi ne zahtijevaju API ključ za prvih 100 zahtjeva dnevno." %}</p>
+    <p>{% trans "Za veće limite, pošaljite API ključ u headeru:" %}</p>
+  </div>
+  <pre>X-API-Key: your_api_key_here</pre>
+
+  <!-- OIB Endpoint -->
+  <h2 class="ev-section-title">{% trans "OIB Provjera" %} <small style="color:var(--text-muted);font-weight:400;font-size:.85rem">ISO 7064 MOD 11,10</small></h2>
+
+  <div class="ev-endpoint">
+    <div>
+      <span class="ev-endpoint-method">GET</span>
+      <span class="ev-endpoint-path">/api/v1/oib/?oib={11_znamenki}</span>
+    </div>
+    <p>{% trans "Provjeri ispravnost OIB broja. Podržava GET i POST." %}</p>
+  </div>
+
+  <pre>GET /api/v1/oib/?oib=12345678903
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "oib": "12345678903",
+  "valid": true,
+  "algorithm": "ISO 7064 MOD 11,10",
+  "country": "HR"
+}</pre>
+
+  <div class="ev-endpoint">
+    <div>
+      <span class="ev-endpoint-method">POST</span>
+      <span class="ev-endpoint-path">/api/v1/oib/</span>
+    </div>
+    <p>{% trans "Isti rezultat putem POST body-a (application/json)." %}</p>
+  </div>
+  <pre>POST /api/v1/oib/
+Content-Type: application/json
+
+{"oib": "12345678903"}
+
+Response: {"oib":"12345678903","valid":true,"algorithm":"ISO 7064 MOD 11,10","country":"HR"}</pre>
+
+  <!-- IBAN Endpoint -->
+  <h2 class="ev-section-title">{% trans "IBAN Provjera" %} <small style="color:var(--text-muted);font-weight:400;font-size:.85rem">ISO 13616 MOD 97</small></h2>
+
+  <div class="ev-endpoint">
+    <div>
+      <span class="ev-endpoint-method">POST</span>
+      <span class="ev-endpoint-path">/evalidator/validate/iban/</span>
+    </div>
+    <p>{% trans "HTMX partial — vraća HTML fragment za prikaz rezultata." %}</p>
+  </div>
+
+  <!-- VAT Endpoint -->
+  <h2 class="ev-section-title">{% trans "VAT ID Provjera" %} <small style="color:var(--text-muted);font-weight:400;font-size:.85rem">27 EU {% trans "zemalja" %}</small></h2>
+
+  <div class="ev-endpoint">
+    <div>
+      <span class="ev-endpoint-method">POST</span>
+      <span class="ev-endpoint-path">/evalidator/validate/vat/</span>
+    </div>
+    <p>{% trans "Provjera VAT ID za sve EU države. Body: country=HR&vat=HR12345678901" %}</p>
+  </div>
+
+  <!-- Status Endpoint -->
+  <h2 class="ev-section-title">{% trans "API Status" %}</h2>
+
+  <div class="ev-endpoint">
+    <div>
+      <span class="ev-endpoint-method">GET</span>
+      <span class="ev-endpoint-path">/evalidator/api/status/</span>
+    </div>
+    <p>{% trans "Vraća verziju, health i (s API ključem) kvotu i usage." %}</p>
+  </div>
+  <pre>GET /evalidator/api/status/
+
+{
+  "status": "ok",
+  "service": "evalidator.eu",
+  "version": "1.0",
+  "authenticated": false,
+  "note": "Pass X-API-Key header for quota info"
+}</pre>
+
+  <!-- Rate Limiting -->
+  <h2 class="ev-section-title">{% trans "Rate Limiting" %}</h2>
+  <div class="ev-prose">
+    <ul>
+      <li>{% trans "Bez ključa: 30 req/min, 100/dan po IP adresi" %}</li>
+      <li>{% trans "Starter plan: 1.000/dan" %}</li>
+      <li>{% trans "Pro plan: 10.000/dan" %}</li>
+      <li>{% trans "Enterprise: neograničeno" %}</li>
+    </ul>
+    <p style="margin-top:12px">{% trans "Rate limit odgovor:" %}</p>
+  </div>
+  <pre>HTTP/1.1 429 Too Many Requests
+
+{"error": "Rate limit", "upgrade": "https://evalidator.eu/pricing/"}</pre>
+
+  <!-- Error Codes -->
+  <h2 class="ev-section-title">{% trans "Error Kodovi" %}</h2>
+  <div class="ev-prose">
+    <ul>
+      <li><strong>200</strong> — {% trans "Uspješno (valid ili invalid, ali parsiran)" %}</li>
+      <li><strong>400</strong> — {% trans "Nedostaje obavezni parametar" %}</li>
+      <li><strong>429</strong> — {% trans "Rate limit prekoračen" %}</li>
+      <li><strong>501</strong> — {% trans "Endpoint u razvoju (batch)" %}</li>
+    </ul>
+  </div>
+
+  <!-- Contact -->
+  <h2 class="ev-section-title">{% trans "Kontakt" %}</h2>
+  <div class="ev-prose">
+    <p>api@evalidator.eu · <a href="https://no-limit.world/">No-limit udruga</a></p>
+  </div>
+</main>
+
+<footer class="ev-footer">
+  <div class="container">
+    <p>© 2026 <a href="https://no-limit.world/">No-limit udruga</a> · {% trans "GDPR: hash-only, nula osobnih podataka" %}</p>
+  </div>
+</footer>
+
+<script>
+function evToggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('ev-theme', next);
+  document.querySelector('.ev-theme-icon').textContent = next === 'light' ? '🌙' : '☀️';
+}
+(function() {
+  const t = localStorage.getItem('ev-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  const icon = document.querySelector('.ev-theme-icon');
+  if (icon) icon.textContent = t === 'light' ? '🌙' : '☀️';
+})();
+</script>
+</body>
+</html>

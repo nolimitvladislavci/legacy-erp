@@ -1,16 +1,115 @@
-{% load static %}<!DOCTYPE html><html lang="hr"><head><meta charset="UTF-8"><title>Pricing — eValidator</title>
-<style>body{background:#0d0d0d;color:#e8e8e8;font-family:'Segoe UI',sans-serif;max-width:900px;margin:0 auto;padding:40px 20px}
-h1{color:#c9a84c}table{width:100%;border-collapse:collapse;margin-top:24px}
-th{background:#1f1f1f;color:#c9a84c;padding:12px 16px;text-align:left}
-td{padding:12px 16px;border-bottom:1px solid #222;color:#aaa}
-a{color:#c9a84c}</style></head>
-<body><a href="/evalidator/">← Natrag</a><br><br>
-<h1>Pricing</h1>
-<table><tr><th>Plan</th><th>Cijena</th><th>Limit</th><th>Features</th></tr>
-<tr><td><strong>Free</strong></td><td>0€</td><td>100/dan</td><td>OIB, IBAN, VAT</td></tr>
-<tr><td><strong>Starter</strong></td><td>9€/mj</td><td>1,000/dan</td><td>+ Batch, Priority</td></tr>
-<tr><td><strong>Pro</strong></td><td>29€/mj</td><td>10,000/dan</td><td>+ Cross-validation, SLA</td></tr>
-<tr><td><strong>Enterprise</strong></td><td>Custom</td><td>Unlimited</td><td>Dedicated + Support</td></tr>
-</table><br>
-<p>Kontakt: api@evalidator.eu</p>
-</body></html>
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% trans "Pricing" %} — eValidator.eu</title>
+<meta name="description" content="{% trans "eValidator planovi — od besplatnog do Enterprise API pristupa za EU validaciju." %}">
+<link rel="canonical" href="https://evalidator.eu/pricing/">
+<script>(function(){var t=localStorage.getItem('ev-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')})();</script>
+<link rel="stylesheet" href="{% static 'evalidator/css/main.css' %}">
+</head>
+<body>
+
+<header class="ev-header">
+  <div class="container">
+    <div class="ev-header-inner">
+      <a href="{% url 'evalidator:home' %}" class="ev-logo">eVALIDATOR<span class="ev-logo-sub">.eu</span></a>
+      <nav class="ev-nav">
+        <a href="{% url 'evalidator:home' %}" class="ev-nav-link">{% trans "Validator" %}</a>
+        <a href="{% url 'evalidator:api_docs' %}" class="ev-nav-link">{% trans "API Docs" %}</a>
+        <button class="ev-theme-toggle" onclick="evToggleTheme()" title="{% trans "Tamna/Svijetla tema" %}">
+          <span class="ev-theme-icon">☀️</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <a href="{% url 'evalidator:home' %}" class="ev-back-link">← {% trans "Natrag na validator" %}</a>
+
+  <div class="ev-page-header">
+    <h1>Pricing</h1>
+    <p>{% trans "Počni besplatno. Skaliraj kada trebaš." %}</p>
+  </div>
+
+  <div class="ev-pricing-grid">
+    <!-- Free -->
+    <div class="ev-plan">
+      <div class="ev-plan-name">Free</div>
+      <div class="ev-plan-price">0€ <span>/{% trans "mj" %}</span></div>
+      <div class="ev-plan-limit">100 {% trans "req/dan" %}</div>
+      <div class="ev-plan-feature">OIB (HR)</div>
+      <div class="ev-plan-feature">IBAN (27 EU)</div>
+      <div class="ev-plan-feature">VAT ID</div>
+      <div class="ev-plan-feature">REST API</div>
+    </div>
+
+    <!-- Starter -->
+    <div class="ev-plan">
+      <div class="ev-plan-name">Starter</div>
+      <div class="ev-plan-price">9€ <span>/{% trans "mj" %}</span></div>
+      <div class="ev-plan-limit">1.000 {% trans "req/dan" %}</div>
+      <div class="ev-plan-feature">{% trans "Sve iz Free" %}</div>
+      <div class="ev-plan-feature">Batch API</div>
+      <div class="ev-plan-feature">Priority {% trans "obrada" %}</div>
+      <div class="ev-plan-feature">Email {% trans "podrška" %}</div>
+    </div>
+
+    <!-- Pro -->
+    <div class="ev-plan ev-plan--highlight">
+      <div class="ev-plan-name" style="color:var(--gold)">Pro ⭐</div>
+      <div class="ev-plan-price">29€ <span>/{% trans "mj" %}</span></div>
+      <div class="ev-plan-limit">10.000 {% trans "req/dan" %}</div>
+      <div class="ev-plan-feature">{% trans "Sve iz Starter" %}</div>
+      <div class="ev-plan-feature">Cross-validation</div>
+      <div class="ev-plan-feature">99.9% SLA</div>
+      <div class="ev-plan-feature">{% trans "Prioritetna podrška" %}</div>
+    </div>
+
+    <!-- Enterprise -->
+    <div class="ev-plan">
+      <div class="ev-plan-name">Enterprise</div>
+      <div class="ev-plan-price" style="font-size:1.4rem">Custom</div>
+      <div class="ev-plan-limit">{% trans "Neograničeno" %}</div>
+      <div class="ev-plan-feature">{% trans "Sve iz Pro" %}</div>
+      <div class="ev-plan-feature">{% trans "Dedicated instanca" %}</div>
+      <div class="ev-plan-feature">White-label</div>
+      <div class="ev-plan-feature">SLA {% trans "ugovor" %}</div>
+    </div>
+  </div>
+
+  <div class="ev-api-section">
+    <h2>{% trans "Kontakt za Enterprise" %}</h2>
+    <div class="ev-prose">
+      <p>api@evalidator.eu · <a href="https://no-limit.world/">No-limit udruga</a></p>
+      <p>{% trans "Posebne cijene za NGO i javni sektor." %}</p>
+    </div>
+  </div>
+</main>
+
+<footer class="ev-footer">
+  <div class="container">
+    <p>© 2026 <a href="https://no-limit.world/">No-limit udruga</a> · {% trans "GDPR: hash-only, nula osobnih podataka" %}</p>
+  </div>
+</footer>
+
+<script>
+function evToggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('ev-theme', next);
+  document.querySelector('.ev-theme-icon').textContent = next === 'light' ? '🌙' : '☀️';
+}
+(function() {
+  const t = localStorage.getItem('ev-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  const icon = document.querySelector('.ev-theme-icon');
+  if (icon) icon.textContent = t === 'light' ? '🌙' : '☀️';
+})();
+</script>
+</body>
+</html>

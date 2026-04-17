@@ -1,0 +1,245 @@
+# eValidator English translations
+# Copyright (C) 2026 No-limit udruga
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: eValidator 1.0\n"
+"Report-Msgid-Bugs-To: api@evalidator.eu\n"
+"POT-Creation-Date: 2026-04-17 23:52+0200\n"
+"PO-Revision-Date: 2026-04-17 23:52+0200\n"
+"Last-Translator: Claude Code\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "API Dokumentacija"
+msgstr "API Documentation"
+
+msgid ""
+"REST API dokumentacija za eValidator — OIB, IBAN, VAT ID provjera. Besplatno "
+"100 req/dan."
+msgstr ""
+"REST API documentation for eValidator — OIB, IBAN, VAT ID validation. Free "
+"100 req/day."
+
+msgid "Validator"
+msgstr "Validator"
+
+msgid "Pricing"
+msgstr "Pricing"
+
+msgid "Tamna/Svijetla tema"
+msgstr "Dark/Light theme"
+
+msgid "Natrag na validator"
+msgstr "Back to validator"
+
+msgid ""
+"REST API za provjeru OIB, IBAN i VAT ID. Besplatno 100 req/dan bez API "
+"ključa."
+msgstr ""
+"REST API for OIB, IBAN and VAT ID validation. Free 100 req/day without API "
+"key."
+
+msgid "Autentikacija"
+msgstr "Authentication"
+
+msgid "Javni endpointi ne zahtijevaju API ključ za prvih 100 zahtjeva dnevno."
+msgstr "Public endpoints do not require an API key for the first 100 requests per day."
+
+msgid "Za veće limite, pošaljite API ključ u headeru:"
+msgstr "For higher limits, send the API key in the header:"
+
+msgid "OIB Provjera"
+msgstr "OIB Validation"
+
+msgid "Provjeri ispravnost OIB broja. Podržava GET i POST."
+msgstr "Validate an OIB number. Supports GET and POST."
+
+msgid "Isti rezultat putem POST body-a (application/json)."
+msgstr "Same result via POST body (application/json)."
+
+msgid "IBAN Provjera"
+msgstr "IBAN Validation"
+
+msgid "HTMX partial — vraća HTML fragment za prikaz rezultata."
+msgstr "HTMX partial — returns an HTML fragment for displaying results."
+
+msgid "VAT ID Provjera"
+msgstr "VAT ID Validation"
+
+msgid "zemalja"
+msgstr "countries"
+
+msgid "Provjera VAT ID za sve EU države. Body: country=HR&vat=HR12345678901"
+msgstr "VAT ID validation for all EU countries. Body: country=HR&vat=HR12345678901"
+
+msgid "API Status"
+msgstr "API Status"
+
+msgid "Vraća verziju, health i (s API ključem) kvotu i usage."
+msgstr "Returns version, health and (with API key) quota and usage."
+
+msgid "Rate Limiting"
+msgstr "Rate Limiting"
+
+msgid "Bez ključa: 30 req/min, 100/dan po IP adresi"
+msgstr "Without key: 30 req/min, 100/day per IP address"
+
+msgid "Starter plan: 1.000/dan"
+msgstr "Starter plan: 1,000/day"
+
+msgid "Pro plan: 10.000/dan"
+msgstr "Pro plan: 10,000/day"
+
+msgid "Enterprise: neograničeno"
+msgstr "Enterprise: unlimited"
+
+msgid "Rate limit odgovor:"
+msgstr "Rate limit response:"
+
+msgid "Error Kodovi"
+msgstr "Error Codes"
+
+msgid "Uspješno (valid ili invalid, ali parsiran)"
+msgstr "Success (valid or invalid, but parsed)"
+
+msgid "Nedostaje obavezni parametar"
+msgstr "Missing required parameter"
+
+msgid "Rate limit prekoračen"
+msgstr "Rate limit exceeded"
+
+msgid "Endpoint u razvoju (batch)"
+msgstr "Endpoint in development (batch)"
+
+msgid "Kontakt"
+msgstr "Contact"
+
+msgid "GDPR: hash-only, nula osobnih podataka"
+msgstr "GDPR: hash-only, zero personal data"
+
+msgid "eValidator — Infrastruktura Povjerenja | EU"
+msgstr "eValidator — Trust Infrastructure | EU"
+
+msgid ""
+"Besplatna provjera OIB, IBAN i VAT ID za cijelu EU. ISO 7064 · MOD97 · EN "
+"16931"
+msgstr ""
+"Free OIB, IBAN and VAT ID validation for all EU. ISO 7064 · MOD97 · EN "
+"16931"
+
+msgid "Infrastruktura Povjerenja"
+msgstr "Trust Infrastructure"
+
+msgid "Besplatna provjera OIB, IBAN i VAT ID za cijelu EU."
+msgstr "Free OIB, IBAN and VAT ID validation for all EU."
+
+msgid "OIB · IBAN · VAT ID · REST API · besplatno"
+msgstr "OIB · IBAN · VAT ID · REST API · free"
+
+msgid "API Docs"
+msgstr "API Docs"
+
+msgid "Infrastruktura"
+msgstr "Infrastructure"
+
+msgid "Povjerenja"
+msgstr "of Trust"
+
+msgid "Ukupno provjera"
+msgstr "Total validations"
+
+msgid "Danas"
+msgstr "Today"
+
+msgid "Unesite OIB (11 znamenki)"
+msgstr "Enter OIB (11 digits)"
+
+msgid "Osobni identifikacijski broj — ISO 7064 MOD 11,10"
+msgstr "Personal identification number — ISO 7064 MOD 11,10"
+
+msgid "Provjera…"
+msgstr "Validating…"
+
+msgid "Međunarodni broj bankovnog računa — ISO 13616 MOD 97"
+msgstr "International bank account number — ISO 13616 MOD 97"
+
+msgid "VAT ID broj"
+msgstr "VAT ID number"
+
+msgid "EU VAT / PDV identifikacijski broj"
+msgstr "EU VAT identification number"
+
+msgid "besplatno"
+msgstr "free"
+
+msgid ""
+"Integriraj eValidator u svoju aplikaciju. 100 provjera/dan besplatno, bez "
+"registracije."
+msgstr ""
+"Integrate eValidator into your application. 100 validations/day free, no "
+"registration required."
+
+msgid "Puna API dokumentacija"
+msgstr "Full API documentation"
+
+msgid "Uvjeti korištenja"
+msgstr "Terms of Use"
+
+msgid "Privatnost"
+msgstr "Privacy"
+
+msgid "nula osobnih podataka"
+msgstr "zero personal data"
+
+msgid ""
+"eValidator planovi — od besplatnog do Enterprise API pristupa za EU "
+"validaciju."
+msgstr ""
+"eValidator plans — from free to Enterprise API access for EU validation."
+
+msgid "Počni besplatno. Skaliraj kada trebaš."
+msgstr "Start free. Scale when you need."
+
+msgid "mj"
+msgstr "mo"
+
+msgid "req/dan"
+msgstr "req/day"
+
+msgid "Sve iz Free"
+msgstr "Everything in Free"
+
+msgid "obrada"
+msgstr "processing"
+
+msgid "podrška"
+msgstr "support"
+
+msgid "Sve iz Starter"
+msgstr "Everything in Starter"
+
+msgid "Prioritetna podrška"
+msgstr "Priority support"
+
+msgid "Neograničeno"
+msgstr "Unlimited"
+
+msgid "Sve iz Pro"
+msgstr "Everything in Pro"
+
+msgid "Dedicated instanca"
+msgstr "Dedicated instance"
+
+msgid "ugovor"
+msgstr "contract"
+
+msgid "Kontakt za Enterprise"
+msgstr "Enterprise Contact"
+
+msgid "Posebne cijene za NGO i javni sektor."
+msgstr "Special pricing for NGOs and public sector."

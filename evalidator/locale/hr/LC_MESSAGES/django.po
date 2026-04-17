@@ -1,0 +1,328 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-17 23:52+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+#: evalidator/templates/evalidator/docs.html:7
+#: evalidator/templates/evalidator/docs.html:34
+msgid "API Dokumentacija"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:8
+msgid ""
+"REST API dokumentacija za eValidator — OIB, IBAN, VAT ID provjera. Besplatno "
+"100 req/dan."
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:20
+#: evalidator/templates/evalidator/pricing.html:20
+msgid "Validator"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:21
+#: evalidator/templates/evalidator/landing.html:46
+#: evalidator/templates/evalidator/pricing.html:7
+msgid "Pricing"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:22
+#: evalidator/templates/evalidator/landing.html:65
+#: evalidator/templates/evalidator/pricing.html:22
+msgid "Tamna/Svijetla tema"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:31
+#: evalidator/templates/evalidator/pricing.html:31
+msgid "Natrag na validator"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:35
+msgid ""
+"REST API za provjeru OIB, IBAN i VAT ID. Besplatno 100 req/dan bez API "
+"ključa."
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:39
+msgid "Autentikacija"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:41
+msgid "Javni endpointi ne zahtijevaju API ključ za prvih 100 zahtjeva dnevno."
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:42
+msgid "Za veće limite, pošaljite API ključ u headeru:"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:47
+msgid "OIB Provjera"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:54
+msgid "Provjeri ispravnost OIB broja. Podržava GET i POST."
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:74
+msgid "Isti rezultat putem POST body-a (application/json)."
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:84
+msgid "IBAN Provjera"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:91
+msgid "HTMX partial — vraća HTML fragment za prikaz rezultata."
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:95
+msgid "VAT ID Provjera"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:95
+#: evalidator/templates/evalidator/landing.html:76
+#: evalidator/templates/evalidator/landing.html:80
+#: evalidator/templates/evalidator/landing.html:95
+msgid "zemalja"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:102
+msgid "Provjera VAT ID za sve EU države. Body: country=HR&vat=HR12345678901"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:106
+msgid "API Status"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:113
+msgid "Vraća verziju, health i (s API ključem) kvotu i usage."
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:126
+msgid "Rate Limiting"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:129
+msgid "Bez ključa: 30 req/min, 100/dan po IP adresi"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:130
+msgid "Starter plan: 1.000/dan"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:131
+msgid "Pro plan: 10.000/dan"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:132
+msgid "Enterprise: neograničeno"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:134
+msgid "Rate limit odgovor:"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:141
+msgid "Error Kodovi"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:144
+msgid "Uspješno (valid ili invalid, ali parsiran)"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:145
+msgid "Nedostaje obavezni parametar"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:146
+msgid "Rate limit prekoračen"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:147
+msgid "Endpoint u razvoju (batch)"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:152
+msgid "Kontakt"
+msgstr ""
+
+#: evalidator/templates/evalidator/docs.html:160
+#: evalidator/templates/evalidator/pricing.html:95
+msgid "GDPR: hash-only, nula osobnih podataka"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:7
+msgid "eValidator — Infrastruktura Povjerenja | EU"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:8
+msgid ""
+"Besplatna provjera OIB, IBAN i VAT ID za cijelu EU. ISO 7064 · MOD97 · EN "
+"16931"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:13
+msgid "Infrastruktura Povjerenja"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:14
+#: evalidator/templates/evalidator/landing.html:76
+msgid "Besplatna provjera OIB, IBAN i VAT ID za cijelu EU."
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:20
+msgid "OIB · IBAN · VAT ID · REST API · besplatno"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:45
+#: evalidator/templates/evalidator/pricing.html:21
+msgid "API Docs"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:75
+msgid "Infrastruktura"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:75
+msgid "Povjerenja"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:87
+msgid "Ukupno provjera"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:91
+msgid "Danas"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:111
+msgid "Unesite OIB (11 znamenki)"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:120
+msgid "Osobni identifikacijski broj — ISO 7064 MOD 11,10"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:124
+#: evalidator/templates/evalidator/landing.html:147
+#: evalidator/templates/evalidator/landing.html:178
+msgid "Provjera…"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:143
+msgid "Međunarodni broj bankovnog računa — ISO 13616 MOD 97"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:164
+msgid "VAT ID broj"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:175
+msgid "EU VAT / PDV identifikacijski broj"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:186
+msgid "besplatno"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:187
+msgid ""
+"Integriraj eValidator u svoju aplikaciju. 100 provjera/dan besplatno, bez "
+"registracije."
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:192
+msgid "Puna API dokumentacija"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:200
+msgid "Uvjeti korištenja"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:201
+msgid "Privatnost"
+msgstr ""
+
+#: evalidator/templates/evalidator/landing.html:202
+msgid "nula osobnih podataka"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:8
+msgid ""
+"eValidator planovi — od besplatnog do Enterprise API pristupa za EU "
+"validaciju."
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:35
+msgid "Počni besplatno. Skaliraj kada trebaš."
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:42
+#: evalidator/templates/evalidator/pricing.html:53
+#: evalidator/templates/evalidator/pricing.html:64
+msgid "mj"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:43
+#: evalidator/templates/evalidator/pricing.html:54
+#: evalidator/templates/evalidator/pricing.html:65
+msgid "req/dan"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:55
+msgid "Sve iz Free"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:57
+msgid "obrada"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:58
+msgid "podrška"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:66
+msgid "Sve iz Starter"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:69
+msgid "Prioritetna podrška"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:76
+msgid "Neograničeno"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:77
+msgid "Sve iz Pro"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:78
+msgid "Dedicated instanca"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:80
+msgid "ugovor"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:85
+msgid "Kontakt za Enterprise"
+msgstr ""
+
+#: evalidator/templates/evalidator/pricing.html:88
+msgid "Posebne cijene za NGO i javni sektor."
+msgstr ""

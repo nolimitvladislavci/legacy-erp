@@ -1,197 +1,239 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="hr">
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>eValidator — Infrastruktura Povjerenja | EU</title>
-<meta name="description" content="Besplatna provjera OIB, IBAN i VAT ID za cijelu EU. ISO 7064 · MOD97 · EN 16931">
-<script src="https://unpkg.com/htmx.org@1.9.10"></script>
-<style>
-  :root{--gold:#c9a84c;--gold-light:#e8c97e;--dark:#0d0d0d;--dark2:#161616;--dark3:#1f1f1f;--text:#e8e8e8;--text-muted:#888;--valid:#22c55e;--invalid:#ef4444;--radius:8px}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--dark);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
-  a{color:var(--gold);text-decoration:none}
-  .container{max-width:900px;margin:0 auto;padding:0 20px}
-  /* Header */
-  header{border-bottom:1px solid #222;padding:16px 0}
-  .header-inner{display:flex;justify-content:space-between;align-items:center}
-  .logo{font-size:1.4rem;font-weight:700;letter-spacing:2px;color:var(--gold)}
-  .logo span{color:var(--text-muted);font-size:.9rem;font-weight:400;margin-left:8px}
-  nav a{margin-left:20px;color:var(--text-muted);font-size:.9rem}
-  nav a:hover{color:var(--gold)}
-  /* Hero */
-  .hero{text-align:center;padding:60px 0 40px}
-  .hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;letter-spacing:1px;margin-bottom:12px}
-  .hero h1 em{color:var(--gold);font-style:normal}
-  .hero p{color:var(--text-muted);font-size:1.1rem;max-width:600px;margin:0 auto 30px}
-  .badge-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
-  .badge{background:var(--dark3);border:1px solid #2a2a2a;border-radius:20px;padding:5px 14px;font-size:.8rem;color:var(--text-muted)}
-  .badge.gold{border-color:var(--gold);color:var(--gold)}
-  /* Stats */
-  .stats{display:flex;gap:20px;justify-content:center;margin-bottom:50px}
-  .stat{text-align:center}
-  .stat .n{font-size:1.8rem;font-weight:700;color:var(--gold)}
-  .stat .l{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
-  /* Validator card */
-  .validator-card{background:var(--dark2);border:1px solid #2a2a2a;border-radius:12px;padding:32px;margin-bottom:24px}
-  /* Tabs */
-  .tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--dark3);padding:4px;border-radius:8px}
-  .tab{flex:1;padding:10px;text-align:center;border-radius:6px;cursor:pointer;font-size:.9rem;color:var(--text-muted);border:none;background:transparent;transition:.2s}
-  .tab.active{background:var(--gold);color:#000;font-weight:600}
-  .tab:hover:not(.active){color:var(--text)}
-  /* Input */
-  .input-group{position:relative}
-  .input-group input{width:100%;padding:14px 18px;background:var(--dark3);border:1px solid #333;border-radius:var(--radius);color:var(--text);font-size:1.1rem;font-family:monospace;letter-spacing:1px;outline:none;transition:.2s}
-  .input-group input:focus{border-color:var(--gold)}
-  .input-group input.valid{border-color:var(--valid)}
-  .input-group input.invalid{border-color:var(--invalid)}
-  .input-hint{font-size:.8rem;color:var(--text-muted);margin-top:6px}
-  /* Result */
-  .result-area{min-height:60px;margin-top:16px}
-  .result-valid{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#0f2d1a;border:1px solid var(--valid);border-radius:var(--radius);color:var(--valid)}
-  .result-invalid{display:flex;flex-direction:column;gap:6px;padding:14px 18px;background:#2d0f0f;border:1px solid var(--invalid);border-radius:var(--radius);color:var(--invalid)}
-  .result-invalid .suggestion{color:var(--gold);font-size:.9rem}
-  .result-loading{color:var(--text-muted);font-size:.9rem;padding:14px 0}
-  /* Tab panels */
-  .tab-panel{display:none}.tab-panel.active{display:block}
-  /* API section */
-  .api-section{background:var(--dark2);border:1px solid #2a2a2a;border-radius:12px;padding:28px;margin-bottom:24px}
-  .api-section h2{color:var(--gold);margin-bottom:12px;font-size:1.1rem}
-  pre{background:var(--dark3);padding:14px;border-radius:6px;font-size:.85rem;overflow-x:auto;color:#a8d8a8}
-  /* Footer */
-  footer{border-top:1px solid #222;padding:24px 0;text-align:center;color:var(--text-muted);font-size:.85rem;margin-top:40px}
-  /* Spinner */
-  .htmx-indicator{display:none}.htmx-request .htmx-indicator{display:inline}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--text-muted);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
-</style>
+<title>{% trans "eValidator — Infrastruktura Povjerenja | EU" %}</title>
+<meta name="description" content="{% trans "Besplatna provjera OIB, IBAN i VAT ID za cijelu EU. ISO 7064 · MOD97 · EN 16931" %}">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://evalidator.eu/">
+<meta property="og:title" content="eValidator — {% trans "Infrastruktura Povjerenja" %} | EU">
+<meta property="og:description" content="{% trans "Besplatna provjera OIB, IBAN i VAT ID za cijelu EU." %}">
+<meta property="og:image" content="https://evalidator.eu{% static 'evalidator/og-image.png' %}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="eValidator — EU Validator">
+<meta name="twitter:description" content="{% trans "OIB · IBAN · VAT ID · REST API · besplatno" %}">
+
+<!-- SEO -->
+<link rel="canonical" href="https://evalidator.eu/">
+<link rel="alternate" hreflang="hr" href="https://evalidator.eu/hr/">
+<link rel="alternate" hreflang="en" href="https://evalidator.eu/en/">
+<link rel="alternate" hreflang="de" href="https://evalidator.eu/de/">
+<link rel="alternate" hreflang="sl" href="https://evalidator.eu/sl/">
+<link rel="alternate" hreflang="x-default" href="https://evalidator.eu/">
+
+<!-- Theme init — prevents FOUC -->
+<script>(function(){var t=localStorage.getItem('ev-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')})();</script>
+
+<link rel="stylesheet" href="{% static 'evalidator/css/main.css' %}">
+<script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
 </head>
 <body>
-<header>
+
+<header class="ev-header">
   <div class="container">
-    <div class="header-inner">
-      <div class="logo">e<em style="color:var(--gold)">VALIDATOR</em><span>.eu</span></div>
-      <nav>
-        <a href="/evalidator/docs/">API Docs</a>
-        <a href="/evalidator/pricing/">Pricing</a>
-        <a href="https://no-limit.world/">No-limit</a>
+    <div class="ev-header-inner">
+      <a href="{% url 'evalidator:home' %}" class="ev-logo">
+        eVALIDATOR<span class="ev-logo-sub">.eu</span>
+      </a>
+      <nav class="ev-nav">
+        <a href="{% url 'evalidator:api_docs' %}" class="ev-nav-link">{% trans "API Docs" %}</a>
+        <a href="{% url 'evalidator:pricing' %}" class="ev-nav-link">{% trans "Pricing" %}</a>
+        <a href="https://no-limit.world/" class="ev-nav-link" target="_blank" rel="noopener">No-limit</a>
+
+        <!-- Language Switcher -->
+        <div class="ev-lang-switcher">
+          {% get_current_language as CURRENT_LANG %}
+          {% get_available_languages as LANGUAGES %}
+          {% for lang_code, lang_name in LANGUAGES %}
+          <form method="post" action="{% url 'set_language' %}" style="display:inline">
+            {% csrf_token %}
+            <input type="hidden" name="language" value="{{ lang_code }}">
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="ev-lang-btn {% if lang_code == CURRENT_LANG %}active{% endif %}">
+              {{ lang_code|upper }}
+            </button>
+          </form>
+          {% endfor %}
+        </div>
+
+        <button class="ev-theme-toggle" onclick="evToggleTheme()" title="{% trans "Tamna/Svijetla tema" %}" aria-label="Toggle theme">
+          <span class="ev-theme-icon">☀️</span>
+        </button>
       </nav>
     </div>
   </div>
 </header>
 
 <main class="container">
-  <section class="hero">
-    <h1>Infrastruktura <em>Povjerenja</em></h1>
-    <p>Besplatna provjera OIB, IBAN i VAT ID za cijelu EU.<br>ISO 7064 · MOD 97 · 27 EU zemalja</p>
-    <div class="badge-row">
-      <span class="badge gold">✓ ISO 7064 MOD 11,10</span>
-      <span class="badge gold">✓ ISO 13616 MOD 97</span>
-      <span class="badge">27 EU zemalja</span>
-      <span class="badge">GDPR compliant</span>
-      <span class="badge">REST API</span>
+  <section class="ev-hero">
+    <h1>{% trans "Infrastruktura" %} <em>{% trans "Povjerenja" %}</em></h1>
+    <p>{% trans "Besplatna provjera OIB, IBAN i VAT ID za cijelu EU." %}<br>ISO 7064 · MOD 97 · 27 EU {% trans "zemalja" %}</p>
+    <div class="ev-badge-row">
+      <span class="ev-badge ev-badge--gold">✓ ISO 7064 MOD 11,10</span>
+      <span class="ev-badge ev-badge--gold">✓ ISO 13616 MOD 97</span>
+      <span class="ev-badge">27 EU {% trans "zemalja" %}</span>
+      <span class="ev-badge">GDPR compliant</span>
+      <span class="ev-badge">REST API</span>
     </div>
-    <div class="stats">
-      <div class="stat"><div class="n">{{ stats.total|default:"0" }}</div><div class="l">Ukupno provjera</div></div>
-      <div class="stat"><div class="n">{{ stats.today|default:"0" }}</div><div class="l">Danas</div></div>
-      <div class="stat"><div class="n">27</div><div class="l">EU zemalja</div></div>
+    <div class="ev-stats">
+      <div class="ev-stat">
+        <span class="ev-stat-n">{{ stats.total|default:"0" }}</span>
+        <span class="ev-stat-l">{% trans "Ukupno provjera" %}</span>
+      </div>
+      <div class="ev-stat">
+        <span class="ev-stat-n">{{ stats.today|default:"0" }}</span>
+        <span class="ev-stat-l">{% trans "Danas" %}</span>
+      </div>
+      <div class="ev-stat">
+        <span class="ev-stat-n">27</span>
+        <span class="ev-stat-l">EU {% trans "zemalja" %}</span>
+      </div>
     </div>
   </section>
 
-  <div class="validator-card">
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('oib',this)">🇭🇷 OIB</button>
-      <button class="tab" onclick="switchTab('iban',this)">🏦 IBAN</button>
-      <button class="tab" onclick="switchTab('vat',this)">🇪🇺 VAT ID</button>
+  <div class="ev-card">
+    <div class="ev-tabs" role="tablist">
+      <button class="ev-tab active" role="tab" aria-selected="true" aria-controls="panel-oib" onclick="evSwitchTab('oib',this)">🇭🇷 OIB</button>
+      <button class="ev-tab" role="tab" aria-selected="false" aria-controls="panel-iban" onclick="evSwitchTab('iban',this)">🏦 IBAN</button>
+      <button class="ev-tab" role="tab" aria-selected="false" aria-controls="panel-vat" onclick="evSwitchTab('vat',this)">🇪🇺 VAT ID</button>
     </div>
 
     <!-- OIB -->
-    <div id="panel-oib" class="tab-panel active">
-      <div class="input-group">
-        <input type="text" name="oib" maxlength="11" placeholder="Unesite OIB (11 znamenki)"
-          hx-post="/evalidator/validate/oib/"
+    <div id="panel-oib" class="ev-tab-panel active" role="tabpanel">
+      <div class="ev-input-group">
+        <input type="text" name="oib" maxlength="11"
+          placeholder="{% trans "Unesite OIB (11 znamenki)" %}"
+          class="ev-input"
+          hx-post="{% url 'evalidator:validate_oib' %}"
           hx-trigger="keyup changed delay:400ms"
           hx-target="#result-oib"
           hx-indicator="#spin-oib"
-          oninput="this.value=this.value.replace(/\D/g,'')">
-        <div class="input-hint">Osobni identifikacijski broj — ISO 7064 MOD 11,10</div>
+          oninput="this.value=this.value.replace(/\D/g,'')"
+          autocomplete="off"
+          aria-label="OIB input">
+        <div class="ev-input-hint">{% trans "Osobni identifikacijski broj — ISO 7064 MOD 11,10" %}</div>
       </div>
-      <div class="result-area">
-        <span id="spin-oib" class="htmx-indicator result-loading"><span class="spinner"></span> Provjera…</span>
-        <div id="result-oib"></div>
+      <div class="ev-result-area">
+        <span id="spin-oib" class="htmx-indicator ev-result-loading">
+          <span class="ev-spinner"></span> {% trans "Provjera…" %}
+        </span>
+        <div id="result-oib" role="status" aria-live="polite"></div>
       </div>
     </div>
 
     <!-- IBAN -->
-    <div id="panel-iban" class="tab-panel">
-      <div class="input-group">
-        <input type="text" name="iban" maxlength="34" placeholder="HR1234567890123456789"
-          hx-post="/evalidator/validate/iban/"
+    <div id="panel-iban" class="ev-tab-panel" role="tabpanel">
+      <div class="ev-input-group">
+        <input type="text" name="iban" maxlength="34"
+          placeholder="HR1234567890123456789"
+          class="ev-input"
+          style="text-transform:uppercase"
+          hx-post="{% url 'evalidator:validate_iban' %}"
           hx-trigger="keyup changed delay:400ms"
           hx-target="#result-iban"
           hx-indicator="#spin-iban"
-          style="text-transform:uppercase">
-        <div class="input-hint">Međunarodni broj bankovnog računa — ISO 13616 MOD 97</div>
+          autocomplete="off"
+          aria-label="IBAN input">
+        <div class="ev-input-hint">{% trans "Međunarodni broj bankovnog računa — ISO 13616 MOD 97" %}</div>
       </div>
-      <div class="result-area">
-        <span id="spin-iban" class="htmx-indicator result-loading"><span class="spinner"></span> Provjera…</span>
-        <div id="result-iban"></div>
+      <div class="ev-result-area">
+        <span id="spin-iban" class="htmx-indicator ev-result-loading">
+          <span class="ev-spinner"></span> {% trans "Provjera…" %}
+        </span>
+        <div id="result-iban" role="status" aria-live="polite"></div>
       </div>
     </div>
 
     <!-- VAT -->
-    <div id="panel-vat" class="tab-panel">
-      <div class="input-group" style="display:flex;gap:10px">
-        <select name="country" id="vat-country" style="background:var(--dark3);border:1px solid #333;border-radius:var(--radius);color:var(--text);padding:14px 12px;font-size:.95rem">
+    <div id="panel-vat" class="ev-tab-panel" role="tabpanel">
+      <div class="ev-input-flex">
+        <select name="country" id="vat-country" class="ev-select" aria-label="Country code">
           <option value="HR">🇭🇷 HR</option><option value="DE">🇩🇪 DE</option>
           <option value="AT">🇦🇹 AT</option><option value="SI">🇸🇮 SI</option>
           <option value="IT">🇮🇹 IT</option><option value="FR">🇫🇷 FR</option>
           <option value="NL">🇳🇱 NL</option><option value="BE">🇧🇪 BE</option>
           <option value="PL">🇵🇱 PL</option><option value="CZ">🇨🇿 CZ</option>
         </select>
-        <input type="text" name="vat" placeholder="VAT ID broj" style="flex:1"
-          hx-post="/evalidator/validate/vat/"
+        <input type="text" name="vat"
+          placeholder="{% trans "VAT ID broj" %}"
+          class="ev-input"
+          style="text-transform:uppercase"
+          hx-post="{% url 'evalidator:validate_vat' %}"
           hx-trigger="keyup changed delay:400ms"
           hx-target="#result-vat"
           hx-indicator="#spin-vat"
           hx-include="#vat-country"
-          style="text-transform:uppercase">
+          autocomplete="off"
+          aria-label="VAT ID input">
       </div>
-      <div class="input-hint">EU VAT / PDV identifikacijski broj</div>
-      <div class="result-area">
-        <span id="spin-vat" class="htmx-indicator result-loading"><span class="spinner"></span> Provjera…</span>
-        <div id="result-vat"></div>
+      <div class="ev-input-hint">{% trans "EU VAT / PDV identifikacijski broj" %}</div>
+      <div class="ev-result-area">
+        <span id="spin-vat" class="htmx-indicator ev-result-loading">
+          <span class="ev-spinner"></span> {% trans "Provjera…" %}
+        </span>
+        <div id="result-vat" role="status" aria-live="polite"></div>
       </div>
     </div>
   </div>
 
-  <div class="api-section">
-    <h2>⚡ REST API — besplatno</h2>
-    <p style="color:var(--text-muted);margin-bottom:12px;font-size:.9rem">Integriraj eValidator u svoju aplikaciju. 100 provjera/dan besplatno, bez registracije.</p>
+  <div class="ev-api-section">
+    <h2>⚡ REST API — {% trans "besplatno" %}</h2>
+    <p>{% trans "Integriraj eValidator u svoju aplikaciju. 100 provjera/dan besplatno, bez registracije." %}</p>
     <pre>GET https://evalidator.eu/api/v1/oib/?oib=12345678901
 
 {"oib":"12345678901","valid":true,"algorithm":"ISO 7064 MOD 11,10","country":"HR"}</pre>
-    <div style="margin-top:12px"><a href="/evalidator/docs/" style="color:var(--gold)">→ Puna API dokumentacija</a></div>
+    <div style="margin-top:12px">
+      <a href="{% url 'evalidator:api_docs' %}" class="ev-link-gold">→ {% trans "Puna API dokumentacija" %}</a>
+    </div>
   </div>
 </main>
 
-<footer>
+<footer class="ev-footer">
   <div class="container">
-    <p>© 2026 <a href="https://no-limit.world/">No-limit udruga</a> · 
-    <a href="/notariat/docs/T1/">Uvjeti korištenja</a> · 
-    <a href="/notariat/docs/G1/">Privatnost</a> · 
-    GDPR: hash-only, nula osobnih podataka</p>
+    <p>© 2026 <a href="https://no-limit.world/">No-limit udruga</a> ·
+    <a href="/notariat/docs/T1/">{% trans "Uvjeti korištenja" %}</a> ·
+    <a href="/notariat/docs/G1/">{% trans "Privatnost" %}</a> ·
+    GDPR: hash-only, {% trans "nula osobnih podataka" %}</p>
   </div>
 </footer>
 
 <script>
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
+function evSwitchTab(name, btn) {
+  document.querySelectorAll('.ev-tab-panel').forEach(p => {
+    p.classList.remove('active');
+    p.setAttribute('aria-hidden', 'true');
+  });
+  document.querySelectorAll('.ev-tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  const panel = document.getElementById('panel-' + name);
+  if (panel) { panel.classList.add('active'); panel.removeAttribute('aria-hidden'); }
   btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
 }
+
+function evToggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('ev-theme', next);
+  document.querySelector('.ev-theme-icon').textContent = next === 'light' ? '🌙' : '☀️';
+}
+
+(function() {
+  const t = localStorage.getItem('ev-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  const icon = document.querySelector('.ev-theme-icon');
+  if (icon) icon.textContent = t === 'light' ? '🌙' : '☀️';
+})();
 </script>
 </body>
 </html>
