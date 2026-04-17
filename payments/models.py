@@ -153,7 +153,10 @@ class Payment(models.Model):
         verbose_name_plural = _("Placanja")
         ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=["company", "status"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["method"]),
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["company", "status", "created_at"]),
             models.Index(fields=["source", "source_id"]),
             models.Index(fields=["external_id"]),
         ]

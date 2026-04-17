@@ -350,6 +350,10 @@ class Invoice(models.Model):
         verbose_name = _("Račun")
         verbose_name_plural = _("Računi")
         ordering = ["-date_issued"]
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["company", "status", "date_issued"]),
+        ]
 
     def __str__(self):
         return f"{self.number} \u2013 {self.client_name} ({self.total} {self.currency})"

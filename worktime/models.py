@@ -6,6 +6,7 @@ from django.db import models
 from django.utils import timezone
 
 from core.managers import CompanyManager
+from core.validators import validate_oib
 
 
 class WorkGroup(models.Model):
@@ -82,7 +83,7 @@ class EmployeeProfile(models.Model):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="employeeprofile")
     employee_id = models.CharField(max_length=20, blank=True)
-    tax_id = models.CharField("OIB", max_length=11, blank=True)
+    tax_id = models.CharField("OIB", max_length=11, blank=True, validators=[validate_oib])
     hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("20.00"))
     overtime_rate = models.DecimalField(
         max_digits=10,

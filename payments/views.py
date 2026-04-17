@@ -291,6 +291,7 @@ def _on_payment_completed(payment):
         logger.warning("_on_payment_completed error: %s", e)
 
 
+@login_required
 def payment_success(request):
     """Success redirect page after payment."""
     payment_id = request.GET.get("payment_id", "")
@@ -325,6 +326,7 @@ def paypal_return(request):
     return redirect("payments:success")
 
 
+@login_required
 def payment_cancel(request):
     """Cancel redirect page."""
     payment_id = request.GET.get("payment_id", "")

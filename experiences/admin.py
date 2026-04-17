@@ -115,3 +115,4 @@ class RecallEventAdmin(admin.ModelAdmin):
 class RecallNotificationAdmin(admin.ModelAdmin):
     list_display = ["recall", "channel", "recipient_name", "status", "sent_at"]
     list_filter = ["channel", "status"]
+    list_select_related = ["recall"]
