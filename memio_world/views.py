@@ -48,39 +48,13 @@ def waitlist_count(request):
     return JsonResponse({"count": count})
 
 
-from django.contrib import messages
 from django.shortcuts import redirect, render
-from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
 
 
 def registracija_page(request):
-    """Registracija/waitlist stranica za memio.world."""
-    if request.method == "POST":
-        email = (request.POST.get("email") or "").strip().lower()
-        name = (request.POST.get("name") or "").strip()
-        interest = (request.POST.get("interest") or "general").strip()
-
-        if not email or "@" not in email:
-            messages.error(request, _("Email adresa je obavezna."))
-        else:
-            entry, created = WaitlistEntry.objects.using("memio_world").get_or_create(
-                email=email,
-                defaults={
-                    "name": name,
-                    "interest": interest,
-                    "source": "memio.world",
-                    "ip": request.META.get("HTTP_X_REAL_IP", request.META.get("REMOTE_ADDR")),
-                },
-            )
-            if created:
-                messages.success(request, _("Uspješno ste se prijavili na listu čekanja!"))
-            else:
-                messages.info(request, _("Već ste prijavljeni. Obavijestit ćemo vas kad krenemo!"))
-            return redirect("memio_world:registracija")
-
-    count = WaitlistEntry.objects.using("memio_world").count()
-    return render(request, "memio_world/registracija.html", {"waitlist_count": count})
+    """Preusmjeri na pravu PLAY registraciju — waitlist je uklonjen."""
+    return redirect("memio_world:register_page")
 
 
 @cache_page(300)
