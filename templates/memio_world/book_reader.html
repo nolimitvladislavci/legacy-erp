@@ -558,6 +558,15 @@ var TOTAL = PAGES.length;
 var currentPage = 0;
 var isFullscreen = false;
 
+/* TTS dostupnost — iOS Safari privatni mod nema glasova */
+var TTS_SUPPORTED = (typeof speechSynthesis !== 'undefined');
+if (!TTS_SUPPORTED) {
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btnSpeak');
+    if (btn) { btn.style.opacity = '.35'; btn.title = 'Zvuk nije podržan u ovom pregledniku'; }
+  });
+}
+
 /* ═══ PAGE ILLUSTRATION PLACEHOLDERS (by story section) ═══ */
 var SECTION_ICONS = [
   '🏰', '👶', '🌿', '🥬', '🧙‍♀️', '😨', '👧', '💇‍♀️', '🗼', '🔒',
@@ -728,11 +737,17 @@ var LANG_PREFERENCE = {
 
 /* Učitaj glasove čim su dostupni */
 function loadTTSVoices() {
-  ttsVoices = speechSynthesis.getVoices();
+  var v = speechSynthesis.getVoices();
+  if (v.length) ttsVoices = v;
 }
 if (typeof speechSynthesis !== 'undefined') {
   loadTTSVoices();
   speechSynthesis.addEventListener('voiceschanged', loadTTSVoices);
+  /* iOS Safari fix: glasovi se učitaju tek na interakciju */
+  document.addEventListener('touchstart', function once() {
+    loadTTSVoices();
+    document.removeEventListener('touchstart', once);
+  }, { once: true });
 }
 
 function getPlainText() {
@@ -836,9 +851,26 @@ function speakPage() {
       }
     };
 
-    /* Chrome stabilizacija: cancel → wait → speak */
+    /* Chrome/iOS stabilizacija: cancel → wait → speak */
     speechSynthesis.cancel();
-    setTimeout(function() { speechSynthesis.speak(utter); }, 80);
+    setTimeout(function() {
+      try {
+        speechSynthesis.speak(utter);
+        /* iOS Safari watchdog: ako nakon 300ms nije pokrenulo, pokušaj bez voice */
+        setTimeout(function() {
+          if (!speechSynthesis.speaking && btn.classList.contains('active')) {
+            var u2 = new SpeechSynthesisUtterance(text);
+            u2.rate = profile.rate; u2.pitch = profile.pitch; u2.volume = 1.0;
+            u2.onend = function() { btn.classList.remove('active'); btn.textContent = '🔊'; };
+            speechSynthesis.cancel();
+            setTimeout(function() { speechSynthesis.speak(u2); }, 50);
+          }
+        }, 300);
+      } catch(err) {
+        console.warn('TTS speak error:', err);
+        btn.classList.remove('active'); btn.textContent = '🔊';
+      }
+    }, 80);
   }
 
   /* Čekaj glasove ako još nisu učitani */

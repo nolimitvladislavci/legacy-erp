@@ -62,14 +62,41 @@ function closeBanner(){
   <div class="auth-link">{% trans "Nemaš račun?" %} <a href="{% url 'memio_world:register_page' %}">{% trans "Registriraj se" %}</a></div>
 </div>
 <script>
-function doLogin() {
-  fetch('{% url "memio_world:login_action" %}', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value})
-  }).then(function(r){return r.json()}).then(function(d) {
-    if (d.ok) window.location.href = d.redirect;
-    else { document.getElementById('loginMsg').textContent = d.error; document.getElementById('loginMsg').style.color = '#c62828'; }
-  });
+async function doLogin() {
+  var btn = document.querySelector('.auth-btn');
+  var msg = document.getElementById('loginMsg');
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass  = document.getElementById('loginPass').value;
+  if (!email || !pass) { msg.textContent = 'Unesite email i lozinku.'; msg.style.color='#c62828'; return; }
+  btn.disabled = true; btn.textContent = '⏳ Prijava...';
+  msg.textContent = ''; msg.style.color = '';
+  try {
+    var r = await fetch('{% url "memio_world:login_action" %}', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({email: email, password: pass})
+    });
+    var d = await r.json();
+    if (d.ok) {
+      msg.textContent = '✓ Uspješna prijava!'; msg.style.color = '#2e7d32';
+      window.location.href = d.redirect || '/api/memio-world/play/account/';
+    } else {
+      /* ApiErrorFormatMiddleware → d.message; fallback d.error */
+      msg.textContent = d.message || d.error || 'Neispravan email ili lozinka.';
+      msg.style.color = '#c62828';
+      btn.disabled = false; btn.textContent = '🔑 Prijavi se';
+    }
+  } catch(e) {
+    msg.textContent = 'Greška mreže. Provjeri internet vezu.';
+    msg.style.color = '#c62828';
+    btn.disabled = false; btn.textContent = '🔑 Prijavi se';
+  }
 }
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('loginPass').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+});
 </script>
 {% endblock %}

@@ -59,21 +59,39 @@
   <div class="auth-link">{% trans "Već imaš račun?" %} <a href="{% url 'memio_world:login_page' %}">{% trans "Prijavi se" %}</a></div>
 </div>
 <script>
-function doRegister() {
+async function doRegister() {
+  var msg = document.getElementById('regMsg');
+  var btn = document.querySelector('.auth-btn');
   var data = {
-    name: document.getElementById('regName').value,
-    email: document.getElementById('regEmail').value,
+    name: document.getElementById('regName').value.trim(),
+    email: document.getElementById('regEmail').value.trim().toLowerCase(),
     password: document.getElementById('regPass').value,
     lang: document.getElementById('regLang').value,
-    ref_code: document.getElementById('regRef').value
+    ref_code: document.getElementById('regRef').value.trim()
   };
-  fetch('{% url "memio_world:register_action" %}', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-  }).then(function(r){return r.json()}).then(function(d) {
-    if (d.ok) { window.location.href = d.redirect; }
-    else { document.getElementById('regMsg').textContent = d.error; document.getElementById('regMsg').style.color = '#c62828'; }
-  }).catch(function(e) { document.getElementById('regMsg').textContent = '{% trans "Greška. Pokušajte ponovno." %}'; });
+  if (!data.email || !data.password) { msg.textContent = 'Email i lozinka su obavezni.'; msg.style.color='#c62828'; return; }
+  if (data.password.length < 6) { msg.textContent = 'Lozinka mora imati barem 6 znakova.'; msg.style.color='#c62828'; return; }
+  btn.disabled = true; btn.textContent = '⏳ Registracija...';
+  msg.textContent = ''; msg.style.color = '';
+  try {
+    var r = await fetch('{% url "memio_world:register_action" %}', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      credentials: 'include', body: JSON.stringify(data)
+    });
+    var d = await r.json();
+    if (d.ok) {
+      msg.textContent = '✓ Račun kreiran!'; msg.style.color = '#2e7d32';
+      window.location.href = d.redirect || '/api/memio-world/play/setup/';
+    } else {
+      msg.textContent = d.message || d.error || '{% trans "Greška. Pokušajte ponovno." %}';
+      msg.style.color = '#c62828';
+      btn.disabled = false; btn.textContent = '🚀 Registriraj se — 7 dana besplatno';
+    }
+  } catch(e) {
+    msg.textContent = 'Greška mreže. Provjeri internet vezu.';
+    msg.style.color = '#c62828';
+    btn.disabled = false; btn.textContent = '🚀 Registriraj se — 7 dana besplatno';
+  }
 }
 </script>
 {% endblock %}
