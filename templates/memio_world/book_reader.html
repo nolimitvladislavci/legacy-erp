@@ -478,6 +478,7 @@ body.night-mode .codex { box-shadow:0 0 40px rgba(0,0,0,.8) }
       {{ lc|upper }}
     </button>
     {% endfor %}
+    <button class="btn" id="btnSpeakTop" onclick="speakPage()" title="Čitaj naglas" style="font-size:1rem;">🔊</button>
     <button class="btn" onclick="toggleNight()" title="Noćni mod">☽</button>
     <button class="btn" onclick="toggleAutoNext()" id="btnAuto" title="Auto-čitanje">▶▶</button>
     <button class="btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
@@ -798,11 +799,13 @@ function speakPage() {
     return;
   }
 
+  var btnTop = document.getElementById('btnSpeakTop');
   /* Toggle off */
   if (btn.classList.contains('active')) {
     speechSynthesis.cancel();
     btn.classList.remove('active');
     btn.textContent = '🔊';
+    if (btnTop) { btnTop.classList.remove('active'); btnTop.textContent = '🔊'; }
     return;
   }
 
@@ -828,10 +831,13 @@ function speakPage() {
 
     btn.classList.add('active');
     btn.textContent = '⏸';
+    if (btnTop) { btnTop.classList.add('active'); btnTop.textContent = '⏸'; }
 
     utter.onend = function() {
       btn.classList.remove('active');
       btn.textContent = '🔊';
+      var bTop = document.getElementById('btnSpeakTop');
+      if (bTop) { bTop.classList.remove('active'); bTop.textContent = '🔊'; }
       /* Auto-nastavak na sljedeću stranicu */
       if (ttsAutoNext && currentPage < TOTAL - 1) {
         setTimeout(function() { nextPage(); setTimeout(speakPage, 600); }, 300);
@@ -898,6 +904,8 @@ function stopSpeaking() {
   if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) speechSynthesis.cancel();
   var btn = document.getElementById('btnSpeak');
   if (btn) { btn.classList.remove('active'); btn.textContent = '🔊'; }
+  var btnTop = document.getElementById('btnSpeakTop');
+  if (btnTop) { btnTop.classList.remove('active'); btnTop.textContent = '🔊'; }
 }
 
 function toggleAutoNext() {

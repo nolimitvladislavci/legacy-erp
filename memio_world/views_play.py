@@ -192,10 +192,24 @@ def _build_from_story_pages(story, story_pages, lang):
     """Build pages from StoryPage model (quality base)."""
     import html as _html
 
+    # Load Europeana illustrations as fallback when StoryPage has no image
+    euro_illustrations = []
+    try:
+        for item in story.illustrations.using("memio_world").all():
+            url = getattr(item, "thumbnail_url", "") or getattr(item, "media_url", "")
+            if url:
+                euro_illustrations.append(url)
+    except Exception:
+        pass
+    illust_idx = 0
+
     pages = []
     for sp in story_pages:
         text = getattr(sp, f"text_{lang}", "") or sp.text_hr
         image = sp.image.url if sp.image else ""
+        if not image and euro_illustrations:
+            image = euro_illustrations[illust_idx % len(euro_illustrations)]
+            illust_idx += 1
         audio_field = getattr(sp, f"audio_{lang}", None)
         audio = ""
         if audio_field:
@@ -240,6 +254,9 @@ def _build_from_story_pages(story, story_pages, lang):
             layout = layout_map.get(sp.layout, "text")
             if not image:
                 layout = "text"
+            elif layout == "text" and image:
+                # Europeana illustration fallback — use split layout
+                layout = "split"
 
             escaped = _html.escape(text) if text else ""
             text_html = "".join(f"<p>{p}</p>" for p in escaped.split("\n") if p.strip())
