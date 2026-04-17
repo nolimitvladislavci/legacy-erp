@@ -23,6 +23,26 @@
 </style>
 {% endblock %}
 {% block content %}
+<!-- LAUNCH BANNER: prikazuje se samo prvi put (nema cookie mw-login-welcomed) -->
+<div id="launchBanner" style="display:none;background:linear-gradient(135deg,#c9a84c22,#8b691422);border:1px solid #c9a84c;border-radius:16px;padding:1rem 1.5rem;margin:1rem auto;max-width:450px;text-align:center;font-family:MedievalSharp,serif;color:#2c1810;position:relative">
+  <button onclick="closeBanner()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b5a4e">✕</button>
+  <div style="font-size:1.8rem;margin-bottom:.4rem">🏰</div>
+  <strong>PLAY.EU je otvoren!</strong><br>
+  <span style="font-size:.85rem;color:#6b5a4e">Dobrodošao/la u digitalnu riznicu za djecu Europe.</span>
+</div>
+<script>
+(function(){
+  if(!localStorage.getItem('mw-login-welcomed')){
+    var b=document.getElementById('launchBanner');
+    if(b) b.style.display='block';
+  }
+})();
+function closeBanner(){
+  localStorage.setItem('mw-login-welcomed','1');
+  var b=document.getElementById('launchBanner');
+  if(b) b.style.display='none';
+}
+</script>
 <div class="auth">
   <div style="text-align:center;font-size:3rem;margin-bottom:.5rem">🔑</div>
   <h1>{% trans "Prijava" %}</h1>
