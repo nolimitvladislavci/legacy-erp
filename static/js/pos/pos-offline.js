@@ -1,0 +1,776 @@
+/* ═══ POS Offline Engine v3 — 48h zakonski mod (23.03.2026) ═══ */
+
+// Čitaj terminal_id iz pos-config (injektira Django template)
+function _getPosConfig() {
+  try { return JSON.parse(document.getElementById('pos-config').textContent || '{}'); } catch(e) { return {}; }
+}
+
+// 48h provjera — poziva se svakih 10 min
+function _check48hAlarm() {
+  var banner = document.getElementById('offline48hBanner');
+  if (!banner) return;
+  openDB(function(db) {
+    var tx = db.transaction('receipts', 'readonly');
+    var critical = 0;
+    var limit36h = Date.now() - 36 * 60 * 60 * 1000;
+    tx.objectStore('receipts').openCursor().onsuccess = function(e) {
+      var c = e.target.result;
+      if (c) {
+        var r = c.value;
+        if (!r.synced && new Date(r.created_at).getTime() < limit36h) critical++;
+        c.continue();
+      }
+    };
+    tx.oncomplete = function() {
+      if (critical > 0) {
+        banner.classList.add('show');
+        banner.textContent = '⚠️ UPOZORENJE: ' + critical + ' bon(ova) bez JIR-a >36h! Uspostavi vezu odmah (zakon: 48h).';
+      } else {
+        banner.classList.remove('show');
+      }
+    };
+  });
+}
+setInterval(_check48hAlarm, 10 * 60 * 1000);
+setTimeout(_check48hAlarm, 3000);
+
+// Ažuriraj offline banner (online/offline status)
+function _updateOnlineBanner() {
+  var b = document.getElementById('offlineBanner');
+  if (!b) return;
+  if (!navigator.onLine) {
+    b.classList.add('show');
+  } else {
+    openDB(function(db) {
+      var tx = db.transaction('receipts', 'readonly');
+      var cnt = 0;
+      tx.objectStore('receipts').index('synced').openCursor(IDBKeyRange.only(0)).onsuccess = function(e) {
+        var c = e.target.result; if (c) { cnt++; c.continue(); }
+      };
+      tx.oncomplete = function() {
+        if (cnt > 0) { b.classList.add('show'); } else { b.classList.remove('show'); }
+        var badge = document.getElementById('offlineSyncBadge');
+        if (badge) { badge.textContent = cnt || ''; badge.style.display = cnt ? 'inline-block' : 'none'; }
+      };
+    });
+  }
+}
+window.addEventListener('online', function() { _updateOnlineBanner(); setTimeout(function(){ if(window.syncOfflineData) window.syncOfflineData(); }, 2000); });
+window.addEventListener('offline', function() { _updateOnlineBanner(); });
+setTimeout(_updateOnlineBanner, 1500);
+
+/* ═══ POS Offline Engine v2 — Kompletna smjena bez interneta ═══
+ *
+ * Nadogradnja pos-core.js offline sustava.
+ * Koristi IndexedDB umjesto localStorage (nema 5MB limita).
+ *
+ * Mogucnosti:
+ * 1. Offline otvaranje smjene (cached session)
+ * 2. Offline prodaja s local receipt brojevima
+ * 3. Offline racun prikaz (ne PDF, ali HTML)
+ * 4. Offline polog/podizanje gotovine
+ * 5. Offline zatvaranje smjene (lokalni Z-report)
+ * 6. Bulk sync kad se vrati internet
+ * 7. IndexedDB storage (neogranicen prostor)
+ */
+(function(){
+  'use strict';
+
+  var DB_NAME = 'pos_offline_v2';
+  var DB_VERSION = 1;
+  var db = null;
+
+  // ── IndexedDB Setup ────────────────────────────────────────────────
+  function openDB(callback) {
+    if (db) { callback(db); return; }
+    var req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e) {
+      var d = e.target.result;
+      if (!d.objectStoreNames.contains('receipts')) {
+        var store = d.createObjectStore('receipts', { keyPath: 'offline_id' });
+        store.createIndex('synced', 'synced', { unique: false });
+        store.createIndex('session_id', 'session_id', { unique: false });
+      }
+      if (!d.objectStoreNames.contains('sessions')) {
+        d.createObjectStore('sessions', { keyPath: 'offline_session_id' });
+      }
+      if (!d.objectStoreNames.contains('cash_ops')) {
+        d.createObjectStore('cash_ops', { keyPath: 'offline_id' });
+      }
+    };
+    req.onsuccess = function(e) { db = e.target.result; callback(db); };
+    req.onerror = function(e) { console.error('IndexedDB error:', e); };
+  }
+
+  // ── 1. Offline Session Management ─────────────────────────────────
+  // Cache session info kad je online, koristi kad je offline
+  window.cacheSessionForOffline = function(sessionData) {
+    openDB(function(db) {
+      var tx = db.transaction('sessions', 'readwrite');
+      tx.objectStore('sessions').put(sessionData);
+    });
+    // Also cache in localStorage as fast fallback
+    try {
+      localStorage.setItem('pos_active_session', JSON.stringify(sessionData));
+    } catch(e) {}
+  };
+
+  window.getOfflineSession = function() {
+    try {
+      return JSON.parse(localStorage.getItem('pos_active_session') || 'null');
+    } catch(e) { return null; }
+  };
+
+  // ── 2. Offline Receipt Queue (IndexedDB) ──────────────────────────
+  window.queueOfflineReceipt = function(receiptData) {
+    var offlineId = 'OFF-' + Date.now() + '-' + Math.random().toString(36).substr(2,6);
+    var session = window.getOfflineSession();
+
+    var record = {
+      offline_id: offlineId,
+      session_id: receiptData.session_id || (session ? session.id : null),
+      terminal_id: receiptData.terminal_id || (session ? session.terminal_id : null) || _getPosConfig().terminal_id || null,
+      items: receiptData.items || [],
+      payment_method: receiptData.payment_method || 'CASH',
+      amount_paid: receiptData.amount_paid || 0,
+      tip_amount: receiptData.tip_amount || 0,
+      note: receiptData.note || '',
+      created_at: new Date().toISOString(),
+      synced: 0,
+      sync_error: '',
+      // Local receipt number
+      local_receipt_number: getNextLocalReceiptNumber(),
+      // Izracunati lokalni total
+      total: calculateTotal(receiptData.items || []),
+      change: 0,
+    };
+
+    record.change = Math.max(0, (record.amount_paid || record.total) - record.total);
+
+    openDB(function(db) {
+      var tx = db.transaction('receipts', 'readwrite');
+      tx.objectStore('receipts').put(record);
+      tx.oncomplete = function() {
+        updateOfflineBadge();
+        showPosToast('Bon #' + record.local_receipt_number + ' spremljen offline', 'info');
+      };
+    });
+
+    return record;
+  };
+
+  function getNextLocalReceiptNumber() {
+    var last = parseInt(localStorage.getItem('pos_offline_receipt_counter') || '0');
+    last++;
+    localStorage.setItem('pos_offline_receipt_counter', String(last));
+    return last;
+  }
+
+  function calculateTotal(items) {
+    var total = 0;
+    items.forEach(function(it) {
+      var price = parseFloat(it.unit_price || it.price || 0);
+      var qty = parseFloat(it.quantity || it.qty || 1);
+      var tax = parseFloat(it.tax_rate || it.tax || 25);
+      total += price * qty * (1 + tax / 100);
+    });
+    return Math.round(total * 100) / 100;
+  }
+
+  // ── 3. Offline Receipt Display ────────────────────────────────────
+  window.showOfflineReceipt = function(record) {
+    var session = window.getOfflineSession();
+    var companyName = session ? session.company_name : 'LIMIT Connect';
+    var terminalName = session ? session.terminal_name : 'POS';
+
+    var html = '<div style="font-family:monospace;max-width:300px;margin:auto;padding:20px;background:#fff;color:#000">';
+    html += '<div style="text-align:center;font-weight:bold;font-size:14px">' + companyName + '</div>';
+    html += '<div style="text-align:center;font-size:11px">' + terminalName + '</div>';
+    html += '<div style="text-align:center;font-size:10px;color:#888">OFFLINE BON</div>';
+    html += '<hr style="border:none;border-top:1px dashed #000">';
+    html += '<div style="font-size:11px">Bon #: OFF-' + record.local_receipt_number + '</div>';
+    html += '<div style="font-size:11px">Datum: ' + new Date(record.created_at).toLocaleString('hr') + '</div>';
+    html += '<hr style="border:none;border-top:1px dashed #000">';
+
+    (record.items || []).forEach(function(it) {
+      var name = it.name || it.description || 'Artikl';
+      var qty = it.quantity || it.qty || 1;
+      var price = parseFloat(it.unit_price || it.price || 0);
+      html += '<div style="display:flex;justify-content:space-between;font-size:11px">';
+      html += '<span>' + qty + 'x ' + name + '</span>';
+      html += '<span>' + (qty * price).toFixed(2) + '</span>';
+      html += '</div>';
+    });
+
+    html += '<hr style="border:none;border-top:1px dashed #000">';
+    html += '<div style="display:flex;justify-content:space-between;font-weight:bold">';
+    html += '<span>UKUPNO:</span><span>' + record.total.toFixed(2) + ' EUR</span></div>';
+
+    if (record.change > 0) {
+      html += '<div style="display:flex;justify-content:space-between;font-size:11px">';
+      html += '<span>Placeno:</span><span>' + record.amount_paid.toFixed(2) + ' EUR</span></div>';
+      html += '<div style="display:flex;justify-content:space-between;font-size:11px">';
+      html += '<span>Povrat:</span><span>' + record.change.toFixed(2) + ' EUR</span></div>';
+    }
+
+    html += '<div style="font-size:10px;color:#888;text-align:center;margin-top:10px">';
+    html += record.payment_method + ' | ' + record.offline_id;
+    // Country-aware offline clause
+    var session = window.getOfflineSession();
+    var isDE = session && (session.country === 'DE' || session.fiscal_system === 'de_gobd');
+    if (isDE) {
+      html += '<br><br><strong style="border:2px solid #000;padding:4px;display:block;text-align:center">*** TSE AUSGEFALLEN ***<br>Nacherfassung erfolgt automatisch<br>gem. KassenSichV §146a AO</strong>';
+    } else {
+      html += '<br>* Fiskalizacija ce biti izvrsena naknadno *';
+    }
+    html += '</div>';
+    html += '</div>';
+
+    // Open in new window for printing
+    var w = window.open('', '_blank', 'width=350,height=500');
+    if (w) {
+      w.document.write('<html><body>' + html + '<script>setTimeout(function(){window.print()},300)<\/script></body></html>');
+    }
+  };
+
+  // ── 4. Offline Cash Operations ────────────────────────────────────
+  window.queueOfflineCashOp = function(type, amount, note) {
+    var session = window.getOfflineSession();
+    var record = {
+      offline_id: 'CASH-' + Date.now(),
+      session_id: session ? session.id : null,
+      type: type, // 'deposit' or 'withdrawal'
+      amount: parseFloat(amount),
+      note: note || '',
+      created_at: new Date().toISOString(),
+    };
+
+    openDB(function(db) {
+      var tx = db.transaction('cash_ops', 'readwrite');
+      tx.objectStore('cash_ops').put(record);
+      tx.oncomplete = function() {
+        showPosToast(
+          (type === 'deposit' ? 'Polog' : 'Podizanje') + ' ' + amount + ' EUR spremljen offline',
+          'info'
+        );
+      };
+    });
+    return record;
+  };
+
+  // ── 5. Offline Shift Summary ──────────────────────────────────────
+  window.getOfflineShiftSummary = function(callback) {
+    openDB(function(db) {
+      var session = window.getOfflineSession();
+      if (!session) { callback(null); return; }
+
+      var tx = db.transaction(['receipts', 'cash_ops'], 'readonly');
+      var receipts = [];
+      var cashOps = [];
+
+      tx.objectStore('receipts').openCursor().onsuccess = function(e) {
+        var cursor = e.target.result;
+        if (cursor) {
+          if (cursor.value.session_id == session.id) {
+            receipts.push(cursor.value);
+          }
+          cursor.continue();
+        }
+      };
+
+      tx.objectStore('cash_ops').openCursor().onsuccess = function(e) {
+        var cursor = e.target.result;
+        if (cursor) {
+          if (cursor.value.session_id == session.id) {
+            cashOps.push(cursor.value);
+          }
+          cursor.continue();
+        }
+      };
+
+      tx.oncomplete = function() {
+        var totalSales = 0;
+        var cashSales = 0;
+        var cardSales = 0;
+        var receiptCount = 0;
+
+        receipts.forEach(function(r) {
+          totalSales += r.total || 0;
+          receiptCount++;
+          if (r.payment_method === 'CASH') cashSales += r.total || 0;
+          else cardSales += r.total || 0;
+        });
+
+        var deposits = 0, withdrawals = 0;
+        cashOps.forEach(function(op) {
+          if (op.type === 'deposit') deposits += op.amount;
+          else withdrawals += op.amount;
+        });
+
+        callback({
+          session_id: session.id,
+          terminal_name: session.terminal_name,
+          receipt_count: receiptCount,
+          total_sales: totalSales,
+          cash_sales: cashSales,
+          card_sales: cardSales,
+          deposits: deposits,
+          withdrawals: withdrawals,
+          opening_cash: session.opening_cash || 0,
+          expected_cash: (session.opening_cash || 0) + cashSales + deposits - withdrawals,
+          unsynced: receipts.filter(function(r) { return !r.synced; }).length,
+        });
+      };
+    });
+  };
+
+  // ── 6. Bulk Sync ──────────────────────────────────────────────────
+  window.syncOfflineData = function() {
+    if (!navigator.onLine) {
+      showPosToast('Nema veze — pokusajte kasnije', 'warning');
+      return;
+    }
+
+    openDB(function(db) {
+      var tx = db.transaction('receipts', 'readonly');
+      var unsynced = [];
+
+      tx.objectStore('receipts').index('synced').openCursor(IDBKeyRange.only(0)).onsuccess = function(e) {
+        var cursor = e.target.result;
+        if (cursor) {
+          unsynced.push(cursor.value);
+          cursor.continue();
+        }
+      };
+
+      tx.oncomplete = function() {
+        if (!unsynced.length) {
+          showPosToast('Sve je sinkronizirano!', 'success');
+          return;
+        }
+
+        showPosToast('Sinkroniziram ' + unsynced.length + ' bonova...', 'info');
+        var done = 0;
+        var errors = 0;
+
+        unsynced.forEach(function(receipt) {
+          var url = '/pos/session/' + receipt.session_id + '/quick-pay/';
+
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+            body: JSON.stringify({
+              session_id: receipt.session_id,
+              items: receipt.items,
+              payment_method: receipt.payment_method,
+              amount_paid: receipt.amount_paid,
+              tip_amount: receipt.tip_amount,
+              note: (receipt.note || '') + ' [OFFLINE:' + receipt.offline_id + ']',
+              client_ip: '',
+              client_ua: 'OFFLINE-SYNC',
+            })
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.ok) {
+              // Mark as synced in IndexedDB
+              var utx = db.transaction('receipts', 'readwrite');
+              var rec = receipt;
+              rec.synced = 1;
+              rec.server_receipt_id = data.receipt_id;
+              rec.server_receipt_number = data.receipt_number;
+              utx.objectStore('receipts').put(rec);
+              done++;
+            } else {
+              errors++;
+              // Store error
+              var etx = db.transaction('receipts', 'readwrite');
+              receipt.sync_error = data.error || 'Unknown';
+              etx.objectStore('receipts').put(receipt);
+            }
+
+            if (done + errors >= unsynced.length) {
+              updateOfflineBadge();
+              if (errors) {
+                showPosToast('Sinkronizirano ' + done + '/' + unsynced.length + ' (' + errors + ' gresaka)', 'warning');
+              } else {
+                showPosToast('Sinkronizirano ' + done + ' bonova!', 'success');
+              }
+            }
+          })
+          .catch(function(err) {
+            errors++;
+            console.error('Sync error:', receipt.offline_id, err);
+          });
+        });
+
+        // Sync cash operations too
+        var cashTx = db.transaction('cash_ops', 'readonly');
+        var cashOps = [];
+        cashTx.objectStore('cash_ops').openCursor().onsuccess = function(e) {
+          var c = e.target.result;
+          if (c) { cashOps.push(c.value); c.continue(); }
+        };
+        cashTx.oncomplete = function() {
+          cashOps.forEach(function(op) {
+            fetch('/pos/session/' + op.session_id + '/cash-deposit/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf() },
+              body: 'amount=' + op.amount + '&deposit_type=' + op.type + '&note=' + encodeURIComponent(op.note + ' [OFFLINE]'),
+            }).catch(function(err) { console.error('Cash sync error:', err); });
+          });
+        };
+      };
+    });
+  };
+
+  // ── 7. Offline Badge ──────────────────────────────────────────────
+  function updateOfflineBadge() {
+    openDB(function(db) {
+      var tx = db.transaction('receipts', 'readonly');
+      var count = 0;
+      tx.objectStore('receipts').index('synced').openCursor(IDBKeyRange.only(0)).onsuccess = function(e) {
+        var cursor = e.target.result;
+        if (cursor) { count++; cursor.continue(); }
+      };
+      tx.oncomplete = function() {
+        var badge = document.getElementById('offlineSyncBadge');
+        if (badge) {
+          badge.textContent = count ? count + ' offline' : '';
+          badge.style.display = count ? 'inline-block' : 'none';
+        }
+        // Also update old badge
+        var oldBadge = document.getElementById('offlineQueue');
+        if (oldBadge) {
+          oldBadge.textContent = count ? count + ' ceka sync' : '';
+        }
+      };
+    });
+  }
+
+  // ── Auto-sync on reconnect ────────────────────────────────────────
+  window.addEventListener('online', function() {
+    setTimeout(function() { window.syncOfflineData(); }, 3000);
+  });
+
+  // Init
+  openDB(function() { updateOfflineBadge(); });
+
+})();
+
+// ══════════════════════════════════════════════════════════════════════════
+// B-01 FIX: BroadcastChannel cross-tab sync + ServiceWorker registration
+// ══════════════════════════════════════════════════════════════════════════
+
+(function() {
+  'use strict';
+
+  // ── BroadcastChannel: cross-tab sync ────────────────────────────────
+  var channel = null;
+  try {
+    channel = new BroadcastChannel('pos_offline_sync');
+    channel.onmessage = function(e) {
+      if (e.data && e.data.type === 'RECEIPT_SYNCED') {
+        // Another tab synced a receipt — update our badge
+        updateOfflineBadge();
+        if (window.showPosToast) {
+          showPosToast('Bon #' + (e.data.receipt_number || '?') + ' sinkroniziran iz drugog taba', 'info');
+        }
+      }
+      if (e.data && e.data.type === 'RECEIPT_QUEUED') {
+        updateOfflineBadge();
+      }
+    };
+  } catch(e) {
+    // BroadcastChannel not supported — fallback to localStorage events
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'pos_offline_sync_trigger') {
+        updateOfflineBadge();
+      }
+    });
+  }
+
+  // Enhance queueOfflineReceipt to broadcast
+  var _origQueue = window.queueOfflineReceipt;
+  if (_origQueue) {
+    window.queueOfflineReceipt = function(receiptData) {
+      var result = _origQueue(receiptData);
+      if (channel) channel.postMessage({ type: 'RECEIPT_QUEUED', offline_id: result.offline_id });
+      try { localStorage.setItem('pos_offline_sync_trigger', Date.now()); } catch(e) {}
+      return result;
+    };
+  }
+
+  // Enhance syncOfflineData to broadcast after sync
+  var _origSync = window.syncOfflineData;
+  if (_origSync) {
+    window.syncOfflineData = function() {
+      _origSync();
+      // After sync, notify other tabs
+      setTimeout(function() {
+        if (channel) channel.postMessage({ type: 'RECEIPT_SYNCED' });
+        try { localStorage.setItem('pos_offline_sync_trigger', Date.now()); } catch(e) {}
+      }, 5000);
+    };
+  }
+
+  // ── ServiceWorker Registration ──────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/pos/sw.js', { scope: '/pos/' })
+      .then(function(reg) {
+        console.log('[POS] ServiceWorker registered, scope:', reg.scope);
+
+        // Listen for SW sync messages
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'SYNC_COMPLETE') {
+            updateOfflineBadge();
+            if (window.showPosToast) {
+              showPosToast('Offline bon sinkroniziran putem ServiceWorker-a!', 'success');
+            }
+            if (channel) channel.postMessage({ type: 'RECEIPT_SYNCED', receipt_id: e.data.receipt_id });
+          }
+        });
+      })
+      .catch(function(err) { console.warn('[POS] SW registration failed:', err); });
+
+    // Request background sync when offline receipt is queued
+    window.requestBackgroundSync = function() {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(function(reg) {
+          if (reg.sync) {
+            reg.sync.register('pos-offline-sync')
+              .then(function() { console.log('[POS] Background sync registered'); })
+              .catch(function() { console.log('[POS] Background sync not available'); });
+          }
+        });
+      }
+    };
+  }
+})();
+
+// ═══ TRIGGER_SYNC from ServiceWorker ═══════════════════════════════════
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+  navigator.serviceWorker.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'TRIGGER_SYNC') {
+      console.log('POS Offline: SW triggered sync');
+      if (window.syncOfflineData) window.syncOfflineData();
+    }
+  });
+}
+
+// ═══ Periodic sync every 2 minutes ═══════════════════════════════════
+setInterval(function() {
+  if (navigator.onLine && window.syncOfflineData) {
+    window.syncOfflineData();
+  }
+}, 2 * 60 * 1000);
+
+// ═══ CIS poruka na ispisu bona bez JIR-a ══════════════════════════════
+window._offlineFiscalNote = function(receipt) {
+  if (!receipt || receipt.jir) return '';
+  return '<div style="text-align:center;border:2px solid #000;padding:4px;margin:8px 0;' +
+    'font-size:.8rem;font-weight:bold">' +
+    'VEZA S CIS-om NIJE OSTVARENA<br>' +
+    '<small>Fiskalizacija u tijeku — ZKI: ' + (receipt.zki || 'LOKALNI') + '</small></div>';
+};
+
+
+/* ═══ OFFLINE CATALOG CACHE — artikli u IndexedDB ═══
+ *
+ * Pri svakom otvaranju POS-a:
+ *   1. Fetch /pos/api/offline-catalog/?terminal_id=X
+ *   2. Spremi artikle u IndexedDB store "catalog"
+ *   3. Spremi timestamp zadnjeg refresha
+ *
+ * Kad internet padne:
+ *   1. Čitaj artikle iz IndexedDB "catalog"
+ *   2. Renderaj grid iz JS-a (umjesto Django template)
+ *   3. Košarica, plaćanje, sve radi lokalno
+ *   4. Bonovi se spremaju u "receipts" store → sync kad se vrati net
+ */
+
+(function(){
+  'use strict';
+
+  var CATALOG_DB = 'pos_catalog_v1';
+  var CATALOG_VERSION = 2;
+
+  function openCatalogDB(cb) {
+    var req = indexedDB.open(CATALOG_DB, CATALOG_VERSION);
+    req.onupgradeneeded = function(e) {
+      var d = e.target.result;
+      if (!d.objectStoreNames.contains('items')) {
+        var store = d.createObjectStore('items', { keyPath: 'id' });
+        store.createIndex('category', 'category');
+        store.createIndex('barcode', 'barcode');
+        store.createIndex('sku', 'sku');
+      }
+      if (!d.objectStoreNames.contains('meta')) {
+        d.createObjectStore('meta', { keyPath: 'key' });
+      }
+    };
+    req.onsuccess = function(e) { cb(e.target.result); };
+    req.onerror = function(e) { console.error('CatalogDB error:', e); };
+  }
+
+  // Fetch + cache catalog from server
+  window.refreshOfflineCatalog = function(terminalId, callback) {
+    if (!terminalId) {
+      try { terminalId = JSON.parse(document.getElementById('pos-config').textContent).terminal_id; } catch(e) {}
+    }
+    if (!terminalId) { console.warn('No terminal_id for catalog'); return; }
+
+    fetch('/pos/api/offline-catalog/?terminal_id=' + terminalId, { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.ok) { console.warn('Catalog API error:', data.error); return; }
+
+        openCatalogDB(function(db) {
+          // Clear old items
+          var clearTx = db.transaction('items', 'readwrite');
+          clearTx.objectStore('items').clear();
+          clearTx.oncomplete = function() {
+            // Write new items
+            var writeTx = db.transaction(['items', 'meta'], 'readwrite');
+            var store = writeTx.objectStore('items');
+            data.items.forEach(function(item) { store.put(item); });
+
+            // Save metadata
+            var meta = writeTx.objectStore('meta');
+            meta.put({ key: 'last_refresh', value: new Date().toISOString() });
+            meta.put({ key: 'item_count', value: data.items.length });
+            meta.put({ key: 'categories', value: data.categories });
+            meta.put({ key: 'terminal', value: data.terminal });
+            meta.put({ key: 'session', value: data.session });
+            meta.put({ key: 'quick_actions', value: data.quick_actions });
+
+            writeTx.oncomplete = function() {
+              console.log('[Offline] Catalog cached: ' + data.items.length + ' items');
+              if (callback) callback(data);
+            };
+          };
+        });
+      })
+      .catch(function(err) {
+        console.warn('[Offline] Catalog fetch failed (offline?):', err.message);
+        if (callback) callback(null);
+      });
+  };
+
+  // Load catalog from IndexedDB (for offline grid rendering)
+  window.loadOfflineCatalog = function(callback) {
+    openCatalogDB(function(db) {
+      var tx = db.transaction(['items', 'meta'], 'readonly');
+      var items = [];
+      var meta = {};
+
+      tx.objectStore('items').openCursor().onsuccess = function(e) {
+        var c = e.target.result;
+        if (c) { items.push(c.value); c.continue(); }
+      };
+
+      // Read meta
+      ['last_refresh', 'categories', 'terminal', 'session', 'quick_actions', 'item_count'].forEach(function(key) {
+        tx.objectStore('meta').get(key).onsuccess = function(e) {
+          if (e.target.result) meta[key] = e.target.result.value;
+        };
+      });
+
+      tx.oncomplete = function() {
+        callback({ items: items, meta: meta });
+      };
+    });
+  };
+
+  // Render offline product grid (replaces Django template grid)
+  window.renderOfflineGrid = function(items, gridId) {
+    var grid = document.getElementById(gridId || 'prodGrid');
+    if (!grid) return;
+
+    if (!items || items.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">⚡ Offline — nema cached artikala</div>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    items.forEach(function(item) {
+      var btn = document.createElement('button');
+      btn.className = 'prod-btn';
+      btn.id = 'pb-' + item.id;
+      btn.dataset.id = item.id;
+      btn.dataset.name = item.name;
+      btn.dataset.price = item.price;
+      btn.dataset.tax = item.tax_rate;
+      btn.dataset.cat = item.category || '';
+      btn.dataset.weighable = item.is_weighable ? '1' : '0';
+      btn.dataset.unit = item.unit || 'kom';
+      btn.dataset.sku = item.sku || '';
+      btn.title = item.name + ' – €' + parseFloat(item.price).toFixed(2);
+      btn.setAttribute('onclick', 'addProduct(this)');
+      btn.innerHTML = '<div class="prod-name">' + item.name + '</div>' +
+                       '<div class="prod-price">€' + parseFloat(item.price).toFixed(2) + '</div>' +
+                       (item.sku ? '<div class="prod-sku">' + item.sku + '</div>' : '') +
+                       '<div class="prod-qty-badge" id="qb-' + item.id + '">0</div>';
+      grid.appendChild(btn);
+    });
+
+    // Rebuild category tabs from offline data
+    var catBar = document.querySelector('.cat-bar');
+    if (catBar) {
+      var cats = {};
+      items.forEach(function(i) { if (i.category) cats[i.category] = true; });
+      var existing = catBar.querySelectorAll('.cat-tab:not([data-cat=""])');
+      if (Object.keys(cats).length > 0 && existing.length === 0) {
+        Object.keys(cats).sort().forEach(function(cat) {
+          var tab = document.createElement('div');
+          tab.className = 'cat-tab';
+          tab.dataset.cat = cat;
+          tab.textContent = cat;
+          tab.setAttribute('onclick', "filterCat(this,'" + cat.replace(/'/g, "\\'") + "')");
+          catBar.appendChild(tab);
+        });
+      }
+    }
+
+    console.log('[Offline] Grid rendered: ' + items.length + ' items from IndexedDB');
+  };
+
+  // ── AUTO-INIT: Cache catalog on page load ──
+  document.addEventListener('DOMContentLoaded', function() {
+    var config;
+    try { config = JSON.parse(document.getElementById('pos-config').textContent); } catch(e) { return; }
+    if (!config || !config.terminal_id) return;
+
+    if (navigator.onLine) {
+      // Online: refresh cache u pozadini (ne blokira UI)
+      setTimeout(function() {
+        window.refreshOfflineCatalog(config.terminal_id);
+      }, 2000);
+    } else {
+      // Offline: renderaj grid iz IndexedDB
+      window.loadOfflineCatalog(function(data) {
+        if (data.items.length > 0) {
+          window.renderOfflineGrid(data.items);
+          // Show offline banner
+          var banner = document.getElementById('offlineBanner');
+          if (banner) {
+            banner.classList.add('show');
+            banner.innerHTML = '📡 OFFLINE MODE — ' + data.items.length + ' artikala iz cache-a' +
+              (data.meta.last_refresh ? ' (ažurirano: ' + new Date(data.meta.last_refresh).toLocaleString('hr') + ')' : '');
+          }
+        }
+      });
+    }
+
+    // Kad se vrati internet — osvježi catalog
+    window.addEventListener('online', function() {
+      setTimeout(function() {
+        window.refreshOfflineCatalog(config.terminal_id, function() {
+          // Reload grid s fresh podacima
+          location.reload();
+        });
+      }, 3000);
+    });
+  });
+
+})();

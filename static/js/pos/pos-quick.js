@@ -1,0 +1,1128 @@
+/* ═══ POS Quick — Basket, Payment, Delivery, Cashier, Tips ═══
+ * Extracted from quick.html main inline script
+ * Reads config from #pos-config JSON block
+ */
+(function(){
+  var cfg = {};
+  try { cfg = JSON.parse(document.getElementById('pos-config').textContent); } catch(e){}
+
+  var SESSION_ID = cfg.session_id || null;
+  var CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+  var LANG_PREFIX = (window.location.pathname.match(/^\/([a-z]{2})\//) || ['',''])[1];
+  var API_BASE = LANG_PREFIX ? '/' + LANG_PREFIX : '';
+  var defaultCashierName = cfg.default_cashier || '';
+
+  var currentCat = '';
+  var currentQ   = '';
+
+  window.filterCat = function(el, cat) {
+    currentCat = cat;
+    document.querySelectorAll('.cat-tab').forEach(function(t){ t.classList.remove('active'); });
+    el.classList.add('active');
+    buildQuickKeys(cat);
+    applyFilter();
+  };
+
+  window.filterProducts = function(q) {
+    currentQ = q.toLowerCase();
+    applyFilter();
+    // AJAX fallback: if client-side finds < 2 results and query > 2 chars, search API
+    if (currentQ.length >= 2) {
+      clearTimeout(window._searchTimer);
+      window._searchTimer = setTimeout(function() {
+        var visible = document.querySelectorAll('.prod-btn[style=""], .prod-btn:not([style])');
+        var localCount = 0;
+        document.querySelectorAll('.prod-btn').forEach(function(b) {
+          if (b.style.display !== 'none') localCount++;
+        });
+        if (localCount < 3) _ajaxSearch(currentQ);
+      }, 400);
+    }
+  };
+
+  function applyFilter() {
+    // Remove any previous AJAX result buttons
+    document.querySelectorAll('.prod-btn-ajax').forEach(function(b) { b.remove(); });
+    document.querySelectorAll('.prod-btn').forEach(function(btn) {
+      var name = btn.dataset.name.toLowerCase();
+      var sku = (btn.dataset.sku || '').toLowerCase();
+      var cat  = btn.dataset.cat;
+      var matchCat = !currentCat || cat === currentCat;
+      var matchQ   = !currentQ || name.includes(currentQ) || sku.includes(currentQ);
+      btn.style.display = (matchCat && matchQ) ? '' : 'none';
+    });
+  }
+
+  function _ajaxSearch(q) {
+    var tid = typeof TERMINAL_ID !== 'undefined' ? TERMINAL_ID : '';
+    fetch('/pos/api/item-search/?q=' + encodeURIComponent(q) + '&terminal_id=' + tid + '&limit=20')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.items || !data.items.length) return;
+        // Remove old AJAX buttons
+        document.querySelectorAll('.prod-btn-ajax').forEach(function(b) { b.remove(); });
+        var grid = document.getElementById('productGrid') || document.querySelector('.product-grid');
+        if (!grid) return;
+        var existingIds = new Set();
+        document.querySelectorAll('.prod-btn').forEach(function(b) { existingIds.add(b.dataset.id); });
+        data.items.forEach(function(item) {
+          if (existingIds.has(String(item.id))) return; // skip if already in DOM
+          var btn = document.createElement('button');
+          btn.className = 'prod-btn prod-btn-ajax';
+          btn.dataset.id = item.id;
+          btn.dataset.name = item.name;
+          btn.dataset.price = item.price || 0;
+          btn.dataset.tax = item.tax_rate || 25;
+          btn.dataset.sku = item.sku || '';
+          btn.dataset.cat = item.category || '';
+          btn.onclick = function() { addProduct(this); };
+          btn.innerHTML = '<div class="prod-name">' + item.name + '</div>' +
+            '<div class="prod-price">' + parseFloat(item.price || 0).toFixed(2) + ' \u20ac</div>';
+          btn.style.borderLeft = '3px solid #22c55e'; // visual hint: from search
+          grid.appendChild(btn);
+        });
+      })
+      .catch(function() {}); // silent fail
+  }
+
+  var basket = {};
+  // ── Cart Persistence (localStorage) ──
+  var _cartKey = 'pos_cart_' + (SESSION_ID || 'default');
+  function _saveCart() {
+    try { localStorage.setItem(_cartKey, JSON.stringify(basket)); } catch(e){}
+  }
+  function _restoreCart() {
+    try {
+      var saved = localStorage.getItem(_cartKey);
+      if (saved) { basket = JSON.parse(saved); renderBasket(); }
+    } catch(e){}
+  }
+  function _clearSavedCart() {
+    basket = {};  // Sprint 6: Clear in-memory basket too
+    try { localStorage.removeItem(_cartKey); } catch(e){}
+    renderBasket();  // Re-render empty basket
+  }
+  var lastReceiptUrl = '';
+  var lastReceiptId = null; window.lastReceiptId = null;
+  var _weighBtn = null;
+
+  window.addProduct = function(btn, programmatic) {
+    // Ripple animacija — samo kod user-klika (event postoji)
+    if (!programmatic && typeof event !== 'undefined' && event && event.clientX) {
+      var rect = btn.getBoundingClientRect();
+      var rip  = document.createElement('div');
+      rip.className = 'ripple';
+      rip.style.left = (event.clientX - rect.left) + 'px';
+      rip.style.top  = (event.clientY - rect.top)  + 'px';
+      btn.appendChild(rip);
+      setTimeout(function(){ rip.remove(); }, 400);
+    }
+
+    if (btn.dataset.weighable === '1') {
+      _weighBtn = btn;
+      document.getElementById('weightProductName').textContent = btn.dataset.name;
+      document.getElementById('weightUnit').textContent = btn.dataset.unit || 'kg';
+      var wi = document.getElementById('weightInput');
+      wi.value = '';
+      document.getElementById('weightModal').classList.add('show');
+      setTimeout(function(){ wi.focus(); }, 80);
+      return;
+    }
+
+    var id    = btn.dataset.id;
+    var name  = btn.dataset.name;
+    var price = parseFloat(btn.dataset.price);
+    var tax   = parseFloat(btn.dataset.tax);
+
+    if (navigator.vibrate) navigator.vibrate(10);
+    var sku = btn.dataset.sku || '';
+    if (basket[id]) { basket[id].qty += 1; }
+    else { basket[id] = { name: name, price: price, tax: tax, qty: 1, sku: sku }; }
+    updateQtyBadge(id);
+    renderBasket();
+  };
+
+  window.confirmWeight = function() {
+    var qty = parseFloat(document.getElementById('weightInput').value);
+    if (!qty || qty <= 0) { fenixToast('Unesite ispravnu količinu', 'warning'); return; }
+    var btn = _weighBtn;
+    var id = btn.dataset.id;
+    var key = id + '_w' + Date.now();
+    basket[key] = { name: btn.dataset.name, price: parseFloat(btn.dataset.price), tax: parseFloat(btn.dataset.tax), qty: parseFloat(qty.toFixed(3)), item_id: id };
+    document.getElementById('weightModal').classList.remove('show');
+    _weighBtn = null;
+    renderBasket();
+  };
+
+  window.cancelWeight = function() {
+    document.getElementById('weightModal').classList.remove('show');
+    _weighBtn = null;
+  };
+
+  function updateQtyBadge(id) {
+    var badge = document.getElementById('qb-' + id);
+    if (!badge) return;
+    var qty = basket[id] ? basket[id].qty : 0;
+    badge.textContent = qty;
+    badge.classList.toggle('show', qty > 0);
+  }
+
+  window.changeQty = function(id, delta, absVal) {
+    if (!basket[id]) return;
+    if (typeof absVal === 'number') { basket[id].qty = absVal; }
+    else { basket[id].qty += delta; }
+    if (basket[id].qty <= 0) delete basket[id];
+    updateQtyBadge(id);
+    updateQkBadge(id);
+    renderBasket();
+  };
+
+  window.removeItem = function(id) {
+    delete basket[id];
+    updateQtyBadge(id);
+    updateQkBadge(id);
+    renderBasket();
+  };
+
+  function renderBasket() {
+    var list = document.getElementById('basketList');
+    var ids  = Object.keys(basket);
+    if (!ids.length) {
+      list.innerHTML = '<div class="basket-empty">Dodajte artiklе klikom ↑</div>';
+      setTotals(0, 0, 0);
+      setPayEnabled(false);
+      updateAiSuggestions();
+      return;
+    }
+    var subtotal = 0, tax = 0;
+    list.innerHTML = ids.map(function(id) {
+      var item = basket[id];
+      var line = item.price * item.qty;
+      var taxAmt = line * item.tax / 100;
+      subtotal += line;
+      tax += taxAmt;
+      var metaLine = (item.sku ? item.sku + ' · ' : '') + '€' + item.price.toFixed(2) + '/kom';
+      return '<div class="b-row" data-item-id="' + id + '">' +
+        '<div class="b-info">' +
+        '<div class="b-name" title="' + item.name + '">' + item.name + '</div>' +
+        '<div class="b-meta">' + metaLine + '</div>' +
+        '</div>' +
+        '<div class="b-qty-ctrl">' +
+        '<button class="bq-btn" onclick="changeQty(\'' + id + '\',-1)">−</button>' +
+        '<span class="b-qty">' + item.qty + '</span>' +
+        '<button class="bq-btn" onclick="changeQty(\'' + id + '\',1)">+</button>' +
+        '</div>' +
+        '<div class="b-price">€' + (item.price * item.qty).toFixed(2) + '</div>' +
+        '<div class="swipe-delete" onclick="removeItem(\'' + id + '\')">Obriši</div></div>';
+    }).join('');
+    setTotals(subtotal, tax, subtotal + tax);
+    setPayEnabled(true);
+    calcChange();
+    updateAiSuggestions();
+    // Sprint 6: Auto-scroll basket to show latest item
+    var basketItems = document.querySelector('.basket-items');
+    if (basketItems) {
+      setTimeout(function() { basketItems.scrollTop = basketItems.scrollHeight; }, 50);
+    }
+  }
+
+  function setTotals(neto, pdv, total) {
+    document.getElementById('tNeto').textContent  = '€' + neto.toFixed(2);
+    document.getElementById('tPdv').textContent   = '€' + pdv.toFixed(2);
+    document.getElementById('tTotal').textContent = '€' + total.toFixed(2);
+    window._total = total;
+  }
+
+  function setPayEnabled(en) {
+    document.getElementById('payCash').disabled = !en;
+    document.getElementById('payCard').disabled = !en;
+    try { document.getElementById('payRevolut').disabled = !en; } catch(e) {}
+    document.getElementById('payBon').disabled = !en;
+    try { document.getElementById('tipToggleBtn').disabled = !en; } catch(e){}
+    try { document.getElementById('pfandBtn').disabled = !en; } catch(e){}
+    try {
+      var st = document.querySelector('#splitToggle button');
+      if (st) { st.disabled = !en; st.style.opacity = en ? '1' : '0.4'; }
+    } catch(e){}
+    var hint = document.getElementById('cashierHint');
+    if (hint) hint.classList.remove('show');
+  }
+
+  window.clearBasket = function() {
+    document.querySelectorAll('.prod-qty-badge').forEach(function(b){ b.textContent='0'; b.classList.remove('show'); });
+    document.querySelectorAll('.qk-badge').forEach(function(b){ b.textContent='0'; b.classList.remove('show'); });
+    basket = {};
+    renderBasket();
+    // Auto-collapse drawer na mobilnom nakon naplate
+    var drawer = document.querySelector('.qp-right');
+    if (drawer) { drawer.classList.remove('peek', 'full'); }
+  };
+
+  window.setExact = function() { document.getElementById('cashAmt').value = (window._total || 0).toFixed(2); calcChange(); };
+  window.addCash = function(n) { var cur = parseFloat(document.getElementById('cashAmt').value) || 0; document.getElementById('cashAmt').value = (cur + n).toFixed(2); calcChange(); };
+  window.setCash = function(n) {
+    if (n === 0) { document.getElementById('cashAmt').value = ''; calcChange(); document.getElementById('cashAmt').focus(); return; }
+    document.getElementById('cashAmt').value = n.toFixed(2); calcChange();
+  };
+  window.calcChange = calcChange;
+  function calcChange() {
+    var paid = parseFloat(document.getElementById('cashAmt').value) || 0;
+    var total = window._total || 0;
+    var change = Math.max(0, paid - total);
+    var row = document.getElementById('changeRow');
+    document.getElementById('changeVal').textContent = '€' + change.toFixed(2);
+    row.classList.toggle('show', paid > total + 0.001);
+  }
+
+  window.pay = function(method) {
+    if (navigator.vibrate) navigator.vibrate(10);
+    try { if (window.event) window.event.stopPropagation(); } catch(e) {}
+    if (!SESSION_ID) { fenixToast('Nema aktivne smjene!', 'warning'); return; }
+    var ids = Object.keys(basket);
+    if (!ids.length) return;
+    var btn = document.getElementById(method === 'CASH' ? 'payCash' : 'payCard');
+    if (btn.dataset.submitting === '1') return;
+    btn.dataset.submitting = '1'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    var amtPaid = method === 'CASH' ? (parseFloat(document.getElementById('cashAmt').value) || window._total) : window._total;
+    var items = buildItemsPayload();
+    var _ctrl = new AbortController();
+    var _timeout = setTimeout(function(){ _ctrl.abort(); }, 15000); // 15s timeout
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', {
+      method: 'POST', credentials: 'same-origin', signal: _ctrl.signal,
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ items: items, method: method, amount_paid: amtPaid, tip_amount: window._tip || 0, cashier: window._currentCashier || '', cashier_id: window._currentCashierId || '' }),
+    })
+    .then(function(res){ return res.text().then(function(text){ return {res:res, text:text}; }); })
+    .then(function(result) {
+      var data;
+      try { data = JSON.parse(result.text); } catch(e) {
+        if (result.text.includes('login') || result.res.status === 302) { window.location.reload(); } else { window.fenixNetworkError('Greška servera', result.res.status ); }
+        return;
+      }
+      if (data.ok) {
+        lastReceiptUrl = data.print_url || ''; lastReceiptId = data.receipt_id || null; window.lastReceiptId = lastReceiptId;
+        window._publicUrl = data.public_url || null;
+        var change = method === 'CASH' ? Math.max(0, amtPaid - parseFloat(data.total)) : 0;
+        showSuccess(data.receipt_number, data.total, change);
+        clearBasket();
+      } else { window.fenixNetworkError('Greška mreže', (data.error || 'nepoznata')); }
+    })
+    .catch(function(e) {
+      clearTimeout(_timeout);
+      btn.disabled = false; btn.dataset.submitting = '0'; btn.textContent = _btnLabels[method] || 'Naplati';
+      if (e.name === 'AbortError') {
+        // Server timeout — offer offline mode
+        if (window.showToast) showToast('Server ne odgovara (15s). Pokušajte ponovo ili koristite offline mode.');
+        if (window.queueOfflineReceipt) {
+          var offRec = window.queueOfflineReceipt({session_id:SESSION_ID,items:items,payment_method:method,amount_paid:amtPaid,tip_amount:window._tip||0,note:window._currentCashier||'',cashier_id:window._currentCashierId||''});
+          if (offRec) { showSuccess('OFF-'+offRec.local_receipt_number,offRec.total,offRec.change); clearBasket(); }
+        }
+        return;
+      }
+      if (!navigator.onLine && window.queueOfflineReceipt) {
+        var offRec = window.queueOfflineReceipt({
+          session_id: SESSION_ID,
+          items: items,
+          payment_method: method,
+          amount_paid: amtPaid,
+          tip_amount: window._tip || 0,
+          note: window._currentCashier || '',
+          cashier_id: window._currentCashierId || '',
+        });
+        showSuccess('OFF-' + offRec.local_receipt_number, offRec.total.toFixed(2), offRec.change.toFixed(2));
+        clearBasket();
+        // Show printable offline receipt
+        if (window.showOfflineReceipt) window.showOfflineReceipt(offRec);
+      } else if (!navigator.onLine && window.queueOfflineSale) {
+        window.queueOfflineSale({ _url: API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', items: items, method: method, amount_paid: amtPaid, tip_amount: window._tip || 0, cashier: window._currentCashier || '', cashier_id: window._currentCashierId || '' });
+        showSuccess('OFF', parseFloat(window._total).toFixed(2), 0);
+        clearBasket();
+      } else { fenixToast('Nema veze. Pokusajte ponovo.', 'warning'); }
+    })
+    .finally(function() { btn.dataset.submitting = ''; btn.disabled = false; btn.innerHTML = method === 'CASH' ? '💵 GOTOVINA' : '💳 KARTICA'; });
+  };
+
+  function showSuccess(num, total, change) {
+    if (navigator.vibrate) navigator.vibrate([20, 80, 20, 80, 40]);
+      _clearSavedCart();
+    document.getElementById('sucTotal').textContent  = '€' + parseFloat(total).toFixed(2);
+    document.getElementById('sucChange').textContent = change > 0.001 ? 'Kusur: €' + change.toFixed(2) : '';
+    document.getElementById('sucNum').textContent    = 'Bon #' + num;
+    document.getElementById('successOverlay').classList.add('show');
+  }
+  window.closeSuccess = function() {
+    document.getElementById('successOverlay').classList.remove('show');
+    document.getElementById('deliveryExtra').style.display = 'none';
+    document.getElementById('cashAmt').value = '';
+    document.getElementById('changeRow').classList.remove('show');
+  };
+  window.printLast = function() { if (lastReceiptUrl) window.open(lastReceiptUrl, '_blank'); };
+
+  window.sendWhatsApp = function() {
+    if (!lastReceiptId) return;
+    var extra = document.getElementById('deliveryExtra');
+    extra.style.display = 'block';
+    extra.innerHTML = '<div style="text-align:center;margin-bottom:.75rem;color:var(--gold);font-weight:600">WhatsApp racun</div><input id="waPhone" type="tel" placeholder="+385 9x xxx xxxx" style="width:100%;padding:.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem;text-align:center;margin-bottom:.5rem"><button onclick="doSendWhatsApp()" style="width:100%;padding:.6rem;background:#25d366;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">Posalji na WhatsApp</button>';
+    document.getElementById('waPhone').focus();
+  };
+  window.doSendWhatsApp = function() {
+    var phone = document.getElementById('waPhone').value.trim();
+    if (!phone || phone.length < 8) { showPosToast('Unesite ispravan broj', 'warning'); return; }
+    event.target.disabled = true; event.target.textContent = 'Otvaram...';
+    fetch(API_BASE + '/pos/receipt/' + lastReceiptId + '/whatsapp/', { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF}, body: 'phone=' + encodeURIComponent(phone) })
+    .then(function(r){ return r.json(); }).then(function(d) {
+      if (d.wa_url) { window.open(d.wa_url, '_blank'); document.getElementById('deliveryExtra').innerHTML = '<div style="text-align:center;color:var(--green)">Poslano!</div>'; }
+      else { document.getElementById('deliveryExtra').innerHTML = '<div style="text-align:center;color:#ef4444">' + (d.error || 'Greska') + '</div>'; }
+    }).catch(function(e) { document.getElementById('deliveryExtra').innerHTML = '<div style="text-align:center;color:#ef4444">Greska: ' + e + '</div>'; });
+  };
+  window.sendEmail = function() {
+    if (!lastReceiptId) return;
+    var extra = document.getElementById('deliveryExtra');
+    extra.style.display = 'block';
+    extra.innerHTML = '<div style="text-align:center;margin-bottom:.75rem;color:var(--gold);font-weight:600">Email racun</div><input id="emailAddr" type="email" placeholder="gost@email.com" style="width:100%;padding:.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem;text-align:center;margin-bottom:.5rem"><button onclick="doSendEmail()" style="width:100%;padding:.6rem;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">Posalji PDF na email</button>';
+    document.getElementById('emailAddr').focus();
+  };
+  window.doSendEmail = function() {
+    var email = document.getElementById('emailAddr').value.trim();
+    if (!email || email.indexOf('@') < 0) { showPosToast('Unesite ispravnu email adresu', 'warning'); return; }
+    event.target.disabled = true; event.target.textContent = 'Saljem...';
+    fetch(API_BASE + '/pos/receipt/' + lastReceiptId + '/email/', { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF}, body: 'email=' + encodeURIComponent(email) })
+    .then(function(r){ return r.json(); }).then(function(d) {
+      if (d.ok) { document.getElementById('deliveryExtra').innerHTML = '<div style="text-align:center;color:var(--green)">Racun poslan na ' + d.sent_to + '!</div>'; showPosToast('Poslan na ' + d.sent_to, 'success'); }
+      else { document.getElementById('deliveryExtra').innerHTML = '<div style="text-align:center;color:#ef4444">' + (d.error || 'Greska') + '</div>'; }
+    }).catch(function(e) { document.getElementById('deliveryExtra').innerHTML = '<div style="text-align:center;color:#ef4444">Greska: ' + e + '</div>'; });
+  };
+  window.showQR = function() {
+    if (!lastReceiptId) return;
+    var extra = document.getElementById('deliveryExtra');
+    var url = window.location.origin + (window._publicUrl || '/pos/r/' + lastReceiptId + '/');
+    extra.style.display = 'block';
+    extra.innerHTML = '<div style="text-align:center"><div style="color:var(--gold);font-weight:600;margin-bottom:.5rem">BEZ PAPIRA — Gost skenira</div><div style="background:#fff;display:inline-block;padding:12px;border-radius:12px"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url) + '" style="width:180px;height:180px"></div><div style="color:var(--muted);font-size:.75rem;margin-top:.5rem">Gost skenira QR → racun na mobitelu</div></div>';
+  };
+
+  window._tip = 0;
+  window._currentCashier = '';
+  window._currentCashierId = null;
+
+  window.toggleTip = function() { var row = document.getElementById("tipRow"); var btn = document.getElementById("tipToggleBtn"); var hidden = row.classList.toggle("hidden"); btn.classList.toggle("active", !hidden); if (hidden) clearTip(); };
+  window.setTipPct = function(pct) { document.querySelectorAll(".tip-pct-btn").forEach(function(b){ b.classList.remove("active"); }); if (event && event.target) event.target.classList.add("active"); document.getElementById("tipCustom").value = ""; window._tip = Math.round((window._total || 0) * pct / 100 * 100) / 100; updateTipDisplay(); };
+  window.setTipCustom = function(val) { document.querySelectorAll(".tip-pct-btn").forEach(function(b){ b.classList.remove("active"); }); window._tip = Math.max(0, parseFloat(val) || 0); updateTipDisplay(); };
+  function updateTipDisplay() { var el = document.getElementById("tipVal"); if (window._tip > 0) { el.textContent = "+ €" + window._tip.toFixed(2); } else { el.textContent = ""; } }
+  function clearTip() { window._tip = 0; document.querySelectorAll(".tip-pct-btn").forEach(function(b){ b.classList.remove("active"); }); document.getElementById("tipCustom").value = ""; updateTipDisplay(); }
+
+  window.addPfandReturn = function(id, name, price) {
+    var key = "pfand_" + id;
+    if (basket[key]) { basket[key].qty++; }
+    else { basket[key] = { id: String(id), name: "↩ POVRAT: " + name, price: -Math.abs(parseFloat(price)), tax: 0, qty: 1, is_pfand_return: true }; }
+    renderBasket();
+    if (typeof closePfandModal === 'function') closePfandModal();
+  };
+
+  var _voucherData = null;
+  window.openVoucherModal = function() {
+    document.getElementById("voucherModal").classList.add("show");
+    document.getElementById("voucherCodeInput").value = "";
+    document.getElementById("voucherInfo").textContent = "";
+    var splitEl = document.getElementById("voucherAmountInput"); if (splitEl) splitEl.value = "";
+    document.getElementById("voucherPayBtn").style.display = "none";
+    document.getElementById("voucherCheckBtn").style.display = "";
+    document.getElementById("voucherSplitSection").style.display = "none";
+    _voucherData = null;
+    setTimeout(function(){ document.getElementById("voucherCodeInput").focus(); }, 100);
+  };
+  window.closeVoucherModal = function() { document.getElementById("voucherModal").classList.remove("show"); };
+  window.checkVoucher = function() {
+    var code = document.getElementById("voucherCodeInput").value.trim(); if (!code) return;
+    var info = document.getElementById("voucherInfo"); info.textContent = "Provjera...";
+    fetch(API_BASE + "/pos/api/voucher/check/?code=" + encodeURIComponent(code))
+    .then(function(r){ return r.json(); }).then(function(data) {
+      if (data.ok && data.is_usable) {
+        var rem = parseFloat(data.remaining); var total = window._total || 0; _voucherData = data;
+        info.style.color = "var(--green)"; info.textContent = "Vaucer " + data.code + ": " + rem.toFixed(2) + " € preostalo";
+        document.getElementById("voucherPayBtn").style.display = ""; document.getElementById("voucherCheckBtn").style.display = "none";
+        if (rem < total - 0.001) { document.getElementById("voucherSplitSection").style.display = ""; document.getElementById("voucherAmountInput").value = rem.toFixed(2); }
+        else { document.getElementById("voucherSplitSection").style.display = "none"; }
+      } else {
+        _voucherData = null; info.style.color = "var(--red)";
+        if (data.is_expired) info.textContent = "Vaucer je istekao.";
+        else if (!data.is_active) info.textContent = "Vaucer je vec iskoristen.";
+        else info.textContent = data.error || "Vaucer nije pronaden.";
+      }
+    }).catch(function() { info.style.color = "var(--red)"; info.textContent = "Greska veze."; });
+  };
+
+  function buildItemsPayload() {
+    return Object.entries(basket).map(function(entry) {
+      var id = entry[0], item = entry[1];
+      var obj = { id: item.id || id, name: item.name, price: item.price, tax: item.tax, qty: item.qty };
+      if (item.is_pfand_return) obj.is_pfand_return = true;
+      return obj;
+    });
+  }
+
+  window.payWithVoucher = function() {
+    if (!_voucherData) return;
+    var code = _voucherData.code; var rem = parseFloat(_voucherData.remaining); var total = window._total || 0;
+    var splitSection = document.getElementById("voucherSplitSection"); var splitEl = document.getElementById("voucherAmountInput");
+    var voucherAmt = (splitSection.style.display !== "none" && splitEl) ? (parseFloat(splitEl.value) || rem) : Math.min(rem, total);
+    closeVoucherModal();
+    var btn = document.getElementById("payBon"); if (btn.dataset.submitting === "1") return;
+    btn.dataset.submitting = "1"; btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    fetch(API_BASE + "/pos/session/" + SESSION_ID + "/quick-pay/", {
+      method: "POST", headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+      body: JSON.stringify({ items: buildItemsPayload(), method: "VOUCHER", amount_paid: total, voucher_code: code, voucher_amount: voucherAmt, remainder_method: "CASH", tip_amount: window._tip || 0, cashier: window._currentCashier || "", cashier_id: window._currentCashierId || "" }),
+    })
+    .then(function(r){ return r.text(); }).then(function(vtxt) {
+      var data; try { data = JSON.parse(vtxt); } catch(e) { window.location.reload(); return; }
+      if (data.ok) { lastReceiptUrl = data.print_url || ""; lastReceiptId = data.receipt_id || null; window.lastReceiptId = lastReceiptId; window._publicUrl = data.public_url || null; showSuccess(data.receipt_number, data.total, 0); clearBasket(); clearTip(); }
+      else { fenixToast("Greska: " + (data.error || "nepoznata", 'error')); }
+    }).catch(function() { fenixToast("Greska veze.", 'error'); })
+    .finally(function() { btn.dataset.submitting = ""; btn.disabled = false; btn.innerHTML = "🎫 BON"; });
+  };
+
+  (function posClock(){
+    var DAYS=['Ned','Pon','Uto','Sri','Čet','Pet','Sub'];
+    var MONTHS=['Sij','Vel','Ožu','Tra','Svi','Lip','Srp','Kol','Ruj','Lis','Stu','Pro'];
+    function tick(){
+      var now=new Date(); var h=String(now.getHours()).padStart(2,'0'); var m=String(now.getMinutes()).padStart(2,'0'); var s=String(now.getSeconds()).padStart(2,'0');
+      var el=document.getElementById('pos-clock'); if(el) el.textContent=h+':'+m+':'+s;
+      var de=document.getElementById('pos-date'); if(de) de.textContent=DAYS[now.getDay()]+' '+now.getDate()+'. '+MONTHS[now.getMonth()]+'.';
+    }
+    tick(); setInterval(tick, 1000);
+  })();
+
+  (function(){
+    var btns = document.querySelectorAll('.cashier-btn');
+    if (btns.length === 1 && btns[0].dataset.hasPin !== '1') { selectCashier(btns[0], btns[0].dataset.name, btns[0].dataset.id); }
+    if (btns.length === 0) { window._currentCashier = defaultCashierName; window._currentCashierId = 'user'; setPayEnabled(Object.keys(basket).length > 0); }
+  })();
+
+  var _pinTarget = null, _pinBuffer = '';
+  window.onCashierClick = function(btn) {
+    if (btn.dataset.hasPin === '1') { _pinTarget = btn; _pinBuffer = ''; document.getElementById('pinDots').textContent = ''; document.getElementById('pinModalTitle').textContent = '🔐 PIN — ' + btn.dataset.name; document.getElementById('pinModal').classList.add('show'); }
+    else { selectCashier(btn, btn.dataset.name, btn.dataset.id); }
+  };
+  window.pinKey = function(k) {
+    if (k === 'clear') { _pinBuffer = _pinBuffer.slice(0, -1); }
+    else if (k === 'ok') { verifyPin(); return; }
+    else { if (_pinBuffer.length >= 8) return; _pinBuffer += k; }
+    document.getElementById('pinDots').textContent = '●'.repeat(_pinBuffer.length);
+    if (_pinBuffer.length === 4) setTimeout(verifyPin, 150);
+  };
+  function verifyPin() {
+    if (!_pinBuffer || !_pinTarget) return;
+    fetch(API_BASE + '/pos/api/cashier/verify-pin/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF }, body: JSON.stringify({ cashier_id: _pinTarget.dataset.id, pin: _pinBuffer }) })
+    .then(function(r){ return r.json(); }).then(function(data) {
+      if (data.ok) { selectCashier(_pinTarget, _pinTarget.dataset.name, _pinTarget.dataset.id); closePinModal(); }
+      else { document.getElementById('pinDots').textContent = '❌ Pogrešan PIN'; _pinBuffer = ''; setTimeout(function(){ document.getElementById('pinDots').textContent = ''; }, 1200); }
+    }).catch(function() { closePinModal(); });
+  }
+  window.closePinModal = function() { document.getElementById('pinModal').classList.remove('show'); _pinTarget = null; _pinBuffer = ''; };
+
+  window.openShiftModal = function() { document.getElementById('shiftModal').classList.add('show'); loadShiftReport(); };
+  window.closeShiftModal = function() { document.getElementById('shiftModal').classList.remove('show'); };
+  function loadShiftReport() {
+    var body = document.getElementById('shiftBody');
+    body.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Učitavam...</div>';
+    var url = window._currentCashierId ? API_BASE + '/pos/session/' + SESSION_ID + '/cashier/' + window._currentCashierId + '/report/' : API_BASE + '/pos/session/' + SESSION_ID + '/report/';
+    fetch(url, { credentials:'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+    .then(function(res) { if (res.redirected || res.status === 302) { body.innerHTML = '<div style="color:#ef4444;padding:1rem">Sesija istekla.</div>'; return Promise.reject('r'); } return res.json(); })
+    .then(function(d) {
+      var rHtml = d.receipts && d.receipts.length ? '<div class="shift-receipts">' + d.receipts.map(function(r){ return '<div class="shift-r-row"><span>' + r.vrijeme + ' — Račun #' + r.broj + '</span><strong>€' + parseFloat(r.ukupno).toFixed(2) + '</strong></div>'; }).join('') + '</div>' : '<p style="color:var(--muted);font-size:.8rem;margin-top:.5rem">Nema računa.</p>';
+      body.innerHTML = [['Blagajnik',d.cashier,''],['Broj računa',d.racuna,''],['Rad',d.prvi+' — '+d.zadnji,''],['Gotovina','€'+parseFloat(d.gotovina).toFixed(2),'green'],['Kartica','€'+parseFloat(d.kartica).toFixed(2),''],['Vaučeri','€'+parseFloat(d.vavceri).toFixed(2),''],['<b>UKUPNO</b>','€'+parseFloat(d.ukupno).toFixed(2),'gold']].map(function(row){ return '<div class="shift-row"><span class="lbl">'+row[0]+'</span><span class="val '+row[2]+'">'+row[1]+'</span></div>'; }).join('') + rHtml;
+    }).catch(function(e) { if (e !== 'r') body.innerHTML = '<div style="color:#ef4444;padding:1rem">Greška</div>'; });
+  }
+  window.printShiftReport = function() {
+    var w = window.open('','_blank','width=380,height=550'); var b = document.getElementById('shiftBody');
+    w.document.write('<html><head><title>Zaključak</title><style>body{font-family:monospace;padding:16px;font-size:12px} .shift-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee} .shift-receipts{margin-top:8px} .shift-r-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}</style></head><body>');
+    w.document.write('<h3 style="text-align:center">ZAKLJUČAK SMJENE</h3><p style="text-align:center;font-size:11px">' + new Date().toLocaleString('hr') + '</p><hr>');
+    w.document.write(b.innerHTML + '</body></html>'); w.document.close(); setTimeout(function(){ w.print(); }, 300);
+  };
+
+  window.showToast = function(msg, duration) {
+    var t = document.getElementById('posToast'); if (!t) return;
+    t.textContent = msg; t.classList.add('show'); clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(function(){ t.classList.remove('show'); }, duration || 3000);
+  };
+  function updateCashierBar(name) {
+    var bar = document.getElementById('activeCashierBar'); if (!bar) return;
+    if (name) { bar.textContent = '👤 Aktivni blagajnik: ' + name; bar.classList.add('show'); } else { bar.classList.remove('show'); }
+  }
+  function selectCashier(el, name, id) {
+    // TASK 2: Multi-konobar preuzimanje
+    var prevName = window._currentCashier;
+    var prevId = window._currentCashierId;
+    if (prevId && prevId !== id && prevName) {
+      if (!confirm('👤 ' + prevName + ' je aktivan/na.\nPreuzeti blagajnu?')) return;
+      showToast('🔄 ' + prevName + ' → ' + name, 2500);
+    }
+    document.querySelectorAll('.cashier-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    window._currentCashier = name || ''; window._currentCashierId = id || null;
+    updateCashierBar(name);
+    if (name && !prevId) showToast('👤 ' + name + ' — prijavljen/a', 2500);
+  }
+
+  // ── AI Product Suggestions ──
+  function updateAiSuggestions() {
+    var bar = document.getElementById('aiSuggest');
+    if (!bar) return;
+
+    var cartItems = [];
+    document.querySelectorAll('.b-row').forEach(function(row) {
+      var id = row.getAttribute('data-item-id');
+      if (id) cartItems.push(id);
+    });
+
+    if (cartItems.length === 0) { bar.classList.remove('show'); return; }
+
+    // Get categories of items in cart
+    var cartCats = {};
+    cartItems.forEach(function(cid) {
+      var pbtn = document.getElementById('pb-' + cid);
+      if (pbtn && pbtn.dataset.cat) cartCats[pbtn.dataset.cat] = true;
+    });
+
+    var suggestions = [];
+    var shown = 0;
+    var allProducts = document.querySelectorAll('.prod-btn');
+
+    // Strategy 1: Same category products not in cart (max 3)
+    allProducts.forEach(function(btn) {
+      var id = btn.dataset.id;
+      if (id && !cartItems.includes(id) && shown < 3 && cartCats[btn.dataset.cat]) {
+        var name = btn.querySelector('.prod-name');
+        var price = btn.querySelector('.prod-price');
+        if (name) {
+          suggestions.push({id: id, name: name.textContent.trim(), price: price ? price.textContent.trim() : '', el: btn});
+          shown++;
+        }
+      }
+    });
+
+    // Strategy 2: Fill remaining slots with popular items (different category)
+    allProducts.forEach(function(btn) {
+      var id = btn.dataset.id;
+      if (id && !cartItems.includes(id) && shown < 5 && !cartCats[btn.dataset.cat]) {
+        var name = btn.querySelector('.prod-name');
+        var price = btn.querySelector('.prod-price');
+        if (name && !suggestions.some(function(s){ return s.id === id; })) {
+          suggestions.push({id: id, name: name.textContent.trim(), price: price ? price.textContent.trim() : '', el: btn});
+          shown++;
+        }
+      }
+    });
+
+    // Render
+    bar.innerHTML = '<span class="ai-suggest-label">\u{1F4A1} Prijedlog:</span>';
+    suggestions.forEach(function(s) {
+      var el = document.createElement('div');
+      el.className = 'ai-suggest-item';
+      el.innerHTML = s.name.substring(0, 20) + (s.name.length > 20 ? '…' : '') + ' <span class="price">' + s.price + '</span>';
+      el.onclick = function() { s.el.click(); if (navigator.vibrate) navigator.vibrate(10); };
+      bar.appendChild(el);
+    });
+
+    bar.classList.toggle('show', suggestions.length > 0);
+  }
+
+  var _revolutPollTimer = null;
+  window.payRevolut = function() {
+    if (!SESSION_ID) { fenixToast('Nema smjene!', 'warning'); return; }
+    if (!Object.keys(basket).length) return;
+    var items = buildItemsPayload();
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', { method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF}, body: JSON.stringify({items: items, method: 'REVOLUT', amount_paid: window._total, cashier: window._currentCashier || '', cashier_id: window._currentCashierId || ''}) })
+    .then(function(r){ return r.json(); }).then(function(data) {
+      if (!data.ok) { fenixToast(data.error || 'Greška', 'error'); return; }
+      var receiptId = data.receipt_id;
+      document.getElementById('revolutAmount').textContent = '€' + parseFloat(data.total).toFixed(2);
+      fetch(API_BASE + '/pos/revolut/pay/' + receiptId + '/', { method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF} })
+      .then(function(r2){ return r2.json(); }).then(function(rev) {
+        if (!rev.ok) { showSuccess(data.receipt_number, data.total, 0); clearBasket(); showToast('Naplata evidentirana (Revolut nije spojen)', 3000); return; }
+        document.getElementById('revolutQR').innerHTML = '<img src="data:image/png;base64,' + (rev.qr_b64 || '') + '" style="width:200px;height:200px;image-rendering:pixelated"><br><a href="' + rev.checkout_url + '" target="_blank" style="color:#0075EB;font-size:.8rem">Otvori link</a>';
+        document.getElementById('revolutModal').style.display = 'flex';
+        document.getElementById('revolutStatus').textContent = 'Čekam plaćanje...';
+        _revolutPollTimer = setInterval(function() {
+          fetch(API_BASE + '/pos/revolut/status/' + receiptId + '/', {credentials: 'same-origin'}).then(function(s){ return s.json(); }).then(function(st) {
+            if (st.status === 'completed') { clearInterval(_revolutPollTimer); document.getElementById('revolutStatus').innerHTML = '<span style="color:#22c55e;font-size:1.2rem">✓ PLAĆENO!</span>'; showSuccess(data.receipt_number, data.total, 0); clearBasket(); setTimeout(closeRevolutModal, 2000); }
+            else if (st.status === 'failed') { clearInterval(_revolutPollTimer); document.getElementById('revolutStatus').innerHTML = '<span style="color:#ef4444">✗ Neuspješno</span>'; }
+          });
+        }, 2000);
+      });
+    }).catch(function(e) { window.fenixNetworkError('Greška mreže', e); });
+  };
+  window.closeRevolutModal = function() { document.getElementById('revolutModal').style.display = 'none'; if (_revolutPollTimer) { clearInterval(_revolutPollTimer); _revolutPollTimer = null; } };
+
+  var ALL_PRODUCTS = [];
+  (function(){
+    document.querySelectorAll('.prod-btn').forEach(function(b){
+      ALL_PRODUCTS.push({ id: b.dataset.id, name: b.dataset.name, price: b.dataset.price, tax: b.dataset.tax, cat: b.dataset.cat, weighable: b.dataset.weighable, unit: b.dataset.unit });
+    });
+    ALL_PRODUCTS.sort(function(a,b){ return a.name.localeCompare(b.name, 'hr'); });
+  })();
+
+  function buildQuickKeys(cat) {
+    var grid = document.getElementById('qkGrid'); var label = document.getElementById('qkCatLabel');
+    if (!grid) return;
+    var filtered = cat ? ALL_PRODUCTS.filter(function(p){ return p.cat === cat; }) : ALL_PRODUCTS;
+    var top12 = filtered.slice(0, 12);
+    label.textContent = cat ? cat : 'Sve kategorije';
+    if (!top12.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.78rem;padding:.5rem">Nema artikala</div>'; return; }
+    grid.innerHTML = top12.map(function(p){
+      return '<button class="qk-btn" id="qk-'+p.id+'" data-id="'+p.id+'" data-name="'+p.name.replace(/"/g,'&quot;')+'" data-price="'+p.price+'" data-tax="'+p.tax+'" data-cat="'+p.cat+'" data-weighable="'+p.weighable+'" data-unit="'+p.unit+'" onclick="qkAdd(this)"><div class="qk-name">'+p.name+'</div><div class="qk-price">€'+parseFloat(p.price).toFixed(2)+'</div><div class="qk-badge" id="qkb-'+p.id+'">0</div></button>';
+    }).join('');
+  }
+
+  window.qkAdd = function(btn) {
+    var rip = document.createElement('div'); rip.className = 'ripple'; rip.style.left = '50%'; rip.style.top = '50%'; btn.appendChild(rip); setTimeout(function(){ rip.remove(); }, 400);
+    if (btn.dataset.weighable === '1') { var pb = document.getElementById('pb-'+btn.dataset.id); if (pb) { addProduct(pb); } else { _weighBtn = btn; document.getElementById('weightProductName').textContent = btn.dataset.name; document.getElementById('weightUnit').textContent = btn.dataset.unit||'kg'; var wi=document.getElementById('weightInput'); wi.value=''; document.getElementById('weightModal').classList.add('show'); setTimeout(function(){wi.focus();},80); } return; }
+    var id = btn.dataset.id, name = btn.dataset.name;
+    var price = parseFloat(btn.dataset.price), tax = parseFloat(btn.dataset.tax);
+    if (navigator.vibrate) navigator.vibrate(10);
+    if (basket[id]) { basket[id].qty += 1; } else { basket[id] = { name: name, price: price, tax: tax, qty: 1 }; }
+    updateQtyBadge(id); updateQkBadge(id); renderBasket();
+  };
+
+  function updateQkBadge(id) { var b = document.getElementById('qkb-'+id); if (!b) return; var qty = basket[id] ? basket[id].qty : 0; b.textContent = qty; b.classList.toggle('show', qty > 0); }
+
+  if (document.readyState !== 'loading') { buildQuickKeys(''); }
+  else { document.addEventListener('DOMContentLoaded', function(){ buildQuickKeys(''); }); }
+
+  (function(){
+    var btns = document.querySelectorAll('.prod-btn'); var items = [];
+    btns.forEach(function(b){ items.push({ id: b.dataset.id, name: b.dataset.name, price: b.dataset.price, tax: b.dataset.tax, cat: b.dataset.cat, weighable: b.dataset.weighable, unit: b.dataset.unit }); });
+    if(items.length && window.cacheArticlesForOffline){ window.cacheArticlesForOffline(items); }
+  })();
+  // Restore cart from localStorage on page load
+  setTimeout(_restoreCart, 100);
+
+})();
+
+  // ── Shift close 2-step flow ────────────────────────────────────────────────
+  var _shiftExpectedCash = 0;
+
+  window.openShiftModal = function() {
+    document.getElementById('shiftModal').classList.add('show');
+    document.getElementById('shiftStep1').style.display = '';
+    document.getElementById('shiftStep2').style.display = 'none';
+    loadShiftReport();
+    // Load expected cash
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/report/', {credentials:'same-origin', headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        _shiftExpectedCash = parseFloat(d.gotovina || 0);
+        var inp = document.getElementById('shiftCashInput');
+        if (inp) inp.placeholder = _shiftExpectedCash.toFixed(2);
+      }).catch(function(){});
+    // Live diff
+    var inp = document.getElementById('shiftCashInput');
+    if (inp) inp.addEventListener('input', function() {
+      var v = parseFloat(this.value) || 0;
+      var diff = v - _shiftExpectedCash;
+      var el = document.getElementById('shiftCashDiff');
+      if (Math.abs(diff) < 0.01) { el.innerHTML = '<span style="color:#22c55e">✓ Točno</span>'; }
+      else if (diff > 0) { el.innerHTML = '<span style="color:#f59e0b">Višak: +' + diff.toFixed(2) + ' €</span>'; }
+      else { el.innerHTML = '<span style="color:#ef4444">Manjak: ' + diff.toFixed(2) + ' €</span>'; }
+    });
+  };
+
+  window.shiftSkipCash = function() { document.getElementById('shiftCashInput').value = ''; shiftGoStep2(); };
+
+  window.shiftGoStep2 = function() {
+    var cash = document.getElementById('shiftCashInput').value || '0';
+    // POST close session
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/close/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'Content-Type':'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+      body: 'closing_cash=' + encodeURIComponent(cash)
+    })
+    .then(function(r) {
+      // Close might redirect (302) — that's ok
+      document.getElementById('shiftStep1').style.display = 'none';
+      document.getElementById('shiftStep2').style.display = '';
+      var diff = (parseFloat(cash) || 0) - _shiftExpectedCash;
+      var diffText = Math.abs(diff) < 0.01 ? 'Gotovina OK' : (diff > 0 ? 'Višak: +' + diff.toFixed(2) + ' €' : 'Manjak: ' + diff.toFixed(2) + ' €');
+      document.getElementById('shiftCloseSummary').textContent = 'Ukupno: €' + _shiftExpectedCash.toFixed(2) + ' | ' + diffText;
+    })
+    .catch(function() {
+      document.getElementById('shiftStep1').style.display = 'none';
+      document.getElementById('shiftStep2').style.display = '';
+      document.getElementById('shiftCloseSummary').textContent = 'Smjena zatvorena';
+    });
+  };
+
+  window.shiftZReport = function() {
+    window.open(API_BASE + '/pos/session/' + SESSION_ID + '/zreport/', '_blank');
+  };
+
+  window.shiftShare = function() {
+    openShare({type:'zreport', id: SESSION_ID, title: 'Z-izvještaj smjene'});
+  };
+
+  window.shiftFinish = function() {
+    window.location.href = API_BASE + '/pos/';
+  };
+
+
+  // ═══ SPLIT PAYMENT ═══
+  var SPLIT_METHODS = [
+    {v:'CASH',l:'💵 Gotovina'},{v:'CARD',l:'💳 Kartica'},
+    {v:'REVOLUT',l:'📱 Revolut'},{v:'AIRCASH',l:'🟡 Aircash'},
+    {v:'MOBILE',l:'📱 mPOS'},{v:'VOUCHER',l:'🎫 Bon'},
+    {v:'ACCOUNT',l:'📄 Na račun'},
+  ];
+  var splitData = [];
+
+  window.toggleSplit = function() {
+    var w = document.getElementById('splitWidget');
+    if (!w) return;
+    var show = w.style.display === 'none';
+    w.style.display = show ? 'block' : 'none';
+    if (show && splitData.length === 0) {
+      addSplitLine('CARD');
+      addSplitLine('CASH');
+    }
+  };
+
+  window.addSplitLine = function(def) {
+    var total = parseFloat(window._total) || 0;
+    var rem = Math.max(0, total - splitData.reduce(function(s,l){return s+l.a;},0));
+    splitData.push({m: def||'CASH', a: parseFloat(rem.toFixed(2))});
+    renderSplit();
+  };
+
+  function renderSplit() {
+    var c = document.getElementById('splitLines');
+    if (!c) return;
+    c.innerHTML = '';
+    splitData.forEach(function(line,i) {
+      var opts = SPLIT_METHODS.map(function(m){
+        return '<option value="'+m.v+'"'+(m.v===line.m?' selected':'')+'>'+m.l+'</option>';
+      }).join('');
+      c.innerHTML += '<div style="display:flex;gap:4px;align-items:center;">' +
+        '<select onchange="splitData['+i+'].m=this.value;updateSplitRem()" ' +
+        'style="flex:1.5;background:var(--surface-elevated,#1e2024);border:1px solid var(--border,#333);' +
+        'border-radius:6px;padding:6px;color:var(--text,#eee);font-size:.8rem;">' + opts + '</select>' +
+        '<input type="number" step="0.01" min="0" value="' + line.a.toFixed(2) + '" ' +
+        'onchange="splitData['+i+'].a=parseFloat(this.value)||0;updateSplitRem()" ' +
+        'style="flex:1;background:var(--surface-elevated,#1e2024);border:1px solid var(--border,#333);' +
+        'border-radius:6px;padding:6px;color:var(--text,#eee);font-size:.8rem;text-align:right;">' +
+        '<span style="font-size:.78rem;color:var(--muted,#888)">€</span>' +
+        (splitData.length > 1 ? '<button type="button" onclick="splitData.splice('+i+',1);renderSplit()" ' +
+        'style="background:rgba(231,76,60,.1);border:none;border-radius:5px;padding:4px 8px;' +
+        'color:#e74c3c;cursor:pointer;font-size:.8rem;min-height:36px;">×</button>' : '') +
+        '</div>';
+    });
+    updateSplitRem();
+  }
+
+  window.updateSplitRem = function() {
+    var total = parseFloat(window._total) || 0;
+    var paid = splitData.reduce(function(s,l){return s+(parseFloat(l.a)||0);},0);
+    var rem = total - paid;
+    var el = document.getElementById('splitRem');
+    if (el) { el.textContent = rem.toFixed(2) + ' EUR'; el.style.color = rem <= 0.01 ? '#10b981' : 'var(--gold,#c9a84c)'; }
+  };
+
+  window.paySplit = function() {
+    if (navigator.vibrate) navigator.vibrate(10);
+    if (!SESSION_ID) { fenixToast('Nema aktivne smjene!', 'warning'); return; }
+    var ids = Object.keys(basket);
+    if (!ids.length) return;
+
+    var total = parseFloat(window._total) || 0;
+    var paid = splitData.reduce(function(s,l){return s+l.a;},0);
+    if (paid < total - 0.01) {
+      fenixToast('Suma (' + paid.toFixed(2) + '€) < iznos (' + total.toFixed(2) + '€)', 'warning');
+      return;
+    }
+
+    var btn = document.getElementById('paySplitBtn');
+    if (btn.dataset.submitting === '1') return;
+    btn.dataset.submitting = '1'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    var items = buildItemsPayload();
+    var payments = splitData.map(function(l){ return {method:l.m, amount:l.a}; });
+    // Primary method for fallback
+    var primaryMethod = splitData.length > 0 ? splitData[0].m : 'CASH';
+
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({
+        items: items,
+        method: primaryMethod,
+        payment_method: primaryMethod,
+        payments: payments,
+        amount_paid: paid,
+        tip_amount: window._tip || 0,
+        cashier: window._currentCashier || '',
+        cashier_id: window._currentCashierId || '',
+      }),
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        lastReceiptUrl = data.print_url || ''; lastReceiptId = data.receipt_id || null;
+        window.lastReceiptId = lastReceiptId;
+        var nonCash = payments.filter(function(p){return p.method!=='CASH';}).reduce(function(s,p){return s+p.amount;},0);
+        var cashPaid = payments.filter(function(p){return p.method==='CASH';}).reduce(function(s,p){return s+p.amount;},0);
+        var change = Math.max(0, cashPaid - (total - nonCash));
+        showSuccess(data.receipt_number, data.total, change);
+        clearBasket();
+        splitData = [];
+        var w = document.getElementById('splitWidget');
+        if (w) w.style.display = 'none';
+      } else {
+        fenixToast(data.error || 'Greška', 'warning');
+      }
+    })
+    .catch(function(e) { fenixToast('Greška: ' + e.message, 'warning'); })
+    .finally(function() { btn.dataset.submitting = ''; btn.disabled = false; btn.innerHTML = '⚡ Naplati split'; });
+  };
+
+
+  // ═══ STOCK ALERT BADGE ═══
+  window.renderStockBadge = function(card, qty, minQty) {
+    if (!card) return;
+    var existing = card.querySelector('.stock-badge');
+    if (existing) existing.remove();
+    minQty = minQty || 5;
+    if (qty <= 0) {
+      card.insertAdjacentHTML('afterbegin',
+        '<span class="stock-badge" style="position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:10px;z-index:5">0</span>');
+      card.style.opacity = '0.5';
+    } else if (qty <= minQty) {
+      card.insertAdjacentHTML('afterbegin',
+        '<span class="stock-badge" style="position:absolute;top:4px;right:4px;background:#f59e0b;color:#fff;font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:10px;z-index:5">' + qty + '</span>');
+    }
+  };
+
+  // Apply stock badges on load
+  document.querySelectorAll('.item-btn').forEach(function(btn) {
+    var qty = parseInt(btn.dataset.qty || '999');
+    var minQty = parseInt(btn.dataset.minQty || '5');
+    if (qty <= minQty) {
+      btn.style.position = 'relative';
+      renderStockBadge(btn, qty, minQty);
+    }
+  });
+
+  // ═══ AI UPSELL ENGINE ═══
+  var _upsellTimer = null;
+  window.triggerUpsell = function() {
+    clearTimeout(_upsellTimer);
+    _upsellTimer = setTimeout(function() {
+      var ids = Object.keys(basket).map(Number).filter(Boolean);
+      if (ids.length === 0 || ids.length > 10) {
+        document.getElementById('aiUpsell').innerHTML = '';
+        return;
+      }
+      fetch(API_BASE + '/pos/api/ai-upsell/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ items: ids }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var panel = document.getElementById('aiUpsell');
+        if (!data.suggestions || !data.suggestions.length) { panel.innerHTML = ''; return; }
+        panel.innerHTML = data.suggestions.map(function(s) {
+          return '<div class="upsell-card" data-sku="' + s.sku_id + '" onclick="addUpsell(' + s.sku_id + ',this)" ' +
+            'style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));' +
+            'border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:10px;cursor:pointer;' +
+            'transition:all .2s;min-width:140px" role="button" tabindex="0" ' +
+            'aria-label="Dodaj ' + s.name + ' za ' + s.price + ' eura">' +
+            '<div style="font-size:.78rem;font-weight:700;color:var(--text,#eee);margin-bottom:2px">' + s.name + '</div>' +
+            '<div style="font-size:.7rem;color:var(--gold,#c9a84c);margin-bottom:4px">' + s.price + ' EUR</div>' +
+            '<div style="font-size:.65rem;color:var(--muted,#888)">&#10024; ' + s.reason + '</div>' +
+            '</div>';
+        }).join('');
+        panel.style.display = 'flex';
+      })
+      .catch(function() {});
+    }, 2000); // 2s debounce
+  };
+
+  window.addUpsell = function(skuId, el) {
+    if (el) { el.style.transform = 'translateX(200px)'; el.style.opacity = '0'; }
+    var btn = document.querySelector('.item-btn[data-id="' + skuId + '"]');
+    if (btn) btn.click();
+    else if (window.addItemById) window.addItemById(skuId);
+    setTimeout(function() { if (el) el.remove(); }, 300);
+  };
+
+  // Hook into cart changes
+  var _origAddItem2 = window.addItem;
+  if (_origAddItem2) {
+    window.addItem = function() {
+      _origAddItem2.apply(this, arguments);
+      triggerUpsell();
+    };
+  }
+
+  // ═══ OFFLINE MODE BANNER ═══
+  (function() {
+    var banner = document.getElementById('offlineBanner');
+    if (!banner) return;
+
+    function updateOffline() {
+      var queue = JSON.parse(localStorage.getItem('pos_offline_queue') || '[]');
+      if (!navigator.onLine) {
+        document.getElementById('offlineCount').textContent = queue.length;
+        banner.style.display = 'block';
+        banner.style.transform = 'translateY(0)';
+      } else if (queue.length > 0) {
+        banner.style.background = '#f59e0b';
+        document.getElementById('offlineText').innerHTML = '&#128260; Sinkronizacija ' + queue.length + ' transakcija...';
+        banner.style.display = 'block';
+        banner.style.transform = 'translateY(0)';
+      } else {
+        banner.style.transform = 'translateY(-100%)';
+        setTimeout(function() { banner.style.display = 'none'; }, 300);
+      }
+    }
+
+    window.addEventListener('online', function() {
+      updateOffline();
+      if (window.showToast) showToast('\u2713 Online — sinkronizacija...', 'success');
+    });
+    window.addEventListener('offline', function() {
+      updateOffline();
+      if (window.showToast) showToast('\u26a0 Offline mode', 'warning');
+    });
+
+    // Check on load
+    updateOffline();
+    setInterval(updateOffline, 10000);
+  })();
+
+  // ═══ KEYBOARD SHORTCUTS ═══
+  document.addEventListener('keydown', function(e) {
+    // F2 = Quick CASH
+    if (e.key === 'F2' && !e.ctrlKey) { e.preventDefault(); if (window.pay) pay('CASH'); }
+    // F3 = Quick CARD
+    if (e.key === 'F3' && !e.ctrlKey) { e.preventDefault(); if (window.pay) pay('CARD'); }
+    // F4 = Split payment
+    if (e.key === 'F4' && !e.ctrlKey) { e.preventDefault(); if (window.toggleSplit) toggleSplit(); }
+    // Ctrl+F = Focus search
+    if (e.ctrlKey && e.key === 'f') {
+      e.preventDefault();
+      var search = document.getElementById('barcode-input') || document.getElementById('search-input');
+      if (search) search.focus();
+    }
+    // Escape = Close modals
+    if (e.key === 'Escape') {
+      document.querySelectorAll('[style*="display:flex"][style*="position:fixed"]').forEach(function(m) {
+        if (m.id !== 'offlineBanner' && m.id !== 'aiUpsell') m.style.display = 'none';
+      });
+    }
+    // Enter on upsell card
+    if (e.key === 'Enter' && document.activeElement.classList.contains('upsell-card')) {
+      var sku = document.activeElement.dataset.sku;
+      if (sku) addUpsell(parseInt(sku), document.activeElement);
+    }
+  });
+
+
+  // ═══ DARK/LIGHT TOGGLE ═══
+  window.toggleTheme = function() {
+    var root = document.documentElement;
+    var isDark = root.getAttribute('data-theme') !== 'light';
+    if (isDark) {
+      root.setAttribute('data-theme', 'light');
+      root.style.setProperty('--black', '#ffffff');
+      root.style.setProperty('--dark', '#f8f9fa');
+      root.style.setProperty('--card', '#ffffff');
+      root.style.setProperty('--border', '#dee2e6');
+      root.style.setProperty('--text', '#212529');
+      root.style.setProperty('--muted', '#6c757d');
+      document.body.style.background = '#f8f9fa';
+      document.body.style.color = '#212529';
+      localStorage.setItem('pos_theme', 'light');
+    } else {
+      root.setAttribute('data-theme', 'dark');
+      root.style.removeProperty('--black');
+      root.style.removeProperty('--dark');
+      root.style.removeProperty('--card');
+      root.style.removeProperty('--border');
+      root.style.removeProperty('--text');
+      root.style.removeProperty('--muted');
+      document.body.style.background = '';
+      document.body.style.color = '';
+      localStorage.setItem('pos_theme', 'dark');
+    }
+  };
+  // Auto-apply saved theme
+  (function() {
+    if (localStorage.getItem('pos_theme') === 'light') toggleTheme();
+  })();
+
+  // ═══ FENIX CAMERA OCR (MVP) ═══
+  window.openFenixCamera = function() {
+    var modal = document.createElement('div');
+    modal.id = 'fenixCameraModal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;flex-direction:column';
+    modal.innerHTML = '<div style="text-align:center;color:#fff;max-width:400px;width:90%">' +
+      '<h3 style="color:var(--gold,#c9a84c);margin-bottom:1rem">&#128247; FenixCamera</h3>' +
+      '<video id="fcVideo" autoplay playsinline style="width:100%;border-radius:12px;margin-bottom:1rem;max-height:50vh"></video>' +
+      '<canvas id="fcCanvas" style="display:none" width="640" height="480"></canvas>' +
+      '<div style="display:flex;gap:1rem;justify-content:center">' +
+      '<button onclick="fenixCapture()" style="background:var(--gold,#c9a84c);color:#000;border:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;min-height:48px">&#128248; Slikaj</button>' +
+      '<button onclick="closeFenixCamera()" style="background:#333;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;min-height:48px">Zatvori</button>' +
+      '</div>' +
+      '<div id="fcResult" style="margin-top:1rem;font-size:.88rem"></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(function(stream) {
+        window._fcStream = stream;
+        document.getElementById('fcVideo').srcObject = stream;
+      })
+      .catch(function() {
+        document.getElementById('fcResult').textContent = 'Kamera nedostupna';
+      });
+  };
+
+  window.fenixCapture = function() {
+    var video = document.getElementById('fcVideo');
+    var canvas = document.getElementById('fcCanvas');
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    document.getElementById('fcResult').innerHTML = '<span style="color:var(--gold)">Analiziram...</span>';
+
+    canvas.toBlob(function(blob) {
+      var fd = new FormData();
+      fd.append('image', blob, 'capture.jpg');
+      fetch(API_BASE + '/pos/api/fenix-camera/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'X-CSRFToken': CSRF },
+        body: fd,
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.sku) {
+          document.getElementById('fcResult').innerHTML =
+            '<span style="color:#22c55e">&#10003; ' + data.sku.name + ' (' + data.sku.price + ' EUR)</span>';
+          if (window.addItemById) addItemById(data.sku.id);
+          else { var btn = document.querySelector('[data-id="'+data.sku.id+'"]'); if(btn) btn.click(); }
+          setTimeout(closeFenixCamera, 1500);
+        } else {
+          document.getElementById('fcResult').innerHTML =
+            '<span style="color:#f59e0b">Nije prepoznato. Pokušajte ponovo.</span>';
+        }
+      })
+      .catch(function() {
+        document.getElementById('fcResult').innerHTML = '<span style="color:#ef4444">Greška</span>';
+      });
+    }, 'image/jpeg', 0.8);
+  };
+
+  window.closeFenixCamera = function() {
+    if (window._fcStream) window._fcStream.getTracks().forEach(function(t) { t.stop(); });
+    var m = document.getElementById('fenixCameraModal');
+    if (m) m.remove();
+  };

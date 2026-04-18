@@ -1,0 +1,103 @@
+/*
+ * WCAG 2.1 AA Accessibility Styles
+ * ─────────────────────────────────
+ * LIMIT Connect — globalni accessibility layer
+ *
+ * Kriteriji pokriveni:
+ *   1.4.3  — Contrast (Minimum) — AA 4.5:1 za tekst
+ *   1.4.4  — Resize Text — viewport bez user-scalable=no
+ *   1.4.11 — Non-text Contrast — focus indikatori 3:1
+ *   2.4.1  — Bypass Blocks — skip link
+ *   2.4.7  — Focus Visible — focus-visible outline
+ *   2.3.3  — Animation from Interactions — reduced motion
+ *   2.5.8  — Target Size (Minimum) — 44x44 touch targets
+ */
+
+/* ── Skip link ──────────────────────────────────────────────── */
+.wcag-skip-link {
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #c9a84c;
+    color: #0a0a0a;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    z-index: 99999;
+    border-radius: 0 0 8px 8px;
+    transition: top 0.2s;
+}
+.wcag-skip-link:focus {
+    top: 0;
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* ── Focus indicators (WCAG 2.4.7) ─────────────────────────── */
+*:focus-visible {
+    outline: 3px solid #c9a84c !important;
+    outline-offset: 2px !important;
+}
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid #c9a84c !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 6px rgba(201, 168, 76, 0.25) !important;
+}
+
+/* Dark theme focus — contrast boost */
+[data-theme="dark"] *:focus-visible {
+    outline-color: #e0c56a !important;
+}
+
+/* ── Reduced motion (WCAG 2.3.3) ───────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ── Touch targets (WCAG 2.5.8 — 44x44px minimum) ──────────── */
+@media (pointer: coarse) {
+    button, a.btn, [role="button"], input[type="submit"],
+    input[type="button"], .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ── Screen reader only (utility) ────────────────────────────── */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* ── High contrast mode support ──────────────────────────────── */
+@media (forced-colors: active) {
+    .wcag-skip-link {
+        border: 2px solid currentColor;
+    }
+    *:focus-visible {
+        outline: 3px solid Highlight !important;
+    }
+}

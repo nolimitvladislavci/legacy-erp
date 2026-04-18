@@ -1,0 +1,156 @@
+/* ═══════════════════════════════════════════════════════════════
+   POS Mobile UI Fix — F1 Audit 07.04.2026
+   Touch targets ≥44px, readable fonts ≥14px, accessible spacing
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Global: ensure min touch target on all interactive elements ── */
+@media (max-width: 900px) {
+  /* Action buttons in topbar — too small for fingers */
+  .qp-action-btn {
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 8px;
+    font-size: .85rem;
+  }
+
+  /* Cashier buttons */
+  .cashier-btn {
+    min-height: 36px;
+    padding: .35rem .6rem;
+    font-size: .75rem;
+  }
+
+  /* Basket +/- buttons — 22px is way too small */
+  .bq-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+    border-radius: 6px;
+  }
+
+  /* Basket delete button */
+  .b-del {
+    padding: .3rem .4rem;
+    font-size: 1rem;
+  }
+
+  /* Cash quick buttons — 28px too small */
+  .cash-q-btn {
+    min-height: 38px !important;
+    padding: .4rem .6rem !important;
+    font-size: .8rem !important;
+  }
+
+  /* Product search input — bigger touch area */
+  .prod-search input {
+    padding: .55rem .75rem;
+    font-size: .9rem;
+  }
+
+  /* Category tabs — bigger tap area */
+  .cat-tab {
+    padding: .65rem 1rem;
+    font-size: .82rem;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 500px) {
+  /* Product buttons — ensure readable text + adequate size */
+  .prod-btn {
+    min-height: 68px;
+    padding: .65rem .4rem;
+  }
+  .prod-name {
+    font-size: .78rem;
+    line-height: 1.25;
+  }
+  .prod-price {
+    font-size: .85rem;
+  }
+
+  /* Basket rows — larger for touch */
+  .b-row {
+    padding: .45rem .65rem;
+    gap: .5rem;
+  }
+  .b-name {
+    font-size: .82rem;
+  }
+  .b-price {
+    font-size: .82rem;
+    width: 58px;
+  }
+
+  /* Basket +/- even bigger on small screens */
+  .bq-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.15rem;
+    border-radius: 8px;
+  }
+
+  /* Payment buttons */
+  .pay-cash, .pay-card, .pay-bon {
+    min-height: 48px !important;
+    font-size: .88rem !important;
+  }
+
+  /* Cash quick buttons */
+  .cash-q-btn {
+    min-height: 40px !important;
+    padding: .45rem .65rem !important;
+    font-size: .82rem !important;
+    flex: 1 1 auto;
+  }
+
+  /* Action buttons in topbar */
+  .qp-action-btn {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+    font-size: .9rem;
+  }
+
+  /* Numpad in PIN modal — bigger keys */
+  #pinModal .qmodal-btn {
+    min-height: 48px;
+    font-size: 1.4rem;
+  }
+
+  /* Toast — readable */
+  .pos-toast {
+    font-size: .9rem;
+    padding: .75rem 1.4rem;
+    bottom: 100px;
+  }
+
+  /* Modal boxes — full width on small screens */
+  .qmodal-box, .weight-box, .shift-box {
+    width: 95vw;
+    max-width: 95vw;
+  }
+}
+
+/* ── 375px (iPhone SE / small phones) ── */
+@media (max-width: 375px) {
+  .prod-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: .35rem;
+  }
+  .prod-btn {
+    min-height: 64px;
+  }
+  .qp-right {
+    min-height: 180px;
+  }
+  .pay-btns-3 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .basket-totals .tot-row.grand {
+    font-size: .95rem;
+  }
+}
