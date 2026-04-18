@@ -123,7 +123,7 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
                 "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
                 "img-src 'self' data: https:; "
                 "connect-src 'self'; "
-                "frame-ancestors 'none'; "
+                "frame-ancestors 'self'; "
                 "base-uri 'self'; "
                 "form-action 'self'"
             )

@@ -667,7 +667,7 @@
     <!-- ═══════════════════════════════════════════════
          SKUPNI DOWNLOAD MODAL
     ════════════════════════════════════════════════ -->
-    <div id="monthlyBundleModal" class="fx-hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10500;display:none;align-items:center;justify-content:center">
+    <div id="monthlyBundleModal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10500;display:none;align-items:center;justify-content:center">
       <div style="background:var(--bg-card);border-radius:14px;border:1px solid var(--border);width:92%;max-width:520px;padding:0;overflow:hidden">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)">
           <h3 style="margin:0;font-size:1rem;font-weight:700"><i class="fas fa-box-archive" style="color:var(--gold)"></i> Skupni Download</h3>
@@ -1747,6 +1747,7 @@ window.closeDrawer = function() {
 // ════════════════════════════════════════════════════════════
 function openMonthlyBundle() {
   var m = document.getElementById('monthlyBundleModal');
+  m.classList.remove('fx-hidden');
   m.style.display = 'flex';
   // Prefill iz aktivnih filtera
   var q = new URLSearchParams(window.location.search);

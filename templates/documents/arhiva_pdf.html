@@ -14,21 +14,21 @@
         font-weight: bold;
     }
     @page { size: A4; margin: 2cm 2.5cm; }
-    body { font-family: "DejaVu", Helvetica, Arial, sans-serif; font-size: 11pt; color:var(--text); line-height: 1.5; }
+    body { font-family: "DejaVu", Helvetica, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.5; }
     .header { border-bottom: 3px solid #c9a84c; padding-bottom: 12px; margin-bottom: 20px; }
-    .header h1 { font-size: 14pt; margin: 0 0 4px 0; color:var(--text); }
-    .header .subtitle { font-size: 9pt; color:var(--text-dim); }
-    .company-info { font-size: 9pt; color:var(--text-dim); margin-bottom: 20px; }
-    .doc-title { font-size: 16pt; font-weight: bold; color:var(--text); margin: 24px 0 16px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    .header h1 { font-size: 14pt; margin: 0 0 4px 0; color: #1a1a1a; }
+    .header .subtitle { font-size: 9pt; color: #6b7280; }
+    .company-info { font-size: 9pt; color: #6b7280; margin-bottom: 20px; }
+    .doc-title { font-size: 16pt; font-weight: bold; color: #1a1a1a; margin: 24px 0 16px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
     table.details { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    table.details td { padding: 6px 10px; border-bottom:1px solid var(--border); font-size: 10pt; }
-    table.details td.label { font-weight: bold; width: 40%; color:var(--text); background: #f9f9f9; }
-    table.details td.value { color:var(--text); }
+    table.details td { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; font-size: 10pt; }
+    table.details td.label { font-weight: bold; width: 40%; color: #374151; background: #f9f9f9; }
+    table.details td.value { color: #1a1a1a; }
     .amount-row td { font-size: 13pt; font-weight: bold; border-bottom: 2px solid #c9a84c; }
-    .amount-row td.value { color:var(--gold); }
+    .amount-row td.value { color: #c9a84c; }
     .fiscal-section { margin-top: 20px; padding: 10px; background: #f7f7f7; border-left: 3px solid #c9a84c; }
-    .fiscal-section h3 { margin: 0 0 8px 0; font-size: 11pt; color:var(--text); }
-    .fiscal-section p { margin: 2px 0; font-size: 9pt; color:var(--text-dim); }
+    .fiscal-section h3 { margin: 0 0 8px 0; font-size: 11pt; color: #1a1a1a; }
+    .fiscal-section p { margin: 2px 0; font-size: 9pt; color: #6b7280; }
     .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 8pt; color: #999; text-align: center; }
     .hash { font-family: "DejaVu", monospace; font-size: 7pt; color: #aaa; word-break: break-all; }
 </style>
@@ -103,9 +103,6 @@
     <p>Zakonski rok cuvanja do: {{ entry.deletion_protected_until }}</p>
     {% endif %}
 </div>
-
-
-{% include "includes/_pdf_footer.html" %}
 
 </body>
 </html>
