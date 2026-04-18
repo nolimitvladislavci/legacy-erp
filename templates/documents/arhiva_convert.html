@@ -149,9 +149,17 @@
   <div class="img-preview" id="imgPreview">
     <div class="photo-grid" id="photoGrid"></div>
     <div class="preview-info" id="previewInfo"></div>
+    <!-- Merge toggle — prikaže se samo kad ima >1 slika -->
+    <div id="mergeToggleRow" style="display:none;align-items:center;justify-content:center;gap:.5rem;margin:.5rem 0;padding:.5rem;background:var(--bg-alt,#f8f8f8);border-radius:8px;font-size:.85rem">
+      <span style="color:var(--text-secondary,#666)">{% trans "Više stranica:" %}</span>
+      <button type="button" id="btnMergeToggle" onclick="toggleMerge()" class="btn-ghost"
+              style="font-size:.82rem;padding:4px 12px" title="Svaka slika → zaseban zapis">
+        <i class="fas fa-copy"></i> {% trans "Odvojeni dokumenti" %}
+      </button>
+    </div>
     <div class="preview-actions">
-      <button type="button" onclick="document.getElementById('fileInput').click()" class="btn-ghost"><i class="fas fa-plus"></i> {% trans "Dodaj" %}</button>
-      <button type="button" onclick="fenixConvertCamera()" class="btn-ghost"><i class="fas fa-camera"></i> {% trans "Kamera" %}</button>
+      <button type="button" onclick="document.getElementById('fileInput').click()" class="btn-ghost"><i class="fas fa-plus"></i> {% trans "Dodaj stranicu" %}</button>
+      <button type="button" onclick="fenixConvertCamera()" class="btn-ghost"><i class="fas fa-camera"></i> {% trans "Slikaj" %}</button>
       <button type="button" onclick="startConvert()" class="btn-gold" id="btnConvert"><i class="fas fa-magic"></i> {% trans "Konvertiraj" %} (<span id="photoCount">0</span>)</button>
       <button type="button" onclick="resetForm()" class="btn-ghost"><i class="fas fa-times"></i> {% trans "Odustani" %}</button>
     </div>

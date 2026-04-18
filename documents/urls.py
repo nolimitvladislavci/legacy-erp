@@ -45,6 +45,7 @@ urlpatterns = [
     path("arhiva/<int:pk>/xml/", views.arhiva_download_xml, name="arhiva_xml"),
     path("arhiva/<int:pk>/send/", views_arhiva.arhiva_send_komitent, name="arhiva_send_komitent"),
     path("arhiva/convert/", views.arhiva_convert, name="arhiva_convert"),
+    path("arhiva/convert/merge/", views.arhiva_convert_merge, name="arhiva_convert_merge"),
     path("knjiga/", views.knjiga_ura_ira, name="knjiga_ura_ira"),
     path("pdv/", views.pdv_obrazac, name="pdv_obrazac"),
     path("scan/create-token/", views.scan_create_token, name="scan_create_token"),

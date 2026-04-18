@@ -450,9 +450,78 @@ def arhiva_convert(request):
                 user=request.user,
             )
 
+            # ── Kreiraj ArhivaEntry iz ConversionRecord ──────────────────
+            arhiva_entry = None
+            if record and record.original_path:
+                try:
+                    from decimal import Decimal as _Dec
+                    from django.utils import timezone as _tz
+                    from documents.conversion_service import _parse_date_obj
+                    from documents.views_arhiva import _fuzzy_match_partner
+
+                    exdata = record.extracted_data or {}
+                    seller = exdata.get("seller") or {}
+                    partner_name = (seller.get("name") or "").strip()
+
+                    amount_raw = exdata.get("total") or 0
+                    try:
+                        amount = _Dec(str(round(float(amount_raw), 2)))
+                    except (ValueError, TypeError):
+                        amount = _Dec("0")
+
+                    doc_number = (exdata.get("invoice_number") or "").strip() or record.original_filename
+                    doc_date = _parse_date_obj(exdata.get("issue_date", "")) if exdata.get("issue_date") else None
+                    currency = (exdata.get("currency") or "EUR").upper()[:3]
+
+                    matched_partner = None
+                    if partner_name:
+                        matched_partner, _ = _fuzzy_match_partner(partner_name, company)
+
+                    arhiva_entry = ArhivaEntry.objects.create(
+                        company=company,
+                        source_type="invoice_in",
+                        source_id=record.original_hash or "",
+                        doc_number=doc_number,
+                        partner_name=partner_name or (matched_partner.name if matched_partner else ""),
+                        partner=matched_partner,
+                        amount=amount,
+                        currency=currency,
+                        doc_date=doc_date or _tz.now().date(),
+                        file_path=record.original_path,
+                        has_image=True,
+                        has_xml=bool(record.xml_path),
+                        archived_by=request.user,
+                        session_key=request.session.session_key or "",
+                    )
+                    record.arhiva_entry = arhiva_entry
+                    record.save(update_fields=["arhiva_entry"])
+
+                    # Trigeraj AI prijedlog
+                    try:
+                        from documents.tasks import generate_ai_proposal
+
+                        arhiva_entry.ai_status = "pending"
+                        arhiva_entry.ai_status_message = "Čekam AI analizu..."
+                        arhiva_entry.save(update_fields=["ai_status", "ai_status_message"])
+                        generate_ai_proposal.apply_async(args=[arhiva_entry.pk], countdown=3)
+                    except Exception as _ai_e:
+                        logger.warning("arhiva_convert: AI trigger failed: %s", _ai_e)
+
+                    logger.info(
+                        "arhiva_convert: ArhivaEntry %s kreiran za %s (partner=%s, iznos=%s)",
+                        arhiva_entry.pk,
+                        company,
+                        partner_name,
+                        amount,
+                    )
+                except Exception as _entry_err:
+                    logger.warning("arhiva_convert: ArhivaEntry creation failed: %s", _entry_err, exc_info=True)
+
             result = {
                 "success": True,
                 "record_id": str(record.id),
+                "entry_id": str(arhiva_entry.pk) if arhiva_entry else None,
+                "archive_number": arhiva_entry.archive_number if arhiva_entry else None,
                 "status": record.status,
                 "confidence": record.ai_confidence,
                 "confidence_score": record.ai_confidence_score,
@@ -703,3 +772,177 @@ def conversion_create_primka(request, pk):
             "message": msg,
         }
     )
+
+
+# ════════════════════════════════════════════════════════════
+# MERGE KONVERZIJA — Više slika → jedan dokument
+# ════════════════════════════════════════════════════════════
+
+
+@login_required
+def arhiva_convert_merge(request):
+    """Merge više slika u jedan PDF dokument pa konvertiraj u XML + ArhivaEntry.
+
+    POST multipart/form-data:
+      file_0, file_1, ... file_N  — slike stranica računa (max 10)
+      csrfmiddlewaretoken
+
+    Vraca JSON identičan kao arhiva_convert single-mode.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"error": "Nema aktivne tvrtke"}, status=400)
+
+    # Prikupi sve uploadane slike (file_0..file_9 ili files[])
+    images = []
+    for key in sorted(request.FILES.keys()):
+        f = request.FILES[key]
+        ext = os.path.splitext(f.name)[1].lower()
+        if ext not in (".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"):
+            continue
+        images.append((f.name, f.read()))
+
+    if not images:
+        return JsonResponse({"error": "Nema slika za spajanje"}, status=400)
+    if len(images) > 10:
+        return JsonResponse({"error": "Max 10 stranica po dokumentu"}, status=400)
+
+    if len(images) == 1:
+        # Single image — delegate to regular convert
+        import io as _io
+        from django.core.files.uploadedfile import InMemoryUploadedFile
+
+        name, data = images[0]
+        f_obj = InMemoryUploadedFile(_io.BytesIO(data), "file", name, "image/jpeg", len(data), None)
+        request.FILES["file"] = f_obj
+        return arhiva_convert(request)
+
+    # Merge images into a single PDF using PyMuPDF
+    try:
+        import fitz  # PyMuPDF
+        import io as _io
+
+        merged_pdf = fitz.open()
+
+        for name, img_bytes in images:
+            try:
+                img_doc = fitz.open(stream=img_bytes, filetype="image")
+                merged_pdf.insert_pdf(img_doc)
+                img_doc.close()
+            except Exception as img_err:
+                logger.warning("arhiva_convert_merge: cannot add image %s: %s", name, img_err)
+                continue
+
+        if merged_pdf.page_count == 0:
+            return JsonResponse({"error": "Spajanje neuspješno — niti jedna stranica"}, status=500)
+
+        pdf_bytes = merged_pdf.tobytes(deflate=True)
+        merged_pdf.close()
+
+        first_name = images[0][0]
+        merged_filename = os.path.splitext(first_name)[0] + "_spoj_%dstr.pdf" % len(images)
+
+    except Exception as merge_err:
+        logger.error("arhiva_convert_merge: PDF merge failed: %s", merge_err, exc_info=True)
+        return JsonResponse({"error": "Spajanje slika neuspješno"}, status=500)
+
+    # Now process merged PDF as a single conversion
+    try:
+        from documents.conversion_service import convert_image_to_xml
+
+        record = convert_image_to_xml(
+            file_bytes=pdf_bytes,
+            filename=merged_filename,
+            company=company,
+            user=request.user,
+        )
+
+        # Create ArhivaEntry
+        arhiva_entry = None
+        if record and record.original_path:
+            try:
+                from decimal import Decimal as _Dec
+                from django.utils import timezone as _tz
+                from documents.conversion_service import _parse_date_obj
+                from documents.views_arhiva import _fuzzy_match_partner
+
+                exdata = record.extracted_data or {}
+                seller = exdata.get("seller") or {}
+                partner_name = (seller.get("name") or "").strip()
+
+                try:
+                    amount = _Dec(str(round(float(exdata.get("total") or 0), 2)))
+                except (ValueError, TypeError):
+                    amount = _Dec("0")
+
+                doc_number = (exdata.get("invoice_number") or "").strip() or merged_filename
+                doc_date = _parse_date_obj(exdata.get("issue_date", "")) if exdata.get("issue_date") else None
+                currency = (exdata.get("currency") or "EUR").upper()[:3]
+
+                matched_partner = None
+                if partner_name:
+                    matched_partner, _ = _fuzzy_match_partner(partner_name, company)
+
+                arhiva_entry = ArhivaEntry.objects.create(
+                    company=company,
+                    source_type="invoice_in",
+                    source_id=record.original_hash or "",
+                    doc_number=doc_number,
+                    partner_name=partner_name or (matched_partner.name if matched_partner else ""),
+                    partner=matched_partner,
+                    amount=amount,
+                    currency=currency,
+                    doc_date=doc_date or _tz.now().date(),
+                    file_path=record.original_path,
+                    has_image=False,
+                    has_pdf=True,
+                    has_xml=bool(record.xml_path),
+                    archived_by=request.user,
+                    session_key=request.session.session_key or "",
+                )
+                record.arhiva_entry = arhiva_entry
+                record.save(update_fields=["arhiva_entry"])
+
+                try:
+                    from documents.tasks import generate_ai_proposal
+
+                    arhiva_entry.ai_status = "pending"
+                    arhiva_entry.ai_status_message = "Čekam AI analizu..."
+                    arhiva_entry.save(update_fields=["ai_status", "ai_status_message"])
+                    generate_ai_proposal.apply_async(args=[arhiva_entry.pk], countdown=3)
+                except Exception as _ai_e:
+                    logger.warning("arhiva_convert_merge: AI trigger failed: %s", _ai_e)
+
+            except Exception as _entry_err:
+                logger.warning("arhiva_convert_merge: ArhivaEntry failed: %s", _entry_err, exc_info=True)
+
+        return JsonResponse(
+            {
+                "success": True,
+                "merged": True,
+                "pages": len(images),
+                "record_id": str(record.id),
+                "entry_id": str(arhiva_entry.pk) if arhiva_entry else None,
+                "archive_number": arhiva_entry.archive_number if arhiva_entry else None,
+                "status": record.status,
+                "confidence": record.ai_confidence,
+                "confidence_score": record.ai_confidence_score,
+                "fields_extracted": record.fields_extracted,
+                "items_extracted": record.items_extracted,
+                "original_size": record.original_size,
+                "xml_size": record.xml_size,
+                "size_reduction_pct": round(record.size_reduction_pct, 1),
+                "is_valid": record.is_valid,
+                "validation_errors": record.validation_errors,
+                "extracted_data": record.extracted_data,
+                "savings": record.savings_display,
+                "message": "Spoj %d stranica konvertiran u arhivu" % len(images),
+            }
+        )
+
+    except Exception as e:
+        logger.error("arhiva_convert_merge FAILED: %s", e, exc_info=True)
+        return JsonResponse({"error": _safe_err(e)}, status=500)

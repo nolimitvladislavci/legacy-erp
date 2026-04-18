@@ -1,10 +1,11 @@
-/** Extracted from arhiva_convert.html */
+/** Arhiva Convert — multi-page + merge support */
 var CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
 var _lm = window.location.pathname.match(/^\/([a-z]{2})\//);
 var API = _lm ? '/' + _lm[1] : '';
 var _pcfg = document.getElementById('page-config');
 var URL_ARHIVA = _pcfg ? JSON.parse(_pcfg.textContent).arhivaListUrl || '' : '';
 var _files = [];
+var _mergeMode = false; // false = odvojeno, true = spoji u jedan dokument
 
 // ── File handling ────────────────────────────────────────────────────────────
 var zone = document.getElementById('uploadZone');
@@ -22,8 +23,8 @@ window.addEventListener('pageshow', function() { if (cam.files && cam.files[0] &
 document.addEventListener('visibilitychange', function() { if (!document.hidden && cam.files && cam.files[0] && !_files.length) addFile(cam.files[0]); });
 
 function addFile(file) {
-  if (!file.type.startsWith('image/')) { fenixToast('Samo slike.', 'warning'); return; }
-  if (file.size > 10*1024*1024) { fenixToast('Prevelika: ' + file.name, 'warning'); return; }
+  if (!file.type.startsWith('image/')) { fenixToast('Samo slike (JPG, PNG).', 'warning'); return; }
+  if (file.size > 15*1024*1024) { fenixToast('Prevelika slika: ' + file.name, 'warning'); return; }
   _files.push(file);
   renderPhotos();
 }
@@ -32,6 +33,11 @@ function removeFile(i) {
   _files.splice(i, 1);
   if (!_files.length) { resetForm(); return; }
   renderPhotos();
+}
+
+function fenixConvertCamera() {
+  cam.value = '';
+  cam.click();
 }
 
 function renderPhotos() {
@@ -51,7 +57,28 @@ function renderPhotos() {
   document.getElementById('previewInfo').textContent = _files.length + ' slika · ' + (_files.reduce(function(s,f){return s+f.size;},0)/1024).toFixed(0) + ' KB';
   document.getElementById('uploadArea').style.display = 'none';
   document.getElementById('imgPreview').style.display = 'block';
+
+  // Merge toggle — prikaži samo ako ima >1 slika
+  var mergeRow = document.getElementById('mergeToggleRow');
+  if (mergeRow) {
+    mergeRow.style.display = _files.length > 1 ? 'flex' : 'none';
+  }
   setStage(1);
+}
+
+function toggleMerge() {
+  _mergeMode = !_mergeMode;
+  var btn = document.getElementById('btnMergeToggle');
+  if (!btn) return;
+  if (_mergeMode) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-layer-group"></i> Spoji u 1 dokument';
+    btn.title = 'Sve stranice → jedan PDF račun';
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-copy"></i> Odvojeni dokumenti';
+    btn.title = 'Svaka slika → zaseban zapis';
+  }
 }
 
 // ── Konverzija ───────────────────────────────────────────────────────────────
@@ -61,6 +88,47 @@ async function startConvert() {
   document.getElementById('cvProgress').style.display = 'block';
   document.getElementById('cvResult').style.display = 'none';
 
+  if (_mergeMode && _files.length > 1) {
+    await convertMerged();
+  } else {
+    await convertSeparate();
+  }
+}
+
+async function convertMerged() {
+  document.getElementById('progressBar').style.width = '20%';
+  document.getElementById('progressLabel').textContent = 'Spajam ' + _files.length + ' stranica...';
+  document.getElementById('progressDetail').textContent = 'Kreiranje PDF-a...';
+  setStage(2);
+
+  try {
+    var fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF);
+    _files.forEach(function(file, i) { fd.append('file_' + i, file); });
+
+    document.getElementById('progressBar').style.width = '50%';
+    document.getElementById('progressDetail').textContent = 'AI ekstrakcija...';
+    setStage(3);
+
+    var res = await fetch(API + '/documents/arhiva/convert/merge/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}, body: fd
+    });
+    var data = await res.json();
+
+    document.getElementById('progressBar').style.width = '100%';
+    setStage(5, true);
+    setTimeout(function() {
+      document.getElementById('cvProgress').style.display = 'none';
+      showSingle(data);
+    }, 300);
+  } catch(e) {
+    document.getElementById('cvProgress').style.display = 'none';
+    showSingle({error: e.message});
+  }
+}
+
+async function convertSeparate() {
   var results = [];
   for (var idx = 0; idx < _files.length; idx++) {
     var file = _files[idx];
@@ -101,7 +169,6 @@ function showResults(results) {
     return;
   }
 
-  // Multi
   var ok = results.filter(function(r){return !r.data.error && r.data.is_valid;}).length;
   var warn = results.filter(function(r){return !r.data.error && !r.data.is_valid;}).length;
   var err = results.filter(function(r){return r.data.error;}).length;
@@ -117,16 +184,21 @@ function showResults(results) {
   var html = '';
   results.forEach(function(r) {
     var icon = r.data.error ? '!' : (r.data.is_valid ? '+' : '?');
+    var entryLink = r.data.entry_id ? ' <a href="' + URL_ARHIVA + '?highlight=' + r.data.entry_id + '" style="color:#c9a84c;font-size:.75rem">→ Arhiva</a>' : '';
     html += '<div style="display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.82rem">' +
       '<span style="color:' + (r.data.error?'#ef4444':r.data.is_valid?'#10b981':'#f59e0b') + ';font-weight:700">' + icon + '</span>' +
-      '<span style="flex:1">' + r.file + '</span>' +
+      '<span style="flex:1">' + r.file + entryLink + '</span>' +
       (r.data.error ? '<span style="color:#ef4444;font-size:.75rem">' + r.data.error + '</span>' : '') +
       '</div>';
   });
   document.getElementById('resultExtras').innerHTML = html;
+
+  var firstEntry = results.find(function(r){return r.data.entry_id;});
+  var archiveBtn = firstEntry
+    ? '<a href="' + URL_ARHIVA + '?highlight=' + firstEntry.data.entry_id + '" class="btn-ghost"><i class="fas fa-archive"></i> Otvori arhivu</a>'
+    : '<a href="' + URL_ARHIVA + '" class="btn-ghost"><i class="fas fa-archive"></i> Otvori arhivu</a>';
   document.getElementById('resultActions').innerHTML =
-    '<button onclick="resetForm()" class="btn-gold"><i class="fas fa-redo"></i> Nova konverzija</button>' +
-    '<a href="' + URL_ARHIVA + '" class="btn-ghost"><i class="fas fa-archive"></i> Otvori arhivu</a>';
+    '<button onclick="resetForm()" class="btn-gold"><i class="fas fa-redo"></i> Nova konverzija</button>' + archiveBtn;
 }
 
 function showSingle(data) {
@@ -147,8 +219,14 @@ function showSingle(data) {
 
   el.classList.add(data.is_valid ? 'ok' : 'warn');
   document.getElementById('resultBadge').className = 'badge ' + (data.is_valid ? 'badge-ok' : 'badge-warn');
-  document.getElementById('resultBadge').textContent = data.is_valid ? 'Spremljeno u arhivu' : 'Spremljeno (s upozorenjima)';
-  document.getElementById('resultMsg').textContent = data.message || '';
+
+  var badgeText = data.merged
+    ? 'Spoj ' + data.pages + ' str. → arhiva'
+    : (data.is_valid ? 'Arhivirano ✓' : 'Arhivirano (upozorenja)');
+  document.getElementById('resultBadge').textContent = badgeText;
+
+  var archiveNum = data.archive_number ? ' · ' + data.archive_number : '';
+  document.getElementById('resultMsg').textContent = (data.message || '') + archiveNum;
 
   var conf = 0;
   if (data.confidence_score != null) {
@@ -168,19 +246,37 @@ function showSingle(data) {
     html += '<details><summary>Upozorenja (' + data.validation_errors.length + ')</summary><pre>' + data.validation_errors.join('\n') + '</pre></details>';
   }
   if (data.extracted_data) {
-    html += '<details><summary>Ekstrahirani podaci</summary><pre>' + JSON.stringify(data.extracted_data, null, 2) + '</pre></details>';
+    var ed = data.extracted_data;
+    var seller = ed.seller || {};
+    if (seller.name || ed.invoice_number || ed.total) {
+      html += '<div style="background:var(--bg-alt,#f8f8f8);border-radius:8px;padding:.75rem 1rem;margin-top:.5rem;font-size:.85rem">';
+      if (seller.name) html += '<div><b>Dobavljač:</b> ' + seller.name + '</div>';
+      if (ed.invoice_number) html += '<div><b>Broj računa:</b> ' + ed.invoice_number + '</div>';
+      if (ed.issue_date) html += '<div><b>Datum:</b> ' + ed.issue_date + '</div>';
+      if (ed.total) html += '<div><b>Iznos:</b> ' + ed.total + ' ' + (ed.currency || 'EUR') + '</div>';
+      html += '</div>';
+    }
+  }
+  // Pregled izvorne slike/dokumenta
+  if (data.entry_id) {
+    html += '<div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">' +
+      '<a href="/hr/documents/arhiva/' + data.entry_id + '/preview/" target="_blank" class="btn-ghost" style="font-size:.82rem"><i class="fas fa-eye"></i> Pregled dokumenta</a>' +
+      '<a href="/hr/documents/arhiva/' + data.entry_id + '/download/" class="btn-ghost" style="font-size:.82rem"><i class="fas fa-download"></i> Preuzmi</a>' +
+      '</div>';
   }
   document.getElementById('resultExtras').innerHTML = html;
 
+  var archiveUrl = data.entry_id ? URL_ARHIVA + '?highlight=' + data.entry_id : URL_ARHIVA;
   document.getElementById('resultActions').innerHTML =
     '<button onclick="resetForm()" class="btn-gold"><i class="fas fa-redo"></i> Nova konverzija</button>' +
-    '<a href="' + URL_ARHIVA + '" class="btn-ghost"><i class="fas fa-archive"></i> Otvori arhivu</a>';
+    '<a href="' + archiveUrl + '" class="btn-ghost"><i class="fas fa-archive"></i> Otvori arhivu</a>';
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function setStage(n, allDone) {
   for (var i = 1; i <= 5; i++) {
     var s = document.getElementById('st' + i);
+    if (!s) continue;
     s.className = 'stage';
     if (allDone) s.classList.add('done');
     else if (i < n) s.classList.add('done');
@@ -207,10 +303,7 @@ function startQRScan() {
     document.getElementById('qrModal').style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
 
-    // Start polling every 2 sec
     _qrPollInterval = setInterval(pollForScan, 2000);
-
-    // Countdown
     _qrCountdown = setInterval(function() {
       _qrSeconds--;
       var m = Math.floor(_qrSeconds / 60);
@@ -254,11 +347,17 @@ function cancelQRScan() {
 
 function resetForm() {
   _files = [];
-  fin.value = ''; cam.value = '';
+  _mergeMode = false;
+  if (fin) fin.value = '';
+  if (cam) cam.value = '';
   document.getElementById('uploadArea').style.display = '';
   document.getElementById('imgPreview').style.display = 'none';
   document.getElementById('cvProgress').style.display = 'none';
   document.getElementById('cvResult').style.display = 'none';
+  var mergeRow = document.getElementById('mergeToggleRow');
+  if (mergeRow) mergeRow.style.display = 'none';
+  var mergeBtn = document.getElementById('btnMergeToggle');
+  if (mergeBtn) { mergeBtn.classList.remove('active'); mergeBtn.innerHTML = '<i class="fas fa-copy"></i> Odvojeni dokumenti'; }
   setStage(1);
   window.scrollTo({top:0, behavior:'smooth'});
 }
