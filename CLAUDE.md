@@ -54,6 +54,27 @@ najvažniji prioritet i počni. Ne pitaj — radi.
 | /no-limit/ | NO LIMIT azil landing |
 | /client/<uuid:token>/ | Klijentski portal (bez logina, token) |
 
+## ARHITEKTURA SERVERA (PROČITAJ UVIJEK PRVI)
+
+```
+SERVER: 37.27.248.86 | ssh -p 2222 root@37.27.248.86
+
+SUSTAV 1 — Fenix V3:    v3.limit-connect.com → /var/www/fenix-v3/   → gunicorn-fenix-v3 :8001
+SUSTAV 2 — Stari ERP:   fina-connect.online  → /var/www/fina-connect/ → gunicorn-fina (unix)
+
+BAZE (Stari ERP):
+  fina_erp     → PgBouncer :6432  ← CONN_MAX_AGE=0 obavezno!
+  memio_pets   → direktno  :5432
+  memio_farm   → direktno  :5432
+  memio_world  → direktno  :5432
+
+REDIS: 127.0.0.1:6379/1 (dijele oba sustava)
+Reload: systemctl reload gunicorn-fina.service
+Detalji: /var/www/fenix-v3/FENIX_ZAKON.md — Zakon 13
+```
+
+---
+
 ## KONTEKST
 
 - Projekt: LIMIT Connect (Django 5.1, PostgreSQL, Redis, Celery)

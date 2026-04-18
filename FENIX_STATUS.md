@@ -1,4 +1,19 @@
 # FENIX PORTAL — STATUS NAPRETKA
+
+## ⚡ ARHITEKTURA SERVERA — UVIJEK AKTUALNO
+
+| | Fenix V3 (NOVO) | Stari ERP (ovaj) |
+|---|---|---|
+| Domena | `v3.limit-connect.com` | `fina-connect.online` |
+| Dir | `/var/www/fenix-v3/` | `/var/www/fina-connect/` |
+| Servis | `gunicorn-fenix-v3` port 8001 | `gunicorn-fina` unix socket |
+| Baza | `fenix_v3_clean` direktno :5432 | `fina_erp` PgBouncer :6432 |
+| Redis | `127.0.0.1:6379/1` | ← dijele oba! |
+
+> Detalji → `/var/www/fenix-v3/FENIX_ZAKON.md` Zakon 13
+
+---
+
 > Zadnji update: 2026-04-18 (Dan 52), commit e6943688 — Domain split + Cluster Module Gate LIVE
 
 ---

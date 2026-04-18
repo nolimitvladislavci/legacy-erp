@@ -380,3 +380,31 @@ Nikad agenti sami ne mijenjaju pravila.
 *"Mi smo primjer drugima. Oni će po našem primjeru kopirati nas,
 a mi ćemo biti živi organizam koji se neprestano razvija."*
 — Ivan Brtan, 2026-04-17, 08:49 CEST
+
+---
+
+## PRAVILO — ARHITEKTURA SERVERA (UVIJEK PROČITAJ PRVO)
+
+```
+SERVER:  37.27.248.86 (Hetzner) | ssh -p 2222 root@37.27.248.86
+
+┌─────────────────────────────────────────────────────────┐
+│  SUSTAV 1: Fenix V3          │  SUSTAV 2: Stari ERP     │
+│  Domena: v3.limit-connect.com│  Domena: fina-connect.online │
+│  Dir:    /var/www/fenix-v3/  │  Dir: /var/www/fina-connect/ │
+│  SVC:    gunicorn-fenix-v3   │  SVC: gunicorn-fina      │
+│  Port:   8001                │  Port: unix socket       │
+│  DB:     fenix_v3_clean      │  DB: fina_erp (PgBouncer)│
+│  Kod:    13× MANJI           │  DB2: memio_pets/farm/world│
+└─────────────────────────────────────────────────────────┘
+
+BAZE (ovaj sustav — Stari ERP):
+  default     → fina_erp       (PgBouncer :6432, CONN_MAX_AGE=0 !)
+  memio_pets  → memio_pets     (direktno :5432)
+  memio_farm  → memio_farm     (direktno :5432)
+  memio_world → memio_world    (direktno :5432)
+
+REDIS: 127.0.0.1:6379/1  (dijele oba sustava — koristiti prefikse!)
+
+Detalji → /var/www/fenix-v3/FENIX_ZAKON.md (Zakon 13)
+```
