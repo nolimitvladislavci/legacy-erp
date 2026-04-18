@@ -68,7 +68,9 @@ BAZE (Stari ERP):
   memio_farm   → direktno  :5432
   memio_world  → direktno  :5432
 
-REDIS: 127.0.0.1:6379/1 (dijele oba sustava)
+REDIS: 127.0.0.1:6379
+  /1 → fina-connect cache | /2 → fina-connect Celery broker | /3 → results
+  /4 → fenix-v3 Celery broker (odvojeno!)
 Reload: systemctl reload gunicorn-fina.service
 Detalji: /var/www/fenix-v3/FENIX_ZAKON.md — Zakon 13
 ```
