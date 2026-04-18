@@ -848,7 +848,7 @@ class LicenseCheckMiddleware:
 class DomainGateMiddleware:
     """
     Svaka domena ima pristup samo relevantnim URL-ovima.
-    limit-connect.com / fina-connect.online → sve (master domene)
+    fina-connect.online → sve (master domena ovog ERP-a, Stari softver)
     memio.farm → livestock, azili, dashboard, accounts, static/media
     memio.pet → memio_pet, boxgram, accounts, static/media
     no-limit.world → no_limit landing, static/media
@@ -1012,11 +1012,7 @@ class DomainGateMiddleware:
         path = request.path
 
         # Master domain — no restrictions
-        if (
-            "limit-connect.com" in host
-            or "fina-connect.online" in host
-            or host in ("localhost", "127.0.0.1", "37.27.248.86")
-        ):
+        if "fina-connect.online" in host or host in ("localhost", "127.0.0.1", "37.27.248.86"):
             request.domain_name = host
             request.domain_restricted = False
             return self.get_response(request)

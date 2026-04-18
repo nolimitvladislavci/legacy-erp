@@ -24,9 +24,9 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = [
     "evalidator.eu",
     "www.evalidator.eu",
-    "limit-connect.com",
-    "www.limit-connect.com",
-    # ".limit-connect.com",  # wildcard uklonjen — koristiti eksplicitnu listu
+    # limit-connect.com → Fenix V3 sustav (drugi server/app)
+    # "limit-connect.com",
+    # "www.limit-connect.com",
     "viskovic-group.de",
     "www.viskovic-group.de",
     "37.27.248.86",
@@ -57,8 +57,8 @@ DEEPSEEK_SPECIALE_MODEL_ID = os.environ.get("DEEPSEEK_SPECIALE_MODEL_ID", "deeps
 QR_HMAC_SECRET = os.environ.get("QR_HMAC_SECRET", SECRET_KEY)  # Uvijek HTTPS, bez trailing slash
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://limit-connect.com",
-    "https://www.limit-connect.com",
+    # "https://limit-connect.com",  # Fenix V3 — drugi sustav
+    # "https://www.limit-connect.com",
     "https://viskovic-group.de",
     # http://37.27.248.86 — UKLONJENO: HTTP origin nije dozvoljen u produkciji
     "https://www.viskovic-group.de",
@@ -445,8 +445,8 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "25"))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@limit-connect.com")
-ADMINS = [("Admin", os.environ.get("ADMIN_EMAIL", "admin@limit-connect.com"))]
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@fina-connect.online")
+ADMINS = [("Admin", os.environ.get("ADMIN_EMAIL", "admin@fina-connect.online"))]
 
 # ── Password validators ───────────────────────────────────────
 AUTHENTICATION_BACKENDS = [
