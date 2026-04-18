@@ -378,6 +378,17 @@ def arhiva_list(request):
         for le in labeled_entries:
             entry_labels[le.id] = list(le.labels.all())
 
+    # Scan result preview card — shown when ?highlight=<pk> present (after upload/scan)
+    highlight_id = request.GET.get("highlight", "")
+    highlight_entry = None
+    if highlight_id:
+        try:
+            _he = ArhivaEntry.objects.unscoped().get(pk=int(highlight_id))
+            if is_superadmin or (_he.company == get_user_company(request)):
+                highlight_entry = _he
+        except (ArhivaEntry.DoesNotExist, ValueError, TypeError):
+            pass
+
     context = {
         "page_obj": page,
         "entries": page,
@@ -410,6 +421,7 @@ def arhiva_list(request):
         "labels": labels,
         "label_filter": label_filter,
         "entry_labels": entry_labels,
+        "highlight_entry": highlight_entry,
     }
 
     # HTMX partial rendering — return only the table + pagination

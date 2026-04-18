@@ -356,10 +356,212 @@
     .label-dropdown { left: auto; right: 0; }
 }
 
+/* ── Predforma (scan result preview card) ─────────────────── */
+.predforma {
+    background: var(--bg-card);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(201,168,76,.15);
+    animation: predformaIn .35s cubic-bezier(.22,1,.36,1);
+}
+@keyframes predformaIn {
+    from { opacity:0; transform:translateY(-12px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.predforma-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(201,168,76,.09);
+    border-bottom: 1px solid rgba(201,168,76,.25);
+}
+.predforma-header h4 {
+    margin: 0; font-size: .95rem; font-weight: 700;
+    color: var(--gold); display: flex; align-items: center; gap: 8px;
+}
+.predforma-body {
+    display: flex; gap: 0; align-items: stretch;
+}
+.predforma-img-col {
+    flex: 0 0 180px; max-width: 220px;
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 220px;
+    cursor: pointer;
+    position: relative; overflow: hidden;
+}
+.predforma-img-col img {
+    width: 100%; height: 100%; object-fit: contain;
+    transition: transform .2s;
+}
+.predforma-img-col:hover img { transform: scale(1.04); }
+.predforma-img-zoom {
+    position: absolute; bottom: 6px; right: 6px;
+    background: rgba(0,0,0,.55); color: #fff; border-radius: 5px;
+    padding: 2px 7px; font-size: .72rem; pointer-events: none;
+}
+.predforma-no-img {
+    width: 180px; min-height: 220px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--text-muted); background: var(--bg-alt, #111);
+    font-size: .82rem;
+}
+.predforma-meta-col {
+    flex: 1; padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.predforma-meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+}
+.predforma-field { display: flex; flex-direction: column; gap: 2px; }
+.predforma-field .lbl {
+    font-size: .68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--text-muted);
+}
+.predforma-field .val {
+    font-size: .9rem; font-weight: 600; color: var(--text);
+}
+.predforma-field .val.gold { color: var(--gold); }
+.predforma-actions {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 4px;
+}
+.predforma-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px; font-size: .82rem; font-weight: 600;
+    cursor: pointer; text-decoration: none; border: none; transition: all .15s;
+}
+.predforma-btn.primary {
+    background: var(--gold); color: var(--text);
+}
+.predforma-btn.primary:hover { opacity: .85; color: var(--text); }
+.predforma-btn.secondary {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+.predforma-btn.secondary:hover { border-color: var(--gold); color: var(--gold); }
+.predforma-btn.danger {
+    background: transparent; border: 1px solid rgba(239,68,68,.3);
+    color: #ef4444;
+}
+.predforma-btn.danger:hover { background: rgba(239,68,68,.08); }
+@media (max-width: 640px) {
+    .predforma-body { flex-direction: column; }
+    .predforma-img-col { flex: unset; width: 100%; max-width: 100%; min-height: 180px; }
+    .predforma-meta-grid { grid-template-columns: 1fr; }
+}
+
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid" class="fx-py-1">
+
+{% if highlight_entry %}
+<!-- ══════════════════════════════════════════════════
+     PREDFORMA — Scan Result Preview Card
+════════════════════════════════════════════════════ -->
+<div class="predforma" id="predformaCard">
+  <div class="predforma-header">
+    <h4>
+      <i class="fas fa-check-circle"></i>
+      {% trans "Dokument pohranjen" %} — {{ highlight_entry.archive_number|default:highlight_entry.doc_number }}
+    </h4>
+    <div style="display:flex;gap:8px;align-items:center">
+      {% if highlight_entry.ai_status == "done" %}
+        <span style="background:rgba(16,185,129,.12);color:#10b981;border-radius:20px;padding:3px 10px;font-size:.75rem;font-weight:700">
+          <i class="fas fa-robot"></i> AI ✓
+        </span>
+      {% elif highlight_entry.ai_status == "pending" or highlight_entry.ai_status == "processing" %}
+        <span style="background:rgba(201,168,76,.1);color:var(--gold);border-radius:20px;padding:3px 10px;font-size:.75rem;font-weight:700">
+          <i class="fas fa-spinner fa-spin"></i> AI analiza...
+        </span>
+      {% endif %}
+      <button onclick="closePredforma()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1.1rem;padding:2px 6px" title="Zatvori">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+  <div class="predforma-body">
+    <!-- Slika -->
+    {% if highlight_entry.has_image and highlight_entry.file_path %}
+    <div class="predforma-img-col"
+         onclick="openPreviewModal('{% url "documents:arhiva_preview" pk=highlight_entry.pk %}', '{{ highlight_entry.doc_number|escapejs }}', 'image')"
+         title="Klikni za pregled pune slike">
+      <img src="{% url 'documents:arhiva_preview' pk=highlight_entry.pk %}"
+           alt="Skeniran dokument"
+           loading="lazy">
+      <span class="predforma-img-zoom"><i class="fas fa-search-plus"></i> Povećaj</span>
+    </div>
+    {% elif highlight_entry.has_pdf %}
+    <div class="predforma-img-col"
+         onclick="openPreviewModal('{% url "documents:arhiva_preview" pk=highlight_entry.pk %}', '{{ highlight_entry.doc_number|escapejs }}', 'pdf')"
+         title="Klikni za pregled PDF-a"
+         style="background:var(--bg-alt,#111)">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--text-muted)">
+        <i class="fas fa-file-pdf" style="font-size:3rem;color:#ef4444;opacity:.8"></i>
+        <span style="font-size:.78rem">PDF dokument</span>
+        <span class="predforma-img-zoom" style="position:static;background:rgba(201,168,76,.15);color:var(--gold)"><i class="fas fa-search-plus"></i> Pregled</span>
+      </div>
+    </div>
+    {% else %}
+    <div class="predforma-no-img">
+      <i class="fas fa-file-alt" style="font-size:2.5rem;opacity:.3"></i>
+      <span>{% trans "Bez priložene slike" %}</span>
+    </div>
+    {% endif %}
+
+    <!-- Metapodaci -->
+    <div class="predforma-meta-col">
+      <div class="predforma-meta-grid">
+        <div class="predforma-field">
+          <span class="lbl">{% trans "Partner" %}</span>
+          <span class="val">{{ highlight_entry.partner_name|default:"—" }}</span>
+        </div>
+        <div class="predforma-field">
+          <span class="lbl">{% trans "Iznos" %}</span>
+          <span class="val gold">{{ highlight_entry.amount|floatformat:2 }} {{ highlight_entry.currency }}</span>
+        </div>
+        <div class="predforma-field">
+          <span class="lbl">{% trans "Datum dokumenta" %}</span>
+          <span class="val">{{ highlight_entry.doc_date|date:"d.m.Y" }}</span>
+        </div>
+        <div class="predforma-field">
+          <span class="lbl">{% trans "Tip" %}</span>
+          <span class="val">{{ highlight_entry.get_source_type_display }}</span>
+        </div>
+        {% if highlight_entry.ai_status_message %}
+        <div class="predforma-field" style="grid-column:1/-1">
+          <span class="lbl"><i class="fas fa-robot"></i> {% trans "AI status" %}</span>
+          <span class="val" style="font-weight:400;font-size:.83rem;color:var(--text-secondary)">{{ highlight_entry.ai_status_message|truncatechars:140 }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="predforma-actions">
+        <button onclick="openDrawer({{ highlight_entry.pk }}); closePredforma();"
+                class="predforma-btn primary">
+          <i class="fas fa-edit"></i> {% trans "Uredi metapodatke" %}
+        </button>
+        <a href="{% url 'documents:arhiva_convert' %}"
+           class="predforma-btn secondary">
+          <i class="fas fa-camera"></i> {% trans "Skeniraj sljedeću stranicu" %}
+        </a>
+        {% if highlight_entry.has_image or highlight_entry.has_pdf %}
+        <button onclick="openPreviewModal('{% url "documents:arhiva_preview" pk=highlight_entry.pk %}', '{{ highlight_entry.doc_number|escapejs }}', '{% if highlight_entry.has_pdf %}pdf{% else %}image{% endif %}')"
+                class="predforma-btn secondary">
+          <i class="fas fa-eye"></i> {% trans "Prikaži" %}
+        </button>
+        {% endif %}
+        <button onclick="closePredforma()" class="predforma-btn danger">
+          <i class="fas fa-times"></i> {% trans "Zatvori" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
     <div class="arhiva-header">
         <div>
@@ -1703,6 +1905,16 @@ window.closeDrawer = function() {
 };
 // ═══════════════════════════════════════════════════════════════════
 
+// ─── PREDFORMA close ─────────────────────────────────────────────────
+function closePredforma() {
+  var card = document.getElementById('predformaCard');
+  if (!card) return;
+  card.style.transition = 'opacity .25s, transform .25s';
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(-8px)';
+  setTimeout(function() { card.remove(); }, 260);
+}
+
 // ─── HIGHLIGHT novog unosa nakon uploada (?highlight=<pk>) ───────────
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -1729,9 +1941,11 @@ window.closeDrawer = function() {
         row.style.background = '';
         row.style.outline = '';
       }, 4000);
-      // Otvori drawer za novi unos
+      // Otvori drawer samo ako predforma nije prikazana
       setTimeout(function() {
-        if (typeof openDrawer === 'function') openDrawer(hid);
+        if (typeof openDrawer === 'function' && !document.getElementById('predformaCard')) {
+          openDrawer(hid);
+        }
       }, 600);
     }
   }
