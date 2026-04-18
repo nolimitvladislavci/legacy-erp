@@ -553,8 +553,27 @@ def arhiva_upload(request):
             except ImportError as ai_err:
                 logger.warning("arhiva_upload: AI trigger failed: %s", ai_err)
 
+            # AJAX response — vraca JSON umjesto redirecta
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse(
+                    {
+                        "ok": True,
+                        "entry_id": str(entry.pk),
+                        "archive_number": entry.archive_number or "",
+                        "partner": entry.partner_name or "",
+                        "amount": str(entry.amount) if entry.amount else "",
+                        "doc_date": str(entry.doc_date) if entry.doc_date else "",
+                        "ai_status": entry.ai_status,
+                        "redirect": f"/hr/documents/arhiva/?highlight={entry.pk}",
+                    }
+                )
+
         except (ValueError, TypeError) as e:
             logger.error("arhiva_upload FAILED: %s", e, exc_info=True)
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse(
+                    {"ok": False, "error": _("Upload nije uspio. Provjerite format datoteke.")}, status=400
+                )
             messages.error(request, _("Upload nije uspio. Provjerite format datoteke i pokušajte ponovo."))
 
         return redirect("documents:arhiva_list")

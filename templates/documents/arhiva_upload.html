@@ -195,69 +195,7 @@
   </form>
 </div>
 
-<div id="camera-preview" class="fx-hidden"></div>
-<script src="/static/js/arhiva-upload.js"></script>
-<script src="/static/js/fenix-scan.js"></script>
-<script>
-FenixScan.create({
-  container: '#scan-invoice',
-  docType: 'invoice',
-  maxImages: 3,
-  label: 'Slikaj racun',
-  hint: 'Visestranicni racuni: dodajte sve stranice',
-  fieldMap: {
-    broj_racuna: '#doc_number',
-    partner: '#partner_name',
-    ukupno: '#amount',
-    datum: '#doc_date',
-  },
-  onResult: function(fields, confidence) {
-    // Auto-open details section if AI filled fields
-    if (fields.partner || fields.ukupno) {
-      var details = document.querySelector('details');
-      if (details) details.open = true;
-    }
-  }
-});
-// Manual edit guard
-['doc_number','partner_name','amount','doc_date'].forEach(function(id) {
-  var el = document.getElementById(id);
-  if (el) el.addEventListener('input', function() {
-    if (this.dataset.aiGenerated !== '1') this.dataset.manualEdit = '1';
-    this.dataset.aiGenerated = '0';
-  });
-});
-</script>
-<script>
-function fenixCameraCapture() {
-  if (window.FenixCamera) {
-    FenixCamera.quick('camera-preview', {
-      onReady: function(r) { handleFenixResult(r); }
-    });
-  } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    // Moderan pristup — direktno otvori kameru
-    document.getElementById('fileInputCamera').setAttribute('capture', 'environment');
-    document.getElementById('fileInputCamera').click();
-  } else {
-    // Fallback za stare browsere
-    document.getElementById('fileInputCamera').click();
-  }
-}
-
-function handleFenixResult(r) {
-  var byteString = atob(r.b64);
-  var ab = new ArrayBuffer(byteString.length);
-  var ia = new Uint8Array(ab);
-  for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-  var blob = new Blob([ab], {type: 'image/jpeg'});
-  var file = new File([blob], r.filename || 'fenix-photo.jpg', {type: 'image/jpeg'});
-  var dt = new DataTransfer();
-  dt.items.add(file);
-  var mainInput = document.getElementById('fileInputMain');
-  mainInput.files = dt.files;
-  handleFile(mainInput);
-}
-</script>
+<div id="camera-preview" style="display:none"></div>
 
 <style>
 @keyframes shake {
@@ -270,34 +208,223 @@ function handleFenixResult(r) {
 
 {% block extra_js %}
 <script>
-var _camStream=null;
-function openLiveCamera(){
-  var modal=document.getElementById('liveCamModal');
-  var video=document.getElementById('liveCamVideo');
-  modal.style.display='block';
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
-    .then(function(stream){_camStream=stream;video.srcObject=stream;})
-    .catch(function(err){
-      modal.style.display='none';
+/* ================================================
+   FENIX ARHIVA UPLOAD — kompletna logika
+   Preview → AJAX upload → Progress → OCR prikaz → Redirect
+   ================================================ */
+
+var _selectedFile = null;
+var _camStream = null;
+
+/* --- FILE PREVIEW --- */
+function handleFile(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  _selectedFile = file;
+
+  var dropContent = document.getElementById('dropContent');
+  var filePreview = document.getElementById('filePreview');
+  var previewImage = document.getElementById('previewImage');
+  var previewName = document.getElementById('previewName');
+  var previewSize = document.getElementById('previewSize');
+
+  previewName.textContent = file.name;
+  previewSize.textContent = (file.size / 1024).toFixed(1) + ' KB · ' + (file.type || 'nepoznat tip');
+
+  if (file.type.startsWith('image/')) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      previewImage.innerHTML = '<img src="' + e.target.result + '" style="max-width:220px;max-height:160px;border-radius:8px;border:2px solid var(--gold)">';
+    };
+    reader.readAsDataURL(file);
+  } else if (file.name.toLowerCase().endsWith('.pdf')) {
+    previewImage.innerHTML = '<div style="font-size:3rem">📄</div>';
+  } else {
+    previewImage.innerHTML = '<div style="font-size:3rem">📁</div>';
+  }
+
+  dropContent.classList.add('fx-hidden');
+  dropContent.style.display = 'none';
+  filePreview.classList.remove('fx-hidden');
+  filePreview.style.display = 'block';
+}
+
+function clearFile() {
+  _selectedFile = null;
+  document.getElementById('fileInputMain').value = '';
+  document.getElementById('fileInputCamera').value = '';
+  var dropContent = document.getElementById('dropContent');
+  var filePreview = document.getElementById('filePreview');
+  dropContent.style.display = 'block';
+  filePreview.style.display = 'none';
+}
+
+/* --- AJAX FORM SUBMIT s progress animacijom --- */
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+  if (!_selectedFile) return; // standardni submit ako nema fajla
+  e.preventDefault();
+  submitAjax();
+});
+
+function submitAjax() {
+  var form = document.getElementById('uploadForm');
+  var fd = new FormData(form);
+
+  // Osiguraj da je file u FormData (može biti iz kamere)
+  if (_selectedFile) {
+    fd.set('file', _selectedFile);
+  }
+
+  // Prikaži progress
+  var progressSection = document.getElementById('progressSection');
+  var progressBar = document.getElementById('progressBar');
+  var step1 = document.getElementById('step1');
+  var step2 = document.getElementById('step2');
+  var step3 = document.getElementById('step3');
+  var step4 = document.getElementById('step4');
+
+  progressSection.classList.remove('fx-hidden');
+  progressSection.style.display = 'block';
+  document.getElementById('filePreview').style.display = 'none';
+
+  var goldStyle = 'color:var(--gold);font-weight:700';
+  var dimStyle  = 'color:var(--text-muted)';
+
+  // Korak 1: Upload
+  step1.style.cssText = goldStyle; step1.textContent = '① Prijenos...';
+  progressBar.style.width = '25%';
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', form.action || window.location.pathname, true);
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+  xhr.upload.onprogress = function(e) {
+    if (e.lengthComputable) {
+      var pct = Math.round((e.loaded / e.total) * 40) + 25;
+      progressBar.style.width = pct + '%';
+    }
+  };
+
+  xhr.upload.onload = function() {
+    // Korak 2: AI čita
+    step1.textContent = '① Prijenos ✓';
+    step2.style.cssText = goldStyle; step2.textContent = '② AI čita...';
+    progressBar.style.width = '65%';
+  };
+
+  xhr.onload = function() {
+    if (xhr.status >= 200 && xhr.status < 300) {
+      var data;
+      try { data = JSON.parse(xhr.responseText); } catch(err) { fallbackRedirect(); return; }
+
+      if (data.ok) {
+        // Korak 3: Arhivirano
+        step2.textContent = '② AI ✓';
+        step3.style.cssText = goldStyle; step3.textContent = '③ Arhivirano!';
+        progressBar.style.width = '85%';
+
+        // Prikaži OCR rezultat
+        setTimeout(function() {
+          step4.style.cssText = goldStyle; step4.textContent = '④ Gotovo ✓';
+          progressBar.style.width = '100%';
+
+          // OCR sažetak ispod progress bara
+          var summary = '';
+          if (data.archive_number) summary += '<span style="color:var(--gold);font-weight:700">Redni broj: ' + esc(data.archive_number) + '</span>';
+          if (data.partner) summary += ' &nbsp;·&nbsp; ' + esc(data.partner);
+          if (data.amount && data.amount !== '0') summary += ' &nbsp;·&nbsp; ' + esc(data.amount) + ' EUR';
+          if (data.doc_date) summary += ' &nbsp;·&nbsp; ' + esc(data.doc_date);
+
+          if (summary) {
+            var info = document.createElement('div');
+            info.style.cssText = 'margin-top:.75rem;font-size:.85rem;color:var(--text-muted);text-align:center';
+            info.innerHTML = summary;
+            progressSection.appendChild(info);
+          }
+
+          // Redirect na popis s highlight
+          setTimeout(function() {
+            window.location.href = data.redirect || '/hr/documents/arhiva/';
+          }, 1800);
+        }, 800);
+
+      } else {
+        showError(data.error || 'Greška pri uploadu.');
+      }
+    } else {
+      try {
+        var errData = JSON.parse(xhr.responseText);
+        showError(errData.error || 'Server greška (' + xhr.status + ')');
+      } catch(e) { showError('Server greška (' + xhr.status + ')'); }
+    }
+  };
+
+  xhr.onerror = function() { showError('Mreža nedostupna. Provjerite internet.'); };
+
+  xhr.send(fd);
+}
+
+function showError(msg) {
+  var progressSection = document.getElementById('progressSection');
+  progressSection.innerHTML = '<div style="color:var(--red);padding:.75rem;text-align:center;font-weight:600">⚠ ' + esc(msg) + '</div>' +
+    '<button type="button" onclick="location.reload()" style="display:block;margin:.75rem auto 0;background:var(--gold);color:#000;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-weight:700">Pokušaj ponovo</button>';
+}
+
+function fallbackRedirect() { window.location.href = '/hr/documents/arhiva/'; }
+function esc(s) { var d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
+
+/* --- DRAG & DROP --- */
+var dropZone = document.getElementById('dropZone');
+if (dropZone) {
+  dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.style.borderColor='var(--gold)'; });
+  dropZone.addEventListener('dragleave', function() { dropZone.style.borderColor=''; });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault(); dropZone.style.borderColor='';
+    var files = e.dataTransfer.files;
+    if (files.length) {
+      var dt = new DataTransfer(); dt.items.add(files[0]);
+      var input = document.getElementById('fileInputMain');
+      input.files = dt.files;
+      handleFile(input);
+    }
+  });
+  dropZone.addEventListener('click', function(e) {
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return;
+    document.getElementById('fileInputMain').click();
+  });
+}
+
+/* --- LIVE CAMERA --- */
+function openLiveCamera() {
+  var modal = document.getElementById('liveCamModal');
+  var video = document.getElementById('liveCamVideo');
+  modal.style.display = 'block';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:false})
+    .then(function(stream) { _camStream = stream; video.srcObject = stream; })
+    .catch(function() {
+      modal.style.display = 'none';
       document.getElementById('fileInputCamera').click();
     });
 }
-function liveCamSnap(){
-  var video=document.getElementById('liveCamVideo');
-  var canvas=document.getElementById('liveCamCanvas');
-  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-  canvas.getContext('2d').drawImage(video,0,0);
-  canvas.toBlob(function(blob){
-    var file=new File([blob],'foto-'+Date.now()+'.jpg',{type:'image/jpeg'});
-    var dt=new DataTransfer();dt.items.add(file);
-    document.getElementById('fileInputMain').files=dt.files;
-    document.getElementById('fileInputMain').dispatchEvent(new Event('change'));
+
+function liveCamSnap() {
+  var video  = document.getElementById('liveCamVideo');
+  var canvas = document.getElementById('liveCamCanvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(function(blob) {
+    var file = new File([blob], 'kamera-' + Date.now() + '.jpg', {type:'image/jpeg'});
+    var dt = new DataTransfer(); dt.items.add(file);
+    var input = document.getElementById('fileInputMain');
+    input.files = dt.files;
+    handleFile(input);
     liveCamClose();
-  },'image/jpeg',0.85);
+  }, 'image/jpeg', 0.88);
 }
-function liveCamClose(){
-  document.getElementById('liveCamModal').style.display='none';
-  if(_camStream){_camStream.getTracks().forEach(function(t){t.stop()});_camStream=null;}
+
+function liveCamClose() {
+  document.getElementById('liveCamModal').style.display = 'none';
+  if (_camStream) { _camStream.getTracks().forEach(function(t){t.stop()}); _camStream = null; }
 }
 </script>
 {% endblock %}

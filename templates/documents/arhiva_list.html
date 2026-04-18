@@ -1592,6 +1592,43 @@ window.closeDrawer = function() {
 };
 // ═══════════════════════════════════════════════════════════════════
 
+// ─── HIGHLIGHT novog unosa nakon uploada (?highlight=<pk>) ───────────
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var hid = params.get('highlight');
+  if (!hid) return;
+
+  // Ukloni ?highlight iz URL-a (clean URL)
+  params.delete('highlight');
+  var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+  history.replaceState(null, '', newUrl);
+
+  // Nađi red u tablici i označi ga
+  function applyHighlight() {
+    var row = document.querySelector('tr[data-id="' + hid + '"]');
+    if (row) {
+      row.scrollIntoView({behavior:'smooth', block:'center'});
+      row.style.transition = 'background .3s';
+      row.style.background = 'rgba(201,168,76,.18)';
+      row.style.outline = '2px solid var(--gold)';
+      row.style.outlineOffset = '-2px';
+      // Fade out nakon 4s
+      setTimeout(function() {
+        row.style.transition = 'background 1.5s, outline 1.5s';
+        row.style.background = '';
+        row.style.outline = '';
+      }, 4000);
+      // Otvori drawer za novi unos
+      setTimeout(function() {
+        if (typeof openDrawer === 'function') openDrawer(hid);
+      }, 600);
+    }
+  }
+
+  // Pokušaj odmah, pa nakon 500ms ako tablica još nije renderirana
+  applyHighlight();
+  setTimeout(applyHighlight, 500);
+})();
 
 {% endblock %}
 {% include 'includes/_share_modal.html' %}
