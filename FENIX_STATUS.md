@@ -532,3 +532,26 @@ CP5 (07.05): Creative Europe demo spreman
 |-------|-------|--------|---------|-----|--------|---------|
 | 2026-04-16 | JUPUS GmbH | DE (Köln) | hello@jupus.de | API korisnik | 📋 Na čekanju — pismo namjere kad batch API bude gotov | AI LegalTech platforma za odvjetnike u DE. Trebaju validaciju OIB/IBAN za HR klijente. HTGF-financirani, 15 zaposlenih, 200+ upita/dan. Kontakt inicirati Q3 2026 kad evalidator.eu ima batch API. |
 
+
+---
+
+## SESIJA 2026-04-18 (CC Sonnet — nastavak)
+
+### Commit log:
+| Commit | Opis |
+|--------|------|
+| ad40054d | fix(static): KRITIČNO — restaurirani svi CSS/JS fajlovi (50 fajlova) obrisani u Antonio test sesiji |
+| af3ff0c6 | feat(games): Čovječe redesign + iOS memory fix + kviz score bugfix |
+
+### Root cause login blokade:
+- Commit 6337920c obrisao sve static/css/ i static/js/ fajlove (50 ukupno)
+- fenix-tokens.css 404 → `.fx-hidden` klasa nedefinirana
+- #docScanModal (base.html:483) dobio `position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999` bez display:none
+- Rezultat: crna podloga + zlatni OCR spinner prekrio cijeli ekran na svakoj stranici
+- Fix: git checkout 1462a933 -- static/css/ static/js/ → svi fajlovi restaurirani
+
+### Iduća sesija:
+- ARHIVA-3: rclone OneDrive backend
+- POS free tier: Marija Čačić pilot
+- Slovarica fix (CC_TASK_SLOVARICA_FIX.md)
+- Slikovnice: PLAN_SLIKOVNICE.md Glava 1 Backend (rok CP1: 2026-04-20)
