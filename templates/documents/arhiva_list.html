@@ -1045,13 +1045,22 @@ function openPreview(entryId, docNumber) {
                 return;
             }
             if(info.file_type==='image'){
-                body.innerHTML='<img src="'+previewUrl+'" alt="'+(docNumber||'')+'">';
+                body.innerHTML='<img src="'+previewUrl+'" alt="'+(docNumber||'')+'"">';
+            } else if(info.file_type==='pdf' || info.file_type==='invoice'){
+                body.innerHTML=
+                    '<object data="'+previewUrl+'" type="application/pdf" width="100%" height="100%" style="border:none">'+
+                    '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1rem;color:#94a3b8">'+
+                    '<i class="fas fa-file-pdf" style="font-size:3rem;color:#ef4444"></i>'+
+                    '<p>PDF pregled nije podržan u ovom pregledniku.</p>'+
+                    '<a href="'+previewUrl+'" download class="preview-modal-btn" style="color:#c9a84c;border-color:#c9a84c"><i class="fas fa-download"></i> Preuzmi PDF</a>'+
+                    '<a href="'+previewUrl+'" target="_blank" class="preview-modal-btn"><i class="fas fa-external-link-alt"></i> Otvori u novom tabu</a>'+
+                    '</div></object>';
             } else {
-                body.innerHTML='<iframe src="'+previewUrl+'" allowfullscreen></iframe>';
+                body.innerHTML='<iframe src="'+previewUrl+'" allowfullscreen style="width:100%;height:100%;border:none"></iframe>';
             }
         })
         .catch(function(){
-            body.innerHTML='<iframe src="'+previewUrl+'" allowfullscreen></iframe>';
+            body.innerHTML='<object data="'+previewUrl+'" type="application/pdf" width="100%" height="100%" style="border:none"><a href="'+previewUrl+'" target="_blank">Otvori dokument</a></object>';
         });
 }
 function closePreview(){
@@ -1067,13 +1076,23 @@ function openPreviewModal(url, title, type) {
     var titleEl = document.getElementById('previewTitle');
     var dlBtn = document.getElementById('previewDownloadBtn');
     var openBtn = document.getElementById('previewOpenBtn');
-    dlBtn.href = url;
+    dlBtn.href = url; dlBtn.download = title || 'dokument';
     openBtn.href = url;
     titleEl.textContent = title || 'Dokument';
     if (type === 'image') {
         body.innerHTML = '<img src="' + url + '" alt="' + (title || '') + '" style="max-width:100%;height:100%;object-fit:contain">';
+    } else if (type === 'pdf') {
+        // <object> je pouzdaniji od <iframe> za PDF — radi i na mobitelu
+        body.innerHTML =
+            '<object data="' + url + '" type="application/pdf" width="100%" height="100%" style="border:none">' +
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1rem;color:#94a3b8">' +
+            '<i class="fas fa-file-pdf" style="font-size:3rem;color:#ef4444"></i>' +
+            '<p>PDF pregled nije podržan u ovom pregledniku.</p>' +
+            '<a href="' + url + '" download class="preview-modal-btn" style="color:#c9a84c;border-color:#c9a84c"><i class="fas fa-download"></i> Preuzmi PDF</a>' +
+            '<a href="' + url + '" target="_blank" class="preview-modal-btn"><i class="fas fa-external-link-alt"></i> Otvori u novom tabu</a>' +
+            '</div></object>';
     } else {
-        body.innerHTML = '<iframe src="' + url + '" allowfullscreen></iframe>';
+        body.innerHTML = '<iframe src="' + url + '" allowfullscreen style="width:100%;height:100%;border:none"></iframe>';
     }
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
