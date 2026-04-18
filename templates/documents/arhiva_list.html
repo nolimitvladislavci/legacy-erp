@@ -875,6 +875,13 @@ function doProknjizi(entryId, dryRun){
         .catch(function(e){showToast('Mrezna greska: '+e.message,'danger');});
 }
 
+// ═══ PAGINACIJA ═══
+function gotoPage(num){
+    var params=new URLSearchParams(window.location.search);
+    params.set('page', num);
+    window.location.search=params.toString();
+}
+
 // ═══ SORT ═══
 function doSort(field){
     var params=new URLSearchParams(window.location.search);
@@ -986,6 +993,25 @@ function closePreview(){
     document.getElementById('previewBody').innerHTML='';
     document.body.style.overflow='';
     _previewCurrentId=null;
+}
+// Direktno otvaranje previewa s URL-om (za image ikonu u tablici)
+function openPreviewModal(url, title, type) {
+    var modal = document.getElementById('previewModal');
+    var body  = document.getElementById('previewBody');
+    var titleEl = document.getElementById('previewTitle');
+    var dlBtn = document.getElementById('previewDownloadBtn');
+    var openBtn = document.getElementById('previewOpenBtn');
+    dlBtn.href = url;
+    openBtn.href = url;
+    titleEl.textContent = title || 'Dokument';
+    if (type === 'image') {
+        body.innerHTML = '<img src="' + url + '" alt="' + (title || '') + '" style="max-width:100%;height:100%;object-fit:contain">';
+    } else {
+        body.innerHTML = '<iframe src="' + url + '" allowfullscreen></iframe>';
+    }
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    _previewCurrentId = null;
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&_previewCurrentId!==null)closePreview();});
 
