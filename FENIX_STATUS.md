@@ -1,5 +1,5 @@
 # FENIX PORTAL — STATUS NAPRETKA
-> Zadnji update: 2026-04-18 (Dan 52), commit ca85bfc1 — 3 Arhiva inovacije LIVE
+> Zadnji update: 2026-04-18 (Dan 52), commit e6943688 — Domain split + Cluster Module Gate LIVE
 
 ---
 
@@ -7,6 +7,7 @@
 
 | Datum | Agent | Fokus | Rezultat | Commit |
 |-------|-------|-------|----------|--------|
+| 2026-04-18 | CC Sonnet | Domain split + Cluster | fina-connect.online odvojen, ModuleGateMiddleware, admin inline, nginx fix | e6943688 |
 | 2026-04-18 | CC Sonnet | Arhiva bugfix marathon | Login fix (static restauriran), games redesign, arhiva bugfixes × 5, 3 arhiva inovacije | ad40054d→ca85bfc1 |
 | 2026-04-18 | CC Sonnet | Fenix V3 PLAN_029-042 | PLAN_031-033 DE Steuerberater+WAHA+DATEV, PLAN_035 invoiceBuilder, PLAN_036-039 UBL+PDF+Email+Payments, PLAN_040 ClientPortal, PLAN_041-042 Accounting+JournalUI — 35/71 DONE |
 | 2026-04-18 | CC Sonnet | evalidator 10/10 + Fenix V3 Arhiva | evalidator: CSS tokens, dark/light, i18n HR/EN/DE, OG meta, docs/pricing, 8 tests. Fenix V3: PLAN_025-028 Digitalna Arhiva LIVE (upload, FenixScan OCR, list+drawer). | e073b488/7336660 |
@@ -53,7 +54,9 @@
 ## PRIORITETI ZA SLJEDEĆU SESIJU
 
 ```
-1. ARHIVA-3 — rclone OneDrive backend (StorageConfig 'network')
+1. ✅ DONE — Domain split (fina-connect.online → port 8000 direktno)
+2. ✅ DONE — Cluster/Module Gate (ModuleGateMiddleware + admin inline)
+3. ARHIVA-3 — rclone OneDrive backend (StorageConfig 'network')
 2. POS free tier — Marija Čačić pilot (obrt kod kuće)
 3. Slovarica fix — CC_TASK_SLOVARICA_FIX.md (font Andika, canvas DPI, 30 MP3)
 4. Slikovnice — PLAN_SLIKOVNICE.md Glava 1 Backend (ROK CP1: 2026-04-20 ⚠)
