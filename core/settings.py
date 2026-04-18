@@ -24,9 +24,8 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = [
     "evalidator.eu",
     "www.evalidator.eu",
-    # limit-connect.com → Fenix V3 sustav (drugi server/app)
-    # "limit-connect.com",
-    # "www.limit-connect.com",
+    "limit-connect.com",
+    "www.limit-connect.com",
     "viskovic-group.de",
     "www.viskovic-group.de",
     "37.27.248.86",
@@ -57,8 +56,8 @@ DEEPSEEK_SPECIALE_MODEL_ID = os.environ.get("DEEPSEEK_SPECIALE_MODEL_ID", "deeps
 QR_HMAC_SECRET = os.environ.get("QR_HMAC_SECRET", SECRET_KEY)  # Uvijek HTTPS, bez trailing slash
 
 CSRF_TRUSTED_ORIGINS = [
-    # "https://limit-connect.com",  # Fenix V3 — drugi sustav
-    # "https://www.limit-connect.com",
+    "https://limit-connect.com",
+    "https://www.limit-connect.com",
     "https://viskovic-group.de",
     # http://37.27.248.86 — UKLONJENO: HTTP origin nije dozvoljen u produkciji
     "https://www.viskovic-group.de",

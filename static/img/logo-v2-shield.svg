@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8c96a"/>
+      <stop offset="100%" style="stop-color:#b89940"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield icon with circuit lines -->
+  <g transform="translate(16, 10)">
+    <!-- Shield shape -->
+    <path d="M45 4 L82 18 C82 18, 84 52, 74 72 C64 88, 45 96, 45 96 C45 96, 26 88, 16 72 C6 52, 8 18, 8 18 Z" 
+          fill="none" stroke="url(#g2)" stroke-width="3.5"/>
+    
+    <!-- Inner circuit — represents digital connectivity -->
+    <circle cx="45" cy="42" r="4" fill="#c9a84c"/>
+    <line x1="45" y1="46" x2="45" y2="62" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+    <line x1="45" y1="38" x2="45" y2="26" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+    <line x1="41" y1="42" x2="28" y2="42" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+    <line x1="49" y1="42" x2="62" y2="42" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+    <!-- Diagonal connections -->
+    <line x1="42" y1="39" x2="33" y2="30" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="48" y1="39" x2="57" y2="30" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="42" y1="45" x2="33" y2="54" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="48" y1="45" x2="57" y2="54" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+    <!-- Endpoint dots -->
+    <circle cx="28" cy="42" r="2.5" fill="#c9a84c" opacity="0.7"/>
+    <circle cx="62" cy="42" r="2.5" fill="#c9a84c" opacity="0.7"/>
+    <circle cx="45" cy="26" r="2.5" fill="#c9a84c" opacity="0.7"/>
+    <circle cx="45" cy="62" r="2.5" fill="#c9a84c" opacity="0.7"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="120" y="48" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="32" font-weight="800" letter-spacing="5" fill="#e2e8f0">
+    LIMIT
+  </text>
+  <text x="120" y="82" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="32" font-weight="300" letter-spacing="3" fill="#c9a84c">
+    CONNECT
+  </text>
+  
+  <!-- Separator line -->
+  <line x1="120" y1="92" x2="330" y2="92" stroke="#c9a84c" stroke-width="1" opacity="0.3"/>
+  
+  <text x="120" y="108" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="10" font-weight="600" letter-spacing="4" fill="#64748b">
+    SECURE · CONNECTED · INTELLIGENT
+  </text>
+</svg>
