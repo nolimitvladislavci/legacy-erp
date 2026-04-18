@@ -59,7 +59,7 @@ najvažniji prioritet i počni. Ne pitaj — radi.
 ```
 SERVER: 37.27.248.86 | ssh -p 2222 root@37.27.248.86
 
-SUSTAV 1 — Fenix V3:    v3.limit-connect.com → /var/www/fenix-v3/   → gunicorn-fenix-v3 :8001
+SUSTAV 1 — Fenix V3:    limit-connect.com     → /var/www/fenix-v3/   → gunicorn-fenix-v3 :8001
 SUSTAV 2 — Stari ERP:   fina-connect.online  → /var/www/fina-connect/ → gunicorn-fina (unix)
 
 BAZA (Fenix V3):
