@@ -1,49 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Konverzija računa" %} | LIMIT Connect
-<!-- LIVE KAMERA MODAL -->
-<div id="liveCamModal" class="fx-hidden" style="position:fixed;inset:0;z-index:10000;background:var(--black)">
-  <video id="liveCamVideo" autoplay playsinline class="fx-w-full" style="height:calc(100% - 60px);object-fit:cover"></video>
-  <div class="fx-bg-card d-flex fx-gap-5 align-items-center justify-content-center" style="position:absolute;bottom:0;left:0;right:0;height:60px">
-    <button onclick="liveCamSnap()" class="fx-rounded-circle fx-pointer fx-bg-gold" style="width:50px;height:50px;border:3px solid var(--white)"></button>
-    <button onclick="liveCamClose()" class="fx-border-none fx-text-white fx-fs-5xl fx-pointer fx-bg-transparent" style="position:absolute;right:16px">&times;</button>
-  </div>
-</div>
-<canvas id="liveCamCanvas" class="fx-hidden"></canvas>
-<script>
-var _camStream=null;
-function openLiveCamera(){
-  var modal=document.getElementById('liveCamModal');
-  var video=document.getElementById('liveCamVideo');
-  modal.style.display='block';
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
-    .then(function(stream){_camStream=stream;video.srcObject=stream;})
-    .catch(function(err){
-      // Fallback na file input ako kamera nije dostupna
-      modal.style.display='none';
-      document.getElementById('fileInputCamera').click();
-    });
-}
-function liveCamSnap(){
-  var video=document.getElementById('liveCamVideo');
-  var canvas=document.getElementById('liveCamCanvas');
-  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-  canvas.getContext('2d').drawImage(video,0,0);
-  canvas.toBlob(function(blob){
-    var file=new File([blob],'foto-'+Date.now()+'.jpg',{type:'image/jpeg'});
-    var dt=new DataTransfer();dt.items.add(file);
-    document.getElementById('fileInputMain').files=dt.files;
-    document.getElementById('fileInputMain').dispatchEvent(new Event('change'));
-    liveCamClose();
-  },'image/jpeg',0.85);
-}
-function liveCamClose(){
-  document.getElementById('liveCamModal').style.display='none';
-  if(_camStream){_camStream.getTracks().forEach(function(t){t.stop()});_camStream=null;}
-}
-</script>
-
-{% endblock %}
+{% block title %}{% trans "Konverzija računa" %} | LIMIT Connect{% endblock %}
 {% block page_title %}{% trans "Konverzija ulaznog računa" %}{% endblock %}
 
 {% block extra_css %}
@@ -127,6 +84,16 @@ function liveCamClose(){
 {% endblock %}
 
 {% block content %}
+<!-- LIVE KAMERA MODAL -->
+<div id="liveCamModal" class="fx-hidden" style="position:fixed;inset:0;z-index:10000;background:var(--black)">
+  <video id="liveCamVideo" autoplay playsinline class="fx-w-full" style="height:calc(100% - 60px);object-fit:cover"></video>
+  <div class="fx-bg-card d-flex fx-gap-5 align-items-center justify-content-center" style="position:absolute;bottom:0;left:0;right:0;height:60px">
+    <button onclick="liveCamSnap()" class="fx-rounded-circle fx-pointer fx-bg-gold" style="width:50px;height:50px;border:3px solid var(--white)"></button>
+    <button onclick="liveCamClose()" class="fx-border-none fx-text-white fx-fs-5xl fx-pointer fx-bg-transparent" style="position:absolute;right:16px">&times;</button>
+  </div>
+</div>
+<canvas id="liveCamCanvas" class="fx-hidden"></canvas>
+
 <div class="fx-m-auto" style="max-width:960px">
 
   <div class="cv-header">
@@ -262,9 +229,36 @@ function fenixConvertCamera() {
 <script>
 // Auto-open camera if linked from arhiva "Skeniraj dokument" button
 if (window.location.search.indexOf('camera=1') !== -1) {
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(fenixConvertCamera, 500);
-  });
+  setTimeout(fenixConvertCamera, 300);
+}
+</script>
+<script>
+var _camStream=null;
+function openLiveCamera(){
+  var modal=document.getElementById('liveCamModal');
+  var video=document.getElementById('liveCamVideo');
+  modal.style.display='block';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+    .then(function(stream){_camStream=stream;video.srcObject=stream;})
+    .catch(function(err){
+      modal.style.display='none';
+      document.getElementById('cameraInput').click();
+    });
+}
+function liveCamSnap(){
+  var video=document.getElementById('liveCamVideo');
+  var canvas=document.getElementById('liveCamCanvas');
+  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  canvas.toBlob(function(blob){
+    var file=new File([blob],'foto-'+Date.now()+'.jpg',{type:'image/jpeg'});
+    if(typeof addFile==='function'){addFile(file);}
+    liveCamClose();
+  },'image/jpeg',0.85);
+}
+function liveCamClose(){
+  document.getElementById('liveCamModal').style.display='none';
+  if(_camStream){_camStream.getTracks().forEach(function(t){t.stop()});_camStream=null;}
 }
 </script>
 {% endblock %}

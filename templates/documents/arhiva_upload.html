@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Upload Dokumenta — LIMIT CONNECT
+{% block title %}Upload Dokumenta — LIMIT CONNECT{% endblock %}
+{% block page_title %}Upload Dokumenta{% endblock %}
+
+{% block shell_right_content %}{% endblock %}
+{% block content %}
 <!-- LIVE KAMERA MODAL -->
 <div id="liveCamModal" class="fx-hidden" style="position:fixed;inset:0;z-index:10000;background:var(--black)">
   <video id="liveCamVideo" autoplay playsinline class="fx-w-full" style="height:calc(100% - 60px);object-fit:cover"></video>
@@ -10,44 +14,7 @@
   </div>
 </div>
 <canvas id="liveCamCanvas" class="fx-hidden"></canvas>
-<script>
-var _camStream=null;
-function openLiveCamera(){
-  var modal=document.getElementById('liveCamModal');
-  var video=document.getElementById('liveCamVideo');
-  modal.style.display='block';
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
-    .then(function(stream){_camStream=stream;video.srcObject=stream;})
-    .catch(function(err){
-      // Fallback na file input ako kamera nije dostupna
-      modal.style.display='none';
-      document.getElementById('fileInputCamera').click();
-    });
-}
-function liveCamSnap(){
-  var video=document.getElementById('liveCamVideo');
-  var canvas=document.getElementById('liveCamCanvas');
-  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-  canvas.getContext('2d').drawImage(video,0,0);
-  canvas.toBlob(function(blob){
-    var file=new File([blob],'foto-'+Date.now()+'.jpg',{type:'image/jpeg'});
-    var dt=new DataTransfer();dt.items.add(file);
-    document.getElementById('fileInputMain').files=dt.files;
-    document.getElementById('fileInputMain').dispatchEvent(new Event('change'));
-    liveCamClose();
-  },'image/jpeg',0.85);
-}
-function liveCamClose(){
-  document.getElementById('liveCamModal').style.display='none';
-  if(_camStream){_camStream.getTracks().forEach(function(t){t.stop()});_camStream=null;}
-}
-</script>
 
-{% endblock %}
-{% block page_title %}Upload Dokumenta{% endblock %}
-
-{% block shell_right_content %}{% endblock %}
-{% block content %}
 <div class="container fx-max-700" class="fx-p-6">
 
   <!-- INFO BANNER -->
@@ -299,4 +266,38 @@ function handleFenixResult(r) {
   75% { transform: translateX(5px); }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var _camStream=null;
+function openLiveCamera(){
+  var modal=document.getElementById('liveCamModal');
+  var video=document.getElementById('liveCamVideo');
+  modal.style.display='block';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+    .then(function(stream){_camStream=stream;video.srcObject=stream;})
+    .catch(function(err){
+      modal.style.display='none';
+      document.getElementById('fileInputCamera').click();
+    });
+}
+function liveCamSnap(){
+  var video=document.getElementById('liveCamVideo');
+  var canvas=document.getElementById('liveCamCanvas');
+  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  canvas.toBlob(function(blob){
+    var file=new File([blob],'foto-'+Date.now()+'.jpg',{type:'image/jpeg'});
+    var dt=new DataTransfer();dt.items.add(file);
+    document.getElementById('fileInputMain').files=dt.files;
+    document.getElementById('fileInputMain').dispatchEvent(new Event('change'));
+    liveCamClose();
+  },'image/jpeg',0.85);
+}
+function liveCamClose(){
+  document.getElementById('liveCamModal').style.display='none';
+  if(_camStream){_camStream.getTracks().forEach(function(t){t.stop()});_camStream=null;}
+}
+</script>
 {% endblock %}
