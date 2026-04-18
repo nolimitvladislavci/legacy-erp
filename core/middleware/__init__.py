@@ -1093,3 +1093,124 @@ class DomainGateMiddleware:
         # Strip www.
         bare = host.replace("www.", "")
         return self.DOMAIN_LANDING.get(bare, self.DOMAIN_LANDING.get(host, "/"))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  MODULE GATE MIDDLEWARE — URL access control per company module config
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class ModuleGateMiddleware(MiddlewareMixin):
+    """
+    Blocks access to module URLs if the company hasn't enabled that module.
+
+    Logic:
+    - Superusers/staff bypass the gate entirely
+    - Unauthenticated requests pass through (let auth middleware handle them)
+    - /admin/, /static/, /media/ always pass
+    - Modules with always_visible=True always pass
+    - If company has no module_config, ALL modules are allowed (permissive default)
+    - Blocked GET → 403 page; blocked HTMX/POST → JSON 403
+
+    URL mapping is built once at class load from companies.module_registry.MODULES.
+    """
+
+    # Paths never blocked regardless of module config
+    BYPASS_PREFIXES = (
+        "/admin/",
+        "/static/",
+        "/media/",
+        "/health/",
+        "/hr/login/",
+        "/hr/accounts/",
+        "/mcp/",
+        "/api/",
+    )
+
+    # Built lazily at first request
+    _url_map: "dict[str, str] | None" = None  # prefix → module_id
+
+    @classmethod
+    def _build_url_map(cls) -> "dict[str, str]":
+        """Build prefix→module_id mapping from module registry. Sorted longest-first."""
+        from companies.module_registry import MODULES
+
+        mapping = {}
+        for mod in MODULES:
+            if mod.get("always_visible"):
+                continue
+            url = mod.get("url", "")
+            if url and url != "/":
+                mapping[url] = mod["id"]
+        # Sort longest prefix first so /hr/worktime/ matches before /hr/
+        return dict(sorted(mapping.items(), key=lambda x: len(x[0]), reverse=True))
+
+    def process_request(self, request):
+        # Bypass: staff/superuser
+        if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+            return None
+
+        # Bypass: non-authenticated
+        if not request.user.is_authenticated:
+            return None
+
+        path = request.path_info
+
+        # Bypass: system paths
+        for prefix in self.BYPASS_PREFIXES:
+            if path.startswith(prefix):
+                return None
+
+        # Build map once
+        if ModuleGateMiddleware._url_map is None:
+            ModuleGateMiddleware._url_map = self._build_url_map()
+
+        # Find matching module
+        module_id = None
+        for prefix, mid in ModuleGateMiddleware._url_map.items():
+            if path.startswith(prefix):
+                module_id = mid
+                break
+
+        if not module_id:
+            return None  # Not a gated path
+
+        # Get company
+        company = getattr(request, "company", None)
+        if not company:
+            return None  # No company context — permissive
+
+        # Get module config
+        try:
+            config = company.module_config
+        except Exception:
+            return None  # No config — permissive
+
+        if config.is_enabled(module_id):
+            return None  # Module is active
+
+        # BLOCKED
+        import logging
+
+        logging.getLogger("core.module_gate").warning(
+            "MODULE_GATE_BLOCK user=%s company=%s module=%s path=%s",
+            request.user.pk,
+            company.pk,
+            module_id,
+            path,
+        )
+
+        is_htmx = request.headers.get("HX-Request") == "true"
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+        if is_htmx or is_ajax or request.method != "GET":
+            from django.http import JsonResponse
+
+            return JsonResponse(
+                {"error": "Modul nije aktiviran za vašu firmu.", "module": module_id},
+                status=403,
+            )
+
+        from django.shortcuts import render
+
+        return render(request, "core/module_blocked.html", {"module_id": module_id}, status=403)

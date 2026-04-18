@@ -220,3 +220,141 @@ class LicenseTokenAdmin(admin.ModelAdmin):
     list_display = ("white_label", "status", "valid_until", "monthly_amount_eur", "last_heartbeat")
     list_filter = ("status",)
     raw_id_fields = ("white_label",)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  COMPANY MODULE CONFIG — admin inline za superadmina
+# ═══════════════════════════════════════════════════════════════════════════
+
+from django import forms as django_forms
+from .models import CompanyModuleConfig
+from .module_registry import MODULES
+
+
+class ModuleCheckboxWidget(django_forms.CheckboxSelectMultiple):
+    """Renders module checkboxes grouped by category."""
+
+    pass
+
+
+class CompanyModuleConfigForm(django_forms.ModelForm):
+    """
+    Custom form that renders enabled_modules as checkboxes (not raw JSON textarea).
+    Each module is shown with its name, icon, category, and tier.
+    """
+
+    MODULE_CHOICES = [
+        (m["id"], f"[{m.get('category', '').upper()}] {m['name']} — {m.get('description', '')[:60]}") for m in MODULES
+    ]
+
+    enabled_modules = django_forms.MultipleChoiceField(
+        choices=MODULE_CHOICES,
+        widget=ModuleCheckboxWidget,
+        required=False,
+        label="Aktivni moduli",
+        help_text="Odaberite module koji su vidljivi ovoj firmi.",
+    )
+
+    class Meta:
+        model = CompanyModuleConfig
+        fields = ["enabled_modules", "notification_mode"]
+
+    def clean_enabled_modules(self):
+        """Convert list back to list (MultipleChoiceField returns list of strings)."""
+        return self.cleaned_data.get("enabled_modules", [])
+
+
+class CompanyModuleConfigInline(admin.StackedInline):
+    model = CompanyModuleConfig
+    form = CompanyModuleConfigForm
+    can_delete = False
+    verbose_name_plural = "Konfiguracija modula (Cluster)"
+    extra = 0
+
+    def get_queryset(self, request):
+        return super().get_queryset(request)
+
+
+# Patch existing CompanyAdmin to include the inline
+# We must re-register since @admin.register already registered it above
+admin.site.unregister(Company)
+
+
+@admin.register(Company)
+class CompanyAdminWithModules(admin.ModelAdmin):
+    inlines_list = [CompanyModuleConfigInline]
+    if HAS_BOXGRAM:
+        inlines_list = [PetProfileInline] + inlines_list
+
+    inlines = inlines_list
+
+    list_display = (
+        "name",
+        "oib",
+        "country",
+        "business_type",
+        "pdv_status",
+        "nkd_code",
+        "currency",
+        "fiscal_system",
+        "is_vat_registered",
+        "is_platform_owner",
+        "grosmarkt_partner",
+        "city",
+        "created_at",
+        "active_module_count",
+    )
+    search_fields = ("name", "oib", "tax_number", "vat_id")
+    list_filter = (
+        "country",
+        "business_type",
+        "pdv_status",
+        "currency",
+        "fiscal_system",
+        "is_vat_registered",
+        "is_platform_owner",
+        "grosmarkt_partner",
+    )
+    list_editable = ("pdv_status",)
+    autocomplete_fields = ("nkd_code",)
+    fieldsets = (
+        (
+            _("Osnovni podaci"),
+            {
+                "fields": ("name", "oib", "address", "city", "zip_code", "iban", "logo"),
+            },
+        ),
+        (
+            _("Klasifikacija djelatnosti"),
+            {
+                "fields": ("nkd_code",),
+            },
+        ),
+        (
+            _("Međunarodne postavke"),
+            {
+                "fields": ("country", "business_type", "tax_number", "vat_id", "currency", "fiscal_system"),
+            },
+        ),
+        (
+            _("PDV i konfiguracija"),
+            {
+                "fields": ("pdv_status", "is_vat_registered"),
+            },
+        ),
+        (
+            _("Grosmarkt Partner"),
+            {
+                "fields": ("grosmarkt_partner", "grosmarkt_role", "grosmarkt_description", "grosmarkt_show_name"),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+    def active_module_count(self, obj):
+        try:
+            return f"{len(obj.module_config.enabled_modules)} modula"
+        except Exception:
+            return "—"
+
+    active_module_count.short_description = "Aktivni moduli"

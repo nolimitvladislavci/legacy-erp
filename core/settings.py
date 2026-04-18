@@ -229,6 +229,7 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "permissions.middleware.RolePermissionMiddleware",
     "core.middleware.CompanyMiddleware",
+    "core.middleware.ModuleGateMiddleware",
     "core.middleware.ImpersonationMiddleware",
     "core.middleware.CompanyBranchMiddleware",
     "core.middleware.AdminLangRedirectMiddleware",
@@ -1443,8 +1444,7 @@ CELERY_BEAT_SCHEDULE["notifications-purge-old"] = {
 # UI: /silk/ (admin pristup)
 if DEBUG:
     INSTALLED_APPS = list(INSTALLED_APPS) + ["silk"]
-    MIDDLEWARE = [
-    "silk.middleware.SilkyMiddleware"] + list(MIDDLEWARE)
+    MIDDLEWARE = ["silk.middleware.SilkyMiddleware"] + list(MIDDLEWARE)
     SILKY_PYTHON_PROFILER = True
     SILKY_MAX_RECORDED_REQUESTS = 100
     SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10

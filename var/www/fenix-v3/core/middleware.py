@@ -5,11 +5,11 @@ TenantMiddleware: Automatski company scope na SVAKI request.
 AuditMiddleware: GDPR audit trail — tko, što, kad.
 AccessibilityMiddleware: WCAG headeri + screen reader hints.
 """
+
 import json
 import logging
 import time
 import uuid
-from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
 
@@ -22,10 +22,15 @@ class TenantMiddleware(MiddlewareMixin):
     Bez firme = redirect na company select.
     Excluda: login, logout, admin, static, public.
     """
+
     EXCLUDE_PATHS = (
-        "/admin/", "/static/", "/media/",
-        "/accounts/login/", "/accounts/logout/",
-        "/accounts/register/", "/api/public/",
+        "/admin/",
+        "/static/",
+        "/media/",
+        "/accounts/login/",
+        "/accounts/logout/",
+        "/accounts/register/",
+        "/api/public/",
         "/health/",
     )
 
@@ -42,10 +47,9 @@ class TenantMiddleware(MiddlewareMixin):
         company_id = request.session.get("active_company_id")
         if company_id:
             from companies.models import Company
+
             try:
-                request.company = Company.objects.get(
-                    id=company_id, is_deleted=False
-                )
+                request.company = Company.objects.get(id=company_id, is_deleted=False)
                 request.company_id = request.company.id
             except Company.DoesNotExist:
                 request.session.pop("active_company_id", None)
@@ -58,6 +62,7 @@ class AuditMiddleware(MiddlewareMixin):
     GDPR audit log. Svaka mutacija (POST/PUT/PATCH/DELETE) se logira.
     Format: JSON structured logging za kasniju analizu.
     """
+
     MUTATION_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
     def process_request(self, request):
@@ -102,13 +107,13 @@ class AccessibilityMiddleware(MiddlewareMixin):
     WCAG compliance headeri.
     Osigurava da svaki response ima ispravne accessibility meta.
     """
+
     def process_response(self, request, response):
         if "text/html" in response.get("Content-Type", ""):
             response["X-Content-Type-Options"] = "nosniff"
             response["Referrer-Policy"] = "strict-origin-when-cross-origin"
             response["Permissions-Policy"] = (
-                "microphone=(self), camera=(), geolocation=(self), "
-                "speech-synthesis=(self), speech-recognition=(self)"
+                "microphone=(self), camera=(), geolocation=(self), speech-synthesis=(self), speech-recognition=(self)"
             )
         return response
 
@@ -118,6 +123,7 @@ class PerformanceMiddleware(MiddlewareMixin):
     Server-Timing header za svaki request.
     Frontend može čitati i prikazati u dev tools.
     """
+
     def process_request(self, request):
         request._perf_start = time.monotonic()
 

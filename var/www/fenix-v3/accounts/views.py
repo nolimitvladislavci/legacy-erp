@@ -9,13 +9,15 @@ Login flow:
 
 Svaki view: HTMX + AI hint + pristupačnost + glasovni unos.
 """
+
 import logging
+
+from core.base_view import FenixView, PublicView
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
-from django.urls import reverse
-from django.contrib import messages
-from core.base_view import FenixView, PublicView
-from .models import LoginAudit, CompanyMembership
+
+from .models import CompanyMembership, LoginAudit
 
 logger = logging.getLogger("fenix.accounts")
 
@@ -50,8 +52,7 @@ class LoginView(PublicView):
 
             # Set active company from default membership
             membership = (
-                CompanyMembership.objects
-                .filter(user=user, is_deleted=False)
+                CompanyMembership.objects.filter(user=user, is_deleted=False)
                 .order_by("-is_default", "-created_at")
                 .select_related("company")
                 .first()
@@ -103,12 +104,11 @@ class DashboardView(FenixView):
         return "Dobrodošli u Fenix. Odaberite tvrtku za početak rada."
 
     def get(self, request):
-        company = self.get_company()
+        _company = self.get_company()  # noqa: F841
 
         # Get user's memberships for company switcher
         memberships = (
-            CompanyMembership.objects
-            .filter(user=request.user, is_deleted=False)
+            CompanyMembership.objects.filter(user=request.user, is_deleted=False)
             .select_related("company")
             .order_by("-is_default", "company__name")
         )
@@ -130,8 +130,7 @@ class CompanySwitchView(FenixView):
             return self.json_error("Nedostaje company_id")
 
         membership = (
-            CompanyMembership.objects
-            .filter(user=request.user, company_id=company_id, is_deleted=False)
+            CompanyMembership.objects.filter(user=request.user, company_id=company_id, is_deleted=False)
             .select_related("company")
             .first()
         )
