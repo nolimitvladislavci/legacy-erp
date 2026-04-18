@@ -1023,10 +1023,10 @@ class DomainGateMiddleware:
             request.domain_restricted = True
             return self.get_response(request)
 
-        # Root path → domain landing
+        # Root path → domain landing (guard: only redirect if landing differs from current path)
         if path in ("/", "/hr/", "/de/", "/en/"):
             landing = self._get_landing(host)
-            if landing:
+            if landing and landing != path:
                 from django.shortcuts import redirect
 
                 return redirect(landing)
@@ -1082,7 +1082,7 @@ class DomainGateMiddleware:
         """Get landing page for domain."""
         # Strip www.
         bare = host.replace("www.", "")
-        return self.DOMAIN_LANDING.get(bare, self.DOMAIN_LANDING.get(host, "/"))
+        return self.DOMAIN_LANDING.get(bare, self.DOMAIN_LANDING.get(host))  # None for unknown domains
 
 
 # ═══════════════════════════════════════════════════════════════════════════
