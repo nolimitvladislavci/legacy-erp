@@ -3,6 +3,16 @@
 
 {% block title %}🎮 Memory — PLAY.EU{% endblock %}
 
+{% block extra_head %}
+<style>
+.memory-card {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="text-center mb-16">
   <h1 style="font-family:var(--serif);font-size:1.6rem">🎮 Memory</h1>
@@ -51,46 +61,53 @@
   const totalPairs = parseInt(document.getElementById('total-pairs').textContent);
   let locked = false;
 
-  cards.forEach(card => {
-    card.addEventListener('click', () => {
-      if (locked) return;
-      if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  function flipCard() {
+    const card = this;
+    if (locked) return;
+    if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
 
-      card.classList.add('flipped');
-      flipped.push(card);
+    card.classList.add('flipped');
+    flipped.push(card);
 
-      if (flipped.length === 2) {
-        moves++;
-        document.getElementById('moves-counter').textContent = '{% trans "Potezi" %}: ' + moves;
-        locked = true;
+    if (flipped.length === 2) {
+      moves++;
+      document.getElementById('moves-counter').textContent = '{% trans "Potezi" %}: ' + moves;
+      locked = true;
 
-        const [a, b] = flipped;
-        if (a.dataset.pair === b.dataset.pair) {
-          a.classList.add('matched');
-          b.classList.add('matched');
-          matched++;
-          document.getElementById('pairs-counter').innerHTML =
-            '{% trans "Parovi" %}: ' + matched + ' / <span id="total-pairs">' + totalPairs + '</span>';
+      const [a, b] = flipped;
+      if (a.dataset.pair === b.dataset.pair) {
+        a.classList.add('matched');
+        b.classList.add('matched');
+        matched++;
+        document.getElementById('pairs-counter').innerHTML =
+          '{% trans "Parovi" %}: ' + matched + ' / <span id="total-pairs">' + totalPairs + '</span>';
+        flipped = [];
+        locked = false;
+
+        if (matched === totalPairs) {
+          setTimeout(() => {
+            document.getElementById('win-message').style.display = 'block';
+            document.getElementById('win-stats').textContent =
+              matched + ' {% trans "parova" %} u ' + moves + ' {% trans "poteza" %}';
+          }, 500);
+        }
+      } else {
+        setTimeout(() => {
+          a.classList.remove('flipped');
+          b.classList.remove('flipped');
           flipped = [];
           locked = false;
-
-          if (matched === totalPairs) {
-            setTimeout(() => {
-              document.getElementById('win-message').style.display = 'block';
-              document.getElementById('win-stats').textContent =
-                matched + ' {% trans "parova" %} u ' + moves + ' {% trans "poteza" %}';
-            }, 500);
-          }
-        } else {
-          setTimeout(() => {
-            a.classList.remove('flipped');
-            b.classList.remove('flipped');
-            flipped = [];
-            locked = false;
-          }, 800);
-        }
+        }, 800);
       }
-    });
+    }
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', flipCard);
+    card.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      flipCard.call(this, e);
+    }, {passive: false});
   });
 })();
 </script>

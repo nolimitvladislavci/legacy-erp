@@ -78,11 +78,11 @@ function selectAnswer(qIdx, aIdx, el) {
   const btns = el.parentElement.querySelectorAll('.quiz-answer');
   if (el.classList.contains('correct') || el.classList.contains('wrong')) return;
 
-  const isCorrect = el.dataset.correct === 'True';
+  const isCorrect = el.dataset.correct === 'true';
   answers.push({question: qIdx, answer: aIdx, correct: isCorrect});
 
   btns.forEach(b => {
-    if (b.dataset.correct === 'True') b.classList.add('correct');
+    if (b.dataset.correct === 'true') b.classList.add('correct');
     else b.classList.add('wrong');
     b.style.pointerEvents = 'none';
   });
