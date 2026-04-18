@@ -660,6 +660,21 @@
             <div id="sendResult" class="fx-fs-base fx-hidden mt-3"></div>
         </div>
     </div>
+
+    <!-- Modal za pregled slike / PDF-a -->
+    <div id="previewModal" class="preview-modal-overlay" onclick="if(event.target===this)closePreview()">
+        <div class="preview-modal">
+            <div class="preview-modal-header">
+                <span class="preview-modal-title" id="previewTitle">Dokument</span>
+                <div class="preview-modal-actions">
+                    <a id="previewDownloadBtn" href="#" download class="preview-modal-btn"><i class="fas fa-download"></i> Preuzmi</a>
+                    <a id="previewOpenBtn" href="#" target="_blank" class="preview-modal-btn"><i class="fas fa-external-link-alt"></i> Otvori</a>
+                    <button onclick="closePreview()" class="preview-modal-close" title="Zatvori">&times;</button>
+                </div>
+            </div>
+            <div class="preview-modal-body" id="previewBody"></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1013,7 +1028,7 @@ function openPreviewModal(url, title, type) {
     document.body.style.overflow = 'hidden';
     _previewCurrentId = null;
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'&&_previewCurrentId!==null)closePreview();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('previewModal').classList.contains('open'))closePreview();});
 
 // ── Company live search ───────────────────────────────────────────────────────
 (function(){
