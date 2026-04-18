@@ -45,7 +45,7 @@ ALLOWED_HOSTS = [
     "www.memio.farm",
 ]
 
-SITE_URL = "https://limit-connect.com"
+SITE_URL = "https://fina-connect.online"
 
 # ── AWS Bedrock (DeepSeek via EU hosting — GDPR compliant) ──────────────────
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")

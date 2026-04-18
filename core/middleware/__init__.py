@@ -848,7 +848,7 @@ class LicenseCheckMiddleware:
 class DomainGateMiddleware:
     """
     Svaka domena ima pristup samo relevantnim URL-ovima.
-    limit-connect.com → sve (master domena)
+    limit-connect.com / fina-connect.online → sve (master domene)
     memio.farm → livestock, azili, dashboard, accounts, static/media
     memio.pet → memio_pet, boxgram, accounts, static/media
     no-limit.world → no_limit landing, static/media
@@ -991,27 +991,7 @@ class DomainGateMiddleware:
             "/ponuda/",
         ),
         "www.viskovic-group.de": "viskovic-group.de",
-        "fina-connect.online": (
-            "/hr/invoicing/",
-            "/de/invoicing/",
-            "/hr/companies/",
-            "/de/companies/",
-            "/hr/partners/",
-            "/de/partners/",
-            "/hr/documents/",
-            "/de/documents/",
-            "/hr/pos/",
-            "/de/pos/",
-            "/hr/worktime/",
-            "/de/worktime/",
-            "/hr/inventory/",
-            "/de/inventory/",
-            "/hr/smart-import/",
-            "/push/",
-            "/site/",
-            "/ponuda/",
-        ),
-        "www.fina-connect.online": "fina-connect.online",
+        # fina-connect.online je master domena — nema ograničenja, obrađuje se gore
     }
 
     # Landing pages per domain (where to redirect if blocked)
@@ -1021,7 +1001,7 @@ class DomainGateMiddleware:
         "memio.world": "/hr/memio/",
         "no-limit.world": "/no-limit/",
         "viskovic-group.de": "/de/dashboard/",
-        "fina-connect.online": "/hr/dashboard/",
+        # fina-connect.online — master domena, nema landinga
     }
 
     def __init__(self, get_response):
@@ -1032,8 +1012,12 @@ class DomainGateMiddleware:
         path = request.path
 
         # Master domain — no restrictions
-        if "limit-connect.com" in host or host in ("localhost", "127.0.0.1", "37.27.248.86"):
-            request.domain_name = "limit-connect.com"
+        if (
+            "limit-connect.com" in host
+            or "fina-connect.online" in host
+            or host in ("localhost", "127.0.0.1", "37.27.248.86")
+        ):
+            request.domain_name = host
             request.domain_restricted = False
             return self.get_response(request)
 
