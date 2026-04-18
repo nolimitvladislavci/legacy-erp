@@ -6,7 +6,8 @@ from django.db import DatabaseError, IntegrityError, models
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import AIActionLog, AIModulePermission, PendingAIAction
 
@@ -898,3 +899,130 @@ def subscription_cockpit(request):
         "months_json": json.dumps(months),
     }
     return render(request, "superadmin_ai/subscription_cockpit.html", ctx)
+
+
+# ─────────────────────────────────────────────────────────────
+#  AI CHAT SOBA  –  /superadmin/ai/chat/
+# ─────────────────────────────────────────────────────────────
+@login_required
+@user_passes_test(is_superadmin)
+def ai_chat(request):
+    """Prikaži chat sučelje."""
+    return render(request, "superadmin_ai/ai_chat.html", {
+        "providers": [
+            {"id": "haiku",   "label": "Claude Haiku",   "icon": "fa-robot",  "color": "#c9a84c"},
+            {"id": "gemini",  "label": "Gemini Flash",   "icon": "fa-star",   "color": "#4285f4"},
+            {"id": "deepseek","label": "DeepSeek Chat",  "icon": "fa-brain",  "color": "#00b4d8"},
+        ]
+    })
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(is_superadmin)
+@require_POST
+def ai_chat_send(request):
+    """
+    HTMX endpoint — primi poruku, pozovi AI, vrati HTML fragment.
+    Body: { provider, message, history: [{role,content},...] }
+    """
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, TypeError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    provider = data.get("provider", "haiku").strip()
+    user_msg = data.get("message", "").strip()
+    history  = data.get("history", [])   # [{role,content}, ...]
+
+    if not user_msg:
+        return JsonResponse({"error": "Prazna poruka"}, status=400)
+
+    messages = history + [{"role": "user", "content": user_msg}]
+    reply = _call_ai(provider, messages)
+    return JsonResponse({"reply": reply, "provider": provider})
+
+
+def _call_ai(provider, messages):
+    """Pozovi odabrani AI provider i vrati odgovor kao string."""
+    from django.conf import settings
+
+    # ── Claude Haiku ──────────────────────────────────────────
+    if provider == "haiku":
+        import urllib.request as ur, json as _j
+        key = getattr(settings, "ANTHROPIC_API_KEY", "")
+        payload = _j.dumps({
+            "model": "claude-haiku-4-5-20251001",
+            "max_tokens": 2048,
+            "system": (
+                "Ti si Fenix AI asistent za superadmina LIMIT Connect platforme. "
+                "Odgovaraj kratko i precizno, na jeziku korisnika (HR/EN/DE)."
+            ),
+            "messages": messages,
+        }).encode()
+        req = ur.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": key,
+                "anthropic-version": "2023-06-01",
+            },
+            method="POST"
+        )
+        try:
+            with ur.urlopen(req, timeout=60) as r:
+                d = _j.loads(r.read())
+                return d["content"][0]["text"]
+        except Exception as e:
+            return f"[Haiku greška: {e}]"
+
+    # ── Gemini Flash ──────────────────────────────────────────
+    elif provider == "gemini":
+        import urllib.request as ur, json as _j
+        key = getattr(settings, "GEMINI_API_KEY", "")
+        # Konvertiraj u Gemini format
+        parts = []
+        for m in messages:
+            role = "user" if m["role"] == "user" else "model"
+            parts.append({"role": role, "parts": [{"text": m["content"]}]})
+        payload = _j.dumps({"contents": parts}).encode()
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}"
+        req = ur.Request(url, data=payload,
+                         headers={"Content-Type": "application/json"}, method="POST")
+        try:
+            with ur.urlopen(req, timeout=60) as r:
+                d = _j.loads(r.read())
+                return d["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception as e:
+            return f"[Gemini greška: {e}]"
+
+    # ── DeepSeek Chat ─────────────────────────────────────────
+    elif provider == "deepseek":
+        import urllib.request as ur, json as _j
+        key = getattr(settings, "DEEPSEEK_API_KEY", "")
+        sys_msg = {"role": "system", "content": (
+            "Ti si Fenix AI asistent za superadmina LIMIT Connect platforme. "
+            "Odgovaraj kratko i precizno, na jeziku korisnika (HR/EN/DE)."
+        )}
+        payload = _j.dumps({
+            "model": "deepseek-chat",
+            "messages": [sys_msg] + messages,
+            "max_tokens": 2048,
+            "temperature": 0.3,
+        }).encode()
+        req = ur.Request(
+            "https://api.deepseek.com/chat/completions",
+            data=payload,
+            headers={"Content-Type": "application/json",
+                     "Authorization": f"Bearer {key}"},
+            method="POST"
+        )
+        try:
+            with ur.urlopen(req, timeout=90) as r:
+                d = _j.loads(r.read())
+                return d["choices"][0]["message"]["content"]
+        except Exception as e:
+            return f"[DeepSeek greška: {e}]"
+
+    return "[Nepoznat provider]"

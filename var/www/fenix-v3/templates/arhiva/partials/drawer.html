@@ -1,0 +1,172 @@
+{% load humanize %}
+<div class="p-4 space-y-4">
+  <!-- Header -->
+  <div class="flex items-start justify-between gap-2">
+    <h2 class="font-bold text-fenix-ink text-lg leading-tight" id="drawer-title">
+      {{ entry.title }}
+    </h2>
+    <button type="button"
+            onclick="document.querySelector('[x-data]').__x.$data.closeDrawer()"
+            class="flex-shrink-0 p-1 rounded hover:bg-fenix-cream"
+            aria-label="Zatvori detalje">
+      <svg class="w-5 h-5" style="color:var(--fenix-text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- File preview -->
+  {% if entry.file_type and "image" in entry.file_type %}
+  <div class="rounded-lg overflow-hidden border border-fenix-cream">
+    <img src="{{ entry.file.url }}" alt="{{ entry.title }}" class="w-full object-contain max-h-48">
+  </div>
+  {% else %}
+  <div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--fenix-cream);">
+    <svg class="w-8 h-8 flex-shrink-0" style="color:var(--fenix-danger);" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+    </svg>
+    <div>
+      <p class="font-medium text-fenix-ink text-sm">{{ entry.file_name }}</p>
+      <p class="text-xs" style="color:var(--fenix-text-muted);">{{ entry.file_size_display }}</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- AI Summary -->
+  {% if entry.ai_summary %}
+  <div class="p-3 rounded-lg" style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.28);">
+    <div class="flex items-center gap-2 mb-2">
+      <span style="color:var(--fenix-gold);" aria-hidden="true">🤖</span>
+      <span class="text-sm font-medium" style="color:var(--fenix-gold-dark);">AI analiza</span>
+      {% if entry.ai_confidence > 0 %}
+      <span class="text-xs ml-auto" style="color:var(--fenix-text-muted);">
+        {{ entry.ai_confidence|floatformat:0 }}% pouzdanost
+      </span>
+      {% endif %}
+    </div>
+    <p class="text-sm text-fenix-ink">{{ entry.ai_summary }}</p>
+    {% if entry.ai_tags %}
+    <div class="flex flex-wrap gap-1 mt-2">
+      {% for tag in entry.ai_tags %}
+      <span class="text-xs px-2 py-0.5 rounded-full"
+            style="background:var(--fenix-cream);color:var(--fenix-text-muted);">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% elif entry.ocr_text %}
+  <!-- OCR status polling -->
+  <div hx-get="{% url 'arhiva:scan_status' entry.pk %}"
+       hx-trigger="every 3s"
+       hx-swap="outerHTML">
+    <div class="p-3 rounded-lg text-center" style="background:var(--fenix-cream);">
+      <svg class="animate-spin w-5 h-5 mx-auto mb-2" style="color:var(--fenix-gold);" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <p class="text-sm text-fenix-ink">AI analiza u tijeku…</p>
+    </div>
+  </div>
+  {% else %}
+  <!-- Nema OCR -->
+  <div class="p-3 rounded-lg text-center" style="background:var(--fenix-cream);">
+    <p class="text-sm" style="color:var(--fenix-text-muted);">OCR skeniranje u tijeku…</p>
+  </div>
+  {% endif %}
+
+  <!-- Meta info -->
+  <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+    <dt style="color:var(--fenix-text-muted);">Datum dokumenta</dt>
+    <dd class="text-fenix-ink font-medium">
+      {% if entry.document_date %}{{ entry.document_date|date:"d.m.Y" }}{% else %}—{% endif %}
+    </dd>
+
+    <dt style="color:var(--fenix-text-muted);">Kategorija</dt>
+    <dd class="text-fenix-ink">
+      {% if entry.category %}{{ entry.category.name }}{% else %}—{% endif %}
+    </dd>
+
+    <dt style="color:var(--fenix-text-muted);">Izvor</dt>
+    <dd class="text-fenix-ink">{{ entry.get_source_display }}</dd>
+
+    <dt style="color:var(--fenix-text-muted);">Uploadano</dt>
+    <dd class="text-fenix-ink">{{ entry.created_at|date:"d.m.Y H:i" }}</dd>
+  </dl>
+
+  <!-- DE Steuerberater sekcija — PLAN_031 -->
+  {% if entry.de_document_type or entry.datev_konto or entry.mwst_rate is not None %}
+  <details class="group rounded-lg border border-fenix-cream" open>
+    <summary class="flex items-center gap-2 p-3 cursor-pointer list-none rounded-lg hover:bg-fenix-cream text-sm font-medium text-fenix-ink">
+      <span aria-hidden="true">🇩🇪</span>
+      <span>DATEV / Steuerberater</span>
+      {% if entry.is_exported_datev %}
+      <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+            style="background:rgba(40,167,69,0.12);color:#28a745;">
+        ✓ Exportirano
+      </span>
+      {% endif %}
+      <svg class="w-4 h-4 ml-auto transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </summary>
+    <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm px-3 pb-3">
+      {% if entry.de_document_type %}
+      <dt style="color:var(--fenix-text-muted);">Dokumenttyp</dt>
+      <dd class="text-fenix-ink">{{ entry.get_de_document_type_display }}</dd>
+      {% endif %}
+
+      {% if entry.mwst_rate is not None %}
+      <dt style="color:var(--fenix-text-muted);">MwSt</dt>
+      <dd class="text-fenix-ink font-medium">{{ entry.mwst_rate }}%</dd>
+      {% endif %}
+
+      {% if entry.datev_konto %}
+      <dt style="color:var(--fenix-text-muted);">DATEV Konto</dt>
+      <dd class="text-fenix-ink font-mono">{{ entry.datev_konto }}</dd>
+      {% endif %}
+
+      {% if entry.datev_kostenstelle %}
+      <dt style="color:var(--fenix-text-muted);">Kostenstelle</dt>
+      <dd class="text-fenix-ink font-mono">{{ entry.datev_kostenstelle }}</dd>
+      {% endif %}
+
+      {% if entry.is_exported_datev and entry.exported_at %}
+      <dt style="color:var(--fenix-text-muted);">Export datum</dt>
+      <dd class="text-fenix-ink">{{ entry.exported_at|date:"d.m.Y H:i" }}</dd>
+      {% endif %}
+    </dl>
+  </details>
+  {% endif %}
+
+  <!-- Action buttons -->
+  <div class="grid grid-cols-2 gap-2 pt-2 border-t border-fenix-cream">
+    <a href="{{ entry.file.url }}" target="_blank" rel="noopener"
+       class="fenix-btn fenix-btn-secondary text-sm text-center" style="min-height:44px;">
+      <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+      </svg>
+      Pregledaj
+    </a>
+
+    <a href="{{ entry.file.url }}" download="{{ entry.file_name }}"
+       class="fenix-btn fenix-btn-secondary text-sm text-center" style="min-height:44px;">
+      <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+      </svg>
+      Preuzmi
+    </a>
+
+    <!-- Delete -->
+    <button type="button"
+            hx-delete="{% url 'arhiva:detail' entry.pk %}"
+            hx-confirm="Obrisati ovaj dokument?"
+            hx-target="#arhiva-list"
+            hx-swap="innerHTML"
+            class="col-span-2 fenix-btn text-sm"
+            style="min-height:44px;background:var(--fenix-danger);color:#fff;"
+            aria-label="Obriši dokument {{ entry.title }}">
+      Obriši dokument
+    </button>
+  </div>
+</div>

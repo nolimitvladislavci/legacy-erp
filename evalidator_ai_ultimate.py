@@ -6,10 +6,7 @@ Pokreni: python3 evalidator_ai_ultimate.py
 
 import hashlib
 import json
-import os
 import re
-import subprocess
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any

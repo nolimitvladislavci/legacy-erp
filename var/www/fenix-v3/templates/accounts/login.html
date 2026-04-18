@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Prijava{% endblock %}
+{% block meta_description %}Fenix — Prijava u sustav{% endblock %}
+{% block public_aria_label %}Prijava u sustav{% endblock %}
+
+{% block content_public %}
+<div class="min-h-screen flex items-center justify-center p-4"
+     style="background: linear-gradient(135deg, var(--fenix-paper) 0%, var(--fenix-cream) 100%);">
+
+  <div class="w-full max-w-md">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold" style="color: var(--fenix-gold);">Fenix</h1>
+      <p class="mt-2 text-lg" style="color: var(--fenix-text-secondary);">LIMIT Connect</p>
+    </div>
+
+    <!-- Login card -->
+    <div class="fenix-card" role="form" aria-label="Obrazac za prijavu">
+      <form method="post"
+            hx-post="{% url 'accounts:login' %}"
+            hx-target="closest .fenix-card"
+            hx-swap="outerHTML"
+            hx-indicator="#login-spinner">
+
+        {% csrf_token %}
+
+        <h2 class="text-xl font-semibold mb-6" style="color: var(--fenix-text);">Prijava</h2>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-4" role="alert">
+          {% for message in messages %}
+          <div class="fenix-toast fenix-toast-{{ message.tags|default:'error' }} mb-2">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Username -->
+        <div class="fenix-field">
+          <label for="username" class="fenix-label">Korisničko ime</label>
+          <div class="relative">
+            <input type="text" id="username" name="username"
+                   value="{{ username|default:'' }}"
+                   class="fenix-input pr-12"
+                   autocomplete="username"
+                   required
+                   autofocus
+                   aria-label="Korisničko ime"
+                   aria-required="true"
+                   placeholder="Unesite korisničko ime">
+            <button type="button" class="fenix-voice-btn" data-target="username"
+                    aria-label="Govori umjesto tipkanja">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="fenix-field">
+          <label for="password" class="fenix-label">Lozinka</label>
+          <div class="relative" x-data="{ show: false }">
+            <input :type="show ? 'text' : 'password'" id="password" name="password"
+                   class="fenix-input pr-12"
+                   autocomplete="current-password"
+                   required
+                   aria-label="Lozinka"
+                   aria-required="true"
+                   placeholder="Unesite lozinku">
+            <button type="button"
+                    @click="show = !show"
+                    class="fenix-voice-btn"
+                    :aria-label="show ? 'Sakrij lozinku' : 'Prikaži lozinku'">
+              <svg x-show="!show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg x-show="show" x-cloak width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit"
+                class="fenix-btn fenix-btn-primary w-full mt-6"
+                aria-label="Prijavi se">
+          <span class="htmx-indicator" id="login-spinner">
+            <div class="fenix-spinner mr-2"></div>
+          </span>
+          Prijavi se
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center mt-6 text-sm" style="color: var(--fenix-text-muted);">
+      &copy; 2026 LIMIT Connect — Fenix v3
+    </p>
+  </div>
+</div>
+{% endblock %}

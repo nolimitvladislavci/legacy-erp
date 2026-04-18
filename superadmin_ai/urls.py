@@ -6,6 +6,8 @@ app_name = "superadmin_ai"
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path("chat/", views.ai_chat, name="ai_chat"),
+    path("chat/send/", views.ai_chat_send, name="ai_chat_send"),
     path("api/update-permission/", views.update_permission, name="update_permission"),
     path("api/bulk-permission/", views.bulk_permission, name="bulk_permission"),
     path("api/bulk-all/", views.bulk_all, name="bulk_all"),

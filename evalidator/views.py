@@ -107,3 +107,48 @@ def pricing(request):
 @csrf_exempt
 def api_batch(request):
     return JsonResponse({'status':'coming_soon','eta':'Q3 2026','contact':'api@evalidator.eu'},status=501)
+
+
+def _resolve_api_key(request):
+    """Vrati APIKey objekt ili None. Prihvaća X-API-Key header i ?api_key= param."""
+    raw = (request.META.get('HTTP_X_API_KEY') or
+           request.GET.get('api_key') or '').strip()
+    if not raw:
+        return None
+    from evalidator.models import APIKey
+    key_hash = hashlib.sha256(raw.encode()).hexdigest()
+    return APIKey.objects.filter(key_hash=key_hash, is_active=True).first()
+
+
+@csrf_exempt
+@require_GET
+def api_status(request):
+    """
+    GET /api/status/
+    Javno: vraća verziju i health bez ključa.
+    S ključem: dodaje plan, kvotu i usage.
+    """
+    from django.utils import timezone
+    now = timezone.now()
+    payload = {
+        'status': 'ok',
+        'service': 'evalidator.eu',
+        'version': '1.0',
+        'timestamp': now.isoformat(),
+        'endpoints': {
+            'oib':   '/api/v1/oib/',
+            'batch': '/api/v1/batch/',
+            'docs':  '/docs/',
+        },
+    }
+    api_key_obj = _resolve_api_key(request)
+    if api_key_obj:
+        payload['authenticated'] = True
+        payload['plan'] = api_key_obj.plan
+        payload['daily_limit'] = api_key_obj.daily_limit
+        payload['daily_used'] = api_key_obj.daily_used
+        payload['daily_remaining'] = max(0, api_key_obj.daily_limit - api_key_obj.daily_used)
+    else:
+        payload['authenticated'] = False
+        payload['note'] = 'Pass X-API-Key header for quota info'
+    return JsonResponse(payload)

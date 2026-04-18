@@ -234,7 +234,7 @@ def _run_opus(task):
     import anthropic
     from django.conf import settings
 
-    OPUS_MODEL = "claude-opus-4-6"
+    OPUS_MODEL = "claude-haiku-4-5-20251001"  # COST CONTROL 2026-04-17: Opus zamijenjen Haiku
     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 
     system = (
