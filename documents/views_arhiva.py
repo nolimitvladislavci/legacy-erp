@@ -1826,3 +1826,436 @@ def arhiva_send_komitent(request, pk):
             return JsonResponse({"error": str(e)[:200]}, status=500)
 
     return JsonResponse({"error": 'Nepoznat kanal. Koristite "email" ili "whatsapp".'}, status=400)
+
+
+# ════════════════════════════════════════════════════════════
+# INOVACIJA 1 — SKUPNI MJESEČNI DOWNLOAD
+# Sve fakture jednog dobavljača za odabrani mjesec → ZIP
+# Smart naming + CSV korice + pokrivalica
+# ════════════════════════════════════════════════════════════
+
+
+@login_required
+def arhiva_monthly_bundle(request):
+    """Skupni download svih dokumenata jednog dobavljača za odabrani mjesec.
+
+    GET params:
+      partner  — dio naziva dobavljača (case-insensitive contains)
+      year     — četveroznamenkasta godina
+      month    — 1–12
+      company  — (superadmin) company ID
+
+    Returns: ZIP s pametnim imenima + CSV sažetak.
+    """
+
+    company = get_user_company(request)
+    if request.user.is_superuser:
+        cid = request.GET.get("company", "")
+        if cid:
+            from companies.models import Company as _C
+
+            company = _C.objects.filter(pk=cid).first() or company
+
+    if not company:
+        return JsonResponse({"error": "Nema aktivne tvrtke"}, status=400)
+
+    partner_q = request.GET.get("partner", "").strip()
+    try:
+        year = int(request.GET.get("year", date.today().year))
+        month = int(request.GET.get("month", date.today().month))
+    except (ValueError, TypeError):
+        return JsonResponse({"error": "Neispravna godina/mjesec"}, status=400)
+
+    if not (1 <= month <= 12) or year < 2000:
+        return JsonResponse({"error": "Neispravan raspon datuma"}, status=400)
+
+    # Filtriranje zapisa
+    qs = ArhivaEntry.objects.filter(
+        company=company,
+        doc_date__year=year,
+        doc_date__month=month,
+    )
+    if partner_q:
+        qs = qs.filter(partner_name__icontains=partner_q)
+
+    qs = qs.order_by("doc_date", "archive_number")
+
+    if not qs.exists():
+        return JsonResponse(
+            {"error": f"Nema dokumenata za {partner_q or 'sve dobavljače'} u {month:02d}/{year}"}, status=404
+        )
+
+    # Limit: max 200 fajlova po ZIP-u
+    entries = list(qs[:200])
+    month_label = f"{year}-{month:02d}"
+    safe_partner = (partner_q or "svi")[:30].replace(" ", "_").replace("/", "-")
+    zip_name = f"ARHIVA_{company.oib or company.name[:10]}_{safe_partner}_{month_label}.zip"
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        csv_rows = []
+        file_count = 0
+
+        for idx, entry in enumerate(entries, start=1):
+            if not entry.file_path:
+                continue
+            full_path = os.path.join(settings.MEDIA_ROOT, entry.file_path)
+            if not os.path.exists(full_path):
+                continue
+
+            # Pametno imenovanje: NN_DobavljacNaziv_BrojRacuna_Iznos.ext
+            ext = os.path.splitext(entry.file_path)[1].lower() or ".bin"
+            safe_partner_name = (entry.partner_name or "nepoznat")[:25].replace(" ", "_").replace("/", "-")
+            safe_doc = (entry.doc_number or "")[:20].replace(" ", "").replace("/", "-")
+            amount_str = str(entry.amount).replace(".", ",") if entry.amount else "0"
+            arc_name = f"{idx:03d}_{safe_partner_name}_{safe_doc}_{amount_str}{entry.currency}{ext}"
+            zf.write(full_path, arc_name)
+            file_count += 1
+
+            csv_rows.append(
+                [
+                    entry.doc_date.strftime("%d.%m.%Y") if entry.doc_date else "",
+                    entry.archive_number or "",
+                    entry.doc_number or "",
+                    entry.partner_name or "",
+                    str(entry.amount) if entry.amount else "0",
+                    entry.currency,
+                    arc_name,
+                ]
+            )
+
+        if file_count == 0:
+            return JsonResponse({"error": "Nema datoteka za preuzimanje"}, status=404)
+
+        # CSV Sažetak
+        csv_buf = io.StringIO()
+        csv_buf.write("\ufeff")  # UTF-8 BOM za Excel
+        import csv as _csv
+
+        writer = _csv.writer(csv_buf, delimiter=";")
+        writer.writerow(["Datum", "Arhivski br.", "Broj dokumenta", "Dobavljač", "Iznos", "Valuta", "Datoteka"])
+        writer.writerows(csv_rows)
+        total_amount = sum(e.amount or 0 for e in entries if e.file_path)
+        writer.writerow([])
+        writer.writerow(
+            [
+                "UKUPNO:",
+                "",
+                "",
+                "",
+                str(round(total_amount, 2)),
+                entries[0].currency if entries else "",
+                f"{file_count} dokumenata",
+            ]
+        )
+        zf.writestr(f"PREGLED_{safe_partner}_{month_label}.csv", csv_buf.getvalue().encode("utf-8"))
+
+    buf.seek(0)
+    response = HttpResponse(buf.getvalue(), content_type="application/zip")
+    response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
+    logger.info(
+        "arhiva_monthly_bundle: company=%s partner=%s %s/%s → %d fajlova",
+        company,
+        partner_q,
+        month,
+        year,
+        file_count,
+    )
+    return response
+
+
+@login_required
+def arhiva_monthly_bundle_preview(request):
+    """JSON preview prije downloada — popis, ukupni iznos, broj fajlova."""
+    company = get_user_company(request)
+    if request.user.is_superuser:
+        cid = request.GET.get("company", "")
+        if cid:
+            from companies.models import Company as _C
+
+            company = _C.objects.filter(pk=cid).first() or company
+
+    if not company:
+        return JsonResponse({"error": "Nema aktivne tvrtke"}, status=400)
+
+    partner_q = request.GET.get("partner", "").strip()
+    try:
+        year = int(request.GET.get("year", date.today().year))
+        month = int(request.GET.get("month", date.today().month))
+    except (ValueError, TypeError):
+        return JsonResponse({"error": "Neispravna godina/mjesec"}, status=400)
+
+    qs = ArhivaEntry.objects.filter(
+        company=company,
+        doc_date__year=year,
+        doc_date__month=month,
+    )
+    if partner_q:
+        qs = qs.filter(partner_name__icontains=partner_q)
+
+    from django.db.models import Count, Sum
+
+    agg = qs.aggregate(cnt=Count("id"), total=Sum("amount"))
+    entries_with_files = qs.filter(file_path__isnull=False).exclude(file_path="").count()
+
+    partners = list(qs.values_list("partner_name", flat=True).distinct().order_by("partner_name")[:20])
+
+    return JsonResponse(
+        {
+            "total_count": agg["cnt"] or 0,
+            "file_count": entries_with_files,
+            "total_amount": float(agg["total"] or 0),
+            "partners": partners,
+            "year": year,
+            "month": month,
+        }
+    )
+
+
+# ════════════════════════════════════════════════════════════
+# INOVACIJA 2 — DUPLIKAT RADAR
+# Detekcija mogućih duplikata prije/nakon uploada
+# Hash / fuzzy iznos+datum / isti broj dokumenta
+# ════════════════════════════════════════════════════════════
+
+
+def _detect_duplicate(company, file_hash, partner_name, amount, doc_date, doc_number, exclude_pk=None):
+    """Vrati (ArhivaEntry, razlog, score) ili (None, '', 0) ako nema duplikata.
+
+    Provjere (po prioritetu):
+      1. Identičan hash datoteke → 100% duplikat
+      2. Isti broj dokumenta + isti partner → 99%
+      3. Isti partner + isti iznos ± 1% + datum ± 14 dana → 85%
+    """
+    from datetime import timedelta
+
+    qs = ArhivaEntry.objects.filter(company=company)
+    if exclude_pk:
+        qs = qs.exclude(pk=exclude_pk)
+
+    # 1. Hash check
+    if file_hash:
+        dup = qs.filter(source_id=file_hash).first()
+        if dup:
+            return dup, "Identična datoteka već arhivirana", 100
+
+    # 2. Isti broj dokumenta + partner (ako nisu prazni)
+    if doc_number and doc_number.strip() and partner_name and partner_name.strip():
+        dup = qs.filter(
+            partner_name__iexact=partner_name.strip(),
+            doc_number__iexact=doc_number.strip(),
+        ).first()
+        if dup:
+            return dup, f"Isti broj dokumenta ({doc_number}) za istog dobavljača", 99
+
+    # 3. Isti partner + iznos ± 1% + datum ± 14 dana
+    if partner_name and partner_name.strip() and amount and float(amount) > 0 and doc_date:
+        tol = float(amount) * 0.01
+        date_lo = doc_date - timedelta(days=14)
+        date_hi = doc_date + timedelta(days=14)
+        dup = qs.filter(
+            partner_name__icontains=partner_name.strip()[:15],
+            amount__gte=float(amount) - tol,
+            amount__lte=float(amount) + tol,
+            doc_date__gte=date_lo,
+            doc_date__lte=date_hi,
+        ).first()
+        if dup:
+            return dup, f"Sličan iznos ({amount}) od istog dobavljača u ±14 dana", 85
+
+    return None, "", 0
+
+
+@login_required
+def arhiva_duplicate_check(request):
+    """AJAX: provjeri duplikat prije/dopo uploada.
+
+    POST JSON: { hash, partner_name, amount, doc_date (YYYY-MM-DD), doc_number, exclude_pk }
+    GET: isto putem query stringa
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, ValueError):
+            data = {}
+    else:
+        data = request.GET
+
+    company = get_user_company(request)
+    if not company and not request.user.is_superuser:
+        return JsonResponse({"error": "Nema aktivne tvrtke"}, status=400)
+
+    file_hash = data.get("hash", "")
+    partner = data.get("partner_name", "")
+    amount_raw = data.get("amount", 0)
+    doc_date_s = data.get("doc_date", "")
+    doc_number = data.get("doc_number", "")
+    exclude_pk = data.get("exclude_pk")
+
+    from decimal import Decimal
+
+    try:
+        amount = Decimal(str(float(amount_raw)))
+    except (ValueError, TypeError):
+        amount = Decimal("0")
+
+    doc_date = None
+    if doc_date_s:
+        from documents.conversion_service import _parse_date_obj
+
+        doc_date = _parse_date_obj(doc_date_s)
+
+    dup, reason, score = _detect_duplicate(
+        company,
+        file_hash,
+        partner,
+        amount,
+        doc_date,
+        doc_number,
+        exclude_pk=exclude_pk,
+    )
+
+    if dup:
+        return JsonResponse(
+            {
+                "duplicate": True,
+                "score": score,
+                "reason": reason,
+                "entry_id": dup.pk,
+                "archive_number": dup.archive_number or "",
+                "doc_number": dup.doc_number or "",
+                "partner_name": dup.partner_name or "",
+                "amount": float(dup.amount) if dup.amount else 0,
+                "doc_date": dup.doc_date.isoformat() if dup.doc_date else "",
+            }
+        )
+
+    return JsonResponse({"duplicate": False, "score": 0})
+
+
+# ════════════════════════════════════════════════════════════
+# INOVACIJA 3 — DOBAVLJAČ INTELLIGENCE
+# Analitika po dobavljaču: trend, praznine, anomalije
+# ════════════════════════════════════════════════════════════
+
+
+@login_required
+def arhiva_partner_intel(request):
+    """Analitika jednog dobavljača: 13 mjeseci trend, praznine, anomalije.
+
+    GET: partner_name (partial), company (superadmin override)
+    """
+    import statistics
+    from datetime import date as _date
+
+    from dateutil.relativedelta import relativedelta
+    from django.db.models import Count, Sum
+
+    company = get_user_company(request)
+    if request.user.is_superuser:
+        cid = request.GET.get("company", "")
+        if cid:
+            from companies.models import Company as _C
+
+            company = _C.objects.filter(pk=cid).first() or company
+
+    if not company:
+        return JsonResponse({"error": "Nema aktivne tvrtke"}, status=400)
+
+    partner_q = request.GET.get("partner", "").strip()
+    if not partner_q:
+        return JsonResponse({"error": "partner parametar obavezan"}, status=400)
+
+    today = _date.today()
+
+    # Zadnjih 13 mjeseci (12 + trenutni)
+    months = []
+    for i in range(12, -1, -1):
+        d = today.replace(day=1) - relativedelta(months=i)
+        months.append(d)
+
+    qs_base = ArhivaEntry.objects.filter(
+        company=company,
+        partner_name__icontains=partner_q,
+    )
+
+    # Agregati po mjesecima
+    monthly = []
+    amounts = []
+    for m in months:
+        agg = qs_base.filter(
+            doc_date__year=m.year,
+            doc_date__month=m.month,
+        ).aggregate(total=Sum("amount"), cnt=Count("id"))
+        total = float(agg["total"] or 0)
+        monthly.append(
+            {
+                "year": m.year,
+                "month": m.month,
+                "label": f"{m.year}-{m.month:02d}",
+                "total": round(total, 2),
+                "count": agg["cnt"] or 0,
+            }
+        )
+        if total > 0:
+            amounts.append(total)
+
+    # Statistike
+    avg = round(statistics.mean(amounts), 2) if amounts else 0
+    stdev = round(statistics.stdev(amounts), 2) if len(amounts) > 1 else 0
+
+    # Praznine (nula u prošlosti — ne za budući)
+    past_months = [m for m in monthly if (m["year"], m["month"]) < (today.year, today.month)]
+    gaps = [m["label"] for m in past_months if m["total"] == 0 and m["count"] == 0]
+
+    # Anomalije: iznos > avg + 1.5 * stdev (ili > 150% avg ako nema stdev)
+    threshold = avg + 1.5 * stdev if stdev > 0 else avg * 1.5
+    anomalies = [
+        {"label": m["label"], "total": m["total"], "deviation_pct": round((m["total"] / avg - 1) * 100) if avg else 0}
+        for m in monthly
+        if m["total"] > threshold and avg > 0
+    ]
+
+    # YTD ovaj vs prošla godina
+    ytd_this = float(
+        qs_base.filter(doc_date__year=today.year, doc_date__month__lte=today.month).aggregate(t=Sum("amount"))["t"] or 0
+    )
+    ytd_prev = float(
+        qs_base.filter(doc_date__year=today.year - 1, doc_date__month__lte=today.month).aggregate(t=Sum("amount"))["t"]
+        or 0
+    )
+    ytd_delta_pct = round((ytd_this / ytd_prev - 1) * 100, 1) if ytd_prev > 0 else None
+
+    # Zadnji dokument
+    last_entry = qs_base.filter(file_path__isnull=False).exclude(file_path="").order_by("-doc_date").first()
+
+    # Broj dokumenata ukupno
+    total_docs = qs_base.count()
+    total_amount = float(qs_base.aggregate(t=Sum("amount"))["t"] or 0)
+
+    return JsonResponse(
+        {
+            "partner": partner_q,
+            "company": str(company),
+            "monthly": monthly,
+            "stats": {
+                "avg_monthly": avg,
+                "stdev": stdev,
+                "total_docs": total_docs,
+                "total_amount": round(total_amount, 2),
+                "ytd_this": round(ytd_this, 2),
+                "ytd_prev": round(ytd_prev, 2),
+                "ytd_delta_pct": ytd_delta_pct,
+            },
+            "gaps": gaps,
+            "anomalies": anomalies,
+            "last_entry": {
+                "id": last_entry.pk,
+                "archive_number": last_entry.archive_number or "",
+                "doc_date": last_entry.doc_date.isoformat() if last_entry and last_entry.doc_date else "",
+                "amount": float(last_entry.amount) if last_entry else 0,
+            }
+            if last_entry
+            else None,
+        }
+    )

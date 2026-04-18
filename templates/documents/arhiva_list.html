@@ -370,6 +370,9 @@
             <a href="{% url 'documents:arhiva_export' %}?{{ request.GET.urlencode }}" class="btn-ghost" title="{% trans 'Exportiraj filtrirane dokumente u CSV' %}">
                 <i class="fas fa-file-csv"></i> CSV
             </a>
+            <button class="btn-ghost" onclick="openMonthlyBundle()" title="Skupni download po dobavljaču/mjesecu">
+                <i class="fas fa-box-archive"></i> Skupni
+            </button>
             {% if company.country == 'DE' or company.country == 'AT' %}
             <a href="{% url 'pos:dsfinvk_export' %}" class="btn-ghost fx-text-gold" title="DSFinV-K Kassenarchiv">
               &#128230; DSFinV-K
@@ -659,6 +662,54 @@
             </div>
             <div id="sendResult" class="fx-fs-base fx-hidden mt-3"></div>
         </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         SKUPNI DOWNLOAD MODAL
+    ════════════════════════════════════════════════ -->
+    <div id="monthlyBundleModal" class="fx-hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10500;display:none;align-items:center;justify-content:center">
+      <div style="background:var(--bg-card);border-radius:14px;border:1px solid var(--border);width:92%;max-width:520px;padding:0;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)">
+          <h3 style="margin:0;font-size:1rem;font-weight:700"><i class="fas fa-box-archive" style="color:var(--gold)"></i> Skupni Download</h3>
+          <button onclick="closeMonthlyBundle()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>
+        </div>
+        <div style="padding:1.25rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+            <div>
+              <label style="font-size:.78rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.3rem">DOBAVLJAČ</label>
+              <input id="mbPartner" type="text" placeholder="npr. HEP, Vodoopskrba..."
+                style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.45rem .7rem;color:var(--text);font-size:.87rem">
+            </div>
+            <div>
+              <label style="font-size:.78rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.3rem">PERIOADA</label>
+              <input id="mbMonth" type="month" value=""
+                style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.45rem .7rem;color:var(--text);font-size:.87rem">
+            </div>
+          </div>
+          <div id="mbPreview" style="background:var(--bg-alt,#f8f8f8);border-radius:8px;padding:.6rem .9rem;font-size:.83rem;min-height:40px;margin-bottom:.75rem;display:none">
+            <span id="mbPreviewText"></span>
+          </div>
+          <!-- Partner Intel panel -->
+          <div id="mbIntelPanel" style="display:none;border-top:1px solid var(--border);padding-top:.75rem;margin-top:.25rem">
+            <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);margin-bottom:.4rem;text-transform:uppercase">Analitika dobavljača — zadnjih 12 mj.</div>
+            <div id="mbIntelChart" style="display:flex;align-items:flex-end;gap:3px;height:50px;margin-bottom:.4rem"></div>
+            <div id="mbIntelStats" style="display:flex;flex-wrap:wrap;gap:.4rem;font-size:.78rem"></div>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button onclick="mbPreviewLoad()" class="btn-ghost" style="font-size:.83rem"><i class="fas fa-search"></i> Provjeri</button>
+            <button onclick="mbDownload()" id="mbDownloadBtn" class="btn-gold" style="font-size:.83rem" disabled><i class="fas fa-download"></i> Preuzmi ZIP</button>
+            <button onclick="mbIntelLoad()" id="mbIntelBtn" class="btn-ghost" style="font-size:.83rem;color:var(--gold)" title="Analitika ovog dobavljača"><i class="fas fa-chart-line"></i> Intel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duplikat Radar Tooltip — prikazuje se u arhiva listi dinamički -->
+    <div id="dupRadarToast" style="display:none;position:fixed;bottom:80px;right:16px;z-index:10400;background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:.75rem 1rem;max-width:320px;font-size:.83rem;box-shadow:0 4px 20px rgba(0,0,0,.2)">
+      <div style="font-weight:700;color:#856404;margin-bottom:.3rem"><i class="fas fa-exclamation-triangle"></i> Moguć duplikat!</div>
+      <div id="dupRadarMsg"></div>
+      <div style="margin-top:.4rem"><a id="dupRadarLink" href="#" class="text-warning fw-bold" style="font-size:.8rem">Otvori original →</a></div>
+      <button onclick="document.getElementById('dupRadarToast').style.display='none'" style="position:absolute;top:6px;right:8px;background:none;border:none;font-size:1rem;cursor:pointer;color:#856404">&times;</button>
     </div>
 
     <!-- Modal za pregled slike / PDF-a -->
@@ -1669,6 +1720,152 @@ window.closeDrawer = function() {
   // Pokušaj odmah, pa nakon 500ms ako tablica još nije renderirana
   applyHighlight();
   setTimeout(applyHighlight, 500);
+})();
+
+
+// ════════════════════════════════════════════════════════════
+// SKUPNI DOWNLOAD — Monthly Bundle
+// ════════════════════════════════════════════════════════════
+function openMonthlyBundle() {
+  var m = document.getElementById('monthlyBundleModal');
+  m.style.display = 'flex';
+  // Prefill iz aktivnih filtera
+  var q = new URLSearchParams(window.location.search);
+  if (q.get('q')) document.getElementById('mbPartner').value = q.get('q');
+  var today = new Date();
+  var ym = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+  document.getElementById('mbMonth').value = q.get('year') && q.get('month')
+    ? q.get('year') + '-' + String(parseInt(q.get('month'))).padStart(2, '0')
+    : ym;
+  document.getElementById('mbPreview').style.display = 'none';
+  document.getElementById('mbIntelPanel').style.display = 'none';
+  document.getElementById('mbDownloadBtn').disabled = true;
+}
+function closeMonthlyBundle() {
+  document.getElementById('monthlyBundleModal').style.display = 'none';
+}
+document.getElementById('monthlyBundleModal').addEventListener('click', function(e) {
+  if (e.target === this) closeMonthlyBundle();
+});
+
+function _mbParams() {
+  var mv = document.getElementById('mbMonth').value; // YYYY-MM
+  var year = mv ? mv.split('-')[0] : '';
+  var month = mv ? mv.split('-')[1] : '';
+  var partner = document.getElementById('mbPartner').value.trim();
+  return { year, month, partner };
+}
+
+async function mbPreviewLoad() {
+  var p = _mbParams();
+  if (!p.year || !p.month) { fenixToast('Odaberite period', 'warning'); return; }
+  var url = '/hr/documents/arhiva/monthly-bundle/preview/?year=' + p.year + '&month=' + p.month;
+  if (p.partner) url += '&partner=' + encodeURIComponent(p.partner);
+  try {
+    var res = await fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    var data = await res.json();
+    var prev = document.getElementById('mbPreview');
+    prev.style.display = 'block';
+    if (data.error) {
+      document.getElementById('mbPreviewText').innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> ' + data.error + '</span>';
+      document.getElementById('mbDownloadBtn').disabled = true;
+    } else {
+      var partnersHtml = data.partners.slice(0, 5).map(function(p) { return '<span style="background:var(--bg,#111);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:.75rem">' + p + '</span>'; }).join(' ');
+      document.getElementById('mbPreviewText').innerHTML =
+        '<b>' + data.file_count + '</b> datoteka · <b>' + data.total_amount.toFixed(2) + ' EUR</b> · ' + data.total_count + ' zapisa<br>' +
+        '<div style="margin-top:.3rem;display:flex;flex-wrap:wrap;gap:.25rem">' + partnersHtml + '</div>';
+      document.getElementById('mbDownloadBtn').disabled = data.file_count === 0;
+    }
+  } catch(e) {
+    fenixToast('Greška: ' + e.message, 'error');
+  }
+}
+
+function mbDownload() {
+  var p = _mbParams();
+  if (!p.year || !p.month) return;
+  var url = '/hr/documents/arhiva/monthly-bundle/?year=' + p.year + '&month=' + p.month;
+  if (p.partner) url += '&partner=' + encodeURIComponent(p.partner);
+  window.location.href = url;
+  fenixToast('ZIP u pripremi...', 'info');
+}
+
+async function mbIntelLoad() {
+  var p = _mbParams();
+  if (!p.partner) { fenixToast('Unesite naziv dobavljača za analitiku', 'warning'); return; }
+  var url = '/hr/documents/arhiva/partner-intel/?partner=' + encodeURIComponent(p.partner);
+  try {
+    var res = await fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    var data = await res.json();
+    if (data.error) { fenixToast(data.error, 'warning'); return; }
+    var panel = document.getElementById('mbIntelPanel');
+    panel.style.display = 'block';
+
+    // Mini bar chart
+    var chartEl = document.getElementById('mbIntelChart');
+    chartEl.innerHTML = '';
+    var maxVal = Math.max.apply(null, data.monthly.map(function(m) { return m.total; })) || 1;
+    data.monthly.forEach(function(m) {
+      var h = Math.round((m.total / maxVal) * 48);
+      var isAnomaly = data.anomalies.some(function(a) { return a.label === m.label; });
+      var isGap = data.gaps.includes(m.label);
+      var col = isAnomaly ? '#ef4444' : isGap ? '#6b7280' : 'var(--gold,#c9a84c)';
+      var bar = document.createElement('div');
+      bar.style.cssText = 'flex:1;background:' + col + ';border-radius:2px 2px 0 0;height:' + (h || 2) + 'px;opacity:.85;cursor:pointer;min-width:8px';
+      bar.title = m.label + ': ' + m.total.toFixed(2) + ' EUR' + (isGap ? ' (praznina)' : '') + (isAnomaly ? ' ⚠ anomalija' : '');
+      chartEl.appendChild(bar);
+    });
+
+    // Stats pills
+    var s = data.stats;
+    var deltaHtml = s.ytd_delta_pct !== null
+      ? '<span style="color:' + (s.ytd_delta_pct > 0 ? '#ef4444' : '#10b981') + '">' + (s.ytd_delta_pct > 0 ? '+' : '') + s.ytd_delta_pct + '% YTD</span>'
+      : '';
+    var gapsHtml = data.gaps.length ? '<span style="color:#f59e0b">⚠ ' + data.gaps.length + ' praznina</span>' : '<span style="color:#10b981">✓ bez praznina</span>';
+    var anomHtml = data.anomalies.length ? '<span style="color:#ef4444">⚡ ' + data.anomalies.length + ' anomalija</span>' : '';
+    document.getElementById('mbIntelStats').innerHTML =
+      '<span>Prosjek: <b>' + s.avg_monthly.toFixed(2) + ' EUR/mj</b></span>' +
+      '<span>Ukupno: <b>' + s.total_amount.toFixed(2) + ' EUR</b></span>' +
+      deltaHtml + ' ' + gapsHtml + ' ' + anomHtml;
+  } catch(e) {
+    fenixToast('Intel greška: ' + e.message, 'error');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// DUPLIKAT RADAR — provjera duplikata pri pregledu novih zapisa
+// Automatski se okida kad se pojavi novi highlight u URL-u
+// ════════════════════════════════════════════════════════════
+(function() {
+  var hid = new URLSearchParams(window.location.search).get('highlight');
+  if (!hid) return;
+  fetch('/hr/documents/arhiva/' + hid + '/detail/', {
+    credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(entry) {
+    if (!entry || entry.error) return;
+    var params = new URLSearchParams();
+    if (entry.source_id) params.set('hash', entry.source_id);
+    if (entry.partner_name) params.set('partner_name', entry.partner_name);
+    if (entry.amount) params.set('amount', entry.amount);
+    if (entry.doc_date) params.set('doc_date', entry.doc_date);
+    if (entry.doc_number) params.set('doc_number', entry.doc_number);
+    params.set('exclude_pk', hid);
+    return fetch('/hr/documents/arhiva/duplicate-check/?' + params.toString(), {
+      credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(function(r) { return r.json(); });
+  })
+  .then(function(dup) {
+    if (!dup || !dup.duplicate) return;
+    var toast = document.getElementById('dupRadarToast');
+    document.getElementById('dupRadarMsg').textContent = dup.reason + ' (' + dup.score + '% sličnost)';
+    document.getElementById('dupRadarLink').href = '?highlight=' + dup.entry_id;
+    document.getElementById('dupRadarLink').textContent = (dup.archive_number || 'ARH-' + dup.entry_id) + ' — ' + (dup.doc_number || '') + ' ' + (dup.amount || '') + ' EUR →';
+    toast.style.display = 'block';
+    setTimeout(function() { toast.style.display = 'none'; }, 12000);
+  })
+  .catch(function() {});
 })();
 
 {% endblock %}
