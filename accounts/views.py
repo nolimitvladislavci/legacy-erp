@@ -331,6 +331,7 @@ def quick_register(request):
                 "racunovodja": "racunovodja",
                 "firma": "company_admin",
                 "obrt": "company_admin",
+                "pos_obrt": "company_admin",
                 "udruga": "company_admin",
             }
             profile_role = role_map.get(role, "company_admin")
@@ -366,7 +367,12 @@ def quick_register(request):
 
             # Trial subscription
             try:
-                plan = PricingPlan.objects.filter(slug="professional" if role == "racunovodja" else "starter").first()
+                _plan_map = {
+                    "racunovodja": "professional",
+                    "pos_obrt": "pos-besplatno",
+                    "udruga": "udruga-starter",
+                }
+                plan = PricingPlan.objects.filter(slug=_plan_map.get(role, "starter")).first()
                 if plan and not company.subscriptions.filter(is_active=True).exists():
                     import datetime
 
@@ -396,6 +402,10 @@ def quick_register(request):
             send_verification_email(user)
         except ImportError:
             pass
+
+        # POS free tier → direktno na onboarding wizard
+        if role == "pos_obrt":
+            return JsonResponse({"ok": True, "redirect": "/hr/pos/onboarding/"})
 
         # Audit
         try:

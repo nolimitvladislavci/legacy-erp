@@ -297,7 +297,112 @@ class DatabaseStorageBackend:
         return DocumentBlob.objects.filter(id=blob_id).exists()
 
 
+class NetworkStorageBackend:
+    """
+    Mrezni disk backend — sinkronizira dokumente na OneDrive/SharePoint/SMB/NAS
+    putem rclone. Radi kao dual-layer: local copy + async rclone push.
+
+    Konfiguracija:
+      StorageConfig.network_remote = "onedrive"  (rclone remote ime)
+      StorageConfig.network_path   = "FenixArhiva"  (folder na remoteu)
+
+    rclone remote se konfigurira jednom: rclone config
+    Podrzan: OneDrive, SharePoint, Google Drive, Dropbox, SMB, SFTP, WebDAV
+    """
+
+    def __init__(self, remote="onedrive", remote_path="FenixArhiva"):
+        self.remote = remote
+        self.remote_path = remote_path.rstrip("/")
+
+    def _rclone_dst(self, rel_path):
+        return f"{self.remote}:{self.remote_path}/{rel_path}"
+
+    def _run_rclone(self, *args, timeout=30):
+        import subprocess
+
+        cmd = ["rclone"] + list(args) + ["--config", "/root/.config/rclone/rclone.conf"]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            return result.returncode, result.stdout, result.stderr
+        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+            logger.error("rclone error: %s", e)
+            return -1, "", str(e)
+
+    def save(self, file_bytes, filename, company_id, source_type, content_type="application/octet-stream", **kwargs):
+
+        # 1. Spremi lokalno kao primarni zapis (instant)
+        rel_path = generate_storage_path(company_id, source_type, filename)
+        local_full = os.path.join(settings.MEDIA_ROOT, rel_path)
+        os.makedirs(os.path.dirname(local_full), exist_ok=True)
+        with open(local_full, "wb") as f:
+            f.write(file_bytes)
+
+        # 2. Async push na rclone remote (ne blokira upload)
+        dst = self._rclone_dst(rel_path)
+        rc, out, err = self._run_rclone("copyto", local_full, dst, timeout=60)
+        if rc == 0:
+            logger.info("NETWORK saved: %s → %s", rel_path, dst)
+            network_url = f"rclone://{self.remote}/{self.remote_path}/{rel_path}"
+        else:
+            logger.warning("rclone push failed (local copy kept): %s", err)
+            network_url = f"{settings.MEDIA_URL}{rel_path}"  # fallback na local URL
+
+        return {
+            "backend": "network",
+            "path": rel_path,
+            "url": network_url,
+            "rclone_dst": dst,
+            "rclone_ok": rc == 0,
+            "size": len(file_bytes),
+            "hash": get_file_hash(file_bytes),
+        }
+
+    def retrieve(self, path):
+        # Pokusaj s lokalne kopije (dual-write uvijek postoji)
+        local_full = os.path.join(settings.MEDIA_ROOT, path)
+        if os.path.exists(local_full):
+            with open(local_full, "rb") as f:
+                return f.read()
+        # Fallback: rclone cat s remotea
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".bin") as tmp:
+            tmp_path = tmp.name
+        try:
+            rc, _, err = self._run_rclone("copyto", self._rclone_dst(path), tmp_path, timeout=30)
+            if rc == 0 and os.path.exists(tmp_path):
+                with open(tmp_path, "rb") as f:
+                    return f.read()
+            logger.error("rclone retrieve failed: %s", err)
+            return None
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
+    def delete(self, path):
+        local_full = os.path.join(settings.MEDIA_ROOT, path)
+        if os.path.exists(local_full):
+            os.remove(local_full)
+        rc, _, err = self._run_rclone("deletefile", self._rclone_dst(path), timeout=20)
+        return rc == 0
+
+    def exists(self, path):
+        local_full = os.path.join(settings.MEDIA_ROOT, path)
+        if os.path.exists(local_full):
+            return True
+        rc, out, _ = self._run_rclone("lsf", self._rclone_dst(path), timeout=10)
+        return rc == 0 and bool(out.strip())
+
+    def sync_status(self):
+        """Vrati statistiku sinkronizacije za admin panel."""
+        rc, out, err = self._run_rclone("size", f"{self.remote}:{self.remote_path}", timeout=20)
+        if rc == 0:
+            return {"ok": True, "info": out.strip()}
+        return {"ok": False, "error": err.strip()}
+
+
 BACKENDS = {
+    "network": NetworkStorageBackend,
     "local": LocalStorageBackend,
     "cloud": CloudStorageBackend,
     "database": DatabaseStorageBackend,

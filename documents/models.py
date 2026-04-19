@@ -730,6 +730,7 @@ class StorageConfig(models.Model):
         ("local", _("Lokalni disk")),
         ("cloud", _("Cloud (B2/S3)")),
         ("database", _("Baza podataka")),
+        ("network", _("Mrezni disk (OneDrive/SharePoint/SMB)")),
     ]
     company = models.OneToOneField(
         Company, on_delete=models.CASCADE, related_name="storage_config", verbose_name=_("Tvrtka")
@@ -741,6 +742,16 @@ class StorageConfig(models.Model):
     auto_compress_images = models.BooleanField(default=True, verbose_name=_("Auto kompresija slika"))
     cloud_bucket = models.CharField(max_length=100, blank=True, verbose_name=_("Cloud bucket"))
     cloud_prefix = models.CharField(max_length=100, blank=True, verbose_name=_("Cloud prefix"))
+    # Network backend (rclone)
+    network_remote = models.CharField(
+        max_length=100,
+        blank=True,
+        default="onedrive",
+        verbose_name=_("rclone remote ime (npr. onedrive, gdrive, smb1)"),
+    )
+    network_path = models.CharField(
+        max_length=200, blank=True, default="FenixArhiva", verbose_name=_("Folder na mreznom disku")
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
