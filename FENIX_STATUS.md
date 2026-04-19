@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-19 (Dan 53), commit 4a54619a — memio.world Kum sustav + Lektire + bottom nav redesign
+> Zadnji update: 2026-04-19 (Dan 53), commit e52d6d4a — OIB fix, Lektire seed 31 knjiga, send advanced modal
 
 ---
 
@@ -22,6 +22,7 @@
 
 | Datum | Agent | Fokus | Rezultat | Commit |
 |-------|-------|-------|----------|--------|
+| 2026-04-19 | CC Sonnet | TROJSTVO TOP5 + Lektire seed + Grand Plan finish | OIB blank=False+admin warn, Lektire 31 knjiga seeded, send_advanced modal wire-up, StepUp API, Celery Beat+3 | e52d6d4a |
 | 2026-04-19 | CC Sonnet | memio.world Kum + Lektire + bottom nav | KumInvitation/Relationship/Gift, LektiraBook/Chapter/Progress, 7 templates, login_required_play, pnav redesign | 4a54619a |
 | 2026-04-19 | CC Sonnet | DATEV 2030 + eValidator Pečat + Glasovni Send | DocumentSeal model+service+verify, DATEV v2 (BelegLink+GUID+SEPA+OSS), arhiva_send_advanced (glas+viral), _send_advanced_modal | 9ae58927 |
 | 2026-04-18 | CC Sonnet | Domain split + Cluster | fina-connect.online odvojen, ModuleGateMiddleware, admin inline, nginx fix | e6943688 |
@@ -244,7 +245,7 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 | B-07 | POS free tier konfiguracija za Mariju Čačić | SREDNJE | memio.world MVP |
 | B-08 | Duplikat Radar integracija u upload view | NIZAK | nice to have |
 | B-09 | core/tests.py pytest collection error | NIZAK | 1-2 linije fix |
-| B-10 | send modal wire-up u arhiva_list.html | SREDNJE | openSendAdvancedModal() |
+| B-10 | send modal wire-up u arhiva_list.html | RIJEŠENO | Napredno slanje LIVE u draweru |
 | B-11 | KumGift Stripe flow | SREDNJE | pending_payment → active |
-| B-12 | Lektire seed (HR kurikulum 1-8) | VISOKO | knjige bez unosa su beskorisne |
+| B-12 | Lektire seed (HR kurikulum 1-8) | RIJEŠENO | 31 knjiga seeded: razredi 1-8 |
 | B-13 | Kum child selector populate | NIZAK | JS needs backend context |
