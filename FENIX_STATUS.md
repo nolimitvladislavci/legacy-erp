@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-19 (Dan 53), commit 9ae58927 — DATEV 2030 + eValidator Pečat + Glasovni Send
+> Zadnji update: 2026-04-19 (Dan 53), commit 4a54619a — memio.world Kum sustav + Lektire + bottom nav redesign
 
 ---
 
@@ -22,6 +22,7 @@
 
 | Datum | Agent | Fokus | Rezultat | Commit |
 |-------|-------|-------|----------|--------|
+| 2026-04-19 | CC Sonnet | memio.world Kum + Lektire + bottom nav | KumInvitation/Relationship/Gift, LektiraBook/Chapter/Progress, 7 templates, login_required_play, pnav redesign | 4a54619a |
 | 2026-04-19 | CC Sonnet | DATEV 2030 + eValidator Pečat + Glasovni Send | DocumentSeal model+service+verify, DATEV v2 (BelegLink+GUID+SEPA+OSS), arhiva_send_advanced (glas+viral), _send_advanced_modal | 9ae58927 |
 | 2026-04-18 | CC Sonnet | Domain split + Cluster | fina-connect.online odvojen, ModuleGateMiddleware, admin inline, nginx fix | e6943688 |
 | 2026-04-18 | CC Sonnet | Predforma (scan preview card) | feat: scan result card s preview slike, metapodacima i akcijama iznad arhive popisa | 542a5cfd |
@@ -29,6 +30,59 @@
 | 2026-04-18 | CC Sonnet | Fenix V3 PLAN_029-042 | PLAN_031-033 DE Steuerberater+WAHA+DATEV, PLAN_035 invoiceBuilder, PLAN_036-039 UBL+PDF+Email+Payments, PLAN_040 ClientPortal, PLAN_041-042 Accounting+JournalUI — 35/71 DONE |
 | 2026-04-18 | CC Sonnet | evalidator 10/10 + Fenix V3 Arhiva | evalidator: CSS tokens, dark/light, i18n HR/EN/DE, OG meta, docs/pricing, 8 tests. Fenix V3: PLAN_025-028 Digitalna Arhiva LIVE (upload, FenixScan OCR, list+drawer). | e073b488/7336660 |
 | 2026-04-16 | Sonnet | Security+Bugfixes | Print/copy/screenshot zaštita LIVE. Marija login fix. Mikrofon fix. Trojstvo IntegrityError fix. CC task Stolarija V2 zapisan. | b297a85d |
+
+---
+
+## SESIJA 2026-04-19 — memio.world KUM SUSTAV + LEKTIRE
+
+### Što je implementirano (commit 4a54619a):
+
+#### BLOK 1 — Kum sustav (digitalni kumovi)
+| Fajl | Opis |
+|------|------|
+| `memio_world/kum_models.py` | KumInvitation (token+expire), KumRelationship (kum←→child←→parent), KumGift (plan sponsorship s approve/decline/activate) |
+| `memio_world/views_kum.py` | kum_dashboard, kum_invite_send (JSON), kum_invite_accept (token landing), kum_gift_create, kum_gift_approve |
+| `memio_world/views_auth.py` | login_required_play decorator dodan |
+| Templates | kum_dashboard.html, kum_invite_landing.html, kum_invite_accepted.html, kum_invite_invalid.html |
+
+**Kum arhitektura:** Kum = ParentAccount. Ista osoba može istovremeno biti Kum drugoj djeci I imati vlastitu djecu kojima netko drugi kumuje. M2M kroz KumRelationship junction model.
+
+#### BLOK 2 — Lektire (HR školski kurikulum)
+| Fajl | Opis |
+|------|------|
+| `memio_world/lektire_models.py` | LektiraBook (razredi 1-8, mandatory/optional, public_domain), LektiraChapter (full_text za PD, summary gating, key_words JSON, discussion_questions JSON), LektiraProgress (chapters_read JSONField, XP nagrade), LektiraQuiz + LektiraQuizQuestion |
+| `memio_world/views_lektire.py` | lektire_home (by_grade dict), lektira_detail, lektira_chapter_read (show_summary), lektira_mark_read (POST JSON → XP) |
+| Templates | lektire_home.html, lektira_detail.html, lektira_chapter.html |
+
+**Gating:** summary i discussion_questions se prikazuju SAMO nakon mark_chapter_read. XP formula: `50 + (grade × 10)`.
+
+#### BLOK 3 — Bottom nav redesign (pnav-*)
+| Fajl | Opis |
+|------|------|
+| `templates/memio_world/base_play.html` | pnav-icon 48×48px, pnav-bubble CSS speech bubbles (::after triangle), scale animation, gold color za active, safe-area-inset-bottom |
+
+#### Migration
+- `memio_world/migrations/0016_kum_lektire.py` — applied ✅ na memio_world bazi
+
+### URLs dodane:
+```
+/api/memio-world/play/kum/                      kum_dashboard
+/api/memio-world/play/kum/pozovi/               kum_invite_send
+/api/memio-world/play/kum/pozivnica/<token>/    kum_invite_accept (public)
+/api/memio-world/play/kum/poklon/               kum_gift_create
+/api/memio-world/play/kum/poklon/<uuid>/odobri/ kum_gift_approve
+/api/memio-world/play/lektire/                  lektire_home
+/api/memio-world/play/lektire/<slug>/           lektira_detail
+/api/memio-world/play/lektire/<slug>/citaj/<n>/ lektira_chapter
+/api/memio-world/play/lektire/<slug>/procitao/<n>/ lektira_mark_read
+```
+
+### Što je OSTALO (memio.world):
+- Lektira content seeding — unos knjiga HR kurikuluma razredi 1-8
+- KumGift → Stripe payment flow (pending_payment → active)
+- Celery task za slanje KumInvitation emaila
+- Child selector populate u kum_dashboard.html (JS needs backend context)
+- ChildProgress integration — wire lektira XP u postojeći stories_read tracker
 
 ---
 
@@ -44,34 +98,18 @@
 | `evalidator/views.py` | verify_seal (/evalidator/verify/<token>/), api_verify_seal (JSON API) |
 | `evalidator/templates/verify_seal.html` | Javna verifikacijska stranica s QR, metapodacima, viral CTA |
 | `evalidator/migrations/0002_*` | DB migracija — applied ✅ |
-| `core/context_processors.py` | failed_imports_badge dodan (bio missing) |
 
-#### BLOK 2 — DATEV 2030 (bolje od DATEV-a)
+#### BLOK 2 — DATEV 2030
 | Fajl | Opis |
 |------|------|
 | `konto/german_accounting.py` | generate_datev_export_v2(): BelegLink, UUID, KOST1, SEPA, OSS/IOSS |
 | `konto/views.py` | datev_export_v2() view: GET=UI, POST=CSV/ZIP download |
-| `konto/urls.py` | /konto/datev-2030/ route dodan |
-| `templates/konto/datev_export_v2.html` | Bogati UI: period picker, Steuerberater, opcije, format |
 
-#### BLOK 3 — Digitalni Send s Glasom + Viral Kod
+#### BLOK 3 — Glasovni Send
 | Fajl | Opis |
 |------|------|
 | `documents/views_arhiva.py` | arhiva_send_advanced(): multi-channel, auto-pečat, viral_code, glas |
-| `documents/urls.py` | /arhiva/<pk>/send-advanced/ i /send-advanced/ui/ dodani |
 | `templates/documents/_send_advanced_modal.html` | Modal: kanali, MediaRecorder, TTS, pečat badge |
-
-### Zakonska osnova:
-- **eIDAS Art. 41**: elektronički vremenski žig = presumpcija integriteta
-- **GoBD §14b**: SHA-256 hash, expires_at 10g, neopozivo, dostupno na zahtjev
-- **GDPR Art. 6(1)(b)**: slanje dokumenta = izvršenje ugovora = lawful basis
-- **Glasovna poruka**: browser-side MediaRecorder/TTS, bez server storage = GDPR safe
-- **ZED HR (NN 150/05)**: digitalni dokument s timestampom = original
-
-### Što je OSTALO (nije implementirano):
-- Send modal integracija u arhiva_list.html (treba `window.openSendAdvancedModal(pk, num)` poziv)
-- SEPA pain.008 XML generator (DATEV 2030 extra format)
-- WhatsApp voice note via WAHA (treba `send_voice()` u core/whatsapp.py)
 
 ---
 
@@ -81,10 +119,11 @@
 1. ARHIVA-3 — rclone OneDrive backend (StorageConfig 'network')
 2. POS free tier — Marija Čačić pilot (obrt kod kuće)
 3. Slovarica fix — CC_TASK_SLOVARICA_FIX.md (font Andika, canvas DPI, 30 MP3)
-4. Slikovnice — PLAN_SLIKOVNICE.md Glava 1 Backend (ROK CP1: 2026-04-20 ⚠ PROŠLO!)
+4. Lektire seed — unos knjiga HR kurikuluma razredi 1-8 u LektiraBook
 5. WhatsApp-IN (ARHIVA-5) — Ivan želi chat-to-archive flow
 6. Send modal integracija u arhiva_list.html (wire up openSendAdvancedModal)
-7. core/tests.py greška (pytest collection error — fix 1-2 linije)
+7. KumGift → Stripe (pending_payment → active flow)
+8. core/tests.py greška (pytest collection error — fix 1-2 linije)
 ```
 
 ---
@@ -106,10 +145,16 @@
 ## DASHBOARD
 ```
 === CODE ===             === ARHIVA ===                === MEMIO ===
-Python LoC:  ~422K       Konjik komitenti:  75         memio.pet:   LIVE ✅
-Tests:       2,401       Arhiva dok.:    20,386        memio.world: Temelj ✅
-Commits:       961+      OCR točnost:      100%        memio.farm:  SyncLink ✅
-Coverage:    40.3%       DocumentSeal:   0 (novi!)     No-limit:    NGO portal ✅
+Python LoC:  ~425K       Konjik komitenti:  75         memio.pet:   LIVE ✅
+Tests:       2,401       Arhiva dok.:    20,386        memio.world: Kum+Lektire ✅
+Commits:       962+      OCR točnost:      100%        memio.farm:  SyncLink ✅
+Coverage:    40.3%       DocumentSeal:   LIVE ✅        No-limit:    NGO portal ✅
+
+=== memio.world NOVI MODULI ===
+Kum sustav:        ✅ LIVE (KumInvitation/Relationship/Gift)
+Lektire:           ✅ LIVE (LektiraBook/Chapter/Progress, razredi 1-8)
+Bottom nav pnav-*: ✅ LIVE (48px icons + CSS speech bubbles)
+Migration 0016:    ✅ Applied
 
 === eVALIDATOR PEČAT ===
 DocumentSeal model:     ✅ LIVE (DB migracija applied)
@@ -163,6 +208,8 @@ Pending:  OneDrive sync, WhatsApp-IN, Skupni download testiran live
 | ARHIVA-7 DATEV Export | ✅ v2 LIVE | 90% |
 | **POS free tier** (Marija Čačić) | ⏳ | — |
 | **PLAY.EU Sprint 1** | ✅ DONE | 100% |
+| **memio.world Kum** | ✅ LIVE | 85% |
+| **memio.world Lektire** | ✅ LIVE (potreban seed) | 75% |
 
 ---
 
@@ -171,7 +218,7 @@ Pending:  OneDrive sync, WhatsApp-IN, Skupni download testiran live
 Server:          37.27.248.86 (Hetzner)
 Aktivnih firmi:  109 | Umbrella djece:  81
 Korisnika:        369 | Faktura:     15,333
-Arhiva dok.:   20,386 | Commits:       961+
+Arhiva dok.:   20,386 | Commits:       962+
 Swap:            18GB (2GB + 16GB) — dovoljno za 5000 user load testove
 RAM:             6.0/7.6 GB (79% = load testovi normalno)
 ```
@@ -198,3 +245,6 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 | B-08 | Duplikat Radar integracija u upload view | NIZAK | nice to have |
 | B-09 | core/tests.py pytest collection error | NIZAK | 1-2 linije fix |
 | B-10 | send modal wire-up u arhiva_list.html | SREDNJE | openSendAdvancedModal() |
+| B-11 | KumGift Stripe flow | SREDNJE | pending_payment → active |
+| B-12 | Lektire seed (HR kurikulum 1-8) | VISOKO | knjige bez unosa su beskorisne |
+| B-13 | Kum child selector populate | NIZAK | JS needs backend context |
