@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-20 (Dan 54), commit 924dca45 — Backlog B04/B07/B09/B11/B13, NO LIMIT osnivači, Stripe KumGift, eArhivator .dok, Genesis #0
+> Zadnji update: 2026-04-20 (Dan 54), commit e621bb7 — CC_TASK_DOK_SCHEMA + CC_TASK_EARHIVATOR komplet, Trojstvo T2 ERacun indexi
 
 ---
 
@@ -117,14 +117,13 @@
 ## PRIORITETI ZA SLJEDEĆU SESIJU
 
 ```
-1. Fenix V3: Grand Plan Blok 2 — BUNKER (TrustAnchor, push-revoke)
-2. Fenix V3: Grand Plan Blok 3 — Contextual Trust Score
-3. eArhivator: Triple DNA na ArhivaEntry (layer2_phash + layer3_vector + cross_hash)
-4. eArhivator: wire earhivator_compressor.py na upload endpoint
-5. WhatsApp-IN (ARHIVA-5) — Ivan želi chat-to-archive flow
-6. NO LIMIT: OIB udruge — zamijeni Ivan OIB kad Marija donese rješenje
-7. Stripe LIVE ključevi za KumGift (sada test mode)
-8. Pilot POS test: Ivica Kruljac + Široki Šor Restoran
+1. NO LIMIT: OIB udruge — update_genesis_oib(novi_oib) kad Marija donese rješenje
+2. Stripe LIVE ključevi za KumGift (sada test mode)
+3. Pilot POS test: Ivica Kruljac + Široki Šor Restoran (test u terenu)
+4. eArhivator MinIO Faza 2 — test stvarnog upload flow-a (EarhivatorEntry.minio_url)
+5. Grand Plan Blok 4 — SMALL DOORS Tier B Shamir recovery UI (backend gotov)
+6. Lektire seed — dodati sadržaj knjiga razredi 1-8 (75% gotovo)
+7. Triple DNA Layer 3 CLIP async — GPU task za semantički embedding
 ```
 
 ---
