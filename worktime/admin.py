@@ -20,9 +20,24 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(EmployeeProfile)
 class EmployeeProfileAdmin(admin.ModelAdmin):
-    list_display = ["user", "company", "employee_id", "hourly_rate", "department", "is_manager"]
-    list_filter = ["company", "is_manager", "department"]
-    search_fields = ["user__username", "user__first_name", "user__last_name"]
+    list_display = ["user", "company", "employee_id", "tax_id", "oib_status", "hourly_rate", "department", "is_manager"]
+    list_filter = ["company", "is_manager", "department", "is_terminated"]
+    search_fields = ["user__username", "user__first_name", "user__last_name", "tax_id"]
+    list_select_related = ["user", "company"]
+
+    @admin.display(description="OIB status", boolean=True)
+    def oib_status(self, obj):
+        return bool(obj.tax_id)
+
+    def changelist_view(self, request, extra_context=None):
+        missing = EmployeeProfile.objects.filter(tax_id="").count()
+        if missing:
+            self.message_user(
+                request,
+                f"ZOR upozorenje: {missing} radnik(a) bez OIB-a — popunite prije obračuna plaća.",
+                level="warning",
+            )
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(TimeEntry)
