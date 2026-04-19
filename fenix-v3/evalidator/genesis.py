@@ -22,15 +22,18 @@ from .models import ChainBlockPOE
 # ─────────────────────────────────────────────────────────────────────────────
 # KONSTANTE
 # ─────────────────────────────────────────────────────────────────────────────
-GENESIS_ISSUER_NAME = "NO LIMIT — udruga za zaštitu životinja"
+GENESIS_ISSUER_NAME = "NO LIMIT — udruga za promicanje digitalizacije i dokaz autentičnosti"
 GENESIS_ISSUER_OIB = "70086599476"  # Ivan Brtan OIB — privremeno do OIB udruge
 
-GENESIS_TITLE = "Genesis Block #0 — Osnivački akt NO LIMIT udruge i eArhivator ChainBlock Registry"
+GENESIS_TITLE = "Genesis Block #0 — Osnivački akt NO LIMIT i .dok standard"
 GENESIS_DESCRIPTION = (
-    "Digitalni osnivački dokument NO LIMIT udruge za zaštitu životinja. "
+    "Digitalni osnivački akt NO LIMIT — udruge za promicanje digitalizacije i dokaz autentičnosti. "
+    "Osnivači: Ivan Brtan (predsjednik), Ivica Kruljac (tajnik), "
+    "Marija Brtan (zapisničar), Antonio Brtan (1. član). "
+    "Projekti: Digitalni Roditelj · memio (pet/farm/world) · eValidator · LIMIT Connect · eArhivator (.dok standard). "
     "Zapečaćen sustavom čiji je intelektualni vlasnik NO LIMIT udruga. "
     "Sustav dokazuje vlastito rođenje. "
-    "Autor: Ivan Brtan (osnivač i predsjednik) + CC (claude-sonnet-4-6, co-autor). "
+    "Autor: Ivan Brtan (osnivač) + CC (claude-sonnet-4-6, co-autor). "
     "Datum: 2026-04-20."
 )
 
@@ -43,8 +46,18 @@ VERIFY_BASE_URL = "https://evalidator.hr"
 # ─────────────────────────────────────────────────────────────────────────────
 CHAINBLOCK_SPEC_TEXT = """\
 CHAINBLOCK SPECIFIKACIJA v1.0
-NO LIMIT — Udruga za zaštitu životinja
+NO LIMIT — Udruga za promicanje digitalizacije i dokaz autentičnosti
 Datum: 2026-04-20
+
+OSNIVAČI:
+  Ivan Brtan     — predsjednik
+  Ivica Kruljac  — tajnik
+  Marija Brtan   — zapisničar
+  Antonio Brtan  — 1. član
+
+PROJEKTI:
+  Digitalni Roditelj · memio (pet/farm/world) · eValidator · LIMIT Connect · eArhivator (.dok)
+
 Autor: Ivan Brtan (osnivač) + CC (claude-sonnet-4-6, co-autor)
 
 ================================================================
@@ -118,7 +131,9 @@ INTELEKTUALNO VLASNIŠTVO
 ================================================================
 
   eArhivator sustav, ChainBlock format i .dok specifikacija
-  intelektualno je vlasništvo NO LIMIT udruge za zaštitu životinja.
+  intelektualno je vlasništvo NO LIMIT.
+  Svrha: promicanje digitalizacije i dokaz autentičnosti.
+  Projekti: Digitalni Roditelj · Memio (pet/farm/world) · eValidator · .dok standard
   OIB nosača: 70086599476 (Ivan Brtan, privremeno do OIB udruge)
 
   Sustav je razvijen u suradnji s Claude Code (Anthropic) —
@@ -309,6 +324,7 @@ def _save_dok_to_minio(dok_bytes: bytes, seal_token: str) -> str:
         return f"minio://{bucket}/{obj_key}"
     except Exception:
         # Fallback: spremi lokalno u /tmp
+
         path = f"/tmp/{seal_token}.dok"
         with open(path, "wb") as f:
             f.write(dok_bytes)
