@@ -842,6 +842,11 @@
             </button>
         </div>
         <div class="d-flex fx-gap-2 fx-flex-wrap">
+            <button onclick="if(_currentEntryId) openSendAdvancedModal(_currentEntryId, _currentEntryNum)" class="btn-drawer fx-text-white fx-border-none fx-rounded fx-fs-compact fx-fw-semibold fx-pointer fx-w-full" style="background:linear-gradient(135deg,#7c3aed,#a855f7);padding:9px 14px;">
+                <i class="fas fa-paper-plane"></i> Pošalji napredno — glas, pečat, viral
+            </button>
+        </div>
+        <div class="d-flex fx-gap-2 fx-flex-wrap">
             <a href="#" id="drawerDownloadLink" class="btn-drawer fx-text-dark fx-no-underline fx-rounded fx-fs-compact fx-fw-semibold text-center fx-bg-gold fx-flex-1" style="padding:8px 14px;min-width:120px">
                 <i class="fas fa-download"></i> {% trans "Spremi lokalno" %}
             </a>
@@ -1728,12 +1733,14 @@ var _sendChannel = "";
 var _currentEntryId = null;
 var _currentEntryPhone = "";
 var _currentEntryEmail = "";
+var _currentEntryNum = "";
 var _currentDownloadUrl = "";
 
 // Postavi podatke kad se drawer otvori (hookaj na postojeći AJAX)
 
 function _hookDrawerData(d) {
     _currentEntryId = d.id;
+    _currentEntryNum = d.doc_number || "";
     _currentEntryPhone = d.company_phone || "";
     _currentEntryEmail = d.company_email || "";
     _currentDownloadUrl = d.download_url || "";
@@ -2104,5 +2111,6 @@ async function mbIntelLoad() {
 
 {% endblock %}
 {% include 'includes/_share_modal.html' %}
+{% include 'documents/_send_advanced_modal.html' %}
 {% block shell_right_title %}Digitalna Arhiva{% endblock %}
 {% block shell_right_content %}{% include "includes/_shell_right_arhiva.html" %}{% endblock %}
