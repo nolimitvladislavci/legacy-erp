@@ -179,7 +179,9 @@ class ERacun(models.Model):
         # B-22: Sprječava duplikat broja računa unutar iste tvrtke
         unique_together = [("company", "invoice_number")]
         indexes = [
+            models.Index(fields=["status"]),
             models.Index(fields=["company", "status"]),
+            models.Index(fields=["company", "status", "created_at"]),
             models.Index(fields=["invoice_number"]),
             models.Index(fields=["issuer_oib"]),
             models.Index(fields=["recipient_oib"]),
