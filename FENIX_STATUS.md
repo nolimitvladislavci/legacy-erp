@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-19 (Dan 53), commit e52d6d4a — OIB fix, Lektire seed 31 knjiga, send advanced modal
+> Zadnji update: 2026-04-20 (Dan 54), commit 924dca45 — Backlog B04/B07/B09/B11/B13, NO LIMIT osnivači, Stripe KumGift, eArhivator .dok, Genesis #0
 
 ---
 
@@ -117,14 +117,14 @@
 ## PRIORITETI ZA SLJEDEĆU SESIJU
 
 ```
-1. ARHIVA-3 — rclone OneDrive backend (StorageConfig 'network')
-2. POS free tier — Marija Čačić pilot (obrt kod kuće)
-3. Slovarica fix — CC_TASK_SLOVARICA_FIX.md (font Andika, canvas DPI, 30 MP3)
-4. Lektire seed — unos knjiga HR kurikuluma razredi 1-8 u LektiraBook
+1. Fenix V3: Grand Plan Blok 2 — BUNKER (TrustAnchor, push-revoke)
+2. Fenix V3: Grand Plan Blok 3 — Contextual Trust Score
+3. eArhivator: Triple DNA na ArhivaEntry (layer2_phash + layer3_vector + cross_hash)
+4. eArhivator: wire earhivator_compressor.py na upload endpoint
 5. WhatsApp-IN (ARHIVA-5) — Ivan želi chat-to-archive flow
-6. Send modal integracija u arhiva_list.html (wire up openSendAdvancedModal)
-7. KumGift → Stripe (pending_payment → active flow)
-8. core/tests.py greška (pytest collection error — fix 1-2 linije)
+6. NO LIMIT: OIB udruge — zamijeni Ivan OIB kad Marija donese rješenje
+7. Stripe LIVE ključevi za KumGift (sada test mode)
+8. Pilot POS test: Ivica Kruljac + Široki Šor Restoran
 ```
 
 ---
@@ -239,13 +239,13 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 |---|-------|------------|-------|
 | B-01 | user_edit company isolation | SREDNJE | company_admin self-service |
 | B-02 | trojstvo_task suggestion_id type guard | NIZAK | kad se dotakne trojstvo |
-| B-04 | StorageConfig 'network' backend | SREDNJE | ARHIVA-3 |
+| B-04 | StorageConfig 'network' backend | RIJEŠENO | NetworkStorageBackend + rclone LIVE |
 | B-05 | WhatsApp-IN nepoznati pošiljatelji | NIZAK | ARHIVA-5 |
 | B-06 | DATEV header verifikacija | RIJEŠENO | DATEV 2030 BelegLink |
-| B-07 | POS free tier konfiguracija za Mariju Čačić | SREDNJE | memio.world MVP |
+| B-07 | POS free tier konfiguracija za Mariju Čačić | RIJEŠENO | pos_obrt role + pos-besplatno plan + Ivica/Sirok Sor piloti |
 | B-08 | Duplikat Radar integracija u upload view | NIZAK | nice to have |
-| B-09 | core/tests.py pytest collection error | NIZAK | 1-2 linije fix |
+| B-09 | core/tests.py pytest collection error | RIJEŠENO | tests.py → tests_core.py |
 | B-10 | send modal wire-up u arhiva_list.html | RIJEŠENO | Napredno slanje LIVE u draweru |
-| B-11 | KumGift Stripe flow | SREDNJE | pending_payment → active |
+| B-11 | KumGift Stripe flow | RIJEŠENO | checkout + webhook + success + activate() LIVE |
 | B-12 | Lektire seed (HR kurikulum 1-8) | RIJEŠENO | 31 knjiga seeded: razredi 1-8 |
-| B-13 | Kum child selector populate | NIZAK | JS needs backend context |
+| B-13 | Kum child selector populate | RIJEŠENO | my_children + my_children_json u kontekstu |
