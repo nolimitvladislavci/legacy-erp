@@ -1,0 +1,143 @@
+{% extends "memio_world/base_play.html" %}
+{% block title %}{{ book.title }} — Memio{% endblock %}
+
+{% block play_content %}
+<div class="lektira-detail">
+
+  {# ── Hero ───────────────────────────────────────────────────────── #}
+  <div class="lektira-hero">
+    <div class="lektira-hero-grade">{{ book.grade }}. razred</div>
+    <h1 class="lektira-hero-title">{{ book.title }}</h1>
+    <p class="lektira-hero-author">{{ book.author }}</p>
+    <div class="lektira-hero-badges">
+      {% if book.is_mandatory %}
+        <span class="lbadge lbadge-required">Obavezna lektira</span>
+      {% else %}
+        <span class="lbadge lbadge-optional">Preporučena lektira</span>
+      {% endif %}
+      {% if book.is_public_domain %}
+        <span class="lbadge lbadge-free">Besplatno čitanje</span>
+      {% endif %}
+      {% if book.estimated_pages %}
+        <span class="lbadge lbadge-info">~{{ book.estimated_pages }} str.</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Progress bar ────────────────────────────────────────────────── #}
+  {% if progress %}
+  <div class="lektira-progress-box">
+    <div class="lp-row">
+      <span class="lp-label">Tvoj napredak</span>
+      <span class="lp-pct">{{ progress.chapters_read|length }}/{{ chapters|length }} poglavlja</span>
+    </div>
+    <div class="lp-bar">
+      {% with pct=progress.chapters_read|length|floatformat:0 %}
+      <div class="lp-fill" style="width:{% if chapters %}{{ progress.chapters_read|length|add:0 }}{% else %}0{% endif %}%"></div>
+      {% endwith %}
+    </div>
+    <div class="lp-status status-{{ progress.status }}">
+      {% if progress.status == "completed" %}✅ Pročitano!
+      {% elif progress.status == "quiz_done" %}🏆 Kviz završen!
+      {% elif progress.status == "in_progress" %}📖 U čitanju…
+      {% else %}🔖 Još nisi počeo/la
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Synopsis ───────────────────────────────────────────────────── #}
+  {% if book.synopsis %}
+  <div class="lektira-synopsis">
+    <h2>O knjizi</h2>
+    <p>{{ book.synopsis }}</p>
+  </div>
+  {% endif %}
+
+  {# ── Chapter list ────────────────────────────────────────────────── #}
+  <div class="lektira-chapters">
+    <h2>Poglavlja</h2>
+    {% for ch in chapters %}
+    {% with already_read=ch.number|stringformat:"s" in read_set %}
+    <a href="{% url 'memio_world:lektira_chapter' book.slug ch.number %}"
+       class="ch-row {% if already_read %}ch-done{% endif %}">
+      <div class="ch-icon">
+        {% if already_read %}✅{% elif book.is_public_domain %}📖{% else %}🔒{% endif %}
+      </div>
+      <div class="ch-info">
+        <div class="ch-num">Poglavlje {{ ch.number }}</div>
+        <div class="ch-title">{{ ch.title }}</div>
+        {% if ch.estimated_minutes_per_chapter %}
+        <div class="ch-time">~{{ ch.estimated_minutes_per_chapter }} min čitanja</div>
+        {% endif %}
+      </div>
+      <div class="ch-arrow">›</div>
+    </a>
+    {% endwith %}
+    {% empty %}
+    <div class="lektira-empty">Poglavlja još nisu dodana za ovu knjigu.</div>
+    {% endfor %}
+  </div>
+
+  {# ── Pedagogical note ───────────────────────────────────────────── #}
+  {% if book.pedagogical_note %}
+  <div class="lektira-ped-note">
+    <div class="ped-icon">👩‍🏫</div>
+    <div class="ped-text">{{ book.pedagogical_note }}</div>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+.lektira-detail { max-width:640px; margin:0 auto; padding:1rem 1rem 6rem; }
+
+.lektira-hero { background:linear-gradient(135deg,#1A0A00 60%,#2d1200);
+  border-radius:20px; padding:2rem 1.5rem; margin-bottom:1rem; color:#fff; text-align:center; }
+.lektira-hero-grade { font-size:.75rem; font-weight:700; color:#C9A84C;
+  text-transform:uppercase; letter-spacing:.08em; margin-bottom:.5rem; }
+.lektira-hero-title { font-size:1.6rem; font-weight:800; margin:.25rem 0; }
+.lektira-hero-author { color:rgba(255,255,255,.7); margin:.25rem 0 1rem; }
+.lektira-hero-badges { display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; }
+.lbadge { font-size:.72rem; font-weight:700; padding:.2rem .6rem; border-radius:20px; }
+.lbadge-required { background:#ef4444; color:#fff; }
+.lbadge-optional  { background:#6b7280; color:#fff; }
+.lbadge-free      { background:#10b981; color:#fff; }
+.lbadge-info      { background:rgba(255,255,255,.15); color:#fff; }
+
+.lektira-progress-box { background:#fff; border-radius:16px; padding:1rem 1.25rem;
+  box-shadow:0 2px 12px rgba(0,0,0,.08); margin-bottom:1rem; }
+.lp-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:.4rem; }
+.lp-label { font-size:.8rem; font-weight:600; color:#6b7280; }
+.lp-pct   { font-size:.8rem; font-weight:700; color:#1A0A00; }
+.lp-bar   { height:8px; background:#f3f4f6; border-radius:8px; overflow:hidden; }
+.lp-fill  { height:100%; background:linear-gradient(90deg,#C9A84C,#f0c060);
+  border-radius:8px; transition:width .4s ease; }
+.lp-status { font-size:.8rem; margin-top:.5rem; }
+
+.lektira-synopsis { background:#fff8f0; border-radius:16px; padding:1.25rem;
+  border-left:4px solid #C9A84C; margin-bottom:1rem; }
+.lektira-synopsis h2 { font-size:1rem; font-weight:700; margin:0 0 .5rem; }
+.lektira-synopsis p  { font-size:.9rem; color:#374151; line-height:1.6; margin:0; }
+
+.lektira-chapters h2 { font-size:1rem; font-weight:700; margin:0 0 .75rem; }
+.ch-row { display:flex; align-items:center; gap:.875rem; background:#fff;
+  border-radius:14px; padding:.875rem 1rem; margin-bottom:.5rem;
+  text-decoration:none; color:inherit;
+  box-shadow:0 1px 6px rgba(0,0,0,.06); transition:transform .15s; }
+.ch-row:active { transform:scale(.98); }
+.ch-done { background:#f0fff4; }
+.ch-icon { font-size:1.4rem; flex-shrink:0; }
+.ch-info { flex:1; }
+.ch-num  { font-size:.7rem; color:#9ca3af; font-weight:600; text-transform:uppercase; }
+.ch-title{ font-size:.95rem; font-weight:600; color:#1A0A00; }
+.ch-time { font-size:.72rem; color:#9ca3af; margin-top:.1rem; }
+.ch-arrow { font-size:1.4rem; color:#C9A84C; font-weight:700; }
+.lektira-empty { text-align:center; padding:2rem; color:#9ca3af; font-size:.9rem; }
+
+.lektira-ped-note { display:flex; gap:.75rem; background:#eff6ff; border-radius:14px;
+  padding:1rem 1.25rem; margin-top:1rem; }
+.ped-icon { font-size:1.5rem; flex-shrink:0; }
+.ped-text { font-size:.85rem; color:#1e40af; line-height:1.6; }
+</style>
+{% endblock %}
