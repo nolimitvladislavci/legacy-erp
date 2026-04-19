@@ -1,6 +1,6 @@
 from django.urls import path
 
-from memio_world import views, views_auth, views_daily, views_games, views_play, views_kum, views_lektire
+from memio_world import views, views_auth, views_daily, views_games, views_kum, views_lektire, views_play
 
 app_name = "memio_world"
 
@@ -106,6 +106,9 @@ urlpatterns = [
     path("play/kum/pozivnica/<str:token>/", views_kum.kum_invite_accept, name="kum_invite_accept"),
     path("play/kum/poklon/", views_kum.kum_gift_create, name="kum_gift_create"),
     path("play/kum/poklon/<uuid:gift_id>/odobri/", views_kum.kum_gift_approve, name="kum_gift_approve"),
+    path("play/kum/poklon/<uuid:gift_id>/plati/", views_kum.kum_gift_checkout, name="kum_gift_checkout"),
+    path("play/kum/poklon/<uuid:gift_id>/success/", views_kum.kum_gift_success, name="kum_gift_success"),
+    path("play/kum/webhook/stripe/", views_kum.kum_gift_stripe_webhook, name="kum_gift_stripe_webhook"),
     # ── Lektire ───────────────────────────────────────────────────
     path("play/lektire/", views_lektire.lektire_home, name="lektire_home"),
     path("play/lektire/<slug:slug>/", views_lektire.lektira_detail, name="lektira_detail"),

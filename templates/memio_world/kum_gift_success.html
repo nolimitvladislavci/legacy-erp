@@ -1,0 +1,35 @@
+{% extends "memio_world/base_play.html" %}
+{% block title %}Poklon aktiviran! — Memio{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:48px auto;padding:0 16px;text-align:center">
+  <div style="font-size:64px;margin-bottom:16px">🎁</div>
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:8px">Poklon je aktiviran!</h1>
+  <p style="color:var(--text-secondary);margin-bottom:24px">
+    Tvoj poklon za <strong>{{ child.name }}</strong> je uspješno plaćen i aktivan.
+  </p>
+
+  <div style="background:var(--card-bg);border-radius:12px;padding:20px;margin-bottom:24px;text-align:left">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span style="color:var(--text-secondary)">Plan</span>
+      <strong>{{ gift.get_plan_display }}</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span style="color:var(--text-secondary)">Iznos</span>
+      <strong>{{ gift.amount_eur }} EUR</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span style="color:var(--text-secondary)">Vrijedi do</span>
+      <strong>{{ gift.valid_until|date:"d.m.Y." }}</strong>
+    </div>
+    {% if gift.gift_message %}
+    <hr style="border-color:var(--border);margin:12px 0">
+    <p style="font-style:italic;color:var(--text-secondary);margin:0">"{{ gift.gift_message }}"</p>
+    {% endif %}
+  </div>
+
+  <a href="{% url 'memio_world:kum_dashboard' %}"
+     style="display:inline-block;background:#C9A84C;color:#000;padding:12px 28px;border-radius:8px;font-weight:700;text-decoration:none">
+    Kum Dashboard
+  </a>
+</div>
+{% endblock %}
