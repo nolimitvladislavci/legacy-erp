@@ -1,0 +1,46 @@
+{% extends "memio_world/base_play.html" %}
+{% block title %}Pozivnica nije valjana — Memio{% endblock %}
+
+{% block play_content %}
+<div class="invite-result">
+
+  <div class="ir-hero ir-error">
+    <div class="ir-emoji">😕</div>
+    <h1>Pozivnica nije valjana</h1>
+    <p>{{ error_message }}</p>
+  </div>
+
+  <div class="ir-info">
+    <p>Mogući razlozi:</p>
+    <ul>
+      <li>Pozivnica je istekla (valjana 30 dana)</li>
+      <li>Pozivnica je već prihvaćena ili odbijena</li>
+      <li>Link je netočan ili nepotpun</li>
+    </ul>
+    <p>Zamoli roditelja da ti pošalje novu pozivnicu.</p>
+  </div>
+
+  <a href="{% url 'memio_world:play_home' %}" class="ir-home-btn">← Na početnu</a>
+
+</div>
+
+<style>
+.invite-result { max-width:480px; margin:0 auto; padding:1rem 1rem 6rem; }
+.ir-hero { border-radius:24px; padding:3rem 1.5rem; text-align:center;
+  color:#fff; margin-bottom:1.5rem; }
+.ir-error { background:linear-gradient(135deg,#7f1d1d,#ef4444); }
+.ir-emoji { font-size:4rem; margin-bottom:.75rem; }
+.ir-hero h1 { font-size:1.8rem; font-weight:800; margin:0 0 .5rem; }
+.ir-hero p  { font-size:1rem; margin:0; opacity:.9; }
+
+.ir-info { background:#fff; border-radius:16px; padding:1.25rem;
+  box-shadow:0 2px 10px rgba(0,0,0,.07); margin-bottom:1.5rem; }
+.ir-info p  { font-size:.9rem; color:#374151; margin:0 0 .5rem; }
+.ir-info ul { font-size:.88rem; color:#6b7280; padding-left:1.2rem; margin:.25rem 0; }
+.ir-info li { margin-bottom:.25rem; }
+
+.ir-home-btn { display:block; text-align:center; background:#1A0A00; color:#C9A84C;
+  font-weight:700; font-size:.95rem; border-radius:14px; padding:.875rem;
+  text-decoration:none; }
+</style>
+{% endblock %}

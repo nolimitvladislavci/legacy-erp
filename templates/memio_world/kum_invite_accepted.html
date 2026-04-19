@@ -1,0 +1,54 @@
+{% extends "memio_world/base_play.html" %}
+{% block title %}Pozivnica prihvaćena — Memio{% endblock %}
+
+{% block play_content %}
+<div class="invite-result">
+
+  <div class="ir-hero ir-success">
+    <div class="ir-emoji">🎉</div>
+    <h1>Bravo! Sad si Kum!</h1>
+    <p>Sada si Kum za <strong>{{ child_name }}</strong>.</p>
+  </div>
+
+  <div class="ir-next">
+    <h3>Što možeš učiniti?</h3>
+    <div class="ir-actions">
+      <a href="{% url 'memio_world:kum_dashboard' %}" class="ir-action-card">
+        <div class="ir-ac-icon">👨‍👩‍👧</div>
+        <div class="ir-ac-label">Moj Kum pregled</div>
+      </a>
+      <a href="{% url 'memio_world:kum_gift_create' %}" class="ir-action-card">
+        <div class="ir-ac-icon">🎁</div>
+        <div class="ir-ac-label">Pošalji poklon pretplatu</div>
+      </a>
+      <a href="{% url 'memio_world:play_home' %}" class="ir-action-card">
+        <div class="ir-ac-icon">🏠</div>
+        <div class="ir-ac-label">Početna stranica</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.invite-result { max-width:480px; margin:0 auto; padding:1rem 1rem 6rem; }
+.ir-hero { border-radius:24px; padding:3rem 1.5rem; text-align:center;
+  color:#fff; margin-bottom:1.5rem; }
+.ir-success { background:linear-gradient(135deg,#065f46,#10b981); }
+.ir-emoji { font-size:4rem; margin-bottom:.75rem; }
+.ir-hero h1 { font-size:1.9rem; font-weight:800; margin:0 0 .5rem; }
+.ir-hero p  { font-size:1rem; margin:0; opacity:.9; }
+.ir-hero strong { color:#fff; }
+
+.ir-next { background:#fff; border-radius:20px; padding:1.5rem;
+  box-shadow:0 2px 12px rgba(0,0,0,.08); }
+.ir-next h3 { font-size:1rem; font-weight:700; margin:0 0 1rem; color:#1A0A00; }
+.ir-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
+.ir-action-card { display:flex; flex-direction:column; align-items:center;
+  background:#f9fafb; border-radius:14px; padding:1rem .75rem;
+  text-decoration:none; color:#374151; transition:transform .15s; }
+.ir-action-card:active { transform:scale(.96); }
+.ir-ac-icon  { font-size:2rem; margin-bottom:.5rem; }
+.ir-ac-label { font-size:.75rem; font-weight:600; text-align:center; }
+</style>
+{% endblock %}

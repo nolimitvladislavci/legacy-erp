@@ -1,0 +1,153 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}📚 Lektire — PLAY.EU{% endblock %}
+
+{% block extra_head %}
+<style>
+.lektire-wrap { max-width: 520px; margin: 0 auto; padding: 1rem; }
+
+.lektire-filter {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.lektire-filter a {
+  padding: 6px 14px; border-radius: 20px; font-size: .8rem; font-weight: 600;
+  text-decoration: none; border: 2px solid rgba(201,168,76,.3);
+  color: rgba(255,255,255,.6); transition: all .15s;
+}
+.lektire-filter a:hover,
+.lektire-filter a.active {
+  background: rgba(201,168,76,.2); border-color: #C9A84C; color: #C9A84C;
+}
+
+.grade-section { margin-bottom: 2rem; }
+.grade-title {
+  font-family: 'Uncial Antiqua', serif;
+  font-size: 1.1rem; color: #C9A84C;
+  margin-bottom: .75rem; padding-bottom: .4rem;
+  border-bottom: 1px solid rgba(201,168,76,.2);
+  display: flex; align-items: center; gap: .5rem;
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.book-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px 12px; border-radius: 16px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  text-decoration: none; color: #fff;
+  transition: transform .15s, border-color .15s, background .15s;
+  position: relative; overflow: hidden;
+}
+.book-card:hover {
+  transform: translateY(-2px);
+  background: rgba(201,168,76,.12);
+  border-color: rgba(201,168,76,.4);
+}
+.book-cover {
+  font-size: 2.8rem; line-height: 1; text-align: center;
+  width: 100%; aspect-ratio: 3/4; max-height: 80px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.04); border-radius: 8px;
+}
+.book-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: .9rem; font-weight: 600; line-height: 1.2;
+}
+.book-author { font-size: .72rem; color: rgba(255,255,255,.5); }
+.book-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: .65rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; align-self: flex-start;
+}
+.book-badge-mandatory { background: rgba(201,168,76,.2); color: #C9A84C; }
+.book-badge-optional  { background: rgba(255,255,255,.08); color: rgba(255,255,255,.5); }
+
+/* Progress bar */
+.book-progress {
+  height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,.1); overflow: hidden;
+}
+.book-progress-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, #C9A84C, #E4D5A0);
+  transition: width .3s;
+}
+.book-done-badge {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 1rem; line-height: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lektire-wrap">
+
+  <h1 style="font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#C9A84C;margin-bottom:1rem;">
+    📚 Lektire
+  </h1>
+
+  {# Filteri po razredu #}
+  <div class="lektire-filter" role="navigation" aria-label="Filtar po razredu">
+    <a href="{% url 'memio_world:lektire_home' %}"
+       class="{% if not grade_filter %}active{% endif %}">Svi razredi</a>
+    {% for g in grades %}
+    <a href="?razred={{ g }}"
+       class="{% if grade_filter == g|stringformat:'s' %}active{% endif %}">{{ g }}. razred</a>
+    {% endfor %}
+  </div>
+
+  {% if not by_grade %}
+  <div style="text-align:center;padding:3rem 1rem;color:rgba(255,255,255,.4);">
+    <div style="font-size:3rem;margin-bottom:1rem;">📖</div>
+    <p>Lektire se dodaju. Uskoro!</p>
+  </div>
+  {% endif %}
+
+  {% for grade, books in by_grade.items %}
+  <div class="grade-section">
+    <div class="grade-title">
+      <span>📘</span>
+      {{ grade }}. razred
+      <span style="font-size:.75rem;color:rgba(255,255,255,.4);font-family:'Space Grotesk',sans-serif;font-weight:400;">
+        — {{ books|length }} lektir{% if books|length != 1 %}e{% else %}a{% endif %}
+      </span>
+    </div>
+    <div class="book-grid">
+      {% for book in books %}
+      {% with prog=progress_map|default:{}  pct=0 %}
+      <a href="{% url 'memio_world:lektira_detail' book.slug %}" class="book-card">
+        {% if book.cover_image %}
+        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}"
+             style="border-radius:8px;width:100%;aspect-ratio:3/4;object-fit:cover;max-height:80px;">
+        {% else %}
+        <div class="book-cover">📖</div>
+        {% endif %}
+
+        <div class="book-title">{{ book.title }}</div>
+        <div class="book-author">{{ book.author }}</div>
+
+        <span class="book-badge {% if book.is_mandatory %}book-badge-mandatory{% else %}book-badge-optional{% endif %}">
+          {% if book.is_mandatory %}★ Obavezna{% else %}✦ Dopunska{% endif %}
+        </span>
+
+        {% with p=progress_map|default_if_none:None %}
+        {% endwith %}
+
+        <div class="book-progress" title="{{ pct }}% pročitano">
+          <div class="book-progress-fill" style="width:{{ pct }}%;"></div>
+        </div>
+      </a>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

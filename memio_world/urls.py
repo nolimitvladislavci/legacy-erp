@@ -1,6 +1,6 @@
 from django.urls import path
 
-from memio_world import views, views_auth, views_daily, views_games, views_play
+from memio_world import views, views_auth, views_daily, views_games, views_play, views_kum, views_lektire
 
 app_name = "memio_world"
 
@@ -100,4 +100,21 @@ urlpatterns = [
     path("play/account/", views_auth.account_page, name="account_page"),
     # ── Book API (JSON za flip engine) ────────────────────────
     path("play/book/<slug:slug>/", views_play.book_api, name="book_api"),
+    # ── Kum sustav ────────────────────────────────────────────────
+    path("play/kum/", views_kum.kum_dashboard, name="kum_dashboard"),
+    path("play/kum/pozovi/", views_kum.kum_invite_send, name="kum_invite_send"),
+    path("play/kum/pozivnica/<str:token>/", views_kum.kum_invite_accept, name="kum_invite_accept"),
+    path("play/kum/poklon/", views_kum.kum_gift_create, name="kum_gift_create"),
+    path("play/kum/poklon/<uuid:gift_id>/odobri/", views_kum.kum_gift_approve, name="kum_gift_approve"),
+    # ── Lektire ───────────────────────────────────────────────────
+    path("play/lektire/", views_lektire.lektire_home, name="lektire_home"),
+    path("play/lektire/<slug:slug>/", views_lektire.lektira_detail, name="lektira_detail"),
+    path(
+        "play/lektire/<slug:slug>/citaj/<int:chapter_num>/", views_lektire.lektira_chapter_read, name="lektira_chapter"
+    ),
+    path(
+        "play/lektire/<slug:slug>/procitao/<int:chapter_num>/",
+        views_lektire.lektira_mark_read,
+        name="lektira_mark_read",
+    ),
 ]

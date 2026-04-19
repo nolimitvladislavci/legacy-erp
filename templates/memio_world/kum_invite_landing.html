@@ -1,0 +1,131 @@
+{% extends "memio_world/base_play.html" %}
+{% block title %}Pozivnica za Kuma — Memio{% endblock %}
+
+{% block play_content %}
+<div class="kum-landing">
+
+  <div class="kum-hero">
+    <div class="kum-emoji">🤝</div>
+    <h1>Pozvan/a si za Kuma!</h1>
+    <p class="kum-from">
+      <strong>{{ invitation.parent.name }}</strong> te poziva da budeš Kum za
+      <strong>{{ invitation.child.name }}</strong>
+    </p>
+  </div>
+
+  {% if invitation.personal_note %}
+  <div class="kum-note">
+    <div class="kum-note-label">Osobna poruka</div>
+    <blockquote class="kum-note-text">"{{ invitation.personal_note }}"</blockquote>
+  </div>
+  {% endif %}
+
+  <div class="kum-permissions">
+    <h3>Kao Kum možeš:</h3>
+    <ul class="kum-perm-list">
+      {% if invitation.can_pay_subscription %}
+      <li class="perm-yes">💳 Platiti Memio pretplatu za {{ invitation.child.name }}</li>
+      {% endif %}
+      {% if invitation.can_see_progress %}
+      <li class="perm-yes">📊 Pratiti napredak djeteta</li>
+      {% endif %}
+      {% if invitation.can_send_messages %}
+      <li class="perm-yes">💬 Slati poruke djetetu</li>
+      {% endif %}
+      {% if not invitation.can_pay_subscription and not invitation.can_see_progress and not invitation.can_send_messages %}
+      <li class="perm-neutral">👀 Pratiti sudjelovanje u aktivnostima</li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <div class="kum-what-is">
+    <div class="kum-wi-icon">ℹ️</div>
+    <div class="kum-wi-text">
+      <strong>Što je Memio Kum?</strong><br>
+      Kum je osoba od povjerenja (ujak, teta, prijatelj obitelji…) koji može financijski
+      podržati djetetovu pretplatu na Memio uz dopuštenje roditelja. Roditelji uvijek
+      imaju punu kontrolu i mogu povući pristup u bilo trenutku.
+    </div>
+  </div>
+
+  {% if already_kum %}
+  <div class="kum-already">
+    ✅ Već si Kum za {{ invitation.child.name }}. Nema potrebe prihvaćati ponovo.
+  </div>
+  {% elif not current_parent %}
+  {# Visitor not logged in — show options #}
+  <div class="kum-cta">
+    <p class="cta-hint">Za prihvaćanje pozivnice trebaš biti prijavljen/a kao Memio roditelj.</p>
+    <a href="{% url 'memio_world:login_page' %}?next={{ request.path }}" class="btn-kum-primary">
+      Prijavi se i prihvati
+    </a>
+    <a href="{% url 'memio_world:register_page' %}?next={{ request.path }}" class="btn-kum-secondary">
+      Registriraj se (besplatno)
+    </a>
+  </div>
+  {% else %}
+  {# Logged in — show accept/decline #}
+  <div class="kum-cta">
+    <p class="cta-hint">Prijavljeni/a si kao <strong>{{ current_parent.name }}</strong>.</p>
+    <form method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="accept">
+      <button type="submit" class="btn-kum-primary">✅ Prihvati pozivnicu</button>
+    </form>
+    <form method="post" action="" style="margin-top:.5rem">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="decline">
+      <button type="submit" class="btn-kum-decline">❌ Odbij pozivnicu</button>
+    </form>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+.kum-landing { max-width:520px; margin:0 auto; padding:1rem 1rem 6rem; }
+
+.kum-hero { text-align:center; background:linear-gradient(135deg,#1A0A00,#2d1200);
+  border-radius:24px; padding:2.5rem 1.5rem; color:#fff; margin-bottom:1.25rem; }
+.kum-emoji { font-size:3.5rem; margin-bottom:.75rem; }
+.kum-hero h1 { font-size:1.8rem; font-weight:800; margin:0 0 .5rem; }
+.kum-from { font-size:.95rem; color:rgba(255,255,255,.8); margin:0; }
+.kum-from strong { color:#C9A84C; }
+
+.kum-note { background:#fff8f0; border-radius:16px; padding:1.25rem;
+  border-left:4px solid #C9A84C; margin-bottom:1rem; }
+.kum-note-label { font-size:.72rem; font-weight:700; color:#C9A84C;
+  text-transform:uppercase; letter-spacing:.06em; margin-bottom:.5rem; }
+.kum-note-text { font-size:.95rem; font-style:italic; color:#374151;
+  margin:0; line-height:1.6; }
+
+.kum-permissions { background:#fff; border-radius:16px; padding:1.25rem;
+  box-shadow:0 2px 10px rgba(0,0,0,.07); margin-bottom:1rem; }
+.kum-permissions h3 { font-size:.9rem; font-weight:700; margin:0 0 .75rem; color:#1A0A00; }
+.kum-perm-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.5rem; }
+.perm-yes     { font-size:.9rem; color:#065f46; background:#f0fff4;
+  border-radius:10px; padding:.5rem .875rem; }
+.perm-neutral { font-size:.9rem; color:#374151; background:#f9fafb;
+  border-radius:10px; padding:.5rem .875rem; }
+
+.kum-what-is { display:flex; gap:.875rem; background:#eff6ff; border-radius:14px;
+  padding:1rem 1.25rem; margin-bottom:1.25rem; }
+.kum-wi-icon { font-size:1.5rem; flex-shrink:0; }
+.kum-wi-text { font-size:.83rem; color:#1e40af; line-height:1.6; }
+
+.kum-already { text-align:center; background:#f0fff4; border-radius:14px;
+  padding:1.25rem; font-size:.95rem; color:#065f46; font-weight:600; }
+
+.kum-cta { text-align:center; }
+.cta-hint { font-size:.85rem; color:#6b7280; margin-bottom:1rem; }
+.btn-kum-primary  { display:block; width:100%; background:linear-gradient(135deg,#C9A84C,#e8c060);
+  color:#1A0A00; font-weight:800; font-size:1rem; border:none; border-radius:14px;
+  padding:.875rem; cursor:pointer; text-decoration:none; margin-bottom:.5rem; }
+.btn-kum-secondary{ display:block; width:100%; background:#1A0A00; color:#C9A84C;
+  font-weight:700; font-size:.9rem; border:none; border-radius:14px;
+  padding:.75rem; cursor:pointer; text-decoration:none; }
+.btn-kum-decline  { display:block; width:100%; background:#fee2e2; color:#991b1b;
+  font-weight:700; font-size:.9rem; border:none; border-radius:14px;
+  padding:.75rem; cursor:pointer; }
+</style>
+{% endblock %}

@@ -1,0 +1,309 @@
+{% extends "memio_world/base_play.html" %}
+{% load i18n %}
+
+{% block title %}🤝 Kum sustav — PLAY.EU{% endblock %}
+
+{% block extra_head %}
+<style>
+.kum-wrap { max-width: 520px; margin: 0 auto; padding: 1rem; }
+.kum-section { margin-bottom: 2rem; }
+.kum-section-title {
+  font-family: 'Uncial Antiqua', serif;
+  font-size: 1.1rem; color: #C9A84C;
+  margin-bottom: 1rem; padding-bottom: .4rem;
+  border-bottom: 1px solid rgba(201,168,76,.2);
+  display: flex; align-items: center; gap: .5rem;
+}
+
+.kum-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  margin-bottom: 10px;
+}
+.kum-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(201,168,76,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+}
+.kum-name { font-weight: 600; font-size: .95rem; }
+.kum-meta { font-size: .75rem; color: rgba(255,255,255,.5); margin-top: 2px; }
+
+.kum-perms { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.kum-perm {
+  font-size: .65rem; font-weight: 600; padding: 2px 8px; border-radius: 8px;
+}
+.kum-perm-yes { background: rgba(29,158,117,.2); color: #1D9E75; }
+.kum-perm-no  { background: rgba(255,255,255,.06); color: rgba(255,255,255,.35); }
+
+/* Invite form */
+.kum-invite-form {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 16px; padding: 18px;
+}
+.kum-invite-form label {
+  display: block; font-size: .8rem; font-weight: 600;
+  color: rgba(255,255,255,.7); margin-bottom: 4px; margin-top: 12px;
+}
+.kum-invite-form input[type="text"],
+.kum-invite-form input[type="email"],
+.kum-invite-form textarea,
+.kum-invite-form select {
+  width: 100%; padding: 9px 12px; border-radius: 10px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+  color: #fff; font-size: .9rem; font-family: inherit; box-sizing: border-box;
+}
+.kum-invite-form input:focus,
+.kum-invite-form select:focus,
+.kum-invite-form textarea:focus {
+  outline: none; border-color: #C9A84C;
+  box-shadow: 0 0 0 3px rgba(201,168,76,.15);
+}
+.kum-checkbox-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  font-size: .85rem; color: rgba(255,255,255,.7);
+}
+.kum-btn-gold {
+  display: block; width: 100%; margin-top: 16px;
+  padding: 12px; border-radius: 12px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #C9A84C, #E4D5A0);
+  color: #1A0A00; font-weight: 700; font-size: 1rem;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: opacity .15s, transform .1s;
+}
+.kum-btn-gold:hover { opacity: .9; transform: translateY(-1px); }
+.kum-btn-gold:active { transform: scale(.97); }
+
+/* Gift pending */
+.gift-card {
+  padding: 14px 16px; border-radius: 14px;
+  background: rgba(201,168,76,.08);
+  border: 1px solid rgba(201,168,76,.3);
+  margin-bottom: 10px;
+}
+.gift-actions { display: flex; gap: 8px; margin-top: 10px; }
+.btn-approve {
+  flex: 1; padding: 8px; border-radius: 10px; border: none; cursor: pointer;
+  background: #1D9E75; color: #fff; font-weight: 700; font-size: .85rem;
+}
+.btn-decline {
+  flex: 1; padding: 8px; border-radius: 10px; border: none; cursor: pointer;
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.6);
+  font-weight: 600; font-size: .85rem;
+}
+
+/* Empty state */
+.kum-empty {
+  text-align: center; padding: 2rem 1rem;
+  color: rgba(255,255,255,.35); font-size: .9rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kum-wrap">
+
+  <h1 style="font-family:'Uncial Antiqua',serif;font-size:1.6rem;color:#C9A84C;margin-bottom:.5rem;">
+    🤝 Kum sustav
+  </h1>
+  <p style="font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem;">
+    Kum je osoba od povjerenja koja može pokrenuti pretplatu za tvoje dijete.
+  </p>
+
+  {# ── Pokloni koji čekaju odobrenje ──────────────────────────────── #}
+  {% if pending_gifts %}
+  <div class="kum-section">
+    <div class="kum-section-title">🎁 Čekaju tvoje odobrenje</div>
+    {% for gift in pending_gifts %}
+    <div class="gift-card">
+      <div class="kum-name">
+        {{ gift.relationship.kum.name|default:gift.relationship.kum.email }}
+        želi pokloniti
+        <strong>{{ gift.get_plan_display }}</strong>
+        za <strong>{{ gift.relationship.child.name }}</strong>
+      </div>
+      <div class="kum-meta">{{ gift.amount_eur }} EUR · {{ gift.created_at|date:"d.m.Y" }}</div>
+      {% if gift.gift_message %}
+      <div style="font-style:italic;font-size:.8rem;color:rgba(255,255,255,.6);margin-top:6px;">
+        „{{ gift.gift_message }}"
+      </div>
+      {% endif %}
+      <div class="gift-actions">
+        <button class="btn-approve"
+                onclick="kumGiftAction('{{ gift.id }}', 'approve')">
+          ✓ Odobri
+        </button>
+        <button class="btn-decline"
+                onclick="kumGiftAction('{{ gift.id }}', 'decline')">
+          ✗ Odbij
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Ja sam Kum ─────────────────────────────────────────────────── #}
+  {% if as_kum %}
+  <div class="kum-section">
+    <div class="kum-section-title">⭐ Ja sam Kum za</div>
+    {% for rel in as_kum %}
+    <div class="kum-card">
+      <div class="kum-avatar">👶</div>
+      <div style="flex:1;min-width:0;">
+        <div class="kum-name">{{ rel.child.name }}</div>
+        <div class="kum-meta">roditelj: {{ rel.parent.name|default:rel.parent.email }}</div>
+        <div class="kum-perms">
+          <span class="kum-perm {% if rel.can_pay_subscription %}kum-perm-yes{% else %}kum-perm-no{% endif %}">
+            {% if rel.can_pay_subscription %}✓{% else %}✗{% endif %} Plaćanje
+          </span>
+          <span class="kum-perm {% if rel.can_see_progress %}kum-perm-yes{% else %}kum-perm-no{% endif %}">
+            {% if rel.can_see_progress %}✓{% else %}✗{% endif %} Napredak
+          </span>
+        </div>
+      </div>
+      {% if rel.can_pay_subscription %}
+      <button onclick="openGiftModal('{{ rel.id }}')"
+              style="padding:8px 12px;border-radius:10px;background:rgba(201,168,76,.15);
+                     border:1px solid rgba(201,168,76,.3);color:#C9A84C;font-weight:700;
+                     font-size:.8rem;cursor:pointer;white-space:nowrap;">
+        🎁 Poklon
+      </button>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Kumovi za moju djecu ────────────────────────────────────────── #}
+  {% if kums_for_my_children %}
+  <div class="kum-section">
+    <div class="kum-section-title">🌟 Kumovi moje djece</div>
+    {% for rel in kums_for_my_children %}
+    <div class="kum-card">
+      <div class="kum-avatar">🤝</div>
+      <div style="flex:1;min-width:0;">
+        <div class="kum-name">{{ rel.kum.name|default:rel.kum.email }}</div>
+        <div class="kum-meta">kum za: {{ rel.child.name }}</div>
+        <div class="kum-perms">
+          <span class="kum-perm {% if rel.can_pay_subscription %}kum-perm-yes{% else %}kum-perm-no{% endif %}">
+            {% if rel.can_pay_subscription %}✓{% else %}✗{% endif %} Plaćanje
+          </span>
+          <span class="kum-perm {% if rel.can_see_progress %}kum-perm-yes{% else %}kum-perm-no{% endif %}">
+            {% if rel.can_see_progress %}✓{% else %}✗{% endif %} Napredak
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# ── Pozovi novog Kuma ───────────────────────────────────────────── #}
+  <div class="kum-section">
+    <div class="kum-section-title">✉️ Pozovi Kuma</div>
+    <div class="kum-invite-form">
+      <label>Email Kuma *</label>
+      <input type="email" id="kum-email" placeholder="npr. pero@primjer.hr">
+
+      <label>Ime Kuma</label>
+      <input type="text" id="kum-name" placeholder="npr. Ujak Pero">
+
+      <label>Za koje dijete</label>
+      <select id="kum-child">
+        <option value="">— odaberi dijete —</option>
+        {# Punimo JS-om ili context procssorom #}
+      </select>
+
+      <label>Osobna poruka (opcionalno)</label>
+      <textarea id="kum-note" rows="2" maxlength="500"
+                placeholder="npr. 'Hvala ti što si prisutan u životu naše Ive!'"></textarea>
+
+      <div style="margin-top:14px;font-size:.8rem;color:rgba(255,255,255,.5);font-weight:600;">
+        Dozvole koje daješ Kumu:
+      </div>
+      <label class="kum-checkbox-row">
+        <input type="checkbox" id="perm-pay" checked>
+        Može platiti pretplatu za dijete
+      </label>
+      <label class="kum-checkbox-row">
+        <input type="checkbox" id="perm-progress" checked>
+        Može vidjeti napredak djeteta
+      </label>
+      <label class="kum-checkbox-row">
+        <input type="checkbox" id="perm-msg">
+        Može slati poruke djetetu
+      </label>
+
+      <button class="kum-btn-gold" onclick="sendKumInvite()">
+        ✉️ Pošalji pozivnicu
+      </button>
+      <div id="kum-invite-result" style="margin-top:10px;font-size:.85rem;"></div>
+    </div>
+  </div>
+
+  {# ── Poslane pozivnice ───────────────────────────────────────────── #}
+  {% if sent_invitations %}
+  <div class="kum-section">
+    <div class="kum-section-title">📨 Poslane pozivnice</div>
+    {% for inv in sent_invitations %}
+    <div class="kum-card" style="opacity:{% if inv.status == 'accepted' %}1{% else %}.7{% endif %};">
+      <div class="kum-avatar" style="font-size:1rem;">
+        {% if inv.status == 'accepted' %}✅{% elif inv.status == 'pending' %}⏳{% else %}❌{% endif %}
+      </div>
+      <div>
+        <div class="kum-name">{{ inv.kum_name|default:inv.kum_email }}</div>
+        <div class="kum-meta">za {{ inv.child.name }} · {{ inv.get_status_display }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+async function sendKumInvite() {
+  const result = document.getElementById('kum-invite-result');
+  const body = {
+    kum_email: document.getElementById('kum-email').value,
+    kum_name: document.getElementById('kum-name').value,
+    child_id: document.getElementById('kum-child').value,
+    personal_note: document.getElementById('kum-note').value,
+    can_pay_subscription: document.getElementById('perm-pay').checked,
+    can_see_progress: document.getElementById('perm-progress').checked,
+    can_send_messages: document.getElementById('perm-msg').checked,
+  };
+  if (!body.kum_email || !body.child_id) {
+    result.innerHTML = '<span style="color:#e74c3c;">Email i dijete su obavezni.</span>';
+    return;
+  }
+  try {
+    const r = await fetch("{% url 'memio_world:kum_invite_send' %}", {
+      method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    result.innerHTML = data.ok
+      ? `<span style="color:#1D9E75;">✓ ${data.message}</span>`
+      : `<span style="color:#e74c3c;">✗ ${data.error}</span>`;
+  } catch(e) {
+    result.innerHTML = '<span style="color:#e74c3c;">Greška pri slanju.</span>';
+  }
+}
+
+async function kumGiftAction(giftId, action) {
+  const r = await fetch(`/memio-world/play/kum/poklon/${giftId}/odobri/`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+    body: JSON.stringify({action}),
+  });
+  const data = await r.json();
+  if (data.ok) location.reload();
+  else alert(data.error);
+}
+</script>
+{% endblock %}

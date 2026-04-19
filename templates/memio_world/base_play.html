@@ -33,28 +33,187 @@
 </main>
 
 <!-- Bottom Navigation — 5 kategorija -->
-<nav class="play-bottom">
-  <a href="{% url 'memio_world:play_home' %}" class="{% if nav == 'home' %}active{% endif %}">
-    <span class="nav-icon">🏠</span>
-    <span>{% trans "Početna" %}</span>
+<nav class="play-bottom" aria-label="Glavna navigacija">
+
+  <a href="{% url 'memio_world:play_home' %}"
+     class="pnav-item {% if nav == 'home' %}pnav-active{% endif %}"
+     aria-label="Početna">
+    <span class="pnav-bubble">🏠 Kući!</span>
+    <span class="pnav-icon">🏠</span>
+    <span class="pnav-label">{% trans "Početna" %}</span>
   </a>
-  <a href="{% url 'memio_world:story_list' %}" class="{% if nav == 'read' %}active{% endif %}">
-    <span class="nav-icon">📖</span>
-    <span>{% trans "Čitaj" %}</span>
+
+  <a href="{% url 'memio_world:story_list' %}"
+     class="pnav-item {% if nav == 'read' %}pnav-active{% endif %}"
+     aria-label="Čitaj priče i lektire">
+    <span class="pnav-bubble">📖 Priče &amp; Lektire</span>
+    <span class="pnav-icon">📖</span>
+    <span class="pnav-label">{% trans "Čitaj" %}</span>
   </a>
-  <a href="{% url 'memio_world:chess_home' %}" class="{% if nav == 'play' %}active{% endif %}">
-    <span class="nav-icon">🎮</span>
-    <span>{% trans "Igraj" %}</span>
+
+  <a href="{% url 'memio_world:chess_home' %}"
+     class="pnav-item {% if nav == 'play' %}pnav-active{% endif %}"
+     aria-label="Igraj igre">
+    <span class="pnav-bubble">🎮 Igre &amp; Izazovi</span>
+    <span class="pnav-icon">🎮</span>
+    <span class="pnav-label">{% trans "Igraj" %}</span>
   </a>
-  <a href="{% url 'memio_world:learning_paths' %}" class="{% if nav == 'learn' %}active{% endif %}">
-    <span class="nav-icon">📚</span>
-    <span>{% trans "Uči" %}</span>
+
+  <a href="{% url 'memio_world:learning_paths' %}"
+     class="pnav-item {% if nav == 'learn' %}pnav-active{% endif %}"
+     aria-label="Uči nova znanja">
+    <span class="pnav-bubble">📚 Škola &amp; Vještine</span>
+    <span class="pnav-icon">📚</span>
+    <span class="pnav-label">{% trans "Uči" %}</span>
   </a>
-  <a href="{% url 'memio_world:comfort_home' %}" class="{% if nav == 'family' %}active{% endif %}">
-    <span class="nav-icon">👨‍👩‍👧</span>
-    <span>{% trans "Obitelj" %}</span>
+
+  <a href="{% url 'memio_world:comfort_home' %}"
+     class="pnav-item {% if nav == 'family' %}pnav-active{% endif %}"
+     aria-label="Obitelj i Kum">
+    <span class="pnav-bubble">👨‍👩‍👧 Obitelj &amp; Kum</span>
+    <span class="pnav-icon">👨‍👩‍👧</span>
+    <span class="pnav-label">{% trans "Obitelj" %}</span>
   </a>
+
 </nav>
+
+<style>
+/* ── Bottom nav — ikonasti dizajn s oblačićima ────────────────── */
+.play-bottom {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  background: linear-gradient(180deg, rgba(20,12,4,0) 0%, rgba(20,12,4,.96) 18%);
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+  z-index: 100;
+  gap: 4px;
+}
+
+.pnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  cursor: pointer;
+}
+
+/* Oblačić (speech bubble) — skriven, pojavi se na hover/focus/active */
+.pnav-bubble {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) scale(.8);
+  transform-origin: bottom center;
+  background: #fff;
+  color: #1A0A00;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .18s, transform .18s;
+  z-index: 10;
+}
+/* Repić oblačića */
+.pnav-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #fff;
+}
+
+/* Ikona */
+.pnav-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.08);
+  border: 2px solid rgba(255,255,255,.1);
+  transition: background .18s, border-color .18s, transform .15s;
+}
+
+/* Label */
+.pnav-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: .65rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.55);
+  letter-spacing: .02em;
+  transition: color .18s;
+  max-width: 60px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hover / focus */
+.pnav-item:hover .pnav-bubble,
+.pnav-item:focus .pnav-bubble,
+.pnav-item:focus-within .pnav-bubble {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+.pnav-item:hover .pnav-icon,
+.pnav-item:focus .pnav-icon {
+  background: rgba(201,168,76,.25);
+  border-color: rgba(201,168,76,.5);
+  transform: translateY(-2px);
+}
+.pnav-item:hover .pnav-label,
+.pnav-item:focus .pnav-label {
+  color: rgba(201,168,76,.9);
+}
+
+/* Aktivan */
+.pnav-active .pnav-icon {
+  background: rgba(201,168,76,.3);
+  border-color: #C9A84C;
+  transform: translateY(-3px);
+}
+.pnav-active .pnav-label {
+  color: #C9A84C;
+  font-weight: 700;
+}
+.pnav-active .pnav-bubble {
+  background: #C9A84C;
+  color: #1A0A00;
+}
+.pnav-active .pnav-bubble::after {
+  border-top-color: #C9A84C;
+}
+
+/* Touch devices — oblačić se prikaže kratko na tap */
+@media (hover: none) {
+  .pnav-item:active .pnav-bubble {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+/* Rezerviraj prostor za fixed bottom nav */
+.play-main {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+</style>
 
 <!-- Footer -->
 <div class="play-footer">

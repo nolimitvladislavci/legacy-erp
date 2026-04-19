@@ -161,8 +161,6 @@ def setup_child_action(request):
     data = json.loads(request.body) if request.content_type == "application/json" else request.POST
     name = (data.get("name") or "").strip()
     birth_date = data.get("birth_date") or ""
-    lang = data.get("language") or "hr"
-
     if not name:
         return JsonResponse({"ok": False, "error": "Ime djeteta je obavezno."}, status=400)
 
@@ -202,3 +200,20 @@ def account_page(request):
         "memio_world/auth_account.html",
         {"nav": "home", "lang": lang, "parent": parent, "children": children},
     )
+
+
+def login_required_play(view_func):
+    """Decorator: zahtjeva prijavljenog roditelja (memio_world session)."""
+    from functools import wraps
+
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        parent = _get_parent(request)
+        if not parent:
+            from django.shortcuts import redirect
+
+            return redirect("memio_world:login_page")
+        request.play_parent = parent
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
