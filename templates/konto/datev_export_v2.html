@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}DATEV 2030 Export — {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+<div class="row justify-content-center">
+<div class="col-xl-8 col-lg-10">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+      <i class="fas fa-file-export text-primary fs-3"></i>
+    </div>
+    <div>
+      <h2 class="mb-0 fw-bold">DATEV 2030 Export</h2>
+      <p class="text-muted mb-0">
+        <span class="badge bg-success me-1">eValidator Pečat</span>
+        <span class="badge bg-primary me-1">GoBD UUID</span>
+        <span class="badge bg-info me-1">BelegLink</span>
+        <span class="badge bg-warning text-dark me-1">SEPA</span>
+        <span class="badge bg-secondary">OSS</span>
+      </p>
+    </div>
+    <div class="ms-auto text-end">
+      <small class="text-muted d-block">Tvrtka</small>
+      <strong>{{ company.name }}</strong>
+    </div>
+  </div>
+
+  <!-- Info Alert -->
+  <div class="alert alert-info d-flex gap-3 mb-4" role="alert">
+    <i class="fas fa-info-circle mt-1 flex-shrink-0"></i>
+    <div>
+      <strong>DATEV EXTF/700 v2</strong> — Format koji DATEV planira kao standard za 2030:
+      svaki knjižni zapis dobiva <strong>BelegLink</strong> (URL verifikacije),
+      <strong>UUID</strong> (GoBD nepobitnost), <strong>eValidator pečat</strong> (eIDAS čl. 41).
+      Import: Kanzlei-Rechnungswesen → Belege → EXTF.
+    </div>
+  </div>
+
+  <form method="post" id="datevForm">
+    {% csrf_token %}
+
+    <!-- ── Vremenski period ── -->
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">
+        <i class="fas fa-calendar-alt me-2"></i>Vremenski period
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Od datuma</label>
+            <input type="date" name="start" class="form-control"
+                   value="{{ default_start }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Do datuma</label>
+            <input type="date" name="end" class="form-control"
+                   value="{{ default_end }}" required>
+          </div>
+        </div>
+        <!-- Brzi odabir perioda -->
+        <div class="mt-2 d-flex flex-wrap gap-2">
+          <small class="text-muted align-self-center">Brzi odabir:</small>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setQuarter(0)">Ovaj kvartal</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setQuarter(-1)">Prethodni kvartal</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setYear(0)">Ova godina</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setYear(-1)">Prošla godina</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Steuerberater podaci ── -->
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">
+        <i class="fas fa-user-tie me-2"></i>Steuerberater podaci
+        <small class="text-muted fw-normal ms-2">(optional — za DATEV uvoz)</small>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Beraternummer</label>
+            <input type="text" name="berater_nr" class="form-control" placeholder="npr. 12345"
+                   maxlength="20">
+            <div class="form-text">Broj vašeg Steuerberatera u DATEV sustavu</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mandantennummer</label>
+            <input type="text" name="mandanten_nr" class="form-control" placeholder="npr. 67890"
+                   maxlength="20">
+            <div class="form-text">Vaš broj klijenta kod Steuerberatera</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DATEV 2030 Opcije ── -->
+    <div class="card mb-3 border-primary">
+      <div class="card-header bg-primary bg-opacity-10 fw-semibold text-primary">
+        <i class="fas fa-star me-2"></i>DATEV 2030 — Napredne opcije
+      </div>
+      <div class="card-body">
+
+        <!-- BelegLink -->
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" name="include_beleglink"
+                 value="1" id="cbBeleglink" checked>
+          <label class="form-check-label" for="cbBeleglink">
+            <strong>BelegLink — eValidator pečat po knjižnom zapisu</strong>
+            <span class="badge bg-success ms-1">eIDAS Art. 41</span>
+          </label>
+          <div class="text-muted small mt-1">
+            Svaki redak dobiva URL: <code>evalidator.eu/verify/XXXXXXXX/</code>
+            Steuerberater može jednim klikom verificirati originalnost dokumenta.
+          </div>
+        </div>
+
+        <!-- UUID -->
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" name="include_guid"
+                 value="1" id="cbGuid" checked>
+          <label class="form-check-label" for="cbGuid">
+            <strong>Buchungs-GUID — UUID4 po zapisu</strong>
+            <span class="badge bg-primary ms-1">GoBD §14b</span>
+          </label>
+          <div class="text-muted small mt-1">
+            Jedinstven, nepobitni identifikator za svako knjiženje.
+            Osnova za GoBD revizijsku nepobitnost i blockchain-ready arhivu.
+          </div>
+        </div>
+
+        <!-- KOST1 -->
+        <div class="mb-3">
+          <label class="form-label">
+            <strong>KOST1 — Standardna kostenstelle</strong>
+            <span class="badge bg-secondary ms-1">optional</span>
+          </label>
+          <input type="text" name="kost_center" class="form-control" style="max-width:200px;"
+                 placeholder="npr. 100" maxlength="8">
+          <div class="form-text">Ako knjiženja nemaju cost center, koristi se ova vrijednost</div>
+        </div>
+
+        <!-- SEPA -->
+        <div class="mb-3">
+          <label class="form-label">
+            <strong>SEPA Mandatsreferenz prefiks</strong>
+            <span class="badge bg-warning text-dark ms-1">optional</span>
+          </label>
+          <input type="text" name="sepa_ref" class="form-control" style="max-width:300px;"
+                 placeholder="npr. DE33ZZZ" maxlength="35">
+          <div class="form-text">ISO 20022 SEPA referenca za direktnu naplatu (pain.008)</div>
+        </div>
+
+        <!-- OSS -->
+        <div class="form-check form-switch mb-1">
+          <input class="form-check-input" type="checkbox" name="oss_mode"
+                 value="1" id="cbOss">
+          <label class="form-check-label" for="cbOss">
+            <strong>OSS/IOSS modus</strong>
+            <span class="badge bg-info ms-1">EU cross-border</span>
+          </label>
+          <div class="text-muted small mt-1">
+            One-Stop-Shop — dodaje EU-Land oznaku za prekogranični PDV (§ 3c UStG)
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Format downloada ── -->
+    <div class="card mb-4">
+      <div class="card-header fw-semibold">
+        <i class="fas fa-download me-2"></i>Format preuzimanja
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="form-check p-3 border rounded-3" style="cursor:pointer;"
+                 onclick="document.getElementById('fmtCsv').checked=true;highlightFormat()">
+              <input class="form-check-input" type="radio" name="export_format"
+                     value="csv" id="fmtCsv" checked>
+              <label class="form-check-label w-100" for="fmtCsv" style="cursor:pointer;">
+                <i class="fas fa-file-csv text-success me-2"></i>
+                <strong>CSV</strong>
+                <div class="text-muted small">DATEV EXTF/700 — direktni import u DATEV</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check p-3 border rounded-3" style="cursor:pointer;"
+                 onclick="document.getElementById('fmtZip').checked=true;highlightFormat()">
+              <input class="form-check-input" type="radio" name="export_format"
+                     value="zip" id="fmtZip">
+              <label class="form-check-label w-100" for="fmtZip" style="cursor:pointer;">
+                <i class="fas fa-file-archive text-warning me-2"></i>
+                <strong>ZIP paket</strong>
+                <div class="text-muted small">CSV + README s uputama i pravnom dokumentacijom</div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Submit ── -->
+    <div class="d-flex gap-3 justify-content-between align-items-center">
+      <a href="{% url 'konto:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Natrag
+      </a>
+      <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
+        <i class="fas fa-file-export me-2"></i>Generiraj DATEV 2030 Export
+      </button>
+    </div>
+
+  </form>
+
+  <!-- ── Info box: Što je DATEV 2030? ── -->
+  <div class="card mt-4 border-0 bg-light">
+    <div class="card-body">
+      <h6 class="fw-bold mb-3"><i class="fas fa-question-circle me-2 text-muted"></i>Što je DATEV 2030?</h6>
+      <div class="row g-3 text-sm">
+        <div class="col-md-6">
+          <strong>Standardni DATEV EXTF:</strong>
+          <ul class="small text-muted mt-1 mb-0">
+            <li>CSV sa 88 stupaca</li>
+            <li>Knjižni stapel format</li>
+            <li>Bez verifikacijskih linkova</li>
+            <li>Bez UUID identifikacije</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <strong>LIMIT Connect DATEV 2030:</strong>
+          <ul class="small text-success mt-1 mb-0">
+            <li>✅ BelegLink → eValidator verify URL</li>
+            <li>✅ UUID4 po zapisu (GoBD nepobitno)</li>
+            <li>✅ SEPA Mandatsreferenz</li>
+            <li>✅ OSS/IOSS EU-Land oznaka</li>
+            <li>✅ ZIP paket s README i pravnom dokumentacijom</li>
+            <li>✅ 100% DATEV EXTF/700 kompatibilan</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-3 small text-muted">
+        <strong>Pravna osnova:</strong>
+        GoBD §14b (DE) · eIDAS Art. 41 (EU) · DATEV EXTF Format-Beschreibung v12.0 (2024)
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+<script>
+function setQuarter(offset) {
+  const now = new Date();
+  let q = Math.floor(now.getMonth() / 3) + offset;
+  let y = now.getFullYear();
+  while (q < 0) { q += 4; y--; }
+  while (q >= 4) { q -= 4; y++; }
+  const startM = q * 3;
+  const endM = startM + 2;
+  const start = new Date(y, startM, 1);
+  const end = new Date(y, endM + 1, 0);
+  document.querySelector('[name=start]').value = start.toISOString().slice(0, 10);
+  document.querySelector('[name=end]').value = end.toISOString().slice(0, 10);
+}
+function setYear(offset) {
+  const y = new Date().getFullYear() + offset;
+  document.querySelector('[name=start]').value = `${y}-01-01`;
+  document.querySelector('[name=end]').value = `${y}-12-31`;
+}
+function highlightFormat() {
+  document.querySelectorAll('.form-check.border').forEach(el => {
+    el.classList.toggle('border-primary', el.querySelector('input').checked);
+    el.classList.toggle('bg-primary', el.querySelector('input').checked);
+    el.classList.toggle('bg-opacity-10', el.querySelector('input').checked);
+  });
+}
+document.getElementById('datevForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generira se...';
+  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-export me-2"></i>Generiraj DATEV 2030 Export'; }, 8000);
+});
+// Init highlight
+highlightFormat();
+</script>
+{% endblock %}

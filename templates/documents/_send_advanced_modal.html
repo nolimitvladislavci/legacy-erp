@@ -1,0 +1,327 @@
+{% load i18n %}
+{# Partial: Napredni send modal s pečatom, viral kodom i glasovnom porukom #}
+{# Uključuje se u arhiva_list.html ili kao HTMX partial #}
+
+<div class="modal fade" id="sendAdvancedModal" tabindex="-1" aria-labelledby="sendAdvancedLabel" aria-modal="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="sendAdvancedLabel">
+          <i class="fas fa-paper-plane me-2 text-primary"></i>
+          Pošalji dokument — <span id="saEntryNum">{% if entry %}{{ entry.doc_number }}{% endif %}</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body pt-2">
+
+        {# ── eValidator Pečat status ── #}
+        <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-4
+                    {% if seal %}bg-success bg-opacity-10 border border-success border-opacity-25
+                    {% else %}bg-light{% endif %}">
+          {% if seal %}
+            <div class="text-success fs-3">✅</div>
+            <div class="flex-grow-1">
+              <div class="fw-semibold">eValidator Pečat aktivan</div>
+              <div class="small text-muted">Token: <code class="fw-bold text-success">{{ seal.seal_token }}</code></div>
+              <div class="small">
+                <a href="{{ seal.verify_url }}" target="_blank" class="text-decoration-none text-success">
+                  <i class="fas fa-external-link-alt me-1"></i>{{ seal.verify_url }}
+                </a>
+              </div>
+            </div>
+            {% if qr_uri %}
+            <img src="{{ qr_uri }}" alt="QR pečat" style="width:64px;height:64px;border-radius:8px;">
+            {% endif %}
+          {% else %}
+            <div class="text-muted fs-3">🔐</div>
+            <div class="flex-grow-1">
+              <div class="fw-semibold">Pečat će se generirati pri slanju</div>
+              <div class="small text-muted">eIDAS Art. 41 — SHA-256 hash + QR verifikacija</div>
+            </div>
+          {% endif %}
+        </div>
+
+        {# ── Kanali slanja ── #}
+        <div class="mb-3">
+          <label class="form-label fw-semibold mb-2">Kanali slanja</label>
+          <div class="d-flex gap-3 flex-wrap">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="chEmail" value="email" checked>
+              <label class="form-check-label" for="chEmail">
+                <i class="fas fa-envelope me-1"></i>Email
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="chWhatsApp" value="whatsapp">
+              <label class="form-check-label" for="chWhatsApp">
+                <i class="fab fa-whatsapp me-1 text-success"></i>WhatsApp
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="chPortal" value="portal" checked>
+              <label class="form-check-label" for="chPortal">
+                <i class="fas fa-link me-1"></i>Portal link u poruci
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {# ── Primatelji ── #}
+        <div class="row g-3 mb-3" id="recipientFields">
+          <div class="col-md-6" id="emailField">
+            <label class="form-label">Email adresa</label>
+            <input type="email" class="form-control" id="saEmail"
+                   placeholder="primatelj@email.com"
+                   value="{% if prefill_email %}{{ prefill_email }}{% endif %}">
+          </div>
+          <div class="col-md-6" id="phoneField" style="display:none;">
+            <label class="form-label">WhatsApp broj</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fab fa-whatsapp text-success"></i></span>
+              <input type="tel" class="form-control" id="saPhone"
+                     placeholder="+385911234567"
+                     value="{% if prefill_phone %}{{ prefill_phone }}{% endif %}">
+            </div>
+            <div class="form-text">Format: +[pozivni][broj]</div>
+          </div>
+        </div>
+
+        {# ── Osobna poruka ── #}
+        <div class="mb-3">
+          <label class="form-label">Osobna poruka <small class="text-muted">(optional, max 500 znakova)</small></label>
+          <textarea class="form-control" id="saCustomMsg" rows="2"
+                    placeholder="npr. Hej Ante, šaljem ti fakturu za ožujak..."
+                    maxlength="500"></textarea>
+          <div class="form-text text-end"><span id="msgLen">0</span>/500</div>
+        </div>
+
+        {# ── Glasovna poruka ── #}
+        <div class="card mb-3 border-0 bg-light" id="voiceSection" style="display:none;">
+          <div class="card-body py-2">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="fas fa-microphone text-danger"></i>
+              <span class="fw-semibold small">Glasovna poruka</span>
+              <span class="badge bg-warning text-dark">GDPR: šalje se izravno, ne sprema</span>
+            </div>
+
+            {# TTS opcija #}
+            <div class="mb-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary me-2" id="btnTTS">
+                <i class="fas fa-volume-up me-1"></i>Generiraj TTS glasovnu poruku
+              </button>
+              <small class="text-muted">Browser Web Speech API — automatski generira glas iz osobne poruke</small>
+            </div>
+
+            {# Snimanje vlastitog glasa #}
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-sm btn-danger" id="btnRecStart">
+                <i class="fas fa-circle me-1"></i>Snimi glas
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary d-none" id="btnRecStop">
+                <i class="fas fa-stop me-1"></i>Zaustavi
+              </button>
+              <span class="badge bg-danger d-none" id="recIndicator">● SNIMA</span>
+              <audio id="voicePreview" controls class="d-none" style="height:32px;flex:1;"></audio>
+            </div>
+            <div class="form-text mt-1">
+              <i class="fas fa-shield-alt me-1 text-success"></i>
+              Glasovna poruka se ne sprema na serveru — šalje se izravno WhatsAppom (GDPR safe)
+            </div>
+          </div>
+        </div>
+
+        {# ── Preview poruke ── #}
+        <details class="mb-3">
+          <summary class="text-muted small" style="cursor:pointer;">Pregled poruke koja se šalje</summary>
+          <pre id="msgPreview" class="bg-light rounded-2 p-3 mt-2 small"
+               style="white-space:pre-wrap;max-height:200px;overflow-y:auto;">
+Dokument: ...
+Partner: ...
+Iznos: ...
+🔐 Pečat: XXXXXXXX
+✅ Verifikacija: https://evalidator.eu/verify/XXXXXXXX/
+          </pre>
+        </details>
+
+      </div>{# end modal-body #}
+
+      <div class="modal-footer border-0 pt-0">
+        <div class="me-auto">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="saveContact" checked>
+            <label class="form-check-label small" for="saveContact">Spremi kontakt podatke</label>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Odustani</button>
+        <button type="button" class="btn btn-primary px-4" id="btnSendAdvanced">
+          <i class="fas fa-paper-plane me-2"></i>Pošalji
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const modal = document.getElementById('sendAdvancedModal');
+  let currentEntryPk = null;
+  let voiceBlob = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+
+  // ── Channel toggles ──
+  document.getElementById('chWhatsApp').addEventListener('change', function() {
+    document.getElementById('phoneField').style.display = this.checked ? '' : 'none';
+    document.getElementById('voiceSection').style.display = this.checked ? '' : 'none';
+  });
+  document.getElementById('chEmail').addEventListener('change', function() {
+    document.getElementById('emailField').style.display = this.checked ? '' : 'none';
+  });
+
+  // ── Message length counter ──
+  document.getElementById('saCustomMsg').addEventListener('input', function() {
+    document.getElementById('msgLen').textContent = this.value.length;
+  });
+
+  // ── TTS (Web Speech API) ──
+  document.getElementById('btnTTS').addEventListener('click', function() {
+    const msg = document.getElementById('saCustomMsg').value ||
+      document.getElementById('saEntryNum').textContent;
+    if (!msg || !window.speechSynthesis) {
+      alert('Web Speech API nije dostupan u ovom pregledniku.');
+      return;
+    }
+    const utt = new SpeechSynthesisUtterance(msg);
+    utt.lang = 'hr-HR';
+    window.speechSynthesis.speak(utt);
+    // TTS bez snimanja — samo preview. Pravi voice note = MediaRecorder.
+    this.innerHTML = '<i class="fas fa-check me-1"></i>Reproducira...';
+    utt.onend = () => {
+      this.innerHTML = '<i class="fas fa-volume-up me-1"></i>Generiraj TTS glasovnu poruku';
+    };
+  });
+
+  // ── MediaRecorder ──
+  document.getElementById('btnRecStart').addEventListener('click', async function() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        voiceBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(voiceBlob);
+        const audio = document.getElementById('voicePreview');
+        audio.src = url;
+        audio.classList.remove('d-none');
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      this.classList.add('d-none');
+      document.getElementById('btnRecStop').classList.remove('d-none');
+      document.getElementById('recIndicator').classList.remove('d-none');
+    } catch(e) {
+      alert('Mikrofon nije dostupan: ' + e.message);
+    }
+  });
+
+  document.getElementById('btnRecStop').addEventListener('click', function() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    this.classList.add('d-none');
+    document.getElementById('btnRecStart').classList.remove('d-none');
+    document.getElementById('recIndicator').classList.add('d-none');
+  });
+
+  // ── Send ──
+  document.getElementById('btnSendAdvanced').addEventListener('click', async function() {
+    if (!currentEntryPk) { alert('Greška: nema entry pk.'); return; }
+
+    const channels = [];
+    if (document.getElementById('chEmail').checked) channels.push('email');
+    if (document.getElementById('chWhatsApp').checked) channels.push('whatsapp');
+
+    if (channels.length === 0) { alert('Odaberite barem jedan kanal slanja.'); return; }
+
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Šalje...';
+
+    let voice_b64 = null;
+    let voice_mime = null;
+    if (voiceBlob && channels.includes('whatsapp')) {
+      const ab = await voiceBlob.arrayBuffer();
+      const bytes = new Uint8Array(ab);
+      let binary = '';
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      voice_b64 = btoa(binary);
+      voice_mime = voiceBlob.type;
+    }
+
+    const payload = {
+      channels,
+      recipient_email: document.getElementById('saEmail').value.trim(),
+      recipient_phone: document.getElementById('saPhone').value.trim(),
+      custom_message: document.getElementById('saCustomMsg').value.trim(),
+      voice_b64,
+      voice_mime,
+      save_contact: document.getElementById('saveContact').checked,
+      include_portal_link: document.getElementById('chPortal').checked,
+    };
+
+    try {
+      const resp = await fetch(`/hr/documents/arhiva/${currentEntryPk}/send-advanced/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '',
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await resp.json();
+
+      if (data.ok) {
+        // Prikaži success s verify URL
+        const toast = `
+          <div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+            <div class="toast show bg-success text-white" role="alert">
+              <div class="toast-header bg-success text-white border-0">
+                <strong class="me-auto">✅ Poslano!</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+              </div>
+              <div class="toast-body">
+                ${data.message}<br>
+                <small>🔐 Pečat: <code>${data.seal_token}</code></small><br>
+                <a href="${data.verify_url}" target="_blank" class="text-white text-decoration-underline small">
+                  Verifikacija →
+                </a>
+              </div>
+            </div>
+          </div>`;
+        document.body.insertAdjacentHTML('beforeend', toast);
+        setTimeout(() => document.querySelectorAll('.position-fixed .toast').forEach(t => t.remove()), 5000);
+        bootstrap.Modal.getInstance(modal)?.hide();
+      } else {
+        alert(`Greška pri slanju:\n${JSON.stringify(data.errors, null, 2)}`);
+      }
+    } catch (e) {
+      alert('Mrežna greška: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Pošalji';
+    }
+  });
+
+  // ── Exposes API za triggeranje s vanjske stranice ──
+  window.openSendAdvancedModal = function(entryPk, entryNum) {
+    currentEntryPk = entryPk;
+    voiceBlob = null;
+    document.getElementById('saEntryNum').textContent = entryNum || '';
+    // Load seal info via HTMX ili static
+    const modalEl = new bootstrap.Modal(modal);
+    modalEl.show();
+  };
+})();
+</script>

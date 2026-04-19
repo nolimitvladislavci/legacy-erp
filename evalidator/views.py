@@ -1,9 +1,13 @@
-import hashlib, json, time
+import hashlib
+import json
+import time
+
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
-from core.oib_validator import validate_oib_hr, validate_iban, validate_vat_id
+from django.views.decorators.http import require_GET, require_POST
+
+from core.oib_validator import validate_iban, validate_oib_hr, validate_vat_id
 
 
 def _log(vtype, value, valid, api=False, ms=0):
@@ -36,6 +40,7 @@ def _rate_ok(request):
 @require_GET
 def landing(request):
     from django.core.cache import cache
+
     from evalidator.models import ValidationLog
 
     stats = cache.get("ev_stats") or {}
@@ -160,12 +165,13 @@ def api_status(request):
     payload = {
         "status": "ok",
         "service": "evalidator.eu",
-        "version": "1.0",
+        "version": "1.1",
         "timestamp": now.isoformat(),
         "endpoints": {
             "oib": "/api/v1/oib/",
             "batch": "/api/v1/batch/",
             "docs": "/docs/",
+            "verify_seal": "/api/v1/verify/<token>/",
         },
     }
     api_key_obj = _resolve_api_key(request)
@@ -179,3 +185,84 @@ def api_status(request):
         payload["authenticated"] = False
         payload["note"] = "Pass X-API-Key header for quota info"
     return JsonResponse(payload)
+
+
+# ═══════════════════════════════════════════════════════
+# DOCUMENT SEAL — Verifikacija pečata vjerodostojnosti
+# ═══════════════════════════════════════════════════════
+
+
+@require_GET
+def verify_seal(request, seal_token: str):
+    """
+    GET /evalidator/verify/<seal_token>/
+
+    Javna stranica verifikacije dokumenta.
+    Prikazuje: status autentičnosti, metapodatke, QR (za re-scan), CTA.
+
+    Zakonski okvir: eIDAS Art. 41 — electronic timestamp presumption of integrity.
+    """
+    from evalidator.models import DocumentSeal
+    from evalidator.seal_service import record_verify, seal_to_qr_base64
+
+    token = seal_token.upper().strip()
+    seal = DocumentSeal.objects.filter(seal_token=token).first()
+
+    ctx = {
+        "token": token,
+        "seal": None,
+        "found": False,
+        "valid": False,
+        "qr_data_uri": "",
+    }
+
+    if seal:
+        ctx["found"] = True
+        ctx["valid"] = seal.is_valid
+        ctx["seal"] = seal
+        try:
+            ctx["qr_data_uri"] = seal_to_qr_base64(seal)
+        except Exception:
+            pass
+        record_verify(token, request)
+
+    return render(request, "evalidator/verify_seal.html", ctx)
+
+
+@require_GET
+def api_verify_seal(request, seal_token: str):
+    """
+    GET /evalidator/api/v1/verify/<token>/
+
+    JSON verifikacija pečata za strojno čitanje (DATEV BelegLink, ERP integracija).
+    """
+    from evalidator.models import DocumentSeal
+    from evalidator.seal_service import record_verify
+
+    token = seal_token.upper().strip()
+    seal = DocumentSeal.objects.filter(seal_token=token).first()
+
+    if not seal:
+        return JsonResponse({"verified": False, "token": token, "error": "Pečat nije pronađen"}, status=404)
+
+    record_verify(token, request)
+
+    return JsonResponse(
+        {
+            "verified": True,
+            "valid": seal.is_valid,
+            "token": seal.seal_token,
+            "sha256": seal.sha256_hash,
+            "doc_number": seal.doc_number,
+            "doc_date": seal.doc_date.isoformat() if seal.doc_date else None,
+            "partner": seal.partner_name,
+            "amount": float(seal.amount) if seal.amount else None,
+            "currency": seal.currency,
+            "issuer": seal.issuer_name,
+            "issuer_country": seal.issuer_country,
+            "sealed_at": seal.sealed_at.isoformat(),
+            "expires_at": seal.expires_at.isoformat() if seal.expires_at else None,
+            "verify_url": seal.verify_url,
+            "legal_basis": "eIDAS Art. 41 — electronic timestamp",
+        }
+    )

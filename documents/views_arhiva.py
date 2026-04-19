@@ -2271,3 +2271,246 @@ def arhiva_partner_intel(request):
             else None,
         }
     )
+
+
+# ════════════════════════════════════════════════════════════════════
+# ENHANCED SEND — Viral Kod + Glasovna Poruka + eValidator Pečat
+# Zakonski okvir: GDPR Art. 6(1)(b), eIDAS Art. 41, GoBD §14b
+# ════════════════════════════════════════════════════════════════════
+
+
+@login_required
+def arhiva_send_advanced(request, pk):
+    """
+    POST /documents/arhiva/<pk>/send-advanced/
+
+    Napredno slanje arhivskog dokumenta s:
+    - eValidator pečat (generira se automatski)
+    - Viral kod (8-char LC kod, ugrađen u poruku)
+    - Multi-channel: email, whatsapp, portal link, sve odjednom
+    - Glasovna poruka: audio blob (Web Speech API TTS, browser-side)
+      → WhatsApp voice note via WAHA (ako kanal=whatsapp)
+    - GDPR consent: implicit u business communication (Art. 6(1)(b))
+
+    Body JSON:
+    {
+      "channels": ["email", "whatsapp"],
+      "recipient_email": "...",
+      "recipient_phone": "+385...",
+      "custom_message": "Osobna poruka (max 500 znakova)",
+      "voice_b64": "base64 audio/wav bytes | null",
+      "voice_mime": "audio/wav",
+      "save_contact": true,
+      "include_portal_link": true
+    }
+
+    Returns JSON:
+    {
+      "ok": true,
+      "seal_token": "LC2B4A8F",
+      "viral_code": "LC4X9A",
+      "verify_url": "https://evalidator.eu/verify/LC2B4A8F/",
+      "results": {"email": true, "whatsapp": true}
+    }
+    """
+    import base64
+    import json as _json
+
+    entry = get_object_or_404(ArhivaEntry.objects.unscoped(), pk=pk)
+    company = get_user_company(request)
+
+    if not request.user.is_superuser and entry.company != company:
+        return JsonResponse({"error": "Nemate pristup."}, status=403)
+
+    try:
+        data = _json.loads(request.body)
+    except (ValueError, _json.JSONDecodeError):
+        return JsonResponse({"error": "Nevažeći JSON."}, status=400)
+
+    channels = data.get("channels", ["email"])
+    recipient_email = data.get("recipient_email", "").strip()
+    recipient_phone = data.get("recipient_phone", "").strip()
+    custom_message = data.get("custom_message", "").strip()[:500]
+    voice_b64 = data.get("voice_b64")  # base64 audio bytes (browser TTS)
+    voice_mime = data.get("voice_mime", "audio/wav")
+    save_contact = data.get("save_contact", True)
+    include_portal_link = data.get("include_portal_link", True)
+
+    # ── 1. Generiraj eValidator pečat ─────────────────────────────────
+    from evalidator.seal_service import get_or_create_seal
+
+    seal, seal_created = get_or_create_seal(entry, user=request.user, channel=",".join(channels))
+
+    # ── 2. Viral kod ──────────────────────────────────────────────────
+    viral_code = seal.viral_code or f"LC{entry.pk:04d}"
+
+    # ── 3. Portal link ────────────────────────────────────────────────
+    portal_url = ""
+    if include_portal_link:
+        try:
+            from django.urls import reverse
+
+            portal_url = (
+                "https://fina-connect.online"
+                + reverse("documents:arhiva_portal", kwargs={"token": str(entry.session_key)})
+                if entry.session_key
+                else ""
+            )
+        except Exception:
+            pass
+
+    # ── 4. Spremi kontakte ────────────────────────────────────────────
+    if save_contact and entry.company:
+        update_fields = []
+        if recipient_phone and recipient_phone != (entry.company.phone or ""):
+            entry.company.phone = recipient_phone
+            update_fields.append("phone")
+        if recipient_email and recipient_email != (entry.company.email or ""):
+            entry.company.email = recipient_email
+            update_fields.append("email")
+        if update_fields:
+            entry.company.save(update_fields=update_fields)
+
+    # ── 5. Sastavi poruku ─────────────────────────────────────────────
+    sender_name = request.user.get_full_name() or request.user.username
+    issuer_name = entry.company.name if entry.company else ""
+
+    body_parts = []
+    if custom_message:
+        body_parts.append(custom_message)
+        body_parts.append("")
+
+    body_parts += [
+        f"Dokument: {entry.doc_number}",
+        f"Partner: {entry.partner_name or '—'}",
+        f"Iznos: {entry.amount} {entry.currency}",
+        f"Datum: {entry.doc_date.strftime('%d.%m.%Y') if entry.doc_date else '—'}",
+        "",
+        f"🔐 Pečat vjerodostojnosti: {seal.seal_token}",
+        f"✅ Verifikacija: {seal.verify_url}",
+    ]
+
+    if portal_url:
+        body_parts += ["", f"📂 Pogledajte dokument: {portal_url}"]
+
+    if viral_code:
+        body_parts += ["", f"🔑 Kod: {viral_code}"]
+
+    body_parts += ["", f"— {sender_name}, {issuer_name}"]
+    body = "\n".join(body_parts)
+
+    subject = f"📄 {entry.doc_number} — {issuer_name}"
+
+    # ── 6. Voice audio (base64 iz browsera) ──────────────────────────
+    voice_bytes = None
+    if voice_b64 and "whatsapp" in channels:
+        try:
+            voice_bytes = base64.b64decode(voice_b64)
+        except Exception:
+            voice_bytes = None
+
+    # ── 7. Slanje po kanalima ─────────────────────────────────────────
+    results = {}
+    errors = {}
+
+    if "email" in channels and recipient_email:
+        try:
+            from core.email_tasks import send_email_task
+
+            send_email_task.delay(
+                subject=subject,
+                message=body,
+                from_email=None,
+                recipient_list=[recipient_email],
+            )
+            results["email"] = True
+        except Exception as e:
+            errors["email"] = str(e)[:200]
+
+    if "whatsapp" in channels and recipient_phone:
+        try:
+            from core.whatsapp import send_text, send_voice
+
+            # Tekst poruka
+            r = send_text(recipient_phone, body)
+            if r.get("success"):
+                results["whatsapp_text"] = True
+            else:
+                errors["whatsapp_text"] = r.get("error", "Greška")
+
+            # Glasovna poruka (ako je proslijeđena)
+            if voice_bytes and hasattr(send_voice, "__call__"):
+                import os
+                import tempfile
+
+                ext = "ogg" if "ogg" in voice_mime else "wav"
+                with tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False) as tf:
+                    tf.write(voice_bytes)
+                    tf.flush()
+                    vr = send_voice(recipient_phone, tf.name)
+                os.unlink(tf.name)
+                if vr.get("success"):
+                    results["whatsapp_voice"] = True
+                else:
+                    errors["whatsapp_voice"] = vr.get("error", "Voice greška")
+        except Exception as e:
+            errors["whatsapp"] = str(e)[:200]
+
+    # ── 8. Audit: spremi zapis slanja ─────────────────────────────────
+    from django.utils import timezone as _tz
+
+    entry.email_sent_at = _tz.now()
+    entry.email_sent_to = recipient_email or recipient_phone
+    entry.save(update_fields=["email_sent_at", "email_sent_to"])
+
+    # ── 9. Vrati rezultat ─────────────────────────────────────────────
+    all_ok = len(results) > 0 and len(errors) == 0
+
+    return JsonResponse(
+        {
+            "ok": all_ok,
+            "seal_token": seal.seal_token,
+            "viral_code": viral_code,
+            "verify_url": seal.verify_url,
+            "seal_created": seal_created,
+            "portal_url": portal_url,
+            "channels_sent": list(results.keys()),
+            "errors": errors,
+            "message": (
+                f"Uspješno poslano na {len(results)} kanal(a)."
+                if all_ok
+                else f"Djelomično: {len(results)} OK, {len(errors)} greška."
+            ),
+        }
+    )
+
+
+@login_required
+def arhiva_send_advanced_ui(request, pk):
+    """
+    GET /documents/arhiva/<pk>/send-advanced/ui/
+    Vraća HTML partial za send modal (HTMX ili klasični fetch).
+    """
+    entry = get_object_or_404(ArhivaEntry.objects.unscoped(), pk=pk)
+    company = get_user_company(request)
+    if not request.user.is_superuser and entry.company != company:
+        from django.http import HttpResponseForbidden
+
+        return HttpResponseForbidden()
+
+    # Provjeri postoji li već pečat
+    from evalidator.models import DocumentSeal
+    from evalidator.seal_service import seal_to_qr_base64
+
+    seal = DocumentSeal.objects.filter(arhiva_entry_id=entry.pk).order_by("-sealed_at").first()
+    qr_uri = seal_to_qr_base64(seal) if seal else ""
+
+    ctx = {
+        "entry": entry,
+        "seal": seal,
+        "qr_uri": qr_uri,
+        "company": company,
+        "prefill_phone": (entry.company.phone or "") if entry.company else "",
+        "prefill_email": (entry.company.email or "") if entry.company else "",
+    }
+    return render(request, "documents/_send_advanced_modal.html", ctx)

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block page_actions %}
+<a href="{% url 'legal:poa_create' %}" class="fenix-btn fenix-btn-primary">+ Nova punomoć</a>
+{% endblock %}
+{% block content %}
+<div class="fenix-card overflow-hidden p-0">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="bg-fenix-ink text-fenix-gold">
+        <th class="px-4 py-3 text-left">Naslov</th>
+        <th class="px-4 py-3 text-left hidden sm:table-cell">Vrsta</th>
+        <th class="px-4 py-3 text-left hidden md:table-cell">Vlastodavac → Opunomoćenik</th>
+        <th class="px-4 py-3 text-right hidden lg:table-cell">Vrijedi do</th>
+        <th class="px-4 py-3 text-center">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in poas %}
+      <tr class="border-b border-fenix-cream hover:bg-fenix-cream/30 transition-colors
+                 {% if not p.is_active %}opacity-50{% endif %}">
+        <td class="px-4 py-3 font-medium">{{ p.title|truncatechars:40 }}</td>
+        <td class="px-4 py-3 hidden sm:table-cell text-fenix-ink/60">{{ p.get_poa_type_display }}</td>
+        <td class="px-4 py-3 hidden md:table-cell text-fenix-ink/70">
+          {{ p.principal_name|truncatechars:20 }} → {{ p.agent_name|truncatechars:20 }}
+        </td>
+        <td class="px-4 py-3 text-right hidden lg:table-cell text-fenix-ink/60">
+          {% if p.is_indefinite %}Neodređeno{% elif p.valid_until %}{{ p.valid_until|date:"d.m.Y" }}{% else %}—{% endif %}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {% if p.is_revoked %}
+          <span class="fenix-badge fenix-badge-danger">Opozvana</span>
+          {% elif p.is_active %}
+          <span class="fenix-badge fenix-badge-success">Aktivna</span>
+          {% else %}
+          <span class="fenix-badge fenix-badge-warning">Istekla</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="px-4 py-8 text-center text-fenix-ink/40">
+        Nema punomoći. <a href="{% url 'legal:poa_create' %}" class="underline">Dodaj →</a>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

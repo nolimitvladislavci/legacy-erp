@@ -1797,3 +1797,139 @@ def cost_center_save(request):
     )
     cc.save()
     return redirect("konto:cost_centers")
+
+
+# ════════════════════════════════════════════════════════════════════
+# DATEV 2030 — Enhanced Export UI
+# Bolje od DATEV-a: BelegLink + GUID + SEPA + OSS + eValidator pečat
+# ════════════════════════════════════════════════════════════════════
+
+
+@login_required
+def datev_export_v2(request):
+    """
+    GET  /konto/datev-2030/        → UI stranica s opcijama
+    POST /konto/datev-2030/        → generiraj CSV i preuzmi
+    """
+    import datetime
+    import io as _io
+    import zipfile
+
+    from django.http import HttpResponse
+
+    from core.company_utils import get_user_company
+    from konto.german_accounting import generate_datev_export_v2
+
+    company = get_user_company(request)
+    if not company:
+        from django.contrib import messages
+
+        messages.error(request, "Niste povezani s firmom.")
+        return redirect("konto:dashboard")
+
+    if company.country != "DE":
+        from django.contrib import messages
+
+        messages.warning(request, "DATEV 2030 export dostupan je samo za njemačke tvrtke (country=DE).")
+        return redirect("konto:dashboard")
+
+    today = datetime.date.today()
+
+    if request.method == "GET":
+        ctx = {
+            "company": company,
+            "today": today,
+            "default_start": today.replace(day=1).isoformat(),
+            "default_end": today.isoformat(),
+        }
+        return render(request, "konto/datev_export_v2.html", ctx)
+
+    # POST — generiraj export
+    start_str = request.POST.get("start", today.replace(day=1).isoformat())
+    end_str = request.POST.get("end", today.isoformat())
+    try:
+        start_date = datetime.date.fromisoformat(start_str)
+        end_date = datetime.date.fromisoformat(end_str)
+    except ValueError:
+        from django.contrib import messages
+
+        messages.error(request, "Neispravan format datuma.")
+        return redirect(request.path)
+
+    berater_nr = request.POST.get("berater_nr", "").strip()
+    mandanten_nr = request.POST.get("mandanten_nr", "").strip()
+    include_beleglink = request.POST.get("include_beleglink") == "1"
+    include_guid = request.POST.get("include_guid") == "1"
+    kost_center = request.POST.get("kost_center", "").strip()
+    sepa_ref = request.POST.get("sepa_ref", "").strip()
+    oss_mode = request.POST.get("oss_mode") == "1"
+    export_format = request.POST.get("export_format", "csv")  # csv | zip
+
+    csv_content = generate_datev_export_v2(
+        company,
+        start_date,
+        end_date,
+        berater_nr=berater_nr,
+        mandanten_nr=mandanten_nr,
+        include_beleglink=include_beleglink,
+        include_guid=include_guid,
+        kost_center=kost_center,
+        sepa_mandant_ref=sepa_ref,
+        oss_mode=oss_mode,
+    )
+
+    safe_name = company.name[:20].replace(" ", "_")
+    base_filename = f"DATEV2030_{safe_name}_{start_date}_{end_date}"
+
+    if export_format == "zip":
+        # ZIP paket: CSV + README
+        buf = _io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(f"{base_filename}.csv", csv_content.encode("utf-8"))
+            readme = _build_datev_readme(company, start_date, end_date, include_beleglink, include_guid)
+            zf.writestr("README.txt", readme.encode("utf-8"))
+        buf.seek(0)
+        response = HttpResponse(buf.read(), content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{base_filename}.zip"'
+        return response
+
+    # Default: plain CSV
+    response = HttpResponse(csv_content.encode("utf-8"), content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{base_filename}.csv"'
+    return response
+
+
+def _build_datev_readme(company, start_date, end_date, beleglink, guid):
+    """README.txt za DATEV 2030 ZIP paket."""
+    from django.utils import timezone
+
+    lines = [
+        "DATEV 2030 Export — LIMIT Connect",
+        "=" * 50,
+        f"Unternehmen:  {company.name}",
+        f"Zeitraum:     {start_date} bis {end_date}",
+        f"Erstellt:     {timezone.now().strftime('%d.%m.%Y %H:%M')} UTC",
+        f"Format:       DATEV EXTF/700 v2 (CSV, Semikolon-getrennt, UTF-8)",
+        "",
+        "Neue Features (2030-Edition):",
+        "  [X] BelegLink — eValidator-Verifikations-URL pro Buchung" if beleglink else "  [ ] BelegLink",
+        "  [X] Buchungs-GUID — UUID4 (GoBD-konform, unveränderlich)" if guid else "  [ ] Buchungs-GUID",
+        "",
+        "Verifikation:",
+        "  Jeder Buchungssatz enthält einen Link zur eValidator-Verifikationsseite.",
+        "  URL-Muster: https://evalidator.eu/verify/<8-CHAR-TOKEN>/",
+        "  API:        https://evalidator.eu/evalidator/api/v1/verify/<TOKEN>/",
+        "",
+        "Rechtliche Grundlage:",
+        "  GoBD §14b:  Unveränderliche Aufbewahrung, 10 Jahre",
+        "  eIDAS Art. 41: Elektronischer Zeitstempel = Vermutung der Integrität",
+        "  DATEV EXTF: Format-Beschreibung v12.0 (2024)",
+        "",
+        "Import in DATEV:",
+        "  Kanzlei-Rechnungswesen → Belege → Import → EXTF",
+        "  Datei auswählen → Prüfen → Importieren",
+        "",
+        "Generiert von LIMIT Connect (fina-connect.online)",
+        "eValidator.eu — EU Infrastruktura Povjerenja",
+    ]
+    return "\n".join(lines)

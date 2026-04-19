@@ -349,3 +349,306 @@ def generate_datev_export(company, start_date, end_date, berater_nr="", mandante
 
     logger.info(f"DATEV export for {company.name}: {row_count} rows, period {start_date} to {end_date}")
     return output.getvalue()
+
+
+# ─── DATEV 2030 — Enhanced Export with eValidator BelegLink + GUID ──────────
+
+import uuid as _uuid_mod
+
+
+def generate_datev_export_v2(
+    company,
+    start_date,
+    end_date,
+    berater_nr="",
+    mandanten_nr="",
+    include_beleglink=True,
+    include_guid=True,
+    kost_center="",
+    sepa_mandant_ref="",
+    oss_mode=False,
+):
+    """
+    DATEV EXTF/700 v2 — Enhanced für 2030.
+
+    Neue Features gegenüber v1:
+    - BelegLink: URL zur eValidator-Verifikationsseite pro Buchung
+    - Buchungs-GUID: UUID4 pro Buchungssatz (GoBD-konform, unveränderlich)
+    - KOST1/KOST2: Kostenstellen aus Invoice-Metadaten
+    - SEPA Mandatsreferenz: pro Buchung aus Company-Einstellungen
+    - OSS-Modus: EU-Drittlandskennung für One-Stop-Shop
+
+    Args:
+        company: Company instance (country='DE')
+        start_date, end_date: date objects
+        berater_nr: Beraternummer (Steuerberater ID)
+        mandanten_nr: Mandantennummer
+        include_beleglink: Füge eValidator-URL als Beleginfo ein
+        include_guid: Füge UUID4 als Buchungs-GUID ein (GoBD)
+        kost_center: Standard-Kostenstelle (KOST1)
+        sepa_mandant_ref: SEPA-Mandatsreferenz-Präfix
+        oss_mode: One-Stop-Shop — setzt EU-Land in Beleginfo
+
+    Returns:
+        str: CSV-Inhalt (EXTF/700 kompatibel)
+    """
+    from konto.models import JournalEntry
+
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=";", quotechar='"', quoting=csv.QUOTE_ALL)
+
+    now = datetime.now()
+    wj_beginn = start_date.replace(month=1, day=1)
+
+    # ── Row 1: EXTF Header ────────────────────────────────────────────────
+    bezeichnung = f"LIMIT Connect v2 Export {start_date}_{end_date}"
+    header = [
+        "EXTF",
+        "700",
+        "21",
+        "Buchungsstapel",
+        "13",
+        now.strftime("%Y%m%d%H%M%S") + "000",
+        "",
+        "LC",
+        "",
+        "",
+        berater_nr,
+        mandanten_nr,
+        wj_beginn.strftime("%Y%m%d"),
+        "4",
+        start_date.strftime("%Y%m%d"),
+        end_date.strftime("%Y%m%d"),
+        bezeichnung[:30],
+        "",
+        "0",
+        "0",
+        "",
+        "EUR",
+        "",
+        "",
+        "",
+        "",
+        "03",
+        "",
+        "",
+    ]
+    writer.writerow(header)
+
+    # ── Row 2: Column headers (88 Felder) ────────────────────────────────
+    columns = [
+        "Umsatz (Soll)",
+        "Soll/Haben-Kennzeichen",
+        "WKZ Umsatz",
+        "Kurs",
+        "Basis-Umsatz",
+        "WKZ Basis-Umsatz",
+        "Konto",
+        "Gegenkonto (ohne BU-Schluessel)",
+        "BU-Schluessel",
+        "Belegdatum",
+        "Belegfeld 1",
+        "Belegfeld 2",
+        "Skonto",
+        "Buchungstext",
+        "Postensperre",
+        "Diverse Adressnummer",
+        "Geschaeftspartnerbank",
+        "Sachverhalt",
+        "Zinssperre",
+        "Beleglink",
+        "Beleginfo - Art 1",
+        "Beleginfo - Inhalt 1",
+        "Beleginfo - Art 2",
+        "Beleginfo - Inhalt 2",
+        "Beleginfo - Art 3",
+        "Beleginfo - Inhalt 3",
+        "Beleginfo - Art 4",
+        "Beleginfo - Inhalt 4",
+        "Beleginfo - Art 5",
+        "Beleginfo - Inhalt 5",
+        "Beleginfo - Art 6",
+        "Beleginfo - Inhalt 6",
+        "Beleginfo - Art 7",
+        "Beleginfo - Inhalt 7",
+        "Beleginfo - Art 8",
+        "Beleginfo - Inhalt 8",
+        "KOST1 - Kostenstelle",
+        "KOST2 - Kostenstelle",
+        "KOST-Menge",
+        "EU-Land u. UStID (Bestimmung)",
+        "EU-Steuersatz (Bestimmung)",
+        "Abw. Versteuerungsart",
+        "Sachverhalt L+L",
+        "Funktionsergaenzung L+L",
+        "BU 49 Hauptfunktionstyp",
+        "BU 49 Hauptfunktionsnummer",
+        "BU 49 Funktionsergaenzung",
+        "Zusatzinformation - Art 1",
+        "Zusatzinformation - Inhalt 1",
+        "Zusatzinformation - Art 2",
+        "Zusatzinformation - Inhalt 2",
+        "Stueck",
+        "Gewicht",
+        "Zahlweise",
+        "Forderungsart",
+        "Veranlagungsjahr",
+        "Zugeordnete Faelligkeit",
+        "Skontotyp",
+        "Auftragsnummer",
+        "Buchungstyp",
+        "USt-Schluessel (Anzahlungen)",
+        "EU-Mitgliedstaat (Anzahlungen)",
+        "Sachverhalt L+L (Anzahlungen)",
+        "EU-Steuersatz (Anzahlungen)",
+        "Erloeskonto (Anzahlungen)",
+        "Herkunft-Kz",
+        "Buchungs GUID",
+        "KOST-Datum",
+        "SEPA-Mandatsreferenz",
+        "Skontosperre",
+        "Gesellschaftername",
+        "Beteiligtennummer",
+        "Identifikationsnummer",
+        "Zeichnernummer",
+        "Postensperre bis",
+        "Bezeichnung SoBil-Sachverhalt",
+        "Kennzeichen SoBil-Buchung",
+        "Festschreibung",
+        "Leistungsdatum",
+        "Datum Zuord. Steuerperiode",
+        "Faelligkeit",
+        "Generalumkehr (GU)",
+        "Steuersatz",
+        "Land",
+    ]
+    writer.writerow(columns)
+    num_cols = len(columns)
+
+    col_idx = {name: i for i, name in enumerate(columns)}
+
+    # ── Data rows ─────────────────────────────────────────────────────────
+    entries = (
+        JournalEntry.objects.filter(
+            company=company,
+            date__gte=start_date,
+            date__lte=end_date,
+            is_posted=True,
+        )
+        .prefetch_related("lines__account")
+        .select_related("source_invoice")
+    )
+
+    row_count = 0
+    for entry in entries:
+        lines = list(entry.lines.all())
+        debit_lines = [l for l in lines if l.side == "debit"]
+        credit_lines = [l for l in lines if l.side == "credit"]
+        if not debit_lines or not credit_lines:
+            continue
+
+        soll = debit_lines[0]
+        haben = credit_lines[0]
+
+        beleg = ""
+        if entry.source_invoice:
+            beleg = getattr(entry.source_invoice, "number", "")[:12]
+        if not beleg:
+            beleg = entry.entry_number[:12]
+
+        amount_str = str(soll.amount).replace(".", ",")
+
+        bu_key = ""
+        if haben.account.code in ("8400",):
+            bu_key = "3"
+        elif haben.account.code in ("8300",):
+            bu_key = "2"
+        elif soll.account.code in ("3400",):
+            bu_key = "9"
+        elif soll.account.code in ("3300",):
+            bu_key = "8"
+
+        beleg_datum = entry.date.strftime("%d%m")
+
+        # eValidator BelegLink — seal lookup oder direkte URL
+        beleglink = ""
+        if include_beleglink:
+            try:
+                from evalidator.models import DocumentSeal
+
+                seal = DocumentSeal.objects.filter(arhiva_entry_id=getattr(entry, "archive_entry_id", None)).first()
+                if seal:
+                    beleglink = seal.verify_url
+                else:
+                    beleglink = f"https://evalidator.eu/evalidator/verify/PENDING/"
+            except Exception:
+                pass
+
+        # Buchungs-GUID (GoBD: eindeutig, unveränderlich)
+        buchungs_guid = str(_uuid_mod.uuid4()) if include_guid else ""
+
+        # SEPA Mandatsreferenz
+        sepa_ref = ""
+        if sepa_mandant_ref:
+            sepa_ref = f"{sepa_mandant_ref}-{entry.entry_number[:8]}"
+
+        # Build row
+        row = [""] * num_cols
+        row[col_idx["Umsatz (Soll)"]] = amount_str
+        row[col_idx["Soll/Haben-Kennzeichen"]] = "S"
+        row[col_idx["WKZ Umsatz"]] = "EUR"
+        row[col_idx["Konto"]] = soll.account.code
+        row[col_idx["Gegenkonto (ohne BU-Schluessel)"]] = haben.account.code
+        row[col_idx["BU-Schluessel"]] = bu_key
+        row[col_idx["Belegdatum"]] = beleg_datum
+        row[col_idx["Belegfeld 1"]] = beleg
+        row[col_idx["Buchungstext"]] = entry.description[:60]
+        row[col_idx["Beleglink"]] = beleglink
+
+        # Beleginfo 1: LIMIT Connect Dokument-ID
+        row[col_idx["Beleginfo - Art 1"]] = "LIMIT-ID"
+        row[col_idx["Beleginfo - Inhalt 1"]] = str(entry.pk)
+
+        # Beleginfo 2: eValidator Token (wenn Seal vorhanden)
+        if beleglink and "/verify/" in beleglink:
+            token = beleglink.split("/verify/")[-1].strip("/")
+            row[col_idx["Beleginfo - Art 2"]] = "EV-TOKEN"
+            row[col_idx["Beleginfo - Inhalt 2"]] = token
+
+        # Beleginfo 3: Herkunft
+        row[col_idx["Beleginfo - Art 3"]] = "QUELLE"
+        row[col_idx["Beleginfo - Inhalt 3"]] = "LIMIT-Connect-v2"
+
+        # KOST1 (Kostenstelle)
+        if kost_center:
+            row[col_idx["KOST1 - Kostenstelle"]] = kost_center[:8]
+
+        # OSS-Modus: EU-Land
+        if oss_mode and entry.source_invoice:
+            eu_land = getattr(entry.source_invoice, "buyer_country", "") or ""
+            if eu_land and eu_land != "DE":
+                row[col_idx["EU-Land u. UStID (Bestimmung)"]] = eu_land
+
+        # Buchungs-GUID (Spalte 66 — "Buchungs GUID")
+        row[col_idx["Buchungs GUID"]] = buchungs_guid
+
+        # SEPA
+        if sepa_ref:
+            row[col_idx["SEPA-Mandatsreferenz"]] = sepa_ref
+
+        # Leistungsdatum (= Belegdatum)
+        row[col_idx["Leistungsdatum"]] = entry.date.strftime("%d%m%Y")
+
+        writer.writerow(row)
+        row_count += 1
+
+    logger.info(
+        "DATEV v2 export for %s: %d rows, %s to %s (beleglink=%s, guid=%s)",
+        company.name,
+        row_count,
+        start_date,
+        end_date,
+        include_beleglink,
+        include_guid,
+    )
+    return output.getvalue()

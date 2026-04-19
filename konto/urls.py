@@ -6,6 +6,7 @@ app_name = "konto"
 
 urlpatterns = [
     path("datev-export/", views.datev_export, name="datev_export"),
+    path("datev-2030/", views.datev_export_v2, name="datev_export_v2"),
     path("skr03-seed/", views.skr03_seed, name="skr03_seed"),
     # Dashboard
     path("", views.dashboard, name="dashboard"),
@@ -56,7 +57,7 @@ urlpatterns = [
     path("api/ignore/<int:pk>/", views.api_ignore_transaction, name="api_ignore_transaction"),
     path("api/transaction/create/", views.api_transaction_create, name="api_transaction_create"),
     path("api/chart/", views.api_chart_data, name="api_chart_data"),
-    # Audit hash chain    path('audit/verify/', views.audit_verify, name='audit_verify'),    path('audit/certificate.pdf', views.audit_certificate_pdf, name='audit_certificate_pdf'),
+    # Audit hash chain
     path("api/unmatched-invoices/", views.api_unmatched_invoices, name="api_unmatched_invoices"),
     # Bankovna rekoncilijacija
     path("reconciliation/", views.reconciliation_dashboard, name="reconciliation"),

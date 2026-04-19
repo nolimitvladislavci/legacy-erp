@@ -15,7 +15,7 @@ def record_change(instance, operation: str, user=None, request=None):
     """
     from sentinel.models import AuditChain
 
-    # Serijaliziraj podatke
+    # Serijaliziraj podatke — uključi i operaciju da se CREATE != UPDATE razlikuju
     data = {}
     try:
         for field in instance._meta.fields:
@@ -29,6 +29,8 @@ def record_change(instance, operation: str, user=None, request=None):
     except Exception:
         data = {"id": str(getattr(instance, "pk", "unknown"))}
 
+    # __operation__ čini data_hash jedinstvenim po tipu operacije
+    data["__operation__"] = operation
     data_str = json.dumps(data, sort_keys=True)
     data_hash = hashlib.sha256(data_str.encode()).hexdigest()
 
@@ -78,12 +80,16 @@ def verify_chain(company) -> dict:
     """
     from sentinel.models import AuditChain
 
-    entries = AuditChain.objects.filter(company=company).order_by("created_at")
-
+    # Chunked — nikad ne učitavaj sve u RAM (memory bomb na large datasets)
+    CHUNK_SIZE = 1000
     prev_hashes = {}  # (content_type_id, object_id) -> last chain_hash
     broken = []
+    count = 0
 
-    for entry in entries:
+    qs = AuditChain.objects.filter(company=company).order_by("created_at")
+    # Iterator umjesto queryset.all() — Django ne drži sve u memoriji
+    for entry in qs.iterator(chunk_size=CHUNK_SIZE):
+        count += 1
         key = (entry.content_type_id, entry.object_id)
         expected_prev = prev_hashes.get(key, "0" * 64)
 
@@ -101,7 +107,6 @@ def verify_chain(company) -> dict:
 
         prev_hashes[key] = entry.chain_hash
 
-    count = entries.count()
     if broken:
         return {"ok": False, "broken_at": broken, "count": count}
     return {"ok": True, "count": count}

@@ -1,0 +1,276 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="hr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eValidator — Verifikacija Pečata {{ token }}</title>
+<meta name="description" content="Provjera autentičnosti digitalnog dokumenta. eValidator pečat vjerodostojnosti — eIDAS Art. 41.">
+<meta name="robots" content="noindex, nofollow">
+<script>(function(){var t=localStorage.getItem('ev-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')})();</script>
+<link rel="stylesheet" href="{% static 'evalidator/css/main.css' %}">
+<style>
+/* ── Verify page extras ── */
+.ev-verify-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+.ev-seal-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  border: 2px solid;
+  margin-bottom: 2rem;
+  max-width: 480px;
+  width: 100%;
+}
+.ev-seal-badge.valid {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, .06);
+}
+.ev-seal-badge.invalid {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, .06);
+}
+.ev-seal-badge.not-found {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, .06);
+}
+.ev-seal-icon { font-size: 3.5rem; line-height: 1; }
+.ev-seal-status {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+.ev-seal-token {
+  font-family: monospace;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  padding: .3rem .8rem;
+  background: rgba(255,255,255,.07);
+  border-radius: 8px;
+}
+.ev-meta-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .4rem 1rem;
+  text-align: left;
+  font-size: .9rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+.ev-meta-label { color: var(--ev-muted, #9ca3af); font-weight: 600; white-space: nowrap; }
+.ev-meta-value { word-break: break-all; }
+.ev-legal-note {
+  font-size: .75rem;
+  color: var(--ev-muted, #9ca3af);
+  margin-top: 1.5rem;
+  max-width: 480px;
+  line-height: 1.5;
+}
+.ev-cta-box {
+  margin-top: 2.5rem;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+}
+.ev-cta-box h3 { font-size: 1rem; margin: 0 0 .5rem; }
+.ev-cta-box p { font-size: .85rem; color: var(--ev-muted, #9ca3af); margin: 0 0 1rem; }
+.ev-btn-outline {
+  display: inline-block;
+  padding: .5rem 1.2rem;
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: .85rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background .15s;
+}
+.ev-btn-outline:hover { background: rgba(255,255,255,.08); }
+.ev-qr-wrap { margin-top: 1rem; }
+.ev-qr-wrap img { width: 120px; height: 120px; border-radius: 8px; border: 3px solid rgba(255,255,255,.12); }
+.ev-verify-count {
+  font-size: .75rem;
+  color: var(--ev-muted, #9ca3af);
+  margin-top: .5rem;
+}
+</style>
+</head>
+<body>
+
+<header class="ev-header">
+  <div class="container">
+    <div class="ev-header-inner">
+      <a href="{% url 'evalidator:home' %}" class="ev-logo">
+        eVALIDATOR<span class="ev-logo-sub">.eu</span>
+      </a>
+      <nav class="ev-nav">
+        <a href="{% url 'evalidator:api_docs' %}" class="ev-nav-link">API Docs</a>
+        <a href="{% url 'evalidator:pricing' %}" class="ev-nav-link">Pricing</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="ev-verify-hero">
+
+    {% if not found %}
+    <!-- ── NOT FOUND ── -->
+    <div class="ev-seal-badge not-found">
+      <span class="ev-seal-icon">⚠️</span>
+      <div class="ev-seal-status">Pečat nije pronađen</div>
+      <div class="ev-seal-token">{{ token }}</div>
+      <p style="font-size:.85rem;color:#9ca3af;margin:.5rem 0 0;">
+        Token <strong>{{ token }}</strong> ne postoji u bazi eValidatora.<br>
+        Provjerite jeste li ispravno unijeli kod.
+      </p>
+    </div>
+
+    {% elif not valid %}
+    <!-- ── EXPIRED ── -->
+    <div class="ev-seal-badge invalid">
+      <span class="ev-seal-icon">🔴</span>
+      <div class="ev-seal-status">Pečat je istekao</div>
+      <div class="ev-seal-token">{{ seal.seal_token }}</div>
+      <div class="ev-meta-grid">
+        <span class="ev-meta-label">Dokument:</span>
+        <span class="ev-meta-value">{{ seal.doc_number }}</span>
+        <span class="ev-meta-label">Pečaćeno:</span>
+        <span class="ev-meta-value">{{ seal.sealed_at|date:"d.m.Y H:i" }} UTC</span>
+        <span class="ev-meta-label">Isteklo:</span>
+        <span class="ev-meta-value">{{ seal.expires_at|date:"d.m.Y" }}</span>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- ── VALID SEAL ── -->
+    <div class="ev-seal-badge valid">
+      <span class="ev-seal-icon">✅</span>
+      <div class="ev-seal-status">Dokument je autentičan</div>
+      <div class="ev-seal-token">{{ seal.seal_token }}</div>
+
+      <div class="ev-meta-grid">
+        {% if seal.doc_number %}
+        <span class="ev-meta-label">Broj dok.:</span>
+        <span class="ev-meta-value">{{ seal.doc_number }}</span>
+        {% endif %}
+        {% if seal.doc_date %}
+        <span class="ev-meta-label">Datum:</span>
+        <span class="ev-meta-value">{{ seal.doc_date|date:"d.m.Y" }}</span>
+        {% endif %}
+        {% if seal.partner_name %}
+        <span class="ev-meta-label">Partner:</span>
+        <span class="ev-meta-value">{{ seal.partner_name }}</span>
+        {% endif %}
+        {% if seal.amount %}
+        <span class="ev-meta-label">Iznos:</span>
+        <span class="ev-meta-value">{{ seal.amount }} {{ seal.currency }}</span>
+        {% endif %}
+        {% if seal.issuer_name %}
+        <span class="ev-meta-label">Izdavač:</span>
+        <span class="ev-meta-value">{{ seal.issuer_name }} ({{ seal.issuer_country }})</span>
+        {% endif %}
+        <span class="ev-meta-label">Pečaćeno:</span>
+        <span class="ev-meta-value">{{ seal.sealed_at|date:"d.m.Y H:i" }} UTC</span>
+        <span class="ev-meta-label">Vrijedi do:</span>
+        <span class="ev-meta-value">{{ seal.expires_at|date:"d.m.Y" }}</span>
+        <span class="ev-meta-label">SHA-256:</span>
+        <span class="ev-meta-value" style="font-family:monospace;font-size:.7rem;">{{ seal.sha256_hash|slice:":32" }}...</span>
+      </div>
+
+      {% if qr_data_uri %}
+      <div class="ev-qr-wrap">
+        <img src="{{ qr_data_uri }}" alt="QR verifikacija" title="Skenirajte za re-verifikaciju">
+        <div class="ev-verify-count">
+          {% if seal.verify_count > 1 %}Pregledano {{ seal.verify_count }}×{% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <p class="ev-legal-note">
+      Ovaj pečat potvrđuje integritet dokumenta u trenutku pečaćenja.<br>
+      Pravna osnova: <strong>eIDAS Art. 41</strong> — elektronički vremenski žig = presumpcija integriteta.<br>
+      Primijenjena shema: <strong>SHA-256</strong> | GoBD §14b (DE) | ZED HR (NN 150/05).<br>
+      Pečat izdao: <strong>eValidator.eu</strong> — EU Infrastruktura Povjerenja
+    </p>
+
+    <!-- ── API verifikacija ── -->
+    <div class="ev-cta-box" style="margin-top:1rem;">
+      <h3>Strojno čitljiva verifikacija</h3>
+      <p>Za automatsku integraciju u vaš ERP ili DATEV sustav:</p>
+      <code style="font-size:.8rem;word-break:break-all;">
+        GET https://evalidator.eu/evalidator/api/v1/verify/{{ seal.seal_token }}/
+      </code>
+    </div>
+
+    <!-- ── Viral CTA — diskretan ── -->
+    <div class="ev-cta-box">
+      <h3>📋 Vaš poslovni partner koristi LIMIT Connect</h3>
+      <p>
+        Digitalna arhiva, e-Računi i AI asistent za računovodstvene urede.<br>
+        Svaki dokument dolazi s ovim pečatom autentičnosti.
+      </p>
+      <a href="https://fina-connect.online/hr/pos/onboarding/" class="ev-btn-outline" target="_blank" rel="noopener">
+        Saznajte više →
+      </a>
+    </div>
+
+    {% endif %}
+
+    <!-- ── Provjeri drugi token ── -->
+    <div class="ev-cta-box" style="margin-top:1rem;">
+      <h3>Provjeri drugi pečat</h3>
+      <form method="get" action="" style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+        <input type="text" name="t" placeholder="Unesite 8-char kod" maxlength="8"
+               style="padding:.4rem .8rem;border-radius:8px;border:1.5px solid rgba(255,255,255,.2);
+                      background:rgba(255,255,255,.05);color:inherit;font-size:.9rem;width:160px;text-transform:uppercase;"
+               oninput="this.value=this.value.toUpperCase()">
+        <button type="submit" class="ev-btn-outline"
+                onclick="if(this.form.t.value.length===8){window.location='/evalidator/verify/'+this.form.t.value+'/';return false;}">
+          Provjeri
+        </button>
+      </form>
+    </div>
+
+  </section>
+</main>
+
+<footer class="ev-footer">
+  <div class="container">
+    <p>
+      <a href="{% url 'evalidator:home' %}">eValidator.eu</a> —
+      EU Infrastruktura Povjerenja |
+      <a href="{% url 'evalidator:api_docs' %}">API Docs</a> |
+      <a href="{% url 'evalidator:pricing' %}">Pricing</a>
+    </p>
+  </div>
+</footer>
+
+<script>
+// Redirect form submit na verify URL
+document.querySelector('form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const t = this.t.value.trim().toUpperCase();
+  if (t.length === 8) {
+    window.location = '/evalidator/verify/' + t + '/';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block page_actions %}
+<div class="flex gap-2">
+  {% if contract.status == 'draft' %}
+  <button hx-post="{% url 'legal:contract_sign' contract.pk %}"
+          hx-vals='{"signed_by": "{{ request.user.get_full_name }}"}'
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-confirm="Potpisati ugovor? SHA-256 hash tijela bit će zapečaćen."
+          hx-target="#sign-result"
+          class="fenix-btn fenix-btn-primary">
+    ✍ Digitalni potpis
+  </button>
+  {% endif %}
+  <span id="sign-result"></span>
+</div>
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- Meta -->
+  <div class="lg:col-span-1 space-y-4">
+    <div class="fenix-card">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-fenix-ink/50 mb-3">Detalji</h3>
+      <dl class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-fenix-ink/60">Vrsta</dt>
+          <dd class="font-medium">{{ contract.get_doc_type_display }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-fenix-ink/60">Status</dt>
+          <dd><span class="fenix-badge {% if contract.status == 'signed' %}fenix-badge-success{% elif contract.status == 'draft' %}fenix-badge-warning{% else %}fenix-badge-info{% endif %}">
+            {{ contract.get_status_display }}</span></dd>
+        </div>
+        {% if contract.valid_from %}
+        <div class="flex justify-between">
+          <dt class="text-fenix-ink/60">Od</dt>
+          <dd>{{ contract.valid_from|date:"d.m.Y" }}</dd>
+        </div>
+        {% endif %}
+        {% if contract.valid_until %}
+        <div class="flex justify-between">
+          <dt class="text-fenix-ink/60">Do</dt>
+          <dd class="{% if contract.is_expiring_soon %}text-amber-600 font-semibold{% endif %}">
+            {{ contract.valid_until|date:"d.m.Y" }}
+            {% if contract.is_expiring_soon %} ⚠{% endif %}
+          </dd>
+        </div>
+        {% endif %}
+        {% if contract.signed_at %}
+        <div class="flex justify-between">
+          <dt class="text-fenix-ink/60">Potpisan</dt>
+          <dd>{{ contract.signed_at|date:"d.m.Y H:i" }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-fenix-ink/60">Potpisao</dt>
+          <dd>{{ contract.signed_by }}</dd>
+        </div>
+        {% endif %}
+        {% if contract.sha256_hash %}
+        <div class="pt-2 border-t border-fenix-cream">
+          <dt class="text-fenix-ink/50 text-xs mb-1">SHA-256 hash</dt>
+          <dd class="font-mono text-xs break-all text-fenix-ink/70">{{ contract.sha256_hash }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+    </div>
+
+    <!-- Stranke -->
+    <div class="fenix-card">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-fenix-ink/50 mb-3">Stranke</h3>
+      <div class="space-y-3 text-sm">
+        <div>
+          <div class="text-xs text-fenix-ink/50 uppercase">Stranka A</div>
+          <div class="font-semibold">{{ contract.party_a_name }}</div>
+          {% if contract.party_a_oib %}<div class="text-fenix-ink/60">OIB: {{ contract.party_a_oib }}</div>{% endif %}
+        </div>
+        <div class="border-t border-fenix-cream pt-3">
+          <div class="text-xs text-fenix-ink/50 uppercase">Stranka B</div>
+          <div class="font-semibold">{{ contract.party_b_name }}</div>
+          {% if contract.party_b_oib %}<div class="text-fenix-ink/60">OIB: {{ contract.party_b_oib }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tijelo ugovora -->
+  <div class="lg:col-span-2">
+    <div class="fenix-card">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-fenix-ink/50 mb-4">Sadržaj ugovora</h3>
+      <div class="prose prose-sm max-w-none text-fenix-ink leading-relaxed border border-fenix-cream rounded-lg p-4 bg-white"
+           style="min-height:400px;">
+        {{ contract.body_html|safe }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,223 +1,113 @@
-# FENIX PORTAL — STATUS NAPRETKA
+# FENIX V3 STATUS — AI-Native ERP · EU #1
+Zadnje ažuriranje: 2026-04-19 (test sprint kompletiran)
 
-## ⚡ ARHITEKTURA SERVERA — UVIJEK AKTUALNO
+## SPRINT NAPREDAK
 
-| | Fenix V3 (NOVO) | Stari ERP (ovaj) |
-|---|---|---|
-| Domena | `v3.limit-connect.com` | `fina-connect.online` |
-| Dir | `/var/www/fenix-v3/` | `/var/www/fina-connect/` |
-| Servis | `gunicorn-fenix-v3` port 8001 | `gunicorn-fina` unix socket |
-| Baza | `fenix_v3_clean` direktno :5432 | `fina_erp` PgBouncer :6432 |
-| Redis | `127.0.0.1:6379/1` | ← dijele oba! |
+| Sprint | Blokovi | Status |
+|--------|---------|--------|
+| Sprint 0 | Blok 0 (Temelj) + Blok 1 (Auth) | ✅ DONE |
+| Sprint 1 | Blok 3 (Fakture) + Blok 4 (Arhiva) | ✅ DONE |
+| Sprint 2 | Blok 2 (Računovodstvo) + Blok 5 (POS) | ✅ DONE |
+| Sprint 3 | Blok 9 (AI) + Blok 11 (WhatsApp) | ✅ DONE |
+| Sprint 4 | Blok 6 (Zaposlenici) + Blok 7 (Legal) | ✅ DONE |
+| Sprint 5 | Blok 8.1-8.8 (Sve vertikale) | ✅ DONE |
+| Sprint 6 | Blok 10 (DE + PEPPOL) | ✅ DONE |
+| Sprint 7 | Blok 12 (SaaS Platform) | ✅ DONE |
+| Sprint 8 | Testiranje + Templates + Production | 🔄 IN PROGRESS |
 
-> Detalji → `/var/www/fenix-v3/FENIX_ZAKON.md` Zakon 13
+## TEST SUITE — 68/68 ZELENO ✅
 
----
+**test_master_5000users.py** — 5000-user simulation, 4 dimenzije:
 
-> Zadnji update: 2026-04-18 (Dan 52), commit e6943688 — Domain split + Cluster Module Gate LIVE
+| Dimenzija | Testovi | Rezultat |
+|-----------|---------|---------|
+| D1 — Logički (modeli, validacije, business logika) | 33 | ✅ 33/33 |
+| D2 — Tehnički (DB integritet, ImageField, Celery, URL routing) | 13 | ✅ 13/13 |
+| D3 — Sigurnost (tenant izolacija, API ključevi, GDPR, HTTP) | 12 | ✅ 12/12 |
+| D4 — Skalabilnost (5000 bulk, 50 concurrent, N+1, benchmark) | 10 | ✅ 10/10 |
+| **UKUPNO** | **68** | **✅ 68/68** |
 
----
+**Bandit security scan**: 0 issues (saas, notifications, country_plugins, shelter, booking, construction, hospitality, retail, agriculture)
 
-## SESIJA LOG
+**Bugovi otkriveni i popravljeni testiranjem:**
+- `TenantView` import: `core.base_view` (ne `core.views`)
+- `APIKey.key_prefix` max_length: 10 → 16 (migration 0002)
+- `CompanySubscription` kwargs: plan_name/days_left ne postoje
+- `bulk_create` preskače `save()` → booking_code treba eksplicitno
+- GDPR unsubscribe URL: `/pub/odjava/{token}/` (ne `/odjava/`)
 
-| Datum | Agent | Fokus | Rezultat | Commit |
-|-------|-------|-------|----------|--------|
-| 2026-04-18 | CC Sonnet | Domain split + Cluster | fina-connect.online odvojen, ModuleGateMiddleware, admin inline, nginx fix | e6943688 |
-| 2026-04-18 | CC Sonnet | Predforma (scan preview card) | feat: scan result card s preview slike, metapodacima i akcijama iznad arhive popisa | 542a5cfd |
-| 2026-04-18 | CC Sonnet | Arhiva bugfix marathon | Login fix (static restauriran), games redesign, arhiva bugfixes × 5, 3 arhiva inovacije | ad40054d→ca85bfc1 |
-| 2026-04-18 | CC Sonnet | Fenix V3 PLAN_029-042 | PLAN_031-033 DE Steuerberater+WAHA+DATEV, PLAN_035 invoiceBuilder, PLAN_036-039 UBL+PDF+Email+Payments, PLAN_040 ClientPortal, PLAN_041-042 Accounting+JournalUI — 35/71 DONE |
-| 2026-04-18 | CC Sonnet | evalidator 10/10 + Fenix V3 Arhiva | evalidator: CSS tokens, dark/light, i18n HR/EN/DE, OG meta, docs/pricing, 8 tests. Fenix V3: PLAN_025-028 Digitalna Arhiva LIVE (upload, FenixScan OCR, list+drawer). | e073b488/7336660 |
-| 2026-04-16 | Sonnet | Security+Bugfixes | Print/copy/screenshot zaštita LIVE. Marija login fix. Mikrofon fix. Trojstvo IntegrityError fix. CC task Stolarija V2 zapisan. | b297a85d |
-| 2026-04-15 | Opus CC | PLAY.EU Faza E | PWA shell, 11 views, 12 templates, memory game, quiz JS, night mode | 9dd0ebea |
-| 2026-04-15 | Opus CC | DeepSeek Patrol | Fix autodiscovery, Celery Beat registered, nocni run 02:45 | 5cf29da6 |
+## IMPLEMENTIRANI MODULI
 
----
+### Core Platform (Blok 0-5)
+- ✅ AuditChain (SHA-256), Domain Gate, DeepSeek Patrol
+- ✅ 4-Layer Auth, Umbrella Komitenti, BillingMiddleware
+- ✅ Trial banner (HTMX dismiss), Upgrade flow
+- ✅ AI Računovodstvo (Haiku konto prijedlog), RRIF+SKR03/SKR04
+- ✅ Fakture HR+DE+EU, PDF IBAN/BIC/payment_terms
+- ✅ FenixScan OCR, Arhiva, eValidacija Pečat
+- ✅ POS offline PWA, HR Fiskalizacija
 
-## SESIJA 2026-04-18 — ARHIVA BUGFIX MARATHON (8 commita)
+### Zaposlenici + Legal (Blok 6-7)
+- ✅ DataVault šifriranje HR podataka, TimeLogRevision, Compliance
+- ✅ Legal: ContractTemplate, Contract (SHA-256), PowerOfAttorney
+- ✅ Dispute: AI risk_score 0-100, DisputeEvent audit trail
 
-### Commits:
-| Commit | Opis |
-|--------|------|
-| ad40054d | fix(static): KRITIČNO — restaurirani CSS/JS (50 fajlova) obrisani u Antonio test sesiji |
-| af3ff0c6 | feat(games): Čovječe redesign + iOS memory fix + kviz score bugfix |
-| fde7439f | fix(arhiva): openPreviewModal undefined + paginacija duplicira page param |
-| 7968b96c | fix(arhiva): convert flow sada kreira ArhivaEntry + multi-page merge |
-| 8b9727f4 | fix(arhiva): dodaj previewModal HTML div — CSS/JS bio ali bez HTML elementa |
-| ca85bfc1 | feat(arhiva): 3 inovacije — Skupni Download + Duplikat Radar + Partner Intel |
+### 8 Vertikala (Blok 8)
+- ✅ Blok 8.1: Stolarija (WindowProfile, MeasurementSession, WindowOffer, BOMItem, InstallationOrder)
+- ✅ Blok 8.2: Udruge (AssociationType, Association, Member, MembershipFee, feature flags)
+- ✅ Blok 8.3: Azil (Animal, VeterinaryVisit, AdoptionRequest, FosterFamily)
+- ✅ Blok 8.4: Termini (Service, Staff, WorkingHours, Appointment, BlockedSlot)
+- ✅ Blok 8.5: Baustela (ConstructionSite, WorkLog, MaterialEntry, ProgressReport)
+- ✅ Blok 8.6: Hotel (RoomType, Room, Guest, Reservation, HousekeepingLog)
+- ✅ Blok 8.7: Maloprodaja (ProductCategory, Product, StockMovement, RetailSale, SaleItem)
+- ✅ Blok 8.8: OPG (Field, Crop, FieldActivity, LivestockHerd)
 
-### Root causes riješeni:
-1. **Login blokada** — 6337920c obrisao 50 static fajlova → .fx-hidden nedefiniran → #docScanModal prekrio ekran
-2. **Dokument nestao** — arhiva_convert kreirao ConversionRecord ali NIKAD ArhivaEntry (arhiva_entry=None)
-   - 2 HEP dokumenta retroaktivno spašena → ARH-2026/19148 i ARH-2026/19149
-3. **previewModal HTML** — CSS klase i JS funkcija postojale, ali `<div id="previewModal">` nije bio u DOM-u
-4. **Paginacija** — ?page=2&{{ urlencode }} dupliciralo page= param, Django uzima zadnju vrijednost
-5. **openPreviewModal undefined** — pozvana u partial ali nikad definirana
-6. **Kviz score=0** — `dataset.correct === 'True'` trebalo biti `'true'` (JSON lowercase)
+### Country Plugins (Blok 10)
+- ✅ CountryConfig per-company/country (HR/DE/AT/SI)
+- ✅ HRPlugin: OIB Luhn validacija, HR faktura format
+- ✅ DEPlugin: Steuernummer validacija, DATEV EXTF header
+- ✅ ATPlugin: UID validacija, Umsatzsteuer
+- ✅ SIPlugin: Davčna številka check digit
+- ✅ PEPPOLDocument (BIS 3.0 tracking, outbound/inbound)
+- ✅ DSFinVKExport (DE TSE, transaction audit)
 
-### 3 Inovacije (ca85bfc1):
-| Inovacija | Opis | Endpoints |
-|-----------|------|-----------|
-| **Skupni Download** | ZIP svih dokumenta jednog dobavljača za period. Smart naming + CSV korice. | /arhiva/monthly-bundle/ + /preview/ |
-| **Duplikat Radar** | 3 razine: hash 100%, doc_broj+partner 99%, iznos±1%+datum±14d 85%. Žuti toast pri novom uploadu. | /arhiva/duplicate-check/ |
-| **Partner Intel** | 13 mj. trend, gap detekcija, anomalija (avg+1.5σ), YTD delta %. Mini bar chart u UI. | /arhiva/partner-intel/ |
+### Notifications (Blok 11)
+- ✅ NotificationTemplate (WhatsApp/Email/Push/SMS, {{variables}})
+- ✅ ContactList + ContactSubscriber (GDPR: opt-in, opt-out, unsubscribe_token)
+- ✅ NotificationCampaign (broadcast fan-out, statistika)
+- ✅ NotificationMessage (per-message log, status tracking)
+- ✅ Celery: send_whatsapp_message (WAHA API), send_campaign (async)
+- ✅ Public GDPR unsubscribe URL (/pub/odjava/<token>/)
 
-### Multi-page merge (7968b96c):
-- Nova ruta /arhiva/convert/merge/ — prima file_0..file_N, PyMuPDF spaja u PDF → jedan ArhivaEntry
-- JS toggle u galeriji: "Odvojeni dokumenti" ↔ "Spoji u 1 dokument" (prikaže se >1 slika)
+### SaaS Platform (Blok 12)
+- ✅ 12.1: UsageEvent + UsageSummary (Celery nightly aggregation)
+- ✅ 12.2: TenantInvite (secure token, 7-day expiry)
+- ✅ 12.4: CompanyBranding (White-Label: logo/colors/domain/email)
+- ✅ 12.5: PartnerProfile + PartnerClientLink (commission 10%, client_limit 50)
+- ✅ 12.6: StripeCustomer, StripeSubscription, StripeWebhookEvent (idempotent)
+- ✅ 12.7: APIKey (SHA-256 hash, rate limit), APIUsageLog, MarketplaceListing
+- ✅ Sidebar: sve vertikale + platforma linkovi
 
----
+## BAZA PODATAKA
+- 50+ tablica u fenix_v3_clean
+- Apps: core, accounts, companies, invoicing, arhiva, pos, stolarija,
+        accounting, ai_cockpit, employees, sentinel, legal, associations,
+        shelter, booking, construction, hospitality, retail, agriculture,
+        country_plugins, notifications, saas
 
-## PRIORITETI ZA SLJEDEĆU SESIJU
+## PRIORITETI ZA SLJEDEĆU SESIJU (Sprint 8 nastavak)
 
-```
-1. ✅ DONE — Domain split (fina-connect.online → port 8000 direktno)
-2. ✅ DONE — Cluster/Module Gate (ModuleGateMiddleware + admin inline)
-3. ARHIVA-3 — rclone OneDrive backend (StorageConfig 'network')
-2. POS free tier — Marija Čačić pilot (obrt kod kuće)
-3. Slovarica fix — CC_TASK_SLOVARICA_FIX.md (font Andika, canvas DPI, 30 MP3)
-4. Slikovnice — PLAN_SLIKOVNICE.md Glava 1 Backend (ROK CP1: 2026-04-20 ⚠)
-5. WhatsApp-IN (ARHIVA-5) — Ivan želi chat-to-archive flow
-```
+1. **Templates** — HTML template za svaku vertikalu (azil, termini, gradilista, hotel, maloprodaja, opg)
+   Trenutno: URL routing + views postoje, templates/ NE postoje
+2. **PEPPOL XML generator** — HR B2G implementacija (ROK: 2026-01-01 — KRITIČNO)
+3. **Stripe checkout flow** — aktivni checkout session za upgrade
+4. **DE TSE integracija** — DSFinV-K compatible POS export
+5. **AI integracije** — booking assistant, construction cost AI
+6. **Prodaja** — onboarding flow za Zdenko pilot, Marija testing
 
----
-
-## RAZVOJNA PRAVILA
-
-### PRAVILO 1 — Nema zakrpa, samo pravi fix
-### PRAVILO 2 — Settings i model choices sinkronizirani
-### PRAVILO 3 — Template promjene = gunicorn reload
-### PRAVILO 4 — `--preload` zabranjeno
-### PRAVILO 5 — Nikad conditional import unutar try/except
-### PRAVILO 6 — QR kodovi uvijek kroz /qr/ endpoint
-### PRAVILO 7 — Svaka nova javna ruta u RouteRegistry
-### PRAVILO 8 — OIBi u testovima validni (ISO 7064 Luhn-10)
-### PRAVILO 9 — Bez datuma izvršenja, samo redoslijed
-
----
-
-## DASHBOARD
-```
-=== CODE ===             === ARHIVA ===                === MEMIO ===
-Python LoC:  ~302K       Konjik komitenti:  75         memio.pet:   LIVE ✅
-Tests:       2,340       Arhiva dok.:    10,109        memio.world: Temelj ✅
-Commits:       960+      OCR točnost:      100%        memio.farm:  SyncLink ✅
-Coverage:    40.3%       ConversionRecord: 2 spašena   No-limit:    NGO portal ✅
-
-=== ARHIVA FEATURESET ===
-Upload → ArhivaEntry:  ✅  |  Convert → ArhivaEntry:  ✅ (bio bug, fixano)
-Preview slike:         ✅  |  Paginacija:              ✅ (bio bug, fixano)
-Multi-page merge:      ✅  |  Skupni download ZIP:     ✅ NEW
-Duplikat Radar:        ✅  |  Partner Intel 13mj:      ✅ NEW
-```
-
----
-
-# ZLATNI KOD — PLAN PRODUKCIJE
-
-## KORACI 1-10 ✅ GOTOVO
-
-## KORAK 11 — BETA: KONJIK D.O.O. 🔄 AKTIVAN (35%)
-```
-Firma:    Konjik d.o.o. — računovodstveni ured, 75 komijenata, 10.109 dok.
-Knjigov.: Marija + Ljiljana + Nikolina + Silvija + Anita
-Cilj:     Marija kaže "ovo radi, mogu pokazati klijentima"
-Status:   Arhiva funkcionalna, konverzija fiksirana, preview radi
-Pending:  OneDrive sync, WhatsApp-IN, Skupni download testiran live
-```
-
-## GORIVO
-| Što | Status | % |
-|-----|--------|---|
-| Koraci 1-10 | ✅ | 100% |
-| Korak 11 Beta | 🔄 | 35% |
-| **ARHIVA-1** Mobile Scan | ✅ LIVE | 95% |
-| ARHIVA-2 Magic Link | ✅ LIVE | 100% |
-| ARHIVA-3 Network Disk | ⏳ | — |
-| ARHIVA-4 WhatsApp Share | ✅ LIVE (arhiva_send_komitent) | 80% |
-| ARHIVA-5 WhatsApp-IN | ⏳ | — |
-| **Skupni Mjesečni Download** | ✅ LIVE | 100% |
-| **Duplikat Radar** | ✅ LIVE | 100% |
-| **Partner Intelligence** | ✅ LIVE | 100% |
-| **Multi-page Merge (convert)** | ✅ LIVE | 100% |
-| ARHIVA-6 DE Steuerberater | ⏳ | — |
-| ARHIVA-7 DATEV Export | ⏳ | — |
-| **POS free tier** (Marija Čačić) | ⏳ | — |
-| **PLAY.EU Sprint 1** | ✅ DONE | 100% |
-| Slovarica fix | ⏳ CC Task | — |
-| Slikovnice CP1 | ⏳ ROK 20.04 | — |
-
----
-
-# OPERACIJA: ARHIVA HR-DE
-
-## OCR BENCHMARK (live test, 2026-04-14)
-```
-4 računa: INA Čepin ×2, Petrol Osijek, Petrol Ljubljana (SI)
-Točnost:  100% — dobavljač, datum, iznos, JIR/ZKI
-```
-
-## Arhiva Feature Matrix
-```
-[x] Upload → ArhivaEntry + OCR + AI prijedlog
-[x] Convert (kamera) → ArhivaEntry (BUG FIXAN 2026-04-18)
-[x] Multi-page merge → jedan PDF → jedan ArhivaEntry
-[x] Preview slike/PDF u modalu (BUG FIXAN 2026-04-18)
-[x] Paginacija bez URL duplikacije (BUG FIXAN 2026-04-18)
-[x] Skupni Mjesečni Download (NEW 2026-04-18)
-[x] Duplikat Radar — 3 razine detekcije (NEW 2026-04-18)
-[x] Partner Intelligence — 13 mj. trend + anomalije (NEW 2026-04-18)
-[ ] ARHIVA-3: rclone OneDrive backend
-[ ] ARHIVA-5: WhatsApp-IN
-[ ] ARHIVA-7: DATEV Export
-```
-
----
-
-# STANJE BAZE I SERVERA
-```
-Server:          37.27.248.86 (Hetzner)
-Aktivnih firmi:  101 | Umbrella djece:  81
-Korisnika:        56 | Faktura:     15,330
-Arhiva dok.:  10,109 | Commits:       960+
-Konjik HEP dok:    4 (ARH-2026/19146-19149, sve OK)
-```
-
-## AI SERVISI
-```
-DeepSeek:   AKTIVAN ✅ (uplata $5.30, 2026-04-14)
-Bedrock:    AKTIVAN ✅ (eu-central-1)
-Anthropic:  AKTIVAN ✅ (API key u settings)
-```
-
----
-
-# BACKLOG
-
-| # | Nalaz | Ozbiljnost | Uvjet |
-|---|-------|------------|-------|
-| B-01 | user_edit company isolation | SREDNJE | company_admin self-service |
-| B-02 | trojstvo_task suggestion_id type guard | NIZAK | kad se dotakne trojstvo |
-| B-04 | StorageConfig 'network' backend | SREDNJE | ARHIVA-3 |
-| B-05 | WhatsApp-IN nepoznati pošiljatelji | NIZAK | ARHIVA-5 |
-| B-06 | DATEV header verifikacija | VISOK | ARHIVA-7 |
-| B-07 | POS free tier konfiguracija za Mariju Čačić | SREDNJE | memio.world MVP |
-| B-08 | Duplikat Radar integracija u upload view | NIZAK | nice to have — dual warning |
-
----
-
-## PLAY.EU — SPRINT 1 ✅ DONE
-```
-Faza A-E: DONE. 23 modela, 237 sadržaja, PWA shell, games, quiz.
-Creative Europe deadline: 2026-05-07
-CP1 Slikovnice: ROK 2026-04-20 ⚠ HITNO
-```
-
----
-
-## MEMIO EKOSISTEM
-```
-memio.pet:   LIVE ✅ (22 rute, 12/12 testovi)
-memio.world: Temelj ✅, MVP čeka POS free tier
-memio.farm:  SyncLink ✅
-No-limit:    NGO portal ✅
-```
+## ARHITEKTURA
+- Server: 37.27.248.86 | ssh -p 2222 root@37.27.248.86
+- Dir: /var/www/fenix-v3/
+- Servis: gunicorn-fenix-v3.service (port 8001)
+- Baza: fenix_v3_clean (direktno :5432)
+- Test: venv/bin/python -m pytest tests/ -v

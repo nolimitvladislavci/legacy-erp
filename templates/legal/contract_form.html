@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div class="fenix-card md:col-span-2">
+        <h3 class="text-sm font-semibold mb-4">Osnovni podaci</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="fenix-label">Naslov ugovora *</label>
+            <input name="title" class="form-input" required placeholder="npr. Ugovor o pružanju usluga računovodstva">
+          </div>
+          <div>
+            <label class="fenix-label">Vrsta ugovora</label>
+            <select name="doc_type" class="form-input">
+              {% for val, label in doc_type_choices %}
+              <option value="{{ val }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="fenix-label">Predložak (opcionalno)</label>
+            <select name="template_id" class="form-input">
+              <option value="">— Bez predloška —</option>
+              {% for t in templates %}
+              <option value="{{ t.pk }}">{{ t.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="fenix-label">Na snazi od</label>
+            <input type="date" name="valid_from" class="form-input">
+          </div>
+          <div>
+            <label class="fenix-label">Na snazi do</label>
+            <input type="date" name="valid_until" class="form-input">
+          </div>
+        </div>
+      </div>
+
+      <div class="fenix-card">
+        <h3 class="text-sm font-semibold mb-4">Stranka A (prodavatelj / poslodavac)</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="fenix-label">Naziv *</label>
+            <input name="party_a_name" class="form-input" required
+                   value="{{ company.name }}" placeholder="Naziv tvrtke ili ime osobe">
+          </div>
+          <div>
+            <label class="fenix-label">OIB</label>
+            <input name="party_a_oib" class="form-input" maxlength="11"
+                   value="{{ company.oib }}" placeholder="12345678901">
+          </div>
+          <div>
+            <label class="fenix-label">Adresa</label>
+            <textarea name="party_a_address" class="form-input" rows="2"
+                      placeholder="{{ company.address }}"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="fenix-card">
+        <h3 class="text-sm font-semibold mb-4">Stranka B (kupac / zaposleník)</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="fenix-label">Naziv *</label>
+            <input name="party_b_name" class="form-input" required
+                   placeholder="Naziv tvrtke ili ime osobe">
+          </div>
+          <div>
+            <label class="fenix-label">OIB</label>
+            <input name="party_b_oib" class="form-input" maxlength="11"
+                   placeholder="12345678901">
+          </div>
+          <div>
+            <label class="fenix-label">Adresa</label>
+            <textarea name="party_b_address" class="form-input" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="fenix-card md:col-span-2">
+        <h3 class="text-sm font-semibold mb-4">Tijelo ugovora</h3>
+        <textarea name="body_html" class="form-input font-mono text-xs" rows="16"
+                  placeholder="Ovdje unesite tekst ugovora (HTML ili plaintext)..."></textarea>
+        <p class="text-xs text-fenix-ink/50 mt-2">
+          Koristite {{varijabla}} za dinamičke dijelove. AI može popuniti iz predloška.
+        </p>
+      </div>
+
+    </div>
+    <div class="flex gap-3">
+      <button type="submit" class="fenix-btn fenix-btn-primary">Spremi ugovor</button>
+      <a href="{% url 'legal:contract_list' %}" class="fenix-btn fenix-btn-ghost">Odustani</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

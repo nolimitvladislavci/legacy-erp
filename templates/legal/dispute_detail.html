@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- Lijevo — meta + AI -->
+  <div class="space-y-4">
+    <div class="fenix-card">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-fenix-ink/50 mb-3">Detalji</h3>
+      <dl class="space-y-2 text-sm">
+        <div class="flex justify-between"><dt class="text-fenix-ink/60">Vrsta</dt><dd>{{ dispute.get_dispute_type_display }}</dd></div>
+        <div class="flex justify-between"><dt class="text-fenix-ink/60">Prioritet</dt>
+          <dd><span class="fenix-badge {% if dispute.priority == 'urgent' %}fenix-badge-danger{% elif dispute.priority == 'high' %}fenix-badge-warning{% else %}fenix-badge-info{% endif %}">{{ dispute.get_priority_display }}</span></dd>
+        </div>
+        <div class="flex justify-between"><dt class="text-fenix-ink/60">Status</dt>
+          <dd><span class="fenix-badge fenix-badge-info">{{ dispute.get_status_display }}</span></dd>
+        </div>
+        {% if dispute.deadline %}
+        <div class="flex justify-between {% if dispute.is_overdue %}text-red-600 font-semibold{% endif %}">
+          <dt class="text-fenix-ink/60">Rok</dt><dd>{{ dispute.deadline|date:"d.m.Y" }}{% if dispute.is_overdue %} 🚨{% endif %}</dd>
+        </div>
+        {% endif %}
+        {% if dispute.amount_claimed %}
+        <div class="flex justify-between"><dt class="text-fenix-ink/60">Iznos</dt><dd>€ {{ dispute.amount_claimed }}</dd></div>
+        {% endif %}
+        {% if dispute.amount_settled %}
+        <div class="flex justify-between text-green-600"><dt>Naplaćeno</dt><dd>€ {{ dispute.amount_settled }}</dd></div>
+        {% endif %}
+        <div class="border-t border-fenix-cream pt-2">
+          <div class="text-fenix-ink/50 text-xs mb-1">Protustrana</div>
+          <div class="font-semibold">{{ dispute.opponent_name }}</div>
+          {% if dispute.opponent_oib %}<div class="text-xs text-fenix-ink/60">OIB: {{ dispute.opponent_oib }}</div>{% endif %}
+        </div>
+      </dl>
+    </div>
+
+    {% if dispute.ai_risk_score is not None %}
+    <div class="fenix-card border-l-4 {% if dispute.ai_risk_score >= 70 %}border-red-400{% elif dispute.ai_risk_score >= 40 %}border-amber-400{% else %}border-green-400{% endif %}">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-semibold uppercase text-fenix-ink/50">AI Analiza rizika</span>
+        <span class="text-2xl font-bold {% if dispute.ai_risk_score >= 70 %}text-red-500{% elif dispute.ai_risk_score >= 40 %}text-amber-500{% else %}text-green-500{% endif %}">
+          {{ dispute.ai_risk_score }}/100
+        </span>
+      </div>
+      {% if dispute.ai_recommendation %}
+      <p class="text-sm text-fenix-ink/80 leading-relaxed">{{ dispute.ai_recommendation }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Desno — opis + kronologija -->
+  <div class="lg:col-span-2 space-y-4">
+    <div class="fenix-card">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-fenix-ink/50 mb-3">Opis spora</h3>
+      <p class="text-sm leading-relaxed text-fenix-ink/80">{{ dispute.description }}</p>
+    </div>
+
+    <!-- Kronologija -->
+    <div class="fenix-card">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-fenix-ink/50 mb-4">Kronologija</h3>
+      <div id="dispute-events-list" class="space-y-3 mb-4">
+        {% include "legal/partials/dispute_events.html" %}
+      </div>
+
+      <!-- Dodaj bilješku -->
+      <form hx-post="{% url 'legal:dispute_detail' dispute.pk %}"
+            hx-target="#dispute-events-list"
+            hx-swap="innerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            class="border-t border-fenix-cream pt-4 space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="fenix-label">Vrsta bilješke</label>
+            <select name="event_type" class="form-input text-sm">
+              <option value="note">Bilješka</option>
+              <option value="document">Dokument dodan</option>
+              <option value="court">Ročište</option>
+              <option value="escalation">Eskalacija</option>
+              <option value="resolution">Rješenje</option>
+            </select>
+          </div>
+          <div>
+            <label class="fenix-label">Promjena statusa (opcionalno)</label>
+            <select name="new_status" class="form-input text-sm">
+              <option value="">— Bez promjene —</option>
+              {% for val, label in dispute.STATUS_CHOICES %}
+              <option value="{{ val }}" {% if val == dispute.status %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="fenix-label">Bilješka *</label>
+          <textarea name="description" class="form-input text-sm" rows="3" required
+                    placeholder="Što se desilo? Unesite detalje..."></textarea>
+        </div>
+        <button type="submit" class="fenix-btn fenix-btn-primary text-sm">Dodaj bilješku</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

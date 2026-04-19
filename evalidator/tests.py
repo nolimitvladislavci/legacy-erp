@@ -2,12 +2,13 @@
 eValidator test suite — 8 tests covering all critical paths.
 """
 
-import json
 import hashlib
+import json
 from unittest.mock import patch
-from django.test import TestCase, Client, override_settings
-from django.urls import reverse
+
 from django.core.cache import cache
+from django.test import Client, TestCase, override_settings
+from django.urls import reverse
 
 
 class EValidatorLandingTest(TestCase):

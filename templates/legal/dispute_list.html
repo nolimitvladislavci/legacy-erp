@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block page_actions %}
+<a href="{% url 'legal:dispute_create' %}" class="fenix-btn fenix-btn-primary">+ Novi spor</a>
+{% endblock %}
+{% block content %}
+
+{% if overdue_count %}
+<div class="fenix-toast fenix-toast-danger mb-4" role="alert">
+  🚨 <strong>{{ overdue_count }}</strong> spor{% if overdue_count != 1 %}ova{% endif %} je prošlo rok!
+</div>
+{% endif %}
+
+<!-- Filter -->
+<div class="flex gap-2 mb-4 flex-wrap">
+  <a href="?" class="fenix-btn {% if not active_status %}fenix-btn-primary{% else %}fenix-btn-ghost{% endif %} text-xs">Svi ({{ open_count }} otvorenih)</a>
+  {% for val, label in status_choices %}
+  <a href="?status={{ val }}"
+     class="fenix-btn {% if active_status == val %}fenix-btn-primary{% else %}fenix-btn-ghost{% endif %} text-xs">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="fenix-card overflow-hidden p-0">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="bg-fenix-ink text-fenix-gold">
+        <th class="px-4 py-3 text-left">Spor</th>
+        <th class="px-4 py-3 text-left hidden sm:table-cell">Protustrana</th>
+        <th class="px-4 py-3 text-center">Prioritet</th>
+        <th class="px-4 py-3 text-center">Status</th>
+        <th class="px-4 py-3 text-right hidden md:table-cell">Rok</th>
+        <th class="px-4 py-3 text-right hidden lg:table-cell">AI rizik</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in disputes %}
+      <tr class="border-b border-fenix-cream hover:bg-fenix-cream/30 transition-colors
+                 {% if d.is_overdue %}bg-red-50{% endif %}">
+        <td class="px-4 py-3">
+          <div class="font-medium">{{ d.title|truncatechars:40 }}</div>
+          <div class="text-xs text-fenix-ink/50">{{ d.get_dispute_type_display }}</div>
+        </td>
+        <td class="px-4 py-3 hidden sm:table-cell text-fenix-ink/70">
+          {{ d.opponent_name|truncatechars:25 }}
+        </td>
+        <td class="px-4 py-3 text-center">
+          <span class="fenix-badge {% if d.priority == 'urgent' %}fenix-badge-danger{% elif d.priority == 'high' %}fenix-badge-warning{% elif d.priority == 'medium' %}fenix-badge-info{% else %}fenix-badge-success{% endif %}">
+            {{ d.get_priority_display }}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-center">
+          <span class="fenix-badge {% if d.status == 'resolved' or d.status == 'closed' %}fenix-badge-success{% elif d.status == 'escalated' %}fenix-badge-danger{% else %}fenix-badge-info{% endif %}">
+            {{ d.get_status_display }}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-right hidden md:table-cell
+                   {% if d.is_overdue %}text-red-600 font-semibold{% else %}text-fenix-ink/60{% endif %}">
+          {% if d.deadline %}{{ d.deadline|date:"d.m.Y" }}{% if d.is_overdue %} 🚨{% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td class="px-4 py-3 text-right hidden lg:table-cell">
+          {% if d.ai_risk_score is not None %}
+          <div class="flex items-center justify-end gap-2">
+            <div class="w-12 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full rounded-full {% if d.ai_risk_score >= 70 %}bg-red-500{% elif d.ai_risk_score >= 40 %}bg-amber-500{% else %}bg-green-500{% endif %}"
+                   style="width:{{ d.ai_risk_score }}%"></div>
+            </div>
+            <span class="text-xs font-mono">{{ d.ai_risk_score }}</span>
+          </div>
+          {% else %}<span class="text-fenix-ink/30 text-xs">—</span>{% endif %}
+        </td>
+        <td class="px-4 py-3 text-right">
+          <a href="{% url 'legal:dispute_detail' d.pk %}" class="fenix-btn fenix-btn-ghost text-xs">Otvori</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="px-4 py-8 text-center text-fenix-ink/40">Nema sporova. <a href="{% url 'legal:dispute_create' %}" class="underline">Dodaj →</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
