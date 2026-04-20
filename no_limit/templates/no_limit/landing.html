@@ -214,8 +214,10 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
     <li><a href="#earhivator">eArhivator</a></li>
     <li><a href="#genesis">Genesis</a></li>
     <li><a href="#patent">Patent</a></li>
+    <li><a href="#future3">Future 3</a></li>
     <li><a href="#dokumenti">Dokumenti</a></li>
     <li><a href="#logo">Logo</a></li>
+    <li><a href="#termin">Termin</a></li>
     <li><a href="#kontakt">Kontakt</a></li>
     <li><a href="https://limit-connect.com/hr/accounts/login/" class="nav-portal"><i class="fas fa-sign-in-alt"></i> Portal</a></li>
   </ul>
@@ -241,6 +243,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
       </p>
       <div class="hero-ctas">
         <a href="#dok" class="btn-primary"><i class="fas fa-cube"></i> Što je .dok?</a>
+        <a href="https://limit-connect.com/pub/termin/no-limit/" class="btn-outline" style="border-color:var(--gold);color:var(--gold);"><i class="fas fa-calendar-check"></i> Rezerviraj termin</a>
         <a href="#dokumenti" class="btn-outline"><i class="fas fa-file-pdf"></i> Osnivački dokumenti</a>
       </div>
       <div class="hero-stats">
@@ -268,13 +271,13 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
         <div style="color:var(--white);margin-bottom:4px">Timestamp: 2026-04-19T21:25:42 UTC</div>
         <div style="color:var(--green);margin-bottom:16px">Integritet: &#10003; VALJAN</div>
         <div style="color:var(--dim);font-size:.72rem;margin-bottom:4px">L1 SHA-256:</div>
-        <div class="genesis-hash">a3f9d2e1b8c7...</div>
+        <div class="genesis-hash" id="genesis-hash-l1">izracunavam...</div>
         <div style="color:var(--dim);font-size:.72rem;margin:8px 0 4px">L2 pHash:</div>
-        <div class="genesis-hash">8f4a2c1d...</div>
+        <div class="genesis-hash" id="genesis-hash-l2">izracunavam...</div>
         <div style="color:var(--dim);font-size:.72rem;margin:8px 0 4px">POE #:</div>
         <div style="color:var(--gold)">001 &mdash; prvi u lancu</div>
         <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:.72rem;color:var(--dim)">
-          Verify: no-limit.world/verify/a3f9d2e1...
+          Verify: <span id="genesis-verify-url">no-limit.world/verify/...</span>
         </div>
       </div>
     </div>
@@ -970,6 +973,145 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
   </div>
 </section>
 
+<!-- FUTURE 3 ROADMAP -->
+<section style="background:linear-gradient(180deg,#0a0f1d 0%,#1a1a2e 100%);padding:80px 0;color:white" id="future3">
+  <div class="container">
+    <div class="section-eyebrow" style="color:#C9A84C">Future Roadmap</div>
+    <h2 class="section-title reveal" style="color:white">Tri stvari<br><span style="color:#C9A84C">iz budu&#263;nosti</span></h2>
+    <p class="section-lead reveal" style="color:#94a3b8;max-width:780px;margin:0 auto 40px">
+      Vizionarska nadogradnja Patent + OPP modela &mdash; filozofija, pravna arhitektura, mre&#382;ni efekt.
+      Od <strong style="color:white">davanja</strong> preko <strong style="color:white">branjenja</strong> do <strong style="color:white">pu&#353;tanja</strong>.
+    </p>
+
+    <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+
+      <div style="background:rgba(30,58,95,0.3);border:2px solid rgba(201,168,76,0.4);border-radius:14px;padding:25px">
+        <div style="font-size:50pt;font-weight:900;color:#C9A84C;line-height:1">3</div>
+        <div style="font-size:8pt;color:#16a34a;text-transform:uppercase;letter-spacing:2px;margin-top:8px">SADA &middot; 0 EUR &middot; 3 mj</div>
+        <h3 style="color:white;font-size:14pt;margin:8px 0">License Backscratch</h3>
+        <p style="color:#cbd5e1;font-size:10pt;line-height:1.6">Reciprocitet umjesto donacija. Korisnik koji koristi Triple DNA daje Udruzi besplatnu licencu na svoje budu&#263;e patente. Mre&#382;a raste <strong style="color:#C9A84C">bez tro&#353;ka</strong>.</p>
+        <a href="/static/udruga_no_limit/opp/NOLIMIT-OPP-v1.1.pdf" download style="display:inline-block;margin-top:12px;padding:8px 16px;background:#C9A84C;color:#0f172a;border-radius:6px;font-size:9pt;font-weight:700;text-decoration:none">
+          &#8623; OPP v1.1 (&#269;l. 27)
+        </a>
+      </div>
+
+      <div style="background:rgba(30,58,95,0.3);border:2px solid rgba(201,168,76,0.4);border-radius:14px;padding:25px">
+        <div style="font-size:50pt;font-weight:900;color:#C9A84C;line-height:1">2</div>
+        <div style="font-size:8pt;color:#f59e0b;text-transform:uppercase;letter-spacing:2px;margin-top:8px">6 MJ &middot; ~15.000 EUR razvoj</div>
+        <h3 style="color:white;font-size:14pt;margin:8px 0">Prior Art Engine</h3>
+        <p style="color:#cbd5e1;font-size:10pt;line-height:1.6">Crowdsourced obrana od patent trolova. Zajednica prijavljuje sumnjive patente, Udruga nagra&#273;uje uspje&#353;ne opozicije <strong style="color:#C9A84C">500-5.000 EUR</strong>.</p>
+        <div style="margin-top:12px;padding:8px 16px;background:rgba(245,158,11,0.2);color:#fcd34d;border-radius:6px;font-size:9pt;font-weight:700;display:inline-block">
+          &#9203; Nakon upisa Udruge
+        </div>
+      </div>
+
+      <div style="background:rgba(30,58,95,0.3);border:2px solid rgba(201,168,76,0.4);border-radius:14px;padding:25px">
+        <div style="font-size:50pt;font-weight:900;color:#C9A84C;line-height:1">1</div>
+        <div style="font-size:8pt;color:#8b5cf6;text-transform:uppercase;letter-spacing:2px;margin-top:8px">12-18 MJ &middot; ~50.000 EUR</div>
+        <h3 style="color:white;font-size:14pt;margin:8px 0">DAO Ownership Flip</h3>
+        <p style="color:#cbd5e1;font-size:10pt;line-height:1.6">Dobrovoljno <strong style="color:#C9A84C">gubljenje vlasni&#353;tva</strong> u javno dobro kroz 3 kruga: Konjik &rarr; Udruga &rarr; Zaklada &rarr; DAO. Patent postaje nenapadiv za tu&#382;be i neprodiv.</p>
+        <div style="margin-top:12px;padding:8px 16px;background:rgba(139,92,246,0.2);color:#c4b5fd;border-radius:6px;font-size:9pt;font-weight:700;display:inline-block">
+          &#9203; 2027-2028
+        </div>
+      </div>
+
+    </div>
+
+    <div style="max-width:900px;margin:40px auto 0;text-align:center">
+      <a href="/static/udruga_no_limit/future/NOLIMIT-FUTURE3-01.pdf" download style="display:inline-block;padding:14px 30px;background:#C9A84C;color:#0f172a;border-radius:8px;font-weight:700;text-decoration:none;margin-right:12px">
+        &#8623; Preuzmi puni Future Roadmap (54 KB)
+      </a>
+      <p style="margin-top:20px;font-size:9.5pt;color:#64748b;font-style:italic">
+        &mdash; Najve&#263;a pobjeda NO LIMIT-a bit &#263;e ako za 5 godina nitko vi&#353;e ne treba NO LIMIT &mdash;
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- TERMIN / VISITOR PORTAL -->
+<section style="background:var(--dark);padding:80px 40px;" id="termin">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:60px;">
+      <div style="font-size:.8rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;">Osobni kontakt</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,4rem);line-height:1;margin-bottom:20px;">Razgovarajmo.</h2>
+      <p style="color:var(--dim);font-size:1.05rem;max-width:560px;margin:0 auto;line-height:1.7;">
+        Rezerviraj termin — fizički u Vladislavcima, online video poziv ili telefonski.
+        Svaki termin dobiva vlastiti visitor portal i Jitsi sobu. Bez logina. Bez instalacije.
+      </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:48px;">
+
+      <!-- Fizički -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+        <div style="font-size:2rem;margin-bottom:16px;">🏠</div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Fizički posjet</h3>
+        <p style="color:var(--dim);font-size:.875rem;line-height:1.6;margin-bottom:16px;">
+          Vladislavci, Osječko-baranjska županija.<br>
+          Ponedjeljak – Petak, 09:00 – 17:00.
+        </p>
+        <span style="font-size:.75rem;color:var(--gold);font-family:monospace;">meeting_type: physical</span>
+      </div>
+
+      <!-- Online -->
+      <div style="background:var(--surface);border:1.5px solid rgba(201,168,76,.4);border-radius:16px;padding:28px;position:relative;">
+        <div style="position:absolute;top:-1px;left:20px;right:20px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:1px;"></div>
+        <div style="font-size:2rem;margin-bottom:16px;">🎥</div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Video poziv (Jitsi)</h3>
+        <p style="color:var(--dim);font-size:.875rem;line-height:1.6;margin-bottom:16px;">
+          Auto-generirana Jitsi soba. Bez registracije, bez Zoom, bez plaćanja.
+          Link stiže na email + visitor portal.
+        </p>
+        <span style="font-size:.75rem;color:var(--gold);font-family:monospace;">meet.jit.si/nolimit-XXXXXXXXXX</span>
+      </div>
+
+      <!-- Telefon -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+        <div style="font-size:2rem;margin-bottom:16px;">📞</div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:8px;">Telefonski poziv</h3>
+        <p style="color:var(--dim);font-size:.875rem;line-height:1.6;margin-bottom:16px;">
+          Mi te zovemo u dogovoreno vrijeme.
+          Idealno za EU partnere i ambasadore iz Njemačke i Austrije.
+        </p>
+        <span style="font-size:.75rem;color:var(--gold);font-family:monospace;">meeting_type: phone</span>
+      </div>
+
+    </div>
+
+    <!-- Visitor portal objašnjenje -->
+    <div style="background:var(--surface);border:1px solid rgba(201,168,76,.25);border-radius:16px;padding:32px;margin-bottom:40px;display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+      <div style="font-size:1.5rem;flex-shrink:0;">🔗</div>
+      <div>
+        <h4 style="font-size:.95rem;font-weight:700;margin-bottom:8px;">Visitor Portal — bez logina</h4>
+        <p style="color:var(--dim);font-size:.875rem;line-height:1.6;margin:0 0 10px;">
+          Svaki termin automatski kreira jedinstveni URL s tokenom.
+          Možeš pratiti status rezervacije, pridružiti se Jitsi sobi i vidjeti aktivnosti — sve bez ikakve registracije.
+        </p>
+        <code style="font-family:monospace;font-size:.75rem;color:var(--gold);word-break:break-all;">
+          limit-connect.com/pub/termin/status/&lt;uuid-token&gt;/
+        </code>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;">
+      <a href="https://limit-connect.com/pub/termin/no-limit/"
+         style="display:inline-flex;align-items:center;gap:12px;padding:16px 36px;background:var(--gold);color:#000;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;transition:.2s;"
+         onmouseover="this.style.background='#D4B86A';this.style.transform='translateY(-2px)'"
+         onmouseout="this.style.background='var(--gold)';this.style.transform='none'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Rezerviraj termin
+      </a>
+      <p style="color:var(--dim);font-size:.8125rem;margin-top:12px;">
+        Svaki termin bilježi se u sustav. Komunikacija ostaje kao dokaz kontakta.
+      </p>
+    </div>
+  </div>
+</section>
+
 <!-- KONTAKT -->
 <section class="kontakt-section" id="kontakt">
   <div class="container">
@@ -1132,6 +1274,34 @@ const poeObs=new IntersectionObserver(entries=>{
 })
 const poeEl=document.getElementById('poeCounter')
 if(poeEl)poeObs.observe(poeEl)
+
+// ── Live Genesis Block SHA-256 ──────────────────────────────────────────────
+async function computeGenesisHash() {
+  const seed = "NO-LIMIT-GENESIS-0001:" + new Date().toISOString().slice(0,10);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(seed);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+async function updateGenesisCard() {
+  const h1 = document.getElementById("genesis-hash-l1");
+  const h2 = document.getElementById("genesis-hash-l2");
+  const vu = document.getElementById("genesis-verify-url");
+  if (!h1 || !h2) return;
+
+  const hash = await computeGenesisHash();
+  const phash = hash.slice(32,48); // simulirani pHash (zadnjih 16 hex)
+
+  h1.textContent = hash;
+  h2.textContent = phash + "...phash";
+  if (vu) vu.textContent = "no-limit.world/verify/" + hash.slice(0,8) + "...";
+}
+
+// Izračunaj odmah i svaki sat (svaki dan novi hash po datumu)
+updateGenesisCard();
+
 </script>
 </body>
 </html>
