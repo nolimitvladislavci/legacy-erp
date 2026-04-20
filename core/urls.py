@@ -984,3 +984,13 @@ urlpatterns += [
     path("qr/s/<str:short>/", qr_verify_short, name="qr_registry_short"),
     path("qr/api/<str:token>/", qr_api_status, name="qr_registry_api"),
 ]
+
+# Command Center — search + trending + chat + OCR
+from core.cmd_center_views import cmd_search, cmd_trending, cmd_chat, cmd_ocr
+
+urlpatterns += [
+    path("api/cmd/search/", cmd_search, name="cmd_search"),
+    path("api/cmd/trending/", cmd_trending, name="cmd_trending"),
+    path("api/cmd/chat/", cmd_chat, name="cmd_chat"),
+    path("api/cmd/ocr/", cmd_ocr, name="cmd_ocr"),
+]

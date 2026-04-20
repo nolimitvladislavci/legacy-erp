@@ -459,3 +459,6 @@ def audit_action(action_name, target_param="pk", target_model_name=None):
 
 # QR Registry — globalni pečat za sve ulazeće/izlazeće objekte
 from core.qr_registry_models import QRToken, QRScanLog  # noqa: F401, E402
+
+# Command Center — SearchAuditLog + ChatMessage
+from core.search_audit_models import SearchAuditLog, ChatMessage  # noqa: F401, E402
