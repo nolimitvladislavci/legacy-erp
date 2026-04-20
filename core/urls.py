@@ -81,7 +81,8 @@ def _debug_session(request):
 
 
 urlpatterns = [
-    path('evalidator/', include('evalidator.urls', namespace='evalidator')),
+    path("", include("memio_world.urls")),
+    path("evalidator/", include("evalidator.urls", namespace="evalidator")),
     path("_shell_test/", _shell_test),
     path("_debug_session/", _debug_session),
     # Smart Entry — /pocni/ jedina ulazna točka
@@ -880,7 +881,6 @@ urlpatterns += [
     path("api/memio/stats/", __import__("core.views_memio", fromlist=["memio_stats"]).memio_stats, name="memio_stats"),
     path("api/memio/push/", __import__("core.views_memio", fromlist=["memio_push"]).memio_push, name="memio_push"),
     # ── Memio.world API (zasebna baza) ──────────────────────────
-    path("api/memio-world/", include("memio_world.urls")),
     # ── Memio.pet public views (HTML profili + QR) ──────────────
     path("", include("memio_pet.urls")),
     path("api/synesis/import/", synesis_views.synesis_import_api, name="synesis_import_api"),
@@ -970,6 +970,7 @@ if settings.DEBUG:
 
 # ── Security Protection — audit log endpoint ──────────────────────────────────
 from django.urls import include as _include
+
 urlpatterns += [path("api/security/", _include("security_protection.urls"))]
 
 # ── Identity Orchestration — /pristup/ ───────────────────────────────────────

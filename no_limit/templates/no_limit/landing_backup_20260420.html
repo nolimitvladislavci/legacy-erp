@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="hr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No Limit — European Association for Real-World Digital Transformation</title>
+<meta name="description" content="Open platforms digitising education, identification, validation, and business processes across the EU.">
+<meta property="og:title" content="No Limit — European Association">
+<meta property="og:url" content="https://no-limit.world/">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="/static/css/nolimit-portal.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+(function(){var t=localStorage.getItem('nl-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();
+</script>
+</head>
+<body>
+
+{% if prijava_ok %}
+<div class="nl-toast" onclick="this.remove()">
+    <i class="fas fa-check-circle"></i> Prijava zaprimljena! / Application received!
+</div>
+{% endif %}
+
+<!-- NAV -->
+<nav class="nl-nav">
+    <div class="nl-nav-brand"><span>No</span> Limit</div>
+    <div class="nl-nav-links">
+        <a href="#projekti" data-i18n="nav_projects">Projekti</a>
+        <a href="#ciljevi" data-i18n="nav_goals">Ciljevi</a>
+        <a href="#osnivaci" data-i18n="nav_founders">Osnivači</a>
+        <a href="#partneri" data-i18n="nav_partners">Partneri</a>
+        <a href="#ambasadori" data-i18n="nav_ambassadors">Ambasadori</a>
+        <a href="/statut/" data-i18n="nav_statute">Statut</a>
+        <a href="/kontakt/" data-i18n="nav_contact">Kontakt</a>
+
+        <!-- Language selector -->
+        <select id="nl-lang-selector" class="nl-lang-select">
+            <option value="hr">🇭🇷 HR</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="de">🇩🇪 DE</option>
+            <option value="sl">🇸🇮 SI</option>
+            <option value="fr">🇫🇷 FR</option>
+            <option value="it">🇮🇹 IT</option>
+            <option value="hu">🇭🇺 HU</option>
+            <option value="pl">🇵🇱 PL</option>
+        </select>
+
+        <!-- Theme toggle -->
+        <button id="nl-theme-btn" class="nl-theme-toggle" title="Dark/Light">
+            <i class="fas fa-sun"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="nl-hero">
+    <h1><span data-i18n="hero_title_1">No Limit</span> <span data-i18n="hero_title_2">— Europska udruga za digitalnu transformaciju stvarnog svijeta</span></h1>
+    <p class="nl-sub" data-i18n="hero_sub">Razvijamo otvorene digitalne platforme za djecu, životinje i institucije diljem Europske unije.</p>
+    <p class="nl-founder" data-i18n="hero_founder">Osnivač i predsjednik: Ivan Brtan</p>
+</section>
+
+<!-- PROJEKTI -->
+<section class="nl-section" id="projekti">
+    <h2 class="nl-section-title" data-i18n="sec_projects">Naši projekti</h2>
+    <p class="nl-section-sub" data-i18n="sec_projects_sub">Pet platformi, jedna misija — digitalizacija stvarnog svijeta i dokaz autentičnosti.</p>
+    <div class="nl-divider"></div>
+    <div class="nl-cards">
+        <a href="https://memio.world" class="nl-card" style="text-decoration:none">
+            <div class="nl-card-icon">🎓</div>
+            <h3 data-i18n="proj_playeu">PLAY.EU</h3>
+            <p data-i18n="proj_playeu_desc">Multikulturalna dječja obrazovna platforma — 22 bajke, 8 regija, 3 jezika. Zero-data politika za djecu.</p>
+            <span class="nl-card-link">memio.world <i class="fas fa-arrow-right"></i></span>
+        </a>
+        <a href="https://memio.pet" class="nl-card" style="text-decoration:none">
+            <div class="nl-card-icon">🐾</div>
+            <h3 data-i18n="proj_pet">memio.pet</h3>
+            <p data-i18n="proj_pet_desc">Digitalni identitet ljubimaca i zaštita životinja. QR profil, uzgajivači, veterinari.</p>
+            <span class="nl-card-link">memio.pet <i class="fas fa-arrow-right"></i></span>
+        </a>
+        <a href="https://evalidator.eu" class="nl-card" style="text-decoration:none">
+            <div class="nl-card-icon">✅</div>
+            <h3 data-i18n="proj_eval">eValidator</h3>
+            <p data-i18n="proj_eval_desc">Javni EU validacijski servis — OIB, IBAN, VAT ID. Infrastruktura povjerenja, besplatno zauvijek.</p>
+            <span class="nl-card-link">evalidator.eu <i class="fas fa-arrow-right"></i></span>
+        </a>
+        <a href="https://limit-connect.com" class="nl-card" style="text-decoration:none">
+            <div class="nl-card-icon">💼</div>
+            <h3 data-i18n="proj_limit">LIMIT Connect</h3>
+            <p data-i18n="proj_limit_desc">ERP/POS sustav za hrvatska i EU poduzeća. Fakturiranje, knjigovodstvo, plaće, vertikale.</p>
+            <span class="nl-card-link">limit-connect.com <i class="fas fa-arrow-right"></i></span>
+        </a>
+        <a href="https://evalidator.hr/verify/NOLIMIT-GENESIS-0001/" class="nl-card" style="text-decoration:none;border:1px solid rgba(201,168,76,.4)">
+            <div class="nl-card-icon">📦</div>
+            <h3 data-i18n="proj_earhiv">eArhivator <span style="background:#C9A84C;color:#000;font-size:10px;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle">.dok</span></h3>
+            <p data-i18n="proj_earhiv_desc">Univerzalni digitalni arhivar — lossless normalizacija, AI restauracija, MPEG-7 manifesti, eValidator pečat. Novi standard pohrane: <strong>.dok</strong></p>
+            <span class="nl-card-link">earhivator.hr <i class="fas fa-arrow-right"></i></span>
+        </a>
+    </div>
+</section>
+
+<!-- CILJEVI -->
+<section class="nl-section" id="ciljevi" style="border-top:1px solid var(--border)">
+    <h2 class="nl-section-title" data-i18n="sec_goals">Ciljevi udruge</h2>
+    <div class="nl-divider"></div>
+    <ol class="nl-ciljevi">
+        <li><span class="nl-cilj-num">1.</span> <span data-i18n="goal_1">Razvoj digitalnih obrazovnih sadržaja za djecu u EU</span></li>
+        <li><span class="nl-cilj-num">2.</span> <span data-i18n="goal_2">Zaštita životinja kroz digitalne identifikacijske sustave</span></li>
+        <li><span class="nl-cilj-num">3.</span> <span data-i18n="goal_3">Javni digitalni servisi — eValidator infrastruktura povjerenja</span></li>
+        <li><span class="nl-cilj-num">4.</span> <span data-i18n="goal_4">Podrška diaspora zajednicama (HR u DE, AT, SI)</span></li>
+        <li><span class="nl-cilj-num">5.</span> <span data-i18n="goal_5">EU projekt prijave (Creative Europe, Interreg, Erasmus+)</span></li>
+        <li><span class="nl-cilj-num">6.</span> <span data-i18n="goal_6">Ambasadorska mreža u svim EU državama</span></li>
+        <li><span class="nl-cilj-num">7.</span> <span data-i18n="goal_7">Digitalna baština i kulturno pamćenje</span></li>
+        <li><span class="nl-cilj-num">8.</span> <span data-i18n="goal_8">Podrška NGO-ima i azilima (No Limit azil program)</span></li>
+    </ol>
+</section>
+
+<!-- OSNIVACI I DOKUMENTI -->
+<section class="nl-section" id="osnivaci" style="border-top:1px solid var(--border)">
+    <h2 class="nl-section-title">Osnivači</h2>
+    <p class="nl-section-sub">Udruga registrirana 2026. godine u Republici Hrvatskoj. Svi dokumenti javno dostupni.</p>
+    <div class="nl-divider"></div>
+    <div class="nl-cards" style="max-width:800px;margin:0 auto">
+        <div class="nl-card" style="flex:1;min-width:160px">
+            <div class="nl-card-icon">👤</div>
+            <h3>Ivan Brtan</h3>
+            <p style="color:var(--text-secondary);font-size:0.85rem">Predsjednik</p>
+            <span style="color:var(--gold);font-size:0.8rem">Osnivač · CEO LIMIT Connect</span>
+        </div>
+        <div class="nl-card" style="flex:1;min-width:160px">
+            <div class="nl-card-icon">👤</div>
+            <h3>Ivica Kruljac</h3>
+            <p style="color:var(--text-secondary);font-size:0.85rem">Tajnik</p>
+            <span style="color:var(--gold);font-size:0.8rem">Osnivač · Pilot POS partner</span>
+        </div>
+        <div class="nl-card" style="flex:1;min-width:160px">
+            <div class="nl-card-icon">👤</div>
+            <h3>Marija Brtan</h3>
+            <p style="color:var(--text-secondary);font-size:0.85rem">Zapisničar</p>
+            <span style="color:var(--gold);font-size:0.8rem">Osnivač</span>
+        </div>
+        <div class="nl-card" style="flex:1;min-width:160px">
+            <div class="nl-card-icon">👤</div>
+            <h3>Antonio Brtan</h3>
+            <p style="color:var(--text-secondary);font-size:0.85rem">1. član</p>
+            <span style="color:var(--gold);font-size:0.8rem">Osnivač</span>
+        </div>
+    </div>
+
+    <!-- Dokumenti -->
+    <div style="max-width:700px;margin:32px auto 0;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <a href="/no-limit/statut/" target="_blank"
+           style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600">
+            📄 Statut udruge
+        </a>
+        <a href="/no-limit/statut/pdf/" target="_blank"
+           style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600">
+            📑 Statut PDF
+        </a>
+        <a href="https://evalidator.hr/verify/NOLIMIT-GENESIS-0001/" target="_blank"
+           style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600">
+            🔐 Genesis Block #0
+        </a>
+    </div>
+    <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:12px">
+        Osnivački dokumenti kriptografski zapečaćeni eValidator sustavom — javno verificabilni.
+    </p>
+</section>
+
+<!-- PARTNERI -->
+<section class="nl-section" id="partneri" style="border-top:1px solid var(--border)">
+    <h2 class="nl-section-title" data-i18n="sec_partners">Partneri</h2>
+    <div class="nl-divider"></div>
+    <div style="max-width:600px;margin:0 auto">
+        <div class="nl-partner">
+            <div class="nl-partner-flag">🇩🇪</div>
+            <div>
+                <div class="nl-partner-name">Viskovic Bau, Nufringen</div>
+                <div class="nl-partner-role" data-i18n="partner_viskovic">Poslovni partner i pokrovitelj</div>
+            </div>
+        </div>
+        <div class="nl-partner">
+            <div class="nl-partner-flag">🇭🇷</div>
+            <div>
+                <div class="nl-partner-name">Konjik d.o.o., Osijek</div>
+                <div class="nl-partner-role" data-i18n="partner_konjik">Tehnološki partner — razvoj platformi</div>
+            </div>
+        </div>
+        <div class="nl-partner" style="border-style:dashed">
+            <div class="nl-partner-flag">🇪🇺</div>
+            <div>
+                <div class="nl-partner-name" style="color:var(--text-muted)" data-i18n="partner_cta">Tvoje mjesto ovdje</div>
+                <div class="nl-partner-role" data-i18n="partner_cta_sub">Partner ili sponzor iz tvoje zemlje</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- AMBASADORI -->
+<section class="nl-section" id="ambasadori" style="border-top:1px solid var(--border)">
+    <h2 class="nl-section-title" data-i18n="sec_ambassadors">Ambasadorska mreža</h2>
+    <p class="nl-section-sub" data-i18n="sec_ambassadors_sub">Tražimo nacionalne koordinatore u svim EU državama.</p>
+    <div class="nl-divider"></div>
+    <div class="nl-cards" style="max-width:700px;margin:0 auto">
+        <div class="nl-amb-card">
+            <div style="font-size:2rem;margin-bottom:8px">🇭🇷</div>
+            <div class="nl-amb-name">Marija Čačić</div>
+            <div class="nl-amb-role" data-i18n="amb_marija_role">HR Ambasador — pedagog, magistra pedagogije</div>
+        </div>
+        {% for amb in ambasadori %}
+        <div class="nl-amb-card">
+            <div style="font-size:2rem;margin-bottom:8px">🇪🇺</div>
+            <div class="nl-amb-name">{{ amb.full_name }}</div>
+            <div class="nl-amb-role">{{ amb.get_country_display }} Ambassador</div>
+        </div>
+        {% endfor %}
+        <a href="/ambasadori/prijava/" class="nl-amb-empty" style="text-decoration:none">
+            <div style="font-size:1.5rem;margin-bottom:8px;color:var(--gold)">+</div>
+            <div style="color:var(--gold);font-weight:600" data-i18n="amb_apply">Postani ambasador</div>
+            <div style="font-size:.85rem;margin-top:4px" data-i18n="amb_apply_sub">Prijavi se za svoju zemlju</div>
+        </a>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="nl-cta">
+    <h2 style="font-size:1.5rem;color:var(--white);margin-bottom:8px" data-i18n="cta_title">Pridruži se pokretu</h2>
+    <p style="color:var(--text-dim);margin-bottom:24px" data-i18n="cta_sub">Bez papira. Bez granica. Bez ograničenja.</p>
+    <a href="/ambasadori/prijava/" class="nl-btn nl-btn-gold">
+        <i class="fas fa-globe-europe"></i> <span data-i18n="cta_ambassador">Postani ambasador</span>
+    </a>
+    <a href="/kontakt/" class="nl-btn nl-btn-outline">
+        <i class="fas fa-envelope"></i> <span data-i18n="cta_contact">Kontakt</span>
+    </a>
+</section>
+
+<!-- FOOTER -->
+<footer class="nl-footer">
+    <p><strong style="color:var(--gold)" data-i18n="footer_title">No Limit — Europska udruga za digitalnu transformaciju stvarnog svijeta</strong></p>
+    <p><span data-i18n="footer_president">Predsjednik: Ivan Brtan</span> | <a href="/statut/">Statut</a> | <a href="/statut/pdf/">PDF</a></p>
+    <p style="margin-top:12px">
+        <a href="https://memio.world">PLAY.EU</a> ·
+        <a href="https://memio.pet">memio.pet</a> ·
+        <a href="https://evalidator.eu">eValidator</a> ·
+        <a href="https://limit-connect.com">LIMIT Connect</a>
+    </p>
+    <p style="margin-top:16px;font-size:.75rem;color:var(--text-muted)" data-i18n="footer_gdpr">© 2026 No-limit udruga. Sva prava pridržana. GDPR-Kids politika aktivna.</p>
+</footer>
+
+<script src="/static/js/nolimit-i18n.js"></script>
+<script>setTimeout(function(){var t=document.querySelector('.nl-toast');if(t)t.remove();},5000);</script>
+</body>
+</html>

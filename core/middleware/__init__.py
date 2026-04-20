@@ -318,6 +318,7 @@ class UserLanguageMiddleware(MiddlewareMixin):
         "/media/",
         "/admin/",
         "/i18n/",
+        "/play/",  # memio.world — zasebna auth, bez i18n redirecta
         "/qr/",  # QR code endpoint
         "/push/",
         "/sw.js",
@@ -883,6 +884,7 @@ class DomainGateMiddleware:
         "/de/logout",
         "/en/logout",
         "/i18n/",
+        "/play/",  # memio.world — zasebna auth, bez i18n redirecta
         "/qr/",  # QR code endpoint
         "/__debug__/",
         "/hr/pocni/",
