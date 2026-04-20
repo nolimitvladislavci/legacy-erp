@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-20 (Dan 54), commit 85646d4d — Command Center LIVE (mic+kamera+tekst+chat+trending+AI)
+> Zadnji update: 2026-04-20 (Dan 54), commit 070ab47c — Command Center v2: prefetch+cross-module+live collab+DeepSeek zero-result
 
 ---
 
