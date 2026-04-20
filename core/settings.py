@@ -1446,3 +1446,14 @@ if DEBUG:
     SILKY_PYTHON_PROFILER = True
     SILKY_MAX_RECORDED_REQUESTS = 100
     SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
+
+
+# QR Registry — cleanup scan logs starijih od 90 dana (svakih 24h)
+CELERY_BEAT_SCHEDULE.update(
+    {
+        "qr-registry-cleanup": {
+            "task": "qr_registry.cleanup_scan_logs",
+            "schedule": 86400,  # 24h u sekundama
+        },
+    }
+)

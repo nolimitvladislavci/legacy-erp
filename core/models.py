@@ -455,3 +455,7 @@ def audit_action(action_name, target_param="pk", target_model_name=None):
         return wrapper
 
     return decorator
+
+
+# QR Registry — globalni pečat za sve ulazeće/izlazeće objekte
+from core.qr_registry_models import QRToken, QRScanLog  # noqa: F401, E402

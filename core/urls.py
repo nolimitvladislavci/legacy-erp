@@ -975,3 +975,12 @@ urlpatterns += [path("api/security/", _include("security_protection.urls"))]
 
 # ── Identity Orchestration — /pristup/ ───────────────────────────────────────
 urlpatterns += [path("pristup/", include("identity.urls", namespace="identity"))]
+
+# QR Registry — globalni verify/shortlink/API
+from core.qr_verify_views import qr_verify, qr_verify_short, qr_api_status
+
+urlpatterns += [
+    path("qr/<str:token>/", qr_verify, name="qr_registry_verify"),
+    path("qr/s/<str:short>/", qr_verify_short, name="qr_registry_short"),
+    path("qr/api/<str:token>/", qr_api_status, name="qr_registry_api"),
+]

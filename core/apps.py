@@ -22,3 +22,8 @@ class CoreConfig(AppConfig):
         from core.validation_engine import activate
 
         activate()
+
+        # QR Registry — globalni auto-QR za sve ulazne/izlazne objekte
+        from core.qr_registry import _connect_signals as _qr_connect
+
+        _qr_connect()
