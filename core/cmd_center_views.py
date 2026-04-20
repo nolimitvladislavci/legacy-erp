@@ -831,3 +831,41 @@ def cmd_predict(request):
 
     cache.set(cache_key, result, 300)  # 5min — podaci se ne mijenjaju minutno
     return JsonResponse(result)
+
+
+# ── 6. GOOD MORNING DASHBOARD ─────────────────────────────────────────────
+
+
+@login_required
+@require_GET
+def cmd_morning(request):
+    """
+    GET /api/cmd/morning/
+
+    Proaktivni briefing — hitne stavke za firmu.
+    Response: {greeting, items: [{priority, emoji, label, title, subtitle, actions, dismiss_key}]}
+    Cache 15min po company.pk (stavke se ne mijenjaju minuto po minutu).
+    """
+    from django.core.cache import cache
+
+    from .good_morning import get_morning_greeting, get_morning_items
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"greeting": "Dobro jutro!", "items": []})
+
+    cache_key = f"morning:{company.pk}"
+    cached = cache.get(cache_key)
+    if cached:
+        cached["greeting"] = get_morning_greeting(request.user)
+        return JsonResponse(cached)
+
+    items = get_morning_items(company=company, user=request.user)
+    result = {
+        "greeting": get_morning_greeting(request.user),
+        "items": items,
+        "total": len(items),
+        "urgent": sum(1 for i in items if i["priority"] == 0),
+    }
+    cache.set(cache_key, result, 900)  # 15min
+    return JsonResponse(result)

@@ -997,7 +997,7 @@ urlpatterns += [
 ]
 
 # Command Center v2 — cross-module, live collab, zero-result AI, prefetch
-from core.cmd_center_views import cmd_cross_module, cmd_live, cmd_predict, cmd_prefetch, cmd_zero_result_ai
+from core.cmd_center_views import cmd_cross_module, cmd_live, cmd_morning, cmd_predict, cmd_prefetch, cmd_zero_result_ai
 
 urlpatterns += [
     path("api/cmd/cross/", cmd_cross_module, name="cmd_cross_module"),
@@ -1005,4 +1005,5 @@ urlpatterns += [
     path("api/cmd/zero/", cmd_zero_result_ai, name="cmd_zero_result"),
     path("api/cmd/prefetch/", cmd_prefetch, name="cmd_prefetch"),
     path("api/cmd/predict/", cmd_predict, name="cmd_predict"),
+    path("api/cmd/morning/", cmd_morning, name="cmd_morning"),
 ]

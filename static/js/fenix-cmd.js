@@ -1229,3 +1229,180 @@ window.FenixCmd.temporalPredictor = FenixTemporalPredictor;
   });
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FenixGoodMorning — ZAKON 25 DAN 1
+   Proaktivni briefing: prikazuje hitne stavke kad je CMD prazan.
+   Dismiss po stavci (localStorage, reset svaki dan).
+   ═══════════════════════════════════════════════════════════════════════════ */
+var FenixGoodMorning = (function () {
+  'use strict';
+
+  var _loaded   = false;
+  var _data     = null;
+  var _panel    = null;
+  var _todayKey = 'gm_dismiss_' + new Date().toISOString().slice(0, 10);
+
+  function _getDismissed() {
+    try { return JSON.parse(localStorage.getItem(_todayKey) || '[]'); }
+    catch (e) { return []; }
+  }
+  function _dismiss(key) {
+    var list = _getDismissed();
+    if (!list.includes(key)) { list.push(key); }
+    try { localStorage.setItem(_todayKey, JSON.stringify(list)); }
+    catch (e) {}
+  }
+
+  function _load() {
+    if (_loaded) return;
+    _loaded = true;
+    fetch('/api/cmd/morning/', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.items || !d.items.length) return;
+        _data = d;
+        _buildPanel();
+      })
+      .catch(function () {});
+  }
+
+  function _buildPanel() {
+    var body = document.getElementById('fcCmdBody');
+    if (!body || !_data) return;
+
+    var dismissed = _getDismissed();
+    var visible = _data.items.filter(function (it) {
+      return !dismissed.includes(it.dismiss_key);
+    });
+    if (!visible.length) return;
+
+    var panel = document.createElement('div');
+    panel.id = 'fcGoodMorning';
+    panel.style.cssText = [
+      'padding:12px 16px',
+      'border-bottom:1px solid rgba(255,255,255,.06)',
+      'animation:fcFadeIn .3s ease',
+    ].join(';');
+
+    /* Greeting header */
+    var hdr = document.createElement('div');
+    hdr.style.cssText = 'font-size:.8rem;font-weight:600;color:#94a3b8;margin-bottom:10px;display:flex;align-items:center;gap:6px';
+    hdr.innerHTML = '<span>' + _escH(_data.greeting) + '</span>' +
+      (_data.urgent > 0
+        ? '<span style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:20px;padding:1px 8px;font-size:.65rem">' + _data.urgent + ' hitno</span>'
+        : '');
+    panel.appendChild(hdr);
+
+    /* Items */
+    visible.slice(0, 4).forEach(function (item) {
+      var row = document.createElement('div');
+      row.style.cssText = [
+        'display:flex',
+        'align-items:flex-start',
+        'gap:10px',
+        'padding:8px 10px',
+        'margin-bottom:4px',
+        'background:' + _priorityBg(item.priority),
+        'border:1px solid ' + _priorityBorder(item.priority),
+        'border-radius:8px',
+        'position:relative',
+      ].join(';');
+
+      var textCol = document.createElement('div');
+      textCol.style.cssText = 'flex:1;min-width:0';
+      textCol.innerHTML =
+        '<div style="font-size:.78rem;font-weight:600;color:#e2e8f0;display:flex;align-items:center;gap:6px">' +
+          '<span>' + _escH(item.emoji) + '</span>' +
+          '<span style="background:rgba(255,255,255,.06);border-radius:4px;padding:0 6px;font-size:.6rem;color:#94a3b8">' + _escH(item.label) + '</span>' +
+          '<span>' + _escH(item.title) + '</span>' +
+        '</div>' +
+        (item.subtitle
+          ? '<div style="font-size:.7rem;color:#64748b;margin-top:2px">' + _escH(item.subtitle) + '</div>'
+          : '') +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">' +
+          (item.actions || []).slice(0, 2).map(function (a) {
+            return '<a href="' + _escH(a.url) + '" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#94a3b8;font-size:.7rem;text-decoration:none;transition:.15s" onmouseover="this.style.color=\'#e2e8f0\'" onmouseout="this.style.color=\'#94a3b8\'">' +
+              '<i class="fas ' + _escH(a.icon || 'fa-arrow-right') + '" style="font-size:.6rem"></i>' +
+              _escH(a.label) + '</a>';
+          }).join('') +
+        '</div>';
+
+      /* Dismiss X */
+      var dimBtn = document.createElement('button');
+      dimBtn.style.cssText = 'background:none;border:none;color:#64748b;cursor:pointer;font-size:.8rem;padding:0 0 0 4px;flex-shrink:0;line-height:1';
+      dimBtn.innerHTML = '&times;';
+      dimBtn.title = 'Zanemari danas';
+      dimBtn.setAttribute('aria-label', 'Zanemari ovu stavku danas');
+      dimBtn.addEventListener('click', function () {
+        _dismiss(item.dismiss_key);
+        row.style.transition = 'opacity .2s';
+        row.style.opacity = '0';
+        setTimeout(function () { row.remove(); _cleanIfEmpty(panel); }, 200);
+      });
+
+      row.appendChild(textCol);
+      row.appendChild(dimBtn);
+      panel.appendChild(row);
+    });
+
+    _panel = panel;
+
+    /* Ubaci na vrh fcCmdBody, ispred svega */
+    body.insertBefore(panel, body.firstChild);
+  }
+
+  function _cleanIfEmpty(panel) {
+    if (!panel.querySelector('[style*="border-radius:8px"]')) {
+      panel.style.transition = 'opacity .2s';
+      panel.style.opacity = '0';
+      setTimeout(function () { panel.remove(); }, 200);
+    }
+  }
+
+  function _priorityBg(p) {
+    if (p === 0) return 'rgba(239,68,68,.06)';
+    if (p === 1) return 'rgba(234,179,8,.06)';
+    return 'rgba(59,130,246,.06)';
+  }
+  function _priorityBorder(p) {
+    if (p === 0) return 'rgba(239,68,68,.2)';
+    if (p === 1) return 'rgba(234,179,8,.2)';
+    return 'rgba(59,130,246,.2)';
+  }
+  function _escH(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function show() {
+    if (!_panel) return;
+    _panel.style.display = 'block';
+  }
+  function hide() {
+    if (!_panel) return;
+    _panel.style.display = 'none';
+  }
+
+  /* Inicijalizacija */
+  document.addEventListener('fcOpen', function () {
+    var inp = document.getElementById('fcCmdInput');
+    if (!inp || inp.value.trim()) return;
+    if (!_loaded) _load();
+    else show();
+  });
+  document.addEventListener('fcClose', hide);
+
+  /* Sakrij kad korisnik počne tipkati */
+  document.addEventListener('DOMContentLoaded', function () {
+    var inp = document.getElementById('fcCmdInput');
+    if (!inp) return;
+    inp.addEventListener('input', function () {
+      if (inp.value.trim()) hide();
+      else show();
+    });
+  });
+
+  return { load: _load };
+})();
+
+window.FenixCmd.goodMorning = FenixGoodMorning;

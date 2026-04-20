@@ -1457,3 +1457,21 @@ CELERY_BEAT_SCHEDULE.update(
         },
     }
 )
+
+# ── ZAKON 25 — Genetic Search + Blind Spots Audit ────────────────────────────
+CELERY_BEAT_SCHEDULE.update(
+    {
+        "genetic-search-evolve": {
+            "task": "core.evolve_search_genes",
+            "schedule": 86400,  # svaki dan u 03:00 (offset via CELERY_BEAT_MAX_LOOP_INTERVAL)
+        },
+        "blind-spots-audit": {
+            "task": "core.blind_spots_audit",
+            "schedule": 86400,  # svaki dan u 02:30
+        },
+        "blind-spots-weekly-digest": {
+            "task": "core.blind_spots_weekly_digest",
+            "schedule": 604800,  # svaki tjedan (ponedjeljak 08:00)
+        },
+    }
+)

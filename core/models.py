@@ -462,3 +462,9 @@ from core.qr_registry_models import QRToken, QRScanLog  # noqa: F401, E402
 
 # Command Center — SearchAuditLog + ChatMessage
 from core.search_audit_models import SearchAuditLog, ChatMessage  # noqa: F401, E402
+
+# Genetic Search — evolucija upita
+from core.genetic_search_models import SearchGene  # noqa: F401, E402
+
+# Blind Spots — adversarial audit
+from core.blind_spots_tasks import BlindSpotReport  # noqa: F401, E402
