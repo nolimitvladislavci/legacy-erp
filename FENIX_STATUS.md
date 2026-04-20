@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-20 (Dan 54), commit b778c137 — QR Registry LIVE (globalni QR modul + VC + honeypot + viral)
+> Zadnji update: 2026-04-20 (Dan 54), commit 85646d4d — Command Center LIVE (mic+kamera+tekst+chat+trending+AI)
 
 ---
 
