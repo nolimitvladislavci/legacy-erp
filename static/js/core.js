@@ -424,7 +424,7 @@ document.addEventListener('keydown', function(e){
 });
 
 document.addEventListener('keydown', function(e){
-  if(!document.getElementById('cmdOverlay').classList.contains('open')) return;
+  var _co=document.getElementById('cmdOverlay'); if(!_co||!_co.classList.contains('open')) return;
   var items = document.querySelectorAll('.cmd-item');
   if(e.key === 'ArrowDown'){
     e.preventDefault();

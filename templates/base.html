@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="/static/css/fenix-protection.css?v={{ STATIC_VERSION|default:'1' }}">
     {% block extra_css %}{% endblock %}
     <!-- BORG Faza 2: HTMX + Sortable.js -->
-    <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
     <!-- HTMX Global CSRF Header — svaki HTMX request šalje X-CSRFToken -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
