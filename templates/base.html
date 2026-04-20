@@ -649,26 +649,98 @@ window.FC = {
 #fcChatSend:hover { opacity: .85; }
 /* Btn visibility */
 #fcBtnBack { display: none; }
+
+/* ── A11Y: Screen reader only ─────────────────────────────────── */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ── A11Y: Focus visible (WCAG 2.1 AA) ────────────────────────── */
+#fcCmdBox *:focus-visible {
+  outline: 3px solid #4fc3f7 !important;
+  outline-offset: 2px !important;
+}
+
+/* ── A11Y: A11y toggle buttons ─────────────────────────────────── */
+.fc-a11y-btn {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  transition: background .15s;
+}
+.fc-a11y-btn:hover, .fc-a11y-btn[aria-pressed=true] {
+  background: rgba(79,195,247,.15);
+  color: #4fc3f7;
+  border-color: #4fc3f7;
+}
+
+/* ── A11Y: High contrast mode ──────────────────────────────────── */
+body[data-a11y~=hc] #fcCmdBox {
+  background: #000 !important;
+  border: 2px solid #fff !important;
+  color: #fff !important;
+}
+body[data-a11y~=hc] #fcCmdInput {
+  background: #111 !important;
+  color: #fff !important;
+  border: 1px solid #fff !important;
+}
+body[data-a11y~=hc] .fc-result-item {
+  color: #fff !important;
+  border-bottom-color: #555 !important;
+}
+body[data-a11y~=hc] .fc-result-item:hover,
+body[data-a11y~=hc] .fc-result-item.fc-selected {
+  background: #fff !important;
+  color: #000 !important;
+}
+body[data-a11y~=hc] .fc-overlay { background: rgba(0,0,0,.95) !important; }
+body[data-a11y~=hc] .fc-icon-btn { color: #fff !important; }
+body[data-a11y~=hc] .fc-footer { background: #111 !important; color: #fff !important; }
+body[data-a11y~=hc] kbd { background: #333 !important; color: #fff !important; border-color: #fff !important; }
+
+/* ── A11Y: Large font mode ─────────────────────────────────────── */
+body[data-a11y~=lg] #fcCmdBox { font-size: 1.1rem; }
+body[data-a11y~=lg] #fcCmdInput { font-size: 1.1rem; }
+body[data-a11y~=lg] .fc-result-title { font-size: .95rem; }
+body[data-a11y~=lg] .fc-result-sub { font-size: .82rem; }
 </style>
 
-<div class="fc-overlay" id="fcCmdOverlay">
+<div class="fc-overlay" id="fcCmdOverlay" role="dialog" aria-modal="true" aria-label="Command Center — pretraži ili pitaj AI" aria-labelledby="fcSrTitle">
   <div class="fc-box" id="fcCmdBox">
 
+    <!-- Screen reader title (visually hidden) -->
+    <h2 id="fcSrTitle" class="sr-only">Command Center — Pretraga i AI asistent</h2>
+    <!-- Live region za SR announcements -->
+    <div id="fcSrAnnounce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
     <!-- Input bar -->
-    <div class="fc-input-bar">
+    <div class="fc-input-bar" role="search">
       <i class="fas fa-search fc-search-icon"></i>
-      <input id="fcCmdInput" placeholder="Pretraži ili pitaj AI..." autocomplete="off">
+      <input id="fcCmdInput" placeholder="Pretraži ili pitaj AI..." autocomplete="off" aria-label="Pretraži ili pitaj AI" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-autocomplete="list" aria-controls="fcCmdResults">
       <div class="fc-input-actions">
-        <button class="fc-icon-btn" id="fcBtnVoice" title="Glasovna pretraga (mikrofon)">
+        <button class="fc-icon-btn" id="fcBtnVoice" title="Glasovna pretraga (mikrofon)" aria-label="Aktiviraj glasovnu pretragu" aria-pressed="false">
           <i class="fas fa-microphone"></i>
         </button>
-        <button class="fc-icon-btn" id="fcBtnCamera" title="Pretraga kamerom (OCR)">
+        <button class="fc-icon-btn" id="fcBtnCamera" title="Pretraga kamerom (OCR)" aria-label="Aktiviraj pretragu kamerom" aria-pressed="false">
           <i class="fas fa-camera"></i>
         </button>
-        <button class="fc-icon-btn" id="fcBtnChat" title="AI Chat asistent" style="color:var(--gold,#c9a84c)">
+        <button class="fc-icon-btn" id="fcBtnChat" title="AI Chat asistent" style="color:var(--gold,#c9a84c)" aria-label="Otvori AI Chat asistenta">
           <i class="fas fa-comment-dots"></i>
         </button>
-        <button class="fc-icon-btn" id="fcBtnBack" title="Natrag na pretragu">
+        <button class="fc-icon-btn" id="fcBtnBack" title="Natrag na pretragu" aria-label="Natrag na pretragu">
           <i class="fas fa-arrow-left"></i>
         </button>
         <kbd class="fc-kbd">ESC</kbd>
@@ -684,7 +756,7 @@ window.FC = {
       <div id="fcCmdTrending"></div>
 
       <!-- Search results -->
-      <div id="fcCmdResults"></div>
+      <div id="fcCmdResults" role="listbox" aria-label="Rezultati pretrage"></div>
 
       <!-- AI Suggest (Budućnost 1 — DeepSeek intent) -->
       <div id="fcAiSuggest"></div>
@@ -693,8 +765,8 @@ window.FC = {
       <div id="fcCmdChatWrap">
         <div id="fcChatMessages"></div>
         <div class="fc-chat-input-bar">
-          <textarea id="fcChatInput" placeholder="Pitajte AI..." rows="1"></textarea>
-          <button id="fcChatSend" title="Pošalji"><i class="fas fa-paper-plane"></i></button>
+          <textarea id="fcChatInput" placeholder="Pitajte AI..." rows="1" aria-label="Unesite poruku za AI asistenta"></textarea>
+          <button id="fcChatSend" title="Pošalji" aria-label="Pošalji poruku"><i class="fas fa-paper-plane"></i></button>
         </div>
       </div>
     </div>
@@ -704,8 +776,12 @@ window.FC = {
       <span><kbd>↑↓</kbd> navigacija</span>
       <span><kbd>Enter</kbd> otvori</span>
       <span><kbd>ESC</kbd> zatvori</span>
-      <span style="margin-left:auto;color:var(--gold,#c9a84c)">
-        <i class="fas fa-fire-alt"></i> Trending · <i class="fas fa-microphone"></i> Glas · <i class="fas fa-camera"></i> Kamera · <i class="fas fa-comment-dots"></i> AI Chat
+      <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <button id="fcA11yFont" class="fc-a11y-btn" aria-label="Povećaj font" title="Povećaj font">Aa</button>
+        <button id="fcA11yContrast" class="fc-a11y-btn" aria-label="Visoki kontrast" title="Visoki kontrast">&#9681;</button>
+        <span style="color:var(--gold,#c9a84c)">
+          <i class="fas fa-fire-alt"></i> Trending · <i class="fas fa-microphone"></i> Glas · <i class="fas fa-camera"></i> Kamera
+        </span>
       </span>
     </div>
 

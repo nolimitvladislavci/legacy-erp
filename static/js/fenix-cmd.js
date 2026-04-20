@@ -1058,3 +1058,174 @@ var FenixTemporalPredictor = (function () {
 
 /* Ažuriraj debug namespace */
 window.FenixCmd.temporalPredictor = FenixTemporalPredictor;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZAKON 24 DAN 2 — WCAG 2.1 AA Accessibility Enhancement
+   KORAK 2.2: Focus trap + keyboard nav
+   KORAK 2.3: High contrast + font size toggle
+   KORAK 2.4: Screen reader live region
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── KORAK 2.4: Screen reader announcements ─────────────────────────── */
+  function _announce(msg) {
+    var el = document.getElementById('fcSrAnnounce');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(function () { el.textContent = msg; }, 50);  // reset → set triggers SR
+  }
+
+  /* Hook na rezultate — announce count */
+  document.addEventListener('fcResultsRendered', function (e) {
+    var d = e.detail || {};
+    if (d.query) {
+      var msg = d.count > 0
+        ? 'Pronađeno ' + d.count + ' rezultata za ' + d.query
+        : 'Nema rezultata za ' + d.query;
+      _announce(msg);
+    }
+  });
+
+  /* Announce CMD open/close */
+  document.addEventListener('fcOpen', function () {
+    _announce('Command Center otvoren. Unesite pojam za pretragu ili pitajte AI asistenta.');
+  });
+  document.addEventListener('fcClose', function () {
+    _announce('Command Center zatvoren.');
+  });
+
+  /* Announce voice/camera state */
+  document.addEventListener('DOMContentLoaded', function () {
+    var btnVoice  = document.getElementById('fcBtnVoice');
+    var btnCamera = document.getElementById('fcBtnCamera');
+
+    if (btnVoice) {
+      btnVoice.addEventListener('click', function () {
+        var isPressed = btnVoice.getAttribute('aria-pressed') === 'true';
+        btnVoice.setAttribute('aria-pressed', isPressed ? 'false' : 'true');
+        _announce(isPressed ? 'Glasovna pretraga deaktivirana.' : 'Glasovna pretraga aktivirana. Govorite...');
+      });
+    }
+    if (btnCamera) {
+      btnCamera.addEventListener('click', function () {
+        var isPressed = btnCamera.getAttribute('aria-pressed') === 'true';
+        btnCamera.setAttribute('aria-pressed', isPressed ? 'false' : 'true');
+        _announce(isPressed ? 'Kamera deaktivirana.' : 'Kamera aktivirana. Snimite dokument.');
+      });
+    }
+
+    /* Aria-expanded na input kad ima rezultata */
+    var inp     = document.getElementById('fcCmdInput');
+    var results = document.getElementById('fcCmdResults');
+    if (inp && results) {
+      var obs = new MutationObserver(function () {
+        var hasResults = results.children.length > 0;
+        inp.setAttribute('aria-expanded', hasResults ? 'true' : 'false');
+      });
+      obs.observe(results, { childList: true });
+    }
+  });
+
+  /* ── KORAK 2.2: Focus trap unutar dijaloga ──────────────────────────── */
+  document.addEventListener('keydown', function (e) {
+    var overlay = document.getElementById('fcCmdOverlay');
+    if (!overlay || !overlay.classList.contains('fc-open')) return;
+    if (e.key !== 'Tab') return;
+
+    /* Skupi sve focusable elemente unutar CMD boxa */
+    var box = document.getElementById('fcCmdBox');
+    if (!box) return;
+    var focusable = Array.from(
+      box.querySelectorAll(
+        'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter(function (el) {
+      return !el.closest('[style*="display:none"]') && !el.closest('[hidden]') &&
+             getComputedStyle(el).display !== 'none';
+    });
+
+    if (!focusable.length) return;
+
+    var first = focusable[0];
+    var last  = focusable[focusable.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  /* ── KORAK 2.3: High contrast + font size toggle ────────────────────── */
+  var A11Y_KEY = 'fenix_a11y';  /* localStorage key */
+
+  function _loadA11yState() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+      if (saved.hc) document.body.setAttribute('data-a11y',
+        (document.body.getAttribute('data-a11y') || '') + ' hc');
+      if (saved.lg) document.body.setAttribute('data-a11y',
+        (document.body.getAttribute('data-a11y') || '') + ' lg');
+    } catch (e) {}
+  }
+
+  function _toggleA11y(mode) {
+    var current = (document.body.getAttribute('data-a11y') || '').split(/\s+/).filter(Boolean);
+    var idx = current.indexOf(mode);
+    if (idx > -1) { current.splice(idx, 1); }
+    else { current.push(mode); }
+    document.body.setAttribute('data-a11y', current.join(' '));
+
+    /* Persist */
+    try {
+      var state = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}');
+      state[mode] = current.includes(mode);
+      localStorage.setItem(A11Y_KEY, JSON.stringify(state));
+    } catch (e) {}
+
+    /* Update button pressed state */
+    var btn = document.getElementById(mode === 'hc' ? 'fcA11yContrast' : 'fcA11yFont');
+    if (btn) btn.setAttribute('aria-pressed', current.includes(mode) ? 'true' : 'false');
+
+    /* Announce */
+    if (mode === 'hc') {
+      _announce(current.includes('hc') ? 'Visoki kontrast aktiviran.' : 'Visoki kontrast deaktiviran.');
+    } else {
+      _announce(current.includes('lg') ? 'Veći font aktiviran.' : 'Standardni font vraćen.');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    _loadA11yState();
+
+    var btnFont     = document.getElementById('fcA11yFont');
+    var btnContrast = document.getElementById('fcA11yContrast');
+
+    if (btnFont) {
+      /* Initial state */
+      var initA11y = (document.body.getAttribute('data-a11y') || '').split(/\s+/);
+      btnFont.setAttribute('aria-pressed', initA11y.includes('lg') ? 'true' : 'false');
+      btnFont.addEventListener('click', function () { _toggleA11y('lg'); });
+    }
+    if (btnContrast) {
+      var initA11y2 = (document.body.getAttribute('data-a11y') || '').split(/\s+/);
+      btnContrast.setAttribute('aria-pressed', initA11y2.includes('hc') ? 'true' : 'false');
+      btnContrast.addEventListener('click', function () { _toggleA11y('hc'); });
+    }
+  });
+
+  /* Keyboard shortcut: Alt+C = high contrast, Alt+F = font toggle */
+  document.addEventListener('keydown', function (e) {
+    if (!e.altKey) return;
+    if (e.key === 'c' || e.key === 'C') { e.preventDefault(); _toggleA11y('hc'); }
+    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); _toggleA11y('lg'); }
+  });
+
+})();
