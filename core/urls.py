@@ -994,3 +994,13 @@ urlpatterns += [
     path("api/cmd/chat/", cmd_chat, name="cmd_chat"),
     path("api/cmd/ocr/", cmd_ocr, name="cmd_ocr"),
 ]
+
+# Command Center v2 — cross-module, live collab, zero-result AI, prefetch
+from core.cmd_center_views import cmd_cross_module, cmd_live, cmd_zero_result_ai, cmd_prefetch
+
+urlpatterns += [
+    path("api/cmd/cross/", cmd_cross_module, name="cmd_cross_module"),
+    path("api/cmd/live/", cmd_live, name="cmd_live"),
+    path("api/cmd/zero/", cmd_zero_result_ai, name="cmd_zero_result"),
+    path("api/cmd/prefetch/", cmd_prefetch, name="cmd_prefetch"),
+]

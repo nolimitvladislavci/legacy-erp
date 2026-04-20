@@ -420,3 +420,371 @@ def cmd_ocr(request):
         text = ""
 
     return JsonResponse({"text": text})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# NADOGRADNJA — 4 mehanizma
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 1. CROSS-MODULE INTELLIGENCE ─────────────────────────────────────────────
+
+
+@login_required
+@require_GET
+def cmd_cross_module(request):
+    """
+    GET /api/cmd/cross/?q=term&entity_type=partner&entity_id=123
+
+    Kad korisnik klikne rezultat (npr. Partner Baumaxx),
+    vraćamo sve povezane zapise tog entiteta:
+      - fakture tog partnera
+      - arhiva dokumenti
+      - zadnje aktivnosti
+
+    UI prikazuje "intelligence panel" pored glavnih rezultata.
+    """
+    q = request.GET.get("q", "").strip()
+    entity_type = request.GET.get("entity_type", "")
+    entity_id = request.GET.get("entity_id", "")
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"related": [], "summary": ""})
+
+    related = []
+    summary = ""
+
+    if entity_type == "partner" and entity_id:
+        related, summary = _cross_partner(entity_id, company)
+    elif entity_type == "invoice" and entity_id:
+        related, summary = _cross_invoice(entity_id, company)
+    elif q and not entity_type:
+        # Fuzzy cross — ako nema explicit entity, pronađi po upitu
+        related, summary = _cross_fuzzy(q, company)
+
+    return JsonResponse({"related": related, "summary": summary})
+
+
+def _cross_partner(entity_id: str, company) -> tuple[list, str]:
+    """Sve što se tiče tog partnera/firme."""
+    related = []
+    partner_name = ""
+    try:
+        from partners.models import Partner
+
+        p = Partner.objects.filter(pk=entity_id, company=company).first()
+        if p:
+            partner_name = p.name
+    except Exception:
+        pass
+
+    name_q = partner_name or entity_id
+
+    # Fakture za tog partnera
+    try:
+        from django.db.models import Sum
+
+        from invoicing.models import Invoice
+
+        invs = Invoice.objects.filter(company=company, client_name__icontains=name_q).order_by("-created_at")[:5]
+        total = (
+            Invoice.objects.filter(company=company, client_name__icontains=name_q).aggregate(t=Sum("total"))["t"] or 0
+        )
+        for inv in invs:
+            related.append(
+                {
+                    "module": "invoicing",
+                    "icon": "fa-file-invoice-dollar",
+                    "type": "Račun",
+                    "title": f"{inv.number} — {inv.total} EUR",
+                    "subtitle": inv.get_status_display(),
+                    "url": f"/hr/invoicing/{inv.pk}/",
+                }
+            )
+        if total:
+            summary += f"Ukupno faktura: {total:.2f} EUR. "
+    except Exception:
+        pass
+
+    # Arhiva dokumenti za tog partnera
+    try:
+        from documents.models import ArhivaEntry
+
+        docs = ArhivaEntry.objects.filter(company=company, title__icontains=name_q).order_by("-created_at")[:3]
+        for d in docs:
+            related.append(
+                {
+                    "module": "arhiva",
+                    "icon": "fa-archive",
+                    "type": "Arhiva",
+                    "title": d.title,
+                    "subtitle": str(d.document_date or ""),
+                    "url": f"/hr/documents/arhiva/?entry={d.pk}",
+                }
+            )
+    except Exception:
+        pass
+
+    if not summary:
+        summary = f"Pronađeno {len(related)} povezanih zapisa za {partner_name or entity_id}."
+    return related, summary
+
+
+def _cross_invoice(entity_id: str, company) -> tuple[list, str]:
+    """Sve fakture istog klijenta + arhiva."""
+    related = []
+    summary = ""
+    try:
+        from invoicing.models import Invoice
+
+        inv = Invoice.objects.filter(pk=entity_id, company=company).first()
+        if not inv:
+            return related, summary
+        # Ostale fakture istog klijenta
+        others = (
+            Invoice.objects.filter(company=company, client_name=inv.client_name)
+            .exclude(pk=entity_id)
+            .order_by("-created_at")[:5]
+        )
+        for o in others:
+            related.append(
+                {
+                    "module": "invoicing",
+                    "icon": "fa-file-invoice-dollar",
+                    "type": "Račun",
+                    "title": f"{o.number} — {o.total} EUR",
+                    "subtitle": o.get_status_display(),
+                    "url": f"/hr/invoicing/{o.pk}/",
+                }
+            )
+        summary = f"Klijent: {inv.client_name} · {len(others)} ostalih računa."
+    except Exception:
+        pass
+    return related, summary
+
+
+def _cross_fuzzy(q: str, company) -> tuple[list, str]:
+    """Fuzzy cross: traži entityje koji se pojavljuju u više modula."""
+    related = []
+    # Uzmi prvih 5 normalnih rezultata i dodaj cross-links
+    base = _do_search(q, company)
+    if base:
+        related = base[:5]
+        summary = f"Pronađeno u {len(set(r['module'] for r in base))} modula."
+    else:
+        summary = ""
+    return related, summary
+
+
+# ── 2. LIVE COLLABORATION ─────────────────────────────────────────────────────
+
+_LIVE_KEY = "cmd:live:{company_id}"
+_LIVE_TTL = 25  # sekundi — koliko dugo ostaje "active"
+_LIVE_LIMIT = 10  # max korisnika u live setu
+
+
+@login_required
+@require_GET
+def cmd_live(request):
+    """
+    GET /api/cmd/live/?q=
+
+    Dual role:
+      1. Ako je q prisutan → publisha "user X traži q" u Redis
+      2. Uvijek vraća tko je aktivan u firmi (zadnjih 25s)
+
+    Vraća: {active: [{username, query, ts}], count: N}
+    Frontend polla ovo svakih 8s.
+    """
+    q = request.GET.get("q", "").strip()
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"active": [], "count": 0})
+
+    try:
+        from django.core.cache import cache
+
+        redis_key = _LIVE_KEY.format(company_id=company.pk)
+
+        # Dohvati postojeći live set
+        live_set: list = cache.get(redis_key) or []
+
+        # Ukloni stare zapise (> TTL)
+        import time
+
+        now = time.time()
+        live_set = [e for e in live_set if now - e.get("ts", 0) < _LIVE_TTL]
+
+        # Update ili dodaj current user
+        if q and len(q) >= 2:
+            username = request.user.get_full_name() or request.user.username
+            # Ukloni stari zapis za ovog usera
+            live_set = [e for e in live_set if e.get("uid") != request.user.pk]
+            live_set.append(
+                {
+                    "uid": request.user.pk,
+                    "username": username,
+                    "query": q[:60],
+                    "ts": now,
+                }
+            )
+            live_set = live_set[-_LIVE_LIMIT:]
+            cache.set(redis_key, live_set, _LIVE_TTL)
+
+        # Pripremi response — ne prikazuj current usera drugima (ali vrati count)
+        others = [{"username": e["username"], "query": e["query"]} for e in live_set if e.get("uid") != request.user.pk]
+
+    except Exception as e:
+        logger.debug("cmd_live redis error: %s", e)
+        others = []
+
+    return JsonResponse({"active": others, "count": len(others)})
+
+
+# ── 3. ZERO-RESULT DEEPSEEK ──────────────────────────────────────────────────
+
+
+@login_required
+@require_GET
+def cmd_zero_result_ai(request):
+    """
+    GET /api/cmd/zero/?q=term
+
+    Kada search vrati 0 rezultata → pravi DeepSeek poziv s contextom firme.
+    Vraća: {answer, actions, confidence}
+
+    Nije rule-based — pravi AI koji razumije kontekst.
+    Cache: 5 minuta po (company, query) paru.
+    """
+    q = request.GET.get("q", "").strip()
+    if len(q) < 3:
+        return JsonResponse({"answer": "", "actions": [], "confidence": 0})
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"answer": "", "actions": [], "confidence": 0})
+
+    # Cache po company+query (5min)
+    from django.core.cache import cache
+
+    cache_key = f"cmd:zero:{company.pk}:{hash(q.lower())}"
+    cached = cache.get(cache_key)
+    if cached:
+        return JsonResponse(cached)
+
+    result = _call_deepseek_zero(q, company, request.user)
+    cache.set(cache_key, result, 300)
+    return JsonResponse(result)
+
+
+def _call_deepseek_zero(q: str, company, user) -> dict:
+    """Pravi DeepSeek poziv za zero-result situacije."""
+    # Skupi company context
+    context_lines = [f"Tvrtka: {company.name}"]
+    try:
+        from invoicing.models import Invoice
+
+        inv_count = Invoice.objects.filter(company=company).count()
+        context_lines.append(f"Faktura u sustavu: {inv_count}")
+    except Exception:
+        pass
+    try:
+        from documents.models import ArhivaEntry
+
+        doc_count = ArhivaEntry.objects.filter(company=company).count()
+        context_lines.append(f"Dokumenata u arhivi: {doc_count}")
+    except Exception:
+        pass
+    try:
+        recent = SearchAuditLog.trending(company, days=7, limit=3)
+        if recent:
+            context_lines.append(f"Nedavne pretrage: {', '.join(recent)}")
+    except Exception:
+        pass
+
+    company_ctx = "\n".join(context_lines)
+
+    prompt = f"""Ti si AI asistent u ERP sustavu za računovodstvo (LIMIT Connect / Fenix).
+Korisnik je tražio: "{q}"
+Pretraživanje nije pronašlo ništa.
+
+Kontekst tvrtke:
+{company_ctx}
+
+Dostupni moduli: Fakture (/hr/invoicing/), Arhiva (/hr/documents/arhiva/), 
+Partneri (/hr/partners/), POS (/hr/pos/), Smart Import (/hr/smart-import/),
+AI Cockpit (/hr/ai-cockpit/doktor/), Konto (/hr/konto/), eRačun (/hr/eracun/).
+
+Odgovori na hrvatskom u JSON formatu:
+{{
+  "answer": "kratko objašnjenje što je korisnik vjerojatno htio i zašto nema rezultata (max 2 rečenice)",
+  "actions": [
+    {{"label": "Naziv akcije", "url": "/hr/...", "icon": "fa-plus", "priority": 1}},
+    ...max 3 akcije
+  ],
+  "confidence": 0.0-1.0
+}}
+
+Samo JSON, bez markdowna."""
+
+    try:
+        from core.deepseek_client import DeepSeekClient
+
+        client = DeepSeekClient()
+        raw = client.chat(prompt, max_tokens=400)
+        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        import json as _json
+
+        parsed = _json.loads(raw)
+        return {
+            "answer": parsed.get("answer", ""),
+            "actions": parsed.get("actions", [])[:3],
+            "confidence": float(parsed.get("confidence", 0.5)),
+        }
+    except Exception as e:
+        logger.warning("DeepSeek zero-result failed: %s", e)
+        # Fallback: strukturirani rule-based
+        sug = _ai_suggest_creation(q, company, user)
+        return {
+            "answer": f"Nema zapisa za '{q[:40]}' u sustavu. Možda trebate kreirati novi zapis?",
+            "actions": [{"label": sug["label"], "url": sug["url"], "icon": sug["icon"], "priority": 1}] if sug else [],
+            "confidence": 0.3,
+        }
+
+
+# ── 4. PREFETCH ENDPOINT (za SearchPrefetcher) ────────────────────────────────
+
+
+@login_required
+@require_GET
+def cmd_prefetch(request):
+    """
+    GET /api/cmd/prefetch/?prefixes=fa,fak,faktu
+
+    Batch endpoint — prima listu prefiksa, vraća rezultate za svaki.
+    Koristi SearchPrefetcher na frontendu koji predviđa sljedeće znakove.
+    Odgovara max 3 prefiksa po zahtjevu, svaki max 3 rezultata.
+    """
+    raw = request.GET.get("prefixes", "")
+    prefixes = [p.strip() for p in raw.split(",") if len(p.strip()) >= 2][:3]
+
+    company = get_user_company(request)
+    if not company or not prefixes:
+        return JsonResponse({"prefetched": {}})
+
+    from django.core.cache import cache
+
+    out = {}
+    for pref in prefixes:
+        cache_key = f"cmd:pf:{company.pk}:{pref.lower()[:20]}"
+        hits = cache.get(cache_key)
+        if hits is None:
+            hits = _do_search(pref, company)[:3]
+            cache.set(cache_key, hits, 120)  # 2min cache
+        out[pref] = hits
+
+    return JsonResponse({"prefetched": out})

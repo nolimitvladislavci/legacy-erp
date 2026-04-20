@@ -470,3 +470,418 @@
   });
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FENIX CMD v2 — 4 nadogradnje
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. PREDICTIVE PREFETCHER ─────────────────────────────────────────────── */
+
+var FenixSearchPrefetcher = (function () {
+  var cache = new Map();          // prefiks → [{module,title,url,...}]
+  var pendingPrefixes = new Set();
+  var prefetchTimer = null;
+
+  /**
+   * Poziva se svaki put kad korisnik tipka.
+   * Predviđa sljedeća 2-3 slova i batch-fetcha u pozadini.
+   */
+  function schedule(query) {
+    clearTimeout(prefetchTimer);
+    if (!query || query.length < 2) return;
+
+    prefetchTimer = setTimeout(function () {
+      var predictions = _predictNextChars(query);
+      var toFetch = predictions.filter(function (p) {
+        return !cache.has(p) && !pendingPrefixes.has(p);
+      });
+      if (toFetch.length === 0) return;
+
+      toFetch.forEach(function (p) { pendingPrefixes.add(p); });
+
+      fetch('/api/cmd/prefetch/?prefixes=' + toFetch.map(encodeURIComponent).join(','), {
+        credentials: 'same-origin',
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var pf = data.prefetched || {};
+          Object.keys(pf).forEach(function (k) {
+            cache.set(k, pf[k]);
+            pendingPrefixes.delete(k);
+          });
+        })
+        .catch(function () {
+          toFetch.forEach(function (p) { pendingPrefixes.delete(p); });
+        });
+    }, 150);  // 150ms — prije debounce searcha (280ms)
+  }
+
+  function get(query) {
+    return cache.get(query) || null;
+  }
+
+  function _predictNextChars(q) {
+    // Generiraj 3 varijante: q + česti nastavci
+    var suffixes = ['a', 'e', 'i', ' ', 'n', 'r', 't'];
+    var predictions = [q];
+    suffixes.slice(0, 3).forEach(function (s) {
+      predictions.push(q + s);
+    });
+    return predictions.filter(function (p) { return p.length >= 2 && p.length <= 30; });
+  }
+
+  return { schedule: schedule, get: get };
+})();
+
+/* Zakači prefetcher na input */
+document.addEventListener('DOMContentLoaded', function () {
+  var inp = document.getElementById('fcCmdInput');
+  if (!inp) return;
+  inp.addEventListener('input', function () {
+    FenixSearchPrefetcher.schedule(inp.value.trim());
+  });
+});
+
+/* Patch _doSearch da provjeri prefetch cache PRIJE API poziva */
+(function () {
+  var _originalDoSearch = window._fcDoSearch;
+  if (!_originalDoSearch) return;  // ako nije eksponiran, patch je inline u closure
+})();
+// Prefetch integracija — exponiraj za inline patch u closure
+window.FenixPrefetcher = FenixSearchPrefetcher;
+
+
+/* ── 2. CROSS-MODULE INTELLIGENCE PANEL ──────────────────────────────────── */
+
+var FenixCrossModule = (function () {
+  var _panel = null;
+  var _activeQuery = '';
+
+  function init() {
+    // Kreiraj panel ako ne postoji
+    if (document.getElementById('fcCrossPanel')) return;
+    var panel = document.createElement('div');
+    panel.id = 'fcCrossPanel';
+    panel.className = 'fc-cross-panel';
+    panel.style.cssText = [
+      'display:none',
+      'position:absolute',
+      'left:calc(100% + 8px)',
+      'top:0',
+      'width:280px',
+      'background:var(--bg-card,#1e2a3a)',
+      'border:1px solid var(--border,#334155)',
+      'border-radius:12px',
+      'padding:12px',
+      'box-shadow:0 8px 30px rgba(0,0,0,.4)',
+      'z-index:10001',
+      'max-height:400px',
+      'overflow-y:auto',
+    ].join(';');
+    var box = document.getElementById('fcCmdBox');
+    if (box) {
+      box.style.position = 'relative';
+      box.appendChild(panel);
+    }
+    _panel = panel;
+  }
+
+  function show(entityType, entityId, query) {
+    init();
+    if (!_panel) return;
+    _activeQuery = query;
+
+    var url = '/api/cmd/cross/?entity_type=' + encodeURIComponent(entityType) +
+              '&entity_id=' + encodeURIComponent(entityId) +
+              '&q=' + encodeURIComponent(query);
+
+    _panel.innerHTML = '<div style="font-size:.7rem;color:#64748b;padding:4px 0">Učitavam veze...</div>';
+    _panel.style.display = 'block';
+
+    fetch(url, { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.related || !data.related.length) { hide(); return; }
+        var html = '<div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold,#c9a84c);margin-bottom:8px">' +
+          '<i class="fas fa-project-diagram"></i> Povezani zapisi</div>';
+        if (data.summary) {
+          html += '<div style="font-size:.72rem;color:#94a3b8;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06)">' +
+            data.summary + '</div>';
+        }
+        data.related.forEach(function (r) {
+          html += '<a href="' + r.url + '" style="display:flex;align-items:center;gap:8px;padding:5px 0;text-decoration:none;color:var(--text,#e2e8f0);font-size:.78rem;border-bottom:1px solid rgba(255,255,255,.04)">' +
+            '<i class="fas ' + (r.icon || 'fa-file') + '" style="color:var(--gold,#c9a84c);width:14px"></i>' +
+            '<span>' + r.title + '</span>' +
+            '<span style="margin-left:auto;font-size:.6rem;color:#64748b">' + r.type + '</span>' +
+            '</a>';
+        });
+        _panel.innerHTML = html;
+      })
+      .catch(hide);
+  }
+
+  function hide() {
+    if (_panel) _panel.style.display = 'none';
+  }
+
+  return { show: show, hide: hide };
+})();
+
+/* Zakači hover na rezultate za cross-module */
+document.addEventListener('mouseover', function (e) {
+  var item = e.target.closest('.fc-result-item');
+  if (!item) return;
+  var module = item.getAttribute('data-module') || '';
+  var eid    = item.getAttribute('data-eid') || '';
+  var q      = (document.getElementById('fcCmdInput') || {}).value || '';
+  if (eid && module) FenixCrossModule.show(module, eid, q);
+});
+document.addEventListener('mouseout', function (e) {
+  var panel = document.getElementById('fcCrossPanel');
+  if (!panel) return;
+  if (!e.relatedTarget || (!e.relatedTarget.closest('.fc-result-item') && !e.relatedTarget.closest('#fcCrossPanel'))) {
+    FenixCrossModule.hide();
+  }
+});
+
+
+/* ── 3. LIVE COLLABORATION ────────────────────────────────────────────────── */
+
+var FenixLiveCollab = (function () {
+  var _timer    = null;
+  var _lastQ    = '';
+  var _banner   = null;
+
+  function init() {
+    if (document.getElementById('fcLiveBanner')) return;
+    var b = document.createElement('div');
+    b.id = 'fcLiveBanner';
+    b.style.cssText = [
+      'display:none',
+      'padding:6px 16px',
+      'background:rgba(22,163,74,.08)',
+      'border-bottom:1px solid rgba(22,163,74,.2)',
+      'font-size:.72rem',
+      'color:#4ade80',
+      'flex-shrink:0',
+    ].join(';');
+    var body = document.getElementById('fcCmdBody');
+    if (body) body.parentNode.insertBefore(b, body);
+    _banner = b;
+  }
+
+  function start() {
+    init();
+    _poll();
+    _timer = setInterval(_poll, 8000);  // poll svakih 8s
+  }
+
+  function stop() {
+    clearInterval(_timer);
+    if (_banner) _banner.style.display = 'none';
+  }
+
+  function onQuery(q) {
+    _lastQ = q;
+    // Odmah publish (ne čekaj interval)
+    if (q && q.length >= 2) _publish(q);
+  }
+
+  function _publish(q) {
+    fetch('/api/cmd/live/?q=' + encodeURIComponent(q), { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(_render)
+      .catch(function () {});
+  }
+
+  function _poll() {
+    fetch('/api/cmd/live/', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(_render)
+      .catch(function () {});
+  }
+
+  function _render(data) {
+    init();
+    if (!_banner) return;
+    var active = data.active || [];
+    if (!active.length) { _banner.style.display = 'none'; return; }
+    var parts = active.slice(0, 3).map(function (a) {
+      return '<strong>' + _escH(a.username) + '</strong> traži <em>"' + _escH(a.query) + '"</em>';
+    });
+    _banner.innerHTML = '<i class="fas fa-circle" style="font-size:.4rem;animation:fc-pulse 1s infinite"></i> ' +
+      'Sada aktivno: ' + parts.join(' · ');
+    _banner.style.display = 'block';
+  }
+
+  function _escH(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  return { start: start, stop: stop, onQuery: onQuery };
+})();
+
+/* Integracija Live Collab s CMD otvaranjem */
+var _origOpen  = window.openCmdPalette;
+var _origClose = window.closeCmdPalette;
+window.openCmdPalette = function () { _origOpen && _origOpen(); FenixLiveCollab.start(); };
+window.closeCmdPalette = function () { _origClose && _origClose(); FenixLiveCollab.stop(); };
+
+/* Prati input za publish */
+document.addEventListener('DOMContentLoaded', function () {
+  var inp = document.getElementById('fcCmdInput');
+  if (!inp) return;
+  inp.addEventListener('input', function () {
+    FenixLiveCollab.onQuery(inp.value.trim());
+  });
+});
+
+
+/* ── 4. ZERO-RESULT DEEPSEEK PANEL ───────────────────────────────────────── */
+
+var FenixZeroResult = (function () {
+  var _container = null;
+  var _loading   = false;
+  var _lastQ     = '';
+  var _debounce  = null;
+
+  function init() {
+    _container = document.getElementById('fcAiSuggest');
+  }
+
+  /**
+   * Poziva se kad search vrati 0 rezultata i q >= 3 znaka.
+   * Prikazuje loading, zatim pravi DeepSeek odgovor.
+   */
+  function trigger(q) {
+    if (!q || q.length < 3 || _loading) return;
+    if (q === _lastQ) return;
+
+    _lastQ = q;
+    clearTimeout(_debounce);
+    _debounce = setTimeout(function () { _fetch(q); }, 600);  // 600ms delay
+  }
+
+  function clear() {
+    _lastQ   = '';
+    _loading = false;
+    clearTimeout(_debounce);
+    _hide();
+  }
+
+  function _fetch(q) {
+    if (!_container) init();
+    if (!_container) return;
+
+    _loading = true;
+    _showLoading(q);
+
+    fetch('/api/cmd/zero/?q=' + encodeURIComponent(q), { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        _loading = false;
+        if (!data.answer && (!data.actions || !data.actions.length)) { _hide(); return; }
+        _showResult(data);
+      })
+      .catch(function () {
+        _loading = false;
+        _hide();
+      });
+  }
+
+  function _showLoading(q) {
+    if (!_container) return;
+    _container.innerHTML = '<i class="fas fa-robot" style="animation:fc-pulse 1s infinite"></i>' +
+      '<span>DeepSeek analizira <em>"' + _escH(q) + '"</em>...</span>';
+    _container.style.display = 'flex';
+    _container.style.background = 'rgba(124,58,237,.08)';
+  }
+
+  function _showResult(data) {
+    if (!_container) return;
+    var html = '<div style="flex:1">' +
+      '<div style="font-size:.78rem;line-height:1.5;margin-bottom:6px">' +
+        '<i class="fas fa-robot" style="color:#7c3aed;margin-right:4px"></i>' +
+        _escH(data.answer) +
+      '</div>';
+
+    if (data.actions && data.actions.length) {
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      data.actions.forEach(function (a) {
+        html += '<a href="' + _escH(a.url) + '" class="fc-suggest-btn">' +
+          '<i class="fas ' + _escH(a.icon || 'fa-arrow-right') + '"></i> ' +
+          _escH(a.label) + '</a>';
+      });
+      html += '</div>';
+    }
+
+    if (data.confidence) {
+      var pct = Math.round(data.confidence * 100);
+      html += '<div style="font-size:.6rem;color:#64748b;margin-top:6px">Pouzdanost: ' + pct + '%</div>';
+    }
+
+    html += '</div>';
+    _container.innerHTML = html;
+    _container.style.display = 'flex';
+    _container.style.flexDirection = 'column';
+  }
+
+  function _hide() {
+    if (_container) _container.style.display = 'none';
+  }
+
+  function _escH(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  return { trigger: trigger, clear: clear };
+})();
+
+/* Zakači Zero-Result na search rezultate */
+(function () {
+  var _origFetch = window._fcInternalDoSearch;
+  // Monkey-patch fetch results → ako 0 rezultata, triggeramo DeepSeek
+  var inp = null;
+  document.addEventListener('DOMContentLoaded', function () {
+    inp = document.getElementById('fcCmdInput');
+  });
+
+  // Preklopi globalni event listener na rezultate
+  document.addEventListener('fcResultsRendered', function (e) {
+    var detail = e.detail || {};
+    if (detail.count === 0 && detail.query && detail.query.length >= 3) {
+      FenixZeroResult.trigger(detail.query);
+    } else {
+      FenixZeroResult.clear();
+    }
+  });
+})();
+
+/* Emituj custom event nakon renderanja rezultata */
+(function () {
+  var _orig = window._fcRenderResults;
+  // Wrap renderResults da emituje event
+  document.addEventListener('DOMContentLoaded', function () {
+    var inp    = document.getElementById('fcCmdInput');
+    var resEl  = document.getElementById('fcCmdResults');
+    if (!resEl || !inp) return;
+
+    // MutationObserver na #fcCmdResults
+    var obs = new MutationObserver(function () {
+      var q    = inp.value.trim();
+      var count = resEl.querySelectorAll('.fc-result-item').length;
+      document.dispatchEvent(new CustomEvent('fcResultsRendered', {
+        detail: { count: count, query: q }
+      }));
+    });
+    obs.observe(resEl, { childList: true });
+  });
+})();
+
+/* Eksponiranje za konzolu/debug */
+window.FenixCmd = {
+  prefetcher: FenixSearchPrefetcher,
+  crossModule: FenixCrossModule,
+  liveCollab: FenixLiveCollab,
+  zeroResult: FenixZeroResult,
+};
