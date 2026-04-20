@@ -14,7 +14,7 @@
         var c=document.getElementById('sidebarFavs'); if(!c)return;
         var favs=getFavs(), html='<div class="fx-fw-bold fx-text-dim fx-uppercase fx-fs-2xs fx-ls-3" style="padding:6px 8px 2px">Favoriti</div>';
         favs.forEach(function(f,i){
-          html+='<a href="'+f.url+'" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-text-body fx-no-underline fx-rounded fx-fs-note align-items-center" style="padding:7px 12px;margin:1px 4px;transition:.15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='none'"><i class="fas '+f.icon+' text-center fx-fs-compact fx-text-gold" style="width:18px"></i>'+f.label+'</a>';
+          html+='<a href="'+f.url+'" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-text-body fx-no-underline fx-rounded fx-fs-note align-items-center" style="padding:7px 12px;margin:1px 4px;transition:.15s" onmouseover="this.style.background="rgba(201,168,76,.08)"" onmouseout="this.style.background="none""><i class="fas '+f.icon+' text-center fx-fs-compact fx-text-gold" style="width:18px"></i>'+f.label+'</a>';
         });
         c.innerHTML=html;
       }

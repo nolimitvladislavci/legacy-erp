@@ -75,13 +75,18 @@
     });
 
     // Global keyboard
+    // Ctrl+K kroatiran od Chromea (adresna traka) → koristimo Ctrl+Space i Ctrl+Shift+K
     document.addEventListener('keydown', function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      var isOpen = (e.ctrlKey || e.metaKey) && e.key === 'k' && !e.shiftKey;
+      var isAlt  = (e.ctrlKey || e.metaKey) && e.key === 'k' && e.shiftKey;
+      var isSpace = (e.ctrlKey || e.metaKey) && e.code === 'Space';
+      if (isOpen || isAlt || isSpace) {
         e.preventDefault();
+        e.stopPropagation();
         state.open ? _close() : _open();
       }
       if (e.key === 'Escape' && state.open) _close();
-    });
+    }, true);  // capture phase — hvata PRIJE browsera
 
     return true;
   }

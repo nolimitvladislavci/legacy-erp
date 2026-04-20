@@ -227,9 +227,7 @@ window._aiPageContext = (function(){
         if(wSending) return;
         var text = inp.value.trim();
         if(!text){
-            addWMsg('assistant', 'Samo naprijed! Ne možete ništa pokvariti. 😊
-
-Napišite pitanje u polje ili koristite gumbe:\n\n\U0001f4f7 \u2014 slikajte dokument ili problem\n\u270f\ufe0f \u2014 opišite što trebate\n\u23ce Enter \u2014 pošaljite poruku');
+            addWMsg('assistant', 'Samo naprijed! Ne možete ništa pokvariti. 😊\n\nNapišite pitanje u polje ili koristite gumbe:\n\n📷 — slikajte dokument ili problem\n✏️ — opišite što trebate\n⏎ Enter — pošaljite poruku');
             inp.focus();
             return;
         }
@@ -311,9 +309,7 @@ Napišite pitanje u polje ili koristite gumbe:\n\n\U0001f4f7 \u2014 slikajte dok
             },
             'pomoc': {
                 user: '\u2753 Trebam pomoć',
-                bot: 'Ne brinite, ne možete ništa pokvariti! Ja samo gledam podatke i dajem informacije.
-
-Evo kako mogu pomoći:\n\n'
+                bot: 'Ne brinite, ne možete ništa pokvariti! Ja samo gledam podatke i dajem informacije.\n\nEvo kako mogu pomoći:\n\n'
                     + '\U0001f4c2 Arhiva \u2014 dokumenti i računi\n'
                     + '\U0001f9fe POS \u2014 blagajna i prodaja\n'
                     + '\U0001f4ca Izvještaji \u2014 Z-report, PDV\n'

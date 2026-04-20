@@ -255,7 +255,7 @@
                     {% endif %}
                 </div>
                 {% if has_multiple_companies %}
-                <i class="fas fa-chevron-down fx-pointer fx-text-dim fx-fs-2xs" style="transition:transform .2s" onclick="toggleCompanySwitcher()" title="Promijeni tvrtku (Ctrl+K)"></i>
+                <i class="fas fa-chevron-down fx-pointer fx-text-dim fx-fs-2xs" style="transition:transform .2s" onclick="toggleCompanySwitcher()" title="Promijeni tvrtku (Ctrl+Space)"></i>
                 {% endif %}
             </div>
         </div>
@@ -277,7 +277,7 @@
                     style="padding:7px 12px;color:var(--gold,#c9a84c);margin:1px 4px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2) !important;cursor:pointer">
               <i class="fas fa-building text-center" style="width:18px"></i>
               <span>{% trans "Promijeni tvrtku" %}</span>
-              <span class="fx-ml-auto" style="font-size:.6rem;opacity:.5">Ctrl+K</span>
+              <span class="fx-ml-auto" style="font-size:.6rem;opacity:.5">Ctrl+Space</span>
             </button>
             {% endif %}
             <a href="{% url 'helpdesk:create' %}" onclick="closeSidebar()" class="d-flex fx-gap-2 fx-no-underline fx-rounded fx-fs-compact align-items-center mb-1" style="padding:7px 12px;color:var(--text-dim);margin:1px 4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)">
@@ -330,10 +330,13 @@
                 <img src="{{ request.company.logo.url }}" alt="{{ request.company.name }}"
                      style="height:28px;max-width:120px;object-fit:contain;margin-right:8px;display:none" class="d-md-inline">
                 {% endif %}
-                <div class="shell-top-search topbar-search" onclick="openCmdPalette()">
-                    <i class="fas fa-search"></i>
-                    <span>Pretrazi...</span>
-                    <kbd>Ctrl+K</kbd>
+                <div class="shell-top-search topbar-search" onclick="openCmdPalette()" 
+                     role="button" aria-label="Otvori Command Center (Ctrl+Space)" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' ')openCmdPalette()"
+                     style="background:rgba(56,139,253,0.12);border-color:rgba(56,139,253,0.35);color:#58a6ff;font-weight:600;">
+                    <i class="fas fa-search" style="color:#58a6ff"></i>
+                    <span>Pretraži ili pitaj AI...</span>
+                    <kbd style="background:rgba(56,139,253,0.2);border-color:rgba(56,139,253,0.4);color:#58a6ff">Ctrl+Space</kbd>
                 </div>
                 {% if request.session.workspace_client_id %}
                 <a href="{% url 'companies:workspace_home' %}" class="btn-ghost btn-sm fx-mr-3 fx-no-underline" title="Natrag na radni prostor">
