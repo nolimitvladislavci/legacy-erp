@@ -724,8 +724,8 @@ var FenixLiveCollab = (function () {
 /* Integracija Live Collab s CMD otvaranjem */
 var _origOpen  = window.openCmdPalette;
 var _origClose = window.closeCmdPalette;
-window.openCmdPalette = function () { _origOpen && _origOpen(); FenixLiveCollab.start(); };
-window.closeCmdPalette = function () { _origClose && _origClose(); FenixLiveCollab.stop(); };
+window.openCmdPalette = function () { _origOpen && _origOpen(); FenixLiveCollab.start(); document.dispatchEvent(new CustomEvent('fcOpen')); };
+window.closeCmdPalette = function () { _origClose && _origClose(); FenixLiveCollab.stop(); document.dispatchEvent(new CustomEvent('fcClose')); };
 
 /* Prati input za publish */
 document.addEventListener('DOMContentLoaded', function () {
@@ -885,3 +885,176 @@ window.FenixCmd = {
   liveCollab: FenixLiveCollab,
   zeroResult: FenixZeroResult,
 };
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FenixTemporalPredictor — ZAKON 24 DAN 1 KORAK 1.3
+   Prikazuje chipove "Tipično u ovo doba:" kada je input prazan.
+   Nestaje čim korisnik počne tipkati. Klik na chip = instant search.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var FenixTemporalPredictor = (function () {
+  'use strict';
+
+  var _loaded   = false;
+  var _data     = null;  /* { personal, team, confidence, window_label, has_data } */
+  var _chipBar  = null;
+  var _visible  = false;
+
+  /* Dohvati predikciju iz API-ja (jednom, cache 5min na serveru) */
+  function _load() {
+    if (_loaded) return;
+    _loaded = true;
+    fetch('/api/cmd/predict/', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.has_data) return;
+        _data = d;
+        _buildBar();
+      })
+      .catch(function () { /* silent — feature degradable */ });
+  }
+
+  /* Kreiraj chip bar ispod inputa (jednom) */
+  function _buildBar() {
+    var box = document.getElementById('fcCmdBox');
+    if (!box || !_data) return;
+
+    var bar = document.createElement('div');
+    bar.id = 'fcPredictBar';
+    bar.style.cssText = [
+      'display:none',
+      'padding:6px 16px 10px',
+      'animation:fcFadeIn 0.25s ease',
+    ].join(';');
+
+    /* Label */
+    var lbl = document.createElement('span');
+    lbl.style.cssText = 'font-size:11px;color:#8b949e;margin-right:6px;';
+    lbl.textContent = '🔮 Tipično ' + _data.window_label + ':';
+    bar.appendChild(lbl);
+
+    /* Chipovi — osobni najprije, zatim timski */
+    var queries = _mergeUnique(_data.personal, _data.team).slice(0, 4);
+    queries.forEach(function (q) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.style.cssText = [
+        'display:inline-flex',
+        'align-items:center',
+        'gap:4px',
+        'padding:3px 10px',
+        'margin:0 4px 4px 0',
+        'background:rgba(56,139,253,0.12)',
+        'border:1px solid rgba(56,139,253,0.3)',
+        'border-radius:20px',
+        'color:#58a6ff',
+        'font-size:12px',
+        'cursor:pointer',
+        'transition:background 0.15s',
+      ].join(';');
+      chip.textContent = q.length > 30 ? q.slice(0, 28) + '…' : q;
+      chip.title = q;
+
+      /* Označi osobne chipove s drugom bojom */
+      if (_data.personal && _data.personal.includes(q)) {
+        chip.style.background = 'rgba(63,185,80,0.12)';
+        chip.style.borderColor = 'rgba(63,185,80,0.3)';
+        chip.style.color = '#3fb950';
+        chip.title = '👤 Tvoj upit · ' + q;
+      }
+
+      chip.addEventListener('mouseenter', function () {
+        chip.style.background = 'rgba(56,139,253,0.22)';
+      });
+      chip.addEventListener('mouseleave', function () {
+        chip.style.background = _data.personal && _data.personal.includes(q)
+          ? 'rgba(63,185,80,0.12)'
+          : 'rgba(56,139,253,0.12)';
+      });
+      chip.addEventListener('click', function () {
+        var inp = document.getElementById('fcCmdInput');
+        if (!inp) return;
+        inp.value = q;
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        inp.focus();
+        hide();
+      });
+      bar.appendChild(chip);
+    });
+
+    /* Confidence tooltip ako < 50% */
+    if (_data.confidence < 0.5) {
+      var hint = document.createElement('span');
+      hint.style.cssText = 'font-size:10px;color:#6e7681;margin-left:4px;';
+      hint.textContent = '(manje podataka)';
+      bar.appendChild(hint);
+    }
+
+    _chipBar = bar;
+
+    /* Ubaci bar ispod input reda unutar fcCmdBox */
+    var inputRow = box.querySelector('#fcCmdInput');
+    if (inputRow && inputRow.parentNode) {
+      inputRow.parentNode.insertBefore(bar, inputRow.nextSibling);
+    } else {
+      box.prepend(bar);
+    }
+  }
+
+  /* Merge bez duplikata — personal first */
+  function _mergeUnique(a, b) {
+    var seen = {};
+    var out = [];
+    (a || []).concat(b || []).forEach(function (q) {
+      if (!seen[q]) { seen[q] = true; out.push(q); }
+    });
+    return out;
+  }
+
+  function show() {
+    if (!_chipBar || _visible) return;
+    _chipBar.style.display = 'block';
+    _visible = true;
+  }
+
+  function hide() {
+    if (!_chipBar || !_visible) return;
+    _chipBar.style.display = 'none';
+    _visible = false;
+  }
+
+  /* Inicijalizacija — veži se na input events */
+  function init() {
+    document.addEventListener('DOMContentLoaded', function () {
+      var inp = document.getElementById('fcCmdInput');
+      if (!inp) return;
+
+      /* Učitaj predikciju unaprijed */
+      _load();
+
+      /* Prikaži kad je input prazan i CMD otvoren */
+      document.addEventListener('fcOpen', function () {
+        if (!inp.value.trim()) show();
+      });
+
+      inp.addEventListener('input', function () {
+        if (inp.value.trim().length > 0) {
+          hide();
+        } else {
+          show();
+        }
+      });
+
+      /* Sakrij kad se CMD zatvori */
+      document.addEventListener('fcClose', function () {
+        hide();
+      });
+    });
+  }
+
+  init();
+
+  return { show: show, hide: hide, reload: function () { _loaded = false; _data = null; _load(); } };
+})();
+
+/* Ažuriraj debug namespace */
+window.FenixCmd.temporalPredictor = FenixTemporalPredictor;

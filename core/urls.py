@@ -953,9 +953,10 @@ urlpatterns += [path("qr/", _qr_view, name="qr_code")]
 
 # ── Kupčeva soba — javni pristup ponudama (kratki URL za QR kod) ──
 from invoicing.views import client_portal as _client_portal_view
+from invoicing.views import portal_accept_trail as _accept_trail
 
 # MORA biti u i18n_patterns — LanguageMiddleware dodaje /hr/ prefiks
-from invoicing.views import portal_ai_agent as _ai_agent, portal_accept_trail as _accept_trail
+from invoicing.views import portal_ai_agent as _ai_agent
 
 urlpatterns += i18n_patterns(
     path("ponuda/<uuid:token>/", _client_portal_view, name="customer_room"),
@@ -977,7 +978,7 @@ urlpatterns += [path("api/security/", _include("security_protection.urls"))]
 urlpatterns += [path("pristup/", include("identity.urls", namespace="identity"))]
 
 # QR Registry — globalni verify/shortlink/API
-from core.qr_verify_views import qr_verify, qr_verify_short, qr_api_status
+from core.qr_verify_views import qr_api_status, qr_verify, qr_verify_short
 
 urlpatterns += [
     path("qr/<str:token>/", qr_verify, name="qr_registry_verify"),
@@ -986,7 +987,7 @@ urlpatterns += [
 ]
 
 # Command Center — search + trending + chat + OCR
-from core.cmd_center_views import cmd_search, cmd_trending, cmd_chat, cmd_ocr
+from core.cmd_center_views import cmd_chat, cmd_ocr, cmd_search, cmd_trending
 
 urlpatterns += [
     path("api/cmd/search/", cmd_search, name="cmd_search"),
@@ -996,11 +997,12 @@ urlpatterns += [
 ]
 
 # Command Center v2 — cross-module, live collab, zero-result AI, prefetch
-from core.cmd_center_views import cmd_cross_module, cmd_live, cmd_zero_result_ai, cmd_prefetch
+from core.cmd_center_views import cmd_cross_module, cmd_live, cmd_predict, cmd_prefetch, cmd_zero_result_ai
 
 urlpatterns += [
     path("api/cmd/cross/", cmd_cross_module, name="cmd_cross_module"),
     path("api/cmd/live/", cmd_live, name="cmd_live"),
     path("api/cmd/zero/", cmd_zero_result_ai, name="cmd_zero_result"),
     path("api/cmd/prefetch/", cmd_prefetch, name="cmd_prefetch"),
+    path("api/cmd/predict/", cmd_predict, name="cmd_predict"),
 ]

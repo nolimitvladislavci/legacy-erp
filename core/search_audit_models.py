@@ -1,7 +1,7 @@
 """
 core/search_audit_models.py — SearchAuditLog + trending queries
 
-Svaки search → 1 log. Trending = top 5 upita ove sedmice po firmi.
+Svaki search → 1 log. Trending = top 5 upita ove sedmice po firmi.
 Budućnost 2 (Sigurnost): GDPR compliant, company-isolated, IP-masked.
 """
 
@@ -89,6 +89,81 @@ class SearchAuditLog(models.Model):
             .order_by("-cnt")[:limit]
         )
         return [r["query"] for r in rows]
+
+    @classmethod
+    def temporal_prediction(cls, company, user=None, limit: int = 3) -> dict:
+        """
+        Temporalna predikcija — što se obično traži SADA (isti dan ± 1, isti sat ± 1).
+
+        Vraća:
+          {
+            "personal": ["faktura Horvat", ...],   # samo ovaj user (ako postoji)
+            "team":     ["DPO izvještaj", ...],     # cijela firma
+            "confidence": 0.0 – 1.0,               # 1.0 = puno podataka, 0.0 = hladan start
+            "window_label": "ponedjeljak jutro"     # human-readable za chip tooltip
+          }
+
+        Algoritam:
+          - weekday_range = [weekday-1, weekday, weekday+1] mod 7
+          - hour_range    = [hour-1, hour, hour+1] (ne prelazi dan)
+          - Traži u posljednjih 90 dana (dovoljno podataka, ne previše stari)
+          - Grupiše po query, broji, sortira po count DESC
+          - Confidence = min(1.0, total_rows / 20.0) — 20 uzoraka = puno povjerenja
+        """
+        from datetime import timedelta
+
+        from django.db.models import Count
+
+        now = timezone.now()
+        weekday = now.weekday()  # 0=Mon, 6=Sun
+        hour = now.hour
+
+        # Raspon: ±1 dan, ±1 sat
+        weekday_range = [(weekday - 1) % 7, weekday, (weekday + 1) % 7]
+        hour_min = max(0, hour - 1)
+        hour_max = min(23, hour + 1)
+
+        since_90d = now - timedelta(days=90)
+
+        # --- Base queryset (team) ---
+        base_qs = cls.objects.filter(
+            company=company,
+            searched_at__gte=since_90d,
+            searched_at__week_day__in=[((d + 1) % 7) + 1 for d in weekday_range],  # Django week_day: 1=Sun … 7=Sat
+            searched_at__hour__gte=hour_min,
+            searched_at__hour__lte=hour_max,
+            result_count__gt=0,  # samo uspješni searchi
+        )
+
+        team_rows = base_qs.values("query").annotate(cnt=Count("id")).order_by("-cnt")[:limit]
+        team_queries = [r["query"] for r in team_rows]
+        total_team = base_qs.count()
+
+        # --- Personal (ako je user poznat) ---
+        personal_queries: list[str] = []
+        if user and user.is_authenticated:
+            personal_rows = base_qs.filter(user=user).values("query").annotate(cnt=Count("id")).order_by("-cnt")[:limit]
+            personal_queries = [r["query"] for r in personal_rows]
+
+        # --- Confidence score ---
+        confidence = min(1.0, total_team / 20.0)
+
+        # --- Human-readable label ---
+        day_names = ["ponedjeljak", "utorak", "srijeda", "četvrtak", "petak", "subota", "nedjelja"]
+        if hour < 12:
+            period = "jutro"
+        elif hour < 17:
+            period = "poslijepodne"
+        else:
+            period = "večer"
+        window_label = f"{day_names[weekday]} {period}"
+
+        return {
+            "personal": personal_queries,
+            "team": team_queries,
+            "confidence": round(confidence, 2),
+            "window_label": window_label,
+        }
 
 
 class ChatMessage(models.Model):

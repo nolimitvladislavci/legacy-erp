@@ -788,3 +788,46 @@ def cmd_prefetch(request):
         out[pref] = hits
 
     return JsonResponse({"prefetched": out})
+
+
+# ── 5. TEMPORAL PREDICTION ENDPOINT ─────────────────────────────────────────
+
+
+@login_required
+@require_GET
+def cmd_predict(request):
+    """
+    GET /api/cmd/predict/
+
+    Temporalna predikcija — što se traži u ovo doba dana/tjedna.
+
+    Response:
+    {
+        "personal": ["faktura Horvat", ...],
+        "team":     ["DPO izvještaj", ...],
+        "confidence": 0.72,
+        "window_label": "ponedjeljak jutro",
+        "has_data": true
+    }
+
+    Frontend: FenixTemporalPredictor — prikazuje chipove ispod inputa
+    kad je prazan, nestaju čim user počne tipkati.
+    """
+    from .search_audit_models import SearchAuditLog
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({"personal": [], "team": [], "confidence": 0.0, "has_data": False})
+
+    from django.core.cache import cache
+
+    cache_key = f"cmd:predict:{company.pk}:{request.user.pk}"
+    cached = cache.get(cache_key)
+    if cached:
+        return JsonResponse(cached)
+
+    result = SearchAuditLog.temporal_prediction(company=company, user=request.user, limit=3)
+    result["has_data"] = bool(result["personal"] or result["team"])
+
+    cache.set(cache_key, result, 300)  # 5min — podaci se ne mijenjaju minutno
+    return JsonResponse(result)
