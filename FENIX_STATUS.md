@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-20 (Dan 54), commit 1295e08 — eArhivator Faza 2 MinIO upload LIVE, bug fix eArhivator trigger
+> Zadnji update: 2026-04-20 (Dan 54), commit b778c137 — QR Registry LIVE (globalni QR modul + VC + honeypot + viral)
 
 ---
 
@@ -120,9 +120,9 @@
 1. NO LIMIT: OIB udruge — update_genesis_oib(novi_oib) kad Marija donese rješenje
 2. Stripe LIVE ključevi za KumGift (sada test mode)
 3. Pilot POS test: Ivica Kruljac + Široki Šor Restoran (test u terenu)
-4. eArhivator MinIO Faza 2 — ✅ RIJEŠENO (commit 1295e08, MinIO upload LIVE, bug fix trigger)
-5. Grand Plan Blok 4 — SMALL DOORS Tier B Shamir recovery UI (backend gotov)
-6. Lektire seed — dodati sadržaj knjiga razredi 1-8 (75% gotovo)
+4. eArhivator MinIO Faza 2 — ✅ RIJEŠENO (commit 1295e08, MinIO upload LIVE)
+5. QR Registry globalni modul — ✅ RIJEŠENO (commit b778c137, VC+honeypot+viral)
+6. Grand Plan Blok 4 — SMALL DOORS Tier B Shamir recovery UI (backend gotov)
 7. Triple DNA Layer 3 CLIP async — GPU task za semantički embedding
 ```
 
