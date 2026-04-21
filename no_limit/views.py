@@ -81,6 +81,23 @@ def ambasadori(request):
     return render(request, "no_limit/ambasadori.html", {"ambasadori": active})
 
 
+def _make_qr_b64(data: str) -> str:
+    """Generira base64 PNG QR kod (gold on dark)."""
+    try:
+        import base64, io
+        import qrcode
+
+        qr = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=8, border=2)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="#c9a84c", back_color="#0a0a0a")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return base64.b64encode(buf.getvalue()).decode()
+    except Exception:
+        return ""
+
+
 def ambasador_prijava(request):
     """Forma za prijavu ambasadora + WA notifikacija."""
     from no_limit.models import AmbassadorApplication
@@ -97,6 +114,14 @@ def ambasador_prijava(request):
         experience = request.POST.get("experience", "").strip()
         languages = request.POST.get("languages", "").strip()
         phone = request.POST.get("phone", "").strip()
+        device_tz = request.POST.get("device_tz", "").strip()[:60]
+        device_platform = request.POST.get("device_platform", "").strip()[:30]
+        # Pohrani device podatke u experience polje (metadata)
+        if device_tz or device_platform:
+            if not experience:
+                experience = f"[Device: {device_platform}, TZ: {device_tz}]"
+            else:
+                experience = f"{experience} [Device: {device_platform}, TZ: {device_tz}]"
 
         if full_name and email and country and motivation:
             AmbassadorApplication.objects.create(
@@ -128,7 +153,10 @@ def ambasador_prijava(request):
                 logger.exception("WA notification failed for ambassador application")
             return redirect("/ambasadori/hvala/")
 
-    return render(request, "no_limit/ambasador_prijava.html")
+    # QR kod koji otvara ovu stranicu s ?qr=1 (za mobilni scan)
+    qr_url = request.build_absolute_uri("/no-limit/ambasadori/prijava/?qr=1")
+    qr_b64 = _make_qr_b64(qr_url)
+    return render(request, "no_limit/ambasador_prijava.html", {"qr_b64": qr_b64, "qr_url": qr_url})
 
 
 def ambasador_hvala(request):

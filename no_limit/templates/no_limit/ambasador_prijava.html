@@ -1,165 +1,360 @@
 <!DOCTYPE html>
-<html lang="hr">
+<html lang="hr" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Postani ambasador — No Limit</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0a0a0a;--surface:#111;--border:#222;--gold:#c9a84c;--text:#e0e0e0;--muted:#888;--font:'Space Grotesk',system-ui,sans-serif}
-
-[data-theme="light"]{
-  --bg:#f5f2ec;--surface:#ffffff;--slate:#edeae3;--border:#d6cfc4;
-  --gold:#8a6d1e;--gold-light:#b8942a;--white:#1a1209;--dim:#5a4e3e;
-  --green:#15803d;--blue:#1d4ed8;--purple:#6d28d9;--dark:#edeae3;
+:root{
+  --bg:#0a0a0a;--surface:#111;--surface2:#161616;--border:#222;
+  --gold:#c9a84c;--gold2:#d4af37;--text:#e0e0e0;--muted:#888;
+  --green:#22c55e;--red:#ef4444;
+  --font:'Space Grotesk',system-ui,sans-serif
 }
-[data-theme="light"] body{background:var(--bg);color:var(--white)}
-[data-theme="light"] nav.scrolled{background:rgba(245,242,236,.96)!important;border-bottom-color:var(--border)!important}
-[data-theme="light"] .hamburger span{background:var(--white)}
-.theme-toggle{width:34px;height:34px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:.2s;flex-shrink:0}
+[data-theme="light"]{
+  --bg:#f5f2ec;--surface:#fff;--surface2:#f0ede6;--border:#d6cfc4;
+  --gold:#8a6d1e;--gold2:#b8942a;--text:#1a1209;--muted:#5a4e3e;--green:#15803d
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;line-height:1.6}
+a{color:var(--gold);text-decoration:none}
+
+/* NAV */
+nav{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface)}
+.nav-brand{font-size:1.3rem;font-weight:700;letter-spacing:1px}
+.nav-brand span{color:var(--gold)}
+.nav-back{color:var(--muted);font-size:.9rem;display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:var(--gold)}
+.theme-toggle{width:34px;height:34px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:.2s}
 .theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
 
-body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;display:flex;flex-direction:column}
-a{color:var(--gold);text-decoration:none}
-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-.nav-brand{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:1px}
-.nav-brand span{color:var(--gold)}
+/* SCREENS */
+.screen{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;max-width:520px;margin:0 auto;width:100%}
+.screen.active{display:flex}
 
-.form-container{max-width:600px;margin:40px auto;padding:0 24px;flex:1}
-h1{font-size:1.6rem;color:#fff;margin-bottom:8px}
-.sub{color:var(--muted);margin-bottom:32px}
+/* SCREEN 1 — LANDING */
+.hero-tag{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;opacity:.8}
+.hero-title{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;text-align:center;line-height:1.2;margin-bottom:12px}
+.hero-sub{color:var(--muted);text-align:center;font-size:.95rem;margin-bottom:36px;max-width:380px}
+.perks{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:36px}
+.perk{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.85rem}
+.perk-icon{font-size:1.3rem;margin-bottom:6px}
+.perk-label{color:var(--muted);font-size:.78rem;margin-bottom:2px}
+.perk-val{font-weight:600;color:var(--text)}
 
-.form-group{margin-bottom:20px}
-label{display:block;font-size:.9rem;color:var(--gold);margin-bottom:6px;font-weight:500}
-input,select,textarea{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);
-    border-radius:8px;color:#fff;font-family:var(--font);font-size:.95rem;transition:border-color .3s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
-textarea{min-height:120px;resize:vertical}
-select{appearance:none;cursor:pointer}
-.required{color:#ef4444}
+.qr-wrap{background:var(--surface);border:2px solid var(--gold);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:28px;width:100%;max-width:240px}
+.qr-wrap img{width:168px;height:168px;image-rendering:pixelated;border-radius:4px}
+.qr-caption{font-size:.78rem;color:var(--muted);text-align:center}
+.qr-url{font-size:.65rem;color:var(--border);word-break:break-all;text-align:center}
 
-.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:500px){.row{grid-template-columns:1fr}}
+.btn-main{background:var(--gold);color:#000;font-weight:700;font-size:1rem;padding:15px 40px;border-radius:10px;border:none;cursor:pointer;width:100%;max-width:320px;transition:all .2s;letter-spacing:.01em}
+.btn-main:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--gold);font-weight:600;font-size:.9rem;padding:11px 28px;border-radius:10px;border:1px solid var(--gold);cursor:pointer;transition:all .2s;margin-top:10px}
+.btn-outline:hover{background:var(--gold);color:#000}
 
-.btn{display:inline-block;padding:14px 32px;border-radius:8px;font-weight:600;font-size:1rem;
-    cursor:pointer;border:none;background:var(--gold);color:#000;width:100%;text-align:center;transition:all .3s}
-.btn:hover{background:#d4af37;transform:translateY(-1px)}
+/* SCREEN 2 — SCAN */
+.scan-icon{font-size:3.5rem;margin-bottom:20px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.6;transform:scale(.97)}50%{opacity:1;transform:scale(1.03)}}
+.scan-title{font-size:1.4rem;font-weight:700;margin-bottom:8px;text-align:center}
+.scan-sub{color:var(--muted);text-align:center;font-size:.9rem;margin-bottom:32px}
+.data-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%;margin-bottom:32px}
+.chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:.82rem;display:flex;align-items:center;gap:6px}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.scan-note{font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:24px}
 
-.info-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:32px;font-size:.9rem}
-.info-box h3{color:var(--gold);margin-bottom:8px;font-size:1rem}
-.info-box ul{margin-left:20px;color:var(--muted)}
-.info-box li{margin-bottom:4px}
+/* SCREEN 3 — FORM */
+.step-label{font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;text-align:center}
+.step-dots{display:flex;gap:8px;justify-content:center;margin-bottom:32px}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.3s}
+.step-dot.on{background:var(--gold);width:24px;border-radius:4px}
+.step-dot.done{background:var(--green)}
+.form-group{width:100%;margin-bottom:18px}
+label{display:block;font-size:.82rem;color:var(--gold);margin-bottom:6px;font-weight:500}
+input,textarea,select{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:.95rem;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold)}
+[data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{background:var(--surface);color:var(--text)}
+textarea{min-height:90px;resize:vertical}
+.inline-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+@media(max-width:420px){.inline-row{grid-template-columns:1fr}}
 
-footer{background:var(--surface);border-top:1px solid var(--border);padding:24px;text-align:center;
-    color:var(--muted);font-size:.85rem;margin-top:auto}
+/* SCREEN 4 — CONFIRM */
+.confirm-title{font-size:1.5rem;font-weight:700;text-align:center;margin-bottom:8px}
+.confirm-sub{color:var(--muted);text-align:center;font-size:.88rem;margin-bottom:28px}
+.confirm-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;width:100%;margin-bottom:24px}
+.confirm-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:.88rem;gap:12px}
+.confirm-row:last-child{border-bottom:none}
+.confirm-key{color:var(--muted);min-width:90px;flex-shrink:0}
+.confirm-val{font-weight:500;text-align:right;word-break:break-word}
+.confirm-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green);border-radius:20px;padding:3px 10px;font-size:.75rem;margin-bottom:20px}
+
+/* FOOTER */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:20px;text-align:center;color:var(--muted);font-size:.82rem}
 </style>
 </head>
 <body>
 
 <nav>
-    <a href="/" class="nav-brand"><span>No</span> Limit</a>
-    <a href="/#ambasadori" style="color:var(--muted);font-size:.9rem">
-        <i class="fas fa-arrow-left"></i> Natrag
-    </a>
-<button class="theme-toggle" id="themeToggle" aria-label="Tema"><span id="themeIcon">☀️</span></button>
+  <a href="/no-limit/" class="nav-brand"><span>No</span> Limit</a>
+  <a href="/no-limit/ambasadori/" class="nav-back">← Ambasadori</a>
+  <button class="theme-toggle" id="themeToggle" aria-label="Tema"><span id="themeIcon">☀️</span></button>
 </nav>
 
-<div class="form-container">
-    <h1><i class="fas fa-globe-europe" style="color:var(--gold)"></i> Postani ambasador</h1>
-    <p class="sub">Prijavi se za nacionalnog koordinatora No Limit projekata u svojoj zemlji.</p>
+<!-- ▸ SCREEN 1: LANDING -->
+<div class="screen active" id="s1">
+  <div class="hero-tag">Ambasadorski program</div>
+  <h1 class="hero-title">Postani glas<br><span style="color:var(--gold)">No Limit</span> u svojoj zemlji</h1>
+  <p class="hero-sub">Koordiniraš PLAY.EU projekte, povezuješ škole i knjižnice, gradiš europsku mrežu digitalne baštine.</p>
 
-    <div class="info-box">
-        <h3><i class="fas fa-gift"></i> Što dobivaš?</h3>
-        <ul>
-            <li>Besplatan pristup svim premium sadržajima platforme</li>
-            <li>20% prihoda od pretplata korisnika iz tvoje zemlje</li>
-            <li>Podrška u pisanju EU grant prijava</li>
-            <li>Naziv "PLAY.EU National Coordinator"</li>
-            <li>Pedagoška i tehnička podrška</li>
-        </ul>
-    </div>
+  <div class="perks">
+    <div class="perk"><div class="perk-icon">🏆</div><div class="perk-label">Naziv</div><div class="perk-val">National Coordinator</div></div>
+    <div class="perk"><div class="perk-icon">💰</div><div class="perk-label">Prihod</div><div class="perk-val">20% od pretplata</div></div>
+    <div class="perk"><div class="perk-icon">🇪🇺</div><div class="perk-label">Podrška</div><div class="perk-val">EU grant prijave</div></div>
+    <div class="perk"><div class="perk-icon">🔓</div><div class="perk-label">Pristup</div><div class="perk-val">Svi premium sadržaji</div></div>
+  </div>
 
-    <form method="POST" action="/ambasadori/prijava/">
-        {% csrf_token %}
+  {% if qr_b64 %}
+  <div class="qr-wrap">
+    <div style="font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:4px">📱 Skeniraj s mobitela</div>
+    <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR kod za prijavu">
+    <div class="qr-caption">Otvara prijavu direktno na tvom uređaju</div>
+  </div>
+  {% endif %}
 
-        <div class="row">
-            <div class="form-group">
-                <label>Puno ime <span class="required">*</span></label>
-                <input type="text" name="full_name" required placeholder="Ime i prezime">
-            </div>
-            <div class="form-group">
-                <label>Email <span class="required">*</span></label>
-                <input type="email" name="email" required placeholder="vas@email.com">
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="form-group">
-                <label>Država <span class="required">*</span></label>
-                <select name="country" required>
-                    <option value="">— Odaberi —</option>
-                    <option value="HR">🇭🇷 Hrvatska</option>
-                    <option value="DE">🇩🇪 Njemačka</option>
-                    <option value="AT">🇦🇹 Austrija</option>
-                    <option value="SI">🇸🇮 Slovenija</option>
-                    <option value="IT">🇮🇹 Italija</option>
-                    <option value="HU">🇭🇺 Mađarska</option>
-                    <option value="CZ">🇨🇿 Češka</option>
-                    <option value="SK">🇸🇰 Slovačka</option>
-                    <option value="PL">🇵🇱 Poljska</option>
-                    <option value="FR">🇫🇷 Francuska</option>
-                    <option value="NL">🇳🇱 Nizozemska</option>
-                    <option value="BE">🇧🇪 Belgija</option>
-                    <option value="SE">🇸🇪 Švedska</option>
-                    <option value="OTHER">🇪🇺 Ostalo</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Grad</label>
-                <input type="text" name="city" placeholder="Vaš grad">
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="form-group">
-                <label>Organizacija</label>
-                <input type="text" name="organization" placeholder="Škola, udruga, knjižnica...">
-            </div>
-            <div class="form-group">
-                <label>Jezici</label>
-                <input type="text" name="languages" placeholder="hr, en, de...">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Telefon</label>
-            <input type="tel" name="phone" placeholder="+385...">
-        </div>
-
-        <div class="form-group">
-            <label>Zašto želiš biti ambasador? <span class="required">*</span></label>
-            <textarea name="motivation" required placeholder="Tvoja motivacija, iskustvo, ideje za svoju zemlju..."></textarea>
-        </div>
-
-        <button type="submit" class="btn">
-            <i class="fas fa-paper-plane"></i> Pošalji prijavu
-        </button>
-    </form>
+  <button class="btn-main" onclick="startScan()">Prijavi se →</button>
+  <div style="margin-top:12px;font-size:.78rem;color:var(--muted)">ili skeniraj QR kod s mobitela</div>
 </div>
 
-<footer>
-    <p>© 2026 No-limit udruga | <a href="/">no-limit.world</a> | GDPR-Kids politika aktivna</p>
-</footer>
+<!-- ▸ SCREEN 2: SCAN / DETECT -->
+<div class="screen" id="s2">
+  <div class="scan-icon" id="scanIcon">📡</div>
+  <div class="scan-title" id="scanTitle">Čitamo podatke uređaja...</div>
+  <div class="scan-sub" id="scanSub">Ovo nam pomaže odrediti koordinatora u tvojoj regiji</div>
+  <div class="data-chips" id="chips"></div>
+  <div class="scan-note" id="scanNote" style="display:none">Prikupljeni podaci koriste se isključivo za dodjelu regije.</div>
+  <button class="btn-main" id="btnNext2" style="display:none;max-width:280px" onclick="goTo(3)">Nastavi →</button>
+</div>
+
+<!-- ▸ SCREEN 3: MINIMAL FORM -->
+<div class="screen" id="s3">
+  <div class="step-dots">
+    <div class="step-dot done" id="dot1"></div>
+    <div class="step-dot on"   id="dot2"></div>
+    <div class="step-dot"      id="dot3"></div>
+  </div>
+  <div class="step-label">Korak 2 od 3 — Tvoji podaci</div>
+
+  <div class="inline-row">
+    <div class="form-group">
+      <label>Ime</label>
+      <input id="f_first" type="text" placeholder="Ime" autocomplete="given-name">
+    </div>
+    <div class="form-group">
+      <label>Prezime</label>
+      <input id="f_last" type="text" placeholder="Prezime" autocomplete="family-name">
+    </div>
+  </div>
+  <div class="form-group" style="width:100%">
+    <label>Email</label>
+    <input id="f_email" type="email" placeholder="vas@email.com" autocomplete="email">
+  </div>
+  <div class="form-group" style="width:100%">
+    <label>Motivacija <span style="color:var(--muted);font-weight:400;font-size:.78rem">— par rečenica</span></label>
+    <textarea id="f_motiv" placeholder="Zašto želiš biti ambasador? Koja je tvoja veza s obrazovanjem, kulturom ili digitalnim projektima?"></textarea>
+  </div>
+  <div style="display:flex;gap:10px;width:100%">
+    <button class="btn-outline" onclick="goTo(2)" style="flex:0 0 auto;padding:11px 16px">←</button>
+    <button class="btn-main" style="flex:1" onclick="goToConfirm()">Pregledaj prijavu →</button>
+  </div>
+</div>
+
+<!-- ▸ SCREEN 4: CONFIRM + SUBMIT -->
+<div class="screen" id="s4">
+  <div class="step-dots">
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+    <div class="step-dot on"></div>
+  </div>
+  <div class="step-label">Korak 3 od 3 — Provjeri i pošalji</div>
+
+  <div class="confirm-badge">✓ Podaci prikupljeni</div>
+
+  <div class="confirm-card" id="confirmCard"></div>
+
+  <form method="POST" action="/no-limit/ambasadori/prijava/" id="submitForm" style="width:100%">
+    {% csrf_token %}
+    <input type="hidden" name="full_name" id="hf_name">
+    <input type="hidden" name="email" id="hf_email">
+    <input type="hidden" name="country" id="hf_country">
+    <input type="hidden" name="city" id="hf_city">
+    <input type="hidden" name="languages" id="hf_langs">
+    <input type="hidden" name="motivation" id="hf_motiv">
+    <input type="hidden" name="device_tz" id="hf_tz">
+    <input type="hidden" name="device_platform" id="hf_platform">
+    <div style="display:flex;gap:10px;width:100%">
+      <button type="button" class="btn-outline" onclick="goTo(3)" style="flex:0 0 auto;padding:11px 16px">←</button>
+      <button type="submit" class="btn-main" style="flex:1">Pošalji prijavu ✓</button>
+    </div>
+  </form>
+  <div style="margin-top:14px;font-size:.75rem;color:var(--muted);text-align:center">
+    Prijavom prihvaćaš <a href="/no-limit/statut/">Statut</a> i GDPR politiku No Limit udruge.
+  </div>
+</div>
+
+<footer>© 2026 No Limit udruga | <a href="/no-limit/">no-limit.world</a></footer>
 
 <script>
+// ── State ──────────────────────────────────────────────────────
+var state = {
+  tz: '', country: '', countryEmoji: '', lang: '', platform: '', mobile: false,
+  first: '', last: '', email: '', motiv: '', city: ''
+};
+
+// ── Theme ──────────────────────────────────────────────────────
 (function(){
   var root=document.documentElement,btn=document.getElementById('themeToggle'),icon=document.getElementById('themeIcon');
   function setTheme(t){root.setAttribute('data-theme',t);if(icon)icon.textContent=t==='light'?'🌙':'☀️';try{localStorage.setItem('nl-theme',t)}catch(e){}}
   var saved='';try{saved=localStorage.getItem('nl-theme')||''}catch(e){}
   setTheme(saved||(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'));
-  if(btn)btn.addEventListener('click',function(){setTheme((root.getAttribute('data-theme')||'dark')==='dark'?'light':'dark')});
+  if(btn)btn.addEventListener('click',function(){setTheme((root.getAttribute('data-theme')||'dark')==='dark'?'light':'dark');});
+})();
+
+// ── Helpers ────────────────────────────────────────────────────
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('s'+n).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── Country from timezone ──────────────────────────────────────
+var TZ_MAP = {
+  'Europe/Zagreb':'HR','Europe/Belgrade':'RS','Europe/Ljubljana':'SI',
+  'Europe/Sarajevo':'BA','Europe/Podgorica':'ME','Europe/Skopje':'MK',
+  'Europe/Berlin':'DE','Europe/Vienna':'AT','Europe/Zurich':'CH',
+  'Europe/Warsaw':'PL','Europe/Prague':'CZ','Europe/Bratislava':'SK',
+  'Europe/Budapest':'HU','Europe/Bucharest':'RO','Europe/Sofia':'BG',
+  'Europe/Paris':'FR','Europe/Brussels':'BE','Europe/Amsterdam':'NL',
+  'Europe/Stockholm':'SE','Europe/Oslo':'NO','Europe/Copenhagen':'DK',
+  'Europe/Helsinki':'FI','Europe/Tallinn':'EE','Europe/Riga':'LV',
+  'Europe/Vilnius':'LT','Europe/London':'GB','Europe/Dublin':'IE',
+  'Europe/Lisbon':'PT','Europe/Madrid':'ES','Europe/Rome':'IT',
+  'Europe/Athens':'GR','America/New_York':'US','America/Chicago':'US',
+  'America/Los_Angeles':'US','America/Toronto':'CA','America/Sao_Paulo':'BR',
+  'Asia/Tokyo':'JP','Asia/Seoul':'KR','Asia/Shanghai':'CN','Asia/Kolkata':'IN',
+  'Australia/Sydney':'AU'
+};
+var FLAG_MAP = {
+  'HR':'🇭🇷','DE':'🇩🇪','AT':'🇦🇹','SI':'🇸🇮','RS':'🇷🇸','BA':'🇧🇦',
+  'PL':'🇵🇱','CZ':'🇨🇿','SK':'🇸🇰','HU':'🇭🇺','RO':'🇷🇴','BG':'🇧🇬',
+  'FR':'🇫🇷','BE':'🇧🇪','NL':'🇳🇱','SE':'🇸🇪','NO':'🇳🇴','DK':'🇩🇰',
+  'FI':'🇫🇮','EE':'🇪🇪','LV':'🇱🇻','LT':'🇱🇹','GB':'🇬🇧','IE':'🇮🇪',
+  'PT':'🇵🇹','ES':'🇪🇸','IT':'🇮🇹','GR':'🇬🇷','CH':'🇨🇭',
+  'US':'🇺🇸','CA':'🇨🇦','BR':'🇧🇷','JP':'🇯🇵','KR':'🇰🇷','AU':'🇦🇺'
+};
+
+function detectDevice(){
+  var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  var lang = (navigator.language || 'en').split('-')[0].toUpperCase();
+  var ua = navigator.userAgent || '';
+  var mobile = /Mobi|Android|iPhone|iPad/i.test(ua);
+  var platform = mobile ? 'Mobilni' : 'Desktop';
+  var country = TZ_MAP[tz] || '';
+  var emoji = FLAG_MAP[country] || '🌐';
+  state.tz = tz;
+  state.country = country;
+  state.countryEmoji = emoji;
+  state.lang = lang;
+  state.platform = platform;
+  state.mobile = mobile;
+  return {tz:tz, country:country, emoji:emoji, lang:lang, platform:platform};
+}
+
+function addChip(icon, label, value, delay){
+  setTimeout(function(){
+    var c = document.createElement('div');
+    c.className = 'chip';
+    c.innerHTML = '<span class="dot"></span><span>' + icon + ' ' + label + ': <strong>' + value + '</strong></span>';
+    c.style.opacity = '0';
+    c.style.transform = 'scale(.8)';
+    c.style.transition = 'all .3s';
+    document.getElementById('chips').appendChild(c);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      c.style.opacity = '1'; c.style.transform = 'scale(1)';
+    });});
+  }, delay);
+}
+
+// ── Start scan ─────────────────────────────────────────────────
+function startScan(){
+  goTo(2);
+  var d = detectDevice();
+  var icon = document.getElementById('scanIcon');
+  var title = document.getElementById('scanTitle');
+  var sub = document.getElementById('scanSub');
+
+  // Chips one by one
+  if(d.tz)      addChip('🕐','Vremenska zona', d.tz, 400);
+  if(d.country) addChip(d.emoji,'Zemlja', d.country, 900);
+  addChip('🗣','Jezik', d.lang, 1400);
+  addChip('📱','Uređaj', d.platform, 1900);
+
+  setTimeout(function(){
+    icon.style.animation = 'none';
+    icon.textContent = '✅';
+    title.textContent = 'Podaci prikupljeni';
+    sub.textContent = 'Regija detektirana — spreman za prijavu';
+    document.getElementById('scanNote').style.display = 'block';
+    document.getElementById('btnNext2').style.display = 'block';
+  }, 2500);
+}
+
+// ── Confirm screen ─────────────────────────────────────────────
+function goToConfirm(){
+  state.first = (document.getElementById('f_first').value||'').trim();
+  state.last  = (document.getElementById('f_last').value||'').trim();
+  state.email = (document.getElementById('f_email').value||'').trim();
+  state.motiv = (document.getElementById('f_motiv').value||'').trim();
+
+  if(!state.first || !state.email){
+    alert('Molimo unesi barem ime i email.');
+    return;
+  }
+
+  // Build confirm card
+  var rows = [
+    ['Ime',        state.first + ' ' + state.last],
+    ['Email',      state.email],
+    ['Zemlja',     state.countryEmoji + ' ' + (state.country||'—')],
+    ['Jezik',      state.lang||'—'],
+    ['Uređaj',     state.platform||'—'],
+    ['Vremenska zona', state.tz||'—'],
+  ];
+  if(state.motiv){
+    rows.push(['Motivacija', state.motiv.length > 80 ? state.motiv.slice(0,80)+'…' : state.motiv]);
+  }
+  var html = rows.map(function(r){
+    return '<div class="confirm-row"><span class="confirm-key">'+r[0]+'</span><span class="confirm-val">'+r[1]+'</span></div>';
+  }).join('');
+  document.getElementById('confirmCard').innerHTML = html;
+
+  // Populate hidden fields
+  document.getElementById('hf_name').value     = state.first + ' ' + state.last;
+  document.getElementById('hf_email').value    = state.email;
+  document.getElementById('hf_country').value  = state.country;
+  document.getElementById('hf_city').value     = state.city;
+  document.getElementById('hf_langs').value    = state.lang;
+  document.getElementById('hf_motiv').value    = state.motiv;
+  document.getElementById('hf_tz').value       = state.tz;
+  document.getElementById('hf_platform').value = state.platform;
+
+  goTo(4);
+}
+
+// ── Auto-start if QR scan ──────────────────────────────────────
+(function(){
+  if(window.location.search.indexOf('qr=1') !== -1){
+    startScan();
+  }
 })();
 </script>
 </body>
