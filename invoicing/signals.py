@@ -190,3 +190,75 @@ def auto_create_otpremnica(sender, instance, created, **kwargs):
 
     except (IntegrityError, DatabaseError) as e:
         logger.warning("auto_create_otpremnica failed for %s: %s", instance.number, e)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GLOBALNI PEČAT — Proof of Existence + DocumentSeal pri finalizaciji fakture
+# ─────────────────────────────────────────────────────────────────────name────
+# Svaka faktura koja prelazi u SENT/CONFIRMED/FISCALIZED automatski dobiva:
+#   1. QRToken (W3C VC 1.1) — već radi via core/qr_registry.py signals
+#   2. DocumentSeal (eIDAS/GoBD/ZED) — novo, kreira se ovdje
+# ─────────────────────────────────────────────────────────────────────────────
+
+_ISSUE_TRIGGER_STATUSES = {"SENT", "CONFIRMED", "FISCALIZED"}
+
+
+@receiver(post_save, sender="invoicing.Invoice")
+def auto_seal_invoice(sender, instance, created, **kwargs):
+    """
+    Pri prvoj finalizaciji fakture (SENT/CONFIRMED/FISCALIZED):
+    kreira DocumentSeal + bilježi u log.
+    Idempotentno — ne duplicira seal za isti račun.
+    """
+    if created:
+        return
+
+    old_status = getattr(instance, "_old_status", None)
+    new_status = instance.status
+
+    # Samo pri prijelazu u issued statuse
+    if new_status not in _ISSUE_TRIGGER_STATUSES:
+        return
+    if old_status in _ISSUE_TRIGGER_STATUSES:
+        return
+
+    try:
+        from evalidator.models import DocumentSeal
+
+        # Idempotentnost — provjeri postoji li već seal za ovaj invoice
+        # SHA-256 iz ključnih metapodataka
+        import hashlib
+        meta = f"invoice:{instance.pk}:{instance.number}:{instance.total}:{instance.company_id}"
+        sha256 = hashlib.sha256(meta.encode()).hexdigest()
+
+        # Idempotentnost — provjeri postoji li već seal za ovaj invoice
+        existing = DocumentSeal.objects.filter(sha256_hash=sha256).first()
+        if existing:
+            return  # već zapečaćeno
+
+        from datetime import timedelta
+        from django.utils import timezone
+
+        company = instance.company
+        expires = timezone.now() + timedelta(days=3652)  # GoBD: 10 godina
+
+        seal = DocumentSeal.objects.create(
+            sha256_hash=sha256,
+            arhiva_company_id=company.pk if company else None,
+            doc_number=instance.number or "",
+            doc_date=getattr(instance, "issue_date", None) or getattr(instance, "date_issue", None),
+            partner_name=getattr(instance, "client_name", "") or "",
+            amount=instance.total or 0,
+            currency=getattr(instance, "currency", "EUR") or "EUR",
+            issuer_name=company.name if company else "",
+            issuer_country=getattr(company, "country", "HR") or "HR",
+            expires_at=expires,
+            send_channel="auto",
+        )
+        logger.info(
+            "DocumentSeal %s kreiran za Invoice %s (status=%s)",
+            seal.seal_token, instance.number, new_status,
+        )
+
+    except Exception as e:
+        logger.warning("auto_seal_invoice failed for %s: %s", getattr(instance, "number", instance.pk), e)
