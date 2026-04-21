@@ -216,6 +216,11 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 ## KONTEKST SESIJE
 
 
+### [S-002] --- 2026-04-21 10:21
+**Branch:** master
+**Zadnji commit:** 9c1656b7 docs(memory): implement 3-layer session memory system
+**Kontekst:** Verifikacija dual-system log-session alata — fina-connect strana.
+
 ### [S-001] — 2026-04-21 10:13
 **Branch:** master  
 **Zadnji commit:** fix(no-limit): send_whatsapp → send_text alias; ruff exclude var/ i _scripts/  
