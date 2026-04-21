@@ -215,6 +215,13 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 
 ## KONTEKST SESIJE
 
+### [S-008] --- 2026-04-21 13:15
+**Sustav:** fina-connect (fina-connect.online) + fenix-v3 (limit-connect.com)
+**Zadnji commit fina:** 978594e feat(chainblock): live verification UI + Trust Badge widget
+**Zadnji commit fenix:** 0d81c55 feat(chainblock): LC-DS-2026-001/002/003 pecaceni
+**Kontekst:** ChainBlock Objelodanjivanje DONE (P0): (A) Genesis card live API fetch + custom token verify input na landing.html. (B) 3 Ustav dokumenta zapecacena kao ChainBlock blokovi 1-3 (LC-DS-2026-001/002/003) — sve 3 verified:true, integrity:ok. LIMIT_CONNECT_USTAV_v1.md: real genesis hash 66c8d286. (C) trust-badge.js embeddable widget 3 linije ugradnje. Open: collectstatic za trust-badge.js.
+
+
 ### [S-007] --- 2026-04-21 12:45
 **Sustav:** fenix-v3 (limit-connect.com)
 **Branch:** master
