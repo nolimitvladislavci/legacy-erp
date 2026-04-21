@@ -12,7 +12,7 @@
 :root{
   --bg:#0a0a0f;--surface:#12121a;--slate:#1a1a28;--border:#2a2a3e;
   --gold:#c9a84c;--gold-light:#e2c875;--white:#f0f0f0;--dim:#8888a8;
-  --green:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;
+  --green:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;--dark:#0d0d14;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -20,9 +20,50 @@ body{font-family:"Space Grotesk",sans-serif;background:var(--bg);color:var(--whi
 a{text-decoration:none;color:inherit}
 img{max-width:100%}
 
+
+/* ── Light theme ──────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg: #f5f2ec;
+  --surface: #ffffff;
+  --slate: #edeae3;
+  --border: #d6cfc4;
+  --gold: #8a6d1e;
+  --gold-light: #b8942a;
+  --white: #1a1209;
+  --dim: #5a4e3e;
+  --green: #15803d;
+  --blue: #1d4ed8;
+  --purple: #6d28d9;
+  --dark: #edeae3;
+}
+[data-theme="light"] body { background: var(--bg); color: var(--white); }
+[data-theme="light"] { --nav-scrolled-bg: rgba(245,242,236,.96); }
+[data-theme="light"] nav.scrolled { background: rgba(245,242,236,.96) !important; border-bottom: 1px solid var(--border) !important; }
+[data-theme="light"] .hamburger span { background: var(--white); }
+[data-theme="light"] .nav-links { background: var(--bg); }
+[data-theme="light"] .genesis-card { background: var(--surface); }
+[data-theme="light"] .hero-title { color: var(--white); }
+[data-theme="light"] .section-title { color: var(--white); }
+[data-theme="light"] .hero::before { background: radial-gradient(ellipse 60% 50% at 60% 40%, rgba(138,109,30,.1) 0%, transparent 70%); }
+
+/* Toggle gumb */
+.theme-toggle {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: .2s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
+
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;transition:.3s}
-nav.scrolled{background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+nav.scrolled{background:var(--nav-scrolled-bg, rgba(10,10,15,.95));backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
 .nav-logo{font-family:"Bebas Neue",sans-serif;font-size:1.6rem;letter-spacing:.1em}
 .nav-logo .nl{color:var(--gold)}
 .nav-links{display:flex;align-items:center;gap:28px;list-style:none}
@@ -215,12 +256,16 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
     <li><a href="#genesis">Genesis</a></li>
     <li><a href="#patent">Patent</a></li>
     <li><a href="#future3">Future 3</a></li>
+    <li><a href="#strategic">Moves</a></li>
     <li><a href="#dokumenti">Dokumenti</a></li>
     <li><a href="#logo">Logo</a></li>
     <li><a href="#termin">Termin</a></li>
     <li><a href="#kontakt">Kontakt</a></li>
     <li><a href="https://limit-connect.com/hr/accounts/login/" class="nav-portal"><i class="fas fa-sign-in-alt"></i> Portal</a></li>
   </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Prebaci temu" title="Svjetli/tamni prikaz">
+    <span id="themeIcon">☀️</span>
+  </button>
   <div class="hamburger" id="hamburger">
     <span></span><span></span><span></span>
   </div>
@@ -1030,7 +1075,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
 
 
 <!-- TERMIN / VISITOR PORTAL -->
-<section style="background:var(--dark);padding:80px 40px;" id="termin">
+<section style="background:var(--slate);padding:80px 40px;" id="termin">
   <div style="max-width:1100px;margin:0 auto;">
     <div style="text-align:center;margin-bottom:60px;">
       <div style="font-size:.8rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;">Osobni kontakt</div>
@@ -1107,6 +1152,62 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
       </a>
       <p style="color:var(--dim);font-size:.8125rem;margin-top:12px;">
         Svaki termin bilježi se u sustav. Komunikacija ostaje kao dokaz kontakta.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIC MOVES -->
+<section style="background:linear-gradient(180deg,#1a1a2e 0%,#2a0a0a 100%);padding:80px 0;color:white" id="strategic">
+  <div class="container">
+    <div class="section-eyebrow" style="color:#dc2626">Strategic Moves &middot; Defensive Playbook</div>
+    <h2 class="section-title reveal" style="color:white">Tri poteza<br><span style="color:#dc2626">protiv Big Tech-a</span></h2>
+    <p class="section-lead reveal" style="color:#94a3b8;max-width:780px;margin:0 auto 40px">
+      Obrambena dopuna Future 3. <strong style="color:#C9A84C">Sidro</strong> (institucijski moat),
+      <strong style="color:#C9A84C">otrov</strong> (akvizicija = 100 god OPP), <strong style="color:#C9A84C">vlast</strong>
+      (zaklada s Google-om unutra ali bez moci da ukine OPP).
+    </p>
+
+    <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+
+      <div style="background:rgba(220,38,38,0.15);border:2px solid rgba(220,38,38,0.5);border-radius:14px;padding:25px">
+        <div style="font-size:50pt;font-weight:900;color:#dc2626;line-height:1">1</div>
+        <div style="font-size:8pt;color:#fca5a5;text-transform:uppercase;letter-spacing:2px;margin-top:8px">Institucijski moat</div>
+        <h3 style="color:white;font-size:14pt;margin:8px 0">Trust Anchor</h3>
+        <p style="color:#cbd5e1;font-size:10pt;line-height:1.6">API za javne biljeznike, sudove, arhive, banke, medije. Kad tvoj potpis postane <strong style="color:#C9A84C">sluzbena metoda u Hrvatskoj</strong>, Google moze imati brzi algoritam &mdash; sud prihvata nas.</p>
+        <div style="margin-top:12px;padding:8px 16px;background:rgba(22,163,74,0.2);color:#86efac;border-radius:6px;font-size:9pt;font-weight:700;display:inline-block">
+          Sutra: prvi sastanci (0 EUR)
+        </div>
+      </div>
+
+      <div style="background:rgba(220,38,38,0.15);border:2px solid rgba(220,38,38,0.5);border-radius:14px;padding:25px">
+        <div style="font-size:50pt;font-weight:900;color:#dc2626;line-height:1">2</div>
+        <div style="font-size:8pt;color:#fca5a5;text-transform:uppercase;letter-spacing:2px;margin-top:8px">Otrov za akviziciju</div>
+        <h3 style="color:white;font-size:14pt;margin:8px 0">Poison Pill</h3>
+        <p style="color:#cbd5e1;font-size:10pt;line-height:1.6">Ugovorna klauzula: ako Konjik bude kupljen, OPP ostaje <strong style="color:#C9A84C">100 godina</strong> ili Ugovor postaje nistavan. Google ne kupuje tehnologiju &mdash; kupuje ulaznicu na trziste koje si stvorio.</p>
+        <div style="margin-top:12px;padding:8px 16px;background:rgba(245,158,11,0.2);color:#fcd34d;border-radius:6px;font-size:9pt;font-weight:700;display:inline-block">
+          OPP v1.2 + Sponsor Agreement
+        </div>
+      </div>
+
+      <div style="background:rgba(220,38,38,0.15);border:2px solid rgba(220,38,38,0.5);border-radius:14px;padding:25px">
+        <div style="font-size:50pt;font-weight:900;color:#dc2626;line-height:1">3</div>
+        <div style="font-size:8pt;color:#fca5a5;text-transform:uppercase;letter-spacing:2px;margin-top:8px">Zaklada - vlasnicki balans</div>
+        <h3 style="color:white;font-size:14pt;margin:8px 0">Open Standard Foundation</h3>
+        <p style="color:#cbd5e1;font-size:10pt;line-height:1.6">Patent u NL/CH zakladi. 5 clanova UO: NO LIMIT (veto), Pravni fakultet, HOK, Google, Microsoft. <strong style="color:#C9A84C">Bolje im je za stolom nego na jelovniku</strong>.</p>
+        <div style="margin-top:12px;padding:8px 16px;background:rgba(139,92,246,0.2);color:#c4b5fd;border-radius:6px;font-size:9pt;font-weight:700;display:inline-block">
+          2027-2028 (s DAO Flip-om)
+        </div>
+      </div>
+
+    </div>
+
+    <div style="max-width:900px;margin:40px auto 0;text-align:center">
+      <a href="/static/udruga_no_limit/future/NOLIMIT-STRATEGIC-MOVES-01.pdf" download style="display:inline-block;padding:14px 30px;background:#dc2626;color:white;border-radius:8px;font-weight:700;text-decoration:none;margin-right:12px">
+        &#8623; Strategic Moves puni dokument (54 KB)
+      </a>
+      <p style="margin-top:20px;font-size:9.5pt;color:#94a3b8;font-style:italic">
+        &mdash; Big Tech misli na sljede&#263;i kvartal. NO LIMIT misli na sljede&#263;e stolje&#263;e. &mdash;
       </p>
     </div>
   </div>
@@ -1301,6 +1402,33 @@ async function updateGenesisCard() {
 
 // Izračunaj odmah i svaki sat (svaki dan novi hash po datumu)
 updateGenesisCard();
+
+
+// ── Light/Dark Theme Toggle ─────────────────────────────────────────────────
+(function() {
+  var root = document.documentElement;
+  var btn  = document.getElementById('themeToggle');
+  var icon = document.getElementById('themeIcon');
+
+  function setTheme(t) {
+    root.setAttribute('data-theme', t);
+    if (icon) icon.textContent = t === 'light' ? '🌙' : '☀️';
+    try { localStorage.setItem('nl-theme', t); } catch(e) {}
+  }
+
+  // Inicijalna tema: localStorage > prefers-color-scheme > dark
+  var saved = '';
+  try { saved = localStorage.getItem('nl-theme') || ''; } catch(e) {}
+  var preferLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  setTheme(saved || (preferLight ? 'light' : 'dark'));
+
+  if (btn) {
+    btn.addEventListener('click', function() {
+      var current = root.getAttribute('data-theme') || 'dark';
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+})();
 
 </script>
 </body>

@@ -9,6 +9,18 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0a0a0a;--surface:#111;--border:#222;--gold:#c9a84c;--text:#e0e0e0;--muted:#888;--font:'Space Grotesk',system-ui,sans-serif}
+
+[data-theme="light"]{
+  --bg:#f5f2ec;--surface:#ffffff;--slate:#edeae3;--border:#d6cfc4;
+  --gold:#8a6d1e;--gold-light:#b8942a;--white:#1a1209;--dim:#5a4e3e;
+  --green:#15803d;--blue:#1d4ed8;--purple:#6d28d9;--dark:#edeae3;
+}
+[data-theme="light"] body{background:var(--bg);color:var(--white)}
+[data-theme="light"] nav.scrolled{background:rgba(245,242,236,.96)!important;border-bottom-color:var(--border)!important}
+[data-theme="light"] .hamburger span{background:var(--white)}
+.theme-toggle{width:34px;height:34px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:.2s;flex-shrink:0}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;display:flex;flex-direction:column}
 a{color:var(--gold);text-decoration:none}
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
@@ -51,6 +63,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:24px
     <a href="/#ambasadori" style="color:var(--muted);font-size:.9rem">
         <i class="fas fa-arrow-left"></i> Natrag
     </a>
+<button class="theme-toggle" id="themeToggle" aria-label="Tema"><span id="themeIcon">☀️</span></button>
 </nav>
 
 <div class="form-container">
@@ -140,5 +153,14 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:24px
     <p>© 2026 No-limit udruga | <a href="/">no-limit.world</a> | GDPR-Kids politika aktivna</p>
 </footer>
 
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById('themeToggle'),icon=document.getElementById('themeIcon');
+  function setTheme(t){root.setAttribute('data-theme',t);if(icon)icon.textContent=t==='light'?'🌙':'☀️';try{localStorage.setItem('nl-theme',t)}catch(e){}}
+  var saved='';try{saved=localStorage.getItem('nl-theme')||''}catch(e){}
+  setTheme(saved||(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'));
+  if(btn)btn.addEventListener('click',function(){setTheme((root.getAttribute('data-theme')||'dark')==='dark'?'light':'dark')});
+})();
+</script>
 </body>
 </html>
