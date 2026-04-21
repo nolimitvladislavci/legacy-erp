@@ -78,7 +78,7 @@ async def run_journey(page, j):
             try:
                 await page.wait_for_selector(j["assert_selector"], timeout=2000)
                 result["passed"] = True
-            except Exception as e:
+            except Exception:
                 result["error"] = f"Selector not found: {j['assert_selector']}"
         else:
             result["passed"] = True

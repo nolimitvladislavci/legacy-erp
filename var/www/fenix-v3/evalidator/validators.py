@@ -4,9 +4,8 @@ eValidator — Engine za validaciju dokumenata
 Svaki validator implementira validate(data) -> List[Issue]
 """
 import re
-import hashlib
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import List
 
 
 @dataclass

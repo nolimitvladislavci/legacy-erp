@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""
+Brzo bilježenje konteksta sesije u FENIX_STATUS.md i IDEAS.md.
+Korištenje: log-session 'Što smo radili i koje su open threads'
+"""
+import sys
+import subprocess
+import re
+from datetime import datetime
+
+FENIX_STATUS = '/var/www/fina-connect/FENIX_STATUS.md'
+IDEAS_FILE   = '/var/www/fina-connect/IDEAS.md'
+
+def git_info():
+    try:
+        branch = subprocess.run(['git', '-C', '/var/www/fina-connect',
+                                 'branch', '--show-current'],
+                                capture_output=True, text=True).stdout.strip()
+        commit = subprocess.run(['git', '-C', '/var/www/fina-connect',
+                                 'log', '-1', '--format=%s'],
+                                capture_output=True, text=True).stdout.strip()
+        return branch, commit
+    except Exception:
+        return 'unknown', 'unknown'
+
+def next_session_id(content):
+    ids = re.findall(r'\[S-(\d+)\]', content)
+    return f"S-{(max(int(i) for i in ids) + 1):03d}" if ids else "S-001"
+
+def update_fenix_status(message):
+    with open(FENIX_STATUS, 'r') as f:
+        content = f.read()
+
+    branch, commit = git_info()
+    sid = next_session_id(content)
+    date = datetime.now().strftime('%Y-%m-%d %H:%M')
+
+    block = f"\n### [{sid}] — {date}\n**Branch:** {branch}  \n**Zadnji commit:** {commit}  \n**Kontekst:** {message}\n"
+
+    marker = '## KONTEKST SESIJE'
+    if marker in content:
+        content = content.replace('_Čeka prvu sesiju._', '')
+        insert_after = content.find(marker)
+        end_of_header = content.find('\n\n', insert_after) + 2
+        content = content[:end_of_header] + block + content[end_of_header:]
+    else:
+        content += f"\n---\n\n## KONTEKST SESIJE\n{block}"
+
+    with open(FENIX_STATUS, 'w') as f:
+        f.write(content)
+
+    return sid
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Korištenje: log-session 'Opis što je rađeno + open threads'")
+        sys.exit(1)
+
+    message = ' '.join(sys.argv[1:])
+    sid = update_fenix_status(message)
+    print(f"✅ Kontekst [{sid}] zapisan u FENIX_STATUS.md")
+    print(f"   Dodaj ideje: echo '- [I-XXX] 💡 Opis' >> {IDEAS_FILE}")

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konjik d.o.o. — Arhitektura povjerenja</title>
+<meta name="description" content="Konjik d.o.o. gradi kriptografsku infrastrukturu povjerenja — od Device Integrity Certificate do civilizacijskog backup sloja.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#08080a;--gold:#c9a84c;--gold2:#e6c97a;
+  --blue:#3b6fd4;--blue2:#6a9de8;--blue3:#1a3a6e;
+  --green:#1a7a4f;--green2:#4caf80;
+  --cream:#f4f1eb;--smoke:#e6e2da;--muted:#6e6860;--ink:#18180f;
+  --surface:#ffffff;--border:rgba(59,111,212,.15);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Fraunces',Georgia,serif;background:var(--black);color:#fff;font-size:16px;line-height:1.6;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,8,10,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.12);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:.08em;color:var(--gold)}
+.nav-brand span{color:rgba(255,255,255,.4);font-weight:400;font-size:.75rem;display:block;letter-spacing:.2em;text-transform:uppercase;margin-top:1px}
+.nav-links{display:flex;gap:1.8rem;align-items:center}
+.nav-links a{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);transition:color .2s;text-decoration:none}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:var(--blue);color:#fff !important;padding:.45rem 1.1rem;border-radius:6px;font-weight:500 !important}
+.nav-cta:hover{background:var(--blue2) !important;color:#fff !important}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:8rem 2rem 4rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 70% 40%,rgba(59,111,212,.08) 0%,transparent 65%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,111,212,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,111,212,.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 420px;gap:4rem;align-items:center}
+.hero-badge{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem}
+.hero-badge::before{content:'';width:2rem;height:1px;background:var(--gold);display:inline-block}
+h1.hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2.8rem,5vw,4.4rem);line-height:.95;letter-spacing:-.03em;color:#fff;margin-bottom:1.8rem}
+h1.hero-title em{color:var(--blue2);font-style:normal}
+.hero-sub{font-size:1.1rem;color:rgba(255,255,255,.45);font-weight:300;max-width:520px;line-height:1.7;margin-bottom:2.5rem}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.05em;background:var(--blue);color:#fff;padding:.85rem 2rem;border-radius:8px;text-decoration:none;transition:background .2s}
+.btn-primary:hover{background:var(--blue2)}
+.btn-ghost{font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.1em;color:rgba(255,255,255,.4);padding:.85rem 1.5rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;text-decoration:none;transition:all .2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Hero card */
+.hero-card{background:rgba(59,111,212,.06);border:1px solid rgba(59,111,212,.2);border-radius:20px;padding:2rem;position:relative;overflow:hidden}
+.hero-card::before{content:'';position:absolute;top:0;left:1.5rem;right:1.5rem;height:1px;background:linear-gradient(90deg,transparent,var(--blue2),transparent)}
+.hc-label{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.5rem}
+.hc-val{font-family:'Syne',sans-serif;font-weight:700;font-size:2.4rem;color:var(--blue2);letter-spacing:-.02em}
+.hc-rows{margin-top:1.5rem;display:flex;flex-direction:column;gap:.5rem}
+.hc-row{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.82rem}
+.hc-row:last-child{border:none}
+.hc-row .k{font-family:'DM Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.3);letter-spacing:.05em}
+.hc-row .v{font-family:'Syne',sans-serif;font-weight:600;color:#fff}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.dot-live{background:var(--green2);box-shadow:0 0 6px var(--green2)}
+.dot-build{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.dot-plan{background:rgba(255,255,255,.2)}
+
+/* ── SECTION COMMON ── */
+section{padding:6rem 2rem}
+.inner{max-width:1100px;margin:0 auto}
+.sec-tag{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue2);margin-bottom:.8rem}
+.sec-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.8rem,3vw,2.6rem);line-height:1.05;letter-spacing:-.02em;margin-bottom:1rem}
+.sec-sub{font-size:.95rem;color:rgba(255,255,255,.4);font-weight:300;max-width:600px;line-height:1.7;margin-bottom:3rem}
+
+/* ── MODUL CARDS ── */
+.modules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.mod-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:2rem;position:relative;transition:border-color .25s}
+.mod-card:hover{border-color:rgba(59,111,212,.35)}
+.mod-card.featured{background:rgba(59,111,212,.07);border-color:rgba(59,111,212,.25)}
+.mod-icon{font-size:2rem;margin-bottom:1rem}
+.mod-tag{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem}
+.mod-card.featured .mod-tag{color:var(--blue2)}
+.mod-card .mod-tag{color:rgba(255,255,255,.25)}
+.mod-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.15rem;color:#fff;margin-bottom:.6rem}
+.mod-desc{font-size:.85rem;color:rgba(255,255,255,.4);line-height:1.7;margin-bottom:1.2rem}
+.mod-status{display:inline-flex;align-items:center;gap:.4rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.08em;padding:.3rem .7rem;border-radius:20px}
+.status-now{background:rgba(76,175,128,.1);border:1px solid rgba(76,175,128,.25);color:var(--green2)}
+.status-wait{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:var(--gold)}
+.status-future{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3)}
+.mod-price{font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--blue2);margin-top:1rem}
+.mod-price small{font-family:'DM Mono',monospace;font-size:.6rem;font-weight:400;color:rgba(255,255,255,.25)}
+
+/* ── DICAAS DETAIL ── */
+.light-section{background:rgba(255,255,255,.015);border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin:2rem 0}
+.step{text-align:center;padding:1.5rem 1rem}
+.step-num{width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid rgba(59,111,212,.3);background:rgba(59,111,212,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Syne',sans-serif;font-weight:700;color:var(--blue2);font-size:.9rem}
+.step-arrow{grid-column:auto;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.15);font-size:1.2rem}
+.step h4{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:#fff;margin-bottom:.4rem}
+.step p{font-size:.78rem;color:rgba(255,255,255,.35);line-height:1.6}
+
+/* Pricing */
+.pricing-table{width:100%;border-collapse:collapse;margin:2rem 0}
+.pricing-table th{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:.9rem 1.2rem;text-align:left;border-bottom:1px solid rgba(255,255,255,.07)}
+.pricing-table td{padding:.9rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.88rem;color:rgba(255,255,255,.7)}
+.pricing-table tr:last-child td{border:none}
+.pricing-table tr.featured-row td{background:rgba(59,111,212,.06);color:#fff}
+.price-val{font-family:'Syne',sans-serif;font-weight:700;color:var(--blue2)}
+
+/* ── ROADMAP ── */
+.roadmap{position:relative;padding:2rem 0}
+.roadmap-line{position:absolute;left:2.2rem;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,rgba(59,111,212,.3) 10%,rgba(59,111,212,.3) 90%,transparent)}
+.rm-item{display:flex;gap:2rem;margin-bottom:2.5rem;position:relative}
+.rm-dot{width:2.4rem;height:2.4rem;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.75rem;z-index:2;margin-top:.2rem}
+.rm-dot.live{background:var(--green);border:2px solid var(--green2);color:#fff}
+.rm-dot.build{background:rgba(59,111,212,.3);border:2px solid var(--blue);color:var(--blue2)}
+.rm-dot.near{background:rgba(201,168,76,.15);border:2px solid rgba(201,168,76,.3);color:var(--gold)}
+.rm-dot.far{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25)}
+.rm-content{}
+.rm-phase{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:.3rem}
+.rm-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:#fff;margin-bottom:.3rem}
+.rm-desc{font-size:.83rem;color:rgba(255,255,255,.4);line-height:1.6;max-width:600px}
+.rm-meta{display:flex;gap:1rem;margin-top:.6rem;flex-wrap:wrap}
+.rm-chip{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.06em;padding:.25rem .6rem;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3)}
+.rm-chip.blue{background:rgba(59,111,212,.1);border-color:rgba(59,111,212,.2);color:var(--blue2)}
+.rm-chip.gold{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.2);color:var(--gold)}
+.rm-chip.green{background:rgba(76,175,128,.08);border-color:rgba(76,175,128,.2);color:var(--green2)}
+
+/* ── LEGAL ── */
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
+.doc-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.4rem;display:flex;gap:1rem;align-items:flex-start;transition:border-color .2s;text-decoration:none;color:inherit}
+.doc-card:hover{border-color:rgba(59,111,212,.3)}
+.doc-icon{width:2.5rem;height:2.5rem;background:rgba(59,111,212,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.doc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:#fff;margin-bottom:.25rem}
+.doc-meta{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.06em;color:rgba(255,255,255,.25)}
+
+/* ── BACKDOOR SECTION ── */
+.backdoor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:2rem}
+.bd-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.6rem}
+.bd-num{font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;color:rgba(59,111,212,.25);line-height:1;margin-bottom:.5rem}
+.bd-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:#fff;margin-bottom:.5rem}
+.bd-desc{font-size:.83rem;color:rgba(255,255,255,.4);line-height:1.7}
+.bd-code{font-family:'DM Mono',monospace;font-size:.72rem;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:.7rem 1rem;margin-top:.7rem;color:rgba(255,255,255,.5);line-height:1.6}
+
+/* ── CR SECTION ── */
+.cr-calc{background:rgba(59,111,212,.05);border:1px solid rgba(59,111,212,.15);border-radius:16px;padding:2rem;max-width:520px}
+.cr-slider-wrap{margin:1rem 0}
+.cr-slider{width:100%;accent-color:var(--blue2);cursor:pointer}
+.cr-output{font-family:'Syne',sans-serif;font-weight:800;font-size:2.8rem;color:var(--blue2);margin:1rem 0 .3rem}
+.cr-label{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.cr-note{font-size:.78rem;color:rgba(255,255,255,.3);margin-top:1rem;line-height:1.6;border-top:1px solid rgba(255,255,255,.06);padding-top:.8rem}
+
+/* ── CONTACT ── */
+.contact-section{background:linear-gradient(135deg,rgba(59,111,212,.06) 0%,rgba(201,168,76,.04) 100%);border-top:1px solid rgba(59,111,212,.1)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.contact-form{display:flex;flex-direction:column;gap:1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.form-input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.75rem 1rem;color:#fff;font-family:'Fraunces',serif;font-size:.9rem;outline:none;transition:border-color .2s;width:100%}
+.form-input:focus{border-color:rgba(59,111,212,.5)}
+.form-input::placeholder{color:rgba(255,255,255,.2)}
+select.form-input option{background:#1a1a2e;color:#fff}
+.form-submit{background:var(--blue);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.05em;padding:.85rem 2rem;border:none;border-radius:8px;cursor:pointer;transition:background .2s}
+.form-submit:hover{background:var(--blue2)}
+.contact-info .ci-item{margin-bottom:1.5rem}
+.ci-label{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:.3rem}
+.ci-val{font-size:.95rem;color:rgba(255,255,255,.7)}
+.ci-val a{color:var(--blue2);text-decoration:none}
+
+/* ── CIVILIZACIJSKA PORUKA ── */
+.civ-section{text-align:center;padding:8rem 2rem;background:linear-gradient(180deg,var(--black) 0%,rgba(8,8,40,.95) 100%)}
+.civ-quote{font-size:clamp(1.2rem,2.5vw,1.8rem);font-weight:300;font-style:italic;color:rgba(255,255,255,.5);max-width:820px;margin:0 auto 2rem;line-height:1.6}
+.civ-quote strong{color:rgba(255,255,255,.9);font-style:normal;font-weight:600}
+.civ-sig{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+
+/* ── FOOTER ── */
+footer{background:rgba(0,0,0,.6);border-top:1px solid rgba(255,255,255,.05);padding:2.5rem 2rem;font-family:'DM Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.2)}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;gap:1rem}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{color:rgba(255,255,255,.2);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--gold)}
+
+/* ── UTIL ── */
+.gold{color:var(--gold)}
+.blue{color:var(--blue2)}
+.muted{color:rgba(255,255,255,.35)}
+.mono{font-family:'DM Mono',monospace}
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);margin:0}
+
+@media(max-width:900px){
+  .hero-inner,.modules-grid,.steps-grid,.contact-grid,.backdoor-grid,.docs-grid{grid-template-columns:1fr}
+  .hero-card{display:none}
+  nav .nav-links{display:none}
+  .roadmap-line{left:1.2rem}
+  .rm-dot{width:2rem;height:2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">KONJIK <span>d.o.o. · Arhitektura povjerenja</span></div>
+  <div class="nav-links">
+    <a href="#dicaas">DICaaS</a>
+    <a href="#cr">CR</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#legal">Dokumenti</a>
+    <a href="#kontakt" class="nav-cta">API ključ →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">Konjik d.o.o. · IP vlasnik · 2026</div>
+      <h1 class="hero-title">Arhitektura<br><em>povjerenja</em><br>za digitalni svijet</h1>
+      <p class="hero-sub">Počinjemo s €0.02 po API pozivu za fintehe. Završavamo 2040. kao matematički temelj na kojemu funkcionira povjerenje između ljudi — bez obzira na to koja država, valuta ili institucija postoji.</p>
+      <div class="hero-btns">
+        <a href="#kontakt" class="btn-primary">Zatraži API ključ →</a>
+        <a href="#roadmap" class="btn-ghost">14-fazni roadmap ↓</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hc-label">Trenutni status sustava</div>
+      <div class="hc-val">DICaaS v1</div>
+      <div class="hc-rows">
+        <div class="hc-row"><span class="k">Triple DNA</span><span class="v"><span class="status-dot dot-live"></span>LIVE</span></div>
+        <div class="hc-row"><span class="k">ChainBlock</span><span class="v"><span class="status-dot dot-live"></span>LIVE</span></div>
+        <div class="hc-row"><span class="k">Genesis Block</span><span class="v"><span class="status-dot dot-live"></span>Verificiran</span></div>
+        <div class="hc-row"><span class="k">TSA (NN 89/25)</span><span class="v"><span class="status-dot dot-build"></span>U integraciji</span></div>
+        <div class="hc-row"><span class="k">QEAA Wallet</span><span class="v"><span class="status-dot dot-plan"></span>Q3 2027</span></div>
+        <div class="hc-row"><span class="k">Trust Protocol</span><span class="v"><span class="status-dot dot-plan"></span>2029</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TRI MODULA -->
+<section id="moduli" style="background:rgba(255,255,255,.01)">
+  <div class="inner">
+    <div class="sec-tag">Tri modula · 2026</div>
+    <h2 class="sec-title">Od sutra do<br>tjedna dana</h2>
+    <p class="sec-sub">Dva modula kreću odmah. Jedan čeka regulatorni sandbox. Redoslijed nije slučajan — svaki financira sljedeći.</p>
+    <div class="modules-grid">
+      <div class="mod-card featured">
+        <div class="mod-icon">🔐</div>
+        <div class="mod-tag">P0 · Kreće sutra</div>
+        <div class="mod-title">Device Integrity<br>Certificate as a Service</div>
+        <p class="mod-desc">Banka ili fintech dobiva kriptografski dokaz da je transakcija došla s "povjerljivog uređaja". NIS2 compliance u 48h. Nulta regulatorna prepreka — tehnička atestacija, ne financijska usluga.</p>
+        <div class="mod-status status-now"><span class="status-dot dot-live"></span>Dostupno odmah</div>
+        <div class="mod-price">€0.02<small>/API call</small></div>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">⚡</div>
+        <div class="mod-tag">P1 · Ovaj tjedan</div>
+        <div class="mod-title">Connectivity Rights<br>Appreciation</div>
+        <p class="mod-desc">CR nije zamjenjiv za novac. Ali raste u utility vrijednosti kako mreža raste. Kao avio milje — ne kamatna stopa, ne depozit, ne vrijednosni papir. Kalkulator u dashboardu.</p>
+        <div class="mod-status status-now"><span class="status-dot dot-live"></span>Implementirati odmah</div>
+        <div class="mod-price">–<small> utility, ne prihod</small></div>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📈</div>
+        <div class="mod-tag">P3 · 2027</div>
+        <div class="mod-title">Yield Gateway<br>DeFi + CeFi</div>
+        <p class="mod-desc">EUR → USDC → Aave/Lido → 6-10% → korisnik (minus spread). Pravni okvir: Ustav Članak 3, tehničke usluga optimizacije imovine. Čeka MiCA sandbox i VASP registraciju.</p>
+        <div class="mod-status status-wait"><span class="status-dot dot-plan"></span>MiCA sandbox Q1 2027</div>
+        <div class="mod-price">1–2%<small> spread</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DICAAS DETAIL -->
+<section id="dicaas" class="light-section">
+  <div class="inner">
+    <div class="sec-tag">Modul 1 · Faza 1-8</div>
+    <h2 class="sec-title">Device Integrity<br>Certificate as a Service</h2>
+    <p class="sec-sub">NIS2 Direktiva (EU) 2022/2555 zahtijeva od banaka i kritične infrastrukture da znaju tko i s čega pristupa. Konjik daje kriptografski dokaz — ne samo password.</p>
+
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>WebAuthn Auth</h4>
+        <p>Korisnik se autenticira passkey-em. Hardware-bound, phishing-proof.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>Device DNA</h4>
+        <p>Triple DNA: WebAuthn + Device Fingerprint + Shamir 3/5. Jedinstven za svaki uređaj.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>X.509 + TSA</h4>
+        <p>Konjik potpisuje certifikat s vremenskim žigom (TSA RFC 3161, NN 89/25).</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h4>Audit Log</h4>
+        <p>Banka dobiva proof + immutable log. ChainBlock Merkle receipt za svaki certifikat.</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.1rem;color:#fff;margin:2.5rem 0 1rem">Cijenik</h3>
+    <table class="pricing-table">
+      <thead>
+        <tr>
+          <th>Plan</th><th>API pozivi/mj</th><th>Implementacija</th><th>Cijena</th><th>Idealno za</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Starter</td>
+          <td>10.000</td>
+          <td>Samoposluživanje</td>
+          <td><span class="price-val">€99/mj</span></td>
+          <td>Startupi, finteh piloti</td>
+        </tr>
+        <tr class="featured-row">
+          <td><strong>Business</strong> ★</td>
+          <td>100.000</td>
+          <td>Onboarding uključen</td>
+          <td><span class="price-val">€599/mj</span></td>
+          <td>Neobanke, PSP-ovi</td>
+        </tr>
+        <tr>
+          <td>Bank</td>
+          <td>1.000.000</td>
+          <td>€50.000 implementacija</td>
+          <td><span class="price-val">€0.03/call</span></td>
+          <td>ZABA, PBZ, RBA, Erste</td>
+        </tr>
+        <tr>
+          <td>Enterprise</td>
+          <td>Neograničeno</td>
+          <td>Dedicated infrastruktura</td>
+          <td><span class="price-val">Dogovor</span></td>
+          <td>HEP, Telekomi, IoT OEM</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:2rem;padding:1.5rem;background:rgba(59,111,212,.05);border:1px solid rgba(59,111,212,.12);border-radius:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.8rem">API preview</div>
+      <pre class="bd-code">curl -X POST https://api.konjik.hr/v1/attest \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"device_dna": "...", "session_id": "...", "user_ref": "..."}'
+
+# Response
+{
+  "certificate_id": "KONJ-2026-7f3a9b2c",
+  "verified": true,
+  "triple_dna_hash": "sha256:...",
+  "tsa_timestamp": "2026-04-21T15:00:00Z",
+  "chainblock_receipt": "LC-CRT-2026-001",
+  "expires_at": "2026-05-21T15:00:00Z"
+}</pre>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CR KALKULATOR -->
+<section id="cr" style="background:rgba(255,255,255,.01)">
+  <div class="inner" style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start">
+    <div>
+      <div class="sec-tag">Modul 2 · CR Appreciation</div>
+      <h2 class="sec-title">Connectivity Rights<br>nisu token</h2>
+      <p style="font-size:.9rem;color:rgba(255,255,255,.45);line-height:1.8;margin-bottom:1.5rem">CR je interno pravo na korištenje platforme. Ne može se prodati. Ne može se kupiti za novac. Nema EUR/CR tečaj nigdje.<br><br>Ali — raste u utility vrijednosti kako mreža raste. Kao avio milje, kao Netflix kvota. <strong style="color:rgba(255,255,255,.8)">Ovo nije kamata. Ovo je aprecijacija usluge.</strong></p>
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:1.2rem;font-family:'DM Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.3);line-height:1.8">
+        <div style="color:var(--blue2);margin-bottom:.4rem">// Formula transparentna</div>
+        CR_utility = base_quota × (1 + log₁₀(users / 1000))<br>
+        <br>
+        1.000 korisnika → 1 CR = 1.0 × transakcija/mj<br>
+        10.000 korisnika → 1 CR = 2.0 × transakcija/mj<br>
+        100.000 korisnika → 1 CR = 3.0 × transakcija/mj<br>
+        1.000.000 korisnika → 1 CR = 4.0 × transakcija/mj
+      </div>
+    </div>
+    <div>
+      <div class="cr-calc">
+        <div class="cr-label">CR Value Calculator</div>
+        <div class="cr-slider-wrap">
+          <input type="range" class="cr-slider" id="crSlider" min="1000" max="1000000" value="1000" step="1000">
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.62rem;color:rgba(255,255,255,.2);margin-bottom:1rem">
+          <span>1.000 korisnika</span><span>1.000.000 korisnika</span>
+        </div>
+        <div class="cr-label">Trenutno korisnika mreže</div>
+        <div id="crUsers" style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.5rem;color:#fff;margin:.3rem 0 1rem">1.000</div>
+        <div class="cr-label">1 CR = transakcija/mj</div>
+        <div class="cr-output" id="crVal">1.0×</div>
+        <div class="cr-note">CR se ne može konvertirati u EUR. Nema sekundarnog tržišta. Svaki pokušaj CR/EUR konverzije kršenje je Ustava Limit-Connect i aktivira suspension računa.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 14-FAZNI ROADMAP -->
+<section id="roadmap">
+  <div class="inner">
+    <div class="sec-tag">Konjik · 2026–2040</div>
+    <h2 class="sec-title">14 faza: od API poziva<br>do civilizacijske infrastrukture</h2>
+    <p class="sec-sub">Svaka faza financira sljedeću. Redoslijed nije ambicija — to je inženjerska logika.</p>
+
+    <div class="roadmap">
+      <div class="roadmap-line"></div>
+
+      <div class="rm-item">
+        <div class="rm-dot live">1</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 1 · Sutra</div>
+          <div class="rm-title">Device Integrity Certificate (Fintechi)</div>
+          <div class="rm-desc">Revolut, Monri, Nuvei, lokalni PSP-ovi. Isti NIS2 potrebe kao banke, odluke za tjedan dana. €0.02-0.05/API call.</div>
+          <div class="rm-meta"><span class="rm-chip green">LIVE</span><span class="rm-chip blue">€0.02-0.05/call</span><span class="rm-chip">NIS2 compliance</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot build">2</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 2 · 3-6 mjeseci</div>
+          <div class="rm-title">DICaaS za banke (ZABA, PBZ, RBA, Erste)</div>
+          <div class="rm-desc">Isti API, duži sales cycle. €0.05/call + €50.000 implementacija. Dedicirani onboarding tim.</div>
+          <div class="rm-meta"><span class="rm-chip blue">€50k impl.</span><span class="rm-chip">4 banke target</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot build">3</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 3 · 6-12 mjeseci</div>
+          <div class="rm-title">Qualified Identity Wallet (QEAA)</div>
+          <div class="rm-desc">eIDAS 2.0 Qualified Electronic Attestation of Attributes. Pravno jednak osobnoj iskaznici. Akreditacija HAKOM/AZOP. €50-100k implementacija + €15k/god.</div>
+          <div class="rm-meta"><span class="rm-chip gold">eIDAS 2.0</span><span class="rm-chip blue">€50-100k</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot near">4</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 4 · 12-18 mjeseci</div>
+          <div class="rm-title">IoT Attestation Network</div>
+          <div class="rm-desc">Ne verificiraš čovjeka — verificiraš uređaj. HEP: 2.5M pametnih brojila × €1/god. Bankomati, parking senzori, kamere. Triple DNA light u firmware.</div>
+          <div class="rm-meta"><span class="rm-chip">HEP 2.5M uređaja</span><span class="rm-chip blue">€1-50/uređaj/god</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot near">5</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 5 · 18-24 mjeseca</div>
+          <div class="rm-title">Zero-Knowledge Compliance Oracle</div>
+          <div class="rm-desc">Regulator verificira compliance bez viđenja podataka. ZKP dokaz = 256 bajtova koji potvrđuje "pravilo nije prekršeno". Deloitte, EY, KPMG, HANFA, AZOP.</div>
+          <div class="rm-meta"><span class="rm-chip gold">ZKP</span><span class="rm-chip blue">€50-100k/impl</span><span class="rm-chip">Big 4</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot near">6</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 6 · 2028-2029</div>
+          <div class="rm-title">Post-Quantum Certificate Migration Authority</div>
+          <div class="rm-desc">NIST PQC standardi (CRYSTALS-Dilithium) zamjenjuju RSA. Svaki X.509 koji je Konjik ikad izdao treba migrirati. Per-cert migration fee × cijela baza klijenata.</div>
+          <div class="rm-meta"><span class="rm-chip">NIST PQC</span><span class="rm-chip gold">2030 deadline</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot near">7</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 7 · 2027-2029</div>
+          <div class="rm-title">Agentic AI Identity (EU AI Act)</div>
+          <div class="rm-desc">AI agenti pišu kod, odobravaju kredite. EU AI Act zahtijeva audit trail svake AI odluke visokog rizika. Triple DNA proširuje se: Device + Human + <strong>Agent DNA</strong>.</div>
+          <div class="rm-meta"><span class="rm-chip gold">EU AI Act</span><span class="rm-chip blue">€100k+/sustav</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot far">8</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 8 · 2029-2030</div>
+          <div class="rm-title">Trust Protocol (od servisa do infrastrukture)</div>
+          <div class="rm-desc">50+ institucionalnih čvorova. Konjik = founding member + protokol vlasnik. Membership fee €50-200k/god. Svaka atestacija na mreži nosi Konjik DNA.</div>
+          <div class="rm-meta"><span class="rm-chip">50+ nodes</span><span class="rm-chip blue">€200k/čvor</span><span class="rm-chip gold">Protokol</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot far">9</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 9 · 2030-2032</div>
+          <div class="rm-title">Self-Sovereign Trust Stack (SSTS)</div>
+          <div class="rm-desc">Svaki mobilni telefon postaje Trust Node. Korisnikov iPhone može potpisivati atestacije za vlastiti krug povjerenja. Konjik postaje "fallback" i globalni directory, ne gatekeeper.</div>
+          <div class="rm-meta"><span class="rm-chip">Secure Enclave</span><span class="rm-chip gold">Decentralizacija</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot far">10</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 10 · 2032-2034</div>
+          <div class="rm-title">Truth Oracle Network (TON)</div>
+          <div class="rm-desc">DICaaS verificira integritet (jesi li ti to ti). TON verificira istinitost (je li ono što kažeš točno). Reuters, HINA, sudovi, osiguravatelji. €0.01-100 po verifikaciji.</div>
+          <div class="rm-meta"><span class="rm-chip">Deepfakes</span><span class="rm-chip blue">Sudski dokaz</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot far">11</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 11 · 2035-2040</div>
+          <div class="rm-title">Civilization Backup (CB-1)</div>
+          <div class="rm-desc">Svakih 30 dana globalni checkpoint: Merkle root → Konjik serveri + 100 Trust Nodes + švicarski bunker + Svalbard + Ethereum. Ako civilizacija padne — reconstruction na temelju kriptografskog dokaza.</div>
+          <div class="rm-meta"><span class="rm-chip gold">Vlade €10-100M</span><span class="rm-chip">Svalbard</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot far">12</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 12 · 2033-2035</div>
+          <div class="rm-title">Digital Estate Protocol (DEP)</div>
+          <div class="rm-desc">Što se dogodi s tvojim digitalnim životom kad umreš? Shamir 3/5 "digitalni testament". Dead Man's Switch: 180 dana bez aktivnosti → protokol se aktivira. Notari i sudovi prihvaćaju Succession Certificate.</div>
+          <div class="rm-meta"><span class="rm-chip">€84T generacijski transfer</span><span class="rm-chip blue">Shamir</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot far">13</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 13 · 2034-2036</div>
+          <div class="rm-title">Reputation Without Identity (RWI)</div>
+          <div class="rm-desc">1.4 milijardi nema pristup financijama jer nema "formalni" identitet. ZKP proof: "Ova osoba nikad nije imala default" — dokazano bez otkrivanja tko je. GDPR zadovoljen, kredit odobren.</div>
+          <div class="rm-meta"><span class="rm-chip gold">1.4B unbanked</span><span class="rm-chip blue">ZKP</span></div>
+        </div>
+      </div>
+
+      <div class="rm-item">
+        <div class="rm-dot far">14</div>
+        <div class="rm-content">
+          <div class="rm-phase">Faza 14 · 2036-2040</div>
+          <div class="rm-title">Konjik Standard KS-1 — ISO povjerenja</div>
+          <div class="rm-desc">Ne produkt. Ne servis. Ne protokol. Standard. KS-1 = međunarodni standard za digitalno povjerenje. ETSI + ISO/IEC JTC 1 ratifikacija. Svaka zemlja koja želi EU Digital Single Market mora biti KS-1 compliant.</div>
+          <div class="rm-meta"><span class="rm-chip gold">ETSI + ISO</span><span class="rm-chip">27 zemalja EU</span><span class="rm-chip blue">Endgame</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ZAŠTITA OD BACKDOORA -->
+<section id="integritet" style="background:rgba(255,255,255,.01)">
+  <div class="inner">
+    <div class="sec-tag">Integritet protokola</div>
+    <h2 class="sec-title">Četiri sloja zaštite<br>od backdoora</h2>
+    <p class="sec-sub">Institucije koje bi tražile tajni pristup su iste koje plaćaju za DICaaS. Ekonomski interes štiti integritet bolje nego pravni argument.</p>
+    <div class="backdoor-grid">
+      <div class="bd-card">
+        <div class="bd-num">01</div>
+        <div class="bd-title">Open Specification</div>
+        <p class="bd-desc">Protokol spec je javna, verzionirana, hashirana — kao IETF RFC. Svaka promjena vidljiva svima. Backdoor se ne može sakriti u javnom RFC-u. NSA nije uspjela u TLS 1.3 (2018.) — isto načelo.</p>
+      </div>
+      <div class="bd-card">
+        <div class="bd-num">02</div>
+        <div class="bd-title">Constitutional Amendment Protocol</div>
+        <p class="bd-desc">Svaka izmjena zahtijeva 3/5 osnivača + 2/3 Trust Node glasova. Nitko ne može jednostrano mijenjati. Institucija koja pritišće mora pritisnuti sve odjednom — matematički nemoguće.</p>
+        <div class="bd-code">// CAP pravilo (Ustav Amandman II)
+izmjena_protokola = founder_sigs(3/5) 
+  AND node_votes(2/3)
+  AND public_notice(30_dana)</div>
+      </div>
+      <div class="bd-card">
+        <div class="bd-num">03</div>
+        <div class="bd-title">Jurisdikcijska arbitraža</div>
+        <p class="bd-desc">Protokol layer registriran kao zaklada u Švicarskoj (model: CERN, ITU). Hrvatska ili EU ne mogu narediti švicarskoj zakladi da promijeni međunarodni standard. Mogu samo izaći — i izgubiti interoperabilnost.</p>
+      </div>
+      <div class="bd-card">
+        <div class="bd-num">04</div>
+        <div class="bd-title">Poison Pill klauza</div>
+        <p class="bd-desc">Eksplicitna klauzula u Ustavu: svaki zahtjev za tajnim pristupom automatski aktivira fork proceduru i migraciju na jurisdiction-free instance. Korisnici slijede granu, ne regulatora.</p>
+        <div class="bd-code">// Ustav Amandman III (planiran)
+IF regulator.request.type == "backdoor":
+  TRIGGER protocol_fork()
+  NOTIFY all_nodes()
+  MIGRATE jurisdiction_free()</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LEGAL DOKUMENTI -->
+<section id="legal">
+  <div class="inner">
+    <div class="sec-tag">Pravna dokumentacija</div>
+    <h2 class="sec-title">Constitution as Code</h2>
+    <p class="sec-sub">Svaki dokument je ChainBlock verificiran, hashiran, vremenski pečatiran. Ovo nije marketing materijal — ovo su strojno čitljivi zakoni sustava.</p>
+    <div class="docs-grid">
+      <a class="doc-card" href="https://limit-connect.com/api/verify/LC-DS-2026-001/" target="_blank">
+        <div class="doc-icon">📜</div>
+        <div>
+          <div class="doc-title">Limit-Connect Ustav v1.0</div>
+          <div class="doc-meta">LC-DS-2026-001 · ChainBlock verified · 6 članaka</div>
+        </div>
+      </a>
+      <a class="doc-card" href="https://limit-connect.com/api/verify/LC-DS-2026-002/" target="_blank">
+        <div class="doc-icon">⚖️</div>
+        <div>
+          <div class="doc-title">Amandman I — DPU Protokol</div>
+          <div class="doc-meta">LC-DS-2026-002 · Digitalni Patentni Ured</div>
+        </div>
+      </a>
+      <a class="doc-card" href="https://limit-connect.com/api/verify/LC-DS-2026-003/" target="_blank">
+        <div class="doc-icon">🌱</div>
+        <div>
+          <div class="doc-title">Amandman II — Bootstrapping</div>
+          <div class="doc-meta">LC-DS-2026-003 · Trust Badge · Autonomous Growth</div>
+        </div>
+      </a>
+      <div class="doc-card" style="cursor:default;opacity:.5">
+        <div class="doc-icon">🔬</div>
+        <div>
+          <div class="doc-title">Triple DNA Specifikacija</div>
+          <div class="doc-meta">WebAuthn + Device Fingerprint + Shamir 3/5 · U pripremi</div>
+        </div>
+      </div>
+      <div class="doc-card" style="cursor:default;opacity:.5">
+        <div class="doc-icon">🗺️</div>
+        <div>
+          <div class="doc-title">Regulatory Compliance Map</div>
+          <div class="doc-meta">NIS2 · eIDAS 2.0 · MiCA · EU AI Act · GDPR · U pripremi</div>
+        </div>
+      </div>
+      <div class="doc-card" style="cursor:default;opacity:.5">
+        <div class="doc-icon">🇪🇺</div>
+        <div>
+          <div class="doc-title">EC DG CONNECT Opinion Letter</div>
+          <div class="doc-meta">TEE/QEAA klasifikacija · Na engleskom · U pripremi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Genesis verification -->
+    <div style="margin-top:2rem;background:rgba(76,175,128,.04);border:1px solid rgba(76,175,128,.15);border-radius:12px;padding:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green2);margin-bottom:.3rem">Genesis Block · Live verifikacija</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:#fff">NOLIMIT-GENESIS-0001</div>
+        <div style="font-family:'DM Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.3);margin-top:.2rem">Hash: 66c8d2862d5a661c6cbe14affbb1d25b0fd3dc0f4950b9fd9a5c8095419a81b5</div>
+      </div>
+      <a href="https://limit-connect.com/api/verify/NOLIMIT-GENESIS-0001/" target="_blank"
+         style="font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;background:rgba(76,175,128,.15);border:1px solid rgba(76,175,128,.3);color:var(--green2);padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;white-space:nowrap">
+        Verificiraj live →
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KONTAKT -->
+<section id="kontakt" class="contact-section">
+  <div class="inner">
+    <div class="contact-grid">
+      <div>
+        <div class="sec-tag">Pilot program · Q2 2026</div>
+        <h2 class="sec-title">Zatraži API ključ</h2>
+        <p style="font-size:.9rem;color:rgba(255,255,255,.4);line-height:1.7;margin-bottom:2rem">
+          DICaaS pilot program je otvoren za fintehe, neobanke i PSP-ove. Onboarding u 48h. Besplatnih 5.000 API poziva za testiranje.
+        </p>
+        <div class="contact-info">
+          <div class="ci-item">
+            <div class="ci-label">Tvrtka</div>
+            <div class="ci-val">Konjik d.o.o.</div>
+          </div>
+          <div class="ci-item">
+            <div class="ci-label">Platforma</div>
+            <div class="ci-val"><a href="https://limit-connect.com" target="_blank">limit-connect.com</a></div>
+          </div>
+          <div class="ci-item">
+            <div class="ci-label">Genesis Block</div>
+            <div class="ci-val"><a href="https://limit-connect.com/api/verify/NOLIMIT-GENESIS-0001/" target="_blank">Verificiraj ↗</a></div>
+          </div>
+        </div>
+      </div>
+      <form class="contact-form" action="mailto:ivan@konjik.hr" method="GET" enctype="text/plain">
+        <div class="form-row">
+          <input type="text" name="company" placeholder="Naziv tvrtke" class="form-input" required>
+          <input type="email" name="email" placeholder="Email" class="form-input" required>
+        </div>
+        <select class="form-input" name="type">
+          <option value="">Tip organizacije</option>
+          <option>Fintech / Neobank</option>
+          <option>Banka (HR)</option>
+          <option>PSP / Payment processor</option>
+          <option>Osiguravajuća kuća</option>
+          <option>IoT / Telekom</option>
+          <option>Javni sektor</option>
+          <option>Revizorska kuća</option>
+        </select>
+        <select class="form-input" name="volume">
+          <option value="">Godišnji volumen API poziva</option>
+          <option>Do 100.000 (Starter)</option>
+          <option>100.000 – 1M (Business)</option>
+          <option>Više od 1M (Enterprise)</option>
+          <option>Ne znam još</option>
+        </select>
+        <textarea class="form-input" name="message" rows="3" placeholder="Kratki opis use-case-a (opcionalno)"></textarea>
+        <button type="submit" class="form-submit">Pošalji zahtjev →</button>
+        <p style="font-size:.72rem;color:rgba(255,255,255,.2);font-family:'DM Mono',monospace">Odgovaramo u 24h. Besplatnih 5.000 API poziva za testiranje.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- CIVILIZACIJSKA PORUKA -->
+<section class="civ-section">
+  <p class="civ-quote">"Počinjemo s <strong>€0.02 po API pozivu</strong> za fintehe.<br>Završavamo 2040. kao <strong>matematički temelj</strong> na kojemu funkcionira povjerenje između ljudi — bez obzira na to koja država, valuta ili institucija postoji."</p>
+  <div class="civ-sig">Konjik d.o.o. · Arhitektura povjerenja · 2026–2040</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>Konjik d.o.o. · limit-connect.com · ChainBlock verified · 2026</div>
+    <div class="footer-links">
+      <a href="#dicaas">DICaaS</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#legal">Dokumenti</a>
+      <a href="https://limit-connect.com/api/verify/NOLIMIT-GENESIS-0001/" target="_blank">Genesis</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// CR Calculator
+const slider = document.getElementById('crSlider');
+const crVal = document.getElementById('crVal');
+const crUsers = document.getElementById('crUsers');
+if(slider){
+  function updateCR(){
+    const u = parseInt(slider.value);
+    crUsers.textContent = u.toLocaleString('hr');
+    const v = 1 + Math.log10(u / 1000);
+    crVal.textContent = v.toFixed(1) + '×';
+  }
+  slider.addEventListener('input', updateCR);
+  updateCR();
+}
+</script>
+
+</body>
+</html>

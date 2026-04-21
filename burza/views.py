@@ -553,3 +553,40 @@ def kanban_col(request, status):
             "company": company,
         },
     )
+
+
+from django.http import JsonResponse
+
+AGRO_CATEGORIES = {"kukuruz", "stoka", "mlijeko_sir", "povrce", "mehanizacija", "eu_fond"}
+
+
+def api_agro_burza(request):
+    """Javni JSON API — agro oglasi NA_BURZI, bez autentikacije."""
+    category = request.GET.get("category", "")
+    qs = ProjectLead.objects.filter(
+        status="NA_BURZI",
+        is_public=True,
+        category__in=AGRO_CATEGORIES,
+    ).select_related("company").order_by("-created_at")[:50]
+
+    if category and category in AGRO_CATEGORIES:
+        qs = qs.filter(category=category)
+
+    leads = []
+    for l in qs:
+        leads.append({
+            "id": l.pk,
+            "title": l.title,
+            "category": l.category,
+            "category_display": l.get_category_display(),
+            "location": l.location,
+            "budget_from": str(l.budget_from) if l.budget_from else None,
+            "budget_to": str(l.budget_to) if l.budget_to else None,
+            "budget_display": l.budget_display,
+            "desired_start": l.desired_start.isoformat() if l.desired_start else None,
+            "description": l.description[:300],
+            "contact_name": l.contact_name,
+            "created_at": l.created_at.date().isoformat(),
+        })
+
+    return JsonResponse({"count": len(leads), "results": leads})

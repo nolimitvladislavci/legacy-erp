@@ -6,171 +6,423 @@
     <style>
         @page {
             size: A4;
-            margin: 20mm;
+            margin: 20mm 22mm 22mm 22mm;
             @bottom-center {
-                content: "Statut No Limit v{{ doc_version }} — Stranica " counter(page) " od " counter(pages);
+                content: "Statut NO LIMIT v{{ doc_version }} — Stranica " counter(page) " od " counter(pages);
                 font-size: 7pt;
                 color: #999;
+                font-family: 'DejaVu Sans', Arial, sans-serif;
             }
         }
         body {
             font-family: 'DejaVu Sans', 'Arial', sans-serif;
             font-size: 10pt;
-            line-height: 1.6;
-            color: #222;
+            line-height: 1.65;
+            color: #1a1a1a;
         }
         h1 {
             text-align: center;
-            font-size: 16pt;
-            margin-bottom: 3mm;
+            font-size: 15pt;
+            margin-bottom: 2mm;
             text-transform: uppercase;
             letter-spacing: 2px;
+            font-weight: bold;
         }
-        h2 {
-            font-size: 11pt;
+        h2.poglavlje {
+            font-size: 10pt;
+            font-weight: bold;
             margin-top: 8mm;
-            margin-bottom: 3mm;
-            color: #333;
-            border-bottom: 0.5pt solid #c9a84c;
-            padding-bottom: 1mm;
+            margin-bottom: 4mm;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #c9a84c;
+            border-bottom: 1pt solid #c9a84c;
+            padding-bottom: 1.5mm;
+        }
+        h3.clanak {
+            font-size: 10pt;
+            font-weight: bold;
+            margin-top: 5mm;
+            margin-bottom: 2mm;
+            color: #222;
         }
         .subtitle {
             text-align: center;
             font-size: 9pt;
-            color: #666;
-            margin-bottom: 10mm;
+            color: #555;
+            margin-bottom: 3mm;
         }
         .doc-id {
             text-align: center;
             font-family: 'DejaVu Sans Mono', monospace;
-            font-size: 8pt;
+            font-size: 7.5pt;
             color: #c9a84c;
-            margin-bottom: 8mm;
+            margin-bottom: 6mm;
+            letter-spacing: 0.5px;
         }
-        ol, ul { margin-left: 5mm; margin-top: 2mm; }
-        li { margin-bottom: 2mm; }
-        .placeholder { color: #c9a84c; font-style: italic; }
-        p { margin-bottom: 4mm; }
+        .header-box {
+            border: 0.5pt solid #c9a84c;
+            border-radius: 4pt;
+            padding: 4mm 6mm;
+            margin-bottom: 6mm;
+            text-align: center;
+        }
+        .preambula {
+            background: #fdfaf4;
+            border-left: 2pt solid #c9a84c;
+            padding: 4mm 6mm;
+            margin: 4mm 0 6mm 0;
+            font-size: 9.5pt;
+            line-height: 1.75;
+        }
+        .preambula p {
+            margin-bottom: 3mm;
+        }
+        ol, ul {
+            margin-left: 5mm;
+            margin-top: 1.5mm;
+            margin-bottom: 1.5mm;
+        }
+        li {
+            margin-bottom: 1.5mm;
+        }
+        p {
+            margin-bottom: 2.5mm;
+        }
+        .note {
+            font-size: 8pt;
+            color: #777;
+            font-style: italic;
+        }
+        .potpisi {
+            margin-top: 16mm;
+            page-break-inside: avoid;
+        }
+        .potpisi-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10mm;
+        }
+        .potpis-blok {
+            width: 22%;
+            text-align: center;
+        }
+        .potpis-linija {
+            border-top: 0.5pt solid #000;
+            padding-top: 2mm;
+            margin-top: 14mm;
+            font-size: 8.5pt;
+        }
+        .logo-hex {
+            text-align: center;
+            font-size: 20pt;
+            color: #c9a84c;
+            margin-bottom: 3mm;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin: 3mm 0;
+        }
+        th {
+            background: #f5f0e8;
+            border: 0.5pt solid #ccc;
+            padding: 2mm 3mm;
+            text-align: left;
+            font-weight: bold;
+            color: #444;
+        }
+        td {
+            border: 0.5pt solid #ddd;
+            padding: 2mm 3mm;
+        }
+        .page-break { page-break-before: always; }
     </style>
 </head>
 <body>
 
-    <div style="text-align: center; margin-bottom: 5mm;">
-        <span style="font-size: 18pt; color: #c9a84c;">&#x2B21;</span>
-    </div>
+<div class="logo-hex">⬡</div>
+<h1>STATUT UDRUGE „NO LIMIT"</h1>
+<p class="subtitle">Europska udruga za digitalnu transformaciju stvarnog svijeta</p>
+<div class="header-box">
+    Kralja Tomislava 291, 31404 Vladislavci, Republika Hrvatska<br>
+    <span style="color:#c9a84c;font-weight:bold">no-limit.world</span> &nbsp;·&nbsp; u osnivanju (19.04.2026.)
+</div>
+<p class="doc-id">Dokument: STATUT-NL &nbsp;|&nbsp; Verzija: {{ doc_version|default:"5.0" }} &nbsp;|&nbsp; {{ doc_date|default:"19.04.2026." }} &nbsp;|&nbsp; 41 članak, 9 poglavlja</p>
+<p style="text-align:center;font-size:9pt;color:#555;">Na temelju članka 13. Zakona o udrugama (Narodne novine broj 74/14, 70/17, 98/19),<br>
+osnivači Udruge na Osnivačkoj skupštini održanoj dana 19. travnja 2026. godine u Vladislavcima, donijeli su ovaj Statut.</p>
 
-    <h1>STATUT UDRUGE "NO LIMIT"</h1>
-    <p class="subtitle">Neprofitna udruga za promicanje digitalizacije i dokaz autentičnosti</p>
-    <p class="doc-id">Dokument: STATUT-NL | Verzija: {{ doc_version|default:"1.0.0" }} | {{ doc_date|default:"16.04.2026." }}</p>
+<!-- PREAMBULA -->
+<div class="preambula">
+<p><strong>PREAMBULA</strong></p>
+<p>Mi, osnivači Udruge „NO LIMIT", svjesni povijesnog trenutka u kojem se nalaze Europa i čovječanstvo — trenutka u kojem digitalna transformacija prelazi prag automatizacije i ulazi u eru autonomnih sustava, u kojem umjetna inteligencija postaje suautor ljudske civilizacije, u kojem se redefiniraju pojmovi vlasništva, identiteta, znanja i kulturne baštine — odlučujemo se osnovati Udrugu kao trajni instrument javnog dobra.</p>
+<p>Vodimo se uvjerenjem:<br>
+— da digitalna transformacija ne smije biti privilegija pojedinaca ni monopol velikih korporacija, nego zajedničko nasljeđe svih građana Europske unije;<br>
+— da se temeljna infrastruktura digitalnog doba — formati datoteka, identifikatori, validacijski sustavi i arhivski standardi — ne smije zatvoriti unutar zidova patenata, već mora biti otvorena, slobodna i trajno zaštićena od prisvajanja;<br>
+— da male zemlje, lokalne zajednice i obrtnici imaju pravo na alate jednake onima koje koriste najveće svjetske organizacije;<br>
+— da kulturna baština i digitalna kreativnost budućih generacija zaslužuju arhiv koji nije ovisan o jednom serveru, jednoj korporaciji ili jednom političkom režimu;<br>
+— da digitalna transformacija mora uključiti i osobe s invaliditetom, osobe smanjene pokretljivosti i sve one koji su dosad bili isključeni iz moderne ekonomije;<br>
+— da je vrijeme izgraditi tehnološku infrastrukturu koju nitko ne može oduzeti, jer je javno objavljena pod licencom koja zauvijek zabranjuje patentiranje izvedenih rješenja.</p>
+<p>A paradoksalno — i upravo zato što promičemo najsuvremeniju digitalnu tehnologiju — prepoznajemo da istinska digitalna suverenost nije moguća bez očuvanja prava građana na gotovinu kao sredstvo plaćanja. Gotovina je zadnja linija privatnosti, autonomije financijskih odluka i otpornosti društva na sustavne poremećaje.</p>
+<p>Posebno prepoznajemo dužnost prema ljudima u nevolji — žrtvama potresa, poplava, prirodnih katastrofa, starijim i bolesnim osobama bez adekvatnog stambenog zbrinjavanja, obiteljima u iznenadnoj ekonomskoj nevolji — jer digitalna transformacija nema smisla ako društvo ne može zaštititi svoje najranjivije.</p>
+<p>S tim uvjerenjima polažemo temeljni kamen Udruge „NO LIMIT" u Vladislavcima, 19. travnja 2026.</p>
+</div>
 
-    <h2>Članak 1 — Naziv, sjedište i OIB</h2>
-    <p>Naziv udruge: <strong>NO LIMIT</strong></p>
-    <p>Skraćeni naziv: <strong>NL</strong></p>
-    <p>Sjedište: <span class="placeholder">[Čepin ili Osijek — Ivan popunjava]</span></p>
-    <p>OIB: <span class="placeholder">[popunjava se nakon registracije]</span></p>
-    <p>Web: no-limit.world</p>
+<!-- I. OPĆE ODREDBE -->
+<h2 class="poglavlje">I. OPĆE ODREDBE</h2>
 
-    <h2>Članak 2 — Misija</h2>
-    <p>NO LIMIT je neprofitna udruga koja promiče digitalizaciju stvarnog svijeta i dokazuje autentičnost digitalnih dokumenata kroz otvorene platforme u Europskoj uniji.</p>
-    <p>Filozofija: "Bez papira. Bez granica. Bez ograničenja."</p>
+<h3 class="clanak">Članak 1. — Naziv</h3>
+<p>Naziv Udruge glasi: <strong>Udruga „NO LIMIT" — Europska udruga za digitalnu transformaciju stvarnog svijeta</strong>. Skraćeni naziv: <strong>NO LIMIT</strong>.</p>
+<p>Naziv na engleskom: „NO LIMIT" — European Association for Digital Transformation of the Real World.<br>
+Naziv na njemačkom: „NO LIMIT" — Europäischer Verein für die digitale Transformation der realen Welt.</p>
 
-    <h2>Članak 3 — Ciljevi</h2>
-    <ol>
-        <li>Razvoj digitalnih obrazovnih sadržaja za djecu u EU</li>
-        <li>Zaštita životinja kroz digitalne identifikacijske sustave</li>
-        <li>Javni digitalni servisi — eValidator infrastruktura povjerenja</li>
-        <li>Podrška diaspora zajednicama (HR u DE, AT, SI)</li>
-        <li>EU projekt prijave (Creative Europe, Interreg, Erasmus+)</li>
-        <li>Ambasadorska mreža u svim EU državama</li>
-        <li>Digitalna baština i kulturno pamćenje</li>
-        <li>Podrška NGO-ima i azilima (No Limit azil program)</li>
-    </ol>
+<h3 class="clanak">Članak 2. — Sjedište</h3>
+<p>Sjedište Udruge je na adresi: <strong>Kralja Tomislava 291, 31404 Vladislavci, Republika Hrvatska</strong>. Skupština može odlukom promijeniti adresu sjedišta unutar mjesta Vladislavci bez izmjene Statuta.</p>
 
-    <h2>Članak 4 — Djelatnosti</h2>
-    <ul>
-        <li>Razvoj i održavanje digitalnih platformi</li>
-        <li>Organizacija edukacija, radionica i EU događanja</li>
-        <li>EU projekt menadžment i provedba</li>
-        <li>Licenciranje sadržaja institucijama</li>
-        <li>Ambasadorska mreža u EU</li>
-        <li>Podrška azilima digitalnim alatima</li>
-    </ul>
+<h3 class="clanak">Članak 3. — Pravna osobnost i područje djelovanja</h3>
+<p>Udruga je pravna osoba neprofitnog karaktera upisana u Registar udruga Republike Hrvatske. Udruga djeluje na području Republike Hrvatske, Europske unije i međunarodno.</p>
 
-    <h2>Članak 5 — Financiranje</h2>
-    <p>Udruga se financira iz:</p>
-    <ul>
-        <li>Članarina</li>
-        <li>Donacija i sponzorstava (Viskovic Bau, Konjik d.o.o.)</li>
-        <li>EU grantova (Creative Europe, Interreg, Erasmus+)</li>
-        <li>Licencnih prihoda od poslovnih partnera</li>
-    </ul>
+<h3 class="clanak">Članak 4. — Pečat i znak</h3>
+<p>Udruga ima pečat okruglog oblika, promjera 30 mm, s natpisom: „Udruga NO LIMIT — Vladislavci" uz središnji znak Udruge (stilizirani simbol beskonačnosti ∞ / jaje s digitalnim očima).</p>
 
-    <h2>Članak 6 — Tijela udruge</h2>
-    <ul>
-        <li><strong>Skupština</strong> — svi članovi</li>
-        <li><strong>Predsjednik:</strong> Ivan Brtan</li>
-        <li><strong>Tajnik:</strong> Ivica Kruljac</li>
-        <li><strong>Zapisničar:</strong> Marija Brtan</li>
-        <li><strong>1. član:</strong> Antonio Brtan</li>
-        <li><strong>Nadzorni odbor</strong></li>
-    </ul>
+<h3 class="clanak">Članak 5. — Zastupanje</h3>
+<p>Udrugu zastupa Predsjednik Udruge. U slučaju spriječenosti zastupa Tajnik Udruge uz pisanu ovlast Predsjednika. Zastupnici se upisuju u Registar udruga.</p>
 
-    <h2>Članak 7 — Ambasadorska mreža EU</h2>
-    <p>Udruga osniva mrežu nacionalnih ambasadora u svim EU državama.
-    Svaki ambasador potpisuje Ugovor o ambasadorskoj suradnji (dokument A1).</p>
-    <p>Uvjeti ambasadorske suradnje:</p>
-    <ul>
-        <li>Besplatan pristup svim premium sadržajima</li>
-        <li>20% prihoda od pretplata iz svoje zemlje</li>
-        <li>Podrška u EU grant prijavama</li>
-        <li>Bez uplate za ulazak, bez nivoa, bez regrutiranja</li>
-    </ul>
+<!-- II. CILJEVI I DJELATNOSTI -->
+<h2 class="poglavlje">II. CILJEVI I DJELATNOSTI</h2>
 
-    <h2>Članak 8 — Partnerstva</h2>
-    <p>Udruga sklapa licencne i partnerske ugovore s poslovnim subjektima.
-    Aktivni partneri:</p>
-    <ul>
-        <li><strong>Konjik d.o.o.</strong>, Osijek (HR) — Tehnološki partner (dokument L1)</li>
-        <li><strong>Viskovic Bau</strong>, Nufringen (DE) — Poslovni partner i pokrovitelj</li>
-    </ul>
+<h3 class="clanak">Članak 6. — Područja djelovanja</h3>
+<ol>
+<li>Demokratska politička kultura — civilno društvo i digitalno građanstvo;</li>
+<li>Obrazovanje, znanost i istraživanje — digitalna pismenost, arhivistika, etika AI;</li>
+<li>Kultura i umjetnost — zaštita digitalne kulturne baštine;</li>
+<li>Tehnička kultura — razvoj otvorenih tehnologija;</li>
+<li>Ljudska prava — pravo na gotovinu, financijska privatnost, digitalna inkluzija osoba s invaliditetom;</li>
+<li>Socijalna djelatnost — profesionalna rehabilitacija i zapošljavanje osoba s invaliditetom;</li>
+<li>Humanitarna djelatnost — pomoć žrtvama prirodnih katastrofa, starijim i bolesnim osobama, obiteljima u nevolji;</li>
+<li>Zaštita od prirodnih nepogoda — pripravnost, odgovor i sanacija posljedica;</li>
+<li>Međunarodna suradnja.</li>
+</ol>
 
-    <h2>Članak 9 — Zaštita djece</h2>
-    <p>Svi sadržaji za djecu usklađeni su s <strong>GDPR-Kids politikom</strong> (dokument G1).
-    Temeljno načelo: nula podataka o djeci — nikad ne prikupljamo,
-    ne pohranjujemo i ne obrađujemo osobne podatke djece.</p>
+<h3 class="clanak">Članak 7. — Ciljevi Udruge</h3>
+<ol>
+<li>Digitalna suverenost Europe — otvoreni tehnološki standardi koji štite europske građane, mala i srednja poduzeća, javne ustanove i kulturne institucije od ovisnosti o monopolnim platformama;</li>
+<li>Trajna zaštita kulturne i poslovne baštine kroz arhivske formate, sustave validacije identiteta i mreže trajne pohrane podataka;</li>
+<li>Promicanje Open Patent Promise kao licencnog modela kojim se ključne tehnologije zauvijek štite od privatizacije;</li>
+<li>Zaštita prava na gotovinu i promicanje hibridnih rješenja koegzistencije gotovine i digitalnih plaćanja, s posebnim naglaskom na hrvatske tehnološke platforme;</li>
+<li>Digitalna inkluzija osoba s invaliditetom kroz profesionalnu rehabilitaciju u profilima nove ekonomije (posebno AI-asistirano knjigovodstvo);</li>
+<li>Stambeno zbrinjavanje osoba u nevolji — zajedničkim dobrovoljnim radom i sredstvima Udruge osiguravati stambeni prostor za žrtve prirodnih katastrofa, starije, bolesne i obitelji u iznenadnoj ekonomskoj nevolji;</li>
+<li>Demokratizacija pristupa naprednim tehnologijama (AI, blockchain) za male zajednice, obrtnike, neprofitne organizacije;</li>
+<li>Edukacija djece i mladih o digitalnoj baštini i odgovornoj uporabi tehnologija (inicijativa PLAY.EU);</li>
+<li>Promicanje kulture sjećanja kroz sustave digitalnog arhiviranja životnih pripovijesti i baštine zajednica (memio.pet, memio.world);</li>
+<li>Suradnja s tijelima Europske unije na projektima digitalne transformacije;</li>
+<li>Izgradnja mreže ambasadora s naglaskom na Hrvatsku i Njemačku kao glavna ciljana tržišta;</li>
+<li>Promicanje financijske pismenosti i demokratizacije pristupa kapitalnim tržištima za građane EU-a.</li>
+</ol>
 
-    <h2>Članak 10 — Prijelazne odredbe</h2>
-    <p>Ovaj statut stupa na snagu danom osnivačke skupštine.</p>
-    <p>Sve izmjene statuta bilježe se u povijesti dokumenta.</p>
+<h3 class="clanak">Članak 8. — Paradoks digitalne suverenosti: zaštita prava na gotovinu</h3>
+<p>Udruga kao posebno načelo zastupa stajalište da istinska digitalna suverenost građana EU-a ne može postojati bez očuvanja prava na gotovinu kao jamca privatnosti, autonomije i otpornosti društva.</p>
+<p>Radi toga Udruga: zauzima se za pravo svakog građanina na plaćanje gotovinom; zagovara hibridni model gdje gotovina i digitalna sredstva plaćanja postoje paralelno i ravnopravno; prepoznaje i promiče hrvatske tehnološke platforme kao primjere dobre prakse; inicira europske istraživačke i zagovaračke projekte; surađuje s ECB, Europskom komisijom, nacionalnim regulatornim tijelima.</p>
+<p>Konkretne komercijalne partnere iz ovog područja Skupština utvrđuje Godišnjim programom rada.</p>
 
-    <!-- POTPISI -->
-    <div style="margin-top: 20mm; page-break-inside: avoid;">
-        <p style="text-align: right; margin-bottom: 15mm;">
-            U _________________, dana _________________ 2026. godine.
-        </p>
-        <div style="width: 22%; display: inline-block; text-align: center; vertical-align: top; margin: 0 1%;">
-            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
+<h3 class="clanak">Članak 9. — Djelatnosti kojima se ostvaruju ciljevi</h3>
+<ol>
+<li>organiziranje edukativnih programa, radionica, seminara i konferencija;</li>
+<li>izrada i distribucija stručnih publikacija;</li>
+<li>razvoj i objavljivanje tehničkih specifikacija otvorenih standarda;</li>
+<li>promicanje i tehnička podrška primjeni Open Patent Promise licenci;</li>
+<li>suradnja s odgojno-obrazovnim ustanovama, sveučilištima i istraživačkim centrima;</li>
+<li>izrada i upravljanje internetskim platformama Udruge;</li>
+<li>prikupljanje, obradba i objavljivanje povijesne, kulturne i arhivske građe;</li>
+<li>provedba projekata financiranih iz EU fondova, državnih, županijskih i lokalnih izvora te privatnih donacija;</li>
+<li>uspostavljanje suradnje sa srodnim udrugama u zemlji i inozemstvu;</li>
+<li>zagovaranje pred europskim i nacionalnim tijelima za očuvanje prava na gotovinu;</li>
+<li>sudjelovanje u projektima profesionalne rehabilitacije i digitalne inkluzije osoba s invaliditetom;</li>
+<li>pružanje usluga (knjigovodstvenih, administrativnih, tehničkih, savjetodavnih) trećim stranama putem zaposlenika Udruge;</li>
+<li>organizacija volonterskih brigada za obnovu i izgradnju stambenih objekata u humanitarnim projektima;</li>
+<li>nabavka građevinskog materijala, stambenih kontejnera i mobilnih kuća za humanitarne projekte;</li>
+<li>suradnja s Hrvatskim Crvenim križem, Caritasom, Civilnom zaštitom, jedinicama lokalne samouprave;</li>
+<li>upravljanje Fondom za stambeno zbrinjavanje Udruge;</li>
+<li>dodjeljivanje stipendija, nagrada i priznanja;</li>
+<li>obavljanje ostalih djelatnosti koje pridonose ostvarenju ciljeva sukladno zakonu.</li>
+</ol>
+
+<h3 class="clanak">Članak 10. — Gospodarske djelatnosti</h3>
+<p>Udruga može obavljati gospodarske djelatnosti sukladno zakonu, pod uvjetom da su neposredno povezane s ostvarivanjem ciljeva i da se dobit ulaže isključivo u djelatnosti Udruge: izdavačka djelatnost; organizacija seminara uz naknadu; izrada i prodaja edukativnih materijala; usluge tehničke i savjetodavne podrške u području digitalizacije, arhivistike i hibridnih plaćanja; usluge certifikacije primjene otvorenih standarda i OPP licenci; edukacijski programi profesionalne rehabilitacije osoba s invaliditetom; pružanje stručnih usluga trećim stranama.</p>
+
+<!-- III. ČLANSTVO -->
+<h2 class="poglavlje">III. ČLANSTVO</h2>
+
+<h3 class="clanak">Članak 11. — Članovi Udruge</h3>
+<p>Članstvo je dobrovoljno. Svi članovi, neovisno o državljanstvu ili prebivalištu, imaju jednaka prava, obveze i odgovornosti. Kategorije: <strong>Redovni</strong> (fizičke osobe starije od 14 g. i pravne osobe); <strong>Počasni</strong>. Maloljetni (14–18 g.) uz pisanu suglasnost zakonskog zastupnika. Pravo odlučivanja u Skupštini imaju punoljetni redovni članovi.</p>
+
+<h3 class="clanak">Članak 12. — Učlanjenje</h3>
+<p>Pristupnica u pisanom ili elektroničkom obliku. O redovnom članstvu odlučuje Predsjednik u roku 30 dana. O počasnom Skupština. Članstvo se stječe upisom u Registar članova.</p>
+
+<h3 class="clanak">Članak 13. — Prava članova</h3>
+<p>Sudjelovati u radu Udruge; birati i biti birani u tijela (punoljetni); davati prijedloge i inicijative; biti informirani o radu; koristiti programe i resurse Udruge.</p>
+
+<h3 class="clanak">Članak 14. — Članarina</h3>
+<table>
+<tr><th>Kategorija</th><th>Iznos godišnje</th></tr>
+<tr><td>Fizička osoba — redovni član</td><td>24 EUR (2 EUR/mj)</td></tr>
+<tr><td>Pravna osoba — redovni član</td><td>120 EUR (10 EUR/mj)</td></tr>
+<tr><td>Djeca i mladi (14–18 g.)</td><td>oslobođeni</td></tr>
+<tr><td>Počasni članovi</td><td>oslobođeni</td></tr>
+<tr><td>Sniženi razred (studenti, nezaposleni, umirovljenici, osobe s invaliditetom)</td><td>12 EUR na pisani zahtjev</td></tr>
+</table>
+<p>Skupština može prilagoditi iznose najviše jednom u 5 godina i najviše 50% u jednom prilagođenju.</p>
+
+<h3 class="clanak">Članak 15. — Obveze članova</h3>
+<p>Poštivati Statut i odluke tijela; djelovati u skladu s ciljevima; čuvati ugled Udruge; redovito plaćati članarinu.</p>
+
+<h3 class="clanak">Članak 16. — Prestanak članstva</h3>
+<p>Dragovoljnim istupom; neplaćanjem članarine duže od 12 mjeseci uz prethodnu opomenu; isključenjem zbog grube povrede Statuta; smrću fizičke ili prestankom pravne osobe.</p>
+
+<h3 class="clanak">Članak 17. — Stegovni postupak</h3>
+<p>O isključenju odlučuje Predsjednik. Prigovor Skupštini u roku od 15 dana od dostave odluke. Odluka Skupštine je konačna.</p>
+
+<!-- IV. TIJELA UDRUGE -->
+<h2 class="poglavlje">IV. TIJELA UDRUGE</h2>
+
+<h3 class="clanak">Članak 18. — Tijela Udruge</h3>
+<p>Tijela Udruge su: Skupština; Predsjednik; Tajnik; Blagajnik; Zapisničar; Likvidator.</p>
+
+<h3 class="clanak">Članak 19. — Skupština</h3>
+<p>Skupština je najviše tijelo Udruge. Čine je svi punoljetni redovni članovi. Skupština donosi Statut i njegove izmjene; usvaja godišnji program rada i financijski plan; usvaja godišnje financijsko izvješće; bira i razrješava sve članove tijela; odlučuje o prijemu u počasno članstvo; odlučuje o udruživanju s drugim udrugama; odlučuje o prestanku Udruge; odlučuje o strateškim partnerstvima u IP-u; odlučuje o plaćama i naknadama.</p>
+
+<h3 class="clanak">Članak 20. — Sjednice Skupštine</h3>
+<p>Redovita skupština zasijeda najmanje jedanput godišnje. Izvanredna — na zahtjev Predsjednika ili 1/3 članova u roku od 30 dana. Kvorum: natpolovična većina punoljetnih redovnih članova. Odluke se donose natpolovičnom većinom nazočnih. Iznimka: izmjena Statuta i prestanak Udruge — 2/3 nazočnih. Sjednice mogu biti elektroničke (videokonferencija), sukladno Zakonu o izmjenama Zakona o udrugama (NN 73/20).</p>
+
+<h3 class="clanak">Članak 21. — Predsjednik</h3>
+<p>Mandat: 5 godina, ponovni izbor moguć. Predsjednik zastupa Udrugu; saziva i predsjedava sjednicama Skupštine; provodi odluke Skupštine; potpisuje sve akte; odlučuje o tekućim poslovima između sjednica; odgovara za zakonitost rada; predlaže godišnji program i financijski plan; sklapa ugovore sukladno odlukama Skupštine.</p>
+
+<h3 class="clanak">Članak 22. — Tajnik</h3>
+<p>Mandat 5 godina. Obavlja administrativne poslove; vodi Registar članova; pomaže Predsjedniku; zastupa Udrugu uz pisanu ovlast Predsjednika. Istovremeno je ovlaštena osoba za usklađenost s propisima o sprječavanju pranja novca.</p>
+
+<h3 class="clanak">Članak 23. — Blagajnik</h3>
+<p>Mandat 5 godina. Može imati prebivalište izvan RH. Vodi materijalno-financijsko poslovanje; priprema financijska izvješća; prati priljeve i odljeve; surađuje s računovodstvenim servisom. Zakon o udrugama ne traži hrvatsko prebivalište za članove tijela izuzev zastupnika.</p>
+
+<h3 class="clanak">Članak 24. — Zapisničar i Likvidator</h3>
+<p>Mandat 5 godina. Zapisničar vodi zapisnike sjednica i čuva arhivu. Likvidator zastupa Udrugu u postupku likvidacije i snosi zakonske obveze likvidatora.</p>
+
+<!-- V. STRATEŠKA PARTNERSTVA I IP -->
+<div class="page-break"></div>
+<h2 class="poglavlje">V. STRATEŠKA PARTNERSTVA I INTELEKTUALNO VLASNIŠTVO</h2>
+
+<h3 class="clanak">Članak 25. — Strateški partner za IP</h3>
+<p>Udruga djeluje kao tehnološki i strateški partner trgovačkog društva <strong>Konjik d.o.o.</strong>, Kralja Tomislava 1a, 31431 Čepin (dalje: „Nositelj IP-a"), koje je nositelj intelektualnog vlasništva tehnologija ekosustava ChainBlock — format .dok, eArhivator, eValidator, PLAY.EU, memio.pet, akademija memio.world. Odnos uređuje poseban Ugovor o strateškom partnerstvu.</p>
+<p>Udruga u suradnji s Nositeljem IP-a: promiče primjenu tehnologija u javnom sektoru; osigurava javni nadzor nad provedbom OPP licence; surađuje s tijelima EU i nacionalnim regulatornim tijelima; organizira edukaciju i certifikaciju partnera; zastupa interese korisnika i šire javnosti; vodi javni registar tehnologija pod OPP.</p>
+
+<h3 class="clanak">Članak 26. — Zaštitni mehanizmi kontinuiteta tehnologije</h3>
+<p>Ugovor o strateškom partnerstvu obvezno sadrži odredbe o prijenosu IP-a s Nositelja na Udrugu ili drugi neprofitni subjekt u slučaju:</p>
+<ol>
+<li>Otvaranja stečaja ili likvidacije Nositelja IP-a;</li>
+<li>Prodaje Nositelja subjektu koji odbija OPP;</li>
+<li>Prestanka aktivnog razvoja duže od 24 mjeseca;</li>
+<li>Pokušaja patentiranja izvedenih rješenja suprotno OPP;</li>
+<li>Pisane obavijesti Nositelja o odustajanju od vlasništva;</li>
+<li>Nemogućnosti pravnog zastupanja Nositelja duže od 6 mjeseci.</li>
+</ol>
+<p>Prijenos se odvija bez naknade u korist Udruge. U slučaju prestanka Udruge, tehnologije se prenose na drugi neprofitni OPP subjekt (FSFE, OSI ili sličan).</p>
+
+<h3 class="clanak">Članak 27. — Open Patent Promise (OPP)</h3>
+<p>OPP znači javnu i neopozivu obvezu nositelja IP-a da: tehnologiju stavlja besplatno na raspolaganje svim korisnicima; ne podnosi tužbe radi povrede patentnih prava; ne dopušta drugima da patentiraju izvedena rješenja. Udruga vodi i objavljuje javni registar svih tehnologija pod OPP licencom. OPP obveza ne prestaje akvizicijom Nositelja IP-a — vrijedi 100 godina od objave.</p>
+
+<h3 class="clanak">Članak 28. — Partnerski projekt „AI + Čovjek"</h3>
+<p>Udruga podupire strateški projekt „AI + Čovjek — Akademija za digitalnu inkluziju" u partnerstvu s Konjik d.o.o. i memio.world. Ciljevi: profesionalna rehabilitacija osoba s invaliditetom; certifikacija zanimanja „AI-asistirani knjigovođa"; zapošljavanje bez fizičke prisutnosti. Projekt se provodi sukladno Europskom aktu o pristupačnosti (EU 2019/882) i UN Konvenciji o pravima osoba s invaliditetom (NN 6/07).</p>
+
+<h3 class="clanak">Članak 29. — Program stambenog zbrinjavanja „DOM"</h3>
+<p>Udruga provodi stalni humanitarni program stambenog zbrinjavanja <strong>„Program DOM"</strong> za osobe koje su zbog prirodne katastrofe, zdravstvenih prilika, starosti, invaliditeta ili iznenadne ekonomske nevolje ostale bez doma ili žive u uvjetima nepodobnim za život.</p>
+<p><em>Oblici pomoći:</em> hitna intervencija; obnova postojećeg objekta; stambeni kontejner; mobilna kuća; nova gradnja; prilagodba prostora osobama s invaliditetom.</p>
+<p><em>Korisnici:</em> žrtve katastrofa; starije i bolesne osobe; obitelji u iznenadnoj nevolji; osobe s invaliditetom; djeca i mladi bez stabilnog doma.</p>
+<p><em>Izvođenje:</em> dobrovoljni rad volontera + sredstva Fonda za stambeno zbrinjavanje + donacije i EU fondovi. Svaki projekt ima projektni broj, dnevnik radova i fotodokumentaciju. Poseban TR za Program DOM, s mjesečnom javnom objavom bilance.</p>
+
+<!-- VI. IMOVINA, FINANCIRANJE I RAD -->
+<h2 class="poglavlje">VI. IMOVINA, FINANCIRANJE I RAD</h2>
+
+<h3 class="clanak">Članak 30. — Imovina</h3>
+<p>Imovinu Udruge čine: novčana sredstva (članarine, donacije, sponzorstva); nekretnine i pokretnine; prihodi od projekata; prihodi od gospodarskih djelatnosti; prava intelektualnog vlasništva prenesena po čl. 26; drugi prihodi prema zakonu.</p>
+
+<h3 class="clanak">Članak 31. — Financiranje i transparentnost</h3>
+<p>Udruga se financira iz: članarina; donacija i sponzorstava; sredstava državnog, županijskog i lokalnog proračuna; sredstava EU fondova; prihoda od ugovora o uslugama; prihoda od gospodarskih djelatnosti. Poslovne knjige sukladno propisima o neprofitnim organizacijama. Javna obavijest za priljeve iznad 1.000 EUR u roku 30 dana.</p>
+
+<h3 class="clanak">Članak 32. — Sprječavanje zloupotrebe, pranja novca i financiranja terorizma</h3>
+<p>Udruga primjenjuje mjere koje nadilaze zakonski minimum sukladno: Zakonu o sprječavanju pranja novca (NN 108/17, 39/19); Direktivama EU 2015/849, 2018/843, 2018/1673; Preporuci 8 FATF-a; Zakonu o humanitarnoj pomoći (NN 102/15).</p>
+<p><em>Ovlaštena osoba za usklađenost:</em> Tajnik. Vodi Registar velikih transakcija (> 10.000 EUR) i Registar donatora.</p>
+<p><em>Pragovi:</em> gotovinske donacije do 200 EUR/donator/godina; donacije iznad 500 EUR — verifikacija identiteta; iznad 5.000 EUR — pisana izjava o izvoru sredstava. Za isplate: > 1.000 EUR dvostruki potpis (Predsjednik + Blagajnik); > 10.000 EUR odluka Skupštine.</p>
+<p><em>„Staklena kuća" transparentnost:</em> mjesečna bilanca Programa DOM; javni popis donatora > 500 EUR; godišnje izvješće o usklađenosti; obvezna revizija za prihod > 100.000 EUR.</p>
+
+<h3 class="clanak">Članak 33. — Rad, plaće, naknade i volonterstvo</h3>
+<p>Udruga može zapošljavati osobe. Osnivači i članovi tijela rade u načelu volonterski; Skupština može odobriti plaću uz uvjet da ukupne plaće članova tijela ne prelaze 30% godišnjeg prihoda i da su svi iznosi javno objavljeni. Naknade suradnicima prema tržišnim uvjetima. Volonteri sukladno Zakonu o volonterstvu.</p>
+
+<!-- VII. JAVNOST RADA -->
+<h2 class="poglavlje">VII. JAVNOST RADA</h2>
+
+<h3 class="clanak">Članak 34. — Javnost djelovanja</h3>
+<p>Rad Udruge je javan. Javnost se osigurava javnošću sjednica Skupštine, objavom svih akata, publikacijama i komunikacijom s medijima.</p>
+
+<h3 class="clanak">Članak 35. — Mrežna stranica</h3>
+<p>Udruga održava javnu mrežnu stranicu na adresi <strong>no-limit.world</strong> i objavljuje: Statut i opće akte; godišnje programe rada i financijska izvješća; popis tijela i naknade; Ugovor o strateškom partnerstvu s Nositeljem IP-a; registar tehnologija pod OPP; obavijesti o priljevima > 1.000 EUR; obavijesti o sjednicama, projektima i događanjima.</p>
+
+<!-- VIII. PRESTANAK UDRUGE -->
+<h2 class="poglavlje">VIII. PRESTANAK UDRUGE</h2>
+
+<h3 class="clanak">Članak 36. — Razlozi prestanka</h3>
+<p>Udruga prestaje: odlukom Skupštine donesenoj 2/3 glasova nazočnih članova; pripajanjem, spajanjem ili podjelom; nastupanjem razloga utvrđenih zakonom.</p>
+
+<h3 class="clanak">Članak 37. — Postupak likvidacije</h3>
+<p>Likvidacija se provodi sukladno Zakonu o udrugama. Likvidator zastupa Udrugu u postupku, podmiruje preuzete obveze, naplati potraživanja, unovči preostalu imovinu i rasporedi je sukladno čl. 38.</p>
+
+<h3 class="clanak">Članak 38. — Sudbina imovine</h3>
+<p>Preostala imovina nakon podmirenja svih obveza pripada drugoj udruzi ili zakladi sa sličnim ciljevima — u prvom redu subjektima koji promiču OPP. Tehnologije iz čl. 26. prenose se sukladno odredbama tog članka. Imovina se ne smije raspodijeliti članovima.</p>
+
+<!-- IX. PRIJELAZNE I ZAVRŠNE ODREDBE -->
+<h2 class="poglavlje">IX. PRIJELAZNE I ZAVRŠNE ODREDBE</h2>
+
+<h3 class="clanak">Članak 39. — Stupanje na snagu</h3>
+<p>Statut stupa na snagu danom donošenja, a primjenjuje se od dana upisa Udruge u Registar udruga Republike Hrvatske.</p>
+
+<h3 class="clanak">Članak 40. — Izmjene i dopune Statuta</h3>
+<p>Izmjene i dopune Statuta donosi Skupština 2/3 većinom glasova nazočnih članova.</p>
+
+<h3 class="clanak">Članak 41. — Tumačenje Statuta</h3>
+<p>Autentično tumačenje Statuta daje Skupština. Između sjednica hitno tumačenje daje Predsjednik, uz obveznu potvrdu Skupštine na prvoj sljedećoj sjednici.</p>
+
+<!-- POTPISI -->
+<div class="potpisi">
+    <p style="text-align:right;font-size:9pt;margin-bottom:12mm;">U Vladislavcima, dana 19. travnja 2026. godine.</p>
+    <div style="display:flex;justify-content:space-between;">
+        <div style="width:22%;text-align:center;">
+            <div style="border-top:0.5pt solid #000;padding-top:2mm;margin-top:18mm;font-size:8.5pt;">
                 <strong>Predsjednik</strong><br>Ivan Brtan
             </div>
         </div>
-        <div style="width: 22%; display: inline-block; text-align: center; vertical-align: top; margin: 0 1%;">
-            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
+        <div style="width:22%;text-align:center;">
+            <div style="border-top:0.5pt solid #000;padding-top:2mm;margin-top:18mm;font-size:8.5pt;">
                 <strong>Tajnik</strong><br>Ivica Kruljac
             </div>
         </div>
-        <div style="width: 22%; display: inline-block; text-align: center; vertical-align: top; margin: 0 1%;">
-            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
+        <div style="width:22%;text-align:center;">
+            <div style="border-top:0.5pt solid #000;padding-top:2mm;margin-top:18mm;font-size:8.5pt;">
                 <strong>Zapisničar</strong><br>Marija Brtan
             </div>
         </div>
-        <div style="width: 22%; display: inline-block; text-align: center; vertical-align: top; margin: 0 1%;">
-            <div style="border-top: 1px solid #000; padding-top: 3mm; margin-top: 20mm; font-size: 9pt;">
-                <strong>1. član</strong><br>Antonio Brtan
+        <div style="width:22%;text-align:center;">
+            <div style="border-top:0.5pt solid #000;padding-top:2mm;margin-top:18mm;font-size:8.5pt;">
+                <strong>Blagajnik</strong><br>Antonio Brtan
             </div>
         </div>
     </div>
+    <div style="margin-top:10mm;text-align:center;">
+        <div style="display:inline-block;width:60mm;text-align:center;">
+            <div style="border:0.5pt dashed #aaa;height:18mm;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:8pt;">Pečat Udruge</div>
+        </div>
+    </div>
+</div>
 
-    {% include "notariat/pdf/evalidator_seal.html" %}
+{% include "notariat/pdf/evalidator_seal.html" %}
 
 </body>
 </html>

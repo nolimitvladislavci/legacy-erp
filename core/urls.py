@@ -499,6 +499,10 @@ urlpatterns += i18n_patterns(
         lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/rizo_paket.html"),
     ),
     path(
+        "konjik/",
+        lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/konjik_tech.html"),
+    ),
+    path(
         "optika-konjik/",
         lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/optika_konjik.html"),
     ),

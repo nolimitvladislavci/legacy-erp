@@ -16,4 +16,5 @@ urlpatterns = [
     path("kanban/col/<str:status>/", views.kanban_col, name="kanban_col"),
     path("upit/", views.public_upit, name="upit"),
     path("upit/hvala/", views.upit_hvala, name="upit_hvala"),
+    path("api/agro/", views.api_agro_burza, name="api_agro"),
 ]
