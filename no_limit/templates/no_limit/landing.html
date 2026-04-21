@@ -308,21 +308,27 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
     </div>
     <div class="hero-visual">
       <div class="genesis-card">
-        <div class="genesis-badge">
-          <div class="genesis-dot"></div>
-          Genesis Block Aktivan
+        <div id="genesis-live-status">
+          <div class="genesis-badge">
+            <div class="genesis-dot"></div>
+            Verificiram...
+          </div>
+          <div style="color:var(--dim);font-size:.8rem;margin-top:8px">Dohvaćam live podatke...</div>
         </div>
-        <div style="color:var(--dim);margin-bottom:8px">NO LIMIT &mdash; NOLIMIT-GENESIS-0001</div>
-        <div style="color:var(--white);margin-bottom:4px">Timestamp: 2026-04-19T21:25:42 UTC</div>
-        <div style="color:var(--green);margin-bottom:16px">Integritet: &#10003; VALJAN</div>
-        <div style="color:var(--dim);font-size:.72rem;margin-bottom:4px">L1 SHA-256:</div>
-        <div class="genesis-hash" id="genesis-hash-l1">izracunavam...</div>
-        <div style="color:var(--dim);font-size:.72rem;margin:8px 0 4px">L2 pHash:</div>
-        <div class="genesis-hash" id="genesis-hash-l2">izracunavam...</div>
-        <div style="color:var(--dim);font-size:.72rem;margin:8px 0 4px">POE #:</div>
-        <div style="color:var(--gold)">001 &mdash; prvi u lancu</div>
-        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:.72rem;color:var(--dim)">
-          Verify: <span id="genesis-verify-url">no-limit.world/verify/...</span>
+        <div class="verify-input-wrap" style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px">
+          <div style="font-size:.72rem;color:var(--dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Verificiraj bilo koji dokument</div>
+          <input id="verify-token-input"
+                 placeholder="Unesi seal token (npr. NOLIMIT-GENESIS-0001)"
+                 style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:monospace;font-size:.78rem;box-sizing:border-box">
+          <button onclick="verifyCustomToken()"
+                  style="margin-top:8px;padding:9px 20px;background:var(--gold);color:#0a0a0a;border:none;border-radius:8px;font-weight:700;cursor:pointer;width:100%;font-size:.85rem">
+            Verificiraj &rarr;
+          </button>
+          <div id="custom-verify-result" style="margin-top:10px;font-family:monospace;font-size:.75rem;min-height:20px"></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px">
+          <div style="font-size:.7rem;color:var(--dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Ugradi na svoju stranicu:</div>
+          <code style="font-family:monospace;font-size:.68rem;color:var(--gold);display:block;background:var(--bg);padding:10px;border-radius:6px;word-break:break-all;line-height:1.6">&lt;script src="https://limit-connect.com/static/trust-badge.js"&gt;&lt;/script&gt;<br>&lt;div data-lc-verify="TVOJ-SEAL-TOKEN"&gt;&lt;/div&gt;</code>
         </div>
       </div>
     </div>
@@ -900,88 +906,223 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
 <!-- DOKUMENTI -->
 <section class="dokumenti-section" id="dokumenti">
   <div class="container">
-    <div class="section-eyebrow">Osnivacka dokumentacija</div>
+    <div class="section-eyebrow">Kompletna dokumentacija udruge</div>
     <h2 class="section-title reveal">Transparentnost<br><span style="color:var(--gold)">od prvog dana</span></h2>
-    <p class="section-lead reveal">Svi osnivacki dokumenti su javni. Preuzmi, provjeri, verificiraj.</p>
-    <div class="doc-grid">
-      <a href="/static/udruga_no_limit/NO_LIMIT_Statut.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F4DC;</div>
-        <div class="doc-title">Statut udruge</div>
-        <div class="doc-meta">Temeljni akt NO LIMIT udruge. Ciljevi, upravljanje, misija.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Zapisnik_osnivacke_skupstine.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F4CB;</div>
-        <div class="doc-title">Zapisnik osnivacke skupstine</div>
-        <div class="doc-meta">Zapisnik prve osnivacke skupstine. Svi osnivaci, odluke, glasovanja.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Popis_osnivaca.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F465;</div>
-        <div class="doc-title">Popis osnivaca</div>
-        <div class="doc-meta">Potpuni popis svih osnivackih clanova udruge NO LIMIT.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Zahtjev_RU1.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F3DB;</div>
-        <div class="doc-title">Zahtjev RU-1</div>
-        <div class="doc-meta">Zahtjev za upis u Registar udruga Republike Hrvatske.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Suglasnost_Vlasnika.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F3E0;</div>
-        <div class="doc-title">Suglasnost vlasnika prostora</div>
-        <div class="doc-meta">Suglasnost Ivice Kruljca o koristenju adrese Kralja Tomislava 291 kao sjedista Udruge.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_osnivanju.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x2696;&#xFE0F;</div>
-        <div class="doc-title">Odluka o osnivanju</div>
-        <div class="doc-meta">Pravni akt o osnivanju Udruge NO LIMIT, 19.04.2026.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_upisu.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F4DD;</div>
-        <div class="doc-title">Odluka o pokretanju upisa</div>
-        <div class="doc-meta">Pokretanje postupka za upis u Registar udruga RH.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_zastupanju.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F464;</div>
-        <div class="doc-title">Odluka o zastupanju</div>
-        <div class="doc-meta">Imenovanje osoba ovlaštenih za zastupanje Udruge.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_logu.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F3A8;</div>
-        <div class="doc-title">Odluka o vizualnom identitetu</div>
-        <div class="doc-meta">Privremeni logo i pe&#269;at, finalizacija u roku 90 dana.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_Programu_DOM.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F3E0;</div>
-        <div class="doc-title">Odluka o Programu DOM</div>
-        <div class="doc-meta">Humanitarni program stambenog zbrinjavanja ljudi u nevolji.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Pratno_obrazlozenje.pdf" class="doc-card reveal" download>
-        <div class="doc-icon">&#x1F4C4;</div>
-        <div class="doc-title">Pratno obrazlo&#382;enje</div>
-        <div class="doc-meta">Pratni dopis uz Zahtjev za upis &mdash; poja&#353;njenja posebnosti Statuta.</div>
-        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
-      </a>
+    <p class="section-lead reveal">Svi dokumenti su javni, preuzimljivi i kriptografski pe&#269;atirani. 23 dokumenta u 4 grupe.</p>
+
+    <!-- GRUPA A: Osnivački akti -->
+    <div style="margin-top:52px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:36px;height:36px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.85rem;flex-shrink:0;"><i class="fas fa-scroll"></i></div>
+        <div>
+          <div style="font-size:.7rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;font-weight:600;">Grupa A</div>
+          <div style="font-size:1.05rem;font-weight:700;">Osniva&#269;ki akti &mdash; 11 dokumenata</div>
+        </div>
+        <div style="margin-left:auto;font-size:.75rem;color:var(--dim);">Osniva&#269;ka skup&#353;tina &middot; 19.04.2026.</div>
+      </div>
+      <div class="doc-grid">
+        <a href="/static/udruga_no_limit/NO_LIMIT_Statut.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F4DC;</div>
+          <div class="doc-title">Statut udruge</div>
+          <div class="doc-meta">Temeljni akt. 41 &#269;lanak, 9 poglavlja, 12 stranica. Preambula, ciljevi, IP partnerstvo (&#269;l.25-28), Program DOM (&#269;l.29), OPP.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF &middot; 60 KB</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Zapisnik_osnivacke_skupstine.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F4CB;</div>
+          <div class="doc-title">Zapisnik osniva&#269;ke skup&#353;tine</div>
+          <div class="doc-meta">Tijek sjednice, 11 to&#269;aka dnevnog reda, jednoglasne odluke sva 4 osniva&#269;a. Mandat tijela 2026&ndash;2031.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Popis_osnivaca.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F465;</div>
+          <div class="doc-title">Popis osniva&#269;a</div>
+          <div class="doc-meta">Ivan Brtan, Ivica Kruljac, Marija Brtan, Antonio Brtan &mdash; OIB-ovi, adrese, potpisi.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_osnivanju.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x2696;&#xFE0F;</div>
+          <div class="doc-title">Odluka o osnivanju</div>
+          <div class="doc-meta">Pravni akt osnivanja Udruge „NO LIMIT", sukladno &#269;l. 11. ZOU, na neodre&#273;eno vrijeme.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_zastupanju.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x270A;</div>
+          <div class="doc-title">Odluka o zastupanju</div>
+          <div class="doc-meta">Ivan Brtan &mdash; Predsjednik i zastupnik. Zamjenski: Ivica Kruljac uz pisanu ovlast. Mandat 5 god.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_upisu.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F4DD;</div>
+          <div class="doc-title">Odluka o pokretanju upisa</div>
+          <div class="doc-meta">Ovlast Predsjedniku za provedbu upisa u Registar udruga RH &mdash; Osje&#269;ko-baranjska &#382;upanija.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_logu.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F3A8;</div>
+          <div class="doc-title">Odluka o vizualnom identitetu</div>
+          <div class="doc-meta">Privremeni logo (stiliz. jaje, simbol &#x221E;) i pe&#269;at &#8960;30mm. Finalizacija 90 dana od upisa.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Odluka_o_Programu_DOM.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F3E0;</div>
+          <div class="doc-title">Odluka o Programu DOM</div>
+          <div class="doc-meta">Pokretanje stalnog humanitarnog programa stambenog zbrinjavanja. Posebni TR, CK/Caritas suradnja.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Zahtjev_RU1.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F3DB;</div>
+          <div class="doc-title">Zahtjev RU-1 za upis</div>
+          <div class="doc-meta">Obrazac za upis u Registar udruga RH &mdash; Ured dr&#382;avne uprave Osje&#269;ko-baranjske &#382;upanije.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Suglasnost_Vlasnika.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F511;</div>
+          <div class="doc-title">Suglasnost vlasnika prostora</div>
+          <div class="doc-meta">Ivica Kruljac daje suglasnost za kori&#353;tenje adrese Kralja Tomislava 291 kao sjedi&#353;ta Udruge.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/NO_LIMIT_Pratno_obrazlozenje.pdf" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">&#x1F4C4;</div>
+          <div class="doc-title">Pratno obrazlo&#382;enje</div>
+          <div class="doc-meta">7 pravnih pojašnjenja posebnosti Statuta: engleski naziv, zaštita gotovine, IP partnerstvo, blagajnik u DE, OPP, Program DOM, e-sjednice.</div>
+          <div class="doc-dl"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+      </div>
     </div>
 
-    <div class="genesis-proof reveal">
+    <!-- GRUPA B: Patent paket -->
+    <div style="margin-top:52px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:36px;height:36px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-size:.85rem;flex-shrink:0;"><i class="fas fa-microscope"></i></div>
+        <div>
+          <div style="font-size:.7rem;letter-spacing:.2em;color:#60a5fa;text-transform:uppercase;font-weight:600;">Grupa B</div>
+          <div style="font-size:1.05rem;font-weight:700;">Patent paket &mdash; Triple DNA metoda &middot; 6 dokumenata</div>
+        </div>
+        <div style="margin-left:auto;font-size:.75rem;color:var(--dim);">DZIV prijava &middot; Konjik d.o.o.</div>
+      </div>
+      <div style="background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:.83rem;color:var(--dim);line-height:1.7;">
+        <strong style="color:var(--white);">Što je ovo:</strong> 6 dokumenata pripremljenih za DZIV prijavu (Konjik d.o.o. podnositelj, Ivan Brtan izumitelj). 80% posla obavljeno &mdash; odvjetniku 1&ndash;2 sata rebalansa. Prior art za&#353;ti&#263;en od 19.04.2026. neovisno o statusu prijave.
+      </div>
+      <div class="doc-grid">
+        <a href="/static/udruga_no_limit/patent/PATENT-01_Tehnicki_opis.pdf" class="doc-card reveal" style="border-color:rgba(59,130,246,.2);" target="_blank">
+          <div class="doc-icon">&#x1F52C;</div>
+          <div class="doc-title" style="color:#93c5fd;">01 &mdash; Tehni&#269;ki opis izuma</div>
+          <div class="doc-meta">Triple DNA: SHA-256 + pHash + AI Embedding. 6 provedbenih primjera, industrijska primjena, tehni&#269;ki efekti. DZIV/EPO format.</div>
+          <div class="doc-dl" style="color:#60a5fa;"><i class="fas fa-download"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/patent/PATENT-02_Nacrt_claims.pdf" class="doc-card reveal" style="border-color:rgba(59,130,246,.2);" target="_blank">
+          <div class="doc-icon">&#x1F4D1;</div>
+          <div class="doc-title" style="color:#93c5fd;">02 &mdash; Nacrt patent claims</div>
+          <div class="doc-meta">13 zahtjeva: 1 glavni + 12 ovisnih. DZIV/EPO standard. Odvjetnik: rebalans 1h.</div>
+          <div class="doc-dl" style="color:#60a5fa;"><i class="fas fa-download"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/patent/PATENT-03_Sazetak.pdf" class="doc-card reveal" style="border-color:rgba(59,130,246,.2);" target="_blank">
+          <div class="doc-icon">&#x1F4CB;</div>
+          <div class="doc-title" style="color:#93c5fd;">03 &mdash; Sa&#382;etak (Abstract)</div>
+          <div class="doc-meta">150 rije&#269;i, HR + EN. Kombinirana metoda za kriptografsku verifikaciju digitalnih dokumenata.</div>
+          <div class="doc-dl" style="color:#60a5fa;"><i class="fas fa-download"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/patent/PATENT-04_Formalni_obrazac.pdf" class="doc-card reveal" style="border-color:rgba(59,130,246,.2);" target="_blank">
+          <div class="doc-icon">&#x1F3DB;</div>
+          <div class="doc-title" style="color:#93c5fd;">04 &mdash; DZIV obrazac P-1</div>
+          <div class="doc-meta">Popunjeni podaci (Konjik d.o.o. + Ivan Brtan), spreman za prepis i predaju. Pristojba: 250 EUR.</div>
+          <div class="doc-dl" style="color:#60a5fa;"><i class="fas fa-download"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/patent/PATENT-05_Sheme.pdf" class="doc-card reveal" style="border-color:rgba(59,130,246,.2);" target="_blank">
+          <div class="doc-icon">&#x1F4D0;</div>
+          <div class="doc-title" style="color:#93c5fd;">05 &mdash; Sheme i dijagrami</div>
+          <div class="doc-meta">FIG. 1&ndash;4: arhitektura Triple DNA, flowchart verifikacije, .dok struktura, ChainBlock POE lanac.</div>
+          <div class="doc-dl" style="color:#60a5fa;"><i class="fas fa-download"></i> PDF</div>
+        </a>
+        <a href="/static/udruga_no_limit/patent/PATENT-06_Upute_odvjetniku.pdf" class="doc-card reveal" style="border-color:rgba(59,130,246,.2);" target="_blank">
+          <div class="doc-icon">&#x2696;&#xFE0F;</div>
+          <div class="doc-title" style="color:#93c5fd;">06 &mdash; Upute odvjetniku</div>
+          <div class="doc-meta">Checklist predaje, rokovi, tro&#353;kovi (~800 EUR ukupno), otvorena pitanja za patent zastupnika.</div>
+          <div class="doc-dl" style="color:#60a5fa;"><i class="fas fa-download"></i> PDF</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- GRUPA C: Genesis + OPP -->
+    <div style="margin-top:52px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:36px;height:36px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--green);font-size:.85rem;flex-shrink:0;"><i class="fas fa-fingerprint"></i></div>
+        <div>
+          <div style="font-size:.7rem;letter-spacing:.2em;color:var(--green);text-transform:uppercase;font-weight:600;">Grupa C</div>
+          <div style="font-size:1.05rem;font-weight:700;">Genesis Block + OPP licenca &middot; 4 dokumenta</div>
+        </div>
+        <div style="margin-left:auto;font-size:.75rem;color:var(--dim);">Prior art &middot; 19.04.2026. &middot; aktivan odmah</div>
+      </div>
+      <div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.15);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:.83rem;color:var(--dim);line-height:1.7;">
+        <strong style="color:var(--white);">&#352;to je ovo:</strong> Genesis Block #0 je vremenski pe&#269;atirani javni dokaz nastanka Triple DNA metode. Objavljen <strong style="color:var(--green);">prije</strong> upisa Udruge &mdash; sam sebe potvr&#273;uje. OPP vrijedi odmah, ne&#269;e prestati akvizicijom Konjik d.o.o. (100 god).
+      </div>
+      <div class="doc-grid">
+        <a href="/static/udruga_no_limit/genesis/NOLIMIT-GENESIS-0001.pdf" class="doc-card reveal" style="border-color:rgba(34,197,94,.25);" target="_blank">
+          <div class="doc-icon">&#x1F510;</div>
+          <div class="doc-title" style="color:#86efac;">Genesis Document #0</div>
+          <div class="doc-meta">NOLIMIT-GENESIS-0001 &middot; 19.04.2026. 12:00 UTC &middot; Samopotvrda Triple DNA metode. SHA-256: 6187541b... POE Block #0.</div>
+          <div class="doc-dl" style="color:var(--green);"><i class="fas fa-file-pdf"></i> PDF &middot; 52 KB</div>
+        </a>
+        <a href="/static/udruga_no_limit/genesis/NOLIMIT-GENESIS-0001.sha256" class="doc-card reveal" style="border-color:rgba(34,197,94,.25);" target="_blank">
+          <div class="doc-icon">&#x1F50D;</div>
+          <div class="doc-title" style="color:#86efac;">SHA-256 hash</div>
+          <div class="doc-meta" style="font-family:monospace;font-size:.78rem;">6187541b2178a2ba...<br>Verificira integritet Genesis PDF-a.</div>
+          <div class="doc-dl" style="color:var(--green);"><i class="fas fa-download"></i> .sha256</div>
+        </a>
+        <a href="/static/udruga_no_limit/genesis/NOLIMIT-GENESIS-0001.chain.json" class="doc-card reveal" style="border-color:rgba(34,197,94,.25);" target="_blank">
+          <div class="doc-icon">&#x26D3;&#xFE0F;</div>
+          <div class="doc-title" style="color:#86efac;">ChainBlock POE (JSON)</div>
+          <div class="doc-meta">Block #0, author Ivan Brtan, IP holder Konjik d.o.o., licenca OPP v1.0, technologies array, timestamp Unix.</div>
+          <div class="doc-dl" style="color:var(--green);"><i class="fas fa-code"></i> .chain.json</div>
+        </a>
+        <a href="/static/udruga_no_limit/opp/NOLIMIT-OPP-v1.1.pdf" class="doc-card reveal" style="border-color:rgba(34,197,94,.25);" target="_blank">
+          <div class="doc-icon">&#x1F6E1;&#xFE0F;</div>
+          <div class="doc-title" style="color:#86efac;">Open Patent Promise v1.1</div>
+          <div class="doc-meta">Neopoziva javna licenca slobode. Akvizicija ne uga&#353;ava OPP (100 god). &#268;l. 27 &mdash; License Backscratch reciprocitet.</div>
+          <div class="doc-dl" style="color:var(--green);"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- GRUPA D: Strateški -->
+    <div style="margin-top:52px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+        <div style="width:36px;height:36px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#a78bfa;font-size:.85rem;flex-shrink:0;"><i class="fas fa-chess-king"></i></div>
+        <div>
+          <div style="font-size:.7rem;letter-spacing:.2em;color:#a78bfa;text-transform:uppercase;font-weight:600;">Grupa D</div>
+          <div style="font-size:1.05rem;font-weight:700;">Strateški dokumenti &middot; 2 dokumenta</div>
+        </div>
+        <div style="margin-left:auto;font-size:.75rem;color:var(--dim);">Future 3 + Defensive Playbook</div>
+      </div>
+      <div class="doc-grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));">
+        <a href="/static/udruga_no_limit/future/NOLIMIT-FUTURE3-01.pdf" class="doc-card reveal" style="border-color:rgba(139,92,246,.25);" target="_blank">
+          <div class="doc-icon">&#x1F680;</div>
+          <div class="doc-title" style="color:#c4b5fd;">Future 3 Roadmap</div>
+          <div class="doc-meta">License Backscratch (odmah, 0 EUR) &#x2192; Prior Art Engine (6 mj, 15k EUR) &#x2192; DAO Ownership Flip (2027&ndash;28, patent u javno dobro). Najve&#263;a pobjeda NO LIMIT-a bit &#263;e ako za 5 godina nitko vi&#353;e ne treba NO LIMIT.</div>
+          <div class="doc-dl" style="color:#a78bfa;"><i class="fas fa-file-pdf"></i> PDF &middot; 54 KB</div>
+        </a>
+        <a href="/static/udruga_no_limit/future/NOLIMIT-STRATEGIC-MOVES-01.pdf" class="doc-card reveal" style="border-color:rgba(220,38,38,.25);" target="_blank">
+          <div class="doc-icon">&#x2694;&#xFE0F;</div>
+          <div class="doc-title" style="color:#fca5a5;">Strategic Moves &mdash; Defensive Playbook</div>
+          <div class="doc-meta">Trust Anchor (institucijski moat, sud prihva&#263;a nas) + Poison Pill (100 god OPP uz akviziciju) + Open Standard Foundation (zaklada s vetom).</div>
+          <div class="doc-dl" style="color:#f87171;"><i class="fas fa-file-pdf"></i> PDF</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Genesis proof footer -->
+    <div class="genesis-proof reveal" style="margin-top:48px;">
       <div class="genesis-proof-icon"><i class="fas fa-shield-alt"></i></div>
       <div>
-        <h4>Genesis Block #0 &mdash; Kriptografski pecateno</h4>
-        <p>Ovi dokumenti i specifikacija .dok standarda kriptografski su zapecateni 2026-04-19 putem naseg vlastitog eArhivator sustava. Prva primjena standarda koji gradimo &mdash; na nasim vlastitim dokumentima.</p>
-        <code>POE #001 &mdash; 2026-04-19T21:25:42 UTC &mdash; no-limit.world/verify/a3f9d2e1...</code>
+        <h4>Svi dokumenti kriptografski pe&#269;atirani &mdash; eArhivator sustav</h4>
+        <p>Osniva&#269;ki dokumenti pe&#269;atirani su 19.04.2026. vlastitim eArhivator sustavom koji opisuju &mdash; prva prakti&#269;na primjena standarda kojeg grade. Svaki PDF nosi SHA-256 otisak, pHash i AI embedding. ChainBlock POE lanac po&#269;inje od Genesis dokumenta.</p>
+        <code>POE #001 &mdash; 2026-04-19T21:25:42 UTC &mdash; SHA-256: 6187541b2178a2baaaa04c759f6674faa56b35a0c672682447fa50f890a19658</code>
       </div>
     </div>
   </div>
 </section>
+
+
 
 <!-- LOGO -->
 <section class="dokumenti-section" id="logo" style="background:linear-gradient(135deg,#0a0f1d 0%,#1e3a5f 100%);padding:80px 0;color:white">
@@ -1376,32 +1517,63 @@ const poeObs=new IntersectionObserver(entries=>{
 const poeEl=document.getElementById('poeCounter')
 if(poeEl)poeObs.observe(poeEl)
 
-// ── Live Genesis Block SHA-256 ──────────────────────────────────────────────
-async function computeGenesisHash() {
-  const seed = "NO-LIMIT-GENESIS-0001:" + new Date().toISOString().slice(0,10);
-  const encoder = new TextEncoder();
-  const data = encoder.encode(seed);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2,"0")).join("");
+// ── Live Genesis Block — ChainBlock API ────────────────────────────────────
+async function verifyGenesis() {
+  const el = document.getElementById('genesis-live-status');
+  if (!el) return;
+  try {
+    const r = await fetch('https://limit-connect.com/api/verify/NOLIMIT-GENESIS-0001/');
+    const d = await r.json();
+    if (d.verified && d.integrity === 'ok') {
+      const ts = new Date(d.tsa_timestamp);
+      const dateStr = ts.toLocaleDateString('hr-HR', {day:'2-digit',month:'2-digit',year:'numeric'});
+      el.innerHTML = `
+        <div class="genesis-badge">
+          <div class="genesis-dot"></div>
+          VERIFICIRANO UŽIVO · ${dateStr}
+        </div>
+        <div style="color:var(--dim);margin-bottom:6px;font-size:.75rem">NO LIMIT — ${d.seal_token}</div>
+        <div style="color:var(--white);margin-bottom:4px;font-size:.8rem">Timestamp: ${d.tsa_timestamp.replace('T',' ').slice(0,19)} UTC</div>
+        <div style="color:var(--green);margin-bottom:12px;font-size:.8rem">Integritet: ✓ ${d.integrity.toUpperCase()}</div>
+        <div style="color:var(--dim);font-size:.7rem;margin-bottom:4px">Block Hash SHA-256:</div>
+        <div class="genesis-hash">${d.block_hash}</div>
+        <div style="display:flex;gap:16px;margin-top:10px;font-size:.72rem;color:var(--dim)">
+          <span>Block #${d.block_number}</span>
+          <span>${d.doc_count} dokument${d.doc_count === 1 ? '' : 'a'}</span>
+          <span style="color:var(--gold)">${d.standard.split('|')[0].trim()}</span>
+        </div>`;
+    } else {
+      el.innerHTML = '<span style="color:var(--dim);font-size:.8rem">⚠ Verifikacija nedostupna — hash nepromjenjiv</span>';
+    }
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--dim);font-size:.8rem">Offline — ChainBlock hash nepromjenjiv</span>';
+  }
 }
 
-async function updateGenesisCard() {
-  const h1 = document.getElementById("genesis-hash-l1");
-  const h2 = document.getElementById("genesis-hash-l2");
-  const vu = document.getElementById("genesis-verify-url");
-  if (!h1 || !h2) return;
-
-  const hash = await computeGenesisHash();
-  const phash = hash.slice(32,48); // simulirani pHash (zadnjih 16 hex)
-
-  h1.textContent = hash;
-  h2.textContent = phash + "...phash";
-  if (vu) vu.textContent = "no-limit.world/verify/" + hash.slice(0,8) + "...";
+async function verifyCustomToken() {
+  const token = document.getElementById('verify-token-input').value.trim();
+  const el = document.getElementById('custom-verify-result');
+  if (!token) return;
+  el.innerHTML = 'Verificiram...';
+  el.style.color = 'var(--dim)';
+  try {
+    const r = await fetch(`https://limit-connect.com/api/verify/${encodeURIComponent(token)}/`);
+    const d = await r.json();
+    if (d.verified) {
+      const ts = new Date(d.tsa_timestamp).toLocaleDateString('hr-HR');
+      el.innerHTML = `✅ VERIFICIRANO · ${ts} · Block #${d.block_number} · ${d.standard.split('|')[0].trim()}`;
+      el.style.color = '#4ade80';
+    } else {
+      el.innerHTML = '❌ Dokument nije pronađen u ChainBlocku';
+      el.style.color = '#f87171';
+    }
+  } catch(e) {
+    el.innerHTML = '⚠ Greška pri verifikaciji';
+    el.style.color = '#fbbf24';
+  }
 }
 
-// Izračunaj odmah i svaki sat (svaki dan novi hash po datumu)
-updateGenesisCard();
+document.addEventListener('DOMContentLoaded', verifyGenesis);
 
 
 // ── Light/Dark Theme Toggle ─────────────────────────────────────────────────
