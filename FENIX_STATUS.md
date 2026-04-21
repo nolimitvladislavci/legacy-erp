@@ -215,6 +215,17 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 
 ## KONTEKST SESIJE
 
+### [S-010] --- 2026-04-21 (Global Notary — Stari ERP)
+**Branch:** master
+**Zadnji commit:** 203de5f3 feat(notary): auto DocumentSeal za sve fakture
+**Kontekst:** Stari ERP (fina-connect.online) dobio auto DocumentSeal za sve fakture pri 
+status prijelazu u SENT/CONFIRMED/FISCALIZED. Idempotentno po sha256_hash metapodataka. 
+GoBD 10g čuvanje (expires_at = now + 3652d). Hookano na isti pre_save signal koji 
+prati status promjene za auto-knjiženje. Globalno: radi za sve 109 aktivnih kompanija 
+bez konfiguracije.
+
+
+
 
 ### [S-009] --- 2026-04-21 16:10
 **Branch:** master
