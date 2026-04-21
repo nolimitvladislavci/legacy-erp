@@ -199,6 +199,14 @@ class AnimalProfile(models.Model):
     father_name = models.CharField(max_length=100, blank=True)
     mother_name = models.CharField(max_length=100, blank=True)
 
+    # Genealogija — soft linkovi (chip_number, ne FK)
+    father_chip    = models.CharField(max_length=20, blank=True, db_index=True,
+        help_text="Broj čipa oca (soft ref — ne FK, može biti iz ext. baze)")
+    mother_chip    = models.CharField(max_length=20, blank=True, db_index=True,
+        help_text="Broj čipa majke (soft ref)")
+    generation_number = models.PositiveSmallIntegerField(default=1,
+        help_text="Koja generacija u uzgoju (1=prva, 2=drugo koljeno...)")
+
     # Foto
     photo = models.ImageField(upload_to="memio_pet/photos/", null=True, blank=True)
 
@@ -823,3 +831,218 @@ class MemorialProfile(models.Model):
 
     def __str__(self):
         return f"Memorijal — {self.animal.name}"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DIGITALNO NASLJEĐE — Sprint Heritage 2026-04-21
+# Generacijsko povjerenje, genetske potvrde, digitalna oporuka.
+# ══════════════════════════════════════════════════════════════════════════════
+
+class HeritageTrait(models.Model):
+    """
+    Nasljedna obilježja — genetski testovi, zdravstvene potvrde, titule.
+    Svaka osobina može biti nasljediva (propagira se na potomke u Trust Scoreu).
+    """
+    TRAIT_TYPE_CHOICES = [
+        ("genetic_test",    "Genetski test"),
+        ("health_clearance","Zdravstvena potvrda"),
+        ("championship",    "Prvak / Titula"),
+        ("talent",          "Talent / Sposobnost"),
+        ("temperament",     "Temperament certifikat"),
+        ("longevity",       "Dugovječnost"),
+        ("other",           "Ostalo"),
+    ]
+    RESULT_CHOICES = [
+        ("pass",    "Položio / Odobreno"),
+        ("fail",    "Nije položio"),
+        ("grade_a", "Odličan (A)"),
+        ("grade_b", "Vrlo dobar (B)"),
+        ("grade_c", "Dobar (C)"),
+        ("pending", "Na čekanju"),
+    ]
+
+    id             = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    animal         = models.ForeignKey(
+        AnimalProfile, on_delete=models.CASCADE, related_name="heritage_traits"
+    )
+    trait_type     = models.CharField(max_length=20, choices=TRAIT_TYPE_CHOICES, default="genetic_test")
+    name           = models.CharField(max_length=200, help_text="npr. 'Hip Dysplasia OFA Excellent'")
+    result         = models.CharField(max_length=10, choices=RESULT_CHOICES, default="pending")
+    certified_by   = models.CharField(max_length=200, blank=True, help_text="Tijelo koje je certificiralo")
+    certificate_id = models.CharField(max_length=100, blank=True)
+    certificate_url= models.URLField(blank=True, help_text="URL javnog certifikata")
+    is_inheritable = models.BooleanField(default=True,
+        help_text="Prenosi li se vrijednost na potomke u Trust Scoreu?")
+    notes          = models.TextField(blank=True)
+    recorded_at    = models.DateField(null=True, blank=True)
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label  = "memio_pet"
+        db_table   = "mp_heritage_trait"
+        ordering   = ["-recorded_at", "trait_type"]
+
+    def __str__(self):
+        return f"{self.animal.name} | {self.get_trait_type_display()} — {self.name}"
+
+    @property
+    def icon(self):
+        return {
+            "genetic_test":    "🧬",
+            "health_clearance":"💚",
+            "championship":    "🏆",
+            "talent":          "⭐",
+            "temperament":     "🧡",
+            "longevity":       "♾️",
+            "other":           "📋",
+        }.get(self.trait_type, "📋")
+
+    @property
+    def result_color(self):
+        return {
+            "pass": "#28a745", "grade_a": "#28a745",
+            "grade_b": "#5cb85c", "grade_c": "#f0ad4e",
+            "fail": "#dc3545", "pending": "#6c757d",
+        }.get(self.result, "#6c757d")
+
+
+class LegacyBequest(models.Model):
+    """
+    Digitalna oporuka — kriptografski verificiran nalog za prijenos
+    digitalnog identiteta ljubimca na nasljednika.
+
+    Nasljednik se identificira po SHA-256 hash-u emaila (privatnost).
+    Aktivira se po trigeru: smrt vlasnika, godišnjica, manualni nalog.
+    """
+    TRIGGER_CHOICES = [
+        ("owner_death",  "Smrt vlasnika"),
+        ("anniversary",  "Godišnjica (Dugini Most)"),
+        ("manual",       "Manualna aktivacija"),
+        ("inactivity",   "Neaktivnost 12 mjeseci"),
+    ]
+    STATUS_CHOICES = [
+        ("draft",     "Nacrt"),
+        ("active",    "Aktivna"),
+        ("triggered", "Aktivirano"),
+        ("completed", "Završeno"),
+        ("revoked",   "Opozvano"),
+    ]
+
+    id                   = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    animal               = models.ForeignKey(
+        AnimalProfile, on_delete=models.CASCADE, related_name="legacy_bequests"
+    )
+    successor_email_hash = models.CharField(max_length=64, db_index=True,
+        help_text="SHA-256 hash nasljednikovog emaila (GDPR)")
+    successor_name       = models.CharField(max_length=200, blank=True,
+        help_text="Ime nasljednika (za prikaz)")
+    message              = models.TextField(blank=True,
+        help_text="Poruka nasljedniku — čita se pri aktivaciji")
+    trigger              = models.CharField(max_length=20, choices=TRIGGER_CHOICES, default="manual")
+    status               = models.CharField(max_length=12, choices=STATUS_CHOICES, default="draft")
+    # Kriptografski pečat
+    seal_hash            = models.CharField(max_length=64, blank=True,
+        help_text="SHA-256(animal.id + successor_email_hash + created_at) — integritet")
+    # Vremenski zapisi
+    created_at           = models.DateTimeField(auto_now_add=True)
+    activated_at         = models.DateTimeField(null=True, blank=True)
+    completed_at         = models.DateTimeField(null=True, blank=True)
+    # Witness (svjedok aktivacije — drugi breeder ili vet)
+    witness_email_hash   = models.CharField(max_length=64, blank=True)
+    witness_confirmed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        app_label = "memio_pet"
+        db_table  = "mp_legacy_bequest"
+        ordering  = ["-created_at"]
+
+    def __str__(self):
+        return f"Oporuka — {self.animal.name} → {self.successor_name or 'anonimno'}"
+
+    def save(self, *args, **kwargs):
+        """Automatski generira kriptografski pečat pri prvom spremu."""
+        import hashlib
+        if not self.seal_hash and self.animal_id and self.successor_email_hash:
+            raw = f"{self.animal_id}:{self.successor_email_hash}:{self.created_at or 'new'}"
+            self.seal_hash = hashlib.sha256(raw.encode()).hexdigest()
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def create_for(cls, animal, successor_email: str, trigger: str = "manual",
+                   message: str = "", successor_name: str = "") -> "LegacyBequest":
+        """Kreira oporuku za ljubimca. Email nasljednika se hashira."""
+        import hashlib
+        h = hashlib.sha256(successor_email.strip().lower().encode()).hexdigest()
+        obj = cls(
+            animal=animal,
+            successor_email_hash=h,
+            successor_name=successor_name,
+            trigger=trigger,
+            message=message,
+            status="active",
+        )
+        obj.save(using="memio_pets")
+        return obj
+
+
+class DigitalHeritage(models.Model):
+    """
+    Agregatni zapis digitalnog nasljeđa — izračunat na temelju:
+      - HeritageTrait-ova životinje
+      - Genealoškog dubine (father_chip / mother_chip na AnimalProfile)
+      - Nasljednih bodova roditeljskih Trust Score-ova
+      - Legacy Bequest statusa
+
+    Ovo je "DNA povjerenja" platforme memio.pet:
+    potomci nasljeđuju dio roditeljskog Trust Scorea,
+    čime uzgajivači koji grade kvalitetu imaju mjerljivu prednost kroz generacije.
+    """
+
+    id                  = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    animal              = models.OneToOneField(
+        AnimalProfile, on_delete=models.CASCADE, related_name="digital_heritage"
+    )
+
+    # Genealoška dubina
+    generation_depth    = models.PositiveSmallIntegerField(default=0,
+        help_text="Koliko generacija predaka je dokumentirano (0=nepoznato)")
+    known_champions     = models.PositiveSmallIntegerField(default=0,
+        help_text="Broj prvaka/titulara u rodovnici")
+    health_clearances   = models.PositiveSmallIntegerField(default=0,
+        help_text="Broj prošlih zdravstvenih potvrda u rodovnici")
+
+    # Naslijeđeni Trust Score (od roditelja)
+    inherited_trust     = models.IntegerField(default=0,
+        help_text="Prosječni Trust Score oca i majke / 10 (max 10 bonus bodova)")
+
+    # Ukupni Heritage Score (0-100)
+    heritage_score      = models.IntegerField(default=0)
+    heritage_breakdown  = models.JSONField(default=dict, blank=True)
+
+    # Narativni sažetak (AI-generated ili manualni)
+    legacy_summary      = models.TextField(blank=True,
+        help_text="Kratki opis naslijeđa — prikazuje se na profilu")
+
+    # Verifikacija
+    is_verified         = models.BooleanField(default=False,
+        help_text="Verificirao uzgajivač ili memio admin")
+    verified_at         = models.DateTimeField(null=True, blank=True)
+
+    created_at          = models.DateTimeField(auto_now_add=True)
+    updated_at          = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = "memio_pet"
+        db_table  = "mp_digital_heritage"
+
+    def __str__(self):
+        return f"Nasljeđe — {self.animal.name} (score: {self.heritage_score})"
+
+    @property
+    def dynasty_level(self):
+        """3 razine: Početnik / Linija / Dinastija."""
+        if self.generation_depth >= 3 and self.known_champions >= 2:
+            return ("Dinastija", "#C9A84C", "🏛️")
+        if self.generation_depth >= 2 or self.known_champions >= 1:
+            return ("Linija", "#5cb85c", "🌿")
+        return ("Početnik", "#6c757d", "🌱")

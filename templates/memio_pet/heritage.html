@@ -1,0 +1,380 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digitalno Nasljeđe — {{ animal.name|default:animal.ear_tag }} · Memio.pet</title>
+<meta name="description" content="Genealoško stablo, Heritage Traits i digitalna oporuka za {{ animal.name }}.">
+<meta property="og:title" content="Nasljeđe — {{ animal.name }} · Memio.pet">
+<meta property="og:type" content="profile">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f6f0;--surface:#fff;--ink:#1a1a2e;--ink2:#3d3d52;
+  --gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--green:#28a745;
+  --red:#dc3545;--top-bar:#1a1a2e;--top-text:#f8f6f0;
+  --shadow:rgba(0,0,0,.06);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+}
+[data-theme="dark"]{--bg:#0f1012;--surface:#18191d;--ink:#edeae2;--ink2:#a09890;--gold:#e2c36d;--line:#2a2b30;--dim:#5a5b65;--top-bar:#09090b;--top-text:#edeae2;--shadow:rgba(0,0,0,.35)}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* Top bar */
+.top-bar{background:var(--top-bar);color:var(--top-text);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top-bar-logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.2rem;font-weight:700}
+.top-bar-nav a{color:var(--top-text);text-decoration:none;font-size:.82rem;opacity:.7;margin-left:16px;transition:opacity .2s}
+.top-bar-nav a:hover{opacity:1;color:var(--gold)}
+.top-bar-nav a.active{opacity:1;color:var(--gold)}
+
+/* Layout */
+.page{max-width:900px;margin:0 auto;padding:32px 20px 60px}
+
+/* Hero */
+.heritage-hero{text-align:center;padding:40px 0 28px}
+.dynasty-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:30px;font-family:var(--serif);font-size:1.1rem;font-weight:700;border:2px solid;margin-bottom:16px}
+.heritage-hero h1{font-family:var(--serif);font-size:2rem;font-weight:700;margin-bottom:8px}
+.heritage-hero .sub{color:var(--dim);font-size:.9rem}
+.score-ring{display:inline-flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 28px;margin-top:20px;box-shadow:0 2px 12px var(--shadow)}
+.score-num{font-family:var(--serif);font-size:2.5rem;font-weight:700;line-height:1}
+.score-label{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+
+/* Sections */
+.section{margin-bottom:32px}
+.section-title{font-family:var(--serif);font-size:1.25rem;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:8px}
+
+/* Genealogy Tree */
+.gen-tree{display:flex;flex-direction:column;align-items:center;gap:0}
+.gen-row{display:flex;justify-content:center;gap:24px;margin-bottom:0}
+.gen-connector{display:flex;justify-content:center;height:32px;position:relative}
+.gen-connector::before{content:'';position:absolute;top:0;left:50%;width:2px;height:100%;background:var(--gold);opacity:.4}
+.gen-node{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:12px 16px;text-align:center;min-width:140px;max-width:180px;transition:all .2s;text-decoration:none;color:var(--ink)}
+.gen-node.subject{border-color:var(--gold);border-width:3px}
+.gen-node.father{border-color:#60a5fa}
+.gen-node.mother{border-color:#f472b6}
+.gen-node.child{border-color:#4ade80}
+.gen-node:hover{box-shadow:0 4px 16px var(--shadow);transform:translateY(-2px)}
+.gen-node-emoji{font-size:2rem;margin-bottom:4px}
+.gen-node-name{font-weight:600;font-size:.9rem}
+.gen-node-breed{font-size:.75rem;color:var(--dim);margin-top:2px}
+.gen-node-role{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;margin-top:4px;padding:2px 8px;border-radius:10px;display:inline-block}
+.role-otac{background:#dbeafe;color:#1d4ed8}
+.role-majka{background:#fce7f3;color:#9d174d}
+.role-subjekt{background:rgba(201,168,76,.15);color:var(--gold)}
+.role-potomak{background:#dcfce7;color:#166534}
+.gen-branch{display:flex;justify-content:center;gap:80px;position:relative;padding-top:16px}
+.gen-branch::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:80px;height:2px;background:var(--gold);opacity:.3}
+.gen-unknown{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:12px 16px;text-align:center;min-width:140px;color:var(--dim);font-size:.82rem}
+
+/* Traits */
+.trait-card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;box-shadow:0 1px 6px var(--shadow)}
+.trait-icon{font-size:1.6rem;flex-shrink:0;margin-top:2px}
+.trait-body{flex:1}
+.trait-name{font-weight:600;font-size:.92rem;margin-bottom:4px}
+.trait-meta{font-size:.78rem;color:var(--dim)}
+.trait-result{font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:12px;display:inline-block;margin-top:6px}
+.result-pass,.result-grade_a{background:#dcfce7;color:#166534}
+.result-grade_b{background:#d1fae5;color:#065f46}
+.result-grade_c{background:#fef9c3;color:#854d0e}
+.result-fail{background:#fee2e2;color:#991b1b}
+.result-pending{background:#f3f4f6;color:#374151}
+.inheritable-badge{font-size:.68rem;padding:1px 8px;border-radius:10px;background:rgba(201,168,76,.15);color:var(--gold);margin-left:8px}
+
+/* Bequest */
+.bequest-card{background:var(--surface);border:2px solid var(--gold);border-radius:14px;padding:20px 24px;box-shadow:0 2px 12px var(--shadow)}
+.bequest-card h3{font-family:var(--serif);font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.bequest-meta{font-size:.82rem;color:var(--dim);margin-bottom:8px}
+.bequest-trigger{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;padding:4px 12px;border-radius:20px;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid var(--gold)}
+.bequest-none{background:var(--bg);border:2px dashed var(--line);border-radius:14px;padding:20px 24px;text-align:center;color:var(--dim)}
+
+/* Breakdown */
+.breakdown-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.breakdown-item{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.breakdown-item-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:6px}
+.breakdown-item-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.breakdown-item-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .5s}
+.breakdown-item-score{font-size:.82rem;font-weight:600}
+
+/* Showcase link */
+.cta-heritage{text-align:center;margin-top:32px;padding:24px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.cta-heritage a{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#fff;text-decoration:none;padding:10px 24px;border-radius:24px;font-weight:600;font-size:.9rem;transition:opacity .2s}
+.cta-heritage a:hover{opacity:.85}
+
+/* Footer */
+.page-footer{text-align:center;padding:28px 16px;font-size:.76rem;color:var(--dim);border-top:1px solid var(--line);margin-top:40px}
+.page-footer a{color:var(--gold);text-decoration:none}
+
+@media(max-width:600px){
+  .page{padding:20px 16px 40px}
+  .gen-branch{gap:16px}
+  .gen-branch::before{width:30px}
+  .gen-node{min-width:110px;padding:10px 10px}
+  .score-ring{flex-direction:column;gap:8px;text-align:center}
+  .breakdown-grid{grid-template-columns:1fr 1fr}
+}
+
+/* QR */
+.qr-section{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:28px;box-shadow:0 1px 8px var(--shadow)}
+.qr-img{width:80px;height:80px;border-radius:8px;border:2px solid var(--line);flex-shrink:0}
+.qr-text{flex:1}
+.qr-title{font-weight:600;font-size:.9rem;margin-bottom:4px}
+.qr-desc{font-size:.78rem;color:var(--dim)}
+
+</style>
+<script>(function(){var s=localStorage.getItem('memio-theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));})();</script>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="/pas/{{ identifier }}/" class="top-bar-logo">memio<span>.pet</span></a>
+  <nav class="top-bar-nav">
+    <a href="/pas/{{ identifier }}/">Profil</a>
+    <a href="/pas/{{ identifier }}/naslijede/" class="active">Nasljeđe</a>
+    <a href="/naslijede/">Showcase</a>
+  </nav>
+</div>
+
+<div class="page">
+
+  <!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+  <div class="heritage-hero">
+    <div class="dynasty-badge" style="border-color:{{ dynasty_color }};color:{{ dynasty_color }}">
+      {{ dynasty_icon }} {{ dynasty_name }}
+    </div>
+    <h1>Digitalno Nasljeđe<br>{{ animal.name|default:animal.ear_tag }}</h1>
+    <div class="sub">{{ animal.get_vrsta_display }} · {{ animal.breed|default:"Pasmina nepoznata" }} · Generacija {{ animal.generation_number }}</div>
+
+    {% if heritage %}
+    <div class="score-ring">
+      <div>
+        <div class="score-num" style="color:{{ dynasty_color }}">{{ heritage.heritage_score }}<span style="font-size:1rem;opacity:.5">/15</span></div>
+        <div class="score-label">Heritage Score</div>
+      </div>
+      <div style="text-align:left">
+        <div style="font-size:.82rem">🏆 {{ heritage.known_champions }} titula u rodovnici</div>
+        <div style="font-size:.82rem">💚 {{ heritage.health_clearances }} health clearance</div>
+        <div style="font-size:.82rem">🌿 {{ heritage.generation_depth }} generacije dokumentirano</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── QR KOD ───────────────────────────────────────────────────────────── -->
+  <div class="qr-section">
+    <img src="/pas/{{ identifier }}/qr/" alt="QR kod" class="qr-img">
+    <div class="qr-text">
+      <div class="qr-title">📱 QR — Skeniraj za Heritage profil</div>
+      <div class="qr-desc">Daj uzgajivaču, veterinaru ili novom vlasniku — link vodi direktno na nasljeđe</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <a href="/pas/{{ identifier }}/qr/" download="heritage-qr.png" style="font-size:.75rem;color:var(--gold);font-weight:600">⬇ Preuzmi PNG</a>
+        <a href="{{ heritage_url }}" style="font-size:.75rem;color:var(--gold);font-weight:600">🔗 Dijeli link</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GENEALOŠKO STABLO ─────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">🌳 Genealoško Stablo</div>
+
+    <!-- Roditelji -->
+    <div class="gen-row" style="margin-bottom:0">
+      <!-- Otac -->
+      <div>
+        {% if father %}
+        <a href="/pas/{{ father.chip_number|default:father.ear_tag }}/naslijede/" class="gen-node father">
+          <div class="gen-node-emoji">{% if father.vrsta == "pas" %}🐕{% elif father.vrsta == "macka" %}🐈{% else %}🐾{% endif %}</div>
+          <div class="gen-node-name">{{ father.name|default:father.ear_tag }}</div>
+          <div class="gen-node-breed">{{ father.breed|default:"—" }}</div>
+          <div class="gen-node-role role-otac">Otac</div>
+        </a>
+        {% elif animal.father_name %}
+        <div class="gen-unknown">
+          <div style="font-size:1.5rem;margin-bottom:4px">🐕</div>
+          <div style="font-weight:600;font-size:.85rem">{{ animal.father_name }}</div>
+          <div style="font-size:.72rem;margin-top:4px;color:var(--gold)">Otac — nije u sustavu</div>
+        </div>
+        {% else %}
+        <div class="gen-unknown">
+          <div style="font-size:1.5rem;margin-bottom:4px">❓</div>
+          <div>Otac nepoznat</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Razmak -->
+      <div style="width:60px"></div>
+
+      <!-- Majka -->
+      <div>
+        {% if mother %}
+        <a href="/pas/{{ mother.chip_number|default:mother.ear_tag }}/naslijede/" class="gen-node mother">
+          <div class="gen-node-emoji">{% if mother.vrsta == "pas" %}🐕{% elif mother.vrsta == "macka" %}🐈{% else %}🐾{% endif %}</div>
+          <div class="gen-node-name">{{ mother.name|default:mother.ear_tag }}</div>
+          <div class="gen-node-breed">{{ mother.breed|default:"—" }}</div>
+          <div class="gen-node-role role-majka">Majka</div>
+        </a>
+        {% elif animal.mother_name %}
+        <div class="gen-unknown">
+          <div style="font-size:1.5rem;margin-bottom:4px">🐕</div>
+          <div style="font-weight:600;font-size:.85rem">{{ animal.mother_name }}</div>
+          <div style="font-size:.72rem;margin-top:4px;color:#f472b6">Majka — nije u sustavu</div>
+        </div>
+        {% else %}
+        <div class="gen-unknown">
+          <div style="font-size:1.5rem;margin-bottom:4px">❓</div>
+          <div>Majka nepoznata</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Konektor -->
+    <div style="display:flex;justify-content:center;height:32px;position:relative">
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:2px;height:100%;background:var(--gold);opacity:.4"></div>
+    </div>
+
+    <!-- Subjekt (ova životinja) -->
+    <div class="gen-row">
+      <div class="gen-node subject">
+        {% if animal.photo %}<img src="{{ animal.photo.url }}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:8px">
+        {% else %}<div class="gen-node-emoji">{% if animal.vrsta == "pas" %}🐕{% elif animal.vrsta == "macka" %}🐈{% else %}🐾{% endif %}</div>{% endif %}
+        <div class="gen-node-name">{{ animal.name|default:animal.ear_tag }}</div>
+        <div class="gen-node-breed">{{ animal.breed|default:"—" }}</div>
+        <div class="gen-node-role role-subjekt">Ovaj profil</div>
+      </div>
+    </div>
+
+    <!-- Potomci -->
+    {% if children %}
+    <div style="display:flex;justify-content:center;height:32px;position:relative">
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:2px;height:100%;background:#4ade80;opacity:.4"></div>
+    </div>
+    <div class="gen-row" style="flex-wrap:wrap;gap:12px">
+      {% for child in children %}
+      <a href="/pas/{{ child.chip_number|default:child.ear_tag }}/naslijede/" class="gen-node child">
+        <div class="gen-node-emoji">{% if child.vrsta == "pas" %}🐕{% elif child.vrsta == "macka" %}🐈{% else %}🐾{% endif %}</div>
+        <div class="gen-node-name">{{ child.name|default:child.ear_tag }}</div>
+        <div class="gen-node-breed">{{ child.breed|default:"—" }}</div>
+        <div class="gen-node-role role-potomak">Potomak</div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── HERITAGE TRAITS ───────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">🧬 Nasljedna Obilježja</div>
+    {% if traits %}
+      {% for trait in traits %}
+      <div class="trait-card">
+        <div class="trait-icon">{{ trait.icon }}</div>
+        <div class="trait-body">
+          <div class="trait-name">
+            {{ trait.name }}
+            {% if trait.is_inheritable %}<span class="inheritable-badge">nasljedivo</span>{% endif %}
+          </div>
+          <div class="trait-meta">
+            {{ trait.get_trait_type_display }}
+            {% if trait.certified_by %} · {{ trait.certified_by }}{% endif %}
+            {% if trait.recorded_at %} · {{ trait.recorded_at|date:"Y." }}{% endif %}
+          </div>
+          <div class="trait-result result-{{ trait.result }}" style="background-color:{{ trait.result_color }}20;color:{{ trait.result_color }}">
+            {{ trait.get_result_display }}
+          </div>
+          {% if trait.certificate_url %}
+          <div style="margin-top:6px"><a href="{{ trait.certificate_url }}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--gold)">Pogledaj certifikat →</a></div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div style="text-align:center;padding:32px;color:var(--dim);border:2px dashed var(--line);border-radius:12px">
+      <div style="font-size:2rem;margin-bottom:8px">🧬</div>
+      <div style="font-weight:600;margin-bottom:4px">Nema dokumentiranih nasljednih obilježja</div>
+      <div style="font-size:.85rem">Genetski testovi i titule povećavaju Heritage Score i povjerenje kupaca.</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── DIGITALNA OPORUKA ─────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">📜 Digitalna Oporuka</div>
+    {% if bequest %}
+    <div class="bequest-card">
+      <h3>✅ Oporuka je aktivna</h3>
+      <div class="bequest-meta">Nasljednik: {{ bequest.successor_name|default:"(privatno)" }}</div>
+      <div class="bequest-meta">Pečat: <code style="font-size:.75rem;background:var(--bg);padding:2px 6px;border-radius:4px">{{ bequest.seal_hash|slice:":16" }}…</code></div>
+      {% if bequest.message %}
+      <div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;font-style:italic;font-size:.88rem;color:var(--ink2)">
+        "{{ bequest.message }}"
+      </div>
+      {% endif %}
+      <div style="margin-top:12px">
+        <span class="bequest-trigger">🔔 Okidač: {{ bequest.get_trigger_display }}</span>
+      </div>
+    </div>
+    {% else %}
+    <div class="bequest-none">
+      <div style="font-size:2rem;margin-bottom:8px">📜</div>
+      <div style="font-weight:600;margin-bottom:8px">Digitalna oporuka nije kreirana</div>
+      <div style="font-size:.85rem;margin-bottom:16px">Odredite tko nasljeđuje digitalni identitet ovog ljubimca. Vaša ljubav ostaje — zauvijek.</div>
+      <a href="/moj-profil/" style="display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#fff;text-decoration:none;padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600">Kreiraj oporuku</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── HERITAGE SCORE BREAKDOWN ──────────────────────────────────────────── -->
+  {% if heritage and heritage.heritage_breakdown %}
+  <div class="section">
+    <div class="section-title">📊 Heritage Score Breakdown</div>
+    <div class="breakdown-grid">
+      {% for key, val in heritage.heritage_breakdown.items %}
+      <div class="breakdown-item">
+        <div class="breakdown-item-label">{{ key }}</div>
+        <div class="breakdown-item-bar">
+          <div class="breakdown-item-fill" style="width:{% widthratio val.score val.max 100 %}%"></div>
+        </div>
+        <div class="breakdown-item-score">{{ val.score }}/{{ val.max }}</div>
+        {% if val.notes %}
+        <div style="font-size:.72rem;color:var(--dim);margin-top:4px">{{ val.notes.0 }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── CTA ───────────────────────────────────────────────────────────────── -->
+  <div class="cta-heritage">
+    <div style="font-family:var(--serif);font-size:1.1rem;font-weight:700;margin-bottom:8px">Otkrijte Elite Nasljeđa</div>
+    <div style="font-size:.85rem;color:var(--dim);margin-bottom:16px">Pogledajte sve verificirane Heritage profile na memio.pet</div>
+    <a href="/naslijede/">🏛️ Otvorite Heritage Showcase</a>
+  </div>
+
+</div>
+
+<footer class="page-footer">
+  <a href="/pas/{{ identifier }}/">← Nazad na profil</a> ·
+  <a href="/naslijede/">Heritage Showcase</a> ·
+  <a href="/privatnost/">Privatnost</a>
+  <br><br>
+  © 2026 memio.pet · Konjik d.o.o. · Digitalno nasljeđe zaštićeno patentom MPH-001
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate bars
+  document.querySelectorAll('.breakdown-item-fill').forEach(function(bar) {
+    var w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(function() { bar.style.width = w; }, 100);
+  });
+});
+</script>
+</body>
+</html>

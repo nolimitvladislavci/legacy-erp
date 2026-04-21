@@ -1,0 +1,109 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heritage Showcase — Elite Nasljeđa · Memio.pet</title>
+<meta name="description" content="Verificirani Heritage profili na memio.pet — genetski testirani, rodovnično dokumentirani ljubimci s najvišim Trust Scoreom.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f6f0;--surface:#fff;--ink:#1a1a2e;--ink2:#3d3d52;--gold:#c9a84c;--line:#ddd9cc;--dim:#7a7a8c;--top-bar:#1a1a2e;--top-text:#f8f6f0;--shadow:rgba(0,0,0,.06);--serif:'Cormorant Garamond',Georgia,serif;--sans:'Space Grotesk',system-ui,sans-serif}
+[data-theme="dark"]{--bg:#0f1012;--surface:#18191d;--ink:#edeae2;--ink2:#a09890;--gold:#e2c36d;--line:#2a2b30;--dim:#5a5b65;--top-bar:#09090b;--top-text:#edeae2}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.top-bar{background:var(--top-bar);color:var(--top-text);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.top-bar-logo{color:var(--gold);text-decoration:none;font-family:var(--serif);font-size:1.2rem;font-weight:700}
+.top-bar-logo span{color:var(--top-text)}
+.page{max-width:960px;margin:0 auto;padding:40px 20px 60px}
+.hero{text-align:center;margin-bottom:40px}
+.hero h1{font-family:var(--serif);font-size:2.4rem;font-weight:700;margin-bottom:8px}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--dim);font-size:1rem;max-width:560px;margin:0 auto}
+.filter-bar{display:flex;gap:10px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.filter-btn{padding:6px 18px;border-radius:20px;border:1px solid var(--line);background:var(--surface);color:var(--ink2);font-size:.82rem;cursor:pointer;transition:all .2s}
+.filter-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.heritage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.heritage-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 2px 12px var(--shadow);transition:all .25s;text-decoration:none;color:var(--ink);display:block}
+.heritage-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px var(--shadow);border-color:var(--gold)}
+.card-photo{height:160px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:4rem;position:relative;overflow:hidden}
+.card-photo img{width:100%;height:100%;object-fit:cover}
+.dynasty-tag{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:var(--gold);font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:12px;backdrop-filter:blur(4px)}
+.card-body{padding:16px}
+.card-name{font-family:var(--serif);font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.card-breed{font-size:.8rem;color:var(--dim);margin-bottom:12px}
+.card-scores{display:flex;gap:8px;flex-wrap:wrap}
+.score-pill{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.score-pill.gold{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold)}
+.empty{text-align:center;padding:60px 20px;color:var(--dim)}
+.empty-icon{font-size:4rem;margin-bottom:16px}
+.page-footer{text-align:center;padding:24px;font-size:.76rem;color:var(--dim);border-top:1px solid var(--line);margin-top:40px}
+.page-footer a{color:var(--gold);text-decoration:none}
+@media(max-width:600px){.hero h1{font-size:1.8rem}.heritage-grid{grid-template-columns:1fr}}
+</style>
+<script>(function(){var s=localStorage.getItem('memio-theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',s||(d?'dark':'light'));})();</script>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="/" class="top-bar-logo">memio<span>.pet</span></a>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <div style="font-size:2.5rem;margin-bottom:12px">🏛️</div>
+    <h1>Heritage <span>Showcase</span></h1>
+    <p>Verificirani digitalni nasljedni profili — genetski testirani, rodovnično dokumentirani ljubimci s najvišim Heritage Scoreom</p>
+  </div>
+
+  {% if heritages %}
+  <div class="heritage-grid">
+    {% for h in heritages %}
+    {% with a=h.animal %}
+    <a href="/pas/{{ a.chip_number|default:a.ear_tag }}/naslijede/" class="heritage-card">
+      <div class="card-photo">
+        {% if a.photo %}
+        <img src="{{ a.photo.url }}" alt="{{ a.name }}">
+        {% else %}
+        {% if a.vrsta == "pas" %}🐕{% elif a.vrsta == "macka" %}🐈{% elif a.vrsta == "konj" %}🐎{% else %}🐾{% endif %}
+        {% endif %}
+        <div class="dynasty-tag">{{ h.dynasty_level.2 }} {{ h.dynasty_level.0 }}</div>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div class="card-name">{{ a.name|default:a.ear_tag }}</div>
+            <div class="card-breed">{{ a.get_vrsta_display }} · {{ a.breed|default:"Pasmina nepoznata" }}</div>
+          </div>
+          <img src="/pas/{{ a.chip_number|default:a.ear_tag }}/naslijede/qr/" alt="QR" style="width:48px;height:48px;border-radius:6px;border:1px solid #ddd;flex-shrink:0">
+        </div>
+        <div class="card-scores">
+          <div class="score-pill gold">🧬 Heritage {{ h.heritage_score }}/15</div>
+          {% if h.known_champions %}<div class="score-pill">🏆 {{ h.known_champions }} titula</div>{% endif %}
+          {% if h.health_clearances %}<div class="score-pill">💚 {{ h.health_clearances }} clearances</div>{% endif %}
+          <div class="score-pill">🌿 Gen.{{ h.generation_depth }}</div>
+        </div>
+        {% if a.breeder %}
+        <div style="margin-top:10px;font-size:.78rem;color:var(--dim)">{{ a.breeder.name }}</div>
+        {% endif %}
+      </div>
+    </a>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">🌱</div>
+    <div style="font-family:var(--serif);font-size:1.3rem;font-weight:700;margin-bottom:8px">Platforma raste</div>
+    <div>Heritage profili se pojavljuju kako uzgajivači dokumentiraju rodovnice i genetske testove.</div>
+    <div style="margin-top:16px"><a href="/registracija/" style="color:var(--gold);font-weight:600">Postanite prvi →</a></div>
+  </div>
+  {% endif %}
+</div>
+
+<footer class="page-footer">
+  <a href="/">← Početna</a> · <a href="/privatnost/">Privatnost</a> · <a href="/uvjeti/">Uvjeti</a>
+  <br><br>© 2026 memio.pet · Konjik d.o.o. · Patent MPH-001
+</footer>
+</body>
+</html>

@@ -51,4 +51,9 @@ urlpatterns = [
         "feed/", lambda r: __import__("django.shortcuts", fromlist=["redirect"]).redirect("/boxgram/feed/"), name="feed"
     ),
     path("api/hit/", views.analytics_hit, name="analytics_hit"),
+    # Digitalno Nasljeđe
+    path("pas/<str:chip_or_tag>/naslijede/", views.pet_heritage, name="pet_heritage"),
+    path("pas/<str:chip_or_tag>/naslijede/qr/", views.heritage_qr_code, name="heritage_qr"),
+    path("naslijede/", views.heritage_showcase, name="heritage_showcase"),
+    path("api/heritage/<str:chip_or_tag>/", views.heritage_api, name="heritage_api"),
 ]

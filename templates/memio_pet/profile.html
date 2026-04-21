@@ -674,9 +674,36 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 </div>
 
+
+<!-- ── DIGITALNO NASLJEĐE — Badge sekcija ──────────────────────────────────── -->
+{% if animal.digital_heritage or animal.father_chip or animal.mother_chip or animal.heritage_traits.count %}
+<div style="max-width:760px;margin:0 auto 32px;padding:0 20px">
+  <div style="background:var(--surface);border:2px solid var(--gold);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;box-shadow:0 2px 12px var(--shadow)">
+    <div style="font-size:2.5rem">🏛️</div>
+    <div style="flex:1;min-width:180px">
+      <div style="font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--gold)">Digitalno Nasljeđe</div>
+      {% if animal.digital_heritage %}
+      <div style="font-size:.82rem;color:var(--dim);margin-top:4px">
+        Heritage Score: <strong>{{ animal.digital_heritage.heritage_score }}/15</strong>
+        · {{ animal.digital_heritage.dynasty_level.2 }} {{ animal.digital_heritage.dynasty_level.0 }}
+        {% if animal.digital_heritage.known_champions %} · 🏆 {{ animal.digital_heritage.known_champions }} titula{% endif %}
+      </div>
+      {% else %}
+      <div style="font-size:.82rem;color:var(--dim);margin-top:4px">Genealogija u izgradnji — dokumentirajte rodovnicu</div>
+      {% endif %}
+    </div>
+    <a href="/pas/{{ identifier }}/naslijede/" style="display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#fff;text-decoration:none;padding:8px 18px;border-radius:20px;font-size:.85rem;font-weight:600;white-space:nowrap;flex-shrink:0">
+      Vidi nasljeđe →
+    </a>
+  </div>
+</div>
+{% endif %}
+
 <div class="page-footer">
-  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca<br>
-  Verificirano putem <a href="https://limit-connect.com">LIMIT Connect</a> · SHA-256<br>
+  <a href="https://memio.pet">Memio.pet</a> — Digitalni dom za tvog ljubimca ·
+  <a href="/pas/{{ identifier }}/naslijede/">Nasljeđe</a> ·
+  <a href="/naslijede/">Heritage Showcase</a><br>
+  Verificirano putem <a href="https://limit-connect.com">LIMIT Connect</a> · SHA-256 · Patent MPH-001<br>
   © 2026 <a href="https://limit-connect.com" class="fx-no-underline fx-text-gold">Konjik d.o.o.</a> & NO LIMIT udruga
 </div>
 

@@ -14,6 +14,7 @@ from core.qr_views import qr_png_bytes
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError, IntegrityError
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
@@ -1474,3 +1475,179 @@ def analytics_hit(request):
 def uvjeti(request):
     """Uvjeti korištenja stranica."""
     return render(request, "memio_pet/uvjeti.html")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DIGITALNO NASLJEĐE — Heritage Views
+# ══════════════════════════════════════════════════════════════════════════════
+
+@require_GET
+@cache_page(3600)
+def heritage_qr_code(request, chip_or_tag):
+    """
+    GET /pas/<chip>/naslijede/qr/
+    QR PNG koji vodi na Heritage profil (ne na osnovni profil).
+    Cache 1h.
+    """
+    animal = _find_animal(chip_or_tag)
+    if not animal:
+        return HttpResponse("Ljubimac nije pronađen.", status=404, content_type="text/plain")
+    identifier = animal.chip_number or animal.ear_tag
+    url = f"https://memio.pet/pas/{identifier}/naslijede/"
+    png = qr_png_bytes(url, size=300, error_correction="H")
+    response = HttpResponse(png, content_type="image/png")
+    response["Cache-Control"] = "public, max-age=86400"
+    response["Content-Disposition"] = f'inline; filename="heritage-{identifier}.png"'
+    return response
+
+
+@require_GET
+def pet_heritage(request, chip_or_tag):
+    """
+    GET /pas/<chip>/naslijede/
+    Detaljna stranica digitalnog nasljeđa — genealoško stablo, Heritage Traits,
+    Legacy Bequest status, naslijeđeni Trust Score.
+    """
+    from memio_pet.models import HeritageTrait, LegacyBequest, DigitalHeritage, AnimalProfile
+
+    animal = _find_animal(chip_or_tag)
+    if not animal:
+        return render(request, "memio_pet/not_found.html", {"chip_or_tag": chip_or_tag}, status=404)
+
+    db = "memio_pets"
+
+    # Heritage traits grupirani po tipu
+    traits = list(HeritageTrait.objects.using(db).filter(animal=animal).order_by("trait_type", "-recorded_at"))
+    traits_by_type = {}
+    for t in traits:
+        traits_by_type.setdefault(t.trait_type, []).append(t)
+
+    # Legacy bequest (aktivna oporuka)
+    bequest = LegacyBequest.objects.using(db).filter(
+        animal=animal, status__in=["active", "triggered"]
+    ).first()
+
+    # Digital Heritage zapis
+    try:
+        heritage = DigitalHeritage.objects.using(db).get(animal=animal)
+    except DigitalHeritage.DoesNotExist:
+        heritage = None
+
+    # Genealoško stablo — dohvati roditelje iz baze ako postoje
+    father = mother = None
+    if animal.father_chip:
+        father = AnimalProfile.objects.using(db).filter(chip_number=animal.father_chip).first()
+    if animal.mother_chip:
+        mother = AnimalProfile.objects.using(db).filter(chip_number=animal.mother_chip).first()
+
+    # Potomci (koji imaju ovog kao oca ili majku)
+    children = list(
+        AnimalProfile.objects.using(db).filter(
+            models.Q(father_chip=animal.chip_number) |
+            models.Q(mother_chip=animal.chip_number)
+        ).exclude(chip_number="")
+    ) if animal.chip_number else []
+
+    # Dynasty level
+    dynasty_name, dynasty_color, dynasty_icon = "Početnik", "#6c757d", "🌱"
+    if heritage:
+        dynasty_name, dynasty_color, dynasty_icon = heritage.dynasty_level
+
+    identifier = animal.chip_number or animal.ear_tag
+
+    return render(request, "memio_pet/heritage.html", {
+        "animal": animal,
+        "traits": traits,
+        "traits_by_type": traits_by_type,
+        "bequest": bequest,
+        "heritage": heritage,
+        "father": father,
+        "mother": mother,
+        "children": children,
+        "dynasty_name": dynasty_name,
+        "dynasty_color": dynasty_color,
+        "dynasty_icon": dynasty_icon,
+        "identifier": identifier,
+        "profile_url": f"https://memio.pet/pas/{identifier}/",
+        "heritage_url": f"https://memio.pet/pas/{identifier}/naslijede/",
+    })
+
+
+@require_GET
+def heritage_showcase(request):
+    """
+    GET /naslijede/
+    Javna galerija — životinje s verificiranim Heritage profilima.
+    Sortira po heritage_score DESC (dynasties first).
+    """
+    from memio_pet.models import DigitalHeritage
+
+    db = "memio_pets"
+    top_heritages = (
+        DigitalHeritage.objects.using(db)
+        .filter(heritage_score__gte=5)
+        .select_related("animal", "animal__breeder")
+        .order_by("-heritage_score", "-known_champions")[:30]
+    )
+
+    return render(request, "memio_pet/heritage_showcase.html", {
+        "heritages": top_heritages,
+        "page_title": "Digitalno Nasljeđe — Elita memio.pet",
+    })
+
+
+@require_GET
+def heritage_api(request, chip_or_tag):
+    """
+    GET /api/heritage/<chip>/
+    JSON za genealoško stablo (D3.js / vizualizacija).
+    """
+    from memio_pet.models import HeritageTrait, DigitalHeritage, AnimalProfile
+
+    animal = _find_animal(chip_or_tag)
+    if not animal:
+        from django.http import JsonResponse
+        return JsonResponse({"error": "Not found"}, status=404)
+
+    db = "memio_pets"
+
+    def _animal_node(a, depth=0):
+        if not a or depth > 3:
+            return None
+        traits_count = HeritageTrait.objects.using(db).filter(animal=a).count()
+        return {
+            "id": str(a.chip_number or a.ear_tag),
+            "name": a.name or a.ear_tag,
+            "species": a.vrsta,
+            "breed": a.breed,
+            "gender": a.spol,
+            "photo": a.photo.url if a.photo else None,
+            "traits_count": traits_count,
+            "generation": a.generation_number,
+            "father": _animal_node(
+                AnimalProfile.objects.using(db).filter(chip_number=a.father_chip).first()
+                if a.father_chip else None, depth + 1
+            ),
+            "mother": _animal_node(
+                AnimalProfile.objects.using(db).filter(chip_number=a.mother_chip).first()
+                if a.mother_chip else None, depth + 1
+            ),
+        }
+
+    try:
+        heritage = DigitalHeritage.objects.using(db).get(animal=animal)
+        heritage_data = {
+            "score": heritage.heritage_score,
+            "generation_depth": heritage.generation_depth,
+            "champions": heritage.known_champions,
+            "clearances": heritage.health_clearances,
+            "dynasty": heritage.dynasty_level[0],
+        }
+    except DigitalHeritage.DoesNotExist:
+        heritage_data = {}
+
+    from django.http import JsonResponse
+    return JsonResponse({
+        "animal": _animal_node(animal),
+        "heritage": heritage_data,
+    })

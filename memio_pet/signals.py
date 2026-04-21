@@ -217,3 +217,71 @@ def on_company_shelter_save(sender, instance, **kwargs):
         logger.info("Bridge auto-push: %s → memio_pets (shelter)", instance.name)
     except Exception as e:
         logger.warning("Bridge push failed for %s: %s", instance.name, e)
+
+
+# ═══════════════════════════════════════════════════════════════
+# DIGITALNO NASLJEĐE — Heritage Bridge Signals (2026-04-21)
+# Patent MPH-001: Kriptografski verificirano digitalno nasljeđe
+# ═══════════════════════════════════════════════════════════════
+
+@receiver(post_save, sender="memio_pet.AnimalProfile")
+def on_animal_status_heritage_sync(sender, instance, **kwargs):
+    """
+    Kad animal.status → uginulo:
+      → Pokretanje sync_dugini_most_to_oracles(animal)
+      → Svako dijete u sustavu dobiva memorial pet_fragment u HeritageOracle
+    """
+    if instance.status != "uginulo":
+        return
+    try:
+        from memio_world.heritage_bridge import sync_dugini_most_to_oracles
+        count = sync_dugini_most_to_oracles(instance)
+        if count:
+            logger.info(
+                "Heritage Bridge: Dugini Most '%s' → %d Oracle(a) ažurirano",
+                instance.name, count
+            )
+    except Exception as exc:
+        logger.warning("Heritage Bridge signal greška (non-critical): %s", exc)
+
+
+@receiver(post_save, sender="memio_pet.HeritageTrait")
+def on_heritage_trait_save(sender, instance, created, **kwargs):
+    """
+    Kad se kreira/ažurira HeritageTrait → recalculate DigitalHeritage score.
+    """
+    if not created:
+        return
+    try:
+        from memio_pet.trust_score import update_digital_heritage
+        update_digital_heritage(instance.animal)
+        logger.info("DigitalHeritage recalculated za %s", instance.animal.name)
+    except Exception as exc:
+        logger.warning("Heritage recalc signal greška: %s", exc)
+
+
+@receiver(post_save, sender="memio_pet.LegacyBequest")
+def on_legacy_bequest_created(sender, instance, created, **kwargs):
+    """
+    Kad se kreira LegacyBequest → VerificationLog za nepromjenjivost.
+    """
+    if not created:
+        return
+    try:
+        _create_verification_log(
+            verification_type="chip_register",  # reuse za bequest
+            animal=instance.animal,
+            breeder=instance.animal.breeder if instance.animal else None,
+            snapshot_data={
+                "bequest_id": str(instance.pk),
+                "animal_name": instance.animal.name,
+                "successor_hash": instance.successor_email_hash[:16] + "...",
+                "seal_hash": instance.seal_hash[:16] + "...",
+                "trigger": instance.trigger,
+                "created_at": str(instance.created_at),
+            },
+            verified_by="System (auto — LegacyBequest)",
+        )
+        logger.info("LegacyBequest VerificationLog kreiran za %s", instance.animal.name)
+    except Exception as exc:
+        logger.warning("LegacyBequest signal greška: %s", exc)

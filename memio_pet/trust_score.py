@@ -189,6 +189,28 @@ def calculate_trust_score(breeder):
         act["max"] = 10
         act["score"] = min(act["score"], 10)
 
+    # ── 8. DIGITALNO NASLJEĐE (animal level, avg po životinji) ────────────
+    heritage_score_sum = 0
+    heritage_notes = []
+    if total_animals > 0:
+        from memio_pet.models import DigitalHeritage as DH
+        heritage_scores = []
+        for anim in animals:
+            try:
+                dh = DH.objects.using(db).get(animal=anim)
+                heritage_scores.append(dh.heritage_score)
+            except DH.DoesNotExist:
+                heritage_scores.append(0)
+        if heritage_scores:
+            avg_h = sum(heritage_scores) / len(heritage_scores)
+            heritage_score_sum = min(15, int(avg_h))
+            heritage_notes.append(f"Prosjek Heritage Score: {avg_h:.1f}/15 (+{heritage_score_sum})")
+        if heritage_score_sum < 15:
+            heritage_notes.append("Dodajte genealogiju i certifikate za veći score")
+    else:
+        heritage_notes.append("Nema životinja s Heritage profilom (0/15)")
+    breakdown["digitalno_nasljedstvo"] = {"score": heritage_score_sum, "max": 15, "notes": heritage_notes}
+
     # ── TOTAL ───────────────────────────────────────────────────
     total = sum(cat["score"] for cat in breakdown.values())
     total = min(total, 100)
@@ -217,3 +239,179 @@ def bulk_update_trust_scores():
         score, _ = update_trust_score(b)
         results.append((b.name, score))
     return results
+
+
+def calculate_heritage_score(animal) -> tuple[int, dict]:
+    """
+    Izračunava Heritage Score za AnimalProfile (0-100).
+    Nadopunjuje globalni Trust Score kao 8. dimenzija Breedera.
+
+    Bodovi:
+      Genealogija dokumentirana:   +5  (barem jedan roditelj poznat)
+      Duboka rodovnica (≥2 gen.):  +5
+      Genetski testovi (pass):     +5  (health clearances)
+      Prvak u rodovnici:           +5  (championship trait)
+      Naslijeđeni Trust Score:     +10 (avg roditeljskog trust / 10)
+      Legacy Bequest kreiran:      +5
+      Sve komponente zajedno:      +5  (bonus za kompletnost)
+      ─────────────────────────────────
+      MAX:                        = 40 (normalizira se na 15 za Trust Score)
+    """
+    db = "memio_pets"
+    breakdown = {}
+    score_raw = 0
+
+    from memio_pet.models import HeritageTrait, LegacyBequest
+
+    # ── 1. GENEALOGIJA ──────────────────────────────────────────────────────
+    gen_score = 0
+    gen_notes = []
+    has_father = bool(animal.father_chip)
+    has_mother = bool(animal.mother_chip)
+
+    if has_father or has_mother:
+        gen_score += 5
+        gen_notes.append(f"Barem jedan roditelj poznat (+5)")
+
+    # Dohvati generacijski dubinu
+    generation = animal.generation_number or 1
+    if generation >= 2:
+        gen_score += 5
+        gen_notes.append(f"Generacija {generation} — duboka rodovnica (+5)")
+    elif has_father and has_mother:
+        gen_notes.append("Oba roditelja dokumentirana — dodaj generacijski broj")
+
+    breakdown["genealogija"] = {"score": gen_score, "max": 10, "notes": gen_notes}
+    score_raw += gen_score
+
+    # ── 2. GENETSKI TESTOVI I HEALTH CLEARANCES ────────────────────────────
+    health_score = 0
+    health_notes = []
+    clearances = HeritageTrait.objects.using(db).filter(
+        animal=animal, trait_type="health_clearance", result__in=["pass", "grade_a", "grade_b"]
+    )
+    n_clearances = clearances.count()
+    if n_clearances >= 3:
+        health_score = 5
+    elif n_clearances >= 1:
+        health_score = 3
+    if n_clearances:
+        health_notes.append(f"{n_clearances} health clearance(s) potvrđenih (+{health_score})")
+    else:
+        health_notes.append("Dodajte genetske testove (OFA, PennHip, ...)")
+    breakdown["health_clearances"] = {"score": health_score, "max": 5, "notes": health_notes}
+    score_raw += health_score
+
+    # ── 3. PRVACI U RODOVNICI ───────────────────────────────────────────────
+    champ_score = 0
+    champ_notes = []
+    championships = HeritageTrait.objects.using(db).filter(animal=animal, trait_type="championship")
+    n_champs = championships.count()
+    if n_champs >= 2:
+        champ_score = 5
+    elif n_champs == 1:
+        champ_score = 3
+    if n_champs:
+        champ_notes.append(f"{n_champs} titule u rodovnici (+{champ_score})")
+        for c in championships[:3]:
+            champ_notes.append(f"  🏆 {c.name}")
+    else:
+        champ_notes.append("Nema evidentiranih titula")
+    breakdown["prvaci"] = {"score": champ_score, "max": 5, "notes": champ_notes}
+    score_raw += champ_score
+
+    # ── 4. NASLIJEĐENI TRUST SCORE OD RODITELJA ────────────────────────────
+    inherited_score = 0
+    inherited_notes = []
+    parent_trusts = []
+
+    if animal.father_chip:
+        from memio_pet.models import AnimalProfile
+        father = AnimalProfile.objects.using(db).filter(chip_number=animal.father_chip).first()
+        if father and father.breeder:
+            parent_trusts.append(father.breeder.trust_score)
+            inherited_notes.append(f"Otac: {father.name} (Trust {father.breeder.trust_score}/100)")
+
+    if animal.mother_chip:
+        from memio_pet.models import AnimalProfile
+        mother = AnimalProfile.objects.using(db).filter(chip_number=animal.mother_chip).first()
+        if mother and mother.breeder:
+            parent_trusts.append(mother.breeder.trust_score)
+            inherited_notes.append(f"Majka: {mother.name} (Trust {mother.breeder.trust_score}/100)")
+
+    if parent_trusts:
+        avg_trust = sum(parent_trusts) / len(parent_trusts)
+        inherited_score = min(10, int(avg_trust / 10))  # max 10 bodova
+        inherited_notes.append(f"Naslijeđeni score: {avg_trust:.0f}/100 → +{inherited_score} bodova")
+    else:
+        inherited_notes.append("Nema dokumentiranih roditelja u sustavu")
+
+    breakdown["naslijedeni_trust"] = {"score": inherited_score, "max": 10, "notes": inherited_notes}
+    score_raw += inherited_score
+
+    # ── 5. LEGACY BEQUEST ───────────────────────────────────────────────────
+    bequest_score = 0
+    bequest_notes = []
+    has_bequest = LegacyBequest.objects.using(db).filter(
+        animal=animal, status__in=["active", "triggered", "completed"]
+    ).exists()
+    if has_bequest:
+        bequest_score = 5
+        bequest_notes.append("Digitalna oporuka kreirana (+5)")
+    else:
+        bequest_notes.append("Kreirajte digitalnu oporuku → nasljedni bonus")
+    breakdown["digitalna_oporuka"] = {"score": bequest_score, "max": 5, "notes": bequest_notes}
+    score_raw += bequest_score
+
+    # ── 6. KOMPLETNOST BONUS ────────────────────────────────────────────────
+    completeness = 0
+    if gen_score >= 5 and health_score >= 3 and n_champs > 0 and has_bequest:
+        completeness = 5
+        breakdown["kompletnost"] = {"score": 5, "max": 5, "notes": ["Sve Heritage komponente popunjene (+5)"]}
+    else:
+        missing = []
+        if gen_score < 5:   missing.append("genealogija")
+        if health_score < 3: missing.append("genetski testovi")
+        if n_champs == 0:   missing.append("titule")
+        if not has_bequest: missing.append("oporuka")
+        breakdown["kompletnost"] = {"score": 0, "max": 5, "notes": [f"Nedostaje: {', '.join(missing)}"]}
+    score_raw += completeness
+
+    # ── NORMALIZACIJA na 15 ─────────────────────────────────────────────────
+    max_raw = 40
+    normalized = int((score_raw / max_raw) * 15)
+    normalized = min(normalized, 15)
+
+    return normalized, score_raw, breakdown
+
+
+def update_digital_heritage(animal) -> "DigitalHeritage":
+    """
+    Izračunava i sprema DigitalHeritage zapis za životinju.
+    Poziva se: post_save signal, Celery beat (noćno), manualno.
+    """
+    from memio_pet.models import DigitalHeritage, HeritageTrait
+
+    db = "memio_pets"
+    normalized, raw, breakdown = calculate_heritage_score(animal)
+
+    # Known champions i health clearances za agregatne fielde
+    n_champs = HeritageTrait.objects.using(db).filter(
+        animal=animal, trait_type="championship"
+    ).count()
+    n_clearances = HeritageTrait.objects.using(db).filter(
+        animal=animal, trait_type="health_clearance", result__in=["pass", "grade_a", "grade_b"]
+    ).count()
+
+    heritage, _ = DigitalHeritage.objects.using(db).update_or_create(
+        animal=animal,
+        defaults={
+            "generation_depth": animal.generation_number or 1,
+            "known_champions": n_champs,
+            "health_clearances": n_clearances,
+            "heritage_score": normalized,
+            "heritage_breakdown": breakdown,
+        }
+    )
+    logger.info("DigitalHeritage updated: %s = %d/15", animal.name, normalized)
+    return heritage
