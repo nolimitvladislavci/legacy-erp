@@ -215,6 +215,11 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 
 ## KONTEKST SESIJE
 
+
+### [S-009] --- 2026-04-21 16:10
+**Branch:** master
+**Zadnji commit:** 1ebfab7c feat(chainblock): live verification UI + trust-badge.js widget na NO LIMIT landingu
+**Kontekst:** ChainBlock Objelodanjivanje task DONE: live verification UI na landing.html, trust-badge.js embeddable widget. Kolateralna provjera: fenix-v3 OPG narudžba + edu booking backend LIVE.
 ### [S-008] --- 2026-04-21 13:15
 **Sustav:** fina-connect (fina-connect.online) + fenix-v3 (limit-connect.com)
 **Zadnji commit fina:** 978594e feat(chainblock): live verification UI + Trust Badge widget
