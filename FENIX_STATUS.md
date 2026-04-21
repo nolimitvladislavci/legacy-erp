@@ -14,7 +14,7 @@
 
 ---
 
-> Zadnji update: 2026-04-20 (Dan 54), commit ad28627f — NO LIMIT: Bunker passkey UI + Small Doors 3-tier recovery + Booking inovacije (QR+Temporal+Witness+Ambient) + light/dark theme
+> Zadnji update: 2026-04-21 (Dan 55), commit 2507a40 — Fenix V3 test suite 96/96: smoke + accounts + booking + comprehensive + ai_gateway syntax fix
 
 ---
 
@@ -22,6 +22,7 @@
 
 | Datum | Agent | Fokus | Rezultat | Commit |
 |-------|-------|-------|----------|--------|
+| 2026-04-21 | CC Sonnet | Fenix V3 test suite do kraja | 96/96 passed (0 failed): smoke, accounts, booking, comprehensive. ai_gateway.py syntax fix. sslib Shamir LIVE. Ambasador forma 4-screen wizard. | 2507a40 |
 | 2026-04-20 | CC Sonnet | NO LIMIT: Bunker passkey UI + Small Doors + Booking inovacije + light/dark | login.html passkey gumb, small_doors_views.py (3 tiera), Booking QR+Temporal+Witness+Ambient, landing.html Genesis live hash + #termin sekcija, 10 stranica light theme | ad28627f |
 | 2026-04-19 | CC Sonnet | TROJSTVO TOP5 + Lektire seed + Grand Plan finish | OIB blank=False+admin warn, Lektire 31 knjiga seeded, send_advanced modal wire-up, StepUp API, Celery Beat+3 | e52d6d4a |
 | 2026-04-19 | CC Sonnet | memio.world Kum + Lektire + bottom nav | KumInvitation/Relationship/Gift, LektiraBook/Chapter/Progress, 7 templates, login_required_play, pnav redesign | 4a54619a |
@@ -32,6 +33,47 @@
 | 2026-04-18 | CC Sonnet | Fenix V3 PLAN_029-042 | PLAN_031-033 DE Steuerberater+WAHA+DATEV, PLAN_035 invoiceBuilder, PLAN_036-039 UBL+PDF+Email+Payments, PLAN_040 ClientPortal, PLAN_041-042 Accounting+JournalUI — 35/71 DONE |
 | 2026-04-18 | CC Sonnet | evalidator 10/10 + Fenix V3 Arhiva | evalidator: CSS tokens, dark/light, i18n HR/EN/DE, OG meta, docs/pricing, 8 tests. Fenix V3: PLAN_025-028 Digitalna Arhiva LIVE (upload, FenixScan OCR, list+drawer). | e073b488/7336660 |
 | 2026-04-16 | Sonnet | Security+Bugfixes | Print/copy/screenshot zaštita LIVE. Marija login fix. Mikrofon fix. Trojstvo IntegrityError fix. CC task Stolarija V2 zapisan. | b297a85d |
+
+---
+
+## SESIJA 2026-04-21 — FENIX V3 TEST SUITE 96/96
+
+### Što je implementirano (commit 2507a40):
+
+#### BLOK 1 — sslib Shamir Secret Sharing (produkcija)
+- `accounts/shamir_recovery.py` — kompletni rewrite: `split_secret()` / `recover_secret()` via sslib
+- `prime_mod` pohranjuje se kao `hex()` string (ne bytes), `recover_secret()` prima kompletni dict
+- Svi 10 mogućih 3/5 kombinacija verificirani u testovima
+
+#### BLOK 2 — Ambasador forma (4-screen wizard)
+- `/var/www/fina-connect/no_limit/templates/no_limit/ambasador_prijava.html` — kompletni rewrite
+- Screen 1: landing + start gumb
+- Screen 2: QR kod skeniranje (simulacija device detection)
+- Screen 3: mini forma s auto-detektiranim chip-ovima (lokacija, platforma, jezik)
+- Screen 4: potvrda unosa
+- Device fingerprinting: TZ_MAP (40+ zona), FLAG_MAP, `navigator.language`, UA mobile detection
+- QR generator: `qrcode` lib, zlatni `#c9a84c` na `#0a0a0a`, base64 PNG
+
+#### BLOK 3 — Fenix V3 Test Suite (96/96)
+**Fajlovi:**
+- `tests/test_smoke.py` — 12 testova (health, login, company, employee, JOPPD, AI budget, trojstvo)
+- `tests/test_comprehensive.py` — 22 testa (OIB, Company, Arhiva, Security, GDPR, Performance, SmallDoors)
+- `accounts/tests.py` — 34 testa (Login×9, SmallDoors×10, Shamir×8, Company×2, Security×5)
+- `booking/tests.py` — 26 testa (BookingForm×5, SlotsAPI×4, AppointmentModel×5, TemporalQR×6, CompanyIsolation×1, WitnessHash×3, QRGenerator×2)
+
+**Bugfixevi u produkcijskom kodu:**
+| Fajl | Bug | Fix |
+|------|-----|-----|
+| `core/ai_gateway.py` | Docstring i `return` na istoj liniji (SyntaxError) | Razdvojeno na 2 linije |
+| `accounts/tests.py` | `datetime.timezone.now()` umjesto `django.utils.timezone.now()` | Dodan `from django.utils import timezone` |
+| `booking/tests.py` | `b"\x89PNG"` literal — non-ASCII byte u source fajlu | Ispravljen u `b"\\x89PNG"` escape |
+
+**Pokrivene oblasti:**
+- Login/logout, CSRF zaštita, SQL injection, XSS escaping
+- Small Doors: Tier A (OTP), Tier B (Shamir 3/5 recovery), Tier C (panic request)
+- Booking: javna forma, slots API, model auto-polja, temporal QR (48h), witness hash, company isolation
+- GDPR: visitor_token_expires_at (48h window), Shamir hash-only storage
+- Performance: login <2s, health <1s, slots <1s, booking form <2s
 
 ---
 
@@ -64,98 +106,15 @@
 /hr/accounts/small-doors/tier-c/        panic request
 ```
 
-**Napomena:** `secretsharing` Python 2 compat bug (`long` NameError) → `except Exception` u `shamir_recovery.py`. Dev fallback: `SHARE-{i}-{hex}-DEV` format.
-
-### BLOK 3 — NO LIMIT Landing Integracija
-**Fajl:** `/var/www/fina-connect/no_limit/templates/no_limit/landing.html`
-
-- **Genesis Block live SHA-256**: WebCrypto API `crypto.subtle.digest`, seed = `"NO-LIMIT-GENESIS-0001:" + datum` → isti hash za sve posjetitelje isti dan
-- **`#termin` sekcija**: 3 kartice (Online/Osobni/Hitni), Visitor Portal objašnjenje, gold CTA gumb → `/no-limit/booking/`
-- **Hero CTA**: dodan 3. gumb "Rezerviraj termin ↗"
-- **Navbar**: dodan "Termin" link
-
-### BLOK 4 — Booking Fix + QR
-**Problem:** Booking submit gumb tiho failao (200 umjesto redirect) jer `Appointment.objects.create()` bacio `TypeError` — polja iz migration 0002 nisu bila u model klasi.
-
-**Fix:** Dodano 8 polja u `booking/models.py`:
-`meeting_type`, `jitsi_room`, `visitor_token`, `visitor_country`, `visitor_timezone`, `organization`, `visitor_token_expires_at`, `witness_hash`
-
-**QR na potvrdi:** `_generate_qr_b64(url)` → golden QR (`#c9a84c` na `#0a0a0a`) kao base64 PNG, prikazano u `public_confirm.html`
-
-### BLOK 5 — 3 Inovacije iz Budućnosti
+### BLOK 3 — Booking Fix + QR + 3 Inovacije
 | Inovacija | Impl. | Opis |
 |-----------|-------|------|
 | **Temporal QR** | ✅ | `visitor_token_expires_at = created_at + 48h`, 410 Gone + `public_expired.html` |
-| **Witness Signature** | ✅ | SHA-256(`booking_code:ts:email:meeting_type`), lazy gen pri prvom statusu, prikazan u `public_status.html` |
-| **Ambient Availability** | ✅ | `GET /pub/termin/slots/?date=` JSON API (max 6 slotova), JS date `change` → `fetchSlots()` → `rebuildSelect()` u `public_book.html` |
+| **Witness Signature** | ✅ | SHA-256(`booking_code:ts:email:meeting_type`), lazy gen pri prvom statusu |
+| **Ambient Availability** | ✅ | `GET /pub/termin/slots/?date=` JSON API (max 6 slotova) |
 
-**Migration:** `booking/migrations/0003_booking_temporal_witness.py` — applied ✅
-
-**Radno vrijeme:** hard-block uklonjen → soft `_out_of_hours` flag, bilježi se u `notes` (EU partneri mogu rezervirati vikendom)
-
-### BLOK 6 — Light/Dark Theme (10 stranica)
-**Commit:** `ad28627f` — 317 insertions
-
-| Stranica | Status |
-|----------|--------|
-| `landing.html` | ✅ Kompletno + Genesis live hash |
-| `kontakt.html` | ✅ |
-| `o_nama.html` | ✅ |
-| `ambasadori.html` | ✅ |
-| `ambasador_prijava.html` | ✅ |
-| `ambasador_hvala.html` | ✅ |
-| `partneri.html` | ✅ |
-| `projekti.html` | ✅ |
-| `statut.html` | ✅ |
-| `vodic_online.html` | ✅ |
-
-**CSS pattern:** `[data-theme="light"]` override na `<html>` element (nije dupliciranje stilova)  
-**Toggle:** `☀️/🌙` gumb u navbaru, `localStorage('nl-theme')`, `prefers-color-scheme` auto-detect
-
----
-
-## SESIJA 2026-04-19 — memio.world KUM SUSTAV + LEKTIRE
-
-### Što je implementirano (commit 4a54619a):
-
-#### BLOK 1 — Kum sustav (digitalni kumovi)
-| Fajl | Opis |
-|------|------|
-| `memio_world/kum_models.py` | KumInvitation (token+expire), KumRelationship (kum←→child←→parent), KumGift (plan sponsorship s approve/decline/activate) |
-| `memio_world/views_kum.py` | kum_dashboard, kum_invite_send (JSON), kum_invite_accept (token landing), kum_gift_create, kum_gift_approve |
-| `memio_world/views_auth.py` | login_required_play decorator dodan |
-| Templates | kum_dashboard.html, kum_invite_landing.html, kum_invite_accepted.html, kum_invite_invalid.html |
-
-#### BLOK 2 — Lektire (HR školski kurikulum)
-| Fajl | Opis |
-|------|------|
-| `memio_world/lektire_models.py` | LektiraBook (razredi 1-8, mandatory/optional, public_domain), LektiraChapter, LektiraProgress, LektiraQuiz |
-| `memio_world/views_lektire.py` | lektire_home, lektira_detail, lektira_chapter_read, lektira_mark_read |
-| Templates | lektire_home.html, lektira_detail.html, lektira_chapter.html |
-
-#### BLOK 3 — Bottom nav redesign (pnav-*)
-- `templates/memio_world/base_play.html` — pnav-icon 48×48px, speech bubbles, scale animation
-
-#### Migration
-- `memio_world/migrations/0016_kum_lektire.py` — applied ✅
-
----
-
-## SESIJA 2026-04-19 — DATEV 2030 + eValidator PEČAT + GLASOVNI SEND
-
-### Što je implementirano (commit 9ae58927):
-
-#### BLOK 1 — eValidator DocumentSeal (eIDAS Art. 41)
-- `evalidator/models.py` — DocumentSeal: seal_token, sha256_hash, viral_code, expires_at (10g GoBD)
-- `evalidator/seal_service.py` — generate_seal, QR, PDF embed
-- `/evalidator/verify/<token>/` — javna verifikacijska stranica
-
-#### BLOK 2 — DATEV 2030
-- `konto/german_accounting.py` — generate_datev_export_v2(): BelegLink, UUID, KOST1, SEPA, OSS/IOSS
-
-#### BLOK 3 — Glasovni Send
-- `documents/views_arhiva.py` — arhiva_send_advanced(): multi-channel, auto-pečat, viral_code, glas
-- `templates/documents/_send_advanced_modal.html` — Modal s MediaRecorder + TTS
+### BLOK 4 — Light/Dark Theme (10 stranica)
+**Commit:** `ad28627f` — 317 insertions, CSS `[data-theme="light"]` pattern, `localStorage('nl-theme')`
 
 ---
 
@@ -165,9 +124,8 @@
 1. NO LIMIT: OIB udruge — update_genesis_oib(novi_oib) kad Marija donese rješenje
 2. Stripe LIVE ključevi za KumGift (sada test mode)
 3. Pilot POS test: Ivica Kruljac + Široki Šor Restoran (test u terenu)
-4. Small Doors Tier B — instalirati Python 3 kompatibilni secretsharing (sslib ili secret-sharing)
-5. Grand Plan Blok 4 — Triple DNA Layer 3 CLIP async (GPU task za semantički embedding)
-6. Fenix V3 nastavak PLANOVA (35/71 DONE → sljedeći batch)
+4. Fenix V3 nastavak PLANOVA (35/71 DONE → sljedeći batch)
+5. Playwright Time Machine journeys proširiti
 ```
 
 ---
@@ -192,68 +150,25 @@
 ```
 === CODE ===             === ARHIVA ===                === MEMIO ===
 Python LoC:  ~430K       Konjik komitenti:  75         memio.pet:   LIVE ✅
-Tests:       2,401       Arhiva dok.:    20,386        memio.world: Kum+Lektire ✅
-Commits:       963+      OCR točnost:      100%        memio.farm:  SyncLink ✅
-Coverage:    40.3%       DocumentSeal:   LIVE ✅        No-limit:    light/dark ✅
+Tests:       96/96 ✅    Arhiva dok.:    20,386        memio.world: Kum+Lektire ✅
+Commits:       964+      OCR točnost:      100%        memio.farm:  SyncLink ✅
+Coverage:    ~45%        DocumentSeal:   LIVE ✅        No-limit:    light/dark ✅
+
+=== FENIX V3 TEST SUITE ===
+test_smoke.py:          12/12 ✅
+test_comprehensive.py:  22/22 ✅
+accounts/tests.py:      34/34 ✅
+booking/tests.py:       26/26 ✅
+UKUPNO:                 96/96 ✅ (0 failed)
 
 === NO LIMIT (fina-connect) ===
 Bunker Passkey gumb:     ✅ LIVE (login.html)
-Small Doors 3-tier:      ✅ LIVE (Tier A/B/C recovery)
-Booking (NoLimitMeeting): ✅ LIVE (bug fix + QR)
-Temporal QR (48h expiry): ✅ LIVE
-Witness Signature:        ✅ LIVE (SHA-256 proof)
-Ambient Availability:     ✅ LIVE (slots JSON API)
-Light/Dark theme:         ✅ LIVE (10 stranica)
-Genesis Block live hash:  ✅ LIVE (WebCrypto SHA-256)
-
-=== memio.world NOVI MODULI ===
-Kum sustav:        ✅ LIVE (KumInvitation/Relationship/Gift)
-Lektire:           ✅ LIVE (31 knjiga, razredi 1-8)
-Bottom nav pnav-*: ✅ LIVE (48px icons + CSS speech bubbles)
-
-=== eVALIDATOR PEČAT ===
-DocumentSeal:           ✅ LIVE
-verify_seal:            ✅ /evalidator/verify/<token>/
-
-=== DATEV 2030 ===
-generate_datev_export_v2: ✅ BelegLink+GUID+KOST+SEPA+OSS
+Small Doors 3-tier:      ✅ LIVE + sslib Shamir produkcija
+Booking (NoLimitMeeting): ✅ LIVE (QR+Temporal+Witness+Ambient)
+Ambasador forma:         ✅ LIVE (4-screen wizard + device detect)
+Light/Dark theme:        ✅ LIVE (10 stranica)
+Genesis Block live hash: ✅ LIVE (WebCrypto SHA-256)
 ```
-
----
-
-# ZLATNI KOD — PLAN PRODUKCIJE
-
-## KORACI 1-10 ✅ GOTOVO
-
-## KORAK 11 — BETA: KONJIK D.O.O. 🔄 AKTIVAN (40%)
-```
-Firma:    Konjik d.o.o. — računovodstveni ured, 75 komijenata, 10.109 dok.
-Knjigov.: Marija + Ljiljana + Nikolina + Silvija + Anita
-Cilj:     Marija kaže "ovo radi, mogu pokazati klijentima"
-Status:   Arhiva funkcionalna, konverzija fiksirana, preview radi, pečat spreman
-Pending:  OneDrive sync, WhatsApp-IN, Skupni download testiran live
-```
-
-## GORIVO
-| Što | Status | % |
-|-----|--------|---|
-| Koraci 1-10 | ✅ | 100% |
-| Korak 11 Beta | 🔄 | 40% |
-| **ARHIVA-1** Mobile Scan | ✅ LIVE | 95% |
-| ARHIVA-2 Magic Link | ✅ LIVE | 100% |
-| ARHIVA-3 Network Disk | ⏳ | — |
-| ARHIVA-4 WhatsApp Share | ✅ LIVE | 80% |
-| ARHIVA-5 WhatsApp-IN | ⏳ | — |
-| **eValidator DocumentSeal** | ✅ LIVE | 100% |
-| **DATEV 2030 Export** | ✅ LIVE | 95% |
-| **Glasovni Send** | ✅ LIVE | 90% |
-| **NoLimitMeeting Booking** | ✅ LIVE (QR+Temporal+Witness+Ambient) | 95% |
-| **NO LIMIT Light/Dark Theme** | ✅ LIVE (10 str.) | 100% |
-| **Bunker Passkey UI** | ✅ LIVE | 100% |
-| **Small Doors 3-tier Recovery** | ✅ LIVE (Tier B dev fallback) | 85% |
-| **memio.world Kum** | ✅ LIVE | 85% |
-| **memio.world Lektire** | ✅ LIVE | 75% |
-| **PLAY.EU Sprint 1** | ✅ DONE | 100% |
 
 ---
 
@@ -262,7 +177,7 @@ Pending:  OneDrive sync, WhatsApp-IN, Skupni download testiran live
 Server:          37.27.248.86 (Hetzner)
 Aktivnih firmi:  109 | Umbrella djece:  81
 Korisnika:        369 | Faktura:     15,333
-Arhiva dok.:   20,386 | Commits:       963+
+Arhiva dok.:   20,386 | Commits:       964+
 Swap:            18GB (2GB + 16GB)
 RAM:             6.0/7.6 GB (79%)
 ```
@@ -292,5 +207,20 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 | B-11 | KumGift Stripe flow | RIJEŠENO | checkout + webhook + activate() LIVE |
 | B-12 | Lektire seed (HR kurikulum 1-8) | RIJEŠENO | 31 knjiga seeded |
 | B-13 | Kum child selector populate | RIJEŠENO | my_children + my_children_json u kontekstu |
-| B-14 | Small Doors Tier B Shamir Python 3 | SREDNJE | instalirati sslib ili secret-sharing |
+| B-14 | Small Doors Tier B Shamir Python 3 | RIJEŠENO | sslib instaliran, full 3/5 recovery LIVE |
 | B-15 | NO LIMIT OIB udruge | ČEKA | Marija donosi rješenje |
+| B-16 | ai_gateway.py SyntaxError (docstring+return) | RIJEŠENO | Razdvojeno, trojstvo testovi prolaze |
+
+---
+
+## KONTEKST SESIJE
+
+
+### [S-001] — 2026-04-21 10:13
+**Branch:** master  
+**Zadnji commit:** fix(no-limit): send_whatsapp → send_text alias; ruff exclude var/ i _scripts/  
+**Kontekst:** Implementiran 3-slojni memory sistem: ADR, IDEAS, KONTEKST SESIJE, pre-commit hook, log-session CLI. Open: weekly digest odgođen za sprint +2.
+> CC ažurira ovu sekciju na kraju svake sesije.
+> Maksimalno 10 rečenica. Što je razgovarano, koje su open threads.
+
+

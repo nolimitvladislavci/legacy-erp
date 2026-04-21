@@ -27,6 +27,22 @@ Pročitaj prvi (najnoviji) → izvršavaj.
 Čitaj FENIX_STATUS.md prioritete. Ako nema CC_TASK, sam odaberi
 najvažniji prioritet i počni. Ne pitaj — radi.
 
+## KORAK 5 — Kraj sesije (OBAVEZNO)
+
+Prije završetka svake sesije izvrši:
+
+1. Ažuriraj `FENIX_STATUS.md` → sekcija `## KONTEKST SESIJE`
+   - 5-10 rečenica: što je rađeno, koje odluke, open threads
+
+2. Ako je razmatrana arhitekturalna odluka → kreiraj ADR fajl:
+   `docs/decisions/ADR-XXX-naziv.md`
+
+3. Ako je iznesena ideja (neimplementirana) → dodaj u `IDEAS.md`:
+   `[I-XXX] 💡 Opis ideje`
+
+4. Commit svega:
+   `docs(memory): update session context + ideas`
+
 ---
 
 ## PRAVILA (ne smiju se kršiti)
