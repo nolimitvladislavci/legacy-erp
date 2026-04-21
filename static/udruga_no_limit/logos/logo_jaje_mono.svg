@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 540 580" xmlns="http://www.w3.org/2000/svg">
+  <!-- MONO za pečat — statična crna silueta na bijelom -->
+
+  <rect width="540" height="580" fill="#FFFFFF"/>
+
+  <!-- Sjena na podu -->
+  <ellipse cx="270" cy="510" rx="115" ry="11" fill="#000" opacity="0.16"/>
+
+  <!-- LIJEVA RUKA — mitten gore-lijevo -->
+  <g transform="rotate(-50 95 145)">
+    <ellipse cx="95" cy="145" rx="28" ry="78" fill="#000"/>
+    <ellipse cx="86" cy="115" rx="6" ry="16" fill="#FFFFFF" opacity="0.32"/>
+  </g>
+
+  <!-- DESNA RUKA — mitten dolje-desno -->
+  <g transform="rotate(-50 445 405)">
+    <ellipse cx="445" cy="405" rx="28" ry="78" fill="#000"/>
+    <ellipse cx="454" cy="435" rx="6" ry="16" fill="#FFFFFF" opacity="0.32"/>
+  </g>
+
+  <!-- GLAVNO TIJELO — obrnuto jaje, gore vrlo široko -->
+  <path d="M 270 100
+           C 105 102, 90 195, 130 255
+           C 155 340, 235 408, 270 410
+           C 305 408, 385 340, 410 255
+           C 450 195, 435 102, 270 100 Z"
+        fill="#000"/>
+
+  <!-- Highlight (suptilan) -->
+  <ellipse cx="215" cy="170" rx="42" ry="48" fill="#FFFFFF" opacity="0.10"/>
+
+  <!-- LCD ploha (BIJELA) -->
+  <path d="M 158 195
+           Q 150 218, 162 240
+           Q 175 256, 200 258
+           L 340 258
+           Q 365 256, 378 240
+           Q 390 218, 382 195
+           Q 372 178, 340 180
+           L 200 180
+           Q 168 178, 158 195 Z"
+        fill="#FFFFFF"/>
+
+  <!-- LIJEVO OKO ∞ -->
+  <g transform="translate(228 220)">
+    <path d="M -16 0 C -16 -10, -8 -10, 0 0 C 8 10, 16 10, 16 0 C 16 -10, 8 -10, 0 0 C -8 10, -16 10, -16 0 Z"
+          stroke="#000" stroke-width="2.8" fill="none"/>
+    <circle cx="9" cy="3" r="3" fill="#000"/>
+  </g>
+
+  <!-- DESNO OKO ∞ -->
+  <g transform="translate(312 220)">
+    <path d="M -16 0 C -16 -10, -8 -10, 0 0 C 8 10, 16 10, 16 0 C 16 -10, 8 -10, 0 0 C -8 10, -16 10, -16 0 Z"
+          stroke="#000" stroke-width="2.8" fill="none"/>
+    <circle cx="-9" cy="3" r="3" fill="#000"/>
+  </g>
+
+  <!-- NO LIMIT — bijelo na crnom tijelu -->
+  <text x="270" y="320" text-anchor="middle"
+        font-family="'Helvetica Neue', 'Arial Black', sans-serif"
+        font-size="34" font-weight="900"
+        fill="#FFFFFF" letter-spacing="5">NO</text>
+  <text x="270" y="358" text-anchor="middle"
+        font-family="'Helvetica Neue', 'Arial Black', sans-serif"
+        font-size="34" font-weight="900"
+        fill="#FFFFFF" letter-spacing="5">LIMIT</text>
+
+  <circle cx="270" cy="385" r="3" fill="#FFFFFF"/>
+</svg>

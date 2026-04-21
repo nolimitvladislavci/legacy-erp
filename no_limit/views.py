@@ -139,7 +139,7 @@ def ambasador_prijava(request):
             )
             # WA notifikacija Ivanu
             try:
-                from core.whatsapp import send_whatsapp
+                from core.whatsapp import send_text as send_whatsapp
 
                 wa_number = getattr(settings, "IVAN_WHATSAPP_NUMBER", "")
                 if wa_number:

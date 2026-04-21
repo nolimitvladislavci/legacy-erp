@@ -1,0 +1,73 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0D080"/>
+      <stop offset="100%" stop-color="#B8943A"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" fill="#FFFFFF"/>
+
+  <!-- LIJEVA GRANA: glavni stub -->
+  <path d="M 120 335 Q 55 200 160 65"
+        stroke="#0F172A" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- LIJEVA GRANA: listovi -->
+  <ellipse cx="97" cy="285" rx="15" ry="6" transform="rotate(-55 97 285)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="78" cy="245" rx="15" ry="6" transform="rotate(-40 78 245)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="68" cy="200" rx="15" ry="6" transform="rotate(-20 68 200)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="72" cy="155" rx="15" ry="6" transform="rotate(10 72 155)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="92" cy="115" rx="15" ry="6" transform="rotate(30 92 115)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="125" cy="82" rx="15" ry="6" transform="rotate(50 125 82)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+
+  <!-- DESNA GRANA: glavni stub -->
+  <path d="M 280 335 Q 345 200 240 65"
+        stroke="#0F172A" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- DESNA GRANA: listovi (mirror) -->
+  <ellipse cx="303" cy="285" rx="15" ry="6" transform="rotate(55 303 285)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="322" cy="245" rx="15" ry="6" transform="rotate(40 322 245)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="332" cy="200" rx="15" ry="6" transform="rotate(20 332 200)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="328" cy="155" rx="15" ry="6" transform="rotate(-10 328 155)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="308" cy="115" rx="15" ry="6" transform="rotate(-30 308 115)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+  <ellipse cx="275" cy="82" rx="15" ry="6" transform="rotate(-50 275 82)"
+           fill="url(#leafGrad)" stroke="#0F172A" stroke-width="1"/>
+
+  <!-- Spoj pri dnu (vrpca) -->
+  <path d="M 120 335 Q 200 360 280 335"
+        stroke="#0F172A" stroke-width="3" fill="none"/>
+  <!-- Vrpca — mali akcenti -->
+  <circle cx="200" cy="351" r="4" fill="#C9A84C"/>
+
+  <!-- NL MONOGRAM u sredini (serif, veliki) -->
+  <text x="200" y="220" text-anchor="middle"
+        font-family="'Times New Roman', Georgia, serif"
+        font-size="115" font-weight="700"
+        fill="#0F172A" letter-spacing="-6">NL</text>
+
+  <!-- Tanka linija ispod monograma -->
+  <line x1="145" y1="240" x2="255" y2="240" stroke="#C9A84C" stroke-width="1.5"/>
+
+  <!-- 2026 ispod -->
+  <text x="200" y="262" text-anchor="middle"
+        font-family="'Times New Roman', Georgia, serif"
+        font-size="19" font-weight="400"
+        fill="#0F172A" letter-spacing="8">MMXXVI</text>
+
+  <!-- NO LIMIT dolje -->
+  <text x="200" y="393" text-anchor="middle"
+        font-family="'Times New Roman', Georgia, serif"
+        font-size="18" font-weight="700"
+        fill="#0F172A" letter-spacing="5">NO  LIMIT</text>
+</svg>

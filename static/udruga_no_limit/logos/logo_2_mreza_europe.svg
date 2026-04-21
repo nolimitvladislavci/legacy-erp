@@ -1,0 +1,79 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="centerGrad2">
+      <stop offset="0%" stop-color="#F0D080"/>
+      <stop offset="60%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#1E3A5F"/>
+    </radialGradient>
+    <linearGradient id="branchGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1E3A5F"/>
+      <stop offset="100%" stop-color="#C9A84C"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" fill="#FFFFFF"/>
+
+  <!-- Krivulje grane (kao mreža / korijen) -->
+  <path d="M 200 200 C 150 160 110 120 75 85"
+        stroke="#1E3A5F" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 200 200 C 250 160 290 120 325 85"
+        stroke="#1E3A5F" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 200 200 C 150 240 110 280 75 315"
+        stroke="#1E3A5F" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 200 200 C 250 240 290 280 325 315"
+        stroke="#1E3A5F" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Dodatne tanke grane (sekundarni čvorovi) -->
+  <line x1="200" y1="200" x2="200" y2="60" stroke="#94A3B8" stroke-width="1.5" opacity="0.5"/>
+  <line x1="200" y1="200" x2="200" y2="340" stroke="#94A3B8" stroke-width="1.5" opacity="0.5"/>
+  <line x1="200" y1="200" x2="60" y2="200" stroke="#94A3B8" stroke-width="1.5" opacity="0.5"/>
+  <line x1="200" y1="200" x2="340" y2="200" stroke="#94A3B8" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- 4 glavna čvorišta -->
+  <!-- Gore-lijevo: HR -->
+  <circle cx="75" cy="85" r="22" fill="#1E3A5F"/>
+  <circle cx="75" cy="85" r="16" fill="#C9A84C"/>
+  <text x="75" y="90" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="11" font-weight="900" fill="#0F172A">HR</text>
+
+  <!-- Gore-desno: DE -->
+  <circle cx="325" cy="85" r="22" fill="#1E3A5F"/>
+  <circle cx="325" cy="85" r="16" fill="#C9A84C"/>
+  <text x="325" y="90" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="11" font-weight="900" fill="#0F172A">DE</text>
+
+  <!-- Dolje-lijevo: SI -->
+  <circle cx="75" cy="315" r="18" fill="#1E3A5F"/>
+  <circle cx="75" cy="315" r="12" fill="#C9A84C"/>
+  <text x="75" y="319" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="9" font-weight="900" fill="#0F172A">SI</text>
+
+  <!-- Dolje-desno: HU -->
+  <circle cx="325" cy="315" r="18" fill="#1E3A5F"/>
+  <circle cx="325" cy="315" r="12" fill="#C9A84C"/>
+  <text x="325" y="319" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="9" font-weight="900" fill="#0F172A">HU</text>
+
+  <!-- Sekundarni mali čvorovi na uglovima -->
+  <circle cx="200" cy="60" r="6" fill="#94A3B8" opacity="0.7"/>
+  <circle cx="200" cy="340" r="6" fill="#94A3B8" opacity="0.7"/>
+  <circle cx="60" cy="200" r="6" fill="#94A3B8" opacity="0.7"/>
+  <circle cx="340" cy="200" r="6" fill="#94A3B8" opacity="0.7"/>
+
+  <!-- Centralno čvorište - naglašeno -->
+  <circle cx="200" cy="200" r="38" fill="#FFFFFF"/>
+  <circle cx="200" cy="200" r="36" fill="#1E3A5F"/>
+  <circle cx="200" cy="200" r="28" fill="url(#centerGrad2)"/>
+
+  <!-- NL monogram u centru -->
+  <text x="200" y="210" text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="24" font-weight="900"
+        fill="#FFFFFF">NL</text>
+
+  <!-- NO LIMIT tekst dolje -->
+  <text x="200" y="380" text-anchor="middle"
+        font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+        font-size="20" font-weight="700"
+        fill="#0F172A" letter-spacing="6">NO LIMIT</text>
+</svg>

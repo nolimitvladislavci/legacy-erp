@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 540 580" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="bodyGrad" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%"  stop-color="#FFFFFF"/>
+      <stop offset="55%" stop-color="#F0F4F8"/>
+      <stop offset="100%" stop-color="#A8B5C9"/>
+    </linearGradient>
+    <radialGradient id="hl" cx="35%" cy="22%" r="22%">
+      <stop offset="0%"  stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="auraGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#A0CFFF" stop-opacity="0.42"/>
+      <stop offset="60%" stop-color="#5DADE2" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#5DADE2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="floorShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#000" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    /* Sve lebdi sinkronizirano vertikalno — BEZ ROTACIJE (jaje stoji uspravno) */
+    .lebdi {
+      animation: lebdi 5s ease-in-out infinite;
+    }
+    @keyframes lebdi {
+      0%, 100% { transform: translateY(0px); }
+      50%      { transform: translateY(-16px); }
+    }
+    .shadow-pulse {
+      animation: shadowP 5s ease-in-out infinite;
+      transform-origin: 270px 510px;
+    }
+    @keyframes shadowP {
+      0%, 100% { transform: scaleX(1);    opacity: 0.55; }
+      50%      { transform: scaleX(0.78); opacity: 0.28; }
+    }
+    .glow-pulse {
+      animation: glowP 3.5s ease-in-out infinite;
+      transform-origin: 270px 280px;
+    }
+    @keyframes glowP {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50%      { opacity: 1.0;  transform: scale(1.08); }
+    }
+    .eye-glow { animation: eyeP 1.8s ease-in-out infinite; }
+    @keyframes eyeP {
+      0%, 100% { filter: drop-shadow(0 0 3px #5DADE2); }
+      50%      { filter: drop-shadow(0 0 10px #00BFFF) drop-shadow(0 0 18px #00BFFF); }
+    }
+    .dot { fill: #FFFFFF; filter: drop-shadow(0 0 5px #5DADE2); }
+  </style>
+
+  <!-- Pozadina -->
+  <rect width="540" height="580" fill="#0a0f1d"/>
+
+  <!-- Sjena na podu (pulsira u suprotnoj fazi) -->
+  <ellipse class="shadow-pulse" cx="270" cy="510" rx="125" ry="14" fill="url(#floorShadow)"/>
+
+  <!-- Aura glow iza tijela -->
+  <ellipse class="glow-pulse" cx="270" cy="280" rx="200" ry="220" fill="url(#auraGlow)"/>
+
+  <!-- CIJELA LEBDECA GRUPA — sve se kreće sinkronizirano vertikalno -->
+  <g class="lebdi">
+
+    <!-- LIJEVA RUKA — mitten gore-lijevo (rotacija -50° prema gore-lijevo) -->
+    <g transform="rotate(-50 95 145)">
+      <!-- Sjena -->
+      <ellipse cx="95" cy="145" rx="28" ry="78" fill="#000" opacity="0.18" transform="translate(3 3)"/>
+      <!-- Tijelo ruke -->
+      <ellipse cx="95" cy="145" rx="28" ry="78" fill="url(#bodyGrad)"/>
+      <!-- Tanki rub -->
+      <ellipse cx="95" cy="145" rx="28" ry="78" fill="none" stroke="#FFFFFF" stroke-width="0.8" opacity="0.5"/>
+      <!-- Highlight -->
+      <ellipse cx="86" cy="115" rx="6" ry="16" fill="#FFFFFF" opacity="0.7"/>
+    </g>
+
+    <!-- DESNA RUKA — mitten dolje-desno (ista rotacija -50°, simetrično preko centra) -->
+    <g transform="rotate(-50 445 405)">
+      <!-- Sjena -->
+      <ellipse cx="445" cy="405" rx="28" ry="78" fill="#000" opacity="0.18" transform="translate(3 3)"/>
+      <!-- Tijelo ruke -->
+      <ellipse cx="445" cy="405" rx="28" ry="78" fill="url(#bodyGrad)"/>
+      <!-- Tanki rub -->
+      <ellipse cx="445" cy="405" rx="28" ry="78" fill="none" stroke="#FFFFFF" stroke-width="0.8" opacity="0.5"/>
+      <!-- Highlight -->
+      <ellipse cx="454" cy="435" rx="6" ry="16" fill="#FFFFFF" opacity="0.7"/>
+    </g>
+
+    <!-- GLAVNO TIJELO — JAKO NAGLAŠENO OBRNUTO JAJE (gore vrlo široko, dolje usko) -->
+
+    <!-- Sjena tijela -->
+    <path d="M 270 100
+             C 105 102, 90 195, 130 255
+             C 155 340, 235 408, 270 410
+             C 305 408, 385 340, 410 255
+             C 450 195, 435 102, 270 100 Z"
+          fill="#000" opacity="0.2" transform="translate(4 4)"/>
+
+    <!-- Tijelo (gornji dio jako širok, donji usko sužen) -->
+    <path d="M 270 100
+             C 105 102, 90 195, 130 255
+             C 155 340, 235 408, 270 410
+             C 305 408, 385 340, 410 255
+             C 450 195, 435 102, 270 100 Z"
+          fill="url(#bodyGrad)"/>
+
+    <!-- Highlight (sjaj na vrhu lijevo) -->
+    <ellipse cx="215" cy="170" rx="48" ry="55" fill="url(#hl)"/>
+
+    <!-- Tanki svjetli rub -->
+    <path d="M 270 100
+             C 105 102, 90 195, 130 255
+             C 155 340, 235 408, 270 410
+             C 305 408, 385 340, 410 255
+             C 450 195, 435 102, 270 100 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="1.2" opacity="0.55"/>
+
+    <!-- LCD CRNA PLOHA — VEĆI (jer je gornji dio širi) -->
+    <path d="M 158 195
+             Q 150 218, 162 240
+             Q 175 256, 200 258
+             L 340 258
+             Q 365 256, 378 240
+             Q 390 218, 382 195
+             Q 372 178, 340 180
+             L 200 180
+             Q 168 178, 158 195 Z"
+          fill="url(#screenGrad)"/>
+
+    <!-- Scan line akcent -->
+    <line x1="165" y1="222" x2="375" y2="222" stroke="#0F2A4F" stroke-width="0.8" opacity="0.5"/>
+
+    <!-- LIJEVO OKO ∞ -->
+    <g transform="translate(228 220)" class="eye-glow">
+      <path d="M -16 0 C -16 -10, -8 -10, 0 0 C 8 10, 16 10, 16 0 C 16 -10, 8 -10, 0 0 C -8 10, -16 10, -16 0 Z"
+            stroke="#5DADE2" stroke-width="2.8" fill="none" id="eyeL4"/>
+      <circle class="dot" r="3.5">
+        <animateMotion dur="2.2s" repeatCount="indefinite">
+          <mpath xlink:href="#eyeL4"/>
+        </animateMotion>
+      </circle>
+    </g>
+
+    <!-- DESNO OKO ∞ -->
+    <g transform="translate(312 220)" class="eye-glow">
+      <path d="M -16 0 C -16 -10, -8 -10, 0 0 C 8 10, 16 10, 16 0 C 16 -10, 8 -10, 0 0 C -8 10, -16 10, -16 0 Z"
+            stroke="#5DADE2" stroke-width="2.8" fill="none" id="eyeR4"/>
+      <circle class="dot" r="3.5">
+        <animateMotion dur="2.2s" repeatCount="indefinite" begin="1.1s">
+          <mpath xlink:href="#eyeR4"/>
+        </animateMotion>
+      </circle>
+    </g>
+
+    <!-- NO LIMIT TEKST u dva reda (donji uži dio jajeta) -->
+    <text x="270" y="320" text-anchor="middle"
+          font-family="'Helvetica Neue', 'Arial Black', sans-serif"
+          font-size="34" font-weight="900"
+          fill="#1a1a1a" letter-spacing="5">NO</text>
+    <text x="270" y="358" text-anchor="middle"
+          font-family="'Helvetica Neue', 'Arial Black', sans-serif"
+          font-size="34" font-weight="900"
+          fill="#1a1a1a" letter-spacing="5">LIMIT</text>
+
+    <!-- Plava točka akcent -->
+    <circle cx="270" cy="385" r="3" fill="#5DADE2"/>
+
+  </g>
+</svg>

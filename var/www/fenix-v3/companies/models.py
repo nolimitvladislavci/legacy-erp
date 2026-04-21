@@ -11,6 +11,7 @@ Iz starog sustava prenosimo:
 - Multi-domain support (memio.farm, memio.pet, memio.world)
 - Fiscalizacija config per-company
 """
+
 from django.db import models
 from django.core.exceptions import ValidationError
 from core.base_model import BaseModel
@@ -48,22 +49,20 @@ class Company(BaseModel):
     Tvrtka / Obrt / Ured.
     Svaki tenant u sustavu. Umbrella za multi-company.
     """
+
     # ── Osnovni podaci ────────────────────────
     name = models.CharField(
-        max_length=255,
-        verbose_name="Naziv tvrtke",
-        help_text="Puni naziv kako je upisan u sudski registar"
+        max_length=255, verbose_name="Naziv tvrtke", help_text="Puni naziv kako je upisan u sudski registar"
     )
     short_name = models.CharField(
-        max_length=50, blank=True,
-        verbose_name="Kratki naziv",
-        help_text="Za prikaz u UI (sidebar, breadcrumbs)"
+        max_length=50, blank=True, verbose_name="Kratki naziv", help_text="Za prikaz u UI (sidebar, breadcrumbs)"
     )
     oib = models.CharField(
-        max_length=11, unique=True,
+        max_length=11,
+        unique=True,
         validators=[validate_oib],
         verbose_name="OIB",
-        help_text="Osobni identifikacijski broj — 11 znamenki"
+        help_text="Osobni identifikacijski broj — 11 znamenki",
     )
 
     # ── Adresa ────────────────────────────────
@@ -79,72 +78,43 @@ class Company(BaseModel):
 
     # ── Umbrella (parent/child) ───────────────
     parent = models.ForeignKey(
-        "self", null=True, blank=True,
+        "self",
+        null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         related_name="children",
         verbose_name="Matična tvrtka",
-        help_text="Za umbrella ured koji upravlja više firmi"
+        help_text="Za umbrella ured koji upravlja više firmi",
     )
 
     # ── Fiscalizacija ─────────────────────────
-    fiscalization_enabled = models.BooleanField(
-        default=False,
-        verbose_name="Fiskalizacija aktivna"
-    )
+    fiscalization_enabled = models.BooleanField(default=False, verbose_name="Fiskalizacija aktivna")
     fiscalization_cert = models.TextField(
-        blank=True,
-        verbose_name="FINA certifikat (PEM)",
-        help_text="Certifikat za potpisivanje fiskalnih računa"
+        blank=True, verbose_name="FINA certifikat (PEM)", help_text="Certifikat za potpisivanje fiskalnih računa"
     )
-    fiscalization_password = models.CharField(
-        max_length=255, blank=True,
-        verbose_name="Lozinka certifikata"
-    )
+    fiscalization_password = models.CharField(max_length=255, blank=True, verbose_name="Lozinka certifikata")
 
     # ── Domain & Branding ─────────────────────
     domain = models.CharField(
-        max_length=100, blank=True,
-        verbose_name="Domena",
-        help_text="Za domain gate: memio.farm, memio.pet, etc."
+        max_length=100, blank=True, verbose_name="Domena", help_text="Za domain gate: memio.farm, memio.pet, etc."
     )
-    logo = models.ImageField(
-        upload_to="companies/logos/",
-        blank=True,
-        verbose_name="Logo"
-    )
-    primary_color = models.CharField(
-        max_length=7, default="#C9A84C",
-        verbose_name="Primarna boja"
-    )
+    logo = models.ImageField(upload_to="companies/logos/", blank=True, verbose_name="Logo")
+    primary_color = models.CharField(max_length=7, default="#C9A84C", verbose_name="Primarna boja")
 
     # ── Postavke ──────────────────────────────
     language = models.CharField(
-        max_length=2, default="hr",
+        max_length=2,
+        default="hr",
         choices=[("hr", "Hrvatski"), ("de", "Deutsch"), ("en", "English")],
-        verbose_name="Jezik"
+        verbose_name="Jezik",
     )
-    timezone = models.CharField(
-        max_length=50, default="Europe/Zagreb",
-        verbose_name="Vremenska zona"
-    )
-    currency = models.CharField(
-        max_length=3, default="EUR",
-        verbose_name="Valuta"
-    )
+    timezone = models.CharField(max_length=50, default="Europe/Zagreb", verbose_name="Vremenska zona")
+    currency = models.CharField(max_length=3, default="EUR", verbose_name="Valuta")
 
     # ── AI & Integracije ──────────────────────
-    ai_enabled = models.BooleanField(
-        default=True,
-        verbose_name="AI asistent aktivan"
-    )
-    whatsapp_enabled = models.BooleanField(
-        default=False,
-        verbose_name="WhatsApp integracija"
-    )
-    whatsapp_number = models.CharField(
-        max_length=30, blank=True,
-        verbose_name="WhatsApp broj"
-    )
+    ai_enabled = models.BooleanField(default=True, verbose_name="AI asistent aktivan")
+    whatsapp_enabled = models.BooleanField(default=False, verbose_name="WhatsApp integracija")
+    whatsapp_number = models.CharField(max_length=30, blank=True, verbose_name="WhatsApp broj")
 
     class Meta:
         verbose_name = "Tvrtka"
@@ -182,12 +152,14 @@ class Company(BaseModel):
 
     def to_ai_context(self):
         ctx = super().to_ai_context()
-        ctx.update({
-            "name": self.name,
-            "oib": self.oib,
-            "country": self.country,
-            "language": self.language,
-            "is_umbrella": self.is_umbrella,
-            "fiscalization": self.fiscalization_enabled,
-        })
+        ctx.update(
+            {
+                "name": self.name,
+                "oib": self.oib,
+                "country": self.country,
+                "language": self.language,
+                "is_umbrella": self.is_umbrella,
+                "fiscalization": self.fiscalization_enabled,
+            }
+        )
         return ctx

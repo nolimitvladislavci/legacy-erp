@@ -1,0 +1,42 @@
+{
+  "block_number": 0,
+  "prev_hash": null,
+  "timestamp": "2026-04-19T12:00:00 UTC",
+  "timestamp_unix": 1776600000,
+  "document": {
+    "name": "NOLIMIT-GENESIS-0001.pdf",
+    "size_bytes": 53532,
+    "l1_sha256": "6187541b2178a2baaaa04c759f6674faa56b35a0c672682447fa50f890a19658",
+    "title": "Genesis Document #0 — Samopotvrda autorstva Triple DNA metode"
+  },
+  "author": {
+    "name": "Ivan Brtan",
+    "oib": "70086599476",
+    "role": "izumitelj"
+  },
+  "ip_holder": {
+    "name": "Konjik d.o.o.",
+    "address": "Kralja Tomislava 1a, 31431 Čepin, Hrvatska",
+    "role": "nositelj IP-a"
+  },
+  "strategic_partner": {
+    "name": "Udruga NO LIMIT",
+    "address": "Kralja Tomislava 291, 31404 Vladislavci, Hrvatska",
+    "status": "u osnivanju",
+    "role": "strateški partner za javnu misiju"
+  },
+  "license": "Open Patent Promise v1.0",
+  "license_url": "https://no-limit.world/opp/",
+  "jurisdiction": "HR",
+  "public_url": "https://no-limit.world/static/udruga_no_limit/genesis/NOLIMIT-GENESIS-0001.pdf",
+  "technologies": [
+    "Triple DNA (L1 SHA-256 + L2 pHash + L3 AI embedding)",
+    ".dok format",
+    "ChainBlock POE",
+    "eArhivator",
+    "eValidator",
+    "PLAY.EU",
+    "memio.pet / memio.farm / memio.world"
+  ],
+  "note": "Genesis Block #0 — prvi i jedinstveni blok u ChainBlock POE lancu. Služi kao javni prior art, deklaracija autorstva, te pravna osnova za Open Patent Promise licencu."
+}

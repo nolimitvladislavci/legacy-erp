@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponuda — Mario Tutić | Viskovic Bau</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1a1a1a; }
+
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-left h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+  .header-left p  { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+  .header-right   { font-size: 11px; color: #c9a84c; text-align: right; line-height: 1.6; }
+
+  .gold-bar { height: 3px; background: linear-gradient(90deg, #c9a84c, #f0d080, #c9a84c); }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: #0f172a;
+    padding: 0 24px;
+    border-bottom: 1px solid #1e3a5f;
+  }
+  .tab {
+    padding: 13px 22px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .tab:hover  { color: #94a3b8; }
+  .tab.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 24px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .toolbar-left { font-size: 12px; color: #64748b; }
+  .toolbar-left strong { color: #0f172a; }
+  .btn-group { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: #0f172a; color: white; }
+  .btn-primary:hover { background: #1e3a5f; }
+  .btn-gold    { background: #c9a84c; color: #0f172a; }
+  .btn-gold:hover { background: #b8943a; }
+  .btn-outline { background: white; color: #0f172a; border: 1.5px solid #e2e8f0; }
+  .btn-outline:hover { border-color: #c9a84c; color: #c9a84c; }
+
+  .viewer-wrap {
+    height: calc(100vh - 145px);
+    background: #e2e8f0;
+    padding: 0;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; height: calc(100vh - 115px); }
+
+  @media (max-width: 600px) {
+    .header { padding: 12px 16px; }
+    .header-left h1 { font-size: 13px; }
+    .tabs { padding: 0 8px; }
+    .tab { padding: 11px 14px; font-size: 12px; }
+    .toolbar { padding: 8px 12px; }
+    .btn { padding: 6px 10px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Ponuda za adaptaciju garaže</h1>
+    <p>Mario Tutić · Duga ulica, Vladislavci · +385 98 988 6095</p>
+  </div>
+  <div class="header-right">
+    Viskovic Bau GmbH &amp; Co. KG<br>
+    Nufringen, Deutschland
+  </div>
+</div>
+<div class="gold-bar"></div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('materijal', this)">📦 Materijal</div>
+  <div class="tab"        onclick="switchTab('rad', this)">🔨 Rad</div>
+</div>
+
+<div id="tab-materijal" class="tab-pane active">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      Ponuda <strong>PON-2026-001</strong> · Materijal · Adaptacija 10×5 m + prostorija 4×3 m
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="printPDF('materijal')">🖨️ Print</button>
+      <a class="btn btn-primary" href="MARIO_MATERIJAL_viskovic.pdf" download="Ponuda_MATERIJAL_Mario_Tutic.pdf">⬇ Download</a>
+    </div>
+  </div>
+  <div class="viewer-wrap">
+    <iframe id="frame-materijal" src="MARIO_MATERIJAL_viskovic.pdf#toolbar=0&navpanes=0&scrollbar=1" title="Ponuda Materijal"></iframe>
+  </div>
+</div>
+
+<div id="tab-rad" class="tab-pane">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      Ponuda <strong>PON-2026-002</strong> · Radovi · Adaptacija 10×5 m + prostorija 4×3 m
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="printPDF('rad')">🖨️ Print</button>
+      <a class="btn btn-primary" href="MARIO_RAD_viskovic.pdf" download="Ponuda_RAD_Mario_Tutic.pdf">⬇ Download</a>
+    </div>
+  </div>
+  <div class="viewer-wrap">
+    <iframe id="frame-rad" src="MARIO_RAD_viskovic.pdf#toolbar=0&navpanes=0&scrollbar=1" title="Ponuda Rad"></iframe>
+  </div>
+</div>
+
+<script>
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function printPDF(name) {
+  const frame = document.getElementById('frame-' + name);
+  try {
+    frame.contentWindow.print();
+  } catch(e) {
+    window.open(frame.src, '_blank');
+  }
+}
+</script>
+
+</body>
+</html>

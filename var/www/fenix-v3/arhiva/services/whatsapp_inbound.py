@@ -9,6 +9,7 @@ Flow:
        → kreiraj ArhivaEntry(source=WHATSAPP)
        → pokrni fenixscan_ocr_task
 """
+
 import hashlib
 import hmac
 import logging
@@ -27,7 +28,9 @@ WAHA_WEBHOOK_SECRET = getattr(settings, "WAHA_WEBHOOK_SECRET", "")
 
 # Podržani MIME tipovi za auto-OCR
 SUPPORTED_MEDIA = {
-    "image/jpeg", "image/png", "image/webp",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
     "application/pdf",
 }
 
@@ -86,9 +89,7 @@ def verify_webhook_signature(body: bytes, signature: str) -> bool:
     """Opcionalna HMAC provjera ako WAHA_WEBHOOK_SECRET nije prazan."""
     if not WAHA_WEBHOOK_SECRET:
         return True  # bez secretsa — prihvati sve
-    expected = hmac.new(
-        WAHA_WEBHOOK_SECRET.encode(), body, hashlib.sha256
-    ).hexdigest()
+    expected = hmac.new(WAHA_WEBHOOK_SECRET.encode(), body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(f"sha256={expected}", signature or "")
 
 
@@ -140,10 +141,7 @@ class WAHAWebhookProcessor:
         entry = self._create_entry(company, filename, content, mimetype, sender_phone, body_text)
         self._trigger_ocr(entry)
 
-        logger.info(
-            "WAHA: ArhivaEntry %s kreiran za firmu %s od %s",
-            entry.pk, company.name, sender_phone
-        )
+        logger.info("WAHA: ArhivaEntry %s kreiran za firmu %s od %s", entry.pk, company.name, sender_phone)
         return {"status": "ok", "entry_id": str(entry.pk)}
 
     def _build_media_url(self, message_id: str) -> str:
@@ -153,7 +151,11 @@ class WAHAWebhookProcessor:
     def _create_entry(self, company, filename, content, mimetype, sender_phone, caption):
         from arhiva.models import ArhivaEntry
 
-        title = caption.strip()[:200] if caption.strip() else f"WhatsApp — {sender_phone} — {timezone.now().strftime('%d.%m.%Y %H:%M')}"
+        title = (
+            caption.strip()[:200]
+            if caption.strip()
+            else f"WhatsApp — {sender_phone} — {timezone.now().strftime('%d.%m.%Y %H:%M')}"
+        )
 
         entry = ArhivaEntry(
             company=company,
@@ -171,6 +173,7 @@ class WAHAWebhookProcessor:
     def _trigger_ocr(self, entry):
         try:
             from arhiva.tasks import fenixscan_ocr_task
+
             fenixscan_ocr_task.delay(str(entry.pk))
         except Exception as exc:
             logger.warning("WAHA: OCR task failed to queue: %s", exc)

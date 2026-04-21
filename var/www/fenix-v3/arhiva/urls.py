@@ -1,4 +1,5 @@
 """Fenix v3 — Arhiva URLs | PLAN_025-032"""
+
 from django.urls import path
 from . import views
 
