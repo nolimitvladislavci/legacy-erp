@@ -216,6 +216,11 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 ## KONTEKST SESIJE
 
 
+### [S-003] --- 2026-04-21 11:15
+**Branch:** master
+**Zadnji commit:** 97df8291 docs(memory): log-session S-002 verifikacija dual-system alata
+**Kontekst:** POS modul audit + fix: 6 production crasheva (signals.py rewrite, POSReceipt 7 novih polja, POSCompany country/fiscal_exempt, POSTierConfig cancelled→is_cancelled typo, tasks.py pos_settings+buyer_oib, views.py slug→terminal_id, close_session Decimal TypeError). Migracija 0009. Tests: 29/29 (0→29). Open: DE/AT/SI fiscal stubs, templates/components prazni, inventory model nedostaje.
+
 ### [S-002] --- 2026-04-21 10:21
 **Branch:** master
 **Zadnji commit:** 9c1656b7 docs(memory): implement 3-layer session memory system
