@@ -215,6 +215,20 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 
 ## KONTEKST SESIJE
 
+### [S-012] --- 2026-04-22 (E-Račun generator na evalidator.eu)
+**Branch:** master
+**Zadnji commit:** 7b112982 feat(evalidator): E-Račun generator UBL 2.1 + OCR import
+**Kontekst:** evalidator.eu dobio standalone e-invoice generator — potpuno neovisan od Fenix V3,
+radi bez modela (stateless). invoice_service.py: UBL 2.1 XML generator (dict-based),
+PEPPOL BIS 3.0, EN 16931, ISO 7064 units, TaxTotal grupiran po stopi.
+views_invoice.py: GET forma, POST→preview+XML+PDF, session download, rate 10/h.
+views_invoice_ocr.py: Gemini Vision 1.5-flash — foto/PDF DOS programa → JSON auto-fill
+forme (5 OCR/sat, 10MB max). PDF via WeasyPrint s eIDAS pečatom (QR kod verifikacije).
+3 jezika: HR/DE/EN — label dict + lang auto-detect iz Accept-Language i seller_country.
+landing.html dobio 6. tab E-Račun s feature gridom i CTA. Open: FENIX V3 integracija
+(copy invoice XML iz arhivator TempArhivaEntry), .dokarh format za export, bunker veza.
+
+
 ### [S-011] --- 2026-04-22 (eValidator V2 + Trojan Horse PWA)
 **Branch:** master
 **Zadnji commit:** 40e51af6 feat(evalidator): batch API + VIES + company lookup + Redis
