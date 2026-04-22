@@ -2,7 +2,8 @@
 FENIX MCP Server — direktni pristup za Sonnet
 Pokrece se kao: venv/bin/python core/mcp_server.py
 
-v3: SQL guard, ORM sandbox, rate limit, extended blocked commands
+v4: SQL guard, ORM sandbox, rate limit, extended blocked commands
+    + .dokarh alati (compress, verify, stats, batch_seal)
 """
 
 import json
@@ -56,9 +57,9 @@ def query_db(sql: str) -> str:
     import re as _re
 
     _sql = sql.strip().rstrip(";")
-    if _re.search(r"(DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE)", _sql, _re.I):
+    if _re.search(r"(DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE)", _sql, _re.I):
         return json.dumps({"error": "BLOCKED: destructive SQL (DROP/TRUNCATE/ALTER/CREATE/GRANT/REVOKE)"})
-    if _re.search(r"(DELETE|UPDATE)", _sql, _re.I) and not _re.search(r"WHERE", _sql, _re.I):
+    if _re.search(r"(DELETE|UPDATE)", _sql, _re.I) and not _re.search(r"WHERE", _sql, _re.I):
         return json.dumps({"error": "BLOCKED: DELETE/UPDATE without WHERE clause"})
     from django.db import connection
 
@@ -243,6 +244,119 @@ def restart_service(service: str) -> str:
     return f"OK: {service} restarted" if r.returncode == 0 else f"Error: {r.stderr}"
 
 
+# ════════════════════════════════════════════════════════════
+# .DOKARH ALATI
+# ════════════════════════════════════════════════════════════
+
+
+@mcp.tool()
+def dokarh_compress(entry_id: int) -> str:
+    """
+    Kompresira ArhivaEntry dokument u .dokarh format.
+    Dodaje kriptografski pečat (SHA-256 + timestamp) za ZOR compliance.
+    Vraca statistiku: original_kb, dokarh_kb, ratio_pct, sha256.
+    """
+    try:
+        from documents.dokarh import compress_arhiva_entry
+        result = compress_arhiva_entry(entry_id)
+        return json.dumps(result, indent=2, ensure_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def dokarh_verify(entry_id: int) -> str:
+    """
+    Verificira kriptografski integritet .dokarh dokumenta.
+    Provjeri je li SHA-256 hash ispravan — dokument nije modificiran.
+    ZOR compliance: potvrda da dokument nije mijenjan od zapečaćivanja.
+    """
+    try:
+        from documents.dokarh import verify_arhiva_entry
+        result = verify_arhiva_entry(entry_id)
+        return json.dumps(result, indent=2, ensure_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def dokarh_stats(company_id: int = 0) -> str:
+    """
+    Statistika .dokarh kompresije.
+    company_id=0 = cijela platforma.
+    Vraca: broj zapečaćenih dokumenata, ušteda u MB, pending_seal (čeka pečat).
+    """
+    try:
+        from documents.dokarh import get_dokarh_stats
+        result = get_dokarh_stats(company_id=company_id if company_id > 0 else None)
+        return json.dumps(result, indent=2, ensure_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def dokarh_batch_seal(company_id: int, limit: int = 50) -> str:
+    """
+    Batch zapečaćivanje dokumenata za kompaniju.
+    Procesuira do `limit` ArhivaEntry zapisa koji još nemaju .dokarh pečat.
+    Korisno za serijsku ZOR compliance pripremu starih arhiva.
+    Vraca: processed, errors, total_saved_kb.
+    """
+    try:
+        from django.conf import settings
+
+        from documents.dokarh import compress_arhiva_entry
+        from documents.models import ArhivaEntry
+
+        qs = (
+            ArhivaEntry.objects
+            .filter(company_id=company_id)
+            .exclude(file_path="")
+            .exclude(file_path__isnull=True)
+            .order_by("-archived_at")
+        )
+
+        processed = 0
+        errors = []
+        total_saved_kb = 0
+
+        for entry in qs[:limit * 3]:  # Pregledamo više, jer neke možda nemaju fizički fajl
+            if processed >= limit:
+                break
+
+            if not entry.file_path:
+                continue
+
+            # Preskoci ako već postoji .dokarh
+            dokarh_path = os.path.join(settings.MEDIA_ROOT, entry.file_path + ".dokarh")
+            if os.path.exists(dokarh_path):
+                continue
+
+            result = compress_arhiva_entry(entry.pk)
+
+            if "error" in result:
+                errors.append({"entry_id": entry.pk, "error": result["error"]})
+            else:
+                processed += 1
+                saved = result.get("original_kb", 0) - result.get("dokarh_kb", 0)
+                total_saved_kb += max(0, saved)
+
+        return json.dumps(
+            {
+                "company_id": company_id,
+                "processed": processed,
+                "errors": errors[:10],  # Max 10 grešaka u outputu
+                "total_saved_kb": total_saved_kb,
+                "total_saved_mb": round(total_saved_kb / 1024, 2),
+                "status": "done",
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
 if __name__ == "__main__":
-    print("Fenix MCP Server v3 (hardened) na http://127.0.0.1:8765")
+    print("Fenix MCP Server v4 (.dokarh edition) na http://127.0.0.1:8765")
     mcp.run(transport="sse", host="127.0.0.1", port=8765)
