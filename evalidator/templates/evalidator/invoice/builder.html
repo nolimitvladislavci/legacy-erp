@@ -454,9 +454,30 @@ function evToggleTheme() {
   document.querySelector(".ev-theme-icon").textContent = next === "light" ? "🌙" : "☀️";
 }
 
-// ── Init ──────────────────────────────────────────────────────────
+// ── Init ─────────────────────────────────────────────────
 applyTranslations();
-addItem();  // jedna stavka po defaultu
+addItem();
+
+// Pre-fill from Fenix V3 / GET params
+(function() {
+  const pf = {{ prefill|safe }};
+  function setIfVal(name, val) {
+    if (!val) return;
+    const el = document.querySelector('[name="' + name + '"]');
+    if (el) el.value = val;
+  }
+  setIfVal('seller_oib', pf.seller_oib);
+  setIfVal('seller_name', pf.seller_name);
+  setIfVal('seller_address', pf.seller_address);
+  setIfVal('seller_city', pf.seller_city);
+  setIfVal('seller_country', pf.seller_country);
+  setIfVal('seller_email', pf.seller_email);
+  setIfVal('seller_iban', pf.seller_iban);
+  if (pf.lang_override) {
+    const btn = document.querySelector('.lang-btn[onclick*="' + pf.lang_override + '"]');
+    if (btn) evSetLang(pf.lang_override, btn);
+  }
+})();
 </script>
 </body>
 </html>

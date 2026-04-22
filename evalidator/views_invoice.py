@@ -65,7 +65,21 @@ def invoice_builder(request):
     lang    = _detect_lang(request)
     today   = date.today()
     due     = today + timedelta(days=8)
+    # Pre-fill iz GET parametara (npr. redirect iz Fenix V3)
+    prefill = {
+        "seller_oib":     request.GET.get("seller_oib", ""),
+        "seller_name":    request.GET.get("seller_name", ""),
+        "seller_address": request.GET.get("seller_address", ""),
+        "seller_city":    request.GET.get("seller_city", ""),
+        "seller_country": request.GET.get("seller_country", "HR"),
+        "seller_email":   request.GET.get("seller_email", ""),
+        "seller_iban":    request.GET.get("seller_iban", ""),
+        "lang_override":  request.GET.get("lang", ""),
+    }
+    if prefill["lang_override"]:
+        lang = prefill["lang_override"]
     ctx = {
+        "prefill":      prefill,
         "lang":         lang,
         "currencies":   _CURRENCIES,
         "pay_methods":  _PAY_METHODS,
