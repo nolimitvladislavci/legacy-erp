@@ -215,6 +215,21 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 
 ## KONTEKST SESIJE
 
+### [S-011] --- 2026-04-22 (eValidator V2 + Trojan Horse PWA)
+**Branch:** master
+**Zadnji commit:** 40e51af6 feat(evalidator): batch API + VIES + company lookup + Redis
+**Kontekst:** Dva sustava unaprijeđena iste sesije. (1) Fenix V3: novi PWA modul arhivator.eu
+— TempUploader/TempArhivaEntry modeli, magic link auth, 10 besplatnih skenova, Celery OCR,
+SSE real-time via Redis pub/sub, CSV export, UTM upgrade funnel — Trojan Horse za Synesis 
+akviziciju računovođa. Nginx arhivator.eu→/pub/arhiva/* proxy live. (2) Fina-Connect: 
+eValidator V2 — batch API (max 100, OIB/IBAN/VAT), _vies_lookup() VIES EU REST, 
+_sudreg_lookup() Sudski registar + 24h cache, validate_company view, Redis HyperLogLog
+live counters (ev:cnt:total/today, ev:hll:ips), 5 tabova na landing (novi Batch+Firma),
+eArhivator CTA block. api_status v2.0 sa live stats. Dokarh.py untracked — .dokarh format
+stub čeka integraciju. Open: arhivator.eu SSL (certbot nakon DNS), .dokarh integracija u
+TempArhivaEntry export, CC_TASK_COMMAND_CENTER_FAZA2.
+
+
 ### [S-010] --- 2026-04-21 (Global Notary — Stari ERP)
 **Branch:** master
 **Zadnji commit:** 203de5f3 feat(notary): auto DocumentSeal za sve fakture
