@@ -1,6 +1,8 @@
 from django.urls import path
 
 from evalidator import views
+from evalidator import views_invoice
+from evalidator import views_invoice_ocr
 
 app_name = "evalidator"
 urlpatterns = [
@@ -15,5 +17,9 @@ urlpatterns = [
     path("verify/<str:seal_token>/", views.verify_seal, name="verify_seal"),
     path("validate/company/", views.validate_company, name="validate_company"),
     path("docs/", views.api_docs, name="api_docs"),
+    path("invoice/", views_invoice.invoice_builder, name="invoice_builder"),
+    path("invoice/generate/", views_invoice.invoice_generate, name="invoice_generate"),
+    path("invoice/ocr-import/", views_invoice_ocr.invoice_ocr_import, name="invoice_ocr_import"),
+    path("invoice/download/", views_invoice.invoice_download, name="invoice_download"),
     path("pricing/", views.pricing, name="pricing"),
 ]

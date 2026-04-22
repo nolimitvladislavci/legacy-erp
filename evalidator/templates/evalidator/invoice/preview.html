@@ -1,0 +1,251 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ lang }}" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% trans "E-Račun — Pregled" %} — eValidator.eu</title>
+<link rel="stylesheet" href="{% static 'evalidator/css/main.css' %}">
+<script>(function(){var t=localStorage.getItem('ev-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')})();</script>
+<style>
+.prev-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; }
+.prev-header { background:#1a1a2e; color:white; padding:16px 20px; border-radius:var(--radius); margin-bottom:16px; display:flex; justify-content:space-between; align-items:flex-start; }
+.prev-doctype { font-size:1.6rem; font-weight:800; color:#c9a84c; }
+.prev-docnr   { font-size:0.9rem; color:#94a3b8; margin-top:4px; }
+.prev-firm    { font-size:1rem; font-weight:700; }
+.prev-firm-sub { font-size:0.78rem; color:#94a3b8; margin-top:2px; }
+.prev-meta { display:flex; gap:0; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:14px; overflow:hidden; }
+.prev-meta-cell { flex:1; padding:8px 12px; border-right:1px solid var(--border); font-size:0.82rem; }
+.prev-meta-cell:last-child { border-right:none; }
+.prev-meta-cell .lbl { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--ev-muted,#94a3b8); margin-bottom:2px; }
+.prev-meta-cell .val { font-weight:700; }
+.prev-meta-cell .val.gold { color:#c9a84c; }
+.parties-row { display:flex; gap:12px; margin-bottom:14px; }
+.party { flex:1; padding:10px 12px; border-radius:var(--radius); font-size:0.85rem; }
+.party-from { background:#1a1a2e; color:white; }
+.party-to   { background:var(--surface); border:1px solid var(--border); }
+.party .plbl { font-size:0.68rem; text-transform:uppercase; letter-spacing:1px; color:#94a3b8; margin-bottom:4px; }
+.party-from .pname { color:white; font-weight:700; font-size:0.95rem; }
+.party-to   .pname { font-weight:700; font-size:0.95rem; }
+.party .pdet { font-size:0.78rem; line-height:1.6; color:#94a3b8; margin-top:2px; }
+table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.87rem; }
+thead tr { background:#1a1a2e; color:white; }
+thead th { padding:7px 8px; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px; text-align:left; }
+thead th.r { text-align:right; }
+tbody tr { border-bottom:1px solid var(--border); }
+tbody tr:nth-child(odd) { background:rgba(255,255,255,0.02); }
+tbody td { padding:7px 8px; }
+tbody td.r { text-align:right; font-family:monospace; }
+.totals-right { display:flex; justify-content:flex-end; margin-bottom:12px; }
+.totals-box { min-width:220px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.tot-line { display:flex; justify-content:space-between; padding:6px 12px; font-size:0.87rem; border-bottom:1px solid var(--border); }
+.tot-line:last-child { border-bottom:none; background:#1a1a2e; color:white; font-weight:700; font-size:1rem; }
+.tot-line:last-child span:last-child { color:#c9a84c; font-family:monospace; }
+.tot-lbl { color:var(--ev-muted,#94a3b8); }
+.pay-box { border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; background:var(--surface); font-size:0.85rem; margin-bottom:12px; }
+.pay-title { font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--ev-muted,#94a3b8); margin-bottom:8px; }
+.pay-row { display:flex; justify-content:space-between; margin-bottom:3px; }
+.pay-lbl { color:var(--ev-muted,#94a3b8); }
+.pay-val { font-weight:700; font-family:monospace; }
+.seal-box { display:flex; align-items:center; gap:14px; background:#1a1a2e; border-radius:var(--radius); padding:12px 14px; margin-bottom:12px; }
+.seal-box .seal-text { flex:1; font-size:0.82rem; color:#94a3b8; line-height:1.5; }
+.seal-box .seal-text strong { color:#c9a84c; }
+.dl-bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:16px 0; }
+.note-box { border-left:2px solid #c9a84c; padding:8px 12px; background:rgba(201,168,76,.06); border-radius:0 var(--radius) var(--radius) 0; font-size:0.87rem; margin-bottom:12px; }
+</style>
+</head>
+<body>
+
+<header class="ev-header">
+  <div class="container">
+    <div class="ev-header-inner">
+      <a href="{% url 'evalidator:home' %}" class="ev-logo">eVALIDATOR<span class="ev-logo-sub">.eu</span></a>
+      <nav class="ev-nav">
+        <a href="{% url 'evalidator:invoice_builder' %}" class="ev-nav-link">← {% trans "Uredi račun" %}</a>
+        <button class="ev-theme-toggle" onclick="evToggleTheme()" aria-label="Toggle theme"><span class="ev-theme-icon">☀️</span></button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container" style="max-width:860px">
+  <div style="padding:20px 0 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div>
+      <h1 style="font-size:1.4rem;font-weight:800;margin-bottom:4px">📄 {% trans "Pregled e-Računa" %}</h1>
+      <p style="font-size:0.82rem;color:var(--ev-muted)">{% trans "Provjeri ispravnost i preuzmi PDF / XML." %}</p>
+    </div>
+    <div class="dl-bar" style="padding:0">
+      <a href="{% url 'evalidator:invoice_download' %}?fmt=pdf" class="ev-btn ev-btn--gold">↓ PDF</a>
+      <a href="{% url 'evalidator:invoice_download' %}?fmt=xml" class="ev-btn">↓ UBL XML</a>
+      <a href="{% url 'evalidator:invoice_builder' %}" class="ev-btn">✎ {% trans "Uredi" %}</a>
+    </div>
+  </div>
+
+  <div class="prev-card">
+
+    <!-- Header -->
+    <div class="prev-header">
+      <div>
+        <div class="prev-firm">{{ data.seller_name }}</div>
+        <div class="prev-firm-sub">{{ data.seller_address }}{% if data.seller_city %} · {{ data.seller_city }}{% endif %}</div>
+        {% if data.seller_oib %}<div class="prev-firm-sub" style="margin-top:2px;font-family:monospace">OIB: {{ data.seller_oib }}</div>{% endif %}
+      </div>
+      <div style="text-align:right">
+        <div class="prev-doctype">
+          {% if data.doc_type == 'INV' %}{% if lang == 'de' %}RECHNUNG{% elif lang == 'en' %}INVOICE{% else %}RAČUN{% endif %}
+          {% elif data.doc_type == 'OFF' %}{% if lang == 'de' %}ANGEBOT{% elif lang == 'en' %}QUOTE{% else %}PONUDA{% endif %}
+          {% elif data.doc_type == 'CRD' %}{% if lang == 'de' %}GUTSCHRIFT{% elif lang == 'en' %}CREDIT NOTE{% else %}ODOBRENJE{% endif %}
+          {% elif data.doc_type == 'PRO' %}{% if lang == 'de' %}PROFORMA{% elif lang == 'en' %}PROFORMA{% else %}PREDRAČUN{% endif %}
+          {% endif %}
+        </div>
+        <div class="prev-docnr">{{ data.number }}</div>
+      </div>
+    </div>
+
+    <!-- Meta strip -->
+    <div class="prev-meta">
+      <div class="prev-meta-cell">
+        <div class="lbl">{% if lang == 'de' %}Datum{% elif lang == 'en' %}Date{% else %}Datum{% endif %}</div>
+        <div class="val">{{ data.issue_date }}</div>
+      </div>
+      {% if data.due_date %}
+      <div class="prev-meta-cell">
+        <div class="lbl">{% if lang == 'de' %}Fällig{% elif lang == 'en' %}Due{% else %}Rok{% endif %}</div>
+        <div class="val">{{ data.due_date }}</div>
+      </div>
+      {% endif %}
+      {% if data.seller_oib %}
+      <div class="prev-meta-cell">
+        <div class="lbl">OIB</div>
+        <div class="val" style="font-family:monospace">{{ data.seller_oib }}</div>
+      </div>
+      {% endif %}
+      <div class="prev-meta-cell">
+        <div class="lbl">{% if lang == 'de' %}Gesamt{% elif lang == 'en' %}Total{% else %}Ukupno{% endif %}</div>
+        <div class="val gold">{{ totals.total }} {{ data.currency }}</div>
+      </div>
+    </div>
+
+    <!-- Parties -->
+    <div class="parties-row">
+      <div class="party party-from">
+        <div class="plbl">{% if lang == 'de' %}Auftragnehmer{% elif lang == 'en' %}From{% else %}Izdavatelj{% endif %}</div>
+        <div class="pname">{{ data.seller_name }}</div>
+        <div class="pdet">{{ data.seller_address }}{% if data.seller_city %}<br>{{ data.seller_city }}{% endif %}{% if data.seller_email %}<br>{{ data.seller_email }}{% endif %}</div>
+      </div>
+      <div class="party party-to">
+        <div class="plbl">{% if lang == 'de' %}Auftraggeber{% elif lang == 'en' %}To{% else %}Primatelj{% endif %}</div>
+        <div class="pname">{{ data.buyer_name }}</div>
+        <div class="pdet">{{ data.buyer_address }}{% if data.buyer_city %}<br>{{ data.buyer_city }}{% endif %}<br>{{ data.buyer_country }}{% if data.buyer_oib %}<br>OIB: {{ data.buyer_oib }}{% endif %}</div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <table>
+      <thead><tr>
+        <th>{% if lang == 'de' %}Beschreibung{% elif lang == 'en' %}Description{% else %}Opis{% endif %}</th>
+        <th class="r">{% if lang == 'de' %}Menge{% elif lang == 'en' %}Qty{% else %}Kol.{% endif %}</th>
+        <th>{% if lang == 'de' %}Einh.{% elif lang == 'en' %}Unit{% else %}Jed.{% endif %}</th>
+        <th class="r">{% if lang == 'de' %}Einzelpreis{% elif lang == 'en' %}Unit price{% else %}Jed. cijena{% endif %}</th>
+        <th class="r">{% if lang == 'de' %}MwSt.%{% elif lang == 'en' %}VAT%{% else %}PDV%{% endif %}</th>
+        <th class="r">{% if lang == 'de' %}Betrag{% elif lang == 'en' %}Amount{% else %}Iznos{% endif %}</th>
+      </tr></thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.description }}</td>
+          <td class="r">{{ item.qty }}</td>
+          <td>{{ item.unit }}</td>
+          <td class="r">{{ item.price }} {{ data.currency }}</td>
+          <td class="r">{{ item.tax_rate }}%</td>
+          <td class="r"><strong>{{ item.total }} {{ data.currency }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-right">
+      <div class="totals-box">
+        <div class="tot-line">
+          <span class="tot-lbl">{% if lang == 'de' %}Nettobetrag{% elif lang == 'en' %}Subtotal{% else %}Osnovica{% endif %}</span>
+          <span>{{ totals.subtotal }} {{ data.currency }}</span>
+        </div>
+        {% for rate, grp in totals.tax_groups.items %}
+        <div class="tot-line">
+          <span class="tot-lbl">{% if lang == 'de' %}MwSt.{% elif lang == 'en' %}VAT{% else %}PDV{% endif %} {{ rate }}%</span>
+          <span>{{ grp.tax }} {{ data.currency }}</span>
+        </div>
+        {% endfor %}
+        <div class="tot-line">
+          <span>{% if lang == 'de' %}GESAMT{% elif lang == 'en' %}TOTAL{% else %}UKUPNO{% endif %}</span>
+          <span>{{ totals.total }} {{ data.currency }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    {% if data.seller_iban %}
+    <div class="pay-box">
+      <div class="pay-title">{% if lang == 'de' %}Zahlungsinformationen{% elif lang == 'en' %}Payment details{% else %}Podaci za plaćanje{% endif %}</div>
+      <div class="pay-row"><span class="pay-lbl">IBAN</span><span class="pay-val">{{ data.seller_iban }}</span></div>
+      {% if data.seller_bic %}<div class="pay-row"><span class="pay-lbl">BIC</span><span class="pay-val">{{ data.seller_bic }}</span></div>{% endif %}
+      <div class="pay-row">
+        <span class="pay-lbl">{% if lang == 'de' %}Verwendungszweck{% elif lang == 'en' %}Reference{% else %}Poziv na broj{% endif %}</span>
+        <span class="pay-val">{{ data.number }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if data.note %}<div class="note-box">{{ data.note }}</div>{% endif %}
+
+    <!-- Seal -->
+    {% if seal_token %}
+    <div class="seal-box">
+      {% if seal_qr_b64 %}<img src="{{ seal_qr_b64 }}" style="width:56px;height:56px;border:1px solid #334155">{% endif %}
+      <div class="seal-text">
+        <strong>eIDAS pečat · GoBD · eValidator.eu</strong><br>
+        {% trans "Kriptografski pečat integriteta (SHA-256). Token:" %} <code style="color:#c9a84c">{{ seal_token }}</code><br>
+        <a href="https://evalidator.eu/verify/{{ seal_token }}/" style="color:#c9a84c;font-size:0.78rem" target="_blank">
+          {% trans "Provjeri na evalidator.eu" %} →
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /prev-card -->
+
+  <!-- Standards info -->
+  <div style="margin:16px 0;display:flex;gap:8px;flex-wrap:wrap">
+    <span class="ev-badge ev-badge--gold">✓ UBL 2.1</span>
+    <span class="ev-badge ev-badge--gold">✓ EN 16931</span>
+    <span class="ev-badge">PEPPOL BIS 3.0</span>
+    <span class="ev-badge">eIDAS Art. 41</span>
+    <span class="ev-badge">GoBD §14b</span>
+    <span class="ev-badge">ZOR čl. 11 (HR)</span>
+  </div>
+
+  <div class="dl-bar" style="padding:4px 0 24px">
+    <a href="{% url 'evalidator:invoice_download' %}?fmt=pdf" class="ev-btn ev-btn--gold ev-btn--lg">↓ {% trans "Preuzmi PDF" %}</a>
+    <a href="{% url 'evalidator:invoice_download' %}?fmt=xml" class="ev-btn">↓ {% trans "Preuzmi UBL XML" %}</a>
+    <a href="{% url 'evalidator:invoice_builder' %}" class="ev-btn">← {% trans "Novi račun" %}</a>
+  </div>
+</main>
+
+<script>
+function evToggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute("data-theme") === "light" ? "dark" : "light";
+  html.setAttribute("data-theme", next);
+  localStorage.setItem("ev-theme", next);
+  document.querySelector(".ev-theme-icon").textContent = next === "light" ? "🌙" : "☀️";
+}
+(function(){
+  const t = localStorage.getItem("ev-theme") || "dark";
+  document.documentElement.setAttribute("data-theme", t);
+  const icon = document.querySelector(".ev-theme-icon");
+  if (icon) icon.textContent = t === "light" ? "🌙" : "☀️";
+})();
+</script>
+</body>
+</html>

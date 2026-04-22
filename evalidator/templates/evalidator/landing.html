@@ -234,6 +234,48 @@
         <div id="result-company" role="status" aria-live="polite"></div>
       </div>
     </div>
+    <!-- E-RAČUN -->
+    <div id="panel-invoice" class="ev-tab-panel" role="tabpanel">
+      <div style="padding:8px 0 12px">
+        <p style="font-size:0.9rem;color:var(--ev-muted);margin-bottom:14px">
+          {% trans "Generiraj UBL 2.1 e-Račun (EN 16931 / PEPPOL BIS 3.0). Besplatno. Bez registracije." %}
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <span class="ev-badge ev-badge--gold">UBL 2.1</span>
+          <span class="ev-badge ev-badge--gold">EN 16931</span>
+          <span class="ev-badge">PEPPOL BIS 3.0</span>
+          <span class="ev-badge">PDF + XML</span>
+          <span class="ev-badge">&#127470;&#127479; &#127465;&#127466; &#127468;&#127463;</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--ev-muted);margin-bottom:6px">&#9989; {% trans "Uključeno besplatno" %}</div>
+            <div style="font-size:0.83rem;line-height:1.7;color:var(--text)">
+              &#128196; UBL 2.1 XML download<br>
+              &#128240; PDF pregled + download<br>
+              &#128274; eIDAS pečat (SHA-256)<br>
+              &#127756; HR / DE / EN jezik<br>
+              &#128203; Do 50 stavki
+            </div>
+          </div>
+          <div style="background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.2);border-radius:var(--radius);padding:12px">
+            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:6px">&#128248; {% trans "AI OCR Import" %}</div>
+            <div style="font-size:0.83rem;line-height:1.7;color:var(--text)">
+              {% trans "Uvezi postojeći račun" %}:<br>
+              &#128247; Fotografija ra&#269;una<br>
+              &#128196; PDF iz DOS programa<br>
+              &#129504; Gemini Vision auto-popuna<br>
+              <span style="color:var(--ev-muted);font-size:0.75rem">5 OCR/sat besplatno</span>
+            </div>
+          </div>
+        </div>
+        <a href="/evalidator/invoice/" class="ev-btn ev-btn--gold" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px">
+          &#9889; {% trans "Otvori E-Račun Generator" %} &#8594;
+        </a>
+        <span style="font-size:0.78rem;color:var(--ev-muted);margin-left:12px">{% trans "10 ra&#269;una/sat &middot; bez registracije" %}</span>
+      </div>
+    </div>
+
   </div>
 
   <div class="ev-api-section">

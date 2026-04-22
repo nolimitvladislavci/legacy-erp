@@ -1,0 +1,462 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ lang }}" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% trans "E-Račun Generator — eValidator.eu" %}</title>
+<meta name="description" content="{% trans "Besplatni EU e-Račun generator. UBL 2.1, EN 16931, PEPPOL BIS 3.0. HR / DE / EN. Bez registracije." %}">
+<link rel="stylesheet" href="{% static 'evalidator/css/main.css' %}">
+<script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+<script>(function(){var t=localStorage.getItem('ev-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')})();</script>
+<style>
+.inv-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px 24px; margin-bottom:16px; }
+.inv-section-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--gold); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.inv-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+.inv-field { display:flex; flex-direction:column; gap:4px; }
+.inv-field label { font-size:0.78rem; color:var(--ev-muted,#94a3b8); font-weight:500; }
+.inv-input, .inv-select { width:100%; background:var(--bg,#0a0a0a); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 11px; font-size:0.9rem; transition:border-color .2s; }
+.inv-input:focus, .inv-select:focus { outline:none; border-color:var(--gold-border,rgba(201,168,76,.4)); }
+.inv-input.mono { font-family:monospace; }
+
+/* items table */
+.items-table { width:100%; border-collapse:collapse; }
+.items-table th { font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--ev-muted,#94a3b8); padding:6px 8px; text-align:left; border-bottom:1px solid var(--border); }
+.items-table th.r { text-align:right; }
+.items-table td { padding:5px 4px; vertical-align:middle; }
+.items-table td.r { text-align:right; }
+.items-table .item-total { font-weight:700; color:var(--gold); font-family:monospace; font-size:0.88rem; white-space:nowrap; }
+.items-table .del-btn { background:none; border:none; color:#e55; cursor:pointer; font-size:1rem; padding:4px; }
+.items-table input, .items-table select { background:var(--bg,#0a0a0a); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:5px 7px; font-size:0.85rem; width:100%; }
+.items-table .qty-in  { width:60px; }
+.items-table .price-in{ width:90px; }
+.items-table .disc-in { width:55px; }
+.items-table .tax-sel { width:65px; }
+
+.totals-panel { background:var(--bg,#0a0a0a); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; min-width:220px; }
+.tot-row { display:flex; justify-content:space-between; font-size:0.88rem; padding:4px 0; border-bottom:1px solid var(--border); }
+.tot-row:last-child { border-bottom:none; border-top:2px solid var(--gold-border,rgba(201,168,76,.3)); padding-top:8px; margin-top:4px; font-size:1.05rem; font-weight:700; color:var(--gold); }
+.tot-label { color:var(--ev-muted,#94a3b8); }
+
+.lang-btns { display:flex; gap:6px; margin-bottom:16px; }
+.lang-btn { padding:5px 14px; border:1px solid var(--border); border-radius:20px; background:var(--surface); color:var(--text); cursor:pointer; font-size:0.82rem; font-weight:600; transition:all .2s; }
+.lang-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,.08); }
+
+.gen-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+.badge-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+
+@media(max-width:600px) {
+  .inv-grid { grid-template-columns:1fr; }
+  .items-table .disc-in { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header class="ev-header">
+  <div class="container">
+    <div class="ev-header-inner">
+      <a href="{% url 'evalidator:home' %}" class="ev-logo">eVALIDATOR<span class="ev-logo-sub">.eu</span></a>
+      <nav class="ev-nav">
+        <a href="{% url 'evalidator:home' %}" class="ev-nav-link">{% trans "Validator" %}</a>
+        <a href="{% url 'evalidator:api_docs' %}" class="ev-nav-link">{% trans "API" %}</a>
+        <a href="{% url 'evalidator:pricing' %}" class="ev-nav-link">{% trans "Pricing" %}</a>
+        <button class="ev-theme-toggle" onclick="evToggleTheme()" aria-label="Toggle theme"><span class="ev-theme-icon">☀️</span></button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container" style="max-width:900px">
+  <div style="padding:24px 0 16px">
+    <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:6px">
+      📄 {% trans "E-Račun Generator" %}
+    </h1>
+    <p style="color:var(--ev-muted,#94a3b8);font-size:0.9rem;margin-bottom:10px">
+      {% trans "Generiraj UBL 2.1 XML i PDF račun besplatno. EN 16931 · PEPPOL BIS 3.0 · eIDAS pečat." %}
+    </p>
+    <div class="badge-row">
+      <span class="ev-badge ev-badge--gold">UBL 2.1</span>
+      <span class="ev-badge ev-badge--gold">EN 16931</span>
+      <span class="ev-badge">PEPPOL BIS 3.0</span>
+      <span class="ev-badge">eIDAS Art. 41</span>
+      <span class="ev-badge">PDF · XML</span>
+      <span class="ev-badge">HR · DE · EN</span>
+    </div>
+  </div>
+
+  <!-- Jezik odabir -->
+  <div class="lang-btns" id="lang-btns">
+    <button class="lang-btn {% if lang == 'hr' %}active{% endif %}" onclick="evSetLang('hr',this)">🇭🇷 Hrvatski</button>
+    <button class="lang-btn {% if lang == 'de' %}active{% endif %}" onclick="evSetLang('de',this)">🇩🇪 Deutsch</button>
+    <button class="lang-btn {% if lang == 'en' %}active{% endif %}" onclick="evSetLang('en',this)">🇬🇧 English</button>
+  </div>
+
+  <form id="inv-form" method="post" action="{% url 'evalidator:invoice_generate' %}">
+    {% csrf_token %}
+    <input type="hidden" name="lang" id="inv-lang" value="{{ lang }}">
+
+  
+  <!-- OCR Import -->
+  <div class="inv-section" id="ocr-section" style="border-color:rgba(201,168,76,0.3)">
+    <div class="inv-section-title">&#128247; <span id="ocr-title">Uvezi iz slike / PDF</span>
+      <span style="font-size:0.7rem;font-weight:400;color:var(--ev-muted);margin-left:8px">Gemini Vision AI &middot; 5/sat</span>
+    </div>
+    <div id="ocr-drop-zone"
+      style="border:2px dashed rgba(201,168,76,0.3);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:border-color .2s"
+      ondragover="event.preventDefault();this.style.borderColor='#c9a84c'"
+      ondragleave="this.style.borderColor='rgba(201,168,76,0.3)'"
+      ondrop="evOcrDrop(event)">
+      <div style="font-size:2rem;margin-bottom:8px">&#128196;</div>
+      <div style="font-size:0.9rem;color:var(--ev-muted)" id="ocr-drop-text">Povuci sliku ili PDF ovdje, ili klikni za odabir</div>
+      <div style="font-size:0.76rem;color:var(--ev-muted);margin-top:4px">JPG &middot; PNG &middot; WebP &middot; PDF &middot; max 10 MB</div>
+      <input type="file" id="ocr-file-in" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="evOcrUpload(this.files[0])">
+    </div>
+    <div id="ocr-status" style="margin-top:10px;display:none">
+      <div style="display:flex;align-items:center;gap:10px;font-size:0.88rem;color:var(--gold)">
+        <span class="ev-spinner"></span> <span id="ocr-status-text">AI analizira dokument...</span>
+      </div>
+    </div>
+    <div id="ocr-result-msg" style="margin-top:8px;display:none"></div>
+  </div>
+
+  <!-- Tip i meta -->
+    <div class="inv-section">
+      <div class="inv-section-title">🧾 <span data-t="doc_meta"></span></div>
+      <div class="inv-grid">
+        <div class="inv-field">
+          <label data-t="doc_type"></label>
+          <select name="doc_type" class="inv-select" id="doc-type-sel">
+            <option value="INV" selected data-hr="Račun" data-de="Rechnung" data-en="Invoice">Račun / Rechnung</option>
+            <option value="OFF" data-hr="Ponuda" data-de="Angebot" data-en="Quote">Ponuda / Angebot</option>
+            <option value="PRO" data-hr="Predračun" data-de="Proforma" data-en="Proforma">Predračun / Proforma</option>
+            <option value="CRD" data-hr="Odobrenje" data-de="Gutschrift" data-en="Credit note">Odobrenje / Gutschrift</option>
+          </select>
+        </div>
+        <div class="inv-field">
+          <label data-t="number"></label>
+          <input type="text" name="number" class="inv-input" value="1/{{ today|slice:':4' }}" placeholder="1/2026">
+        </div>
+        <div class="inv-field">
+          <label data-t="issue_date"></label>
+          <input type="date" name="issue_date" class="inv-input" value="{{ today }}">
+        </div>
+        <div class="inv-field">
+          <label data-t="due_date"></label>
+          <input type="date" name="due_date" class="inv-input" value="{{ due_default }}">
+        </div>
+        <div class="inv-field">
+          <label data-t="currency"></label>
+          <select name="currency" class="inv-select">
+            {% for c in currencies %}<option value="{{ c }}"{% if c == 'EUR' %} selected{% endif %}>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="inv-field">
+          <label data-t="pay_method"></label>
+          <select name="payment_method" class="inv-select">
+            <option value="T" selected data-hr="Transakcijski račun" data-de="Überweisung" data-en="Bank transfer">Bank transfer</option>
+            <option value="G" data-hr="Gotovina" data-de="Barzahlung" data-en="Cash">Cash</option>
+            <option value="K" data-hr="Kartica" data-de="Karte" data-en="Card">Card</option>
+            <option value="O" data-hr="Ostalo" data-de="Sonstige" data-en="Other">Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Izdavatelj -->
+    <div class="inv-section">
+      <div class="inv-section-title">🏢 <span data-t="seller"></span></div>
+      <div class="inv-grid">
+        <div class="inv-field" style="grid-column:span 2">
+          <label data-t="company_name"></label>
+          <input type="text" name="seller_name" class="inv-input" placeholder="Moja firma d.o.o." required>
+        </div>
+        <div class="inv-field">
+          <label>OIB / Steuer-Nr.</label>
+          <input type="text" name="seller_oib" class="inv-input mono" maxlength="11" placeholder="12345678901"
+            oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div class="inv-field">
+          <label>VAT ID (EU)</label>
+          <input type="text" name="seller_vat_id" class="inv-input mono" placeholder="HR12345678901">
+        </div>
+        <div class="inv-field" style="grid-column:span 2">
+          <label data-t="address"></label>
+          <input type="text" name="seller_address" class="inv-input" placeholder="Ilica 100, 10000 Zagreb">
+        </div>
+        <div class="inv-field">
+          <label data-t="city"></label>
+          <input type="text" name="seller_city" class="inv-input" placeholder="Zagreb">
+        </div>
+        <div class="inv-field">
+          <label data-t="country"></label>
+          <input type="text" name="seller_country" class="inv-input" value="HR" maxlength="2" style="text-transform:uppercase">
+        </div>
+        <div class="inv-field">
+          <label>Email</label>
+          <input type="email" name="seller_email" class="inv-input" placeholder="info@firma.hr">
+        </div>
+        <div class="inv-field">
+          <label>IBAN</label>
+          <input type="text" name="seller_iban" class="inv-input mono" placeholder="HR1234567890123456789"
+            oninput="this.value=this.value.replace(/\s/g,'').toUpperCase()">
+        </div>
+        <div class="inv-field">
+          <label>BIC / SWIFT</label>
+          <input type="text" name="seller_bic" class="inv-input mono" placeholder="PBZGHR2X" style="text-transform:uppercase">
+        </div>
+      </div>
+    </div>
+
+    <!-- Primatelj -->
+    <div class="inv-section">
+      <div class="inv-section-title">📬 <span data-t="buyer"></span></div>
+      <div class="inv-grid">
+        <div class="inv-field" style="grid-column:span 2">
+          <label data-t="company_name"></label>
+          <input type="text" name="buyer_name" class="inv-input" placeholder="Kupac d.o.o." required>
+        </div>
+        <div class="inv-field">
+          <label>OIB / Steuer-Nr.</label>
+          <input type="text" name="buyer_oib" class="inv-input mono" maxlength="11" placeholder="98765432100"
+            oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div class="inv-field" style="grid-column:span 2">
+          <label data-t="address"></label>
+          <input type="text" name="buyer_address" class="inv-input" placeholder="Hauptstraße 1, 10115 Berlin">
+        </div>
+        <div class="inv-field">
+          <label data-t="city"></label>
+          <input type="text" name="buyer_city" class="inv-input" placeholder="Berlin">
+        </div>
+        <div class="inv-field">
+          <label data-t="country"></label>
+          <input type="text" name="buyer_country" class="inv-input" value="HR" maxlength="2" style="text-transform:uppercase">
+        </div>
+      </div>
+    </div>
+
+    <!-- Stavke -->
+    <div class="inv-section">
+      <div class="inv-section-title">📋 <span data-t="items"></span></div>
+      <div style="overflow-x:auto">
+        <table class="items-table" id="items-tbl">
+          <thead><tr>
+            <th style="width:35%" data-t="th_desc"></th>
+            <th class="r" style="width:8%"  data-t="th_qty"></th>
+            <th style="width:7%"   data-t="th_unit"></th>
+            <th class="r" style="width:12%" data-t="th_price"></th>
+            <th class="r" style="width:8%"  data-t="th_disc"></th>
+            <th style="width:8%"   data-t="th_tax"></th>
+            <th class="r" style="width:12%" data-t="th_total"></th>
+            <th style="width:4%"></th>
+          </tr></thead>
+          <tbody id="items-body">
+            <!-- dynamically added rows -->
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:10px">
+        <button type="button" class="ev-btn" onclick="addItem()">+ <span data-t="add_item"></span></button>
+        <div class="totals-panel" id="totals-panel">
+          <div class="tot-row"><span class="tot-label" data-t="subtotal"></span><span id="t-sub">0.00</span></div>
+          <div class="tot-row" id="tax-rows"></div>
+          <div class="tot-row"><span data-t="total"></span><span id="t-total" style="font-family:monospace">0.00 <span id="t-cur">EUR</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Napomena -->
+    <div class="inv-section">
+      <div class="inv-section-title">📝 <span data-t="note_title"></span></div>
+      <textarea name="note" class="ev-textarea" rows="2" placeholder="..."></textarea>
+    </div>
+
+    <!-- Generate bar -->
+    <div class="gen-bar">
+      <button type="submit" name="action" value="preview" class="ev-btn ev-btn--gold ev-btn--lg" id="gen-btn">
+        ⚡ <span data-t="generate"></span>
+      </button>
+      <button type="submit" formaction="{% url 'evalidator:invoice_generate' %}?format=xml" class="ev-btn">
+        ↓ XML
+      </button>
+      <button type="submit" formaction="{% url 'evalidator:invoice_generate' %}?format=pdf" class="ev-btn">
+        ↓ PDF
+      </button>
+      <span style="font-size:0.8rem;color:var(--ev-muted)"><span data-t="rate_note"></span></span>
+    </div>
+  </form>
+
+  <!-- Info -->
+  <div style="margin:24px 0;padding:16px 20px;border:1px solid var(--border);border-radius:var(--radius-lg);font-size:0.85rem;color:var(--ev-muted,#94a3b8)">
+    <strong style="color:var(--gold)">🔒 GDPR & eIDAS</strong> —
+    {% trans "Podaci se NE pohranjuju na serveru. Račun se generira u memoriji i briše. eIDAS pečat = SHA-256 hash radi verifikacije integriteta." %}
+    &nbsp;·&nbsp;
+    <a href="{% url 'evalidator:api_docs' %}" class="ev-link-gold">{% trans "API dokumentacija" %}</a>
+  </div>
+</main>
+
+<script>
+// ── Prijevodi UI labela ──────────────────────────────────────────
+const T = {
+  hr: {
+    doc_meta:"Dokument", doc_type:"Tip dokumenta", number:"Broj računa",
+    issue_date:"Datum izdavanja", due_date:"Rok plaćanja", currency:"Valuta", pay_method:"Način plaćanja",
+    seller:"Izdavatelj", buyer:"Primatelj / Kupac", company_name:"Naziv tvrtke",
+    address:"Adresa", city:"Grad / PLZ", country:"Zemlja (ISO 2)",
+    items:"Stavke", add_item:"Dodaj stavku",
+    th_desc:"Opis", th_qty:"Kol.", th_unit:"Jed.", th_price:"Jed. cijena", th_disc:"Pop.%", th_tax:"PDV%", th_total:"Iznos",
+    subtotal:"Osnovica", total:"UKUPNO",
+    note_title:"Napomena",
+    generate:"Generiraj pregled", rate_note:"10 računa/sat besplatno",
+  },
+  de: {
+    doc_meta:"Dokument", doc_type:"Dokumenttyp", number:"Rechnungsnummer",
+    issue_date:"Rechnungsdatum", due_date:"Fälligkeitsdatum", currency:"Währung", pay_method:"Zahlungsart",
+    seller:"Auftragnehmer", buyer:"Auftraggeber / Kunde", company_name:"Firmenname",
+    address:"Adresse", city:"Stadt / PLZ", country:"Land (ISO 2)",
+    items:"Positionen", add_item:"Position hinzufügen",
+    th_desc:"Beschreibung", th_qty:"Menge", th_unit:"Einh.", th_price:"Einzelpreis", th_disc:"Rabatt", th_tax:"MwSt%", th_total:"Betrag",
+    subtotal:"Nettobetrag", total:"GESAMT",
+    note_title:"Hinweis",
+    generate:"Vorschau generieren", rate_note:"10 Rechnungen/Stunde kostenlos",
+  },
+  en: {
+    doc_meta:"Document", doc_type:"Document type", number:"Invoice number",
+    issue_date:"Issue date", due_date:"Due date", currency:"Currency", pay_method:"Payment method",
+    seller:"From / Seller", buyer:"To / Buyer", company_name:"Company name",
+    address:"Address", city:"City / Postcode", country:"Country (ISO 2)",
+    items:"Line items", add_item:"Add item",
+    th_desc:"Description", th_qty:"Qty", th_unit:"Unit", th_price:"Unit price", th_disc:"Disc%", th_tax:"VAT%", th_total:"Amount",
+    subtotal:"Subtotal", total:"TOTAL",
+    note_title:"Note",
+    generate:"Generate preview", rate_note:"10 invoices/hour free",
+  },
+};
+
+let _lang = "{{ lang }}";
+let _itemCount = 0;
+
+function evSetLang(lang, btn) {
+  _lang = lang;
+  document.getElementById("inv-lang").value = lang;
+  document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const t = T[_lang] || T.hr;
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const k = el.getAttribute("data-t");
+    if (t[k]) el.textContent = t[k];
+  });
+  // doc_type options
+  document.querySelectorAll("#doc-type-sel option").forEach(opt => {
+    const v = opt.getAttribute("data-" + _lang);
+    if (v) opt.textContent = v;
+  });
+  // pay method options
+  document.querySelectorAll("select[name=payment_method] option").forEach(opt => {
+    const v = opt.getAttribute("data-" + _lang);
+    if (v) opt.textContent = v;
+  });
+  recalcTotals();
+}
+
+// ── Stavke ──────────────────────────────────────────────────────
+const UNITS = {{ units|safe }};
+const TAX_RATES = {{ tax_rates|safe }};
+
+function addItem() {
+  const idx = _itemCount++;
+  const t = T[_lang] || T.hr;
+  const tbody = document.getElementById("items-body");
+  const tr = document.createElement("tr");
+  tr.id = "item-row-" + idx;
+  tr.innerHTML = `
+    <td><input type="text" name="item_desc_${idx}" placeholder="${t.th_desc}" required></td>
+    <td><input type="number" name="item_qty_${idx}" class="qty-in" value="1" min="0.001" step="any" oninput="recalcTotals()"></td>
+    <td>
+      <select name="item_unit_${idx}">
+        ${UNITS.map(u => `<option value="${u}"${u==='kom'?' selected':''}>${u}</option>`).join('')}
+      </select>
+    </td>
+    <td><input type="number" name="item_price_${idx}" class="price-in" value="0.00" min="0" step="0.01" oninput="recalcTotals()"></td>
+    <td><input type="number" name="item_disc_${idx}" class="disc-in" value="0" min="0" max="100" step="0.1" oninput="recalcTotals()"></td>
+    <td>
+      <select name="item_tax_${idx}" class="tax-sel" onchange="recalcTotals()">
+        ${TAX_RATES.map(r => `<option value="${r}"${r==='25'?' selected':''}>${r}%</option>`).join('')}
+      </select>
+    </td>
+    <td class="r item-total" id="item-total-${idx}">0.00</td>
+    <td><button type="button" class="del-btn" onclick="delItem(${idx})">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  recalcTotals();
+}
+
+function delItem(idx) {
+  const row = document.getElementById("item-row-" + idx);
+  if (row) row.remove();
+  recalcTotals();
+}
+
+function recalcTotals() {
+  const rows = document.querySelectorAll("#items-body tr");
+  let subtotal = 0, tax_total = 0;
+  const taxGroups = {};
+  const cur = document.querySelector("select[name=currency]")?.value || "EUR";
+
+  rows.forEach(tr => {
+    const idx = tr.id.replace("item-row-", "");
+    const qty   = parseFloat(tr.querySelector(`[name=item_qty_${idx}]`)?.value) || 0;
+    const price = parseFloat(tr.querySelector(`[name=item_price_${idx}]`)?.value) || 0;
+    const disc  = parseFloat(tr.querySelector(`[name=item_disc_${idx}]`)?.value) || 0;
+    const tax   = parseFloat(tr.querySelector(`[name=item_tax_${idx}]`)?.value) || 0;
+
+    const gross = qty * price;
+    const sub   = gross * (1 - disc / 100);
+    const taxA  = sub * tax / 100;
+    const tot   = sub + taxA;
+
+    subtotal  += sub;
+    tax_total += taxA;
+
+    const rk = tax.toFixed(0);
+    if (!taxGroups[rk]) taxGroups[rk] = {taxable: 0, tax: 0};
+    taxGroups[rk].taxable += sub;
+    taxGroups[rk].tax     += taxA;
+
+    const cell = document.getElementById("item-total-" + idx);
+    if (cell) cell.textContent = tot.toFixed(2);
+  });
+
+  const total = subtotal + tax_total;
+  document.getElementById("t-sub").textContent  = subtotal.toFixed(2);
+  document.getElementById("t-total").innerHTML  = `${total.toFixed(2)} <span id="t-cur">${cur}</span>`;
+
+  // tax breakdown rows
+  const taxDiv = document.getElementById("tax-rows");
+  const t = T[_lang] || T.hr;
+  taxDiv.innerHTML = Object.entries(taxGroups).sort((a,b)=>b[0]-a[0]).map(([r,g]) =>
+    `<span class="tot-label">${t.total === 'TOTAL' ? 'VAT' : (t.total === 'GESAMT' ? 'MwSt.' : 'PDV')} ${r}%</span><span>${g.tax.toFixed(2)}</span>`
+  ).join("");
+  document.getElementById("t-cur").textContent = cur;
+}
+
+// ── Helpers ──────────────────────────────────────────────────────
+function evToggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute("data-theme") === "light" ? "dark" : "light";
+  html.setAttribute("data-theme", next);
+  localStorage.setItem("ev-theme", next);
+  document.querySelector(".ev-theme-icon").textContent = next === "light" ? "🌙" : "☀️";
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+applyTranslations();
+addItem();  // jedna stavka po defaultu
+</script>
+</body>
+</html>
