@@ -83,11 +83,11 @@
     </div>
     <div class="ev-stats">
       <div class="ev-stat">
-        <span class="ev-stat-n">{{ stats.total|default:"0" }}</span>
+        <span class="ev-stat-n" id="stat-total">{{ stats.total|default:"0" }}</span>
         <span class="ev-stat-l">{% trans "Ukupno provjera" %}</span>
       </div>
       <div class="ev-stat">
-        <span class="ev-stat-n">{{ stats.today|default:"0" }}</span>
+        <span class="ev-stat-n" id="stat-today">{{ stats.today|default:"0" }}</span>
         <span class="ev-stat-l">{% trans "Danas" %}</span>
       </div>
       <div class="ev-stat">
@@ -102,6 +102,8 @@
       <button class="ev-tab active" role="tab" aria-selected="true" aria-controls="panel-oib" onclick="evSwitchTab('oib',this)">🇭🇷 OIB</button>
       <button class="ev-tab" role="tab" aria-selected="false" aria-controls="panel-iban" onclick="evSwitchTab('iban',this)">🏦 IBAN</button>
       <button class="ev-tab" role="tab" aria-selected="false" aria-controls="panel-vat" onclick="evSwitchTab('vat',this)">🇪🇺 VAT ID</button>
+      <button class="ev-tab" role="tab" aria-selected="false" aria-controls="panel-batch" onclick="evSwitchTab('batch',this)">⚡ {% trans "Batch" %}</button>
+      <button class="ev-tab" role="tab" aria-selected="false" aria-controls="panel-company" onclick="evSwitchTab('company',this)">🏢 {% trans "Firma" %}</button>
     </div>
 
     <!-- OIB -->
@@ -180,18 +182,95 @@
         <div id="result-vat" role="status" aria-live="polite"></div>
       </div>
     </div>
+
+    <!-- BATCH -->
+    <div id="panel-batch" class="ev-tab-panel" role="tabpanel">
+      <div class="ev-batch-intro">
+        <p>{% trans "Validiraj do 100 OIB/IBAN/VAT stavki odjednom. Jedan po liniji ili zarezom odvojen." %}</p>
+      </div>
+      <div class="ev-input-group">
+        <textarea id="batch-input" class="ev-textarea" rows="6"
+          placeholder="12345678901&#10;HR1234567890123456789012&#10;DE123456789&#10;..."
+          aria-label="Batch input"></textarea>
+        <div class="ev-batch-controls">
+          <select id="batch-type" class="ev-select" aria-label="Type">
+            <option value="oib">OIB</option>
+            <option value="iban">IBAN</option>
+            <option value="vat">VAT ID</option>
+          </select>
+          <button class="ev-btn ev-btn--gold" onclick="evRunBatch()" id="batch-btn">
+            ⚡ {% trans "Validiraj sve" %}
+          </button>
+          <button class="ev-btn" onclick="evDownloadBatch()" id="batch-dl-btn" style="display:none">
+            ↓ CSV
+          </button>
+        </div>
+      </div>
+      <div id="batch-progress" style="display:none" class="ev-batch-progress">
+        <div class="ev-spinner"></div> <span id="batch-progress-text">{% trans "Provjera…" %}</span>
+      </div>
+      <div id="batch-results" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- COMPANY -->
+    <div id="panel-company" class="ev-tab-panel" role="tabpanel">
+      <div class="ev-input-group">
+        <input type="text" name="oib" maxlength="11"
+          placeholder="{% trans "OIB → naziv firme iz Sudskog registra" %}"
+          class="ev-input"
+          hx-post="{% url 'evalidator:validate_company' %}"
+          hx-trigger="keyup changed delay:600ms"
+          hx-target="#result-company"
+          hx-indicator="#spin-company"
+          oninput="this.value=this.value.replace(/\D/g,'')"
+          autocomplete="off"
+          aria-label="OIB company lookup">
+        <div class="ev-input-hint">{% trans "Pretraži Sudski registar RH po OIB-u — naziv, MBS, status, sjedište" %}</div>
+      </div>
+      <div class="ev-result-area">
+        <span id="spin-company" class="htmx-indicator ev-result-loading">
+          <span class="ev-spinner"></span> {% trans "Pretraga registra…" %}
+        </span>
+        <div id="result-company" role="status" aria-live="polite"></div>
+      </div>
+    </div>
   </div>
 
   <div class="ev-api-section">
     <h2>⚡ REST API — {% trans "besplatno" %}</h2>
     <p>{% trans "Integriraj eValidator u svoju aplikaciju. 100 provjera/dan besplatno, bez registracije." %}</p>
-    <pre>GET https://evalidator.eu/api/v1/oib/?oib=12345678901
+    <pre>GET https://evalidator.eu/api/v1/oib/?oib=12345678901&company=1
 
-{"oib":"12345678901","valid":true,"algorithm":"ISO 7064 MOD 11,10","country":"HR"}</pre>
-    <div style="margin-top:12px">
+{"oib":"12345678901","valid":true,"company":{"name":"Moja firma d.o.o.","mbs":"012345678","status":"aktivan"}}</pre>
+    <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
       <a href="{% url 'evalidator:api_docs' %}" class="ev-link-gold">→ {% trans "Puna API dokumentacija" %}</a>
+      <a href="{% url 'evalidator:pricing' %}" class="ev-link-gold">→ {% trans "Batch API za enterprise" %}</a>
     </div>
   </div>
+
+  <!-- eArhivator CTA -->
+  <div class="ev-cta-arhivator">
+    <div class="ev-cta-arhivator-inner">
+      <div class="ev-cta-arhivator-icon">📁</div>
+      <div class="ev-cta-arhivator-text">
+        <h3>{% trans "Arhiviraj dokumente s pravnim pečatom" %}</h3>
+        <p>{% trans "eArhivator — besplatno OCR skeniranje, AI strukturiranje i RFC 3161 vremenski žig. Validirani podaci izravno u arhivu." %}</p>
+        <div class="ev-cta-badges">
+          <span class="ev-badge ev-badge--gold">RFC 3161 TSA</span>
+          <span class="ev-badge">eIDAS Art. 41</span>
+          <span class="ev-badge">AI OCR</span>
+          <span class="ev-badge">10 {% trans "besplatnih skenova" %}</span>
+        </div>
+      </div>
+      <div class="ev-cta-arhivator-action">
+        <a href="https://arhivator.eu/start/" class="ev-btn ev-btn--gold ev-btn--lg" target="_blank" rel="noopener">
+          {% trans "Isprobaj besplatno" %} →
+        </a>
+        <div style="font-size:0.78rem;color:var(--ev-muted);margin-top:6px;text-align:center">{% trans "Nema registracije" %} · Magic link</div>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <footer class="ev-footer">
@@ -234,6 +313,94 @@ function evToggleTheme() {
   const icon = document.querySelector('.ev-theme-icon');
   if (icon) icon.textContent = t === 'light' ? '🌙' : '☀️';
 })();
+
+// Batch validation
+let _batchResults = [];
+
+async function evRunBatch() {
+  const raw = document.getElementById('batch-input').value.trim();
+  const type = document.getElementById('batch-type').value;
+  if (!raw) return;
+
+  const values = raw.split(/[\n,;]+/).map(v => v.trim()).filter(Boolean);
+  if (values.length > 100) {
+    document.getElementById('batch-results').innerHTML =
+      '<div class="result-invalid">Max 100 stavki. Vi imate ' + values.length + '.</div>';
+    return;
+  }
+
+  const items = values.map(v => ({type: type, value: v}));
+  const btn = document.getElementById('batch-btn');
+  const prog = document.getElementById('batch-progress');
+  const progText = document.getElementById('batch-progress-text');
+  btn.disabled = true;
+  prog.style.display = 'flex';
+  progText.textContent = 'Provjera ' + items.length + ' stavki...';
+
+  try {
+    const resp = await fetch('/api/v1/batch/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': evGetCsrf()},
+      body: JSON.stringify({items: items})
+    });
+    const data = await resp.json();
+    _batchResults = data.results || [];
+    renderBatchResults(data);
+  } catch(e) {
+    document.getElementById('batch-results').innerHTML =
+      '<div class="result-invalid">Greška: ' + e.message + '</div>';
+  } finally {
+    btn.disabled = false;
+    prog.style.display = 'none';
+  }
+}
+
+function renderBatchResults(data) {
+  const el = document.getElementById('batch-results');
+  const dlBtn = document.getElementById('batch-dl-btn');
+  if (!data.results || !data.results.length) { el.innerHTML = ''; return; }
+
+  let html = '<div class="ev-batch-summary">';
+  html += '<span class="ev-badge ev-badge--gold">✓ ' + data.valid + ' ispravnih</span> ';
+  html += '<span class="ev-badge" style="border-color:var(--ev-red,#e55)">✗ ' + data.invalid + ' neispravnih</span>';
+  html += ' <span class="ev-badge">' + data.count + ' ukupno</span></div>';
+
+  html += '<div class="ev-batch-list">';
+  data.results.forEach(r => {
+    const cls = r.valid ? 'ev-batch-item ev-batch-item--valid' : 'ev-batch-item ev-batch-item--invalid';
+    html += '<div class="' + cls + '">';
+    html += '<span class="ev-batch-icon">' + (r.valid ? '✓' : '✗') + '</span>';
+    html += '<span class="ev-batch-value">' + escHtml(r.value) + '</span>';
+    html += '<span class="ev-batch-msg">' + escHtml(r.message) + '</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  el.innerHTML = html;
+  dlBtn.style.display = 'inline-flex';
+}
+
+function evDownloadBatch() {
+  if (!_batchResults.length) return;
+  let csv = 'type,value,valid,message\n';
+  _batchResults.forEach(r => {
+    csv += [r.type, r.value, r.valid, r.message].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'evalidator-batch.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function evGetCsrf() {
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 </script>
 </body>
 </html>

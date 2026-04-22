@@ -1,0 +1,26 @@
+{% if valid %}
+  {% if company and company.found %}
+  <div class="result-valid">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="font-size:1.3rem">✓</span>
+      <strong>{{ company.name }}</strong>
+    </div>
+    <div class="ev-company-card">
+      {% if company.mbs %}<div class="ev-company-row"><span class="ev-company-label">MBS</span><span>{{ company.mbs }}</span></div>{% endif %}
+      {% if company.status %}<div class="ev-company-row"><span class="ev-company-label">Status</span><span class="{% if 'aktivn' in company.status|lower %}ev-status-active{% else %}ev-status-inactive{% endif %}">{{ company.status }}</span></div>{% endif %}
+      {% if company.address %}<div class="ev-company-row"><span class="ev-company-label">Sjedište</span><span>{{ company.address }}</span></div>{% endif %}
+      <div class="ev-company-row"><span class="ev-company-label">OIB</span><span>{{ oib }}</span></div>
+    </div>
+  </div>
+  {% else %}
+  <div class="result-valid" style="background:rgba(201,168,76,0.08);border-color:rgba(201,168,76,0.3)">
+    <span style="font-size:1.1rem">✓</span>
+    <span>{{ message }}</span>
+    <div style="margin-top:6px;font-size:0.82rem;color:var(--ev-muted)">OIB: {{ oib }} — fizička osoba ili obrt nije u Sudskom registru</div>
+  </div>
+  {% endif %}
+{% elif message %}
+<div class="result-invalid">
+  <span style="font-size:1.1rem">✗</span> {{ message }}
+</div>
+{% endif %}
