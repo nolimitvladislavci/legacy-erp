@@ -213,83 +213,13 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 
 ---
 
-## KONTEKST SESIJE
+## KONTEKST SESIJE (2026-04-23)
 
-### [S-012] --- 2026-04-22 (E-Račun generator na evalidator.eu)
-**Branch:** master
-**Zadnji commit:** 7b112982 feat(evalidator): E-Račun generator UBL 2.1 + OCR import
-**Kontekst:** evalidator.eu dobio standalone e-invoice generator — potpuno neovisan od Fenix V3,
-radi bez modela (stateless). invoice_service.py: UBL 2.1 XML generator (dict-based),
-PEPPOL BIS 3.0, EN 16931, ISO 7064 units, TaxTotal grupiran po stopi.
-views_invoice.py: GET forma, POST→preview+XML+PDF, session download, rate 10/h.
-views_invoice_ocr.py: Gemini Vision 1.5-flash — foto/PDF DOS programa → JSON auto-fill
-forme (5 OCR/sat, 10MB max). PDF via WeasyPrint s eIDAS pečatom (QR kod verifikacije).
-3 jezika: HR/DE/EN — label dict + lang auto-detect iz Accept-Language i seller_country.
-landing.html dobio 6. tab E-Račun s feature gridom i CTA. Open: FENIX V3 integracija
-(copy invoice XML iz arhivator TempArhivaEntry), .dokarh format za export, bunker veza.
+Sesija 57. — CC_TASK_NOLIMIT_SERVIS.md:
 
+1. Pravopis no_limit.html — 73 dijakritičke ispravke. Backup: no_limit_backup_20260423.html
+2. OSS kartice — 5 novih doc-kartica u .dokumenti-section: folija-py/js/go/dotnet, OpenDOK-2026.
+3. Trust Badge v2.0 — data-folija-seal, chain pulse animacija, expanded panel.
 
-### [S-011] --- 2026-04-22 (eValidator V2 + Trojan Horse PWA)
-**Branch:** master
-**Zadnji commit:** 40e51af6 feat(evalidator): batch API + VIES + company lookup + Redis
-**Kontekst:** Dva sustava unaprijeđena iste sesije. (1) Fenix V3: novi PWA modul arhivator.eu
-— TempUploader/TempArhivaEntry modeli, magic link auth, 10 besplatnih skenova, Celery OCR,
-SSE real-time via Redis pub/sub, CSV export, UTM upgrade funnel — Trojan Horse za Synesis 
-akviziciju računovođa. Nginx arhivator.eu→/pub/arhiva/* proxy live. (2) Fina-Connect: 
-eValidator V2 — batch API (max 100, OIB/IBAN/VAT), _vies_lookup() VIES EU REST, 
-_sudreg_lookup() Sudski registar + 24h cache, validate_company view, Redis HyperLogLog
-live counters (ev:cnt:total/today, ev:hll:ips), 5 tabova na landing (novi Batch+Firma),
-eArhivator CTA block. api_status v2.0 sa live stats. Dokarh.py untracked — .dokarh format
-stub čeka integraciju. Open: arhivator.eu SSL (certbot nakon DNS), .dokarh integracija u
-TempArhivaEntry export, CC_TASK_COMMAND_CENTER_FAZA2.
-
-
-### [S-010] --- 2026-04-21 (Global Notary — Stari ERP)
-**Branch:** master
-**Zadnji commit:** 203de5f3 feat(notary): auto DocumentSeal za sve fakture
-**Kontekst:** Stari ERP (fina-connect.online) dobio auto DocumentSeal za sve fakture pri 
-status prijelazu u SENT/CONFIRMED/FISCALIZED. Idempotentno po sha256_hash metapodataka. 
-GoBD 10g čuvanje (expires_at = now + 3652d). Hookano na isti pre_save signal koji 
-prati status promjene za auto-knjiženje. Globalno: radi za sve 109 aktivnih kompanija 
-bez konfiguracije.
-
-
-
-
-### [S-009] --- 2026-04-21 16:10
-**Branch:** master
-**Zadnji commit:** 1ebfab7c feat(chainblock): live verification UI + trust-badge.js widget na NO LIMIT landingu
-**Kontekst:** ChainBlock Objelodanjivanje task DONE: live verification UI na landing.html, trust-badge.js embeddable widget. Kolateralna provjera: fenix-v3 OPG narudžba + edu booking backend LIVE.
-### [S-008] --- 2026-04-21 13:15
-**Sustav:** fina-connect (fina-connect.online) + fenix-v3 (limit-connect.com)
-**Zadnji commit fina:** 978594e feat(chainblock): live verification UI + Trust Badge widget
-**Zadnji commit fenix:** 0d81c55 feat(chainblock): LC-DS-2026-001/002/003 pecaceni
-**Kontekst:** ChainBlock Objelodanjivanje DONE (P0): (A) Genesis card live API fetch + custom token verify input na landing.html. (B) 3 Ustav dokumenta zapecacena kao ChainBlock blokovi 1-3 (LC-DS-2026-001/002/003) — sve 3 verified:true, integrity:ok. LIMIT_CONNECT_USTAV_v1.md: real genesis hash 66c8d286. (C) trust-badge.js embeddable widget 3 linije ugradnje. Open: collectstatic za trust-badge.js.
-
-
-### [S-007] --- 2026-04-21 12:45
-**Sustav:** fenix-v3 (limit-connect.com)
-**Branch:** master
-**Zadnji commit:** 576659f feat(celery): POS beat schedule
-**Kontekst:** POS Integration sesija DOVRSENA: 5 faza, 61 testova, migracije 0009-0014. HashChain+Shamir, AI Anomaly z-score, Industry Benchmark k-anonimnost. Sve 3 ideje iz buducnosti implementirane. Celery Beat: anomaly 6h + benchmark 02:30. gunicorn-fenix-v3 reloadan.
-
-
-
-### [S-003] --- 2026-04-21 11:15
-**Branch:** master
-**Zadnji commit:** 97df8291 docs(memory): log-session S-002 verifikacija dual-system alata
-**Kontekst:** POS modul audit + fix: 6 production crasheva (signals.py rewrite, POSReceipt 7 novih polja, POSCompany country/fiscal_exempt, POSTierConfig cancelled→is_cancelled typo, tasks.py pos_settings+buyer_oib, views.py slug→terminal_id, close_session Decimal TypeError). Migracija 0009. Tests: 29/29 (0→29). Open: DE/AT/SI fiscal stubs, templates/components prazni, inventory model nedostaje.
-
-### [S-002] --- 2026-04-21 10:21
-**Branch:** master
-**Zadnji commit:** 9c1656b7 docs(memory): implement 3-layer session memory system
-**Kontekst:** Verifikacija dual-system log-session alata — fina-connect strana.
-
-### [S-001] — 2026-04-21 10:13
-**Branch:** master  
-**Zadnji commit:** fix(no-limit): send_whatsapp → send_text alias; ruff exclude var/ i _scripts/  
-**Kontekst:** Implementiran 3-slojni memory sistem: ADR, IDEAS, KONTEKST SESIJE, pre-commit hook, log-session CLI. Open: weekly digest odgođen za sprint +2.
-> CC ažurira ovu sekciju na kraju svake sesije.
-> Maksimalno 10 rečenica. Što je razgovarano, koje su open threads.
-
-
+Commit: 2be4997a feat(nolimit): pravopis + OSS kartice + trust-badge v2.0
+Open: no_limit_backup_20260423.html cisti u sljedecoj sesiji.
