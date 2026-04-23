@@ -169,7 +169,12 @@ def login_view(request):
                 return redirect("superadmin_dashboard")
             return redirect("dashboard")
 
+    # memio.pet branded login template
+    _host = request.get_host().split(":")[0].lower()
+    _login_tpl = "registration/login_memio_pet.html" if "memio" in _host else _login_tpl
+
     if request.method == "POST":
+
         from django.contrib.auth.models import User as AuthUser
 
         email = request.POST.get("email", "").strip().lower()
@@ -194,7 +199,7 @@ def login_view(request):
                 errors.append("Ne postoji racun s ovom email adresom ili korisnickim imenom.")
                 return render(
                     request,
-                    "registration/login.html",
+                    _login_tpl,
                     {
                         "errors": errors,
                         "email_value": email,
@@ -206,7 +211,7 @@ def login_view(request):
                 errors.append("Pogresna lozinka. Pokusajte ponovo ili resetirajte lozinku.")
                 return render(
                     request,
-                    "registration/login.html",
+                    _login_tpl,
                     {
                         "errors": errors,
                         "email_value": email,
@@ -224,7 +229,7 @@ def login_view(request):
                     errors.append("Vaš račun je deaktiviran. Kontaktirajte administratora.")
                 return render(
                     request,
-                    "registration/login.html",
+                    _login_tpl,
                     {
                         "errors": errors,
                         "email_value": email,
@@ -310,7 +315,7 @@ def login_view(request):
 
         return render(
             request,
-            "registration/login.html",
+            _login_tpl,
             {
                 "errors": errors,
                 "email_value": email,
@@ -321,7 +326,7 @@ def login_view(request):
     prefill_email = request.GET.get("email", "")
     return render(
         request,
-        "registration/login.html",
+        _login_tpl,
         {
             "success_msg": success_msg,
             "email_value": prefill_email,
