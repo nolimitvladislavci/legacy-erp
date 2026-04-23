@@ -729,33 +729,50 @@ def landing_page(request):
     })
 
 
-@login_required
 def breeder_dashboard(request):
+    """PLAN-010: Dashboard za uzgajivace/vlasnike — session ili Django auth."""
     db = "memio_pets"
-    breeder = BreederProfile.objects.using(db).filter(user_id=request.user.pk).first()
+    breeder = None
+
+    # 1. Session-based auth (memio.pet native — bez Django korisnika)
+    bp_pk = request.session.get("memio_breeder_pk")
+    if bp_pk:
+        try:
+            import uuid as _uuid
+            breeder = BreederProfile.objects.using(db).filter(pk=_uuid.UUID(str(bp_pk))).first()
+        except (ValueError, Exception):
+            pass
+
+    # 2. Django user auth (fallback)
+    if not breeder and request.user.is_authenticated:
+        breeder = BreederProfile.objects.using(db).filter(user_id=request.user.pk).first()
+        if not breeder:
+            breeder = BreederProfile.objects.using(db).filter(email=request.user.email).first()
+            if breeder:
+                breeder.user_id = request.user.pk
+                breeder.save(using=db, update_fields=["user_id"])
+
     if not breeder:
-        breeder = BreederProfile.objects.using(db).filter(email=request.user.email).first()
-        if breeder:
-            breeder.user_id = request.user.pk
-            breeder.save(using=db, update_fields=["user_id"])
-    if not breeder:
-        messages.info(request, _("Nemate profil. Kreirajte ga."))
-        return redirect("memio_pet:registracija")
+        return redirect("memio_pet:prijava")
+
     animals = list(AnimalProfile.objects.using(db).filter(breeder=breeder).order_by("-created_at"))
     reviews = list(
-        BreederReview.objects.using(db).filter(breeder=breeder, is_published=True).order_by("-created_at")[:10]
+        BreederReview.objects.using(db).filter(breeder=breeder, is_published=True).order_by("-created_at")[:5]
     )
-    trust_score = breeder.trust_score
-    trust_color = "#28a745" if trust_score >= 80 else "#ffc107" if trust_score >= 50 else "#dc3545"
+    trust_score = breeder.trust_score or 0
+    trust_tier = "gold" if trust_score >= 80 else "silver" if trust_score >= 50 else "bronze"
+
     return render(
         request,
-        "memio_pet/dashboard.html",
+        "memio/dashboard.html",
         {
             "breeder": breeder,
             "animals": animals,
             "reviews": reviews,
             "trust_score": trust_score,
-            "trust_color": trust_color,
+            "trust_tier": trust_tier,
+            "has_pin": bool(breeder.login_pin_hash),
+            "total_animals": len(animals),
         },
     )
 
@@ -1036,7 +1053,7 @@ def memorial_candle_api(request, chip_or_tag):
 
 
 def prijava(request):
-    """Prijava postojećeg korisnika — email lookup → session."""
+    """Prijava postojećeg korisnika — email lookup → PIN login (ako ima PIN) ili session."""
     error = None
     email_value = ""
 
@@ -1048,6 +1065,10 @@ def prijava(request):
         else:
             bp = BreederProfile.find_by_email(email)
             if bp:
+                if bp.login_pin_hash:
+                    # Korisnik ima PIN — redirect na PIN login
+                    return redirect("memio_pet:pin_login", breeder_pk=bp.pk)
+                # Bez PIN-a — direktna prijava
                 request.session["memio_breeder_pk"] = str(bp.pk)
                 request.session["memio_breeder_email"] = bp.email
                 request.session.set_expiry(86400 * 7)
@@ -1057,7 +1078,7 @@ def prijava(request):
 
     return render(
         request,
-        "memio_pet/prijava.html",
+        "memio/prijava.html",
         {
             "error": error,
             "email_value": email_value,
@@ -2091,3 +2112,93 @@ body{background:#1a1a2e;color:#f8f6f0;font-family:'Inter',system-ui,sans-serif;m
     response["Content-Disposition"] = 'attachment; filename="' + filename + '"'
     response["X-Folija-Hash"] = payload_hash[:16]
     return response
+
+def pin_setup(request):
+    """PLAN-011: Postavljanje ili promjena PIN-a za brzi login."""
+    import hashlib
+    from django.utils import timezone
+
+    db = "memio_pets"
+    bp_pk = request.session.get("memio_breeder_pk")
+    if not bp_pk:
+        return redirect("memio_pet:prijava")
+
+    bp = BreederProfile.objects.using(db).filter(pk=bp_pk).first()
+    if not bp:
+        return redirect("memio_pet:prijava")
+
+    error = None
+    success = False
+
+    if request.method == "POST":
+        pin = request.POST.get("pin", "").strip()
+        pin_confirm = request.POST.get("pin_confirm", "").strip()
+        if len(pin) < 4 or not pin.isdigit():
+            error = "PIN mora biti broj od 4-6 znamenki."
+        elif pin != pin_confirm:
+            error = "PIN-ovi se ne poklapaju."
+        else:
+            pin_hash = hashlib.sha256(pin.encode()).hexdigest()
+            bp.login_pin_hash = pin_hash
+            bp.login_pin_attempts = 0
+            bp.login_pin_locked_until = None
+            bp.save(using=db, update_fields=["login_pin_hash", "login_pin_attempts", "login_pin_locked_until"])
+            success = True
+
+    return render(request, "memio/pin_setup.html", {
+        "bp": bp,
+        "error": error,
+        "success": success,
+    })
+
+
+def pin_login(request, breeder_pk):
+    """PLAN-011: PIN login za poznati profil."""
+    import hashlib
+    from django.utils import timezone
+    from datetime import timedelta
+
+    db = "memio_pets"
+    bp = BreederProfile.objects.using(db).filter(pk=breeder_pk).first()
+    if not bp or not bp.login_pin_hash:
+        return redirect("memio_pet:prijava")
+
+    error = None
+    locked = False
+
+    if bp.login_pin_locked_until and bp.login_pin_locked_until > timezone.now():
+        locked = True
+        mins_left = int((bp.login_pin_locked_until - timezone.now()).seconds / 60) + 1
+        error = f"Previše neuspjelih pokušaja. Pokušaj ponovo za {mins_left} min."
+    elif request.method == "POST":
+        pin = request.POST.get("pin", "").strip()
+        if not pin.isdigit():
+            error = "PIN mora biti broj."
+        else:
+            pin_hash = hashlib.sha256(pin.encode()).hexdigest()
+            if pin_hash == bp.login_pin_hash:
+                # Uspješna prijava
+                bp.login_pin_attempts = 0
+                bp.login_pin_locked_until = None
+                bp.save(using=db, update_fields=["login_pin_attempts", "login_pin_locked_until"])
+                request.session["memio_breeder_pk"] = str(bp.pk)
+                request.session["memio_breeder_email"] = bp.email
+                request.session.set_expiry(86400 * 7)
+                return redirect("memio_pet:breeder_profile", breeder_id=bp.pk)
+            else:
+                bp.login_pin_attempts = (bp.login_pin_attempts or 0) + 1
+                if bp.login_pin_attempts >= 5:
+                    bp.login_pin_locked_until = timezone.now() + timedelta(minutes=15)
+                    bp.login_pin_attempts = 0
+                    error = "Previše pokušaja. Profil zakljucan na 15 minuta."
+                    locked = True
+                else:
+                    remaining = 5 - bp.login_pin_attempts
+                    error = f"Pogrešan PIN. Još {remaining} pokušaj/a."
+                bp.save(using=db, update_fields=["login_pin_attempts", "login_pin_locked_until"])
+
+    return render(request, "memio/pin_login.html", {
+        "bp": bp,
+        "error": error,
+        "locked": locked,
+    })

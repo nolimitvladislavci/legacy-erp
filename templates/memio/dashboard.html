@@ -1,0 +1,238 @@
+{% extends "memio/base.html" %}
+{% load i18n static %}
+
+{% block title %}Moj profil — memio.pet{% endblock %}
+{% block meta_desc %}Upravljajte profilom i ljubimcima na memio.pet.{% endblock %}
+
+{% block extra_css %}
+<style>
+.dash-wrap{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+.dash-hero{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px 32px;margin-bottom:24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.dash-avatar{width:80px;height:80px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;flex-shrink:0;background:var(--ink-l)}
+.dash-avatar img{width:100%;height:100%;object-fit:cover}
+.dash-avatar-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.2rem}
+.dash-info{flex:1;min-width:200px}
+.dash-name{font-size:1.5rem;font-weight:700}
+.dash-email{font-size:.82rem;color:var(--muted);margin-top:2px}
+.dash-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.dash-badge{padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700}
+.dash-badge-gold{background:rgba(201,168,76,.2);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+.dash-badge-green{background:rgba(72,199,142,.15);color:#48c78e;border:1px solid rgba(72,199,142,.3)}
+.dash-badge-muted{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)}
+.dash-actions{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+/* Trust meter */
+.trust-bar-wrap{margin-top:10px}
+.trust-label{font-size:.72rem;color:var(--muted);margin-bottom:4px}
+.trust-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;max-width:200px}
+.trust-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.trust-fill-gold{background:linear-gradient(90deg,#c9a84c,#e8c96a)}
+.trust-fill-silver{background:linear-gradient(90deg,#8888aa,#aaaacc)}
+.trust-fill-bronze{background:linear-gradient(90deg,#cd7f32,#e8a455)}
+/* Stats row */
+.dash-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 16px;text-align:center}
+.stat-num{font-size:2rem;font-weight:800;color:var(--gold)}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:4px}
+/* Section */
+.dash-section{margin-bottom:28px}
+.dash-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dash-section-title{font-size:1rem;font-weight:700}
+/* Animal grid */
+.dash-animals{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.dash-animal-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-decoration:none;color:var(--paper);transition:border-color .2s,transform .2s;display:flex;flex-direction:column}
+.dash-animal-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-2px);text-decoration:none}
+.dash-animal-img{aspect-ratio:4/3;overflow:hidden;background:var(--ink-l)}
+.dash-animal-img img{width:100%;height:100%;object-fit:cover}
+.dash-animal-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.dash-animal-body{padding:10px 12px}
+.dash-animal-name{font-size:.9rem;font-weight:700}
+.dash-animal-species{font-size:.72rem;color:var(--muted)}
+.dash-animal-actions{padding:0 12px 10px;display:flex;gap:6px}
+.dash-animal-btn{flex:1;padding:6px;border:1px solid var(--line);border-radius:8px;font-size:.68rem;text-align:center;text-decoration:none;color:var(--muted);transition:all .2s}
+.dash-animal-btn:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+/* Add animal CTA */
+.dash-add-cta{border:1.5px dashed rgba(201,168,76,.4);border-radius:14px;padding:28px;text-align:center;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:8px}
+.dash-add-cta:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+.dash-add-cta .icon{font-size:2rem}
+/* Settings panel */
+.dash-settings{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dash-setting-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);gap:12px}
+.dash-setting-row:last-child{border-bottom:none}
+.dash-setting-icon{font-size:1.2rem;width:32px;text-align:center;flex-shrink:0}
+.dash-setting-info{flex:1}
+.dash-setting-title{font-size:.85rem;font-weight:600}
+.dash-setting-desc{font-size:.72rem;color:var(--muted)}
+.dash-setting-action{font-size:.78rem;font-weight:600;color:var(--gold);text-decoration:none}
+.dash-setting-action:hover{text-decoration:underline}
+/* Logout */
+.dash-logout{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--line);border-radius:8px;font-size:.8rem;color:var(--muted);text-decoration:none;transition:all .2s}
+.dash-logout:hover{border-color:#ff6b6b;color:#ff6b6b;text-decoration:none}
+@media(max-width:600px){
+  .dash-wrap{padding:20px 12px 60px}
+  .dash-hero{padding:20px;gap:16px}
+  .dash-actions{margin-left:0;width:100%}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+
+  <!-- Hero / Profil info -->
+  <div class="dash-hero">
+    <div class="dash-avatar">
+      {% if breeder.avatar %}<img src="{{ breeder.avatar.url }}" alt="{{ breeder.name }}">
+      {% else %}<div class="dash-avatar-placeholder">🐾</div>{% endif %}
+    </div>
+    <div class="dash-info">
+      <div class="dash-name">{{ breeder.name }}</div>
+      <div class="dash-email">{{ breeder.email }}</div>
+      <div class="dash-badges">
+        <span class="dash-badge dash-badge-gold">{{ breeder.get_account_type_display }}</span>
+        {% if breeder.city %}<span class="dash-badge dash-badge-muted">📍 {{ breeder.city }}</span>{% endif %}
+        {% if has_pin %}<span class="dash-badge dash-badge-green">🔐 PIN aktivan</span>{% endif %}
+      </div>
+      <div class="trust-bar-wrap">
+        <div class="trust-label">Trust score: {{ trust_score }}/100</div>
+        <div class="trust-bar">
+          <div class="trust-fill trust-fill-{{ trust_tier }}" style="width:{{ trust_score }}%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-actions">
+      <a href="/uzgajivac/{{ breeder.pk }}/" class="mp-btn-ghost" style="padding:8px 16px;font-size:.8rem">Javni profil</a>
+      <a href="/ljubimac/zatrazi/" class="mp-btn-primary" style="padding:8px 16px;font-size:.8rem">+ Dodaj ljubimca</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="dash-stats">
+    <div class="stat-card">
+      <div class="stat-num">{{ total_animals }}</div>
+      <div class="stat-label">Ljubimaca</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">{{ trust_score }}</div>
+      <div class="stat-label">Trust score</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">{{ reviews|length }}</div>
+      <div class="stat-label">Recenzija</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="count-putovnica">—</div>
+      <div class="stat-label">.dok Putovnica</div>
+    </div>
+  </div>
+
+  <!-- Ljubimci -->
+  <div class="dash-section">
+    <div class="dash-section-header">
+      <div class="dash-section-title">🐾 Moji ljubimci</div>
+      <a href="/ljubimac/zatrazi/" class="mp-btn-ghost" style="padding:6px 14px;font-size:.78rem">+ Novi</a>
+    </div>
+    <div class="dash-animals">
+      {% for animal in animals %}
+      <a href="/pas/{{ animal.chip_number|default:animal.ear_tag }}/" class="dash-animal-card">
+        <div class="dash-animal-img">
+          {% if animal.photo %}<img src="{{ animal.photo.url }}" alt="{{ animal.name }}" loading="lazy">
+          {% else %}
+          <div class="dash-animal-placeholder">
+            {% if animal.vrsta == 'pas' %}🐕{% elif animal.vrsta == 'macka' %}🐈{% elif animal.vrsta == 'konj' %}🐎{% else %}🐾{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="dash-animal-body">
+          <div class="dash-animal-name">{{ animal.name|default:"Bez imena" }}</div>
+          <div class="dash-animal-species">{{ animal.get_vrsta_display }}{% if animal.breed %} · {{ animal.breed|truncatechars:16 }}{% endif %}</div>
+        </div>
+        <div class="dash-animal-actions">
+          <span class="dash-animal-btn">👁 Profil</span>
+          <span class="dash-animal-btn">📄 .dok</span>
+          {% if animal.chip_number %}<span class="dash-animal-btn">📱 QR</span>{% endif %}
+        </div>
+      </a>
+      {% empty %}
+      <a href="/ljubimac/zatrazi/" class="dash-add-cta" style="grid-column:1/-1">
+        <span class="icon">🐾</span>
+        <strong>Dodaj prvog ljubimca</strong>
+        <span style="font-size:.78rem">Klikni za kreiranje profila s QR karticom i .dok putovnicom</span>
+      </a>
+      {% endfor %}
+      {% if animals %}
+      <a href="/ljubimac/zatrazi/" class="dash-add-cta">
+        <span class="icon">+</span>
+        <span style="font-size:.82rem">Dodaj ljubimca</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Postavke -->
+  <div class="dash-section">
+    <div class="dash-section-header">
+      <div class="dash-section-title">⚙️ Postavke</div>
+    </div>
+    <div class="dash-settings">
+      <div class="dash-setting-row">
+        <div class="dash-setting-icon">🔐</div>
+        <div class="dash-setting-info">
+          <div class="dash-setting-title">Brzi PIN login</div>
+          <div class="dash-setting-desc">{% if has_pin %}PIN je aktivan — brza prijava bez emaila{% else %}Nema PIN-a — prijava samo emailom{% endif %}</div>
+        </div>
+        <a href="/pin/postavi/" class="dash-setting-action">{% if has_pin %}Promijeni{% else %}Postavi{% endif %}</a>
+      </div>
+      <div class="dash-setting-row">
+        <div class="dash-setting-icon">📱</div>
+        <div class="dash-setting-info">
+          <div class="dash-setting-title">Uvezi sa društvenih mreža</div>
+          <div class="dash-setting-desc">Importaj slike s Instagrama, TikToka, Facebooka</div>
+        </div>
+        <a href="/uvezi/" class="dash-setting-action">Uvezi</a>
+      </div>
+      <div class="dash-setting-row">
+        <div class="dash-setting-icon">🏆</div>
+        <div class="dash-setting-info">
+          <div class="dash-setting-title">Javni profil</div>
+          <div class="dash-setting-desc">Kako te vide kupci, udomitelji i ostali</div>
+        </div>
+        <a href="/uzgajivac/{{ breeder.pk }}/" class="dash-setting-action">Pogledaj →</a>
+      </div>
+      <div class="dash-setting-row">
+        <div class="dash-setting-icon">📊</div>
+        <div class="dash-setting-info">
+          <div class="dash-setting-title">memio.gram</div>
+          <div class="dash-setting-desc">Dijeli slike i videe svojih ljubimaca</div>
+        </div>
+        <a href="/gram/" class="dash-setting-action">Otvori Gram</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout -->
+  <div style="text-align:center;margin-top:32px">
+    <a href="/odjava/" class="dash-logout" onclick="return logOut()">↩ Odjava</a>
+  </div>
+
+</div>
+
+<script>
+// Count .dok available
+(function(){
+  var animals = {{ total_animals }};
+  // Count animals with chip_number (putovnica eligible)
+  var chips = [{% for a in animals %}{% if a.chip_number %}'{{ a.chip_number }}'{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}];
+  document.getElementById('count-putovnica').textContent = chips.length;
+})();
+
+function logOut() {
+  // Clear memio session
+  fetch('/api/hit/', {method:'POST', headers:{'X-CSRFToken': '{{ csrf_token }}', 'Content-Type':'application/json'}, body:'{}'}).catch(function(){});
+  // Clear session storage
+  sessionStorage.clear();
+  // Redirect to landing
+  window.location.href = '/';
+  return false;
+}
+</script>
+{% endblock %}
