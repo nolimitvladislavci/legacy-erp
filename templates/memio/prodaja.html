@@ -8,9 +8,11 @@
 
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px">
     <a href="/prodaja/" class="mp-badge {% if not vrsta %}mp-badge-gold{% else %}mp-badge-muted{% endif %}" style="padding:8px 16px;font-size:.82rem">Sve vrste</a>
-    {% for kd, kn in "pas,🐕 Psi|macka,🐈 Mačke|konj,🐎 Konji|zec,🐇 Zečevi|ptica,🐦 Ptice"|split:"|" %}
-    <a href="/prodaja/?vrsta={{ kd }}" class="mp-badge {% if vrsta == kd %}mp-badge-gold{% else %}mp-badge-muted{% endif %}" style="padding:8px 16px;font-size:.82rem">{{ kn }}</a>
-    {% endfor %}
+    <a href="/prodaja/?vrsta=pas" class="mp-badge {% if vrsta == 'pas' %}mp-badge-gold{% else %}mp-badge-muted{% endif %}" style="padding:8px 16px;font-size:.82rem">🐕 Psi</a>
+    <a href="/prodaja/?vrsta=macka" class="mp-badge {% if vrsta == 'macka' %}mp-badge-gold{% else %}mp-badge-muted{% endif %}" style="padding:8px 16px;font-size:.82rem">🐈 Mačke</a>
+    <a href="/prodaja/?vrsta=konj" class="mp-badge {% if vrsta == 'konj' %}mp-badge-gold{% else %}mp-badge-muted{% endif %}" style="padding:8px 16px;font-size:.82rem">🐎 Konji</a>
+    <a href="/prodaja/?vrsta=zec" class="mp-badge {% if vrsta == 'zec' %}mp-badge-gold{% else %}mp-badge-muted{% endif %}" style="padding:8px 16px;font-size:.82rem">🐇 Zečevi</a>
+    <a href="/prodaja/?vrsta=ptica" class="mp-badge {% if vrsta == 'ptica' %}mp-badge-gold{% else %}mp-badge-muted{% endif %}" style="padding:8px 16px;font-size:.82rem">🐦 Ptice</a>
   </div>
 
   <div class="mp-grid-auto">
