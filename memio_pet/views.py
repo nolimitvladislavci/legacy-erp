@@ -21,7 +21,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET, require_POST
 
-from memio_pet.models import AnimalProfile, BreederProfile, BreederReview, PetHealthRecord, PetOwnership
+from memio_pet.models import AnimalProfile, BreederProfile, BreederReview, PetHealthRecord, PetOwnership, LifeMilestone
 
 
 def _find_animal(chip_or_tag):
@@ -1817,3 +1817,277 @@ def farma_landing(request):
         "stats": stats,
         "vrsta": vrsta,
     })
+
+
+def pet_passport_dok(request, chip_or_tag):
+    """PLAN-008: Generira .dok Putovnicu kao ZIP (payload+outfit+proof+viewer)."""
+    import json, zipfile, io, hashlib, datetime
+    from django.http import HttpResponse
+
+    animal = _find_animal(chip_or_tag)
+    if not animal:
+        return HttpResponse("Ljubimac nije pronadjen.", status=404)
+
+    db = "memio_pets"
+
+    # --- skupi podatke ---
+    health_records = list(
+        PetHealthRecord.objects.using(db)
+        .filter(animal=animal)
+        .order_by("-datum")
+        .values("tip", "opis", "datum", "veterinar", "lijek", "trosak_eur")
+    )
+    for r in health_records:
+        if r.get("datum"):
+            r["datum"] = str(r["datum"])
+        if r.get("trosak_eur") is not None:
+            r["trosak_eur"] = float(r["trosak_eur"])
+
+    ownership_chain = list(
+        PetOwnership.objects.using(db)
+        .filter(animal=animal)
+        .order_by("acquired_at")
+        .values("owner_name", "owner_city", "acquired_at", "released_at", "transfer_type", "contract_ref")
+    )
+    for o in ownership_chain:
+        if o.get("acquired_at"):
+            o["acquired_at"] = str(o["acquired_at"])
+        if o.get("released_at"):
+            o["released_at"] = str(o["released_at"])
+
+    milestones = list(
+        LifeMilestone.objects.using(db)
+        .filter(animal=animal)
+        .order_by("date")
+        .values("title", "note", "date", "type")
+    )
+    for m in milestones:
+        if m.get("date"):
+            m["date"] = str(m["date"])
+
+    issued_at = datetime.datetime.utcnow().isoformat() + "Z"
+    name_slug = (animal.name or "ljubimac").lower().replace(" ", "-")
+
+    # --- payload.json ---
+    payload = {
+        "doc_type": "memio-putovnica",
+        "version": "1.0",
+        "issued_at": issued_at,
+        "animal": {
+            "id": str(animal.id),
+            "name": animal.name or "",
+            "vrsta": animal.vrsta or "",
+            "breed": animal.breed or "",
+            "date_of_birth": str(animal.date_of_birth) if animal.date_of_birth else "",
+            "spol": animal.spol or "",
+            "color_description": animal.color_description or "",
+            "chip_number": animal.chip_number or "",
+            "ear_tag": animal.ear_tag or "",
+            "status": animal.status or "",
+            "is_uginulo": animal.status == "uginulo",
+        },
+        "health_records": health_records,
+        "ownership_chain": ownership_chain,
+        "milestones": milestones,
+    }
+    payload_json = json.dumps(payload, ensure_ascii=False, indent=2)
+    payload_hash = hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
+
+    # --- outfit.json (metadata) ---
+    outfit = {
+        "doc_type": "memio-putovnica",
+        "version": "1.0",
+        "format": "dok-v1",
+        "title": "Putovnica: " + (animal.name or "Ljubimac"),
+        "issued_at": issued_at,
+        "issued_by": "memio.pet",
+        "payload_sha256": payload_hash,
+        "subject": {
+            "chip_number": animal.chip_number or "",
+            "ear_tag": animal.ear_tag or "",
+            "name": animal.name or "",
+        },
+        "viewer": "viewer.html",
+    }
+    outfit_json = json.dumps(outfit, ensure_ascii=False, indent=2)
+
+    # --- proof.json (Folija seal) ---
+    proof = {
+        "standard": "Folija-v1",
+        "payload_sha256": payload_hash,
+        "timestamp": issued_at,
+        "verify_url": "https://memio.pet/folija/verify/?hash=" + payload_hash,
+        "short_hash": payload_hash[:16],
+        "note": "Ovaj dokument je kriptografski zapecacen sustavom Folija. Verificirajte autenticnost na verify_url.",
+    }
+    proof_json = json.dumps(proof, ensure_ascii=False, indent=2)
+
+    # --- viewer.html (standalone offline citac) ---
+    viewer_html = """<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>memio.pet — Putovnica</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#f8f6f0;font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:24px}
+.wrap{max-width:720px;margin:0 auto}
+.logo{font-size:1.1rem;color:#c9a84c;font-weight:700;margin-bottom:24px}
+.hero{background:#12122a;border:1px solid rgba(201,168,76,.25);border-radius:16px;padding:32px;margin-bottom:20px}
+.hero h1{font-size:2rem;color:#f8f6f0;margin-bottom:4px}
+.hero .sub{font-size:.9rem;color:#8888aa}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:700;margin:8px 4px 0 0}
+.badge-gold{background:rgba(201,168,76,.2);color:#c9a84c;border:1px solid rgba(201,168,76,.4)}
+.badge-green{background:rgba(72,199,142,.15);color:#48c78e;border:1px solid rgba(72,199,142,.3)}
+.section{background:#12122a;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;margin-bottom:16px}
+.section h2{font-size:1rem;color:#c9a84c;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)}
+.row{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.label{font-size:.72rem;color:#8888aa;width:120px;flex-shrink:0}
+.value{font-size:.85rem;color:#f8f6f0}
+.record{border-left:2px solid rgba(201,168,76,.3);padding:8px 12px;margin-bottom:10px;border-radius:0 8px 8px 0;background:rgba(255,255,255,.03)}
+.record .rtype{font-size:.7rem;color:#c9a84c;font-weight:700;text-transform:uppercase}
+.record .rdesc{font-size:.82rem;color:#f8f6f0;margin:4px 0}
+.record .rmeta{font-size:.7rem;color:#8888aa}
+.folija{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:16px;margin-top:20px;font-size:.78rem}
+.folija .title{color:#c9a84c;font-weight:700;margin-bottom:8px}
+.folija .hash{font-family:monospace;font-size:.7rem;color:#8888aa;word-break:break-all}
+.folija a{color:#c9a84c}
+.empty{color:#8888aa;font-size:.82rem;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">&#128062; memio.pet — Putovnica</div>
+
+  <div class="hero">
+    <h1 id="pet-name">—</h1>
+    <div class="sub" id="pet-species-breed"></div>
+    <div id="pet-badges"></div>
+  </div>
+
+  <div class="section">
+    <h2>&#128203; Osnovni podaci</h2>
+    <div id="basic-data"></div>
+  </div>
+
+  <div class="section">
+    <h2>&#127973; Zdravstveni zapisi</h2>
+    <div id="health-data"></div>
+  </div>
+
+  <div class="section">
+    <h2>&#128101; Lanac vlasnistva</h2>
+    <div id="ownership-data"></div>
+  </div>
+
+  <div class="section">
+    <h2>&#11088; Prekretnice</h2>
+    <div id="milestones-data"></div>
+  </div>
+
+  <div class="folija">
+    <div class="title">&#128274; Folija-v1 — Kriptografski pecat</div>
+    <div>SHA-256 payloada: <span class="hash" id="folija-hash"></span></div>
+    <div style="margin-top:6px">Verificiraj: <a id="folija-url" href="#" target="_blank"></a></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var data = null;
+  var proof = null;
+
+  function loadFiles(){
+    Promise.all([
+      fetch("payload.json").then(function(r){return r.json();}),
+      fetch("proof.json").then(function(r){return r.json();})
+    ]).then(function(results){
+      data = results[0];
+      proof = results[1];
+      render();
+    }).catch(function(e){
+      document.body.innerHTML += '<p style="color:#ff6b6b;padding:20px">Greska pri ucitavanju: ' + e.message + '</p>';
+    });
+  }
+
+  function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function render(){
+    var a = data.animal;
+    document.getElementById("pet-name").textContent = a.name || "Nepoznato";
+    document.getElementById("pet-species-breed").textContent = [a.species, a.breed].filter(Boolean).join(" · ");
+
+    var badges = "";
+    if(a.chip_number) badges += '<span class="badge badge-gold">Čip: ' + esc(a.chip_number) + "</span>";
+    if(a.ear_tag) badges += '<span class="badge badge-gold">Uho: ' + esc(a.ear_tag) + "</span>";
+    if(a.is_memorial) badges += '<span class="badge badge-green">&#127752; Memorijal</span>';
+    document.getElementById("pet-badges").innerHTML = badges;
+
+    var basic = [
+      ["Spol", a.gender], ["Boja", a.color],
+      ["Datum rodenja", a.birth_date], ["Status", a.status],
+    ];
+    var bhtml = "";
+    basic.forEach(function(row){
+      if(row[1]) bhtml += '<div class="row"><span class="label">' + esc(row[0]) + '</span><span class="value">' + esc(row[1]) + "</span></div>";
+    });
+    document.getElementById("basic-data").innerHTML = bhtml || '<p class="empty">Nema podataka.</p>';
+
+    var hhtml = "";
+    (data.health_records||[]).forEach(function(r){
+      hhtml += '<div class="record"><div class="rtype">' + esc(r.tip) + "</div>";
+      hhtml += '<div class="rdesc">' + esc(r.opis) + "</div>";
+      var meta = esc(r.datum||"");
+      if(r.veterinar) meta += " · " + esc(r.veterinar);
+      if(r.lijek) meta += " · " + esc(r.lijek);
+      hhtml += '<div class="rmeta">' + meta + "</div></div>";
+    });
+    document.getElementById("health-data").innerHTML = hhtml || '<p class="empty">Nema zdravstvenih zapisa.</p>';
+
+    var ohtml = "";
+    (data.ownership_chain||[]).forEach(function(o){
+      ohtml += '<div class="record"><div class="rtype">' + esc(o.owner_name) + (o.owner_city ? " — " + esc(o.owner_city) : "") + "</div>";
+      ohtml += '<div class="rmeta">' + esc(o.acquired_at||"") + (o.released_at ? " → " + esc(o.released_at) : " → danas");
+      if(o.transfer_type) ohtml += " · " + esc(o.transfer_type);
+      ohtml += "</div></div>";
+    });
+    document.getElementById("ownership-data").innerHTML = ohtml || '<p class="empty">Nema zapisa o vlasnistvu.</p>';
+
+    var mhtml = "";
+    (data.milestones||[]).forEach(function(m){
+      mhtml += '<div class="record"><div class="rtype">' + esc(m.date||"") + "</div>";
+      mhtml += '<div class="rdesc">' + esc(m.title) + "</div>";
+      if(m.note) mhtml += '<div class="rmeta">' + esc(m.note) + "</div>";
+      mhtml += "</div>";
+    });
+    document.getElementById("milestones-data").innerHTML = mhtml || '<p class="empty">Nema prekretnica.</p>';
+
+    if(proof){
+      document.getElementById("folija-hash").textContent = proof.payload_sha256 || "";
+      var url = proof.verify_url || "";
+      document.getElementById("folija-url").href = url;
+      document.getElementById("folija-url").textContent = url;
+    }
+  }
+
+  loadFiles();
+})();
+</script>
+</body>
+</html>"""
+
+    # --- pakuj u ZIP ---
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("payload.json", payload_json.encode("utf-8"))
+        zf.writestr("outfit.json", outfit_json.encode("utf-8"))
+        zf.writestr("proof.json", proof_json.encode("utf-8"))
+        zf.writestr("viewer.html", viewer_html.encode("utf-8"))
+    buf.seek(0)
+
+    filename = "putovnica-" + name_slug + ".dok"
+    response = HttpResponse(buf.read(), content_type="application/zip")
+    response["Content-Disposition"] = 'attachment; filename="' + filename + '"'
+    response["X-Folija-Hash"] = payload_hash[:16]
+    return response

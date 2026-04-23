@@ -62,4 +62,7 @@ urlpatterns = [
     path("pretraga/", views.pretraga, name="pretraga"),
     path("prodaja/", views.prodaja, name="prodaja"),
     path("farma/", views.farma_landing, name="farma_landing"),
+
+    # PLAN-008: .dok Putovnica
+    path("pas/<str:chip_or_tag>/putovnica/", views.pet_passport_dok, name="pet_passport"),
 ]
