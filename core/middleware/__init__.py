@@ -929,10 +929,12 @@ class DomainGateMiddleware:
             "/en/memio/",
             "/hr/boxgram/",
             "/de/boxgram/",
+            "/boxgram/",
             "/pet/",
             "/hr/pet/",
             "/ponuda/",
             # memio_pet app routes (mounted at root)
+            "/",             # landing page
             "/registracija/",
             "/prijava/",
             "/pas/",
@@ -952,8 +954,17 @@ class DomainGateMiddleware:
             "/feed/",
             "/badge/",
             "/pristanak/",
+            "/pristanak-ponovo/",
+            "/memorijal/",
+            "/naslijede/",
             "/api/hit/",
             "/api/memorial/",
+            "/api/heritage/",
+            # PLAN-002 nove rute
+            "/gram/",
+            "/pretraga/",
+            "/prodaja/",
+            "/farma/",
         ),
         "www.memio.pet": "memio.pet",
         "memio.world": (
@@ -999,7 +1010,7 @@ class DomainGateMiddleware:
     # Landing pages per domain (where to redirect if blocked)
     DOMAIN_LANDING = {
         "memio.farm": "/hr/livestock/",
-        "memio.pet": "/hr/memio/",
+        "memio.pet": "/",  # PLAN-002: Django landing page
         "memio.world": "/hr/memio/",
         "no-limit.world": "/no-limit/",
         "viskovic-group.de": "/de/dashboard/",

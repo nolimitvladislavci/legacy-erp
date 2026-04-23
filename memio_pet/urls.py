@@ -56,4 +56,10 @@ urlpatterns = [
     path("pas/<str:chip_or_tag>/naslijede/qr/", views.heritage_qr_code, name="heritage_qr"),
     path("naslijede/", views.heritage_showcase, name="heritage_showcase"),
     path("api/heritage/<str:chip_or_tag>/", views.heritage_api, name="heritage_api"),
+
+    # PLAN-002: gram + pretraga + prodaja + farma
+    path("gram/", lambda r: __import__("django.shortcuts", fromlist=["redirect"]).redirect("/boxgram/feed/"), name="gram"),
+    path("pretraga/", views.pretraga, name="pretraga"),
+    path("prodaja/", views.prodaja, name="prodaja"),
+    path("farma/", views.farma_landing, name="farma_landing"),
 ]

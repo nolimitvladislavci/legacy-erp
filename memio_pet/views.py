@@ -628,7 +628,69 @@ def resend_consent(request):
 
 @cache_page(300)
 def landing_page(request):
-    return render(request, "memio_pet/landing.html")
+    """PLAN-002: Landing page s live podacima iz baze."""
+    from memio_pet.models import AnimalProfile, BreederProfile
+    db = "memio_pets"
+
+    # 6 najnovijih profila s fotom
+    recent_animals = list(
+        AnimalProfile.objects.using(db)
+        .exclude(photo="")
+        .exclude(photo__isnull=True)
+        .order_by("-id")[:6]
+    )
+    # Fallback: ako nema s fotom — uzmi bez
+    if len(recent_animals) < 3:
+        recent_animals = list(
+            AnimalProfile.objects.using(db).order_by("-id")[:6]
+        )
+
+    # Udomljavanje — do 4 komada
+    adoption_animals = list(
+        AnimalProfile.objects.using(db)
+        .filter(status__in=["u_azilu", "aktivno"])
+        .exclude(photo="")
+        .exclude(photo__isnull=True)
+        .order_by("-id")[:4]
+    )
+
+    # Statistike
+    stats = {
+        "animals": AnimalProfile.objects.using(db).count(),
+        "breeders": BreederProfile.objects.using(db).count(),
+        "adopted":  AnimalProfile.objects.using(db).filter(status="udomljen").count(),
+        "species":  9,
+    }
+
+    # boxgram feed preview (4 najnovija javna posta s medijima)
+    feed_events = []
+    try:
+        from boxgram.models import LifeEvent, EventMedia
+        events_qs = (
+            LifeEvent.objects.filter(pet_profile__is_public=True)
+            .select_related("pet_profile")
+            .prefetch_related("media")
+            .order_by("-created_at")[:8]
+        )
+        for ev in events_qs:
+            first_media = ev.media.filter(media_type="image").first()
+            if first_media:
+                feed_events.append({
+                    "event": ev,
+                    "pet": ev.pet_profile,
+                    "media": first_media,
+                })
+            if len(feed_events) >= 4:
+                break
+    except Exception:
+        pass
+
+    return render(request, "memio/landing.html", {
+        "recent_animals": recent_animals,
+        "adoption_animals": adoption_animals,
+        "feed_events": feed_events,
+        "stats": stats,
+    })
 
 
 @login_required
@@ -1650,4 +1712,72 @@ def heritage_api(request, chip_or_tag):
     return JsonResponse({
         "animal": _animal_node(animal),
         "heritage": heritage_data,
+    })
+
+# ─── PLAN-002 / PLAN-005 / PLAN-006 / PLAN-009 — Stub views ─────────────────
+
+def pretraga(request):
+    """PLAN-005: Pretraga ljubimaca s filterima."""
+    from memio_pet.models import AnimalProfile
+    db = "memio_pets"
+    q       = request.GET.get("q", "").strip()
+    vrsta   = request.GET.get("vrsta", "")
+    status  = request.GET.get("status", "")
+    grad    = request.GET.get("grad", "").strip()
+
+    qs = AnimalProfile.objects.using(db).order_by("-id")
+    if q:
+        qs = qs.filter(name__icontains=q) | AnimalProfile.objects.using(db).filter(breed__icontains=q)
+    if vrsta:
+        qs = qs.filter(vrsta=vrsta)
+    if status:
+        qs = qs.filter(status=status)
+    if grad:
+        qs = qs.filter(owner__city__icontains=grad)
+
+    results = list(qs[:48])
+    return render(request, "memio/pretraga.html", {
+        "results": results,
+        "q": q, "vrsta": vrsta, "status": status, "grad": grad,
+        "total": len(results),
+    })
+
+
+def prodaja(request):
+    """PLAN-006: Tržnica — životinje na prodaju i udomljavanje."""
+    from memio_pet.models import AnimalProfile
+    db = "memio_pets"
+    vrsta = request.GET.get("vrsta", "")
+    qs = AnimalProfile.objects.using(db).filter(
+        status__in=["rezerviran", "prodano", "u_azilu", "aktivno"]
+    ).order_by("-id")
+    if vrsta:
+        qs = qs.filter(vrsta=vrsta)
+    listings = list(qs[:48])
+    return render(request, "memio/prodaja.html", {"listings": listings, "vrsta": vrsta})
+
+
+def farma_landing(request):
+    """PLAN-009: Farma sekcija — komercijalne životinje."""
+    from memio_pet.models import AnimalProfile, BreederProfile
+    db = "memio_pets"
+    FARMA_VRSTE = ["konj", "ovca", "koza", "svinja", "ptica"]
+    vrsta = request.GET.get("vrsta", "")
+
+    farma_breeders = BreederProfile.objects.using(db).filter(
+        account_type__in=["sheep_farmer", "pig_farmer", "poultry", "horse"]
+    ).order_by("-trust_score")[:12]
+
+    qs = AnimalProfile.objects.using(db).filter(vrsta__in=FARMA_VRSTE).order_by("-id")
+    if vrsta:
+        qs = qs.filter(vrsta=vrsta)
+    animals = list(qs[:24])
+
+    stats = {k: AnimalProfile.objects.using(db).filter(vrsta=k).count() for k in FARMA_VRSTE}
+
+    return render(request, "memio/farma.html", {
+        "animals": animals,
+        "breeders": farma_breeders,
+        "stats": stats,
+        "vrsta": vrsta,
     })

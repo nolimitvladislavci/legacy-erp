@@ -1,0 +1,84 @@
+{% extends "memio/base.html" %}
+{% load i18n %}
+{% block title %}Farma — konji, ovce, svinje, peradarstvo — memio.pet{% endblock %}
+{% block extra_css %}
+<style>
+.farma-hero{background:linear-gradient(135deg,rgba(110,231,183,.07) 0%,transparent 60%);border-bottom:1px solid rgba(110,231,183,.15);padding:48px 24px 40px;text-align:center}
+.farma-stat{background:rgba(110,231,183,.1);border:1px solid rgba(110,231,183,.2);border-radius:12px;padding:20px;text-align:center}
+.farma-stat-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#6ee7b7}
+.farma-stat-label{font-size:.75rem;color:var(--muted);margin-top:4px}
+</style>
+{% endblock %}
+{% block content %}
+<div class="farma-hero">
+  <span class="mp-badge mp-badge-green" style="margin-bottom:16px">🌾 Farma sekcija</span>
+  <h1 class="mp-heading" style="text-align:center">Digitalni karton za farmske životinje</h1>
+  <p class="mp-subhead" style="text-align:center;margin:0 auto;max-width:500px">Matični broj, stado, veterinarski karton, tržišna vrijednost.</p>
+</div>
+
+<div class="mp-section">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;justify-content:center">
+    <a href="/farma/" class="mp-badge {% if not vrsta %}mp-badge-green{% else %}mp-badge-muted{% endif %}" style="padding:9px 18px;font-size:.85rem">Sve farma vrste</a>
+    <a href="/farma/?vrsta=konj" class="mp-badge {% if vrsta == 'konj' %}mp-badge-green{% else %}mp-badge-muted{% endif %}" style="padding:9px 18px;font-size:.85rem">🐎 Konji</a>
+    <a href="/farma/?vrsta=ovca" class="mp-badge {% if vrsta == 'ovca' %}mp-badge-green{% else %}mp-badge-muted{% endif %}" style="padding:9px 18px;font-size:.85rem">🐑 Ovce</a>
+    <a href="/farma/?vrsta=koza" class="mp-badge {% if vrsta == 'koza' %}mp-badge-green{% else %}mp-badge-muted{% endif %}" style="padding:9px 18px;font-size:.85rem">🐐 Koze</a>
+    <a href="/farma/?vrsta=svinja" class="mp-badge {% if vrsta == 'svinja' %}mp-badge-green{% else %}mp-badge-muted{% endif %}" style="padding:9px 18px;font-size:.85rem">🐖 Svinje</a>
+    <a href="/farma/?vrsta=ptica" class="mp-badge {% if vrsta == 'ptica' %}mp-badge-green{% else %}mp-badge-muted{% endif %}" style="padding:9px 18px;font-size:.85rem">🐓 Peradarstvo</a>
+  </div>
+
+  <div class="mp-grid-4" style="margin-bottom:40px">
+    <div class="farma-stat"><div style="font-size:2rem;margin-bottom:8px">🐎</div><div class="farma-stat-num">{{ stats.konj|default:0 }}</div><div class="farma-stat-label">Konji</div></div>
+    <div class="farma-stat"><div style="font-size:2rem;margin-bottom:8px">🐑</div><div class="farma-stat-num">{{ stats.ovca|default:0 }}</div><div class="farma-stat-label">Ovce i koze</div></div>
+    <div class="farma-stat"><div style="font-size:2rem;margin-bottom:8px">🐖</div><div class="farma-stat-num">{{ stats.svinja|default:0 }}</div><div class="farma-stat-label">Svinje</div></div>
+    <div class="farma-stat"><div style="font-size:2rem;margin-bottom:8px">🐓</div><div class="farma-stat-num">{{ stats.ptica|default:0 }}</div><div class="farma-stat-label">Peradarstvo</div></div>
+  </div>
+
+  {% if animals %}
+  <h2 class="mp-heading" style="font-size:1.4rem;margin-bottom:20px">Životinje</h2>
+  <div class="mp-grid-auto" style="margin-bottom:48px">
+    {% for animal in animals %}
+    <a href="/pas/{{ animal.chip_number|default:animal.ear_tag }}/" class="mp-animal-card" style="text-decoration:none">
+      <div class="mp-animal-card-img">
+        {% if animal.photo %}
+          <img src="{{ animal.photo.url }}" alt="{{ animal.name|default:'Životinja' }}" loading="lazy">
+        {% else %}
+          <div style="width:100%;height:100%;min-height:160px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:var(--ink-l)">
+            {% if animal.vrsta == 'konj' %}🐎{% elif animal.vrsta == 'ovca' %}🐑{% elif animal.vrsta == 'svinja' %}🐖{% elif animal.vrsta == 'ptica' %}🐓{% else %}🌾{% endif %}
+          </div>
+        {% endif %}
+        <div class="mp-species-icon">{{ animal.get_vrsta_display }}</div>
+      </div>
+      <div class="mp-animal-card-body">
+        <div class="mp-animal-card-name">{{ animal.name|default:animal.ear_tag }}</div>
+        <div class="mp-animal-card-meta">{{ animal.breed|default:'' }}{% if animal.pedigree_number %} · {{ animal.pedigree_number }}{% endif %}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if breeders %}
+  <h2 class="mp-heading" style="font-size:1.4rem;margin-bottom:20px">Uzgajivači i farme</h2>
+  <div class="mp-grid-3">
+    {% for breeder in breeders %}
+    <a href="/uzgajivac/{{ breeder.id }}/" class="mp-card" style="padding:20px;text-decoration:none;display:block">
+      <div style="font-size:1.6rem;margin-bottom:10px">
+        {% if breeder.account_type == 'horse' %}🐎{% elif breeder.account_type == 'sheep_farmer' %}🐑{% elif breeder.account_type == 'pig_farmer' %}🐖{% elif breeder.account_type == 'poultry' %}🐓{% else %}🌾{% endif %}
+      </div>
+      <div style="font-weight:700;color:var(--paper);margin-bottom:6px">{{ breeder.name }}</div>
+      <div style="font-size:.78rem;color:var(--muted)">{{ breeder.get_account_type_display }}{% if breeder.city %} · {{ breeder.city }}{% endif %}</div>
+      {% if breeder.is_cro_validated %}<span class="mp-badge mp-badge-green" style="margin-top:10px">✓ Verificiran</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if not animals and not breeders %}
+  <div style="text-align:center;padding:60px;color:var(--muted)">
+    <div style="font-size:3rem;margin-bottom:12px">🌾</div>
+    <p>Farma sekcija je u pripremi. Registriraj svoju farmu besplatno.</p>
+    <a href="/registracija/" class="mp-btn-primary" style="display:inline-block;margin-top:20px">Registriraj farmu →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

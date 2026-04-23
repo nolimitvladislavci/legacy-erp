@@ -1,0 +1,452 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}memio.pet — Digitalni karton vašeg ljubimca{% endblock %}</title>
+<meta name="description" content="{% block meta_desc %}memio.pet — QR karton, putovnica i cijeli životni put vašeg ljubimca. Pas, mačka, konj, farma.{% endblock %}">
+<meta property="og:title" content="{% block og_title %}memio.pet{% endblock %}">
+<meta property="og:description" content="{% block og_desc %}Digitalni karton ljubimca — od rođenja do vječnosti.{% endblock %}">
+<meta property="og:image" content="{% block og_image %}https://memio.pet/static/memio/og-default.jpg{% endblock %}">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="icon" href="/static/memio/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+{% block extra_head %}{% endblock %}
+
+<style>
+/* ─── Design Tokens ─────────────────────────────────────── */
+:root {
+  --ink:      #1a1a2e;
+  --ink-l:    #252540;
+  --gold:     #c9a84c;
+  --gold-l:   #e8c96a;
+  --gold-dim: rgba(201,168,76,.12);
+  --paper:    #f8f6f0;
+  --muted:    #8888aa;
+  --line:     rgba(255,255,255,.08);
+  --surface:  rgba(255,255,255,.04);
+  --red:      #f87171;
+  --green:    #4ade80;
+  --blue:     #60a5fa;
+  --radius:   14px;
+  --radius-s: 8px;
+  --shadow:   0 20px 60px rgba(0,0,0,.4);
+  --nav-h:    62px;
+
+  /* Species colours */
+  --pas:    #c9a84c;
+  --macka:  #a78bfa;
+  --konj:   #86efac;
+  --farma:  #6ee7b7;
+  --ostalo: #94a3b8;
+}
+
+/* ─── Reset ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--ink);
+  color:var(--paper);
+  min-height:100vh;
+  padding-top:var(--nav-h);
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--gold-l);text-decoration:underline}
+img{max-width:100%;display:block}
+button{cursor:pointer;font-family:inherit}
+
+/* ─── Navigation ─────────────────────────────────────────── */
+.mp-nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:var(--nav-h);
+  background:rgba(26,26,46,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;
+  padding:0 24px;gap:0;
+}
+.mp-nav-logo{
+  display:flex;align-items:center;gap:10px;
+  font-family:'Playfair Display',serif;
+  font-size:1.22rem;font-weight:700;
+  color:var(--paper);letter-spacing:-.01em;
+  text-decoration:none;flex-shrink:0;
+  margin-right:28px;
+}
+.mp-nav-logo:hover{text-decoration:none;color:var(--paper)}
+.mp-nav-logo span{color:var(--gold)}
+.mp-nav-logo svg{width:28px;height:28px;fill:var(--gold)}
+
+.mp-nav-links{
+  display:flex;align-items:center;gap:4px;flex:1;
+}
+.mp-nav-links a{
+  padding:7px 13px;border-radius:8px;
+  font-size:.82rem;font-weight:500;color:var(--muted);
+  transition:color .2s,background .2s;
+  white-space:nowrap;
+}
+.mp-nav-links a:hover{color:var(--paper);background:var(--surface);text-decoration:none}
+.mp-nav-links a.active{color:var(--gold)}
+
+.mp-nav-search{
+  flex:1;max-width:320px;
+  position:relative;margin:0 12px;
+}
+.mp-nav-search input{
+  width:100%;padding:8px 14px 8px 36px;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:20px;color:var(--paper);
+  font-size:.82rem;font-family:inherit;
+  transition:border-color .2s,background .2s;
+}
+.mp-nav-search input:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,.07)}
+.mp-nav-search input::placeholder{color:var(--muted)}
+.mp-nav-search svg{
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;stroke:var(--muted);pointer-events:none;
+}
+
+.mp-nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.mp-btn-ghost{
+  padding:7px 14px;border-radius:8px;
+  font-size:.8rem;font-weight:500;color:var(--muted);
+  border:1px solid var(--line);background:none;
+  transition:all .2s;
+}
+.mp-btn-ghost:hover{color:var(--gold);border-color:var(--gold)}
+.mp-btn-primary{
+  padding:8px 18px;border-radius:8px;
+  font-size:.82rem;font-weight:700;
+  background:var(--gold);color:var(--ink);
+  border:none;transition:background .2s,transform .1s;
+}
+.mp-btn-primary:hover{background:var(--gold-l);transform:translateY(-1px)}
+
+/* Mobile nav */
+.mp-nav-hamburger{
+  display:none;background:none;border:none;
+  color:var(--muted);padding:8px;margin-left:auto;
+}
+.mp-nav-mobile{
+  display:none;position:fixed;top:var(--nav-h);left:0;right:0;
+  background:rgba(26,26,46,.98);border-bottom:1px solid var(--line);
+  padding:12px 16px;flex-direction:column;gap:4px;z-index:999;
+}
+.mp-nav-mobile a{
+  padding:12px 16px;border-radius:8px;color:var(--muted);
+  font-size:.9rem;font-weight:500;display:block;
+}
+.mp-nav-mobile a:hover{color:var(--paper);background:var(--surface);text-decoration:none}
+.mp-nav-mobile.open{display:flex}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+.mp-footer{
+  border-top:1px solid var(--line);
+  padding:40px 24px 24px;
+  margin-top:80px;
+}
+.mp-footer-inner{
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;
+}
+.mp-footer-brand .mp-nav-logo{font-size:1.3rem;margin-bottom:12px}
+.mp-footer-brand p{font-size:.8rem;color:var(--muted);line-height:1.6;max-width:260px}
+
+.mp-footer-col h4{font-size:.75rem;font-weight:700;color:var(--paper);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.mp-footer-col a{display:block;font-size:.8rem;color:var(--muted);
+  margin-bottom:8px;transition:color .2s}
+.mp-footer-col a:hover{color:var(--gold);text-decoration:none}
+
+/* Innovation badges */
+.mp-inov-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;
+}
+.mp-inov-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  font-size:.68rem;font-weight:600;letter-spacing:.03em;
+  background:var(--gold-dim);border:1px solid rgba(201,168,76,.25);
+  color:var(--gold);transition:background .2s;
+  text-decoration:none;
+}
+.mp-inov-badge:hover{background:rgba(201,168,76,.2);text-decoration:none;color:var(--gold-l)}
+.mp-inov-badge svg{width:11px;height:11px;fill:currentColor}
+
+.mp-footer-bottom{
+  max-width:1200px;margin:24px auto 0;
+  padding-top:20px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.73rem;color:var(--muted);flex-wrap:wrap;gap:8px;
+}
+
+/* ─── Generic components ─────────────────────────────────── */
+
+/* Card */
+.mp-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden;
+  transition:border-color .2s,transform .2s;
+}
+.mp-card:hover{border-color:rgba(201,168,76,.25);transform:translateY(-2px)}
+
+/* Badge */
+.mp-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:20px;
+  font-size:.68rem;font-weight:600;letter-spacing:.03em;
+}
+.mp-badge-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.mp-badge-green{background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.25)}
+.mp-badge-red{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.25)}
+.mp-badge-muted{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line)}
+
+/* Section wrapper */
+.mp-section{max-width:1200px;margin:0 auto;padding:60px 24px}
+.mp-section-sm{max-width:800px;margin:0 auto;padding:48px 24px}
+
+/* Section heading */
+.mp-heading{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;
+  color:var(--paper);margin-bottom:8px;
+}
+.mp-subhead{font-size:.95rem;color:var(--muted);margin-bottom:32px;line-height:1.6}
+
+/* Grid helpers */
+.mp-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.mp-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.mp-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.mp-grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+
+/* Animal card (reusable) */
+.mp-animal-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden;
+  transition:border-color .25s,transform .25s;
+  display:flex;flex-direction:column;
+}
+.mp-animal-card:hover{border-color:rgba(201,168,76,.3);transform:translateY(-3px);text-decoration:none}
+.mp-animal-card-img{
+  aspect-ratio:4/3;background:var(--ink-l);
+  position:relative;overflow:hidden;
+}
+.mp-animal-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.mp-animal-card:hover .mp-animal-card-img img{transform:scale(1.04)}
+.mp-animal-card-img .mp-species-icon{
+  position:absolute;top:10px;left:10px;
+  background:rgba(26,26,46,.8);backdrop-filter:blur(8px);
+  border-radius:8px;padding:5px 9px;
+  font-size:.75rem;font-weight:600;color:var(--gold);
+}
+.mp-animal-card-img .mp-status-badge{
+  position:absolute;top:10px;right:10px;
+}
+.mp-animal-card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:6px}
+.mp-animal-card-name{font-size:1rem;font-weight:700;color:var(--paper)}
+.mp-animal-card-meta{font-size:.78rem;color:var(--muted)}
+.mp-animal-card-breeder{font-size:.75rem;color:var(--gold);margin-top:auto;padding-top:8px}
+
+/* Folija trust badge */
+.mp-folija-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.72rem;color:var(--gold);
+  border:1px solid rgba(201,168,76,.25);
+  padding:3px 9px;border-radius:20px;
+  background:var(--gold-dim);
+}
+.mp-folija-badge svg{width:12px;height:12px}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media(max-width:768px){
+  .mp-nav-links,.mp-nav-search{display:none}
+  .mp-nav-hamburger{display:block}
+  .mp-nav-actions .mp-btn-ghost{display:none}
+  .mp-footer-inner{grid-template-columns:1fr 1fr;gap:24px}
+  .mp-grid-4,.mp-grid-3{grid-template-columns:repeat(2,1fr)}
+  .mp-grid-2{grid-template-columns:1fr}
+  .mp-section{padding:40px 16px}
+}
+@media(max-width:480px){
+  .mp-footer-inner{grid-template-columns:1fr}
+  .mp-grid-4,.mp-grid-3,.mp-grid-2{grid-template-columns:1fr}
+}
+
+{% block extra_css %}{% endblock %}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="mp-nav" role="navigation" aria-label="Glavna navigacija">
+  <a href="/" class="mp-nav-logo">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/>
+      <circle cx="9" cy="3" r="1.5"/><circle cx="15" cy="3" r="1.5"/>
+      <path d="M12 9c-3.5 0-6 2.5-6 5.5 0 2 1 3.5 3 4l3 1 3-1c2-.5 3-2 3-4 0-3-2.5-5.5-6-5.5z"/>
+    </svg>
+    memio<span>.pet</span>
+  </a>
+
+  <div class="mp-nav-links">
+    <a href="/" {% if request.resolver_match.url_name == 'landing' %}class="active"{% endif %}>Početna</a>
+    <a href="/gram/" {% if 'boxgram' in request.path %}class="active"{% endif %}>📸 Gram</a>
+    <a href="/pretraga/">Pretraga</a>
+    <a href="/udomljavanje/" {% if 'udomljavanje' in request.path %}class="active"{% endif %}>Udomljavanje</a>
+    <a href="/prodaja/" {% if 'prodaja' in request.path %}class="active"{% endif %}>Prodaja</a>
+    <a href="/farma/" {% if 'farma' in request.path %}class="active"{% endif %}>🌾 Farma</a>
+  </div>
+
+  <div class="mp-nav-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="text" placeholder="Pretraži ljubimce, uzgajivače..."
+           id="nav-search-inp" autocomplete="off"
+           onkeydown="if(event.key==='Enter'&&this.value.trim())location.href='/pretraga/?q='+encodeURIComponent(this.value.trim())">
+  </div>
+
+  <div class="mp-nav-actions">
+    {% if user.is_authenticated %}
+      <a href="/moj-profil/" class="mp-btn-ghost">Moj profil</a>
+    {% else %}
+      <a href="/prijava/" class="mp-btn-ghost">Prijava</a>
+      <a href="/registracija/" class="mp-btn-primary">+ Registracija</a>
+    {% endif %}
+  </div>
+
+  <button class="mp-nav-hamburger" id="mp-hamburger" aria-label="Izbornik" aria-expanded="false">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+</nav>
+
+<!-- Mobile nav menu -->
+<div class="mp-nav-mobile" id="mp-mobile-menu" role="menu">
+  <a href="/">🏠 Početna</a>
+  <a href="/gram/">📸 Gram — memio.gram</a>
+  <a href="/pretraga/">🔍 Pretraga</a>
+  <a href="/udomljavanje/">❤️ Udomljavanje</a>
+  <a href="/prodaja/">🛒 Prodaja</a>
+  <a href="/farma/">🌾 Farma</a>
+  <hr style="border-color:var(--line);margin:8px 0">
+  {% if user.is_authenticated %}
+    <a href="/moj-profil/">👤 Moj profil</a>
+  {% else %}
+    <a href="/prijava/">Prijava</a>
+    <a href="/registracija/" style="color:var(--gold)">+ Registracija</a>
+  {% endif %}
+</div>
+
+{% block messages %}
+{% if messages %}
+<div style="max-width:900px;margin:12px auto;padding:0 24px">
+  {% for msg in messages %}
+  <div class="mp-badge {% if msg.tags == 'error' %}mp-badge-red{% elif msg.tags == 'success' %}mp-badge-green{% else %}mp-badge-muted{% endif %}"
+       style="padding:10px 16px;border-radius:10px;display:block;margin-bottom:8px;font-size:.85rem">
+    {{ msg }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+<!-- Footer -->
+<footer class="mp-footer" role="contentinfo">
+  <div class="mp-footer-inner">
+    <div class="mp-footer-brand">
+      <a href="/" class="mp-nav-logo" style="display:inline-flex;margin-bottom:10px">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/>
+          <circle cx="9" cy="3" r="1.5"/><circle cx="15" cy="3" r="1.5"/>
+          <path d="M12 9c-3.5 0-6 2.5-6 5.5 0 2 1 3.5 3 4l3 1 3-1c2-.5 3-2 3-4 0-3-2.5-5.5-6-5.5z"/>
+        </svg>
+        memio<span>.pet</span>
+      </a>
+      <p>Digitalni karton vašeg ljubimca — od prvog koraka do vječnog nasljeđa. QR pristup, putovnica, kompletna povijest.</p>
+      <div class="mp-inov-row">
+        <a href="https://limit-connect.com/folija/" class="mp-inov-badge" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 2L4 7v5c0 5.5 3.3 10.7 8 13 4.7-2.3 8-7.5 8-13V7l-8-5z"/></svg>
+          Folija
+        </a>
+        <a href="https://limit-connect.com/dok/" class="mp-inov-badge" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          .dok
+        </a>
+        <a href="https://limit-connect.com/chainblock/" class="mp-inov-badge" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="6" height="6" rx="1"/><rect x="10" y="7" width="6" height="6" rx="1"/><rect x="18" y="7" width="4" height="6" rx="1"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="16" y1="10" x2="18" y2="10"/></svg>
+          ChainBlock
+        </a>
+      </div>
+    </div>
+
+    <div class="mp-footer-col">
+      <h4>Ljubimci</h4>
+      <a href="/gram/">Gram — feed</a>
+      <a href="/pretraga/">Pretraga</a>
+      <a href="/udomljavanje/">Udomljavanje</a>
+      <a href="/prodaja/">Prodaja</a>
+      <a href="/registracija/">Registriraj ljubimca</a>
+    </div>
+
+    <div class="mp-footer-col">
+      <h4>Farma</h4>
+      <a href="/farma/">Sve vrste</a>
+      <a href="/farma/?vrsta=konj">Konji</a>
+      <a href="/farma/?vrsta=ovca">Ovce i koze</a>
+      <a href="/farma/?vrsta=svinja">Svinje</a>
+      <a href="/farma/?vrsta=ptica">Peradarstvo</a>
+    </div>
+
+    <div class="mp-footer-col">
+      <h4>Usluge</h4>
+      <a href="/hoteli/">Pet hoteli</a>
+      <a href="/barf/">BARF hrana</a>
+      <a href="/dresura/">Dresura pasa</a>
+      <a href="/krematoriji/">Krematoriji</a>
+      <a href="/prijava/">Veterinar (prijava)</a>
+    </div>
+  </div>
+
+  <div class="mp-footer-bottom">
+    <span>© 2026 memio.pet — LIMIT Connect d.o.o.</span>
+    <div style="display:flex;gap:16px">
+      <a href="/privatnost/">Privatnost</a>
+      <a href="/uvjeti/">Uvjeti korištenja</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Mobile nav toggle
+(function(){
+  var btn = document.getElementById('mp-hamburger');
+  var menu = document.getElementById('mp-mobile-menu');
+  if(!btn||!menu) return;
+  btn.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  });
+  // Close on outside click
+  document.addEventListener('click', function(e){
+    if(!btn.contains(e.target) && !menu.contains(e.target)){
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+})();
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

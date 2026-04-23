@@ -1,0 +1,622 @@
+{% extends "memio/base.html" %}
+{% load i18n static %}
+
+{% block title %}memio.pet — Digitalni karton vašeg ljubimca{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ─── Hero ───────────────────────────────────────────────── */
+.mp-hero {
+  min-height: 88vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 24px 80px;
+}
+.mp-hero-text h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--paper);
+  margin-bottom: 20px;
+}
+.mp-hero-text h1 em {
+  font-style: normal;
+  color: var(--gold);
+}
+.mp-hero-text p {
+  font-size: 1.05rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 32px;
+  max-width: 440px;
+}
+.mp-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+.mp-hero-cta {
+  padding: 14px 28px;
+  background: var(--gold); color: var(--ink);
+  border-radius: 10px; font-weight: 700; font-size: 1rem;
+  transition: background .2s, transform .15s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.mp-hero-cta:hover { background: var(--gold-l); transform: translateY(-2px); text-decoration: none; color: var(--ink); }
+.mp-hero-cta-sec {
+  padding: 14px 28px;
+  background: var(--surface); color: var(--paper);
+  border: 1px solid var(--line); border-radius: 10px;
+  font-weight: 500; font-size: 1rem;
+  transition: border-color .2s, background .2s;
+}
+.mp-hero-cta-sec:hover { border-color: var(--gold); background: var(--gold-dim); text-decoration: none; color: var(--gold); }
+
+.mp-hero-stats {
+  display: flex; gap: 28px; flex-wrap: wrap;
+}
+.mp-hero-stat { }
+.mp-hero-stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 700; color: var(--gold);
+  line-height: 1;
+}
+.mp-hero-stat-label { font-size: .75rem; color: var(--muted); margin-top: 3px; }
+
+/* Hero photo grid */
+.mp-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 180px);
+  gap: 10px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.mp-hero-cell {
+  position: relative; overflow: hidden;
+  background: var(--ink-l);
+}
+.mp-hero-cell img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform .5s;
+}
+.mp-hero-cell:hover img { transform: scale(1.06); }
+.mp-hero-cell-label {
+  position: absolute; bottom: 8px; left: 8px;
+  background: rgba(26,26,46,.82); backdrop-filter: blur(8px);
+  border-radius: 6px; padding: 4px 9px;
+  font-size: .7rem; font-weight: 600; color: var(--paper);
+}
+.mp-hero-cell-big { grid-row: 1 / 3; grid-column: 1; }
+.mp-hero-cell-big { grid-column: 1; grid-row: 1 / 3; }
+.mp-hero-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 6px; color: var(--muted);
+  font-size: .75rem;
+}
+.mp-hero-placeholder svg { width: 32px; height: 32px; opacity: .3; }
+
+/* ─── Search bar ─────────────────────────────────────────── */
+.mp-search-bar {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 24px;
+  max-width: 900px;
+  margin: 0 auto 60px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  align-items: flex-end;
+}
+.mp-search-bar label { font-size: .72rem; color: var(--muted); font-weight: 600; letter-spacing: .05em; display: block; margin-bottom: 5px; }
+.mp-search-bar select, .mp-search-bar input {
+  padding: 10px 14px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--line); border-radius: 8px;
+  color: var(--paper); font-size: .88rem; font-family: inherit;
+  min-width: 150px;
+}
+.mp-search-bar select:focus, .mp-search-bar input:focus {
+  outline: none; border-color: var(--gold);
+}
+.mp-search-bar select option { background: var(--ink); }
+.mp-search-field { flex: 1; min-width: 140px; }
+.mp-search-btn {
+  padding: 11px 24px;
+  background: var(--gold); color: var(--ink);
+  border: none; border-radius: 8px;
+  font-weight: 700; font-size: .9rem;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.mp-search-btn:hover { background: var(--gold-l); }
+
+/* ─── Feed section ───────────────────────────────────────── */
+.mp-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.mp-feed-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color .25s, transform .25s;
+}
+.mp-feed-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-3px); }
+.mp-feed-card-img {
+  aspect-ratio: 1;
+  background: var(--ink-l);
+  overflow: hidden;
+}
+.mp-feed-card-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform .4s;
+}
+.mp-feed-card:hover .mp-feed-card-img img { transform: scale(1.05); }
+.mp-feed-card-body { padding: 12px 14px; }
+.mp-feed-card-pet {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.mp-feed-card-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--gold-dim); overflow: hidden;
+  border: 1px solid rgba(201,168,76,.3);
+  flex-shrink: 0;
+}
+.mp-feed-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mp-feed-card-petname { font-size: .8rem; font-weight: 600; color: var(--paper); }
+.mp-feed-card-species { font-size: .7rem; color: var(--muted); }
+.mp-feed-card-caption {
+  font-size: .8rem; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.mp-feed-card-meta {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 8px; font-size: .72rem; color: var(--muted);
+}
+
+/* ─── Stats strip ────────────────────────────────────────── */
+.mp-stats-strip {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 32px 24px;
+}
+.mp-stats-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-around;
+  flex-wrap: wrap; gap: 24px;
+  text-align: center;
+}
+.mp-stat-item-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem; font-weight: 700; color: var(--gold);
+}
+.mp-stat-item-label { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+
+/* ─── How it works ───────────────────────────────────────── */
+.mp-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.mp-step {
+  text-align: center; padding: 28px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  position: relative;
+}
+.mp-step-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--gold-dim); border: 1px solid rgba(201,168,76,.3);
+  color: var(--gold); font-weight: 700; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.mp-step-icon {
+  font-size: 2rem; margin-bottom: 12px;
+}
+.mp-step h3 { font-size: .95rem; font-weight: 700; color: var(--paper); margin-bottom: 8px; }
+.mp-step p { font-size: .8rem; color: var(--muted); line-height: 1.6; }
+
+/* ─── Adoption strip ─────────────────────────────────────── */
+.mp-adoption-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ─── CTA bottom ──────────────────────────────────────────── */
+.mp-cta-block {
+  text-align: center;
+  padding: 80px 24px;
+  background: linear-gradient(135deg, rgba(201,168,76,.06) 0%, rgba(201,168,76,.02) 100%);
+  border: 1px solid rgba(201,168,76,.12);
+  border-radius: 24px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.mp-cta-block h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  color: var(--paper);
+  margin-bottom: 16px;
+}
+.mp-cta-block p { font-size: 1rem; color: var(--muted); margin-bottom: 28px; line-height: 1.7; }
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media(max-width:900px){
+  .mp-hero { grid-template-columns: 1fr; min-height: auto; }
+  .mp-hero-grid { display: none; }
+  .mp-steps { grid-template-columns: repeat(2,1fr); }
+  .mp-adoption-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media(max-width:540px){
+  .mp-steps { grid-template-columns: 1fr; }
+  .mp-adoption-grid { grid-template-columns: 1fr; }
+  .mp-search-bar { flex-direction: column; }
+  .mp-search-field, .mp-search-bar select { width: 100%; min-width: 0; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ──────────────────────────────────────────────── -->
+<section class="mp-hero" aria-label="Naslovna sekcija">
+  <div class="mp-hero-text">
+    <h1>Svaki ljubimac<br>zaslužuje svoju<br><em>priču</em></h1>
+    <p>QR karton, putovnica i cijeli životni put — od prvog koraka do vječnog nasljeđa. Za pse, mačke, konje, farmu i sve što vam je vrijedno.</p>
+
+    <div class="mp-hero-actions">
+      <a href="/registracija/" class="mp-hero-cta">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Registriraj ljubimca besplatno
+      </a>
+      <a href="/gram/" class="mp-hero-cta-sec">📸 Vidi Gram</a>
+    </div>
+
+    <div class="mp-hero-stats">
+      <div class="mp-hero-stat">
+        <div class="mp-hero-stat-num">{{ stats.animals }}</div>
+        <div class="mp-hero-stat-label">Profila ljubimaca</div>
+      </div>
+      <div class="mp-hero-stat">
+        <div class="mp-hero-stat-num">{{ stats.breeders }}</div>
+        <div class="mp-hero-stat-label">Uzgajivača i azila</div>
+      </div>
+      <div class="mp-hero-stat">
+        <div class="mp-hero-stat-num">{{ stats.adopted }}</div>
+        <div class="mp-hero-stat-label">Udomljenih</div>
+      </div>
+      <div class="mp-hero-stat">
+        <div class="mp-hero-stat-num">{{ stats.species }}</div>
+        <div class="mp-hero-stat-label">Vrsta životinja</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo grid - live from DB -->
+  <div class="mp-hero-grid" aria-hidden="true">
+    {% for animal in recent_animals %}
+    <div class="mp-hero-cell {% if forloop.first %}mp-hero-cell-big{% endif %}">
+      <a href="/pas/{{ animal.chip_number|default:animal.ear_tag }}/">
+        {% if animal.photo %}
+          <img src="{{ animal.photo.url }}" alt="{{ animal.name|default:'Ljubimac' }}" loading="lazy">
+        {% else %}
+          <div class="mp-hero-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="9" cy="3" r="1.5"/><circle cx="15" cy="3" r="1.5"/><path d="M12 9c-3.5 0-6 2.5-6 5.5 0 2 1 3.5 3 4l3 1 3-1c2-.5 3-2 3-4 0-3-2.5-5.5-6-5.5z"/></svg>
+            {{ animal.name|default:'?' }}
+          </div>
+        {% endif %}
+        {% if animal.name %}
+        <div class="mp-hero-cell-label">{{ animal.name }} {% if animal.breed %}&middot; {{ animal.breed|truncatechars:16 }}{% endif %}</div>
+        {% endif %}
+      </a>
+    </div>
+    {% empty %}
+    {% for i in "123456" %}
+    <div class="mp-hero-cell {% if forloop.first %}mp-hero-cell-big{% endif %}">
+      <div class="mp-hero-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="9" cy="3" r="1.5"/><circle cx="15" cy="3" r="1.5"/><path d="M12 9c-3.5 0-6 2.5-6 5.5 0 2 1 3.5 3 4l3 1 3-1c2-.5 3-2 3-4 0-3-2.5-5.5-6-5.5z"/></svg>
+        <span>Vaš ljubimac ovdje</span>
+      </div>
+    </div>
+    {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ── SEARCH BAR ─────────────────────────────────────────── -->
+<div style="max-width:1200px;margin:0 auto;padding:0 24px">
+  <form class="mp-search-bar" action="/pretraga/" method="get" role="search">
+    <div class="mp-search-field">
+      <label for="s-q">Ime ili pasmina</label>
+      <input type="text" id="s-q" name="q" placeholder="npr. Labrador, Rex, Persian...">
+    </div>
+    <div>
+      <label for="s-vrsta">Vrsta</label>
+      <select name="vrsta" id="s-vrsta">
+        <option value="">Sve vrste</option>
+        <option value="pas">🐕 Pas</option>
+        <option value="macka">🐈 Mačka</option>
+        <option value="konj">🐎 Konj</option>
+        <option value="zec">🐇 Zec</option>
+        <option value="ptica">🐦 Ptica</option>
+        <option value="ovca">🐑 Ovca</option>
+        <option value="svinja">🐖 Svinja</option>
+        <option value="ostalo_ljubimac">Ostalo</option>
+      </select>
+    </div>
+    <div>
+      <label for="s-status">Status</label>
+      <select name="status" id="s-status">
+        <option value="">Svi statusi</option>
+        <option value="aktivno">Aktivno</option>
+        <option value="u_azilu">U azilu</option>
+        <option value="rezerviran">Rezerviran</option>
+        <option value="prodano">Prodaja</option>
+      </select>
+    </div>
+    <div>
+      <label for="s-grad">Grad</label>
+      <input type="text" id="s-grad" name="grad" placeholder="Zagreb, Split..." style="min-width:130px">
+    </div>
+    <button type="submit" class="mp-search-btn">🔍 Pretraži</button>
+  </form>
+</div>
+
+<!-- ── STATS STRIP ────────────────────────────────────────── -->
+<div class="mp-stats-strip">
+  <div class="mp-stats-inner">
+    <div class="mp-stat-item">
+      <div class="mp-stat-item-num">{{ stats.animals }}</div>
+      <div class="mp-stat-item-label">Profila ljubimaca</div>
+    </div>
+    <div class="mp-stat-item">
+      <div class="mp-stat-item-num">{{ stats.breeders }}</div>
+      <div class="mp-stat-item-label">Uzgajivača i azila</div>
+    </div>
+    <div class="mp-stat-item">
+      <div class="mp-stat-item-num">{{ stats.adopted }}</div>
+      <div class="mp-stat-item-label">Sretan novi dom</div>
+    </div>
+    <div class="mp-stat-item">
+      <div class="mp-stat-item-num">9</div>
+      <div class="mp-stat-item-label">Vrsta životinja</div>
+    </div>
+    <div class="mp-stat-item">
+      <div class="mp-stat-item-num">🛡️</div>
+      <div class="mp-stat-item-label">Folija pečat na svakom dokumentu</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── GRAM FEED PREVIEW ──────────────────────────────────── -->
+{% if feed_events %}
+<section class="mp-section">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 class="mp-heading">📸 memio.gram</h2>
+      <p class="mp-subhead" style="margin-bottom:0">Najnovije iz zajednice ljubimaca</p>
+    </div>
+    <a href="/gram/" class="mp-btn-ghost" style="padding:9px 20px;font-size:.85rem">Vidi sve →</a>
+  </div>
+
+  <div class="mp-feed-grid">
+    {% for item in feed_events %}
+    <a href="/boxgram/ljubimac/{{ item.pet.slug }}/" class="mp-feed-card" style="text-decoration:none">
+      <div class="mp-feed-card-img">
+        <img src="{{ item.media.file.url }}" alt="{{ item.pet.name }}" loading="lazy">
+      </div>
+      <div class="mp-feed-card-body">
+        <div class="mp-feed-card-pet">
+          <div class="mp-feed-card-avatar">
+            {% if item.pet.avatar %}
+              <img src="{{ item.pet.avatar.url }}" alt="{{ item.pet.name }}">
+            {% else %}
+              <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--gold)">🐾</div>
+            {% endif %}
+          </div>
+          <div>
+            <div class="mp-feed-card-petname">{{ item.pet.name }}</div>
+            <div class="mp-feed-card-species">{{ item.pet.get_species_display }}</div>
+          </div>
+        </div>
+        {% if item.event.caption %}
+          <p class="mp-feed-card-caption">{{ item.event.caption }}</p>
+        {% endif %}
+        <div class="mp-feed-card-meta">
+          <span>❤️ {{ item.event.hearts_count|default:0 }}</span>
+          <span>💬 {{ item.event.comments_count|default:0 }}</span>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── KAKO FUNKCIONIRA ───────────────────────────────────── -->
+<section class="mp-section" style="padding-top:20px">
+  <h2 class="mp-heading" style="text-align:center">Kako funkcionira?</h2>
+  <p class="mp-subhead" style="text-align:center;margin:0 auto 40px;max-width:500px">Četiri koraka do digitalnog kartona koji traje vječno</p>
+
+  <div class="mp-steps">
+    <div class="mp-step">
+      <div class="mp-step-num">1</div>
+      <div class="mp-step-icon">📝</div>
+      <h3>Registriraj ljubimca</h3>
+      <p>Ime, vrsta, pasmina, datum rođenja. Gotovo za 2 minute. Besplatno zauvijek.</p>
+    </div>
+    <div class="mp-step">
+      <div class="mp-step-num">2</div>
+      <div class="mp-step-icon">📱</div>
+      <h3>Dobij QR kod</h3>
+      <p>Odmah po registraciji. Stavi na ogrlicu, putovnicu ili karton. Skeniranjem se otvara cijela povijest.</p>
+    </div>
+    <div class="mp-step">
+      <div class="mp-step-num">3</div>
+      <div class="mp-step-icon">🎬</div>
+      <h3>Dodaj medije</h3>
+      <p>Fotografije, videi, glasovni zapisi. AI ih obrađuje u pozadini — transkripcija, prepoznavanje rase.</p>
+    </div>
+    <div class="mp-step">
+      <div class="mp-step-num">4</div>
+      <div class="mp-step-icon">📄</div>
+      <h3>Preuzmi Putovnicu</h3>
+      <p>Cijela povijest u jednom <strong style="color:var(--gold)">.dok</strong> dokumentu. Kriptografski pečatena, verificirana, offline čitljiva 50 godina.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── UDOMLJAVANJE ───────────────────────────────────────── -->
+{% if adoption_animals %}
+<section class="mp-section" style="padding-top:20px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 class="mp-heading">❤️ Traže dom</h2>
+      <p class="mp-subhead" style="margin-bottom:0">Ovi ljubimci čekaju na tebe</p>
+    </div>
+    <a href="/udomljavanje/" class="mp-btn-ghost" style="padding:9px 20px;font-size:.85rem">Svi oglasi →</a>
+  </div>
+
+  <div class="mp-adoption-grid">
+    {% for animal in adoption_animals %}
+    <a href="/pas/{{ animal.chip_number|default:animal.ear_tag }}/" class="mp-animal-card" style="text-decoration:none">
+      <div class="mp-animal-card-img">
+        {% if animal.photo %}
+          <img src="{{ animal.photo.url }}" alt="{{ animal.name|default:'Ljubimac' }}" loading="lazy">
+        {% else %}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;background:var(--ink-l)">
+            {% if animal.vrsta == 'pas' %}🐕{% elif animal.vrsta == 'macka' %}🐈{% elif animal.vrsta == 'konj' %}🐎{% else %}🐾{% endif %}
+          </div>
+        {% endif %}
+        <div class="mp-species-icon">
+          {% if animal.vrsta == 'pas' %}🐕{% elif animal.vrsta == 'macka' %}🐈{% elif animal.vrsta == 'konj' %}🐎{% else %}{{ animal.get_vrsta_display }}{% endif %}
+        </div>
+        <div class="mp-status-badge">
+          <span class="mp-badge {% if animal.status == 'u_azilu' %}mp-badge-gold{% else %}mp-badge-green{% endif %}">
+            {{ animal.get_status_display }}
+          </span>
+        </div>
+      </div>
+      <div class="mp-animal-card-body">
+        <div class="mp-animal-card-name">{{ animal.name|default:'Bez imena' }}</div>
+        <div class="mp-animal-card-meta">
+          {{ animal.breed|default:animal.get_vrsta_display }}{% if animal.date_of_birth %} · {{ animal.date_of_birth|timesince|truncatewords:2 }}{% endif %}
+        </div>
+        {% if animal.owner %}
+        <div class="mp-animal-card-breeder">{{ animal.owner.name }}</div>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── INOVACIJE (ugrađene, ne opisane) ──────────────────── -->
+<section class="mp-section" style="padding-top:20px">
+  <h2 class="mp-heading" style="text-align:center">Pod haubom</h2>
+  <p class="mp-subhead" style="text-align:center;margin:0 auto 40px;max-width:520px">Tehnologije koje rade tiho — vi vidite samo rezultat</p>
+
+  <div class="mp-grid-3">
+    <div class="mp-card" style="padding:28px">
+      <div style="font-size:2.2rem;margin-bottom:16px">📄</div>
+      <h3 style="font-size:1rem;font-weight:700;color:var(--paper);margin-bottom:8px">Putovnica kao <span style="color:var(--gold)">.dok</span></h3>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.6">Svaki dokument koji preuzmeš je <code style="color:var(--gold)">.dok</code> format — ZIP s JSON podacima, HTML čitačem i kriptografskim dokazom. Čita se offline. Traje 50 godina.</p>
+      <a href="https://limit-connect.com/dok/" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:.75rem;color:var(--muted)">Saznaj više →</a>
+    </div>
+    <div class="mp-card" style="padding:28px">
+      <div style="font-size:2.2rem;margin-bottom:16px">🛡️</div>
+      <h3 style="font-size:1rem;font-weight:700;color:var(--paper);margin-bottom:8px">Folija pečat</h3>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.6">Svaki karton i putovnica nose Folija kriptografski pečat. Real-time verifikacija integriteta — nemoguće krivotvoriti bez ostavljanja traga.</p>
+      <a href="https://limit-connect.com/folija/" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:.75rem;color:var(--muted)">Saznaj više →</a>
+    </div>
+    <div class="mp-card" style="padding:28px">
+      <div style="font-size:2.2rem;margin-bottom:16px">🧬</div>
+      <h3 style="font-size:1rem;font-weight:700;color:var(--paper);margin-bottom:8px">AI analiza medija</h3>
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.6">Glasovni zapisi se automatski transkribuju. Fotografije prolaze kroz AI prepoznavanje rase. Videi dobivaju naslovnicu. Sve u pozadini.</p>
+      <span style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:.75rem;color:var(--muted)">Gemini + Whisper</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── FARMA TEASER ───────────────────────────────────────── -->
+<section style="background:linear-gradient(135deg,rgba(110,231,183,.05) 0%,rgba(52,211,153,.02) 100%);border-top:1px solid rgba(110,231,183,.1);border-bottom:1px solid rgba(110,231,183,.1);padding:48px 24px;margin:40px 0">
+  <div style="max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+    <div>
+      <span class="mp-badge mp-badge-green" style="margin-bottom:16px">🌾 Farma sekcija</span>
+      <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.4rem,2.5vw,2rem);color:var(--paper);margin-bottom:12px">
+        Za konje, ovce, svinje<br>i peradarstvo
+      </h2>
+      <p style="font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:20px">
+        Komercijalna strana — matični broj životinje, stado, tržišna vrijednost, veterinarski karton za inspekciju. Svaka farma dobiva vlastiti portal.
+      </p>
+      <a href="/farma/" class="mp-btn-ghost" style="padding:10px 22px">Otvori Farma portal →</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+      {% for species, emoji, label in "konj,🐎,Konji|ovca,🐑,Ovce|koza,🐐,Koze|svinja,🐖,Svinje|ptica,🐓,Peradarstvo|ostalo_ljubimac,🐄,Ostalo"|split:"|" %}
+      <a href="/farma/?vrsta={{ species|cut:',🐎,Konji'|cut:',🐑,Ovce'|cut:',🐐,Koze'|cut:',🐖,Svinje'|cut:',🐓,Peradarstvo'|cut:',🐄,Ostalo' }}" style="background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.15);border-radius:10px;padding:14px 8px;text-decoration:none;transition:background .2s" onmouseover="this.style.background='rgba(110,231,183,.15)'" onmouseout="this.style.background='rgba(110,231,183,.08)'">
+        <div style="font-size:1.8rem">{{ emoji }}</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:5px">{{ label }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section class="mp-section">
+  <div class="mp-cta-block">
+    <div style="font-size:3rem;margin-bottom:16px">🐾</div>
+    <h2>Tvoj ljubimac zaslužuje<br>više od fotografija</h2>
+    <p>Kreira profil za 2 minute. QR kod odmah. Putovnica s Folija pečatom. Besplatno.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="/registracija/" class="mp-hero-cta">Registriraj besplatno →</a>
+      <a href="/gram/" class="mp-hero-cta-sec">📸 Pogledaj Gram</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animate stats on scroll
+(function(){
+  var nums = document.querySelectorAll('.mp-hero-stat-num, .mp-stat-item-num');
+  var seen = false;
+  function animateNum(el){
+    var target = parseInt(el.textContent.replace(/\D/g,''));
+    if(!target || target < 2) return;
+    var start = 0, dur = 1200, startTime = null;
+    function step(ts){
+      if(!startTime) startTime = ts;
+      var prog = Math.min((ts-startTime)/dur, 1);
+      var ease = 1-Math.pow(1-prog, 3);
+      el.textContent = Math.round(ease*target);
+      if(prog < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var observer = new IntersectionObserver(function(entries){
+    if(seen) return;
+    entries.forEach(function(e){
+      if(e.isIntersecting){ seen=true; nums.forEach(animateNum); observer.disconnect(); }
+    });
+  },{threshold:.5});
+  if(nums.length) observer.observe(nums[0]);
+})();
+</script>
+{% endblock %}
