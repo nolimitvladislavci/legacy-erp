@@ -236,7 +236,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
     <li><a href="#dok">Standard .dok</a></li>
     <li><a href="#evalidator">eValidator</a></li>
     <li><a href="#earhivator">eArhivator</a></li>
-    <li><a href="#dokumenti">Dokumenti</a></li>
+    <li><a href="#vivus" style="color:#a78bfa">VIVUS</a> <a href="#dokumenti">Dokumenti</a></li>
           <li><a href="#objave">Open Source</a></li>
     <li><a href="#kontakt">Kontakt</a></li>
     <li><a href="https://limit-connect.com/hr/accounts/login/" class="nav-portal"><i class="fas fa-sign-in-alt"></i> Portal</a></li>
@@ -837,6 +837,99 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
 </section>
 
 
+<!-- VIVUS INOVACIJSKI LABORATORIJ -->
+<section class="vivus-section" id="vivus">
+  <div class="container">
+    <div class="vivus-header">
+      <div class="vivus-protocol-badge reveal"><i class="fas fa-dna"></i>&nbsp;&nbsp;VIVUS Protocol v0.1 &mdash; 2026-04-23</div>
+      <div class="section-eyebrow">Inovacijski laboratorij &mdash; prior art, javno zapecaceno</div>
+      <h2 class="section-title reveal">Dokumenti koji<br><span style="color:#a78bfa">zive</span></h2>
+      <p class="section-lead reveal" style="margin:0 auto">VIVUS (lat. zivahan) je protokol koji tretira digitalne dokumente kao zive organizme. Nastao 2026-04-23 u NO LIMIT laboratoriju. Zapecacen u krunici: blokovi #27 do #31.</p>
+    </div>
+    <div class="vivus-layers">
+      <div class="vivus-layer reveal" data-lnum="L1">
+        <div class="vivus-layer-num">VIVUS L1</div>
+        <div class="vivus-layer-title">FenixHex &mdash; Heksagrammicki QR</div>
+        <div class="vivus-layer-desc">QR kod u obliku heksagrama (davidova zvijezda). Tri zone: Identitet + Sadrzaj + Potpis. Centralni pecato = prorocki prostor. Fluorescencija cini ga vidljivim i u UV svjetlu.</div>
+        <div class="vivus-layer-base">Inovacija: hexagram shape + 3-zone hash segmentation</div>
+      </div>
+      <div class="vivus-layer reveal" data-lnum="L2">
+        <div class="vivus-layer-num">VIVUS L2</div>
+        <div class="vivus-layer-title">Entanglement Primitives</div>
+        <div class="vivus-layer-desc">H_content i H_visual tvore HMAC par. Promjena jednog oboruje drugi. Kvantna isprepletnost bez kvantnog racunala. Nije moguce modificirati vizual bez obaranja hasha sadrzaja.</div>
+        <div class="vivus-layer-base">Temelj: fenix_folija.py (live u produkciji od 2026-04-22)</div>
+      </div>
+      <div class="vivus-layer reveal" data-lnum="L3">
+        <div class="vivus-layer-num">VIVUS L3</div>
+        <div class="vivus-layer-title">Freshness Oracle</div>
+        <div class="vivus-layer-desc">Blockchain timestamp kao objektivni sat. Dokument ne moze tvrditi da je noviji od blockchain bloka koji ga svjedoci. Eliminira backdating apsolutno.</div>
+        <div class="vivus-layer-base">Temelj: Shamir recovery + TSA standard (NN 89/25)</div>
+      </div>
+      <div class="vivus-layer reveal" data-lnum="L4">
+        <div class="vivus-layer-num">VIVUS L4</div>
+        <div class="vivus-layer-title">Witness Consensus</div>
+        <div class="vivus-layer-desc">Svaki scan = glas za stvarnost. n-of-m threshold: kad N razlicitih svjedoka potvrde isti hash, dokument postaje drustveno verificiran. Kapljica postaje voda.</div>
+        <div class="vivus-layer-base">Temelj: ChainBlockPOE append-only log (32 bloka)</div>
+      </div>
+      <div class="vivus-layer reveal" data-lnum="L5">
+        <div class="vivus-layer-num">VIVUS L5</div>
+        <div class="vivus-layer-title">Generative DNA &mdash; Klasteri</div>
+        <div class="vivus-layer-desc">Dokumenti koji radaju djecu. cluster_id grupira srodne dokumente. Njihov zajednicki Merkle root = digitalni portret entiteta. Klaster Ivan Brtan 2026 = jedna istina viseg reda.</div>
+        <div class="vivus-layer-base">Ideja: voda kao klaster, ocean kao meta-informacija</div>
+      </div>
+      <div class="vivus-layer reveal" data-lnum="L6">
+        <div class="vivus-layer-num">VIVUS L6</div>
+        <div class="vivus-layer-title">Prophetic Seal</div>
+        <div class="vivus-layer-desc">HMAC(seal_key, activation_date) = matematicka poruka buducnosti. Aktivira se na datum ili uvjet (dead-man switch). Neizmjenjivo. Primjer u produkciji: Digitalna Oporuka.</div>
+        <div class="vivus-layer-base">Produkcija: DigitalnaOporuka + NN 89/25 compliance</div>
+      </div>
+    </div>
+    <div class="vivus-cluster reveal">
+      <h3 class="vivus-cluster-title">Roadmap &mdash; <span style="color:#a78bfa">za svakoga tko preuzme stafetu</span></h3>
+      <p style="color:var(--dim);font-size:.9rem;margin-bottom:8px">VIVUS je otvoreni protokol. Faze su javno objavljene. Prva implementacija dobiva kreditiranje kao VIVUS Early Implementor.</p>
+      <div class="vivus-phases">
+        <div class="vivus-phase">
+          <div class="vivus-phase-num">FAZA 0 &#x2705;</div>
+          <div class="vivus-phase-title">Specifikacija zapecacena</div>
+          <div class="vivus-phase-items">ADR-001 u fenix-v3<br>Blokovi #27-#31 u krunici<br>IDEAS.md [I-017]<br>no-limit.world objavljen</div>
+        </div>
+        <div class="vivus-phase">
+          <div class="vivus-phase-num">FAZA 1 &#x1F504;</div>
+          <div class="vivus-phase-title">core/vivus/ engine</div>
+          <div class="vivus-phase-items">hex_generator.py (L1)<br>entanglement.py (L2 HMAC)<br>freshness_oracle.py (L3)<br>witness_consensus.py (L4)</div>
+        </div>
+        <div class="vivus-phase">
+          <div class="vivus-phase-num">FAZA 2 &#x1F4A1;</div>
+          <div class="vivus-phase-title">.dokarh format</div>
+          <div class="vivus-phase-items">.dokarh bundle struktura<br>manifest.xml prosirenje<br>FenixHex renderer<br>OpenDOK kompatibilnost</div>
+        </div>
+        <div class="vivus-phase">
+          <div class="vivus-phase-num">FAZA 3 &#x1F4A1;</div>
+          <div class="vivus-phase-title">L5 Klasteri</div>
+          <div class="vivus-phase-items">cluster_id na dokumentima<br>Merkle root po klasteru<br>Digitalni portret API<br>Klaster meta-dokument</div>
+        </div>
+        <div class="vivus-phase">
+          <div class="vivus-phase-num">FAZA 4 &#x1F4A1;</div>
+          <div class="vivus-phase-title">L6 Prophetic engine</div>
+          <div class="vivus-phase-items">Dead-man switch engine<br>HMAC activation trigger<br>Datumski + uvjetni okidaci<br>Oporuka L6 showcase</div>
+        </div>
+        <div class="vivus-phase">
+          <div class="vivus-phase-num">FAZA 5 &#x1F4A1;</div>
+          <div class="vivus-phase-title">Otvoreni patent</div>
+          <div class="vivus-phase-items">PCT prijava prior art<br>Open Patent Promise<br>VIVUS Certified badge<br>EU CRA uskladenost</div>
+        </div>
+      </div>
+      <div class="vivus-seal-row">
+        <span class="vivus-seal">NOLIMIT-VIVUS-0027</span>
+        <span class="vivus-seal">NOLIMIT-VIVUS-L1-0028</span>
+        <span class="vivus-seal">NOLIMIT-VIVUS-L2-0029</span>
+        <span class="vivus-seal">NOLIMIT-VIVUS-L4-0030</span>
+        <span class="vivus-seal">NOLIMIT-VIVUS-L6-0031</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- JAVNE OBJAVE -->
 <section class="objave-section" id="objave">
   <div class="container">
@@ -845,7 +938,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
     <p class="section-lead reveal">Svaka objava nosi kriptografski pečateni ChainBlock blok. Klik na "Verificiraj" dokazuje autenticnost — matematicki, nepromjenjivo.</p>
 
     <div class="chain-count reveal">
-      <div class="num">27</div>
+      <div class="num">32</div>
       <div class="lbl">zapečaćenih blokova<br>u ChainBlock lancu</div>
     </div>
 
@@ -921,6 +1014,19 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
         </div>
       </a>
 
+      <a href="#vivus" class="objava-card reveal" style="border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.04)">
+        <div class="objava-header">
+          <span class="objava-platform" style="background:rgba(139,92,246,.15);color:#a78bfa;border-color:rgba(139,92,246,.3)"><i class="fas fa-dna"></i> VIVUS Protocol</span>
+          <span class="objava-platform platform-github"><i class="fas fa-lock"></i> Prior Art</span>
+        </div>
+        <div class="objava-title">VIVUS Protocol v0.1 &mdash; Living Document Standard</div>
+        <div class="objava-desc">Protokol za dokumente koji zive. FenixHex QR (L1), Entanglement Primitives (L2), Witness Consensus (L4), Prophetic Seal (L6). Nastao 2026-04-23.</div>
+        <div class="objava-chain">Blokovi #27-#31 &mdash; NOLIMIT-VIVUS-0027 &mdash; 2026-04-23</div>
+        <div class="objava-links">
+          <a href="https://limit-connect.com/verify/NOLIMIT-VIVUS-0027/" target="_blank" class="objava-link" style="color:var(--green);border-color:rgba(34,197,94,.3)"><i class="fas fa-check-circle"></i> Verificiraj</a>
+        </div>
+      </a>
+
       <div class="objava-card reveal" style="border-style:dashed;cursor:default">
         <div class="objava-header">
           <span class="objava-platform platform-github" style="opacity:.5"><i class="fas fa-hourglass-half"></i> Uskoro</span>
@@ -936,7 +1042,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px
       <div class="genesis-proof-icon"><i class="fas fa-link"></i></div>
       <div>
         <h4>Svaki blok javno verificiran &mdash; odmah, besplatno, zauvijek</h4>
-        <p>Sva gornja objavljivanja zapečaćena su u nepromjenjivom ChainBlock lancu. Zamijeni token za bilo koji blok #0&ndash;#26:</p>
+        <p>Sva gornja objavljivanja zapečaćena su u nepromjenjivom ChainBlock lancu. Zamijeni token za bilo koji blok #0&ndash;#31:</p>
         <code><a href="https://limit-connect.com/verify/NOLIMIT-OSS-FOLIJA-PY-0022/" style="color:var(--gold)" target="_blank">limit-connect.com/verify/<strong>NOLIMIT-OSS-FOLIJA-PY-0022</strong>/</a></code>
       </div>
     </div>
