@@ -1,3 +1,30 @@
+# FINA-CONNECT STATUS — Azurirano: 2026-04-23
+
+## ZADNJE SESIJE
+
+### [S-057] --- 2026-04-23 (Pravopis fix + Haiku migracija)
+**Branch:** master | **Zadnji commit:** d8e34ac1
+
+**Uradeno:**
+
+1. **Pravopis no_limit.html** - svi CRO dijakritici ispravljeni (61 zamjena)
+   - izvlaci->izvlaci, nacin->nacin, osnivaci->osnivaci, popis osnivaca->osnivaca
+   - pecateni->pecateni, clanici->clanici, matematicki->matematicki, elektronicki->elektronicki
+   - Commit: d8e34ac1 fix(no_limit): pravopis zavrseni
+
+2. **Haiku model migracija** (cbbb8092)
+   - claude-haiku-4-5-20251001 -> claude-3-5-haiku-20241022 u 56 fajlova
+   - Privremeno dok se ne resetiraju tokeni za 4.5 (1.5.2026)
+
+3. **local_fallback.py** (cbbb8092)
+   - core/local_fallback.py: Tesseract OCR, regex invoice parser, suggest_konto
+   - documents/tasks.py: generate_ai_proposal sad koristi lokalni fallback
+
+**Open threads:**
+- OSS kartice su vec implementirane u no_limit.html (provjeri Task 2)
+
+---
+
 # FENIX PORTAL — STATUS NAPRETKA
 
 ## ⚡ ARHITEKTURA SERVERA — UVIJEK AKTUALNO
