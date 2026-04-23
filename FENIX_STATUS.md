@@ -2,6 +2,64 @@
 
 ## ZADNJE SESIJE
 
+### [S-059] --- 2026-04-23 (memio.pet PLAN-007..011 implementacija)
+**Branch:** master | **Zadnji commit:** 5ac60c6d
+
+**Uradeno:**
+
+1. **PLAN-008: .dok Putovnica** (pet_passport_dok view)
+   - ZIP download: payload.json + outfit.json + proof.json + viewer.html
+   - Folija-v1 SHA-256 kriptografski pecat
+   - Standalone offline HTML citac unutar .dok arhive
+   - URL: /pas/<chip>/putovnica/ -> application/zip (3.4KB)
+   - Fix: polja PetHealthRecord (datum/tip/opis/veterinar), PetOwnership (acquired_at), LifeMilestone (date/note)
+   - Fix: LifeMilestone dodan u views.py import
+
+2. **PLAN-007: Registracija wizard** (memio/registracija.html)
+   - Novi template extends memio/base.html
+   - Account type vizualne kartice, GDPR dob provjera (JS), parental email row
+   - Fix: URL konflikt - registracija_page() u memio_world/views.py
+     dispatcha na memio_pet.views.registracija za memio.pet domenu
+   - https://memio.pet/registracija/ -> 200 OK
+
+3. **PLAN-011: PIN brzi login**
+   - BreederProfile + AnimalProfile + VeterinarProfile: login_pin_hash/attempts/locked_until
+   - Migracija 0014 aplicirana na memio_pets DB
+   - pin_login() view: brute-force zastita (5 pokusaja, 15min lockout)
+   - pin_setup() view: postavljanje/promjena PIN-a
+   - prijava() redirecta na PIN login ako korisnik ima PIN hash
+   - Novi templates: memio/prijava.html, pin_login.html, pin_setup.html
+   - /pin/ ruta u nginx + DomainGateMiddleware whitelist
+   - Keyboard support na PIN padu (numpad + Backspace + Enter)
+
+4. **PLAN-010: Moj profil dashboard** (memio/dashboard.html)
+   - Session-based auth (memio_breeder_pk iz session) + Django auth fallback
+   - @login_required uklonjen -> neulogirani idu na /prijava/
+   - Trust score bar (gold/silver/bronze), stat kartice, animal grid
+   - Settings panel: PIN, uvezi, javni profil, gram links
+   - https://memio.pet/moj-profil/ -> 302 na /prijava/ (ocekivano bez sesije)
+
+5. **Fix: prodaja.html split filter**
+   - |split filter ne postoji u Djangu -> hardkodirani linkovi
+
+**SSH kljuc za pristup:** ~/.ssh/ivan_key (NE defaultni id_ed25519!)
+
+**Stanje ruta memio.pet:**
+- / -> 200, /registracija/ -> 200, /prijava/ -> 200
+- /farma/ -> 200, /pretraga/ -> 200, /prodaja/ -> 200
+- /pas/<chip>/ -> 200, /pas/<chip>/putovnica/ -> 200 (ZIP)
+- /gram/ -> 302 (na boxgram feed - ocekivano)
+
+**Open threads:**
+- PLAN-005 pretraga: stub template, treba real filtri s DB queryem
+- PLAN-006 prodaja: stub, treba real listing iz baze
+- PLAN-009 farma: treba real stats iz DB
+- PLAN-012 nginx: kompletno (putovnica kroz /pas/ location block)
+- PLAN-013 AI media: voice->transcript, foto->breed detekcija (nije krece)
+- PLAN-014 Vet bridge: Fenix V3 vet API -> memio.pet zdravlje (nije krece)
+- boxgram public_profile.html: moguce profilirati na memio/base.html
+
+---
 ### [S-058] --- 2026-04-23 (memio.pet redesign + branded login)
 **Branch:** master | **Zadnji commit:** d98d76e3
 
