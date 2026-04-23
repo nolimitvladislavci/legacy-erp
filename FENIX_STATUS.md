@@ -2,6 +2,38 @@
 
 ## ZADNJE SESIJE
 
+### [S-058] --- 2026-04-23 (memio.pet redesign + branded login)
+**Branch:** master | **Zadnji commit:** d98d76e3
+
+**Uradeno:**
+
+1. **memio.pet index.html kompletni redesign** (/var/www/memio-pet/index.html)
+   - 7 sekcija: hero, features, kako-radi, profili, inovacije, trust, cta
+   - Fiksirani top nav + desni dot-nav (IntersectionObserver)
+   - Prev/next navigacijske strelice na dnu svake sekcije
+   - Reveal animacije (IntersectionObserver fade-in)
+   - Sav sadrzaj centriran, SVG ikone 80px/42px stroke
+   - **3 INOVACIJE IZ BUDUCNOSTI**: AI Zdravstveni Prorok, Besmrtni Karton (.dok), Folija Runtime Seal
+   - Trust sekcija: ChainBlock, .dok, Folija, TSA RFC 3161 badgevi
+   - Live Folija badge: data-folija-seal="NOLIMIT-GENESIS-0001"
+   - OSS pills: folija-py, folija-js, folija-go, folija-dotnet, OpenDOK-2026
+
+2. **memio.pet branded login** (templates/registration/login_memio_pet.html)
+   - Paw print SVG logo, "memio.pet" branding
+   - Dark ink/gold dizajn, Playfair Display + Inter
+   - Password strength meter, eye toggle, PIN shortcut, language switcher
+   - Back link "Povratak na memio.pet"
+
+3. **login_view host detekcija** (core/views.py)
+   - _host detekcija: "memio" in host -> login_memio_pet.html
+   - 6 render() poziva zamijenjeno s _login_tpl varijablom
+   - manage.py check: 0 errors
+
+**Open threads:**
+- OSS kartice implementirane u no_limit.html (ok)
+
+---
+
 ### [S-057] --- 2026-04-23 (Pravopis fix + Haiku migracija)
 **Branch:** master | **Zadnji commit:** d8e34ac1
 
