@@ -1,0 +1,719 @@
+{% extends "memio/base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ animal.name|default:"Ljubimac" }} — {{ animal.get_vrsta_display }} — memio.pet{% endblock %}
+{% block meta_desc %}Digitalni karton: {{ animal.name|default:"Ljubimac" }}, {{ animal.breed|default:animal.get_vrsta_display }}. Cjepljenja, povijest, rodovnica, QR.{% endblock %}
+{% block og_title %}{{ animal.name|default:"Ljubimac" }} — memio.pet{% endblock %}
+{% block og_desc %}{{ animal.breed|default:animal.get_vrsta_display }}{% if animal.date_of_birth %}, {{ animal.date_of_birth|timesince|truncatewords:2 }}{% endif %}. Digitalni karton s Folija pečatom.{% endblock %}
+{% block og_image %}{% if animal.photo %}{{ animal.photo.url }}{% else %}https://memio.pet/static/memio/og-default.jpg{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ─── Profile Hero ───────────────────────────────────────── */
+.pp-hero {
+  position: relative;
+  background: var(--ink-l);
+  min-height: 320px;
+  overflow: hidden;
+}
+.pp-hero-cover {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--ink-l) 0%, #0f0f22 100%);
+}
+.pp-hero-cover img {
+  width: 100%; height: 100%; object-fit: cover; opacity: .25;
+}
+.pp-hero-inner {
+  position: relative; z-index: 2;
+  max-width: 1200px; margin: 0 auto;
+  padding: 40px 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 28px;
+  align-items: center;
+}
+.pp-avatar {
+  width: 140px; height: 140px;
+  border-radius: 20px;
+  border: 3px solid rgba(201,168,76,.4);
+  overflow: hidden; flex-shrink: 0;
+  background: var(--ink);
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+}
+.pp-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pp-avatar-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4rem;
+}
+.pp-info h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700; color: var(--paper);
+  margin-bottom: 8px; line-height: 1.15;
+}
+.pp-meta-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  align-items: center; margin-bottom: 14px;
+}
+.pp-chip { font-size: .72rem; color: var(--muted); font-family: monospace; }
+.pp-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+.pp-qr-wrap {
+  background: white; border-radius: 12px; padding: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.pp-qr-wrap img { width: 90px; height: 90px; display: block; }
+.pp-passport-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 8px;
+  background: var(--gold-dim); border: 1px solid rgba(201,168,76,.3);
+  color: var(--gold); font-size: .78rem; font-weight: 600;
+  transition: background .2s; white-space: nowrap; text-decoration: none;
+}
+.pp-passport-btn:hover { background: rgba(201,168,76,.2); text-decoration: none; color: var(--gold-l); }
+.pp-passport-btn svg { width: 14px; height: 14px; }
+
+/* ─── Tabs ───────────────────────────────────────────────── */
+.pp-tabs-bar {
+  background: rgba(26,26,46,.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: var(--nav-h); z-index: 100;
+}
+.pp-tabs-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; gap: 0; overflow-x: auto;
+  padding: 0 24px;
+  scrollbar-width: none;
+}
+.pp-tabs-inner::-webkit-scrollbar { display: none; }
+.pp-tab {
+  padding: 14px 20px;
+  font-size: .85rem; font-weight: 500;
+  color: var(--muted); border: none; background: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer; white-space: nowrap;
+  transition: color .2s, border-color .2s;
+}
+.pp-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.pp-tab:hover { color: var(--paper); }
+
+/* Tab content panels */
+.pp-tab-panel { display: none; }
+.pp-tab-panel.active { display: block; }
+
+/* ─── Content wrapper ────────────────────────────────────── */
+.pp-content { max-width: 1200px; margin: 0 auto; padding: 36px 24px; }
+
+/* ─── Mediji grid ────────────────────────────────────────── */
+.pp-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.pp-media-item {
+  aspect-ratio: 1; border-radius: 12px;
+  overflow: hidden; background: var(--ink-l);
+  position: relative; cursor: pointer;
+}
+.pp-media-item img, .pp-media-item video {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .4s;
+}
+.pp-media-item:hover img, .pp-media-item:hover video { transform: scale(1.05); }
+.pp-media-type-badge {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,.7); border-radius: 6px;
+  padding: 3px 7px; font-size: .65rem; font-weight: 600; color: white;
+}
+.pp-media-event-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,.8));
+  padding: 20px 10px 10px; font-size: .72rem; color: var(--paper);
+}
+
+/* Audio player */
+.pp-audio-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.pp-audio-icon { font-size: 1.8rem; flex-shrink: 0; }
+.pp-audio-info { flex: 1; }
+.pp-audio-info p { font-size: .82rem; color: var(--paper); margin-bottom: 4px; }
+.pp-audio-info span { font-size: .72rem; color: var(--muted); }
+.pp-audio-card audio { width: 100%; margin-top: 8px; }
+
+/* ─── Timeline ───────────────────────────────────────────── */
+.pp-timeline { position: relative; padding-left: 28px; }
+.pp-timeline::before {
+  content: ''; position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px; background: var(--line);
+}
+.pp-tl-item {
+  position: relative; margin-bottom: 28px;
+}
+.pp-tl-dot {
+  position: absolute; left: -24px; top: 4px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--ink-l); border: 2px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem;
+}
+.pp-tl-dot.gold { border-color: var(--gold); background: var(--gold-dim); }
+.pp-tl-dot.green { border-color: var(--green); background: rgba(74,222,128,.1); }
+.pp-tl-date { font-size: .72rem; color: var(--muted); margin-bottom: 4px; }
+.pp-tl-title { font-size: .92rem; font-weight: 600; color: var(--paper); margin-bottom: 4px; }
+.pp-tl-note { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+.pp-tl-photo { margin-top: 10px; border-radius: 10px; overflow: hidden; max-width: 240px; }
+.pp-tl-photo img { width: 100%; display: block; }
+
+/* ─── Health records ─────────────────────────────────────── */
+.pp-health-item {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px 20px;
+  display: grid; grid-template-columns: 44px 1fr auto;
+  gap: 14px; align-items: start;
+  margin-bottom: 12px;
+}
+.pp-health-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.pp-health-icon.cijepljenje { background: rgba(74,222,128,.12); }
+.pp-health-icon.pregled { background: rgba(96,165,250,.12); }
+.pp-health-icon.lijek { background: rgba(251,191,36,.12); }
+.pp-health-icon.operacija { background: rgba(248,113,113,.12); }
+.pp-health-type { font-size: .78rem; font-weight: 700; color: var(--paper); margin-bottom: 4px; }
+.pp-health-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+.pp-health-vet { font-size: .72rem; color: var(--gold); margin-top: 5px; }
+.pp-health-date { font-size: .72rem; color: var(--muted); white-space: nowrap; text-align: right; }
+
+/* ─── Pedigree tree ──────────────────────────────────────── */
+.pp-pedigree {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 24px; align-items: center;
+  margin-bottom: 32px;
+}
+.pp-pedigree-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; padding: 16px;
+  text-align: center; text-decoration: none;
+  transition: border-color .2s, transform .2s;
+  display: block;
+}
+.pp-pedigree-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-2px); text-decoration: none; }
+.pp-pedigree-card-img {
+  width: 64px; height: 64px; border-radius: 12px;
+  overflow: hidden; background: var(--ink-l);
+  margin: 0 auto 10px;
+}
+.pp-pedigree-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.pp-pedigree-name { font-size: .9rem; font-weight: 700; color: var(--paper); }
+.pp-pedigree-meta { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+.pp-pedigree-center { text-align: center; }
+.pp-pedigree-center-avatar {
+  width: 90px; height: 90px; border-radius: 16px;
+  overflow: hidden; background: var(--ink-l);
+  margin: 0 auto 10px; border: 2px solid rgba(201,168,76,.3);
+}
+.pp-pedigree-center-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ─── Ownership chain ────────────────────────────────────── */
+.pp-ownership-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 14px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 12px;
+  margin-bottom: 10px;
+}
+.pp-ownership-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+.pp-ownership-name { font-size: .9rem; font-weight: 600; color: var(--paper); }
+.pp-ownership-meta { font-size: .75rem; color: var(--muted); margin-top: 3px; }
+.pp-folija-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,.2); border-radius: 8px;
+  margin-top: 8px; font-size: .75rem; color: var(--gold);
+}
+
+/* ─── Memorial overlay ───────────────────────────────────── */
+.pp-memorial-banner {
+  background: linear-gradient(135deg, rgba(148,163,184,.1) 0%, transparent 100%);
+  border: 1px solid rgba(148,163,184,.2);
+  border-radius: 14px; padding: 20px 24px;
+  margin-bottom: 28px; text-align: center;
+}
+.pp-memorial-banner h3 { font-size: 1.1rem; color: var(--paper); margin-bottom: 8px; }
+.pp-memorial-banner p { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+
+/* ─── Empty state ────────────────────────────────────────── */
+.pp-empty {
+  text-align: center; padding: 48px 20px;
+  color: var(--muted);
+}
+.pp-empty .emoji { font-size: 2.5rem; margin-bottom: 12px; }
+.pp-empty p { font-size: .88rem; line-height: 1.6; }
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media(max-width:768px){
+  .pp-hero-inner { grid-template-columns: auto 1fr; grid-template-rows: auto auto; gap:16px; }
+  .pp-actions { grid-column: 1/-1; flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .pp-avatar { width: 100px; height: 100px; }
+  .pp-pedigree { grid-template-columns: 1fr; gap: 16px; }
+  .pp-pedigree-center { order: -1; }
+}
+@media(max-width:480px){
+  .pp-media-grid { grid-template-columns: repeat(2,1fr); }
+  .pp-health-item { grid-template-columns: 36px 1fr; }
+  .pp-health-date { grid-column: 2; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
+<div class="pp-hero">
+  <div class="pp-hero-cover">
+    {% if animal.photo %}<img src="{{ animal.photo.url }}" alt="">{% endif %}
+  </div>
+  <div class="pp-hero-inner">
+    <!-- Avatar -->
+    <div class="pp-avatar">
+      {% if animal.photo %}
+        <img src="{{ animal.photo.url }}" alt="{{ animal.name|default:'Ljubimac' }}">
+      {% else %}
+        <div class="pp-avatar-placeholder">
+          {% if animal.vrsta == 'pas' %}🐕{% elif animal.vrsta == 'macka' %}🐈{% elif animal.vrsta == 'konj' %}🐎{% elif animal.vrsta == 'zec' %}🐇{% elif animal.vrsta == 'ptica' %}🐦{% elif animal.vrsta == 'ovca' %}🐑{% elif animal.vrsta == 'svinja' %}🐖{% else %}🐾{% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Info -->
+    <div class="pp-info">
+      <div class="pp-meta-row">
+        <span class="mp-badge mp-badge-gold">{{ animal.get_vrsta_display }}</span>
+        {% if animal.breed %}<span class="mp-badge mp-badge-muted">{{ animal.breed }}</span>{% endif %}
+        {% if verified %}<span class="mp-badge mp-badge-green">✓ Verificiran</span>{% endif %}
+        {% if is_memorial %}<span class="mp-badge mp-badge-muted">🌈 Dugin most</span>{% endif %}
+        {% if animal.spol != 'N' %}<span class="mp-badge mp-badge-muted">{% if animal.spol == 'M' %}♂ Mužjak{% else %}♀ Ženka{% endif %}</span>{% endif %}
+      </div>
+
+      <h1>{{ animal.name|default:"Bez imena" }}</h1>
+
+      <div class="pp-meta-row" style="gap:16px">
+        {% if animal.date_of_birth %}
+          <span style="font-size:.82rem;color:var(--muted)">📅 {{ animal.date_of_birth|date:"d.m.Y." }} ({{ animal.date_of_birth|timesince|truncatewords:2 }})</span>
+        {% endif %}
+        {% if animal.weight_kg %}
+          <span style="font-size:.82rem;color:var(--muted)">⚖️ {{ animal.weight_kg }} kg</span>
+        {% endif %}
+        {% if breeder %}
+          <a href="/uzgajivac/{{ breeder.id }}/" style="font-size:.82rem;color:var(--gold)">🏠 {{ breeder.name }}</a>
+        {% endif %}
+      </div>
+
+      {% if animal.chip_number %}
+        <div class="pp-chip">Čip: {{ animal.chip_number }}</div>
+      {% elif animal.ear_tag %}
+        <div class="pp-chip">Ušna markica: {{ animal.ear_tag }}</div>
+      {% endif %}
+    </div>
+
+    <!-- QR + actions -->
+    <div class="pp-actions">
+      <div class="pp-qr-wrap">
+        <img src="{{ qr_url }}" alt="QR kod" title="Skeniraj za javni profil">
+      </div>
+      <a href="/pas/{{ identifier }}/putovnica/" class="pp-passport-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Preuzmi Putovnicu
+      </a>
+      <div class="mp-folija-badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v5c0 5.5 3.3 10.7 8 13 4.7-2.3 8-7.5 8-13V7l-8-5z"/></svg>
+        Folija verificiran
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB BAR ─────────────────────────────────────────────── -->
+<div class="pp-tabs-bar">
+  <div class="pp-tabs-inner" role="tablist">
+    <button class="pp-tab active" onclick="switchTab('mediji',this)" role="tab" aria-selected="true">
+      📸 Mediji{% if boxgram_events %} <span style="font-size:.7rem;background:var(--gold-dim);color:var(--gold);padding:1px 6px;border-radius:10px;margin-left:4px">{{ boxgram_events|length }}</span>{% endif %}
+    </button>
+    <button class="pp-tab" onclick="switchTab('zdravlje',this)" role="tab">
+      💉 Zdravlje{% if health_records %} <span style="font-size:.7rem;background:var(--gold-dim);color:var(--gold);padding:1px 6px;border-radius:10px;margin-left:4px">{{ health_records|length }}</span>{% endif %}
+    </button>
+    <button class="pp-tab" onclick="switchTab('timeline',this)" role="tab">
+      ⭐ Prekretnice{% if milestones %} <span style="font-size:.7rem;background:var(--gold-dim);color:var(--gold);padding:1px 6px;border-radius:10px;margin-left:4px">{{ milestones|length }}</span>{% endif %}
+    </button>
+    <button class="pp-tab" onclick="switchTab('rodovnica',this)" role="tab">🧬 Rodovnica</button>
+    <button class="pp-tab" onclick="switchTab('vlasnistvo',this)" role="tab">
+      🏠 Vlasništvo{% if ownership_chain %} <span style="font-size:.7rem;background:var(--gold-dim);color:var(--gold);padding:1px 6px;border-radius:10px;margin-left:4px">{{ ownership_chain|length }}</span>{% endif %}
+    </button>
+  </div>
+</div>
+
+<!-- ── TAB CONTENT ─────────────────────────────────────────── -->
+<div class="pp-content">
+
+  <!-- ── TAB: MEDIJI ──────────────────────────────────────── -->
+  <div id="tab-mediji" class="pp-tab-panel active">
+    {% if is_memorial and memorial %}
+    <div class="pp-memorial-banner">
+      <div style="font-size:2rem;margin-bottom:8px">🌈</div>
+      <h3>{{ animal.name|default:"Ljubimac" }} je prešao Dugin most</h3>
+      {% if memorial.epitaph %}<p>{{ memorial.epitaph }}</p>{% endif %}
+      {% if memorial.date_of_death %}<p style="margin-top:8px;font-size:.78rem">{{ memorial.date_of_death|date:"d.m.Y." }}</p>{% endif %}
+      <a href="/pas/{{ identifier }}/dugini-most/" style="display:inline-block;margin-top:12px;color:var(--gold);font-size:.82rem">Zapali svjećicu →</a>
+    </div>
+    {% endif %}
+
+    {% if boxgram_events %}
+      <div class="pp-media-grid">
+        {% for item in boxgram_events %}
+          {% for media in item.media_list %}
+            <div class="pp-media-item">
+              {% if media.media_type == 'image' %}
+                <img src="{{ media.file.url }}" alt="{{ item.event.caption|default:animal.name }}" loading="lazy">
+              {% elif media.media_type == 'video' %}
+                <video src="{{ media.file.url }}" muted loop preload="none" poster=""
+                       onmouseenter="this.play()" onmouseleave="this.pause()"></video>
+                <div class="pp-media-type-badge">▶ Video</div>
+              {% elif media.media_type == 'audio' %}
+                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--ink-l)">
+                  <audio controls style="width:90%;max-width:200px">
+                    <source src="{{ media.file.url }}">
+                  </audio>
+                </div>
+                <div class="pp-media-type-badge">🎙 Audio</div>
+              {% endif %}
+              {% if item.event.caption %}
+                <div class="pp-media-event-caption">{{ item.event.caption|truncatechars:60 }}</div>
+              {% endif %}
+            </div>
+          {% empty %}
+            <!-- event without media — show text card -->
+          {% endfor %}
+        {% endfor %}
+      </div>
+
+      <!-- Audio posts separate row -->
+      {% for item in boxgram_events %}
+        {% for media in item.media_list %}
+          {% if media.media_type == 'audio' %}
+          <!-- handled in grid above -->
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+
+    {% elif animal.photo %}
+      <div class="pp-media-grid">
+        <div class="pp-media-item" style="border-radius:16px">
+          <img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+        </div>
+      </div>
+      <div class="pp-empty" style="padding-top:28px">
+        <p>Nema dodatnih medija.<br>
+        {% if user.is_authenticated %}
+          <a href="/boxgram/ljubimac/{{ identifier }}/dodaj/" style="color:var(--gold)">Dodaj fotografiju, video ili glasovni zapis →</a>
+        {% else %}
+          <a href="/prijava/" style="color:var(--gold)">Prijavi se za dodavanje medija →</a>
+        {% endif %}
+        </p>
+      </div>
+    {% else %}
+      <div class="pp-empty">
+        <div class="emoji">📸</div>
+        <p>Još nema medija za ovog ljubimca.</p>
+        {% if user.is_authenticated %}
+          <a href="/boxgram/ljubimac/{{ identifier }}/dodaj/" class="mp-btn-primary" style="display:inline-block;margin-top:16px">Dodaj prvu fotografiju →</a>
+        {% else %}
+          <a href="/prijava/" class="mp-btn-ghost" style="display:inline-block;margin-top:16px;padding:10px 20px">Prijava za dodavanje medija</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── TAB: ZDRAVLJE ────────────────────────────────────── -->
+  <div id="tab-zdravlje" class="pp-tab-panel">
+    {% if health_records %}
+      {% for hr in health_records %}
+      <div class="pp-health-item">
+        <div class="pp-health-icon {{ hr.tip }}">
+          {% if hr.tip == 'cijepljenje' %}💉
+          {% elif hr.tip == 'pregled' %}🩺
+          {% elif hr.tip == 'lijek' %}💊
+          {% elif hr.tip == 'operacija' %}🔪
+          {% elif hr.tip == 'karantena' %}🔒
+          {% else %}📋{% endif %}
+        </div>
+        <div>
+          <div class="pp-health-type">{{ hr.get_tip_display }}</div>
+          {% if hr.opis %}<div class="pp-health-desc">{{ hr.opis }}</div>{% endif %}
+          {% if hr.lijek %}<div class="pp-health-desc" style="margin-top:4px">💊 {{ hr.lijek }}</div>{% endif %}
+          {% if hr.veterinar %}<div class="pp-health-vet">🩺 {{ hr.veterinar }}{% if hr.vet_profile and hr.vet_profile.is_licensed %} ✓{% endif %}</div>{% endif %}
+          {% if hr.trosak_eur %}<div style="font-size:.72rem;color:var(--muted);margin-top:3px">💶 {{ hr.trosak_eur }} €</div>{% endif %}
+        </div>
+        <div class="pp-health-date">{{ hr.datum|date:"d.m.Y." }}</div>
+      </div>
+      {% endfor %}
+
+      <div class="pp-folija-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v5c0 5.5 3.3 10.7 8 13 4.7-2.3 8-7.5 8-13V7l-8-5z"/></svg>
+        Zdravstvena povijest je kriptografski zapečaćena · Folija · ChainBlock
+        <a href="/pas/{{ identifier }}/putovnica/" style="margin-left:auto;color:var(--gold);font-size:.72rem">Preuzmi Putovnicu →</a>
+      </div>
+    {% else %}
+      <div class="pp-empty">
+        <div class="emoji">🩺</div>
+        <p>Još nema zdravstvenih zapisa.<br>
+           Veterinarski zapisi se automatski pojavljuju ovdje kada ih vet doda iz sustava.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── TAB: PREKRETNICE ──────────────────────────────────── -->
+  <div id="tab-timeline" class="pp-tab-panel">
+    {% if timeline %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start">
+        <div>
+          <h3 style="font-size:.85rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px">Cijeli životni put</h3>
+          <div class="pp-timeline">
+            {% for item in timeline %}
+            <div class="pp-tl-item">
+              <div class="pp-tl-dot {% if item.type == 'rodenje' or item.type == 'award' %}gold{% elif item.type == 'zdravlje' or item.type == 'cijepljenje' %}green{% endif %}">
+                {{ item.icon }}
+              </div>
+              <div class="pp-tl-date">{{ item.date|date:"d.m.Y." }}</div>
+              <div class="pp-tl-title">{{ item.title }}</div>
+              {% if item.note %}<div class="pp-tl-note">{{ item.note }}</div>{% endif %}
+              {% if item.photo %}
+              <div class="pp-tl-photo">
+                <img src="{{ item.photo }}" alt="{{ item.title }}" loading="lazy">
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size:.85rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px">Posebne prekretnice</h3>
+          {% if milestones %}
+            <div style="display:grid;gap:12px">
+              {% for m in milestones %}
+              <div class="mp-card" style="padding:16px;display:flex;gap:14px;align-items:start">
+                {% if m.photo %}
+                <div style="width:60px;height:60px;border-radius:8px;overflow:hidden;flex-shrink:0">
+                  <img src="{{ m.photo.url }}" alt="{{ m.title }}" style="width:100%;height:100%;object-fit:cover">
+                </div>
+                {% else %}
+                <div style="font-size:1.8rem;flex-shrink:0">{{ m.get_type_display|slice:":2" }}</div>
+                {% endif %}
+                <div>
+                  <div style="font-size:.88rem;font-weight:700;color:var(--paper)">{{ m.title }}</div>
+                  <div style="font-size:.72rem;color:var(--muted);margin-top:3px">{{ m.date|date:"d.m.Y." }}</div>
+                  {% if m.note %}<div style="font-size:.78rem;color:var(--muted);margin-top:5px;line-height:1.5">{{ m.note }}</div>{% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="color:var(--muted);font-size:.85rem;padding:20px 0">
+              Vlasnik još nije dodao posebne prekretnice.
+              {% if user.is_authenticated %}
+                <br><a href="/ljubimac/milestone/novi/" style="color:var(--gold);margin-top:8px;display:inline-block">Dodaj prvu prekretnicu →</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="pp-empty">
+        <div class="emoji">⭐</div>
+        <p>Životni put se gradi s prvim upisom.<br>Cjepljenja, vet pregledi i posebne prekretnice će se prikazati ovdje.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── TAB: RODOVNICA ────────────────────────────────────── -->
+  <div id="tab-rodovnica" class="pp-tab-panel">
+    {% if father_animal or mother_animal or animal.father_name or animal.mother_name %}
+      <h3 style="font-size:.85rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px">Genealoško stablo (2 razine)</h3>
+
+      <div class="pp-pedigree">
+        <!-- Otac -->
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:.05em">OCA / FATHER</div>
+          {% if father_animal %}
+          <a href="/pas/{{ father_animal.chip_number|default:father_animal.ear_tag }}/" class="pp-pedigree-card">
+            <div class="pp-pedigree-card-img">
+              {% if father_animal.photo %}<img src="{{ father_animal.photo.url }}" alt="{{ father_animal.name }}">
+              {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem">🐕</div>{% endif %}
+            </div>
+            <div class="pp-pedigree-name">{{ father_animal.name|default:"Bez imena" }}</div>
+            <div class="pp-pedigree-meta">{{ father_animal.breed|default:father_animal.get_vrsta_display }}</div>
+            {% if father_animal.chip_number %}<div class="pp-chip" style="margin-top:4px">{{ father_animal.chip_number }}</div>{% endif %}
+          </a>
+          {% elif animal.father_name %}
+          <div class="pp-pedigree-card">
+            <div class="pp-pedigree-card-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem">🐕</div></div>
+            <div class="pp-pedigree-name">{{ animal.father_name }}</div>
+            {% if animal.father_chip %}<div class="pp-chip" style="margin-top:4px">{{ animal.father_chip }}</div>{% endif %}
+            <div class="pp-pedigree-meta" style="color:var(--muted)">Nije registriran na memio.pet</div>
+          </div>
+          {% else %}
+          <div class="pp-pedigree-card" style="opacity:.4">
+            <div class="pp-pedigree-card-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem">❓</div></div>
+            <div class="pp-pedigree-name">Nepoznat</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Centar — sam ljubimac -->
+        <div class="pp-pedigree-center">
+          <div style="font-size:.65rem;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:.06em">OVAJ PROFIL</div>
+          <div class="pp-pedigree-center-avatar">
+            {% if animal.photo %}<img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+            {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem">{% if animal.vrsta == 'pas' %}🐕{% elif animal.vrsta == 'macka' %}🐈{% else %}🐾{% endif %}</div>{% endif %}
+          </div>
+          <div class="pp-pedigree-name">{{ animal.name|default:"Bez imena" }}</div>
+          {% if animal.pedigree_number %}
+          <div class="pp-pedigree-meta" style="margin-top:4px">
+            <span class="mp-badge mp-badge-gold" style="font-size:.65rem">{{ animal.pedigree_number }}</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Majka -->
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:.05em">MAJKA / MOTHER</div>
+          {% if mother_animal %}
+          <a href="/pas/{{ mother_animal.chip_number|default:mother_animal.ear_tag }}/" class="pp-pedigree-card">
+            <div class="pp-pedigree-card-img">
+              {% if mother_animal.photo %}<img src="{{ mother_animal.photo.url }}" alt="{{ mother_animal.name }}">
+              {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem">🐕</div>{% endif %}
+            </div>
+            <div class="pp-pedigree-name">{{ mother_animal.name|default:"Bez imena" }}</div>
+            <div class="pp-pedigree-meta">{{ mother_animal.breed|default:mother_animal.get_vrsta_display }}</div>
+          </a>
+          {% elif animal.mother_name %}
+          <div class="pp-pedigree-card">
+            <div class="pp-pedigree-card-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem">🐕</div></div>
+            <div class="pp-pedigree-name">{{ animal.mother_name }}</div>
+            <div class="pp-pedigree-meta" style="color:var(--muted)">Nije registrirana na memio.pet</div>
+          </div>
+          {% else %}
+          <div class="pp-pedigree-card" style="opacity:.4">
+            <div class="pp-pedigree-card-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem">❓</div></div>
+            <div class="pp-pedigree-name">Nepoznata</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if animal.pedigree_number %}
+      <div class="pp-folija-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v5c0 5.5 3.3 10.7 8 13 4.7-2.3 8-7.5 8-13V7l-8-5z"/></svg>
+        Rodovnica br. {{ animal.pedigree_number }} · Kriptografski zapečaćena u Putovnici
+      </div>
+      {% endif %}
+
+    {% else %}
+      <div class="pp-empty">
+        <div class="emoji">🧬</div>
+        <p>Podaci o porijeklu nisu uneseni.<br>
+           Uzgajivač može dodati čip brojeve roditelja za aktivaciju rodovnice.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── TAB: VLASNIŠTVO ───────────────────────────────────── -->
+  <div id="tab-vlasnistvo" class="pp-tab-panel">
+    {% if ownership_chain %}
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:20px">Lanac vlasništva — proveniencija koja povećava vrijednost životinje.</p>
+
+      {% for own in ownership_chain %}
+      <div class="pp-ownership-item">
+        <div class="pp-ownership-icon">
+          {% if own.transfer_type == 'initial' %}🌱
+          {% elif own.transfer_type == 'sale' %}💰
+          {% elif own.transfer_type == 'adoption' %}❤️
+          {% elif own.transfer_type == 'return' %}↩️
+          {% else %}🏠{% endif %}
+        </div>
+        <div style="flex:1">
+          <div class="pp-ownership-name">{{ own.owner_name }}</div>
+          <div class="pp-ownership-meta">
+            {{ own.get_transfer_type_display }} · {{ own.acquired_at|date:"d.m.Y." }}
+            {% if own.released_at %} → {{ own.released_at|date:"d.m.Y." }}{% endif %}
+            {% if own.owner_city %} · {{ own.owner_city }}{% endif %}
+          </div>
+          {% if own.contract_ref %}
+            <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Ugovor: {{ own.contract_ref }}</div>
+          {% endif %}
+        </div>
+        {% if forloop.last %}
+          <span class="mp-badge mp-badge-green" style="flex-shrink:0">Trenutni vlasnik</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <div class="pp-folija-row" style="margin-top:16px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v5c0 5.5 3.3 10.7 8 13 4.7-2.3 8-7.5 8-13V7l-8-5z"/></svg>
+        Lanac vlasništva je nepromjenjiv i kriptografski verificiran · Folija pečat
+        <a href="/pas/{{ identifier }}/putovnica/" style="margin-left:auto;color:var(--gold);font-size:.72rem">Preuzmi Putovnicu (.dok) →</a>
+      </div>
+    {% else %}
+      <div class="pp-empty">
+        <div class="emoji">🏠</div>
+        <p>Lanac vlasništva nije evidentiran.<br>Svaki transfer dodaje vrijednost dokumentu.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div><!-- /.pp-content -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.pp-tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.pp-tab').forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected','true');
+  // scroll tab into view on mobile
+  btn.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+}
+
+// Lightbox za slike
+(function(){
+  var overlay = null;
+  document.querySelectorAll('.pp-media-item img').forEach(function(img){
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', function(){
+      if(!overlay){
+        overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+        var big = document.createElement('img');
+        big.style.cssText = 'max-width:92vw;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8)';
+        big.src = img.src;
+        overlay.appendChild(big);
+        overlay.addEventListener('click', function(){ document.body.removeChild(overlay); overlay=null; });
+        document.body.appendChild(overlay);
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

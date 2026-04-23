@@ -133,9 +133,42 @@ def pet_profile_page(request, chip_or_tag):
         )
     timeline.sort(key=lambda x: x["date"])
 
+    # PLAN-003: boxgram media za ovog ljubimca
+    boxgram_events = []
+    try:
+        from boxgram.models import LifeEvent, EventMedia
+        # pokusaj match po chip_number ili ear_tag u limit_connect_ref
+        bg_qs = LifeEvent.objects.filter(
+            pet_profile__limit_connect_ref__in=[animal.chip_number, animal.ear_tag, str(animal.id)]
+        ).select_related("pet_profile").prefetch_related("media").order_by("-created_at")[:20]
+        for ev in bg_qs:
+            boxgram_events.append({
+                "event": ev,
+                "pet": ev.pet_profile,
+                "media_list": list(ev.media.all()),
+            })
+    except Exception:
+        pass
+
+    # Rodovnica — trazi roditelje po chip/ear_tag
+    father_animal = None
+    mother_animal = None
+    if animal.father_chip:
+        father_animal = AnimalProfile.objects.using(db).filter(
+            chip_number=animal.father_chip
+        ).first() or AnimalProfile.objects.using(db).filter(
+            ear_tag=animal.father_chip
+        ).first()
+    if animal.mother_chip:
+        mother_animal = AnimalProfile.objects.using(db).filter(
+            chip_number=animal.mother_chip
+        ).first() or AnimalProfile.objects.using(db).filter(
+            ear_tag=animal.mother_chip
+        ).first()
+
     return render(
         request,
-        "memio_pet/profile.html",
+        "memio/pet_profile.html",
         {
             "animal": animal,
             "breeder": breeder,
@@ -153,6 +186,9 @@ def pet_profile_page(request, chip_or_tag):
             "memorial": memorial,
             "timeline": timeline,
             "milestones": milestones,
+            "boxgram_events": boxgram_events,
+            "father_animal": father_animal,
+            "mother_animal": mother_animal,
             "needs_parental_consent": breeder.needs_parental_consent if breeder else False,
         },
     )
