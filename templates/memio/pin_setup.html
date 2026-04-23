@@ -1,0 +1,61 @@
+{% extends "memio/base.html" %}
+{% load i18n static %}
+
+{% block title %}Postavi PIN — memio.pet{% endblock %}
+
+{% block extra_css %}
+<style>
+.pin-setup-wrap{max-width:440px;margin:0 auto;padding:40px 20px 80px}
+.setup-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:32px}
+.setup-title{font-size:1.3rem;font-weight:700;margin-bottom:6px}
+.setup-sub{font-size:.82rem;color:var(--muted);margin-bottom:24px}
+.setup-input{display:flex;justify-content:center;gap:10px;margin-bottom:16px}
+.setup-digit{width:46px;height:56px;border:1.5px solid var(--line);border-radius:10px;background:rgba(255,255,255,.04);text-align:center;font-size:1.4rem;font-weight:700;color:var(--paper);font-family:inherit}
+.setup-digit:focus{outline:none;border-color:var(--gold)}
+.setup-btn{width:100%;padding:13px;background:var(--gold);color:var(--ink);border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px}
+.setup-error{color:#ff6b6b;font-size:.82rem;padding:10px;background:rgba(255,107,107,.1);border-radius:8px;margin-bottom:12px}
+.setup-success{color:#48c78e;font-size:.82rem;padding:10px;background:rgba(72,199,142,.1);border-radius:8px;margin-bottom:12px;text-align:center}
+.skip-link{display:block;text-align:center;margin-top:16px;font-size:.82rem;color:var(--muted);text-decoration:none}
+.skip-link:hover{color:var(--gold)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pin-setup-wrap">
+  <div class="setup-card">
+    <h1 class="setup-title">🔐 Postavi brzi PIN</h1>
+    <p class="setup-sub">PIN vam omogućuje brzu prijavu bez unosa emaila svaki put.</p>
+
+    {% if success %}
+    <div class="setup-success">✅ PIN je uspješno postavljen! Sljedeći put možete se prijaviti PIN-om.</div>
+    <a href="/moj-profil/" class="setup-btn" style="display:block;text-align:center;text-decoration:none;margin-top:8px">Idi na profil →</a>
+    {% else %}
+
+    {% if error %}
+    <div class="setup-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">PIN (4-6 znamenki)</label>
+      <div class="setup-input" id="pin1-wrap">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+               class="setup-digit" id="pin1" name="pin" placeholder="••••••"
+               style="width:160px;text-align:center" required>
+      </div>
+
+      <label style="font-size:.78rem;font-weight:600;color:var(--muted);display:block;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em">Potvrdi PIN</label>
+      <div class="setup-input">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+               class="setup-digit" id="pin2" name="pin_confirm" placeholder="••••••"
+               style="width:160px;text-align:center" required>
+      </div>
+
+      <button type="submit" class="setup-btn">Postavi PIN</button>
+    </form>
+
+    <a href="/moj-profil/" class="skip-link">Preskočiti za sada →</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "memio/base.html" %}
+{% load i18n static %}
+
+{% block title %}Prijava — memio.pet{% endblock %}
+{% block meta_desc %}Prijavi se na memio.pet upisom email adrese — bez lozinke.{% endblock %}
+
+{% block extra_css %}
+<style>
+.login-wrap{max-width:460px;margin:0 auto;padding:40px 20px 80px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .logo-mark{font-size:3rem}
+.login-logo h1{font-size:1.5rem;font-weight:700;margin-top:8px}
+.login-logo p{font-size:.82rem;color:var(--muted);margin-top:4px}
+.login-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:32px;box-shadow:0 8px 40px rgba(0,0,0,.25)}
+.login-error{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:12px 16px;font-size:.84rem;color:#ff6b6b;margin-bottom:20px}
+.login-error a{color:#ff6b6b;text-decoration:underline}
+.login-field{margin-bottom:20px}
+.login-field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.login-input{width:100%;padding:13px 16px;background:rgba(255,255,255,.04);border:1.5px solid var(--line);border-radius:12px;color:var(--paper);font-size:1rem;font-family:inherit;transition:border-color .2s}
+.login-input:focus{outline:none;border-color:var(--gold)}
+.login-input::placeholder{color:var(--muted)}
+.login-btn{width:100%;padding:14px;background:var(--gold);color:var(--ink);border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.login-btn:hover{opacity:.9}
+.login-divider{display:flex;align-items:center;gap:12px;margin:24px 0}
+.login-divider hr{flex:1;border:none;border-top:1px solid var(--line)}
+.login-divider span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.login-ghost{width:100%;padding:13px;background:none;border:1.5px solid var(--line);border-radius:12px;color:var(--paper);font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;display:block;transition:border-color .2s,color .2s}
+.login-ghost:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+.login-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:20px;line-height:1.6}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+
+  <div class="login-logo">
+    <div class="logo-mark">🔑</div>
+    <h1>Prijava</h1>
+    <p>Nema lozinke — samo tvoj email</p>
+  </div>
+
+  <div class="login-card">
+    {% if error %}
+    <div class="login-error">
+      {{ error }}
+      {% if 'nije pronađen' in error %}
+      <br><a href="/registracija/">Kreiraj novi profil →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="login-field">
+        <label for="login-email">Email adresa</label>
+        <input type="email" id="login-email" name="email"
+               value="{{ email_value|default:'' }}"
+               class="login-input"
+               placeholder="tvoj@email.com"
+               required autofocus autocomplete="email">
+      </div>
+      <button type="submit" class="login-btn">Prijavi se →</button>
+    </form>
+
+    <div class="login-divider">
+      <hr><span>ili</span><hr>
+    </div>
+
+    <a href="/registracija/" class="login-ghost">Kreiraj novi profil</a>
+
+    <p class="login-note">
+      Ako imaš postavljeni PIN, bit ćeš preusmjeren na ekran za unos PIN-a.<br>
+      Tvoj profil je uvijek dostupan.
+    </p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var saved = localStorage.getItem('memio_email');
+  var el = document.getElementById('login-email');
+  if (saved && el && !el.value) el.value = saved;
+  var form = el ? el.closest('form') : null;
+  if (form) {
+    form.addEventListener('submit', function(){
+      if (el.value) localStorage.setItem('memio_email', el.value);
+    });
+  }
+})();
+</script>
+{% endblock %}

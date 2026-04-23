@@ -962,6 +962,8 @@ class DomainGateMiddleware:
             "/api/heritage/",
             # PLAN-002 nove rute
             "/gram/",
+            # PLAN-011 PIN login
+            "/pin/",
             "/pretraga/",
             "/prodaja/",
             "/farma/",

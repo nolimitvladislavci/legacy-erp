@@ -1,0 +1,123 @@
+{% extends "memio/base.html" %}
+{% load i18n static %}
+
+{% block title %}PIN prijava — memio.pet{% endblock %}
+
+{% block extra_css %}
+<style>
+.pin-wrap{max-width:400px;margin:0 auto;padding:40px 20px 80px;text-align:center}
+.pin-avatar{width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;margin:0 auto 16px;background:var(--ink-l)}
+.pin-avatar img{width:100%;height:100%;object-fit:cover}
+.pin-name{font-size:1.2rem;font-weight:700}
+.pin-email{font-size:.8rem;color:var(--muted);margin-bottom:32px}
+.pin-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:32px}
+.pin-display{display:flex;justify-content:center;gap:12px;margin-bottom:28px}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--gold);background:transparent;transition:background .15s}
+.pin-dot.filled{background:var(--gold)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto}
+.pin-btn{padding:16px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;font-size:1.3rem;font-weight:700;color:var(--paper);cursor:pointer;transition:all .15s;font-family:inherit}
+.pin-btn:hover{background:rgba(201,168,76,.15);border-color:var(--gold)}
+.pin-btn:active{transform:scale(.95)}
+.pin-btn.del{font-size:1rem;color:var(--muted)}
+.pin-error{color:#ff6b6b;font-size:.82rem;margin-top:16px}
+.pin-locked{color:#f0a500;font-size:.82rem;margin-top:16px;padding:12px;background:rgba(240,165,0,.1);border-radius:8px}
+.pin-back{display:block;margin-top:20px;font-size:.82rem;color:var(--muted);text-decoration:none}
+.pin-back:hover{color:var(--gold)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pin-wrap">
+  <div style="margin-bottom:24px">
+    <h1 style="font-size:1.4rem">Dobrodošli natrag 👋</h1>
+    <p style="font-size:.82rem;color:var(--muted)">Unesite PIN za brzu prijavu</p>
+  </div>
+
+  <div class="pin-avatar">
+    {% if bp.avatar %}<img src="{{ bp.avatar.url }}" alt="{{ bp.name }}">
+    {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem">🐾</div>{% endif %}
+  </div>
+  <div class="pin-name">{{ bp.name }}</div>
+  <div class="pin-email">{{ bp.email }}</div>
+
+  <div class="pin-card">
+    <!-- PIN dots -->
+    <div class="pin-display" id="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+      <div class="pin-dot" id="d4"></div>
+      <div class="pin-dot" id="d5"></div>
+    </div>
+
+    {% if locked %}
+    <div class="pin-locked">🔒 {{ error }}</div>
+    {% else %}
+
+    <!-- Numpad -->
+    <div class="pin-pad" id="pin-pad">
+      {% for digit in "123456789" %}
+      <button class="pin-btn" onclick="pinPress('{{ digit }}')">{{ digit }}</button>
+      {% endfor %}
+      <button class="pin-btn" style="visibility:hidden"></button>
+      <button class="pin-btn" onclick="pinPress('0')">0</button>
+      <button class="pin-btn del" onclick="pinDel()">⌫</button>
+    </div>
+
+    <!-- Hidden form -->
+    <form id="pin-form" method="post" style="display:none">
+      {% csrf_token %}
+      <input type="hidden" name="pin" id="pin-value">
+    </form>
+
+    {% if error %}
+    <div class="pin-error">{{ error }}</div>
+    {% endif %}
+    {% endif %}
+  </div>
+
+  <a href="/prijava/" class="pin-back">← Prijavi se drugim emailom</a>
+</div>
+
+<script>
+var pinVal = '';
+var maxLen = 6;
+
+function pinPress(digit) {
+  if (pinVal.length >= maxLen) return;
+  pinVal += digit;
+  updateDots();
+  if (pinVal.length >= 4) {
+    // Auto-submit after 4 digits (or wait for 6)
+    setTimeout(function() {
+      if (pinVal.length >= 4) submitPin();
+    }, 300);
+  }
+}
+
+function pinDel() {
+  pinVal = pinVal.slice(0, -1);
+  updateDots();
+}
+
+function updateDots() {
+  for (var i = 0; i < 6; i++) {
+    var dot = document.getElementById('d' + i);
+    if (dot) dot.classList.toggle('filled', i < pinVal.length);
+  }
+}
+
+function submitPin() {
+  document.getElementById('pin-value').value = pinVal;
+  document.getElementById('pin-form').submit();
+}
+
+// Keyboard support
+document.addEventListener('keydown', function(e) {
+  if (e.key >= '0' && e.key <= '9') pinPress(e.key);
+  else if (e.key === 'Backspace') pinDel();
+  else if (e.key === 'Enter' && pinVal.length >= 4) submitPin();
+});
+</script>
+{% endblock %}
