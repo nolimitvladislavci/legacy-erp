@@ -73,3 +73,11 @@ urlpatterns = [
     # PLAN-010: Odjava
     path("odjava/", views.odjava, name="odjava"),
 ]
+
+# PLAN-013: AI media endpoints
+from memio_pet import ai_views as _ai
+urlpatterns += [
+    path('ai/breed/', _ai.breed_detect, name='ai_breed_detect'),
+    path('ai/transcribe/', _ai.transcribe_audio, name='ai_transcribe'),
+    path('ai/status/', _ai.ai_status, name='ai_status'),
+]
