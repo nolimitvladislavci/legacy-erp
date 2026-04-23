@@ -36,7 +36,7 @@
       <div class="mp-animal-card-body">
         <div class="mp-animal-card-name">{{ animal.name|default:'Bez imena' }}</div>
         <div class="mp-animal-card-meta">{{ animal.breed|default:animal.get_vrsta_display }}{% if animal.date_of_birth %} · {{ animal.date_of_birth|timesince|truncatewords:2 }}{% endif %}</div>
-        {% if animal.owner %}<div class="mp-animal-card-breeder">{{ animal.owner.name }}</div>{% endif %}
+        {% if animal.owner %}<div class="mp-animal-card-breeder">{{ animal.breeder.name }}</div>{% endif %}
       </div>
     </a>
     {% empty %}

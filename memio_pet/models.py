@@ -98,6 +98,11 @@ class BreederProfile(models.Model):
     consent_sent_at = models.DateTimeField(null=True, blank=True)
     consent_given_at = models.DateTimeField(null=True, blank=True)
 
+    # PLAN-011: Brzi login PIN (6 znamenki, hashiran)
+    login_pin_hash = models.CharField(max_length=128, blank=True, verbose_name="PIN hash")
+    login_pin_attempts = models.SmallIntegerField(default=0, verbose_name="Neuspjeli PIN pokusaji")
+    login_pin_locked_until = models.DateTimeField(null=True, blank=True, verbose_name="PIN zakljucan do")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -228,6 +233,11 @@ class AnimalProfile(models.Model):
 
     # Referenca prema LIMIT Connect (nije FK)
     limit_livestock_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    # PLAN-011: Brzi login PIN (6 znamenki, hashiran)
+    login_pin_hash = models.CharField(max_length=128, blank=True, verbose_name="PIN hash")
+    login_pin_attempts = models.SmallIntegerField(default=0, verbose_name="Neuspjeli PIN pokusaji")
+    login_pin_locked_until = models.DateTimeField(null=True, blank=True, verbose_name="PIN zakljucan do")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -392,6 +402,11 @@ class VeterinarProfile(models.Model):
     country = models.CharField(max_length=5, default="HR")
     is_verified = models.BooleanField(default=False, verbose_name="HVK verificiran")
     verified_at = models.DateTimeField(null=True, blank=True)
+    # PLAN-011: Brzi login PIN (6 znamenki, hashiran)
+    login_pin_hash = models.CharField(max_length=128, blank=True, verbose_name="PIN hash")
+    login_pin_attempts = models.SmallIntegerField(default=0, verbose_name="Neuspjeli PIN pokusaji")
+    login_pin_locked_until = models.DateTimeField(null=True, blank=True, verbose_name="PIN zakljucan do")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

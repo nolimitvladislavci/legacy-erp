@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NO LIMIT — Europska udruga za digitalnu transformaciju</title>
+<meta name="description" content="NO LIMIT gradi .dok standard — kriptografski format koji cuva digitalne dokumente zauvijek. eValidator, eArhivator, ChainBlock.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--slate:#1a1a28;--border:#2a2a3e;
+  --gold:#c9a84c;--gold-light:#e2c875;--white:#f0f0f0;--dim:#8888a8;
+  --green:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Space Grotesk",sans-serif;background:var(--bg);color:var(--white);line-height:1.6}
+a{text-decoration:none;color:inherit}
+img{max-width:100%}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;transition:.3s}
+nav.scrolled{background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:"Bebas Neue",sans-serif;font-size:1.6rem;letter-spacing:.1em}
+.nav-logo .nl{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{font-size:.9rem;font-weight:500;color:var(--dim);transition:.2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-portal{padding:8px 20px;border:1px solid var(--gold);border-radius:6px;color:var(--gold)!important;font-size:.85rem!important}
+.nav-portal:hover{background:rgba(201,168,76,.15)!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.hamburger span{width:24px;height:2px;background:var(--white);transition:.3s;display:block}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:80px 40px 40px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 60% 40%,rgba(201,168,76,.08) 0%,transparent 70%)}
+.hero-inner{max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.hero-eyebrow{font-size:.8rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:20px}
+.hero-title{font-family:"Bebas Neue",sans-serif;font-size:clamp(4rem,8vw,8rem);line-height:.95;margin-bottom:24px}
+.hero-title .accent{color:var(--gold)}
+.hero-lead{font-size:1.15rem;color:var(--dim);line-height:1.8;margin-bottom:36px;max-width:500px}
+.hero-ctas{display:flex;gap:16px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:var(--gold);color:#000;border-radius:8px;font-weight:700;font-size:.95rem;transition:.2s}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-2px)}
+.btn-outline{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border:1px solid var(--border);color:var(--dim);border-radius:8px;font-weight:500;font-size:.95rem;transition:.2s}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.hero-visual{display:flex;justify-content:center;align-items:center}
+.genesis-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;font-family:monospace;font-size:.8rem;line-height:1.8;color:var(--dim);position:relative;overflow:hidden}
+.genesis-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold))}
+.genesis-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green);border-radius:20px;padding:6px 14px;font-size:.75rem;font-weight:600;margin-bottom:16px}
+.genesis-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.genesis-hash{color:var(--gold);word-break:break-all;font-size:.72rem}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px;padding-top:40px;border-top:1px solid var(--border)}
+.stat-num{font-family:"Bebas Neue",sans-serif;font-size:2.5rem;color:var(--gold)}
+.stat-label{font-size:.8rem;color:var(--dim);margin-top:4px}
+
+/* SECTIONS */
+section{padding:100px 40px}
+.container{max-width:1200px;margin:0 auto}
+.section-eyebrow{font-size:.75rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+.section-title{font-family:"Bebas Neue",sans-serif;font-size:clamp(2.5rem,5vw,4rem);line-height:1;margin-bottom:20px}
+.section-lead{font-size:1.05rem;color:var(--dim);line-height:1.8;max-width:600px}
+
+/* MISIJA */
+.misija{background:var(--surface)}
+.misija-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:60px}
+.misija-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:32px;transition:.3s}
+.misija-card:hover{border-color:var(--gold);transform:translateY(-4px)}
+.misija-icon{width:48px;height:48px;background:rgba(201,168,76,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:20px;color:var(--gold)}
+.misija-card h3{font-size:1.1rem;font-weight:700;margin-bottom:10px}
+.misija-card p{font-size:.9rem;color:var(--dim);line-height:1.7}
+
+/* DOK SECTION */
+.dok-section{background:var(--bg)}
+.dok-intro{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:80px}
+.dok-badge{display:inline-block;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);border-radius:6px;padding:6px 14px;font-size:.8rem;font-weight:700;font-family:monospace;margin-bottom:20px}
+.dimensions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-top:40px}
+.dim-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;transition:.3s;position:relative;overflow:hidden}
+.dim-card:hover{border-color:var(--gold);transform:translateY(-3px)}
+.dim-card::after{content:attr(data-dim);position:absolute;right:20px;top:20px;font-family:"Bebas Neue",sans-serif;font-size:4rem;color:rgba(201,168,76,.06);line-height:1}
+.dim-num{font-family:"Bebas Neue",sans-serif;font-size:.9rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px}
+.dim-tag{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:14px}
+.tag-fizicko{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.tag-logicko{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3)}
+.tag-autonomno{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+.dim-title{font-size:1.1rem;font-weight:700;margin-bottom:10px}
+.dim-desc{font-size:.88rem;color:var(--dim);line-height:1.7}
+.dim-example{margin-top:16px;padding:12px;background:rgba(255,255,255,.03);border-left:2px solid var(--gold);border-radius:0 6px 6px 0;font-size:.8rem;color:var(--dim);font-style:italic}
+
+/* EVALIDATOR */
+.evalidator-section{background:var(--slate)}
+.evalidator-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.ev-features{display:flex;flex-direction:column;gap:20px;margin-top:32px}
+.ev-feature{display:flex;gap:16px;align-items:flex-start}
+.ev-icon{width:40px;height:40px;min-width:40px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--green);font-size:.9rem}
+.ev-feature h4{font-size:.95rem;font-weight:700;margin-bottom:4px}
+.ev-feature p{font-size:.85rem;color:var(--dim);line-height:1.6}
+.ev-widget{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:32px}
+.ev-widget-title{font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.ev-form{display:flex;flex-direction:column;gap:12px}
+.ev-input{padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:inherit;font-size:.9rem;outline:none;transition:.2s}
+.ev-input:focus{border-color:var(--gold)}
+.ev-submit{padding:12px;background:var(--green);color:#000;border:none;border-radius:8px;font-family:inherit;font-weight:700;font-size:.95rem;cursor:pointer;transition:.2s}
+.ev-submit:hover{background:#16a34a}
+.ev-result{margin-top:16px;padding:12px;border-radius:8px;font-size:.85rem;display:none}
+.ev-links{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+
+/* EARHIVATOR */
+.earhivator-section{background:var(--bg)}
+.earhivator-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.pipeline{display:flex;flex-direction:column;gap:0;margin-top:32px}
+.pipeline-step{display:flex;gap:16px;align-items:flex-start;position:relative;padding-bottom:24px}
+.pipeline-step:not(:last-child)::after{content:"";position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--border)}
+.step-num{width:40px;height:40px;min-width:40px;background:var(--surface);border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:"Bebas Neue",sans-serif;font-size:1rem;color:var(--gold);z-index:1}
+.step-content h4{font-size:.95rem;font-weight:700;margin-bottom:4px}
+.step-content p{font-size:.85rem;color:var(--dim);line-height:1.6}
+.dok-anatomy{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;font-family:monospace;font-size:.8rem;line-height:2;color:var(--dim)}
+.dok-anatomy .folder{color:var(--gold)}
+.dok-anatomy .file{color:var(--white)}
+.dok-anatomy .comment{color:var(--dim)}
+
+/* REGISTAR */
+.registry-section{background:var(--surface)}
+.registry-inner{text-align:center;max-width:800px;margin:0 auto}
+.registry-counter{font-family:"Bebas Neue",sans-serif;font-size:6rem;color:var(--gold);line-height:1;margin:40px 0 10px}
+.registry-label{font-size:1rem;color:var(--dim);margin-bottom:60px}
+.registry-flow{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:40px}
+.rf-step{text-align:center;max-width:160px}
+.rf-icon{width:56px;height:56px;border:2px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 12px}
+.rf-label{font-size:.82rem;color:var(--dim);line-height:1.4}
+.rf-arrow{color:var(--gold);font-size:1.2rem;opacity:.5}
+
+/* OSNIVACI */
+.osnivaci{background:var(--slate)}
+.osnivaci-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:60px}
+.osn-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:32px;display:flex;gap:20px;align-items:flex-start;transition:.3s}
+.osn-card:hover{border-color:var(--gold)}
+.osn-avatar{width:56px;height:56px;min-width:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;font-family:"Bebas Neue",sans-serif;font-size:1.4rem;color:#000}
+.osn-name{font-size:1rem;font-weight:700;margin-bottom:4px}
+.osn-role{font-size:.8rem;color:var(--gold);font-weight:600;margin-bottom:8px}
+.osn-bio{font-size:.85rem;color:var(--dim);line-height:1.6}
+
+/* DOKUMENTI */
+.dokumenti-section{background:var(--bg)}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:48px}
+.doc-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;transition:.3s;cursor:pointer}
+.doc-card:hover{border-color:var(--gold);transform:translateY(-3px)}
+.doc-icon{font-size:2rem;margin-bottom:16px}
+.doc-title{font-weight:700;font-size:.95rem;margin-bottom:6px}
+.doc-meta{font-size:.8rem;color:var(--dim);margin-bottom:16px;flex:1}
+.doc-dl{font-size:.8rem;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:6px}
+.genesis-proof{background:var(--surface);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:28px;margin-top:32px;display:flex;gap:20px;align-items:flex-start}
+.genesis-proof-icon{color:var(--green);font-size:1.5rem;margin-top:2px}
+.genesis-proof h4{font-size:.95rem;font-weight:700;margin-bottom:6px}
+.genesis-proof p{font-size:.85rem;color:var(--dim);line-height:1.6}
+.genesis-proof code{font-family:monospace;font-size:.75rem;color:var(--gold);word-break:break-all;display:block;margin-top:8px}
+
+/* KONTAKT */
+.kontakt-section{background:var(--slate)}
+.kontakt-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:60px}
+.kontakt-info{display:flex;flex-direction:column;gap:24px}
+.ki-item{display:flex;gap:16px;align-items:flex-start}
+.ki-icon{width:44px;height:44px;min-width:44px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.95rem}
+.ki-label{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.ki-value{font-size:.95rem;font-weight:600}
+.partner-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+.partner-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center;transition:.3s}
+.partner-card:hover{border-color:var(--gold)}
+.partner-flag{font-size:1.8rem;margin-bottom:8px}
+.partner-name{font-size:.9rem;font-weight:700;margin-bottom:4px}
+.partner-type{font-size:.78rem;color:var(--dim)}
+
+/* FOOTER */
+footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 40px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+.footer-logo{font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:.1em}
+.footer-logo .nl{color:var(--gold)}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-links a{font-size:.85rem;color:var(--dim);transition:.2s}
+.footer-links a:hover{color:var(--gold)}
+.footer-legal{font-size:.78rem;color:var(--dim);text-align:center;margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
+
+
+/* JAVNE OBJAVE */
+.objave-section{background:var(--slate)}
+.objave-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:48px}
+.objava-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:.3s;text-decoration:none;color:inherit}
+.objava-card:hover{border-color:var(--gold);transform:translateY(-3px)}
+.objava-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.objava-platform{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.platform-pypi{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.platform-npm{background:rgba(220,38,38,.15);color:#f87171;border:1px solid rgba(220,38,38,.3)}
+.platform-go{background:rgba(6,182,212,.15);color:#22d3ee;border:1px solid rgba(6,182,212,.3)}
+.platform-nuget{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3)}
+.platform-cc0{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+.platform-github{background:rgba(255,255,255,.07);color:var(--white);border:1px solid var(--border)}
+.objava-title{font-size:.98rem;font-weight:700}
+.objava-desc{font-size:.84rem;color:var(--dim);line-height:1.65;flex:1}
+.objava-chain{font-size:.7rem;font-family:monospace;color:var(--gold);padding:7px 10px;background:rgba(201,168,76,.06);border-radius:5px;border-left:2px solid var(--gold)}
+.objava-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.objava-link{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border);border-radius:5px;font-size:.76rem;color:var(--dim);transition:.2s}
+.objava-link:hover{border-color:var(--gold);color:var(--gold)}
+.chain-count{display:inline-flex;align-items:center;gap:14px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:14px 22px;margin-bottom:36px}
+.chain-count .num{font-family:"Bebas Neue",sans-serif;font-size:2.2rem;color:var(--green);line-height:1}
+.chain-count .lbl{font-size:.82rem;color:var(--dim);line-height:1.5}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:.6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* MOBILE */
+@media(max-width:900px){
+  nav{padding:0 20px}
+  .nav-links{display:none;flex-direction:column;position:fixed;top:64px;left:0;right:0;background:var(--bg);border-bottom:1px solid var(--border);padding:20px;gap:16px}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .hero-inner,.dok-intro,.evalidator-inner,.earhivator-inner,.kontakt-grid{grid-template-columns:1fr;gap:40px}
+  .hero{padding:100px 20px 60px}
+  section{padding:60px 20px}
+  .hero-visual{display:none}
+  .partner-grid{grid-template-columns:1fr}
+  .footer-inner{flex-direction:column;text-align:center}
+  .rf-arrow{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="#" class="nav-logo"><span class="nl">NO</span>&nbsp;LIMIT</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#misija">Misija</a></li>
+    <li><a href="#dok">Standard .dok</a></li>
+    <li><a href="#evalidator">eValidator</a></li>
+    <li><a href="#earhivator">eArhivator</a></li>
+    <li><a href="#dokumenti">Dokumenti</a></li>
+          <li><a href="#objave">Open Source</a></li>
+    <li><a href="#kontakt">Kontakt</a></li>
+    <li><a href="https://limit-connect.com/hr/accounts/login/" class="nav-portal"><i class="fas fa-sign-in-alt"></i> Portal</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow">NO LIMIT &mdash; Vladislavci, Hrvatska &mdash; EU</div>
+      <h1 class="hero-title">
+        Digitalna<br>
+        <span class="accent">Istina.</span><br>
+        Zauvijek.
+      </h1>
+      <p class="hero-lead">
+        Gradimo <strong>.dok</strong> &mdash; kriptografski standard koji dokumentima
+        daje tri identiteta, pečat integriteta i sposobnost da nadžive
+        svoju firmu, svoju platformu i svoje doba.
+      </p>
+      <div class="hero-ctas">
+        <a href="#dok" class="btn-primary"><i class="fas fa-cube"></i> Što je .dok?</a>
+        <a href="#dokumenti" class="btn-outline"><i class="fas fa-file-pdf"></i> Osnivački dokumenti</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">9</div>
+          <div class="stat-label">Dimenzija standarda</div>
+        </div>
+        <div>
+          <div class="stat-num">3</div>
+          <div class="stat-label">DNA sloja po dokumentu</div>
+        </div>
+        <div>
+          <div class="stat-num">#0</div>
+          <div class="stat-label">Genesis Block aktivan</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="genesis-card">
+        <div class="genesis-badge">
+          <div class="genesis-dot"></div>
+          Genesis Block Aktivan
+        </div>
+        <div id="genesis-live-status">
+          <div style="color:var(--dim);font-size:.8rem;opacity:.6">Verificiram u stvarnom vremenu...</div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:.72rem;color:var(--dim);margin-bottom:8px">Verificiraj bilo koji dokument:</div>
+          <input id="verify-token-input"
+                 placeholder="Unesi seal token (npr. LC-DS-2026-001)"
+                 style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--white);font-family:monospace;font-size:.78rem;box-sizing:border-box">
+          <button onclick="verifyCustomToken()"
+                  style="margin-top:8px;padding:9px 20px;background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;font-weight:700;cursor:pointer;width:100%;font-size:.82rem">
+            Verificiraj &#8594;
+          </button>
+          <div id="custom-verify-result" style="margin-top:10px;font-family:monospace;font-size:.75rem;min-height:18px"></div>
+        </div>
+      </div>
+      <!-- C-02: Trust Badge embed info -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:16px;font-family:monospace">
+        <div style="font-size:.72rem;color:var(--dim);margin-bottom:10px;font-family:sans-serif;font-weight:600">Ugradi verificirani badge na svoju stranicu:</div>
+        <code style="font-size:.68rem;color:var(--gold);display:block;line-height:1.8;word-break:break-all">
+&lt;script src="https://limit-connect.com/static/trust-badge.js"&gt;&lt;/script&gt;<br>
+&lt;div data-lc-verify="TVOJ-SEAL-TOKEN"&gt;&lt;/div&gt;
+        </code>
+        <div style="margin-top:10px;font-size:.68rem;color:var(--dim);font-family:sans-serif">
+          Primjer:
+          <span data-lc-verify="NOLIMIT-GENESIS-0001" style="margin-left:8px"></span>
+          <script src="https://limit-connect.com/static/trust-badge.js"></script>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISIJA -->
+<section class="misija" id="misija">
+  <div class="container">
+    <div class="section-eyebrow">Tko smo i zasto postojimo</div>
+    <h2 class="section-title reveal">Sto branimo.<br>Sto gradimo.</h2>
+    <p class="section-lead reveal">NO LIMIT gradi otvorenu digitalnu infrastrukturu za djecu, zivotinje i institucije diljem EU. Bez vlasnickih lockina. Bez skrivenih trosica. Bez rokova trajanja.</p>
+    <div class="misija-grid">
+      <div class="misija-card reveal">
+        <div class="misija-icon"><i class="fas fa-cube"></i></div>
+        <h3>.dok Standard</h3>
+        <p>Kriptografski arhivski format koji dokumentima daje tri identiteta i sposobnost da zivu neovisno o ikojoj firmi ili servisu.</p>
+      </div>
+      <div class="misija-card reveal">
+        <div class="misija-icon"><i class="fas fa-check-shield"></i></div>
+        <h3>eValidator</h3>
+        <p>Javni EU servis za validaciju OIB-a, IBAN-a i VAT ID-a. Infrastruktura povjerenja dostupna besplatno zauvijek.</p>
+      </div>
+      <div class="misija-card reveal">
+        <div class="misija-icon"><i class="fas fa-archive"></i></div>
+        <h3>eArhivator</h3>
+        <p>Digitalni notar koji slike, zvuk i dokumente komprimira, izvlaci znacenje i peca ih kriptografski na nacin koji vrijedi i za 100 godina.</p>
+      </div>
+      <div class="misija-card reveal">
+        <div class="misija-icon"><i class="fas fa-paw"></i></div>
+        <h3>Memio Ekosustav</h3>
+        <p>Digitalni identitet za zivotinje (memio.pet), farme (memio.farm) i djecju kulturnu bastinu (memio.world / PLAY.EU).</p>
+      </div>
+      <div class="misija-card reveal">
+        <div class="misija-icon"><i class="fas fa-graduation-cap"></i></div>
+        <h3>PLAY.EU &mdash; Digitalna Lektirnica</h3>
+        <p>22 bajke, 8 regija, 3 jezika. Zero-data politika za djecu. Kultura europske bastine dostupna bez tracka podataka o djeci.</p>
+      </div>
+      <div class="misija-card reveal">
+        <div class="misija-icon"><i class="fas fa-globe-europe"></i></div>
+        <h3>EU Ambasadorska Mreza</h3>
+        <p>Koordinatori u svakoj drzavi clanici EU. Isti standard, lokalni jezik, jedna misija: digitalna transformacija stvarnog svijeta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOK STANDARD -->
+<section class="dok-section" id="dok">
+  <div class="container">
+    <div class="section-eyebrow">Otvoreni kriptografski standard</div>
+    <div class="dok-intro">
+      <div>
+        <div class="dok-badge">.dok</div>
+        <h2 class="section-title reveal">Container<br>of Truth</h2>
+        <p class="section-lead reveal">
+          <strong>.dok</strong> nije format za pohranu. To je kriptografski kontejner istine.<br><br>
+          Svaki <code style="color:var(--gold);font-family:monospace">.dok</code> paket sadrzi binarni sadrzaj, 
+          XML pravni omotac, JSON-LD semantiku i WASM reader koji cijeli paket moze verificirati 
+          bez interneta, bez tvoje firme, za 100 godina.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
+          <a href="#" class="btn-primary" style="font-size:.85rem;padding:10px 20px"><i class="fas fa-download"></i> Preuzmi specifikaciju</a>
+          <a href="https://github.com/no-limit-hr" class="btn-outline" style="font-size:.85rem;padding:10px 20px"><i class="fab fa-github"></i> GitHub</a>
+        </div>
+      </div>
+      <div class="dok-anatomy reveal">
+        <div><span class="folder">dokument.dok</span> <span class="comment">// ZIP arhiva</span></div>
+        <div>&nbsp;&nbsp;<span class="folder">manifest.xml</span> <span class="comment">// pravni omotac</span></div>
+        <div>&nbsp;&nbsp;<span class="folder">data.jsonld</span> <span class="comment">// semanticki sadrzaj</span></div>
+        <div>&nbsp;&nbsp;<span class="folder">master/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">original.webp</span> <span class="comment">// komprimiran</span></div>
+        <div>&nbsp;&nbsp;<span class="folder">schema.xsd</span> <span class="comment">// embedana shema</span></div>
+        <div>&nbsp;&nbsp;<span class="folder">reader.wasm</span> <span class="comment">// self-verify</span></div>
+        <div>&nbsp;&nbsp;<span class="folder">readme.txt</span> <span class="comment">// 10 jezika</span></div>
+        <div style="margin-top:16px;color:var(--gold)">&#8226; L1: SHA-256 (fizicki)</div>
+        <div style="color:var(--blue)">&#8226; L2: pHash (perceptualni)</div>
+        <div style="color:var(--purple)">&#8226; L3: AI Embedding (semanticki)</div>
+      </div>
+    </div>
+
+    <h3 class="reveal" style="font-family:Bebas Neue,sans-serif;font-size:2rem;margin-bottom:12px">9 Dimenzija standarda</h3>
+    <p class="reveal" style="color:var(--dim);font-size:.9rem;margin-bottom:40px">Od bita do besmrtnosti. Svaka dimenzija gradi na prethodnoj.</p>
+
+    <div class="dimensions-grid">
+      <!-- D1 -->
+      <div class="dim-card reveal" data-dim="1">
+        <div class="dim-num">DIMENZIJA 01</div>
+        <div class="dim-tag tag-fizicko">Fizicko</div>
+        <div class="dim-title">Fizicki Identitet &mdash; SHA-256</div>
+        <div class="dim-desc">
+          Svaki .dok paket ima SHA-256 otisak originalnog sadrzaja izracunat <em>prije</em> kompresije. 
+          Promjena i jednog bita u dokumentu mijenja otisak i invalidira cijeli lanac. 
+          Ovo je temelj &mdash; kao DNK koji se ne moze lazirati.
+        </div>
+        <div class="dim-example">Primjer: Racun od 5MB JPEG dobiva 64-znacni hex otisak. Netko promijeni iznos u Photoshopu &mdash; otisak se mijenja &mdash; peat postaje nevaljan.</div>
+      </div>
+      <!-- D2 -->
+      <div class="dim-card reveal" data-dim="2">
+        <div class="dim-num">DIMENZIJA 02</div>
+        <div class="dim-tag tag-fizicko">Fizicko</div>
+        <div class="dim-title">Perceptualni Identitet &mdash; pHash</div>
+        <div class="dim-desc">
+          pHash hvata vizualni "dojam" dokumenta, neovisno o kompresiji. 
+          Isti racun skeniran, rekomprimiran ili fotografiran &mdash; pHash ostaje isti. 
+          Rjesava problem "isti dokument, razliciti biti" koji SHA-256 ne moze rijesiti.
+        </div>
+        <div class="dim-example">Primjer: Racun skeniran na 300 DPI i zatim rekomprimiran u WebP. SHA-256 je razlicit, pHash je isti &mdash; dokument je autentican.</div>
+      </div>
+      <!-- D3 -->
+      <div class="dim-card reveal" data-dim="3">
+        <div class="dim-num">DIMENZIJA 03</div>
+        <div class="dim-tag tag-fizicko">Fizicko</div>
+        <div class="dim-title">Semanticki Identitet &mdash; AI Embedding</div>
+        <div class="dim-desc">
+          AI model izvuce "znacenje" dokumenta i spremi ga kao matematicki vektor. 
+          Isti ugovor na hrvatskom i njemackom imat ce slicne vektore jer znace isto. 
+          Identitet nije samo u bitima &mdash; iden u znacenju.
+        </div>
+        <div class="dim-example">Primjer: Ugovor iz 1990. kaze "videokaseta". Semanticki embedding razumije to kao "medij za pohranu videa" &mdash; znacenje prezivljava tehnologiju.</div>
+      </div>
+      <!-- D4 -->
+      <div class="dim-card reveal" data-dim="4">
+        <div class="dim-num">DIMENZIJA 04</div>
+        <div class="dim-tag tag-logicko">Logicko</div>
+        <div class="dim-title">Kriptografski Pecat &mdash; Chain of Integrity</div>
+        <div class="dim-desc">
+          chain_hash = SHA-256(L1 + L2 + XML koverta). Svaki sloj ukljucuje prethodni. 
+          Promjena i jednog podatka u cijelom lancu invalidira peat. 
+          eIDAS-kompatibilan &mdash; pravna snaga elektronickog potpisa.
+        </div>
+        <div class="dim-example">Primjer: Sud trazi dokaz da ugovor nije mijenjan. Umjesto vjestaka, matematika odgovara za 2 sekunde.</div>
+      </div>
+      <!-- D5 -->
+      <div class="dim-card reveal" data-dim="5">
+        <div class="dim-num">DIMENZIJA 05</div>
+        <div class="dim-tag tag-logicko">Logicko</div>
+        <div class="dim-title">Knowledge Graph &mdash; Citation Mreza</div>
+        <div class="dim-desc">
+          Svaki .dok paket moze citirati drugi. ChainBlock Registry prati te veze. 
+          Kad imas 10.000 dokumenata, nastaje knowledge graph &mdash; 
+          pretraga koja razumije kontekst, ne samo kljucne rijeci.
+        </div>
+        <div class="dim-example">Primjer: Racun citira ugovor koji ga je stvorio. Ugovor citira ponudu. Gradimo povijest transakcije, ne samo njene isjecke.</div>
+      </div>
+      <!-- D6 -->
+      <div class="dim-card reveal" data-dim="6">
+        <div class="dim-num">DIMENZIJA 06</div>
+        <div class="dim-tag tag-logicko">Logicko</div>
+        <div class="dim-title">Trzisite Artefakata &mdash; Dokazana Autenticnost</div>
+        <div class="dim-desc">
+          .dok s pecatom ima dokazivu autenticnost. Originalna slika, originalni rukopis, 
+          originalni ugovor &mdash; to su trzisni artefakti. 
+          Marketplace dolazi sam od sebe kad infrastruktura sazori.
+        </div>
+        <div class="dim-example">Primjer: Fotograf prodaje original fotografije. Kupac dobiva .dok paket s dokazom da je to jedini original &mdash; bez blockchaina, bez gas fee-a.</div>
+      </div>
+      <!-- D7 -->
+      <div class="dim-card reveal" data-dim="7">
+        <div class="dim-num">DIMENZIJA 07</div>
+        <div class="dim-tag tag-autonomno">Autonomno</div>
+        <div class="dim-title">Autonomna Evolucija &mdash; Self-Healing</div>
+        <div class="dim-desc">
+          Kad SHA-256 jednog dana postane nesiguran, .dok paketi se sami migriraju na SHA-3. 
+          Stari hash ostaje kao dokaz kontinuiteta, novi preuzima strazarenje. 
+          Sustav koji se sam popravlja.
+        </div>
+        <div class="dim-example">Primjer: 2035. objavljeno da je SHA-256 kompromitiran. ChainBlock Registry izdaje upgrade naredbu (multi-sig 3-of-5). Svi paketi se sami nadogradjuju.</div>
+      </div>
+      <!-- D8 -->
+      <div class="dim-card reveal" data-dim="8">
+        <div class="dim-num">DIMENZIJA 08</div>
+        <div class="dim-tag tag-autonomno">Autonomno</div>
+        <div class="dim-title">Kognitivni Suverenitet &mdash; Osobni Mozak</div>
+        <div class="dim-desc">
+          Svaki .dok paket sadrzi vektorsku mapu odnosa prema svim tvojim dokumentima. 
+          Tvoj arhiv postaje osobni mozak neovisan o OpenAI, Googleu ili ikome drugome. 
+          Zna kako je tvoj ugovor povezan s tvojim racunom.
+        </div>
+        <div class="dim-example">Primjer: Pitanje: "Koji su racuni vezani za projekt ABC?" Odgovor dolazi iz tvojih .dok paketa &mdash; bez cloud servisa, bez pretplate.</div>
+      </div>
+      <!-- D9 -->
+      <div class="dim-card reveal" data-dim="9">
+        <div class="dim-num">DIMENZIJA 09</div>
+        <div class="dim-tag tag-autonomno">Autonomno</div>
+        <div class="dim-title">Eterina Besmrtnost &mdash; Distribuirana Prisutnost</div>
+        <div class="dim-desc">
+          Shamir Secret Sharing dijeli arhiv na 5 fragmenata distribuiranih po prijateljevim uredajima. 
+          Treba 3 za rekonstrukciju. Cak i ako tvoja firma nestane i serveri izgore &mdash; 
+          arhiv lebdi u mrezi.
+        </div>
+        <div class="dim-example">Primjer: Tvoja firma se ugasi. Server se gasi. Ali Marija, Petar i Ana imaju fragmente. Troje se sjetu &mdash; arhiv zivi.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVALIDATOR -->
+<section class="evalidator-section" id="evalidator">
+  <div class="container">
+    <div class="evalidator-inner">
+      <div>
+        <div class="section-eyebrow">Javni EU servis &mdash; besplatno zauvijek</div>
+        <h2 class="section-title reveal">e<span style="color:var(--gold)">Validator</span></h2>
+        <p class="section-lead reveal">Infrastruktura povjerenja za Europu. Validacija OIB-a, IBAN-a, VAT ID-a i eIDAS digitalnih dokumenata &mdash; otvorena, brza, bez pretplate.</p>
+        <div class="ev-features">
+          <div class="ev-feature reveal">
+            <div class="ev-icon"><i class="fas fa-id-card"></i></div>
+            <div>
+              <h4>OIB Validator</h4>
+              <p>ISO 7064 Mod 11-10 kontrolna provjera. Verifikacija u Sudskom registru i bazi FINA-e.</p>
+            </div>
+          </div>
+          <div class="ev-feature reveal">
+            <div class="ev-icon"><i class="fas fa-university"></i></div>
+            <div>
+              <h4>IBAN Validator</h4>
+              <p>Mod 97 provjera za sve EU drzave. Identifikacija banke i BIC koda.</p>
+            </div>
+          </div>
+          <div class="ev-feature reveal">
+            <div class="ev-icon"><i class="fas fa-file-certificate"></i></div>
+            <div>
+              <h4>Dokument Pecat (.dok)</h4>
+              <p>Zapecati dokument kriptografski. Dobij POE token za sudsku upotrebu. eIDAS clankom 41.</p>
+            </div>
+          </div>
+          <div class="ev-feature reveal">
+            <div class="ev-icon"><i class="fas fa-globe"></i></div>
+            <div>
+              <h4>EU VAT ID</h4>
+              <p>Verifikacija PDV broja za sve EU drzave. VIES servis + lokalna provjera.</p>
+            </div>
+          </div>
+        </div>
+        <div class="ev-links">
+          <a href="https://evalidator.eu" class="btn-primary" style="font-size:.85rem;padding:10px 20px"><i class="fas fa-external-link-alt"></i> evalidator.eu</a>
+          <a href="/validator/" class="btn-outline" style="font-size:.85rem;padding:10px 20px"><i class="fas fa-check"></i> Provjeri odmah</a>
+        </div>
+      </div>
+      <div class="ev-widget reveal">
+        <div class="ev-widget-title">
+          <i class="fas fa-shield-check" style="color:var(--green)"></i>
+          Brza provjera
+        </div>
+        <div class="ev-form" id="evForm">
+          <select class="ev-input" id="evType">
+            <option value="oib">OIB (11 znamenki)</option>
+            <option value="iban">IBAN</option>
+            <option value="vat">EU VAT ID</option>
+          </select>
+          <input class="ev-input" id="evInput" type="text" placeholder="Unesite vrijednost...">
+          <button class="ev-submit" onclick="evValidate()"><i class="fas fa-check"></i> Provjeri</button>
+        </div>
+        <div class="ev-result" id="evResult"></div>
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+          <div style="font-size:.8rem;color:var(--dim);margin-bottom:12px">Podrzane drzave za VAT</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span style="font-size:.75rem;background:var(--surface);padding:3px 8px;border-radius:4px">HR</span>
+            <span style="font-size:.75rem;background:var(--surface);padding:3px 8px;border-radius:4px">DE</span>
+            <span style="font-size:.75rem;background:var(--surface);padding:3px 8px;border-radius:4px">AT</span>
+            <span style="font-size:.75rem;background:var(--surface);padding:3px 8px;border-radius:4px">SI</span>
+            <span style="font-size:.75rem;background:var(--surface);padding:3px 8px;border-radius:4px">HU</span>
+            <span style="font-size:.75rem;background:var(--surface);padding:3px 8px;border-radius:4px">+ 22</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EARHIVATOR -->
+<section class="earhivator-section" id="earhivator">
+  <div class="container">
+    <div class="section-eyebrow">Digitalni notar</div>
+    <h2 class="section-title reveal">e<span style="color:var(--gold)">Arhivator</span></h2>
+    <p class="section-lead reveal">Semanticka kompresija + kriptografski pecat. Slika, zvuk ili dokument ulaze &mdash; .dok paket izlazi. Trajno. Verificirano. Autonomno.</p>
+    <div class="earhivator-inner" style="margin-top:60px">
+      <div>
+        <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:8px">Kako radi</h3>
+        <p style="font-size:.9rem;color:var(--dim);margin-bottom:24px">Jedan prolaz &mdash; tri razultata: kompresija, semantika, pecat.</p>
+        <div class="pipeline">
+          <div class="pipeline-step reveal">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h4>Ingest &amp; Kompresija</h4>
+              <p>JPEG, PDF, MP3, MP4, RAW &mdash; svaki format prihvacen. AI layout detekcija uklanja bjeline papira, logotipe i dekoraciju. Ostaje samo informacija.</p>
+            </div>
+          </div>
+          <div class="pipeline-step reveal">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h4>Triple DNA</h4>
+              <p>SHA-256 + pHash + AI Embedding. Tri identiteta, racunata na originalu PRIJE kompresije. Cross-hash pecati sve tri zajedno.</p>
+            </div>
+          </div>
+          <div class="pipeline-step reveal">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h4>Semanticka Ekstrakcija</h4>
+              <p>FenixScan OCR izvlaci strukturirane podatke (dobavljac, iznos, datum). JSON-LD format &mdash; strojno citljivo, Schema.org kompatibilno.</p>
+            </div>
+          </div>
+          <div class="pipeline-step reveal">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <h4>Pakiranje u .dok</h4>
+              <p>manifest.xml + data.jsonld + slim.webp + schema.xsd + reader.wasm + readme.txt. Sve u jednom ZIP paketu koji se sam verificira.</p>
+            </div>
+          </div>
+          <div class="pipeline-step reveal" style="padding-bottom:0">
+            <div class="step-num" style="background:var(--gold);color:#000;border-color:var(--gold)">5</div>
+            <div class="step-content">
+              <h4>ChainBlock Registry &mdash; POE</h4>
+              <p>Proof of Existence token &mdash; matematicki dokaz da dokument postoji od tocnog trenutka. Bez blockchaina, bez gas fee-a, bez trece strane.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="dok-anatomy reveal" style="margin-bottom:24px">
+          <div style="color:var(--gold);margin-bottom:12px;font-size:.85rem;font-family:Space Grotesk,sans-serif;font-weight:700">Razina smanjivanja po formatu</div>
+          <div><span style="color:var(--green)">JPEG/PNG</span> <span style="color:var(--dim)">&rarr;</span> <span style="color:var(--white)">WebP lossless</span> <span style="color:var(--gold)">&mdash; do 70% manje</span></div>
+          <div><span style="color:var(--green)">MP3/AAC</span> <span style="color:var(--dim)">&rarr;</span> <span style="color:var(--white)">Opus 64kbps</span> <span style="color:var(--gold)">&mdash; do 80% manje</span></div>
+          <div><span style="color:var(--green)">PDF scan</span> <span style="color:var(--dim)">&rarr;</span> <span style="color:var(--white)">PDF optimized</span> <span style="color:var(--gold)">&mdash; do 60% manje</span></div>
+          <div><span style="color:var(--green)">MP4/MOV</span> <span style="color:var(--dim)">&rarr;</span> <span style="color:var(--white)">H.265 CRF28</span> <span style="color:var(--gold)">&mdash; do 65% manje</span></div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);color:var(--dim)">Profili: BUSINESS (lossless, za OCR) / USER (lossy, vizualno)</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:24px" class="reveal">
+          <div style="font-size:.85rem;font-weight:700;margin-bottom:16px;color:var(--gold)"><i class="fas fa-balance-scale"></i> &nbsp;Pravna snaga</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:10px;align-items:center;font-size:.85rem">
+              <i class="fas fa-check" style="color:var(--green);min-width:16px"></i>
+              <span>eIDAS clankom 41 &mdash; elektronicki pecat</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:.85rem">
+              <i class="fas fa-check" style="color:var(--green);min-width:16px"></i>
+              <span>RFC 3161 &mdash; kvalificirani timestamp (FINA TSA)</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:.85rem">
+              <i class="fas fa-check" style="color:var(--green);min-width:16px"></i>
+              <span>GDPR Art.25 &mdash; privacy by design, tombstone pattern</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:.85rem">
+              <i class="fas fa-check" style="color:var(--green);min-width:16px"></i>
+              <span>ZOR HR &mdash; revizijski trag nepromjenjiv</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:.85rem">
+              <i class="fas fa-check" style="color:var(--green);min-width:16px"></i>
+              <span>Open Patent Promise &mdash; nitko te ne moze tuziti</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAINBLOCK REGISTRY -->
+<section class="registry-section" id="registry">
+  <div class="container">
+    <div class="registry-inner">
+      <div class="section-eyebrow reveal">ChainBlock Registry</div>
+      <h2 class="section-title reveal">Javni Registar<br><span style="color:var(--gold)">Digitalne Istine</span></h2>
+      <p class="section-lead reveal" style="margin:0 auto 20px">Append-only log svih .dok pecata. Bez blockchaina. Bez gas fee-a. Hash-Linking: svaki zapis ukljucuje hash prethodnog.</p>
+      <div class="registry-counter reveal" id="poeCounter">001</div>
+      <div class="registry-label reveal">Proof of Existence tokena u registru</div>
+      <div class="registry-flow reveal">
+        <div class="rf-step">
+          <div class="rf-icon"><i class="fas fa-file-upload"></i></div>
+          <div class="rf-label">Upload dokumenta</div>
+        </div>
+        <div class="rf-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="rf-step">
+          <div class="rf-icon" style="border-color:var(--gold)"><i class="fas fa-dna" style="color:var(--gold)"></i></div>
+          <div class="rf-label">Triple DNA izracun</div>
+        </div>
+        <div class="rf-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="rf-step">
+          <div class="rf-icon" style="border-color:var(--blue)"><i class="fas fa-lock" style="color:var(--blue)"></i></div>
+          <div class="rf-label">Cross-hash pecat</div>
+        </div>
+        <div class="rf-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="rf-step">
+          <div class="rf-icon" style="border-color:var(--green)"><i class="fas fa-certificate" style="color:var(--green)"></i></div>
+          <div class="rf-label">POE Token</div>
+        </div>
+        <div class="rf-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="rf-step">
+          <div class="rf-icon" style="border-color:var(--purple)"><i class="fas fa-infinity" style="color:var(--purple)"></i></div>
+          <div class="rf-label">Trajno u registru</div>
+        </div>
+      </div>
+      <div style="margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <a href="/verify/" class="btn-primary"><i class="fas fa-search"></i> Provjeri dokument</a>
+        <a href="https://limit-connect.com" class="btn-outline"><i class="fas fa-sign-in-alt"></i> Arhiviraj dokument</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OSNIVACI -->
+<section class="osnivaci" id="osnivaci">
+  <div class="container">
+    <div class="section-eyebrow">Tko stoji iza NO LIMIT-a</div>
+    <h2 class="section-title reveal">Ljudi koji<br><span style="color:var(--gold)">grade standard</span></h2>
+    <div class="osnivaci-grid">
+      <div class="osn-card reveal">
+        <div class="osn-avatar">IB</div>
+        <div>
+          <div class="osn-name">Ivan Brtan</div>
+          <div class="osn-role">Osnivac i predsjednik</div>
+          <div class="osn-bio">Osnivac LIMIT Connect ERP platforme i NO LIMIT udruge. Gradi otvorenu digitalnu infrastrukturu za EU. Vladislavci, Hrvatska.</div>
+        </div>
+      </div>
+      <div class="osn-card reveal">
+        <div class="osn-avatar" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">MC</div>
+        <div>
+          <div class="osn-name">Marija Cacic</div>
+          <div class="osn-role">HR Ambasador &mdash; Pedagogija</div>
+          <div class="osn-bio">Magistra pedagogije. Koordinatorica digitalnog obrazovanja u Republici Hrvatskoj. Suradnica na PLAY.EU projektu.</div>
+        </div>
+      </div>
+      <div class="osn-card reveal">
+        <div class="osn-avatar" style="background:linear-gradient(135deg,#22c55e,#16a34a)">IT</div>
+        <div>
+          <div class="osn-name">Ivanka Tutic</div>
+          <div class="osn-role">DE Ambasador &mdash; Njemacka</div>
+          <div class="osn-bio">Koordinatorica NO LIMIT mreze u Njemackoj. Veza s hrvatskom dijasporom u DE/AT regiji.</div>
+        </div>
+      </div>
+      <div class="osn-card reveal" style="border-style:dashed;border-color:var(--border);cursor:pointer" onclick="window.location='#kontakt'">
+        <div class="osn-avatar" style="background:var(--bg);border:2px dashed var(--border)">
+          <i class="fas fa-plus" style="color:var(--dim);font-size:.9rem"></i>
+        </div>
+        <div>
+          <div class="osn-name" style="color:var(--dim)">Tvoja drzava</div>
+          <div class="osn-role">Ambasador na cekanju</div>
+          <div class="osn-bio">Trazimo koordinatore u svakoj EU drzavi. Isti standard, lokalni jezik, jedna misija.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOKUMENTI -->
+<section class="dokumenti-section" id="dokumenti">
+  <div class="container">
+    <div class="section-eyebrow">Osnivacka dokumentacija</div>
+    <h2 class="section-title reveal">Transparentnost<br><span style="color:var(--gold)">od prvog dana</span></h2>
+    <p class="section-lead reveal">Svi osnivacki dokumenti su javni. Preuzmi, provjeri, verificiraj.</p>
+    <div class="doc-grid">
+      <a href="/static/udruga_no_limit/NO_LIMIT_Statut.pdf" class="doc-card reveal" download>
+        <div class="doc-icon">&#x1F4DC;</div>
+        <div class="doc-title">Statut udruge</div>
+        <div class="doc-meta">Temeljni akt NO LIMIT udruge. Ciljevi, upravljanje, misija.</div>
+        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
+      </a>
+      <a href="/static/udruga_no_limit/NO_LIMIT_Zapisnik_osnivacke_skupstine.pdf" class="doc-card reveal" download>
+        <div class="doc-icon">&#x1F4CB;</div>
+        <div class="doc-title">Zapisnik osnivacke skupstine</div>
+        <div class="doc-meta">Zapisnik prve osnivacke skupstine. Svi osnivaci, odluke, glasovanja.</div>
+        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
+      </a>
+      <a href="/static/udruga_no_limit/NO_LIMIT_Popis_osnivaca.pdf" class="doc-card reveal" download>
+        <div class="doc-icon">&#x1F465;</div>
+        <div class="doc-title">Popis osnivaca</div>
+        <div class="doc-meta">Potpuni popis svih osnivackih clanova udruge NO LIMIT.</div>
+        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
+      </a>
+      <a href="/static/udruga_no_limit/NO_LIMIT_Zahtjev_RU1.pdf" class="doc-card reveal" download>
+        <div class="doc-icon">&#x1F3DB;</div>
+        <div class="doc-title">Zahtjev RU-1</div>
+        <div class="doc-meta">Zahtjev za upis u Registar udruga Republike Hrvatske.</div>
+        <div class="doc-dl"><i class="fas fa-download"></i> PDF preuzimanje</div>
+      </a>
+    </div>
+
+    <div class="genesis-proof reveal">
+      <div class="genesis-proof-icon"><i class="fas fa-shield-alt"></i></div>
+      <div>
+        <h4>Genesis Block #0 &mdash; Kriptografski pecateno</h4>
+        <p>Ovi dokumenti i specifikacija .dok standarda kriptografski su zapecateni 2026-04-19 putem naseg vlastitog eArhivator sustava. Prva primjena standarda koji gradimo &mdash; na nasim vlastitim dokumentima.</p>
+        <code>NOLIMIT-GENESIS-0001 &mdash; 2026-04-19T21:28:42 UTC &mdash; HASH: 66c8d2862d5a661c6cbe14affbb1d25b0fd3dc0f4950b9fd9a5c8095419a81b5</code><br><code style="margin-top:4px;display:block">LC-DS-2026-001 | LC-DS-2026-002 | LC-DS-2026-003 &mdash; Verificiraj: <a href="https://limit-connect.com/api/verify/LC-DS-2026-001/" style="color:var(--gold)" target="_blank">limit-connect.com/api/verify/LC-DS-2026-001/</a></code>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- JAVNE OBJAVE -->
+<section class="objave-section" id="objave">
+  <div class="container">
+    <div class="section-eyebrow reveal">Open Source &amp; Javne objave</div>
+    <h2 class="section-title reveal">Nas kod.<br><span style="color:var(--gold)">Javno. Verificirano.</span></h2>
+    <p class="section-lead reveal">Svaka objava nosi kriptografski pecateni ChainBlock blok. Klik na "Verificiraj" dokazuje autenticnost — matematicki, nepromjenjivo.</p>
+
+    <div class="chain-count reveal">
+      <div class="num">27</div>
+      <div class="lbl">zapecacenih blokova<br>u ChainBlock lancu</div>
+    </div>
+
+    <div class="objave-grid">
+
+      <a href="https://pypi.org/project/folija/" target="_blank" rel="noopener" class="objava-card reveal">
+        <div class="objava-header">
+          <span class="objava-platform platform-pypi"><i class="fab fa-python"></i> PyPI</span>
+          <span class="objava-platform platform-github"><i class="fab fa-github"></i> GitHub</span>
+        </div>
+        <div class="objava-title">folija-py &mdash; Runtime Integrity za Python</div>
+        <div class="objava-desc">SHA-256 watchdog za Python module. sys.meta_path hook intercept pri svakom importu. WSGI/ASGI middleware. MIT licenca. Nula vanjskih ovisnosti.</div>
+        <div class="objava-chain">Block #22 &mdash; NOLIMIT-OSS-FOLIJA-PY-0022 &mdash; 2026-04-23</div>
+        <div class="objava-links">
+          <span class="objava-link"><i class="fab fa-python"></i> pypi.org/project/folija</span>
+          <a href="https://limit-connect.com/verify/NOLIMIT-OSS-FOLIJA-PY-0022/" target="_blank" class="objava-link" style="color:var(--green);border-color:rgba(34,197,94,.3)"><i class="fas fa-check-circle"></i> Verificiraj</a>
+        </div>
+      </a>
+
+      <a href="https://www.npmjs.com/package/folija" target="_blank" rel="noopener" class="objava-card reveal">
+        <div class="objava-header">
+          <span class="objava-platform platform-npm"><i class="fab fa-node-js"></i> npm</span>
+          <span class="objava-platform platform-github"><i class="fab fa-github"></i> GitHub</span>
+        </div>
+        <div class="objava-title">folija-js &mdash; Runtime Integrity za Node.js</div>
+        <div class="objava-desc">Presrece svaki require() poziv putem Module._load hooka. Express/Koa/Fastify middleware. MIT licenca. Nula produkcijskih ovisnosti.</div>
+        <div class="objava-chain">Block #23 &mdash; NOLIMIT-OSS-FOLIJA-JS-0023 &mdash; 2026-04-23</div>
+        <div class="objava-links">
+          <span class="objava-link"><i class="fab fa-npm"></i> npmjs.com/package/folija</span>
+          <a href="https://limit-connect.com/verify/NOLIMIT-OSS-FOLIJA-JS-0023/" target="_blank" class="objava-link" style="color:var(--green);border-color:rgba(34,197,94,.3)"><i class="fas fa-check-circle"></i> Verificiraj</a>
+        </div>
+      </a>
+
+      <a href="https://github.com/nolimitvladislavci/folija-go" target="_blank" rel="noopener" class="objava-card reveal">
+        <div class="objava-header">
+          <span class="objava-platform platform-go"><i class="fas fa-code"></i> Go module</span>
+          <span class="objava-platform platform-github"><i class="fab fa-github"></i> GitHub</span>
+        </div>
+        <div class="objava-title">folija-go &mdash; Runtime Integrity za Go</div>
+        <div class="objava-desc">Thread-safe file watching s sync.RWMutex. SHA-256 baseline snapshots. IntegrityReport s exit kodovima 0/1/2. MIT licenca. Samo Go stdlib.</div>
+        <div class="objava-chain">Block #24 &mdash; NOLIMIT-OSS-FOLIJA-GO-0024 &mdash; 2026-04-23</div>
+        <div class="objava-links">
+          <span class="objava-link"><i class="fab fa-github"></i> github.com/nolimitvladislavci/folija-go</span>
+          <a href="https://limit-connect.com/verify/NOLIMIT-OSS-FOLIJA-GO-0024/" target="_blank" class="objava-link" style="color:var(--green);border-color:rgba(34,197,94,.3)"><i class="fas fa-check-circle"></i> Verificiraj</a>
+        </div>
+      </a>
+
+      <a href="https://github.com/nolimitvladislavci/folija-dotnet" target="_blank" rel="noopener" class="objava-card reveal">
+        <div class="objava-header">
+          <span class="objava-platform platform-nuget"><i class="fas fa-cube"></i> NuGet</span>
+          <span class="objava-platform platform-github"><i class="fab fa-github"></i> GitHub</span>
+        </div>
+        <div class="objava-title">folija-dotnet &mdash; Runtime Integrity za .NET/C#</div>
+        <div class="objava-desc">ReaderWriterLockSlim thread-safety. AppDomain.AssemblyLoad hook. ASP.NET Core middleware. Cilja net9.0 i net10.0. 30/30 testova. MIT licenca.</div>
+        <div class="objava-chain">Block #25 &mdash; NOLIMIT-OSS-FOLIJA-DOTNET-0025 &mdash; 2026-04-23</div>
+        <div class="objava-links">
+          <span class="objava-link"><i class="fas fa-cube"></i> nuget.org/packages/Folija</span>
+          <a href="https://limit-connect.com/verify/NOLIMIT-OSS-FOLIJA-DOTNET-0025/" target="_blank" class="objava-link" style="color:var(--green);border-color:rgba(34,197,94,.3)"><i class="fas fa-check-circle"></i> Verificiraj</a>
+        </div>
+      </a>
+
+      <a href="https://github.com/nolimitvladislavci/opendok" target="_blank" rel="noopener" class="objava-card reveal">
+        <div class="objava-header">
+          <span class="objava-platform platform-cc0"><i class="fas fa-unlock"></i> CC0 &mdash; Javna domena</span>
+          <span class="objava-platform platform-github"><i class="fab fa-github"></i> GitHub</span>
+        </div>
+        <div class="objava-title">OpenDOK-2026 &mdash; Otvoreni standard za digitalne dokumente</div>
+        <div class="objava-desc">Specifikacija .dok bundlea: manifest.xml (SHA-256, MPEG-7 metadata) + master/ sadrzaj + schema.xsd + readme.txt (HR/EN/DE). Javna domena &mdash; slobodno koristi, siri, implementiraj. Kompatibilno s EU Cyber Resilience Act.</div>
+        <div class="objava-chain">Block #26 &mdash; NOLIMIT-OSS-OPENDOK-2026-0026 &mdash; 2026-04-23</div>
+        <div class="objava-links">
+          <span class="objava-link"><i class="fab fa-github"></i> github.com/nolimitvladislavci/opendok</span>
+          <a href="https://limit-connect.com/verify/NOLIMIT-OSS-OPENDOK-2026-0026/" target="_blank" class="objava-link" style="color:var(--green);border-color:rgba(34,197,94,.3)"><i class="fas fa-check-circle"></i> Verificiraj</a>
+        </div>
+      </a>
+
+      <div class="objava-card reveal" style="border-style:dashed;cursor:default">
+        <div class="objava-header">
+          <span class="objava-platform platform-github" style="opacity:.5"><i class="fas fa-hourglass-half"></i> Uskoro</span>
+        </div>
+        <div class="objava-title" style="color:var(--dim)">Folija za Rust, Java, PHP, Ruby...</div>
+        <div class="objava-desc">Runtime integrity membrane dolazi na sve glavne platforme. Svaka nova implementacija automatski dobiva ChainBlock pecateni blok pri prvoj objavi.</div>
+        <div class="objava-chain" style="opacity:.45">Block #27+ &mdash; U pripremi</div>
+      </div>
+
+    </div>
+
+    <div class="genesis-proof reveal" style="margin-top:40px">
+      <div class="genesis-proof-icon"><i class="fas fa-link"></i></div>
+      <div>
+        <h4>Svaki blok javno verificiran &mdash; odmah, besplatno, zauvijek</h4>
+        <p>Sva gornja objavljivanja zapecacena su u nepromjenjivom ChainBlock lancu. Zamijeni token za bilo koji blok #0&ndash;#26:</p>
+        <code><a href="https://limit-connect.com/verify/NOLIMIT-OSS-FOLIJA-PY-0022/" style="color:var(--gold)" target="_blank">limit-connect.com/verify/<strong>NOLIMIT-OSS-FOLIJA-PY-0022</strong>/</a></code>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- KONTAKT -->
+<section class="kontakt-section" id="kontakt">
+  <div class="container">
+    <div class="section-eyebrow">Povezi se s nama</div>
+    <h2 class="section-title reveal">Budi dio<br><span style="color:var(--gold)">pokreta</span></h2>
+    <div class="kontakt-grid">
+      <div>
+        <div class="kontakt-info">
+          <div class="ki-item reveal">
+            <div class="ki-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <div class="ki-label">Sjediste</div>
+              <div class="ki-value">Vladislavci, Hrvatska</div>
+            </div>
+          </div>
+          <div class="ki-item reveal">
+            <div class="ki-icon"><i class="fas fa-user-tie"></i></div>
+            <div>
+              <div class="ki-label">Predsjednik</div>
+              <div class="ki-value">Ivan Brtan</div>
+            </div>
+          </div>
+          <div class="ki-item reveal">
+            <div class="ki-icon"><i class="fas fa-globe"></i></div>
+            <div>
+              <div class="ki-label">Web</div>
+              <div class="ki-value">no-limit.world</div>
+            </div>
+          </div>
+          <div class="ki-item reveal">
+            <div class="ki-icon"><i class="fas fa-cube"></i></div>
+            <div>
+              <div class="ki-label">Standard</div>
+              <div class="ki-value">.dok &mdash; Open Patent Promise</div>
+            </div>
+          </div>
+        </div>
+        <h3 style="font-size:1rem;font-weight:700;margin:32px 0 16px">Partneri</h3>
+        <div class="partner-grid">
+          <div class="partner-card reveal">
+            <div class="partner-flag">&#x1F1E9;&#x1F1EA;</div>
+            <div class="partner-name">Viskovic Bau</div>
+            <div class="partner-type">Nufringen, Njemacka<br>Poslovni pokrovitelj</div>
+          </div>
+          <div class="partner-card reveal">
+            <div class="partner-flag">&#x1F1ED;&#x1F1F7;</div>
+            <div class="partner-name">Konjik d.o.o.</div>
+            <div class="partner-type">Osijek, Hrvatska<br>Tehnoloski partner</div>
+          </div>
+          <div class="partner-card reveal" onclick="window.location='mailto:info@no-limit.world'" style="cursor:pointer">
+            <div class="partner-flag">&#x1F1EA;&#x1F1FA;</div>
+            <div class="partner-name">Tvoja organizacija</div>
+            <div class="partner-type">EU drzava<br>Postani partner</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:20px">Postani ambasador ili partner</h3>
+        <form id="kontaktForm" onsubmit="sendKontakt(event)" style="display:flex;flex-direction:column;gap:14px">
+          <input class="ev-input" type="text" name="ime" placeholder="Ime i prezime *" required>
+          <input class="ev-input" type="email" name="email" placeholder="Email adresa *" required>
+          <input class="ev-input" type="text" name="drzava" placeholder="Drzava (npr. Slovenija)">
+          <select class="ev-input" name="uloga">
+            <option value="">Zanima me...</option>
+            <option value="ambasador">Postati ambasador</option>
+            <option value="partner">Tehnoloski partner</option>
+            <option value="dok">Implementirati .dok standard</option>
+            <option value="evalidator">Koristiti eValidator API</option>
+            <option value="eu_fond">EU projekt suradnja</option>
+          </select>
+          <textarea class="ev-input" name="poruka" rows="4" placeholder="Kratka poruka..."></textarea>
+          <button class="ev-submit" type="submit"><i class="fas fa-paper-plane"></i> Posalji</button>
+        </form>
+        <div id="kontaktSuccess" style="display:none;margin-top:16px;padding:16px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:var(--green);font-size:.9rem">
+          <i class="fas fa-check"></i> Prijava primljena! Javit cemo se uskoro.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo"><span class="nl">NO</span>&nbsp;LIMIT</div>
+      <div style="font-size:.78rem;color:var(--dim);margin-top:6px">Europska udruga za digitalnu transformaciju stvarnog svijeta</div>
+    </div>
+    <div class="footer-links">
+      <a href="https://limit-connect.com">LIMIT Connect</a>
+      <a href="https://evalidator.eu">eValidator</a>
+      <a href="https://memio.pet">Memio Pet</a>
+      <a href="https://memio.world">PLAY.EU</a>
+      <a href="/static/udruga_no_limit/NO_LIMIT_Statut.pdf">Statut</a>
+    </div>
+  </div>
+  <div class="footer-legal">
+    &copy; 2026 NO LIMIT udruga, Vladislavci &mdash; Sva prava pridrzana &mdash; 
+    .dok standard pod <strong>Open Patent Promise</strong> &mdash;
+    Genesis Block #0 zapecaten 2026-04-19
+  </div>
+</footer>
+
+<script>
+// Navbar scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60)
+})
+
+// Hamburger
+document.getElementById('hamburger').addEventListener('click',()=>{
+  document.getElementById('navLinks').classList.toggle('open')
+})
+
+// Reveal on scroll
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible')}})
+},{threshold:.1})
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el))
+
+// eValidator
+function evValidate(){
+  const type = document.getElementById('evType').value
+  const val  = document.getElementById('evInput').value.trim().replace(/\s/g,'')
+  const res  = document.getElementById('evResult')
+  if(!val){res.style.display='block';res.style.background='rgba(239,68,68,.1)';res.style.border='1px solid rgba(239,68,68,.3)';res.style.color='#f87171';res.innerHTML='<i class="fas fa-exclamation"></i> Unesite vrijednost';return}
+  if(type==='oib'){
+    const ok = validateOIB(val)
+    res.style.display='block'
+    if(ok){res.style.background='rgba(34,197,94,.1)';res.style.border='1px solid rgba(34,197,94,.3)';res.style.color='#4ade80';res.innerHTML='<i class="fas fa-check"></i> OIB <strong>'+val+'</strong> je valjan'}
+    else{res.style.background='rgba(239,68,68,.1)';res.style.border='1px solid rgba(239,68,68,.3)';res.style.color='#f87171';res.innerHTML='<i class="fas fa-times"></i> OIB nije valjan'}
+  } else {
+    res.style.display='block';res.style.background='rgba(59,130,246,.1)';res.style.border='1px solid rgba(59,130,246,.3)';res.style.color='#60a5fa'
+    res.innerHTML='<i class="fas fa-external-link-alt"></i> Provjeri na <a href="https://evalidator.eu" style="color:var(--gold)">evalidator.eu</a>'
+  }
+}
+function validateOIB(oib){
+  if(!/^\d{11}$/.test(oib))return false
+  let n=10
+  for(let i=0;i<10;i++){n+=parseInt(oib[i]);n%=10;if(n===0)n=10;n*=2;n%=11}
+  return(n%10===0?0:(11-n%10))===parseInt(oib[10])
+}
+
+// Kontakt form
+function sendKontakt(e){
+  e.preventDefault()
+  document.getElementById('kontaktForm').style.display='none'
+  document.getElementById('kontaktSuccess').style.display='block'
+}
+
+// POE counter animation
+function animateCounter(){
+  const el=document.getElementById('poeCounter')
+  if(!el)return
+  let count=0,target=1
+  const int=setInterval(()=>{count++;el.textContent=String(count).padStart(3,'0');if(count>=target)clearInterval(int)},80)
+}
+const poeObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting){animateCounter();poeObs.disconnect()}
+})
+const poeEl=document.getElementById('poeCounter')
+if(poeEl)poeObs.observe(poeEl)
+// A-01: Live Genesis verification
+async function verifyGenesis() {
+  const el = document.getElementById('genesis-live-status');
+  if (!el) return;
+  try {
+    const r = await fetch('https://limit-connect.com/api/verify/NOLIMIT-GENESIS-0001/');
+    const d = await r.json();
+    if (d.verified && d.integrity === 'ok') {
+      const dt = new Date(d.tsa_timestamp);
+      const dateStr = dt.toLocaleDateString('hr-HR') + ' ' + dt.toLocaleTimeString('hr-HR', {hour:'2-digit',minute:'2-digit'});
+      el.innerHTML = '<span class="genesis-badge" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px">'
+        + '<span class="genesis-dot"></span>VERIFICIRANO UZIVO &middot; ' + dateStr + '</span>'
+        + '<div class="genesis-hash" style="margin-bottom:4px">HASH: ' + d.block_hash + '</div>'
+        + '<div style="margin-top:6px;font-size:.72rem;color:var(--dim)">'
+        + d.standard + ' &middot; Block #' + d.block_number + ' &middot; ' + d.doc_count + ' dokumenata'
+        + '</div>';
+    }
+  } catch(e) {
+    const el2 = document.getElementById('genesis-live-status');
+    if (el2) el2.innerHTML = '<span style="color:var(--dim);font-size:.75rem">Offline &mdash; hash nepromjenjiv</span>';
+  }
+}
+document.addEventListener('DOMContentLoaded', verifyGenesis);
+
+// A-02: Custom token verification
+async function verifyCustomToken() {
+  const token = document.getElementById('verify-token-input').value.trim();
+  const el = document.getElementById('custom-verify-result');
+  if (!token) return;
+  el.innerHTML = 'Verificiram...';
+  el.style.color = 'var(--dim)';
+  try {
+    const r = await fetch('https://limit-connect.com/api/verify/' + encodeURIComponent(token) + '/');
+    const d = await r.json();
+    if (d.verified) {
+      el.innerHTML = '✅ VERIFICIRANO &middot; ' + d.tsa_timestamp + ' &middot; ' + d.standard;
+      el.style.color = '#4ade80';
+    } else {
+      el.innerHTML = '❌ Dokument nije pronadjen u ChainBlocku';
+      el.style.color = '#f87171';
+    }
+  } catch(e) {
+    el.innerHTML = '⚠️ Greska pri verifikaciji';
+    el.style.color = '#fbbf24';
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1790,7 +1790,7 @@ def pretraga(request):
     if status:
         qs = qs.filter(status=status)
     if grad:
-        qs = qs.filter(owner__city__icontains=grad)
+        qs = qs.filter(breeder__city__icontains=grad)
 
     results = list(qs[:48])
     return render(request, "memio/pretraga.html", {
