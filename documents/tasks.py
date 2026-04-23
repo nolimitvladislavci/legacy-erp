@@ -22,6 +22,7 @@ def arhiva_ai_monitor(self):
 
     from companies.models import Company
     from documents.models import ArhivaEntry
+    from core.local_fallback import ocr_image, ocr_pdf, parse_invoice_text, suggest_konto
 
     alerts = []
     now = timezone.now()
@@ -101,7 +102,7 @@ def arhiva_ai_monitor(self):
         client = anthropic.Anthropic()
         summary = json.dumps(alerts, ensure_ascii=False, indent=2, default=str)
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=500,
             messages=[
                 {
@@ -230,7 +231,7 @@ def arhiva_morning_brief(self):
         if api_key:
             client = anthropic.Anthropic(api_key=api_key)
             response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=300,
                 messages=[
                     {
@@ -499,9 +500,10 @@ def generate_ai_proposal(self, entry_id):
         }
     )
 
+    _ai_ok = False
     try:
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001", max_tokens=400, messages=[{"role": "user", "content": messages_content}]
+            model="claude-3-5-haiku-20241022", max_tokens=400, messages=[{"role": "user", "content": messages_content}]
         )
         raw = response.content[0].text.strip()
 
@@ -543,9 +545,32 @@ def generate_ai_proposal(self, entry_id):
 
         return {"entry_id": entry_id, "confidence": proposal.get("confidence", "unknown")}
 
-    except (json.JSONDecodeError, ValueError) as e:
+    except Exception as e:
         logger.error("generate_ai_proposal failed for entry %s: %s", entry_id, e)
         try:
+        logger.warning("AI API greska za entry %s: %s - fallback na lokalni", entry_id, e)
+        # LOCAL FALLBACK
+        _ocr_text = ""
+        if file_bytes:
+            from core.local_fallback import ocr_image, ocr_pdf, parse_invoice_text, suggest_konto
+            _fr = ocr_pdf(file_bytes) if content_type == "application/pdf" else ocr_image(file_bytes)
+            _ocr_text = _fr.text if _fr.success else ""
+        _parsed = parse_invoice_text(_ocr_text) if _ocr_text else {}
+        _konto = suggest_konto(_ocr_text or str(entry.partner_name or ""))
+        _iznos = float(entry.amount or 0) or _parsed.get("iznos", 0)
+        proposal = {
+            "debit":  [{"account": _konto["konto"], "description": _konto["opis"], "amount": _iznos}],
+            "credit": [{"account": "2200", "description": "Obveze prema dobavljacima", "amount": _iznos}],
+            "confidence": "low",
+            "note": "[LOKALNI FALLBACK] AI nedostupan. " + (_ocr_text[:150] if _ocr_text else "OCR N/A"),
+            "fallback": True,
+        }
+        entry.ai_proposal = proposal
+        entry.ai_status = "done"
+        entry.ai_status_message = "Lokalna analiza (AI nedostupan) — provjeri rucno"
+        entry.save(update_fields=["ai_proposal", "ai_status", "ai_status_message"])
+        return {"entry_id": entry_id, "confidence": "low", "fallback": True}
+        # Originalni error handling (nedostizno ako fallback prode):
             entry.ai_status = "error"
             entry.ai_status_message = f"AI greška: {str(e)[:150]}"
             entry.save(update_fields=["ai_status", "ai_status_message"])
@@ -1055,7 +1080,7 @@ def ai_tag_photos(self):
 
             client = anthropic.Anthropic(api_key=api_key)
             response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=200,
                 messages=[
                     {

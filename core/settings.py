@@ -1119,8 +1119,8 @@ CELERY_BEAT_SCHEDULE.update(
 # Ako nedostaju — AI infrastruktura pada, BORG ne funkcionira.
 GEMINI_API_KEY = _os.environ.get("GEMINI_API_KEY", "")
 ANTHROPIC_API_KEY = _os.environ.get("ANTHROPIC_API_KEY", "")
-CLAUDE_MODEL = _os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5-20251001")  # COST CONTROL 2026-04-17
-HAIKU_MODEL = _os.environ.get("HAIKU_MODEL", "claude-haiku-4-5-20251001")
+CLAUDE_MODEL = _os.environ.get("CLAUDE_MODEL", "claude-3-5-haiku-20241022")  # COST CONTROL 2026-04-17
+HAIKU_MODEL = _os.environ.get("HAIKU_MODEL", "claude-3-5-haiku-20241022")
 
 # ── AI Health Check — svaki sat ───────────────────────────────────────────────
 CELERY_BEAT_SCHEDULE.update(

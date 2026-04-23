@@ -69,7 +69,7 @@ class UredPoruka(BaseModel):
 
     tokens_in = models.IntegerField(default=0)
     tokens_out = models.IntegerField(default=0)
-    model_used = models.CharField(max_length=50, default="claude-haiku-4-5-20251001")
+    model_used = models.CharField(max_length=50, default="claude-3-5-haiku-20241022")
     latency_ms = models.IntegerField(default=0)
 
     extracted_actions = models.JSONField(default=list)

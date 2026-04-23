@@ -64,7 +64,7 @@ def triage_signal(signal):
         )
 
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -121,7 +121,7 @@ def apply_triage(signal, triage_result):
             "dev_summary": triage_result.get("dev_summary", ""),
             "user_response": triage_result.get("user_response", ""),
             "duplicate_hint": triage_result.get("is_duplicate_hint"),
-            "model": "claude-haiku-4-5-20251001",
+            "model": "claude-3-5-haiku-20241022",
         },
         ensure_ascii=False,
     )

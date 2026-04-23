@@ -43,7 +43,7 @@ def extract_mrz_with_haiku(image_path: str) -> dict:
         client = anthropic.Anthropic()
 
         msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=400,
             messages=[
                 {

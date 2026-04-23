@@ -330,7 +330,7 @@ def _ai_analyze_anomalies(health_results, pending_count):
             "timestamp": timezone.now().strftime("%d.%m.%Y %H:%M"),
         }
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=300,
             messages=[
                 {

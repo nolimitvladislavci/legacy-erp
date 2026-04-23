@@ -213,7 +213,7 @@ def _extract_invoice_data_claude(file_bytes, filename):
     }.get(ext, "image/jpeg")
 
     response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+        model="claude-3-5-haiku-20241022",
         max_tokens=4096,
         messages=[
             {

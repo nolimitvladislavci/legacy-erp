@@ -147,7 +147,7 @@ class ContractAIGenerateView(TenantView):
                 prompt = f"{template.ai_prompt}\n\nVarijable:\n{json.dumps(variables, ensure_ascii=False)}\n\nTrenutno tijelo:\n{body[:3000]}"
                 result = gateway.chat(
                     messages=[{"role": "user", "content": prompt}],
-                    model="claude-haiku-4-5-20251001",
+                    model="claude-3-5-haiku-20241022",
                     max_tokens=2000,
                 )
                 body = result.get("content", body)
@@ -333,7 +333,7 @@ def _trigger_dispute_ai(dispute_id: str):
                 )
                 result = gw.chat(
                     messages=[{"role": "user", "content": prompt}],
-                    model="claude-haiku-4-5-20251001",
+                    model="claude-3-5-haiku-20241022",
                     max_tokens=300,
                 )
                 import json as _json

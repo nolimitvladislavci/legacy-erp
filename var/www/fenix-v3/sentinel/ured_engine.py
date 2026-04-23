@@ -117,7 +117,7 @@ AKTIVNA UPOZORENJA:
         # Spremi korisničku poruku
         UredPoruka.objects.create(konverzacija=self.konverzacija, role="user", sadrzaj=user_message)
 
-        model = "claude-sonnet-4-6" if use_sonnet else "claude-haiku-4-5-20251001"
+        model = "claude-sonnet-4-6" if use_sonnet else "claude-3-5-haiku-20241022"
 
         system = self.SYSTEM_PROMPT.format(
             company_context=self._build_company_context(),
@@ -174,7 +174,7 @@ AKTIVNA UPOZORENJA:
         try:
             client = anthropic.Anthropic()
             response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=200,
                 messages=[
                     {

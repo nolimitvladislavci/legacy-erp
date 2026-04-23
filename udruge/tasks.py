@@ -370,7 +370,7 @@ def ai_search_eu_funds(self, company_id):
         ) % profile
 
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001", max_tokens=1500, messages=[{"role": "user", "content": prompt}]
+            model="claude-3-5-haiku-20241022", max_tokens=1500, messages=[{"role": "user", "content": prompt}]
         )
         text = response.content[0].text.strip()
         if text.startswith("```"):

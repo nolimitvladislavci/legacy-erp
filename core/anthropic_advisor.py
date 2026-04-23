@@ -17,8 +17,8 @@ from typing import Optional
 
 logger = logging.getLogger("anthropic_advisor")
 
-HAIKU_MODEL  = "claude-haiku-4-5-20251001"
-SONNET_MODEL = "claude-haiku-4-5-20251001"  # COST CONTROL 2026-04-17: downgrade dok API billing nije pod kontrolom
+HAIKU_MODEL  = "claude-3-5-haiku-20241022"
+SONNET_MODEL = "claude-3-5-haiku-20241022"  # COST CONTROL 2026-04-17: downgrade dok API billing nije pod kontrolom
 # OPUS_MODEL je namjerno uklonjen — ne koristiti u produkciji
 
 

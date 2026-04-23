@@ -897,7 +897,7 @@ def ai_barcode_lookup(request):
 
             client = anthropic.Anthropic(api_key=anthropic_key)
             resp = client.messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=300,
                 messages=[
                     {
@@ -6662,7 +6662,7 @@ def api_fenix_camera(request):
 
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=150,
             messages=[
                 {

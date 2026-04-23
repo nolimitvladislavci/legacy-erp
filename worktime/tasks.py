@@ -85,7 +85,7 @@ def worktime_anomaly_patrol(self):
         if api_key:
             client = anthropic.Anthropic(api_key=api_key)
             response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=400,
                 messages=[
                     {

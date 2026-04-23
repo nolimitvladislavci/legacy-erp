@@ -37,7 +37,7 @@ def _personalize(subject_tpl, body_tpl, contact):
             'Return ONLY valid JSON: {"subject":"...","body":"..."}'
         )
         resp = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=800,
             messages=[{"role": "user", "content": prompt}],
         )

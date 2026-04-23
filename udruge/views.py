@@ -230,7 +230,7 @@ def ai_analyze(request, pk):
         )
 
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=300,
             messages=[
                 {
@@ -1244,7 +1244,7 @@ def email_kampanja_create(request):
                     )
                 )
                 response = client.messages.create(
-                    model="claude-haiku-4-5-20251001",
+                    model="claude-3-5-haiku-20241022",
                     max_tokens=1000,
                     messages=[{"role": "user", "content": ai_prompt}],
                 )
@@ -4927,7 +4927,7 @@ def golubar_ai_ime(request):
 
         client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=200,
             messages=[
                 {
@@ -5044,7 +5044,7 @@ def golubar_ai_prsten(request):
         content.append({"type": "text", "text": prompt})
 
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=120,
             messages=[{"role": "user", "content": content}],
         )

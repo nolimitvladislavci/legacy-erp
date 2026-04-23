@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db import DatabaseError
 
 logger = logging.getLogger("claude_doktor")
-HAIKU_MODEL = "claude-haiku-4-5-20251001"
+HAIKU_MODEL = "claude-3-5-haiku-20241022"
 
 
 @shared_task(bind=True, max_retries=2, default_retry_delay=120)

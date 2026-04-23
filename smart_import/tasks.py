@@ -737,7 +737,7 @@ def classify_inbox_item(self, item_id):
 
         client = anthropic.Anthropic()
         msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=10,
             messages=[
                 {

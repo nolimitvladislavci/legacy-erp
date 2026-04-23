@@ -82,7 +82,7 @@ def _call_haiku_vision(image_b64: str, image_bytes: bytes) -> dict:
             media_type = "image/png"
 
         response = client.messages.create(
-            model=getattr(settings, "HAIKU_MODEL", "claude-haiku-4-5-20251001"),
+            model=getattr(settings, "HAIKU_MODEL", "claude-3-5-haiku-20241022"),
             max_tokens=300,
             messages=[
                 {

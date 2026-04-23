@@ -190,7 +190,7 @@ def _call_anthropic(content, max_tokens=300):
 
     client = ant.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
     response = client.messages.create(
-        model=os.environ.get("HAIKU_MODEL", "claude-haiku-4-5-20251001"),
+        model=os.environ.get("HAIKU_MODEL", "claude-3-5-haiku-20241022"),
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": content}],
     )

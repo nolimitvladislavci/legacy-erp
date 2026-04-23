@@ -6,8 +6,8 @@ from django.db import DatabaseError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-haiku-4-5-20251001"
-# Pricing: $0.80/MTok input, $4.00/MTok output (claude-haiku-4-5-20251001, 2025)
+MODEL = "claude-3-5-haiku-20241022"
+# Pricing: $0.80/MTok input, $4.00/MTok output (claude-3-5-haiku-20241022, 2025)
 COST_INPUT_PER_TOKEN = 0.80 / 1_000_000  # USD
 COST_OUTPUT_PER_TOKEN = 4.0 / 1_000_000  # USD
 

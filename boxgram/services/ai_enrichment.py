@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 """
 Boxgram AI Enrichment — Haiku auto-opisi za LifeEvent
-Model: claude-haiku-4-5-20251001
+Model: claude-3-5-haiku-20241022
 """
 
 import logging
@@ -50,7 +50,7 @@ def enrich_life_event(event) -> str:
 
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
-            model="claude-haiku-4-5-20251001", max_tokens=150, messages=[{"role": "user", "content": prompt}]
+            model="claude-3-5-haiku-20241022", max_tokens=150, messages=[{"role": "user", "content": prompt}]
         )
 
         generated = message.content[0].text.strip()
@@ -77,7 +77,7 @@ def moderate_social_import(import_obj) -> dict:
         client = anthropic.Anthropic(api_key=api_key)
 
         message = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=100,
             messages=[
                 {

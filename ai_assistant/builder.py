@@ -206,7 +206,7 @@ def _call_claude(prompt, module, context):
     try:
         client = get_claude_client()
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=4096,
             system=f"""Ti si Django inženjer za LIMIT Connect ERP.
 Modul: {module}
@@ -335,7 +335,7 @@ def builder_api(request):
     try:
         client = get_claude_client()
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=2048,
             system="""Ti si AI Builder asistent za LIMIT Connect ERP.
 Pomazeš korisnicima prilagoditi sustav. Odgovaraj na hrvatskom.

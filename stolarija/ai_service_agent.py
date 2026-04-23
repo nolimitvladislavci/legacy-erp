@@ -163,7 +163,7 @@ def analyze_image(image_bytes: bytes, context: str = "") -> dict:
             b64 = base64.b64encode(image_bytes).decode()
 
             response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=500,
                 messages=[
                     {
@@ -280,7 +280,7 @@ def _generate_llm_draft(message, sentiment, category, warranty_info) -> str:
         )
 
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=400,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],

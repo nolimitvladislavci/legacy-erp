@@ -403,7 +403,7 @@ VRATI JSON:
 }""" % (type_label, type_label, p.ime_potrosaca, p.opis_prigovora[:500], lang_label, deadline)
 
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -938,7 +938,7 @@ def moderate_prigovor_content(self, prigovor_id):
 
             client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
             response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=200,
                 messages=[
                     {

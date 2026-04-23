@@ -82,10 +82,10 @@ class ClaudeClientTest(TestCase):
     """Tests for claude_client.py configuration."""
 
     def test_model_is_current(self):
-        """MODEL should be the current claude-haiku-4-5-20251001."""
+        """MODEL should be the current claude-3-5-haiku-20241022."""
         from ai_assistant.claude_client import MODEL
 
-        self.assertEqual(MODEL, "claude-haiku-4-5-20251001")
+        self.assertEqual(MODEL, "claude-3-5-haiku-20241022")
 
     def test_estimate_cost_zero_tokens(self):
         """Zero tokens → zero cost."""

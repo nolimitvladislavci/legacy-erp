@@ -71,7 +71,7 @@ def interpret_message(raw_text, channel="voice", user=None, company=None):
             user_context += "\nKanal: Glasovni unos — prirodni jezik, moguće greške u transkripciji"
 
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-haiku-20241022",
             max_tokens=500,
             system=SYSTEM_PROMPT + user_context,
             messages=[{"role": "user", "content": raw_text}],

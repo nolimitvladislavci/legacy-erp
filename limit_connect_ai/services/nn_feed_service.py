@@ -232,7 +232,7 @@ class NNFeedScraperService:
             from anthropic import Anthropic
 
             resp = Anthropic(api_key=api_key).messages.create(
-                model="claude-haiku-4-5-20251001",
+                model="claude-3-5-haiku-20241022",
                 max_tokens=600,
                 temperature=0.1,
                 system=system,

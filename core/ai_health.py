@@ -181,7 +181,7 @@ def check_gemini():
         return False, str(e)[:150]
 
 
-def check_anthropic(model_key="claude-haiku-4-5-20251001"):
+def check_anthropic(model_key="claude-3-5-haiku-20241022"):
     try:
         key = getattr(settings, "ANTHROPIC_API_KEY", "") or os.environ.get("ANTHROPIC_API_KEY", "")
         if not key:
@@ -275,7 +275,7 @@ def run_ai_health_check():
     if not ok:
         problems.append(f"Gemini: {msg}")
 
-    ok, msg = check_anthropic("claude-haiku-4-5-20251001")
+    ok, msg = check_anthropic("claude-3-5-haiku-20241022")
     results["haiku"] = {"ok": ok, "msg": msg}
     if not ok:
         problems.append(f"Haiku: {msg}")

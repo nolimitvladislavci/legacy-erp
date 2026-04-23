@@ -482,7 +482,7 @@ def agent_gateway(request):
             if api_key:
                 client = anthropic.Anthropic(api_key=api_key)
                 report = client.messages.create(
-                    model="claude-haiku-4-5-20251001",
+                    model="claude-3-5-haiku-20241022",
                     max_tokens=150,
                     messages=[
                         {
@@ -958,7 +958,7 @@ def _call_ai(provider, messages):
         key = getattr(settings, "ANTHROPIC_API_KEY", "")
         payload = _j.dumps(
             {
-                "model": "claude-haiku-4-5-20251001",
+                "model": "claude-3-5-haiku-20241022",
                 "max_tokens": 2048,
                 "system": (
                     "Ti si Fenix AI asistent za superadmina LIMIT Connect platforme. "
