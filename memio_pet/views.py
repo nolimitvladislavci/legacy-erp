@@ -490,7 +490,7 @@ def registracija(request):
                     error = f"Greska: {e}"
     return render(
         request,
-        "memio_pet/registracija.html",
+        "memio/registracija.html",
         {
             "error": error,
             "chip": request.GET.get("chip", ""),

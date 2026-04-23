@@ -53,7 +53,11 @@ from django.views.decorators.cache import cache_page
 
 
 def registracija_page(request):
-    """Preusmjeri na pravu PLAY registraciju — waitlist je uklonjen."""
+    """Preusmjeri na PLAY registraciju, ili na memio.pet registraciju ako je memio.pet domena."""
+    host = request.get_host().split(":")[0].lower()
+    if "memio.pet" in host:
+        from memio_pet.views import registracija as memio_pet_reg
+        return memio_pet_reg(request)
     return redirect("memio_world:register_page")
 
 
