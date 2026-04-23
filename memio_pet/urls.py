@@ -65,4 +65,11 @@ urlpatterns = [
 
     # PLAN-008: .dok Putovnica
     path("pas/<str:chip_or_tag>/putovnica/", views.pet_passport_dok, name="pet_passport"),
+
+    # PLAN-011: Brzi PIN login
+    path("pin/<uuid:breeder_pk>/", views.pin_login, name="pin_login"),
+    path("pin/postavi/", views.pin_setup, name="pin_setup"),
+
+    # PLAN-010: Odjava
+    path("odjava/", views.odjava, name="odjava"),
 ]

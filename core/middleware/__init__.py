@@ -964,6 +964,8 @@ class DomainGateMiddleware:
             "/gram/",
             # PLAN-011 PIN login
             "/pin/",
+            # PLAN-010 Odjava
+            "/odjava/",
             "/pretraga/",
             "/prodaja/",
             "/farma/",

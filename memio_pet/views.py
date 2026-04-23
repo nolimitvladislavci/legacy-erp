@@ -2202,3 +2202,17 @@ def pin_login(request, breeder_pk):
         "error": error,
         "locked": locked,
     })
+
+
+def odjava(request):
+    """PLAN-010: Odjava iz memio.pet session."""
+    request.session.pop("memio_breeder_pk", None)
+    request.session.pop("memio_breeder_email", None)
+    request.session.modified = True
+    from django.contrib import messages
+    # Ako je Django user login takodje, odjavi
+    if request.user.is_authenticated:
+        from django.contrib.auth import logout as django_logout
+        django_logout(request)
+    from django.shortcuts import redirect
+    return redirect("/")
