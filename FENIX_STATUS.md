@@ -340,3 +340,23 @@ Sesija 57. — CC_TASK_NOLIMIT_SERVIS.md:
 
 Commit: 2be4997a feat(nolimit): pravopis + OSS kartice + trust-badge v2.0
 Open: no_limit_backup_20260423.html cisti u sljedecoj sesiji.
+---
+
+## KONTEKST SESIJE (2026-04-23, S-060)
+
+Nastavak sesije. Fokus: memio.pet PLAN-005/006/009 real data.
+
+1. **Bug fix: owner → breeder** (commit d3cecf6d)
+   -  view:  → 
+   - :  → 
+   - AnimalProfile ima  FK, ne 
+
+2. **Seed test data** (17 životinja, 5 uzgajivača)
+   - Pas: Rex, Luna, Max, Bella, Bruno
+   - Mačka: Maca, Leo, Siva
+   - Konj: Vjetar, Bura, Zora (Lipicaner, Arapski, Posavac)
+   - Ovca: Bijanka, Jela | Koza: Žuta | Svinja: Crnica, Šara | Ptica: Kokica
+   - Uzgajivači: Mirko Horvat (Zagreb), Azil Srce (Split), OPG Kovač (Osijek), Farma Zeleni Dol (Varaždin), Ante Jurić (Dubrovnik)
+   - Stranice /pretraga/, /prodaja/, /farma/ sada prikazuju real data
+
+Open: no_limit_backup_20260423.html još nije obrisan (backup fajl).
