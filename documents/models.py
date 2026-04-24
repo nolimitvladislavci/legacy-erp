@@ -441,6 +441,10 @@ class ArhivaEntry(models.Model):
     # Sprint 3: Labele za kategorizaciju
     labels = models.ManyToManyField("ArhivaLabel", blank=True, related_name="entries", verbose_name=_("Labele"))
 
+    # VIVUS kriptografski sloj
+    vivus_blob = models.TextField(blank=True, default="", help_text="VIVUS_DOK_V1 enkriptirani sadrzaj")
+    vivus_fingerprint = models.CharField(max_length=64, blank=True, default="")
+
     class Meta:
         verbose_name = _("Arhivski zapis")
         verbose_name_plural = _("Arhivski zapisi")
@@ -617,6 +621,17 @@ class ArhivaEntry(models.Model):
         # Snapshot tracked fields for change detection
         instance._loaded_values = {f: getattr(instance, f, None) for f in cls._AUDIT_TRACKED_FIELDS if f in field_names}
         return instance
+
+    def set_vivus_secret(self, data: str, passphrase: str) -> None:
+        from .dok_crypto import encrypt, fingerprint
+        self.vivus_blob = encrypt(data, passphrase)
+        self.vivus_fingerprint = fingerprint(self.vivus_blob)
+
+    def get_vivus_secret(self, passphrase: str) -> str:
+        from .dok_crypto import decrypt
+        if not self.vivus_blob:
+            return ""
+        return decrypt(self.vivus_blob, passphrase).decode("utf-8")
 
     @property
     def is_deletion_protected(self):
