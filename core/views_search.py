@@ -211,7 +211,31 @@ def global_search(request):
     except DatabaseError:
         pass
 
-    return JsonResponse({"results": results[:MAX_TOTAL], "query": q})
+    # ModuleLink — linkabilne ikone modula (NOVO)
+    try:
+        from core.models import ModuleLink
+        qs = ModuleLink.objects.filter(
+            is_active=True
+        ).filter(
+            Q(name__icontains=q) | Q(name_short__icontains=q) |
+            Q(description__icontains=q) | Q(keywords__icontains=q)
+        ).order_by("sort_order")[:8]
+        for mod in qs:
+            results.insert(0, {  # Moduli na vrh liste
+                "module":      "module_registry",
+                "type":        "Modul",
+                "title":       mod.name,
+                "subtitle":    mod.description,
+                "url":         mod.url,
+                "icon":        mod.icon,
+                "name_short":  mod.name_short,
+                "category":    mod.category,
+                "is_module":   True,
+            })
+    except Exception:
+        pass
+
+    return JsonResponse({"results": results[:MAX_TOTAL + 8], "query": q})
 
 
 @login_required

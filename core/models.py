@@ -468,3 +468,56 @@ from core.genetic_search_models import SearchGene  # noqa: F401, E402
 
 # Blind Spots — adversarial audit
 from core.blind_spots_tasks import BlindSpotReport  # noqa: F401, E402
+
+
+# ── ModuleLink — globalni registar modula/servisa na IP adresi ────────────────
+from django.db import models as _models  # noqa: E402
+
+
+class ModuleLink(_models.Model):
+    """
+    Globalni registar svih modula/servisa na IP 37.27.248.86.
+    Pretraživ imenom, opisom i ključnim riječima.
+    """
+    CATEGORY_CHOICES = [
+        ("finance","Financije"), ("documents","Dokumenti"), ("hr","Zaposlenici / HR"),
+        ("crm","Komitenti / CRM"), ("pos","POS / Blagajna"),
+        ("specialty","Specijalizirani modul"), ("ai","AI / Inteligencija"),
+        ("security","Sigurnost"), ("settings","Postavke"), ("portal","Portal"),
+        ("animals","Životinje"), ("real_estate","Nekretnine / Gradnja"),
+        ("social","Socijala / Udruge"), ("other","Ostalo"),
+    ]
+    PROJECT_CHOICES = [
+        ("fenix-v3","Fenix V3"), ("fina-connect","Stari ERP"), ("shared","Zajednički"),
+    ]
+
+    icon          = _models.CharField(max_length=10)
+    name          = _models.CharField(max_length=100)
+    name_short    = _models.CharField(max_length=30)
+    description   = _models.CharField(max_length=250, blank=True)
+    url           = _models.CharField(max_length=300)
+    category      = _models.CharField(max_length=20, choices=CATEGORY_CHOICES, default="other")
+    roles         = _models.JSONField(default=list, blank=True)
+    project       = _models.CharField(max_length=20, choices=PROJECT_CHOICES, default="fina-connect")
+    sort_order    = _models.PositiveSmallIntegerField(default=0)
+    is_active     = _models.BooleanField(default=True)
+    is_admin_only = _models.BooleanField(default=False)
+    keywords      = _models.CharField(max_length=400, blank=True)
+    created_at    = _models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label           = "core"
+        ordering            = ["sort_order", "category", "name"]
+        verbose_name        = "Modul / servis"
+        verbose_name_plural = "Moduli i servisi"
+
+    def __str__(self):
+        return f"{self.icon} {self.name_short}"
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.pk, "icon": self.icon, "name": self.name,
+            "name_short": self.name_short, "description": self.description,
+            "url": self.url, "category": self.category,
+            "project": self.project, "keywords": self.keywords,
+        }
