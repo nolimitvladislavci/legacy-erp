@@ -330,6 +330,25 @@ Anthropic:  AKTIVAN ✅ (API key u settings)
 
 ---
 
+## KONTEKST SESIJE (2026-04-24 — VIVUS ArhivaEntry integracija)
+
+### Sto je radeno:
+- Kopiran dok_crypto.py u documents/dok_crypto.py (standalone, bez kros-projekt importa)
+- Dodana polja vivus_blob i vivus_fingerprint na ArhivaEntry model
+- Dodane metode set_vivus_secret() i get_vivus_secret() direktno na ArhivaEntry
+- Kreirana i primijenjena migracija 0028_arhivaentry_vivus_blob_arhivaentry_vivus_fingerprint
+- manage.py check: 0 gresaka (1 silenced — uobicajeno)
+- Oba gunicorn servisa reloadani
+
+### Kljucne odluke:
+- Koristena kopija dok_crypto.py (ne kros-projekt import) — nema ovisnosti o fenix-v3 putanjama
+- Polja optional (blank=True, default=) — ne utjece na postojece ArhivaEntry zapise
+- Metode set/get_vivus_secret su inline (ne mixin) — jednostavniji model
+
+### Open threads:
+- VIVUS API endpointi za fina-connect nisu implementirani (samo fenix-v3 ima /lanac/vivus/)
+- UI za enkriptiranje dokumenata u arhivi — nije planirano ovom sesijom
+
 ## KONTEKST SESIJE (2026-04-23)
 
 Sesija 57. — CC_TASK_NOLIMIT_SERVIS.md:
