@@ -1,4 +1,4 @@
-# FINA-CONNECT STATUS — Azurirano: 2026-04-23
+# FINA-CONNECT STATUS — Azurirano: 2026-04-24
 
 ## ZADNJE SESIJE
 
@@ -379,3 +379,28 @@ Nastavak sesije. Fokus: memio.pet PLAN-005/006/009 real data.
    - Stranice /pretraga/, /prodaja/, /farma/ sada prikazuju real data
 
 Open: no_limit_backup_20260423.html još nije obrisan (backup fajl).
+
+---
+
+## KONTEKST SESIJE (2026-04-24 — Module Launcher + form_toolbar asimilacija)
+
+### Što je rađeno:
+1. **Module Launcher** — `/hr/moduli/` LIVE na fina-connect
+   - `companies/views_launcher.py` — čita iz `companies.module_registry.MODULES` (95+ modula)
+   - FA_TO_EMOJI dict (50+ mappings): fa-tachometer-alt→📊, fa-file-invoice-dollar→🧾 itd.
+   - Bootstrap dark card grid, live search JS debounce 300ms, category filter pills
+   - Route dodan direktno u `core/urls.py` (ne u companies/urls.py) → `/hr/moduli/`
+   - Sidebar: launcher gumb na vrhu `templates/includes/_sidebar_modules.html`
+   - API: `/hr/moduli/api/` → JSON (max 20 rezultata)
+
+2. **form_toolbar asimilacija** — ANALIZA DOVRŠENA (implementacija TODO)
+   - Fenix V3 `form_toolbar.html` v2 napisan s 5 ikona (TTS+STT+Kamera/QR+Tipkovnica+Pretraga)
+   - fina-connect nema form_toolbar — implementacija planirana kao sljedeći korak
+
+### manage.py check: 0 errors ✅ (nisu promijenjeni Python fajlovi — samo template + view)
+### Gunicorn: treba reload pri sljedećoj sesiji
+
+### Open threads:
+- form_toolbar v2 port na fina-connect (copy/adapt iz fenix-v3)
+- no_limit_backup_20260423.html još nije obrisan
+- memio_farm 0 zapisa — popuniti seed podacima
