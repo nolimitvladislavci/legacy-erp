@@ -217,7 +217,7 @@ def ai_status(request):
         },
         "haiku_blocked_until": "2026-05-01" if haiku_blocked else None,
         "features": {
-            "breed_detect": "POST /memio/ai/breed/",
-            "transcribe": "POST /memio/ai/transcribe/",
+            "breed_detect": "POST /ai/breed/",
+            "transcribe": "POST /ai/transcribe/",
         },
     })
