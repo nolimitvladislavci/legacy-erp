@@ -1011,3 +1011,10 @@ urlpatterns += [
     path("api/cmd/predict/", cmd_predict, name="cmd_predict"),
     path("api/cmd/morning/", cmd_morning, name="cmd_morning"),
 ]
+
+# ── Module Launcher — /hr/moduli/ (ikone + opis + direktni launch) ──
+from companies.views_launcher import launcher as _moduli_launcher, launcher_api as _moduli_api
+urlpatterns += [
+    path("moduli/", _moduli_launcher, name="moduli_launcher"),
+    path("moduli/api/", _moduli_api, name="moduli_launcher_api"),
+]

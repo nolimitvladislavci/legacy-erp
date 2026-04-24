@@ -72,3 +72,10 @@ urlpatterns += [
     path("settings/tab/<str:tab_name>/", views_settings.settings_tab, name="settings_tab"),
     path("settings/toggle-module/", views_settings.toggle_module, name="toggle_module"),
 ]
+
+# Module Launcher — /hr/kompanije/moduli/ (visual launcher, not toggle)
+from companies import views_launcher as _vl
+urlpatterns += [
+    path("moduli/", _vl.launcher, name="moduli_launcher"),
+    path("moduli/api/", _vl.launcher_api, name="moduli_launcher_api"),
+]

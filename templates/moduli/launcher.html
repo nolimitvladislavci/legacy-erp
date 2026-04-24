@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Moduli — LIMIT Connect{% endblock %}
+{% block page_title %}📦 Svi moduli{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Module Launcher — fina-connect edition ────────────────────── */
+.ml-hero { margin-bottom: 1.5rem; }
+.ml-hero h4 { font-weight: 800; color: var(--gold, #c9a84c); margin: 0 0 .25rem; }
+.ml-hero p  { color: var(--text-dim); font-size: .85rem; margin: 0; }
+
+/* Search + filter */
+.ml-bar { display: flex; gap: .75rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.75rem; }
+.ml-search-wrap {
+  flex: 1; min-width: 240px;
+  position: relative;
+}
+.ml-search-wrap input {
+  width: 100%;
+  background: var(--dark, #1a1a1a);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: .55rem 1rem .55rem 2.4rem;
+  color: var(--white, #fff);
+  font-size: .875rem;
+  outline: none;
+  transition: border-color .15s;
+}
+.ml-search-wrap input:focus { border-color: var(--gold, #c9a84c); }
+.ml-search-wrap .ml-icon {
+  position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+  color: var(--text-dim); font-size: .85rem; pointer-events: none;
+}
+.ml-cats { display: flex; gap: .35rem; flex-wrap: wrap; }
+.ml-cat-btn {
+  padding: .3rem .75rem; border-radius: 20px; font-size: .75rem; font-weight: 600;
+  border: 1px solid rgba(255,255,255,.1);
+  background: var(--dark, #1a1a1a);
+  color: var(--text-dim); cursor: pointer; text-decoration: none;
+  transition: all .15s; white-space: nowrap;
+}
+.ml-cat-btn:hover { border-color: var(--gold, #c9a84c); color: var(--gold, #c9a84c); }
+.ml-cat-btn.active {
+  background: var(--gold, #c9a84c); border-color: var(--gold, #c9a84c);
+  color: #000;
+}
+
+/* Category section */
+.ml-section { margin-bottom: 2rem; }
+.ml-section-hdr {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--text-dim);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  padding-bottom: .5rem; margin-bottom: .9rem;
+}
+.ml-count { margin-left: auto; background: rgba(255,255,255,.07); padding: .1rem .45rem; border-radius: 8px; font-size: .65rem; }
+
+/* Grid */
+.ml-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: .6rem;
+}
+
+/* Card */
+.ml-card {
+  display: flex; flex-direction: column;
+  background: var(--dark, #1a1a1a);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  padding: 1rem .9rem .85rem;
+  text-decoration: none !important;
+  color: var(--white, #fff);
+  transition: all .15s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.ml-card:hover {
+  border-color: rgba(201,168,76,.45);
+  background: rgba(201,168,76,.04);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  color: var(--white, #fff);
+}
+.ml-card:active { transform: none; }
+
+/* Icon */
+.ml-card-icon {
+  font-size: 1.8rem; line-height: 1;
+  margin-bottom: .5rem;
+  display: block;
+  transition: transform .15s;
+}
+.ml-card:hover .ml-card-icon { transform: scale(1.1); }
+
+/* Name */
+.ml-card-name {
+  font-size: .82rem; font-weight: 700; color: #fff;
+  margin-bottom: .3rem; line-height: 1.2;
+}
+
+/* Desc */
+.ml-card-desc {
+  font-size: .68rem; color: var(--text-dim);
+  line-height: 1.35; flex: 1;
+}
+
+/* Arrow */
+.ml-card-arrow {
+  position: absolute; top: .6rem; right: .65rem;
+  font-size: .7rem; color: var(--text-dim);
+  opacity: 0; transition: opacity .15s;
+}
+.ml-card:hover .ml-card-arrow { opacity: 1; }
+
+/* Empty */
+.ml-empty { text-align: center; padding: 4rem 2rem; color: var(--text-dim); }
+.ml-empty .ml-empty-icon { font-size: 3rem; display: block; margin-bottom: .75rem; }
+
+@media (max-width: 576px) {
+  .ml-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .5rem; }
+  .ml-card { padding: .8rem .7rem .7rem; }
+  .ml-card-icon { font-size: 1.5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ml-hero">
+  <h4>📦 Svi moduli</h4>
+  <p>{{ total }} modula — kliknite ikonu za direktno otvaranje</p>
+</div>
+
+<!-- Search + filter bar -->
+<form method="get" class="ml-bar" id="mlForm">
+  <div class="ml-search-wrap">
+    <span class="ml-icon"><i class="fas fa-search"></i></span>
+    <input type="text" name="q" value="{{ q }}" placeholder="Pretraži module..." id="mlSearch" autocomplete="off">
+  </div>
+  <div class="ml-cats">
+    <a href="{% url 'moduli_launcher' %}" class="ml-cat-btn {% if not cat and not q %}active{% endif %}">Sve</a>
+    {% for c in cat_filter %}
+    <a href="?cat={{ c.key }}" class="ml-cat-btn {% if cat == c.key %}active{% endif %}">
+      {{ c.icon }} {{ c.label }}
+    </a>
+    {% endfor %}
+  </div>
+</form>
+
+<!-- Groups -->
+{% if groups %}
+  {% for group in groups %}
+  <div class="ml-section">
+    <div class="ml-section-hdr">
+      <span>{{ group.icon }}</span>
+      {{ group.label }}
+      <span class="ml-count">{{ group.modules|length }}</span>
+    </div>
+    <div class="ml-grid">
+      {% for mod in group.modules %}
+      <a href="{{ mod.resolved_url }}" class="ml-card" title="{{ mod.description }}">
+        <span class="ml-card-icon">{{ mod.emoji }}</span>
+        <div class="ml-card-name">{{ mod.name }}</div>
+        {% if mod.description %}
+        <div class="ml-card-desc">{{ mod.description|truncatechars:65 }}</div>
+        {% endif %}
+        <span class="ml-card-arrow">↗</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+<div class="ml-empty">
+  <span class="ml-empty-icon">🔍</span>
+  <p>Nema modula za "<strong>{{ q }}</strong>"</p>
+  <a href="{% url 'moduli_launcher' %}" class="ml-cat-btn active d-inline-block mt-2">Prikaži sve</a>
+</div>
+{% endif %}
+
+<script>
+const mlInput = document.getElementById('mlSearch');
+let mlTimer;
+mlInput?.addEventListener('input', () => {
+  clearTimeout(mlTimer);
+  mlTimer = setTimeout(() => {
+    const q = mlInput.value.trim();
+    const url = new URL(window.location);
+    if (q) url.searchParams.set('q', q);
+    else url.searchParams.delete('q');
+    url.searchParams.delete('cat');
+    window.location = url.toString();
+  }, 300);
+});
+</script>
+{% endblock %}
