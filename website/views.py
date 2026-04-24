@@ -735,3 +735,17 @@ def nolimit_partner(request):
     from django.shortcuts import render
 
     return render(request, "website/no_limit.html", {})
+
+
+def vivus_spec(request):
+    """Javna VIVUS specifikacija — služi Markdown kao tekst ili HTML."""
+    spec_path = "/var/www/fenix-v3/docs/vivus/VIVUS_SPEC_v1.md"
+    try:
+        with open(spec_path) as f:
+            content = f.read()
+    except FileNotFoundError:
+        content = "VIVUS Spec v1.0 — uskoro dostupno."
+
+    from django.http import HttpResponse
+    # Sirovi Markdown kao text/plain za sada
+    return HttpResponse(content, content_type="text/plain; charset=utf-8")

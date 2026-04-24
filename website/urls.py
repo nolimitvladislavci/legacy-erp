@@ -5,6 +5,7 @@ from . import cms_views, views
 app_name = "website"
 
 urlpatterns = [
+    path("vivus/spec/", views.vivus_spec, name="vivus_spec"),
     path("grosmarkt/anfrage/", views.grosmarkt_anfrage, name="grosmarkt_anfrage"),
     # Viskovic CMS gallery (legacy)
     path("cms/gallery/", cms_views.cms_gallery, name="cms_gallery"),
