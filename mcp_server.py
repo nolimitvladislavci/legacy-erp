@@ -102,27 +102,38 @@ def django_orm(code: str) -> str:
 
 @mcp.tool()
 def read_file(path: str) -> str:
-    """Citaj fajl iz projekta."""
-    full = os.path.join(PROJECT, path.lstrip("/")) if not path.startswith(PROJECT) else path
-    if not full.startswith(PROJECT):
-        return "Error: path outside project"
+    """Citaj fajl iz projekta ili s apsolutne putanje na serveru."""
+    ALLOWED_ROOTS = ("/var/www/", "/etc/nginx/", "/etc/systemd/")
+    if os.path.isabs(path):
+        full = os.path.normpath(path)
+        if not any(full.startswith(r) for r in ALLOWED_ROOTS):
+            return "Error: path outside allowed server roots"
+    else:
+        full = os.path.normpath(os.path.join(PROJECT, path))
+        if not full.startswith(PROJECT):
+            return "Error: path outside project"
     try:
-        content = open(full).read()
-        return f"[{content.count(chr(10))} linija]\n{content[:30000]}"
+        c = open(full).read()
+        return f"[{c.count(chr(10))} linija]\n{c[:30000]}"
     except (FileNotFoundError, IOError) as e:
         return f"Error: {e}"
 
 
 @mcp.tool()
 def write_file(path: str, content: str) -> str:
-    """Pisi fajl u projekt."""
-    full = os.path.join(PROJECT, path.lstrip("/")) if not path.startswith(PROJECT) else path
-    if not full.startswith(PROJECT):
-        return "Error: path outside project"
+    """Pisi fajl — apsolutna putanja mora biti unutar /var/www/, relativna unutar PROJECT."""
+    if os.path.isabs(path):
+        full = os.path.normpath(path)
+        if not full.startswith("/var/www/"):
+            return "Error: write blocked — path outside /var/www/"
+    else:
+        full = os.path.normpath(os.path.join(PROJECT, path))
+        if not full.startswith(PROJECT):
+            return "Error: path outside project"
     try:
         os.makedirs(os.path.dirname(full), exist_ok=True)
         open(full, "w").write(content)
-        return f"OK: {path} ({len(content)} chars)"
+        return f"OK: {full} ({len(content)} chars)"
     except (FileNotFoundError, IOError) as e:
         return f"Error: {e}"
 
