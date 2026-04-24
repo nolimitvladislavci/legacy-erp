@@ -4,9 +4,6 @@ PLAN-013: AI media za memio.pet
 - POST /memio/ai/breed/ — foto → JSON analiza (rasa, vrsta, zdravlje)
 - POST /memio/ai/transcribe/ — audio → tekst transkript
 - GET  /memio/ai/status/ — koji AI provideri su dostupni
-
-Globalno dostupno, poziva se po potrebi.
-Fallback lanac: Sonnet Vision → Gemini → offline poruka.
 """
 import json
 import logging
@@ -18,13 +15,11 @@ from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger(__name__)
 
-# ── AI helpers (direktno Anthropic + Gemini, fina-connect nema ai_gateway) ─────
 
 def _call_vision(image_bytes: bytes, prompt: str, mime_type: str = "image/jpeg") -> dict:
     """Sonnet vision → Gemini vision → offline."""
     from django.conf import settings
 
-    # 1. Sonnet vision
     try:
         import anthropic
         client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
@@ -41,7 +36,6 @@ def _call_vision(image_bytes: bytes, prompt: str, mime_type: str = "image/jpeg")
     except Exception as e:
         logger.warning("AI media Sonnet greska: %s", e)
 
-    # 2. Gemini vision fallback
     try:
         import httpx
         api_key = settings.GEMINI_API_KEY
@@ -92,22 +86,18 @@ def _call_transcribe(audio_bytes: bytes, mime_type: str = "audio/mpeg", language
                 "error": f"Transkripcija neuspjesna: {e}"}
 
 
-# ── Views ───────────────────────────────────────────────────────────────────────
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def breed_detect(request):
     """
     POST /memio/ai/breed/
     Body: multipart s poljem 'photo' (slika zivotinje)
-    Vraca JSON: vrsta, rasa, spol, procjena_dobi, zdravlje, povjerenje
     """
     photo = request.FILES.get("photo")
     if not photo:
         return JsonResponse({"error": "Nedostaje polje 'photo'"}, status=400)
 
-    max_size = 10 * 1024 * 1024  # 10MB
-    if photo.size > max_size:
+    if photo.size > 10 * 1024 * 1024:
         return JsonResponse({"error": "Slika prevelika (max 10MB)"}, status=400)
 
     image_bytes = photo.read()
@@ -130,11 +120,9 @@ def breed_detect(request):
             "error": result.get("error", "Greska"),
         }, status=503)
 
-    # Pokusaj parsirati JSON iz AI odgovora
     content = result["content"]
     animal_data = {}
     try:
-        # Izdvoji JSON iz odgovora (AI ponekad dodaje tekst oko JSON-a)
         start = content.find("{")
         end = content.rfind("}") + 1
         if start >= 0 and end > start:
@@ -142,7 +130,6 @@ def breed_detect(request):
     except json.JSONDecodeError:
         animal_data = {"napomena": content}
 
-    # Ako je zadana zivotinja u URL parametru, azuriraj breed polje
     ear_tag = request.POST.get("ear_tag") or request.GET.get("ear_tag")
     if ear_tag and animal_data.get("rasa"):
         try:
@@ -168,14 +155,12 @@ def transcribe_audio(request):
     """
     POST /memio/ai/transcribe/
     Body: multipart s poljem 'audio'
-    Vraca JSON: transcript (tekst)
     """
     audio = request.FILES.get("audio")
     if not audio:
         return JsonResponse({"error": "Nedostaje polje 'audio'"}, status=400)
 
-    max_size = 20 * 1024 * 1024  # 20MB
-    if audio.size > max_size:
+    if audio.size > 20 * 1024 * 1024:
         return JsonResponse({"error": "Audio prevelik (max 20MB)"}, status=400)
 
     audio_bytes = audio.read()
@@ -200,10 +185,7 @@ def transcribe_audio(request):
 
 @require_http_methods(["GET"])
 def ai_status(request):
-    """
-    GET /memio/ai/status/
-    Vraca koji AI provideri su dostupni (bez testnog poziva — samo cache stanje).
-    """
+    """GET /memio/ai/status/"""
     from django.conf import settings
     import datetime
 
@@ -217,7 +199,7 @@ def ai_status(request):
         },
         "haiku_blocked_until": "2026-05-01" if haiku_blocked else None,
         "features": {
-            "breed_detect": "POST /ai/breed/",
-            "transcribe": "POST /ai/transcribe/",
+            "breed_detect": "POST /memio/ai/breed/",
+            "transcribe": "POST /memio/ai/transcribe/",
         },
     })
