@@ -267,3 +267,13 @@ def prijava_azila(request):
                 pass
             return redirect("/?prijava=ok")
     return redirect("/")
+
+
+# ═══════════════════════════════════════════════════════════════
+#  FOLIJA — Runtime Integrity Membrane showcase
+# ═══════════════════════════════════════════════════════════════
+
+
+def folija_page(request):
+    """Folija open-source showcase page."""
+    return render(request, 'no_limit/folija.html')

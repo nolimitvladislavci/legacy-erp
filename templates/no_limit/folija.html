@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folija — Runtime Integrity Membrane</title>
+<meta name="description" content="Zero-overhead tamper detection for Python and Node.js. Built by OpenDOK Foundation.">
+<meta property="og:title" content="Folija — Runtime Integrity Membrane">
+<meta property="og:description" content="SHA-256 baseline, sys.meta_path hooks, WhatsApp + blockchain alerts.">
+<meta property="og:type" content="website">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;
+  --surface:#0f0f1a;
+  --surface2:#13131f;
+  --border:#1e1e2e;
+  --green:#00ff88;
+  --green-dim:rgba(0,255,136,0.12);
+  --green-mid:rgba(0,255,136,0.25);
+  --text:#e8e8f0;
+  --dim:#6b6b8a;
+  --white:#ffffff;
+  --mono:"Courier New",Courier,monospace;
+  --sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--white);font-weight:700;font-size:1.05rem;letter-spacing:.02em}
+.nav-logo svg{width:26px;height:26px}
+.nav-links{display:flex;align-items:center;gap:20px}
+.nav-links a{color:var(--dim);text-decoration:none;font-size:.85rem;transition:color .2s}
+.nav-links a:hover{color:var(--green)}
+.nav-links .btn-sm{background:var(--green-dim);color:var(--green);border:1px solid var(--green-mid);border-radius:6px;padding:6px 14px;font-size:.82rem;font-weight:600;transition:all .2s}
+.nav-links .btn-sm:hover{background:var(--green-mid)}
+
+/* HERO */
+.hero{text-align:center;padding:90px 20px 72px;max-width:800px;margin:0 auto}
+.hero-icon{margin-bottom:28px;display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:20px}
+.hero-icon svg{width:44px;height:44px}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.hero h1 .accent{color:var(--green)}
+.hero .subtitle{font-size:.82rem;color:var(--dim);margin-bottom:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.hero .tagline{font-size:1.15rem;color:var(--text);max-width:580px;margin:0 auto 40px;font-weight:400;opacity:.85}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.cta-terminal{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-family:var(--mono);font-size:.9rem;color:var(--green);cursor:pointer;transition:all .2s;position:relative;user-select:none}
+.cta-terminal:hover{border-color:var(--green-mid);background:var(--green-dim)}
+.cta-terminal .prompt{color:var(--dim)}
+.cta-terminal .copy-hint{font-family:var(--sans);font-size:.7rem;color:var(--dim);margin-left:8px;opacity:0;transition:opacity .2s}
+.cta-terminal:hover .copy-hint{opacity:1}
+.cta-terminal.copied{border-color:var(--green)}
+.cta-github{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 24px;color:var(--text);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .2s}
+.cta-github:hover{border-color:var(--dim);color:var(--white)}
+.cta-github svg{width:18px;height:18px;opacity:.7}
+
+/* SECTIONS */
+.section{padding:64px 20px;max-width:1000px;margin:0 auto}
+.section-label{font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
+.section-title{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;letter-spacing:-.02em;margin-bottom:40px}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;position:relative;overflow:hidden;transition:border-color .2s}
+.step:hover{border-color:var(--green-mid)}
+.step::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0;transition:opacity .2s}
+.step:hover::before{opacity:1}
+.step-num{font-size:.7rem;font-weight:700;letter-spacing:.12em;color:var(--green);text-transform:uppercase;margin-bottom:14px;opacity:.7}
+.step-icon{font-size:2rem;margin-bottom:12px}
+.step h3{font-size:1.1rem;font-weight:600;margin-bottom:10px;color:var(--white)}
+.step p{font-size:.88rem;color:var(--dim);line-height:1.65}
+.step code{font-family:var(--mono);font-size:.78rem;background:rgba(0,255,136,.08);color:var(--green);padding:1px 6px;border-radius:4px}
+
+/* STATS BAR */
+.stats-bar{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:32px 20px}
+.stats-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;text-align:center}
+.stat-num{font-size:2rem;font-weight:800;color:var(--green);font-family:var(--mono);margin-bottom:4px;letter-spacing:-.02em}
+.stat-label{font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+
+/* TABS / INSTALL */
+.tabs{display:flex;gap:2px;margin-bottom:0;border-bottom:1px solid var(--border)}
+.tab-btn{padding:10px 20px;background:none;border:none;color:var(--dim);font-size:.85rem;font-family:var(--sans);cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.code-block{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:24px;position:relative}
+.code-block pre{font-family:var(--mono);font-size:.88rem;color:var(--text);overflow-x:auto;line-height:1.7}
+.kw{color:#c792ea}
+.fn{color:#82aaff}
+.str{color:#c3e88d}
+.cm{color:var(--dim)}
+.copy-btn{position:absolute;top:14px;right:14px;background:var(--border);border:none;color:var(--dim);font-family:var(--sans);font-size:.72rem;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .2s}
+.copy-btn:hover{background:var(--green-dim);color:var(--green)}
+
+/* USE CASES */
+.cases-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.case-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .2s}
+.case-card:hover{border-color:var(--green-mid)}
+.case-icon{font-size:1.5rem;margin-bottom:10px}
+.case-card h4{font-size:.92rem;font-weight:600;color:var(--white);margin-bottom:6px}
+.case-card p{font-size:.8rem;color:var(--dim);line-height:1.55}
+
+/* ENTERPRISE */
+.enterprise-block{background:linear-gradient(135deg,var(--surface) 0%,rgba(0,255,136,.04) 100%);border:1px solid var(--green-mid);border-radius:16px;padding:40px}
+.enterprise-block h2{font-size:1.6rem;font-weight:700;margin-bottom:16px;color:var(--white)}
+.enterprise-block p{color:var(--dim);font-size:.95rem;line-height:1.7;margin-bottom:16px}
+.alarm-channels{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.alarm-chip{display:inline-flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green-mid);border-radius:8px;padding:8px 16px;font-size:.82rem;color:var(--green);font-weight:500}
+
+/* LINKS */
+.links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.link-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-decoration:none;display:flex;flex-direction:column;gap:8px;transition:all .2s;color:inherit}
+.link-card:hover{border-color:var(--green-mid);transform:translateY(-2px)}
+.link-card .link-icon{font-size:1.6rem}
+.link-card h4{font-size:.92rem;font-weight:600;color:var(--white)}
+.link-card span{font-size:.78rem;color:var(--green);font-family:var(--mono)}
+
+/* FOOTER */
+footer{text-align:center;padding:36px 20px;border-top:1px solid var(--border);color:var(--dim);font-size:.78rem}
+footer a{color:var(--dim);text-decoration:none;transition:color .2s}
+footer a:hover{color:var(--green)}
+.footer-badge{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:.72rem;opacity:.6}
+
+/* SEP */
+.sep{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+
+@media(max-width:640px){
+  .hero{padding:60px 20px 52px}
+  .enterprise-block{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg viewBox="0 0 26 26" fill="none">
+      <path d="M13 2L4 6v7c0 4.97 3.82 9.62 9 10.75C18.18 22.62 22 17.97 22 13V6L13 2z" fill="rgba(0,255,136,0.15)" stroke="#00ff88" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M9 13l3 3 5-5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Folija
+  </a>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#install">Install</a>
+    <a href="https://pypi.org/project/folija/" target="_blank" rel="noopener">PyPI</a>
+    <a href="https://github.com/nolimitvladislavci/folija" target="_blank" rel="noopener" class="btn-sm">GitHub &#8594;</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-icon">
+    <svg viewBox="0 0 44 44" fill="none">
+      <path d="M22 4L6 10v12c0 8.28 6.37 16.03 15 18.75C29.63 38.03 36 30.28 36 22V10L22 4z" fill="rgba(0,255,136,0.12)" stroke="#00ff88" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M15 22l5 5 9-9" stroke="#00ff88" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <p class="subtitle">Runtime Integrity Membrane</p>
+  <h1><span class="accent">Folija</span></h1>
+  <p class="tagline">Zero-overhead tamper detection for Python and Node.js.<br>Built by <strong>OpenDOK Foundation</strong>.</p>
+  <div class="hero-ctas">
+    <div class="cta-terminal" onclick="copyInstall(this)" title="Click to copy">
+      <span class="prompt">$</span>
+      <span>pip install folija</span>
+      <span class="copy-hint">click to copy</span>
+    </div>
+    <a href="https://github.com/nolimitvladislavci/folija" target="_blank" rel="noopener" class="cta-github">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      View on GitHub
+    </a>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-num" data-target="293" data-suffix="">293</div>
+      <div class="stat-label">files monitored</div>
+    </div>
+    <div>
+      <div class="stat-num" data-target="0" data-suffix="ms">0ms</div>
+      <div class="stat-label">per-request overhead</div>
+    </div>
+    <div>
+      <div class="stat-num" data-target="3" data-suffix="">3</div>
+      <div class="stat-label">alarm channels</div>
+    </div>
+    <div>
+      <div class="stat-num" data-target="100" data-suffix="%">100%</div>
+      <div class="stat-label">open source</div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works">
+  <p class="section-label">Mechanism</p>
+  <h2 class="section-title">How it works</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">Step 01</div>
+      <div class="step-icon">&#128272;</div>
+      <h3>Baseline</h3>
+      <p>At startup, Folija computes a <code>SHA-256</code> hash of every monitored source file and stores a signed baseline manifest. Any deviation from this manifest is a tamper event.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">Step 02</div>
+      <div class="step-icon">&#128065;</div>
+      <h3>Runtime Watch</h3>
+      <p>A custom <code>sys.meta_path</code> hook intercepts every module import at runtime. Each load is verified against the baseline &#8212; zero impact on request latency.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">Step 03</div>
+      <div class="step-icon">&#128680;</div>
+      <h3>Alarm</h3>
+      <p>On tamper detected: WhatsApp alert fires instantly, a blockchain seal is submitted via <code>ChainBlock POE</code>, and a Redis tamper flag is raised to block further execution.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- INSTALLATION -->
+<section class="section" id="install">
+  <p class="section-label">Getting Started</p>
+  <h2 class="section-title">Installation</h2>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'py')">Python</button>
+    <button class="tab-btn" onclick="switchTab(this,'node')">Node.js</button>
+  </div>
+
+  <div id="tab-py" class="tab-panel active">
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      <pre><span class="cm"># Install</span>
+<span class="dim" style="color:var(--dim)">$</span> <span style="color:var(--green)">pip install folija</span>
+
+<span class="cm"># Add to your Django/FastAPI/Flask entry point</span>
+<span class="kw">from</span> folija <span class="kw">import</span> activate
+
+activate()  <span class="cm"># Inserts hook into sys.meta_path -- done.</span>
+
+<span class="cm"># Optional: custom baseline path + alarm webhook</span>
+activate(
+    baseline_path=<span class="str">".folija/baseline.json"</span>,
+    alarm_webhook=<span class="str">"https://your-endpoint.example/alarm"</span>,
+    redis_url=<span class="str">"redis://localhost:6379/4"</span>,
+)</pre>
+    </div>
+  </div>
+
+  <div id="tab-node" class="tab-panel">
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      <pre><span class="cm"># Install</span>
+<span style="color:var(--dim)">$</span> <span style="color:var(--green)">npm install folija</span>
+
+<span class="cm">// Add to your app entry point (index.js / server.js)</span>
+<span class="kw">const</span> { activate } = require(<span class="str">"folija"</span>);
+
+activate();  <span class="cm">// Hooks into Node.js module loader -- done.</span>
+
+<span class="cm">// Optional config</span>
+activate({
+  baselinePath: <span class="str">".folija/baseline.json"</span>,
+  alarmWebhook: <span class="str">"https://your-endpoint.example/alarm"</span>,
+  redisUrl: <span class="str">"redis://localhost:6379/4"</span>,
+});</pre>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- USE CASES -->
+<section class="section" id="use-cases">
+  <p class="section-label">Where it fits</p>
+  <h2 class="section-title">Use Cases</h2>
+  <div class="cases-grid">
+    <div class="case-card">
+      <div class="case-icon">&#127959;</div>
+      <h4>Production Django / FastAPI</h4>
+      <p>Monitor all application modules in production. Instant alert if a file is altered between deploys.</p>
+    </div>
+    <div class="case-card">
+      <div class="case-icon">&#128176;</div>
+      <h4>Financial Software</h4>
+      <p>ERP, accounting, and invoicing platforms where a tampered module could mean fraudulent transactions.</p>
+    </div>
+    <div class="case-card">
+      <div class="case-icon">&#9878;</div>
+      <h4>Legal Document Systems</h4>
+      <p>Ensure document generation logic is unmodified. Every signed output is provably from unaltered code.</p>
+    </div>
+    <div class="case-card">
+      <div class="case-icon">&#128274;</div>
+      <h4>Mission-Critical Backends</h4>
+      <p>Any Python or Node.js service where integrity guarantees are a compliance or contractual requirement.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ENTERPRISE -->
+<section class="section" id="enterprise">
+  <div class="enterprise-block">
+    <p class="section-label" style="margin-bottom:10px">Production-tested</p>
+    <h2>Enterprise Grade, Open Source</h2>
+    <p>
+      Folija is production-tested in <strong style="color:var(--white)">NO LIMIT ERP</strong> &#8212; an EU-targeted accounting
+      and business management platform monitoring <strong style="color:var(--green)">293+ critical modules</strong>
+      across 9 application domains including finance, legal documents, payroll, and inventory.
+    </p>
+    <p>
+      The production deployment runs on a hardened Django stack with three independent alarm channels
+      firing in parallel the moment any monitored file deviates from its signed baseline.
+    </p>
+    <div class="alarm-channels">
+      <div class="alarm-chip">&#10003; WhatsApp real-time alert</div>
+      <div class="alarm-chip">&#10003; ChainBlock POE &#8212; blockchain seal</div>
+      <div class="alarm-chip">&#10003; Redis tamper flag &#8212; execution halt</div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- LINKS -->
+<section class="section" id="links">
+  <p class="section-label">Find us on</p>
+  <h2 class="section-title">Links</h2>
+  <div class="links-grid">
+    <a href="https://pypi.org/project/folija/" target="_blank" rel="noopener" class="link-card">
+      <div class="link-icon">&#128230;</div>
+      <h4>PyPI</h4>
+      <span>pypi.org/project/folija</span>
+    </a>
+    <a href="https://www.npmjs.com/package/folija" target="_blank" rel="noopener" class="link-card">
+      <div class="link-icon">&#127809;</div>
+      <h4>npm</h4>
+      <span>npmjs.com/package/folija</span>
+    </a>
+    <a href="https://github.com/nolimitvladislavci/folija" target="_blank" rel="noopener" class="link-card">
+      <div class="link-icon">&#11088;</div>
+      <h4>GitHub</h4>
+      <span>github.com/nolimitvladislavci/folija</span>
+    </a>
+    <a href="https://no-limit.world/" target="_blank" rel="noopener" class="link-card">
+      <div class="link-icon">&#127757;</div>
+      <h4>OpenDOK Foundation</h4>
+      <span>no-limit.world</span>
+    </a>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div>&#169; 2026 OpenDOK Foundation &nbsp;|&nbsp; MIT License &nbsp;|&nbsp; Built with <a href="https://limit-connect.com" target="_blank">NO LIMIT ERP</a></div>
+  <div class="footer-badge">
+    <svg width="12" height="12" viewBox="0 0 26 26" fill="none">
+      <path d="M13 2L4 6v7c0 4.97 3.82 9.62 9 10.75C18.18 22.62 22 17.97 22 13V6L13 2z" fill="rgba(0,255,136,0.3)" stroke="#00ff88" stroke-width="1.5"/>
+      <path d="M9 13l3 3 5-5" stroke="#00ff88" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Guarded by Folija v0.1.0
+  </div>
+</footer>
+
+<script>
+function copyInstall(el) {
+  navigator.clipboard.writeText("pip install folija").then(function() {
+    el.classList.add("copied");
+    var hint = el.querySelector(".copy-hint");
+    hint.textContent = "copied!";
+    hint.style.opacity = "1";
+    setTimeout(function() {
+      el.classList.remove("copied");
+      hint.textContent = "click to copy";
+    }, 2000);
+  });
+}
+
+function copyCode(btn) {
+  var pre = btn.parentElement.querySelector("pre");
+  navigator.clipboard.writeText(pre.innerText).then(function() {
+    btn.textContent = "copied!";
+    btn.style.color = "var(--green)";
+    setTimeout(function() { btn.textContent = "copy"; btn.style.color = ""; }, 2000);
+  });
+}
+
+function switchTab(btn, id) {
+  document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
+  document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
+  btn.classList.add("active");
+  document.getElementById("tab-" + id).classList.add("active");
+}
+
+var counted = false;
+var statsBar = document.querySelector(".stats-bar");
+var observer = new IntersectionObserver(function(entries) {
+  if (entries[0].isIntersecting && !counted) {
+    counted = true;
+    document.querySelectorAll(".stat-num[data-target]").forEach(function(el) {
+      var target = parseInt(el.dataset.target);
+      var suffix = el.dataset.suffix || "";
+      if (target === 0) { el.textContent = "0" + suffix; return; }
+      var start = 0;
+      var increment = target / 75;
+      var timer = setInterval(function() {
+        start = Math.min(start + increment, target);
+        el.textContent = Math.floor(start) + suffix;
+        if (start >= target) clearInterval(timer);
+      }, 16);
+    });
+  }
+}, { threshold: 0.3 });
+observer.observe(statsBar);
+</script>
+</body>
+</html>

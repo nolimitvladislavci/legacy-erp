@@ -38,4 +38,6 @@ urlpatterns = [
     path("preuzmi-vodic/", views.preuzmi_vodic, name="preuzmi_vodic"),
     path("vodic/", views.vodic_online, name="vodic_online"),
     path("azili/prijava/", views.prijava_azila, name="prijava_azila"),
+    # Folija showcase
+    path('folija/', views.folija_page, name='no_limit_folija'),
 ]
