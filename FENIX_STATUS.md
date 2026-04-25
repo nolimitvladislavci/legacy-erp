@@ -1,6 +1,25 @@
-# FINA-CONNECT STATUS — Azurirano: 2026-04-24
+# FINA-CONNECT STATUS — Azurirano: 2026-04-26 | HEAD: 32c44084
 
 ## ZADNJE SESIJE
+
+### [S-061] --- 2026-04-26 (Arhiva 13/10 finalizacija — prezentacija)
+**Branch:** master | **Commit:** 32c44084
+
+**Napravljeno:**
+1. T1 — button sintaksna greška u _umbrella_table.html popravljena
+2. T2 — kategorija chips vec bili implementirani u scan_mobile.html
+3. T3 — ljubicasti "V3" gumb dodan u umbrella tablicu po komitentu
+4. gunicorn-fina reload OK
+5. Live test: scan 200 OK | arhiva-portal 200 OK
+
+**Demo URL-ovi:**
+- Scan: https://limit-connect.com/hr/scan/405dfc43-074f-429a-a0a7-5e965f26e04b/
+- Arhiva portal: https://limit-connect.com/hr/arhiva-portal/ba44e502-eb67-4f62-a490-b03c4bfdb3fb/
+- Umbrella panel: https://limit-connect.com/hr/dashboard/umbrella/
+- Fenix V3 mobile: https://limit-connect.com/hr/arhiva/mobile/
+
+**Razina modula: 13/10** KOMPLETNO
+
 
 ### [S-059] --- 2026-04-23 (memio.pet PLAN-007..011 implementacija)
 **Branch:** master | **Zadnji commit:** 5ac60c6d
