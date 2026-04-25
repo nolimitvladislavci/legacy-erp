@@ -857,26 +857,27 @@ function speakPage() {
       }
     };
 
-    /* Chrome/iOS stabilizacija: cancel → wait → speak */
-    speechSynthesis.cancel();
-    setTimeout(function() {
-      try {
-        speechSynthesis.speak(utter);
-        /* iOS Safari watchdog: ako nakon 300ms nije pokrenulo, pokušaj bez voice */
-        setTimeout(function() {
-          if (!speechSynthesis.speaking && btn.classList.contains('active')) {
-            var u2 = new SpeechSynthesisUtterance(text);
-            u2.rate = profile.rate; u2.pitch = profile.pitch; u2.volume = 1.0;
-            u2.onend = function() { btn.classList.remove('active'); btn.textContent = '🔊'; };
-            speechSynthesis.cancel();
-            setTimeout(function() { speechSynthesis.speak(u2); }, 50);
-          }
-        }, 300);
-      } catch(err) {
-        console.warn('TTS speak error:', err);
-        btn.classList.remove('active'); btn.textContent = '🔊';
+    /* iOS Safari zahtijeva speak() DIREKTNO u user gesture — bez setTimeout.
+       Chrome bug (cancel→speak) rješavamo: cancel samo ako vec govori. */
+    try {
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
       }
-    }, 80);
+      speechSynthesis.speak(utter);
+      /* Watchdog: 400ms — ako nije krenulo (Chrome stale state), prisili restart */
+      setTimeout(function() {
+        if (!speechSynthesis.speaking && btn.classList.contains('active')) {
+          var u2 = new SpeechSynthesisUtterance(text);
+          u2.rate = profile.rate; u2.pitch = profile.pitch; u2.volume = 1.0;
+          u2.onend = function() { btn.classList.remove('active'); btn.textContent = '🔊'; };
+          speechSynthesis.cancel();
+          speechSynthesis.speak(u2);
+        }
+      }, 400);
+    } catch(err) {
+      console.warn('TTS speak error:', err);
+      btn.classList.remove('active'); btn.textContent = '🔊';
+    }
   }
 
   /* Čekaj glasove ako još nisu učitani */
