@@ -1,5 +1,5 @@
 {% load i18n %}
-{# Umbrella Client List v3.0 — EU #1 Innovation Edition #}
+{# Umbrella Client List v3.1 — EU #1 Innovation Edition #}
 {# AI Priority Queue + Deadline Radar + Start My Day #}
 
 {% if items %}
@@ -72,6 +72,11 @@
                   onclick="quickScan('{{ cd.company.pk }}','{{ cd.company.name|escapejs }}')">
             <i class="fas fa-camera"></i>
           </button>
+          <a href="https://limit-connect.com/hr/arhiva/mobile/"
+             target="_blank"
+             class="u-action-btn u-action-v3" title="Fenix V3 Upload — {{ cd.company.name }}">
+            V3
+          </a>
           <button type="button" class="u-action-btn u-action-share" title="{% trans 'Pošalji link' %} {{ cd.company.name }}"
                   onclick="sendArhivaLink('{{ cd.company.pk }}','{{ cd.company.name|escapejs }}','{{ cd.company.email|default_if_none:'' }}','{{ cd.company.phone|default_if_none:'' }}')">
             <i class="fas fa-share-alt"></i>
@@ -80,7 +85,7 @@
             <input type="hidden" name="action" value="remove_child">
             <input type="hidden" name="company_id" value="{{ cd.company.pk }}">
             <button type="submit" class="u-unlink-btn" title="{% trans 'Odvezi' %}"
-                    onclick="return confirm('Odvezati {{ cd.company.name }}?')"
+                    onclick="return confirm('Odvezati {{ cd.company.name }}?')">
               <i class="fas fa-unlink"></i>
             </button>
           </form>
@@ -126,6 +131,8 @@
 .u-action-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:1px solid var(--border,#e2e8f0);background:transparent;color:var(--text-muted,#94a3b8);font-size:11px;cursor:pointer;transition:all .12s;text-decoration:none;}
 .u-action-arhiva:hover{background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);border-color:var(--gold,#c9a84c);}
 .u-action-scan:hover{background:rgba(34,197,94,.1);color:#16a34a;border-color:#16a34a;}
+.u-action-v3{font-size:9px;font-weight:800;color:#a78bfa;}
+.u-action-v3:hover{background:rgba(167,139,250,.1);color:#a78bfa;border-color:#a78bfa;}
 .u-action-share:hover{background:rgba(37,211,102,.1);color:#25D366;border-color:#25D366;}
 .u-unlink-btn{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text-muted,#cbd5e1);font-size:11px;cursor:pointer;transition:all .12s;margin-top:4px;}
 .u-unlink-btn:hover{background:#fef2f2;color:#ef4444;border-color:#fca5a5;}
@@ -140,7 +147,6 @@
 
 <script>
 function sendArhivaLink(companyId, companyName, email, phone){
-  // Create access token, then offer send options
   var fd = new FormData();
   fd.append('csrfmiddlewaretoken', getCsrf());
   fd.append('company_id', companyId);
@@ -151,25 +157,20 @@ function sendArhivaLink(companyId, companyName, email, phone){
     if(!d.ok){ fenixToast(d.error||'Greška','error'); return; }
     var url = d.url;
     var msg = companyName + ' — pogledajte svoju digitalnu arhivu:\n' + url;
-    // Build modal content
     var html = '<div style="padding:1.5rem;max-width:420px">';
     html += '<h5 style="margin:0 0 1rem;font-weight:700"><i class="fas fa-share-alt" style="color:var(--gold)"></i> Pošalji link — ' + companyName + '</h5>';
     html += '<div style="background:var(--bg-card,#1a1a1a);border:1px solid var(--border,#333);border-radius:8px;padding:10px;margin-bottom:1rem;word-break:break-all;font-size:.82rem">' + url + '</div>';
     html += '<div style="display:flex;flex-direction:column;gap:8px">';
-    // WhatsApp
     if(phone){
       var waPhone = phone.replace(/[^0-9+]/g,'');
       html += '<a href="https://wa.me/' + waPhone.replace('+','') + '?text=' + encodeURIComponent(msg) + '" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:700;text-decoration:none;text-align:center"><i class="fab fa-whatsapp"></i> WhatsApp (' + phone + ')</a>';
     }
     html += '<a href="https://wa.me/?text=' + encodeURIComponent(msg) + '" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:700;text-decoration:none;text-align:center"><i class="fab fa-whatsapp"></i> WhatsApp (odaberi kontakt)</a>';
-    // Email
     if(email){
       html += '<a href="mailto:' + email + '?subject=' + encodeURIComponent('Pristup digitalnoj arhivi — ' + companyName) + '&body=' + encodeURIComponent(msg) + '" class="btn btn-sm btn-outline-secondary" style="padding:10px 16px;border-radius:8px;text-decoration:none;text-align:center"><i class="fas fa-envelope"></i> Email (' + email + ')</a>';
     }
-    // Copy
     html += '<button onclick="navigator.clipboard.writeText(\'' + url + '\');fenixToast(\' Kopirano!\',\' success\');this.closest(\'[data-modal]\').remove()" class="btn btn-sm btn-outline-secondary" style="padding:10px 16px;border-radius:8px"><i class="fas fa-copy"></i> Kopiraj link</button>';
     html += '</div></div>';
-    // Show as modal
     var modal = document.createElement('div');
     modal.setAttribute('data-modal','1');
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
@@ -183,7 +184,6 @@ function sendArhivaLink(companyId, companyName, email, phone){
 }
 
 function quickScan(companyId, companyName){
-  // Create or reuse scan token for this company
   var fd = new FormData();
   fd.append('csrfmiddlewaretoken', getCsrf());
   fd.append('label', companyName + ' — mobitel scan');
@@ -191,7 +191,6 @@ function quickScan(companyId, companyName){
   .then(function(r){return r.json()})
   .then(function(d){
     if(d.ok && d.url){
-      // Show QR or open in new tab
       if(confirm(companyName + '\n\nOtvoriti scan stranicu?\n' + d.url)){
         window.open(d.url, '_blank');
       } else {
