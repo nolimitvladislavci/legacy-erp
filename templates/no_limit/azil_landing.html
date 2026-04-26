@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Besplatni POS za azile — NO LIMIT x LIMIT Connect</title>
-<meta name="description" content="Vaš azil zaslužuje digitalni alat. Besplatno. Zauvijek. POS na mobitelu, fiskalizacija, donacije, statistike.">
+<meta name="description" content="Vaša organizacija zaslužuje digitalni alat. Besplatno. Zauvijek. POS na mobitelu, fiskalizacija, donacije, statistike.">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -55,7 +55,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 <body>
 
 <div class="top-bar">
-  <a href="/no-limit/" class="top-bar-logo">🐾 NO LIMIT</a>
+  <a href="/no-limit/" class="top-bar-logo">NO LIMIT</a>
   <div class="top-bar-right">
     <a href="/no-limit/vodic/">Vodič</a>
     <a href="https://limit-connect.com">LIMIT Connect</a>
@@ -65,7 +65,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 <div class="hero">
   <div class="hero-emoji">🏠</div>
   <h1>Vaš azil zaslužuje <span>digitalni alat</span></h1>
-  <p>POS na mobitelu. Fiskalizacija. Donacije. Statistike usvajanja. Besplatno. Zauvijek.</p>
+  <p>POS na mobitelu. Fiskalizacija. Donacije. Statistike. Besplatno. Zauvijek.</p>
 </div>
 
 <div class="features">
@@ -87,7 +87,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   <div class="feat">
     <div class="feat-icon">📊</div>
     <h3>Statistike</h3>
-    <p>Koliko životinja udomljeno, koliko prihoda, mjesečni trend — sve na dashboardu.</p>
+    <p>Prihodi, troškovi, klijenti, mjesečni trend — sve na dashboardu.</p>
   </div>
 </div>
 
@@ -108,14 +108,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   <p class="sub">Popunite formu i javit ćemo vam se u roku od 48h s pristupnim podacima.</p>
 
   {% if request.GET.prijava == 'ok' %}
-  <div class="msg-ok">Prijava zaprimljena! Javit ćemo vam se uskoro. 🐾</div>
+  <div class="msg-ok">Prijava zaprimljena! Javit ćemo vam se u roku od 48 sata.</div>
   {% endif %}
 
   <div class="card">
     <form method="post" action="{% url 'no_limit:prijava_azila' %}">
       {% csrf_token %}
       <div class="field">
-        <label>Naziv azila / udruge</label>
+        <label>Naziv organizacije / udruge</label>
         <input type="text" name="naziv" placeholder="Azil za životinje Osijek" required>
       </div>
       <div class="field">
