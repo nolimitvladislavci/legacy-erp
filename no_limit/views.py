@@ -277,3 +277,51 @@ def prijava_azila(request):
 def folija_page(request):
     """Folija open-source showcase page."""
     return render(request, 'no_limit/folija.html')
+
+
+# ═══════════════════════════════════════════════════════════════
+#  WITNESS CONFIRMATION — token-based, bez logina
+# ═══════════════════════════════════════════════════════════════
+
+
+def witness_confirm(request, token):
+    """Stranica za potvrdu svjedocenja — bez logina, token-based."""
+    from no_limit.models import WitnessConfirmation
+    from django.utils import timezone
+
+    try:
+        obj = WitnessConfirmation.objects.get(token=token)
+    except (WitnessConfirmation.DoesNotExist, Exception):
+        return render(request, "no_limit/witness_invalid.html", status=404)
+
+    already_confirmed = obj.status == "confirmed"
+    expired = obj.expires_at and timezone.now() > obj.expires_at
+
+    if request.method == "POST" and not already_confirmed and not expired:
+        statement = request.POST.get("statement", "").strip()
+        ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))
+        if ip and "," in ip:
+            ip = ip.split(",")[0].strip()
+        ua = request.META.get("HTTP_USER_AGENT", "")
+        obj.mark_confirmed(ip=ip, user_agent=ua, statement=statement)
+        # WhatsApp notifikacija Ivanu
+        try:
+            from core.whatsapp import send_whatsapp
+            from django.conf import settings
+            wa_no = getattr(settings, "IVAN_WHATSAPP_NUMBER", "")
+            if wa_no:
+                send_whatsapp(
+                    wa_no,
+                    f"Svjedok potvrdio!\n{obj.witness_name} ({obj.witness_country})\n"
+                    f"Dokument: {obj.document_seal_token}\n"
+                    f"Vrijeme: {obj.confirmed_at.strftime('%d.%m.%Y %H:%M')}"
+                )
+        except Exception:
+            pass
+        return render(request, "no_limit/witness_confirmed.html", {"obj": obj})
+
+    return render(request, "no_limit/witness_confirm.html", {
+        "obj": obj,
+        "already_confirmed": already_confirmed,
+        "expired": expired,
+    })

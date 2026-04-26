@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Potvrda svjedocenja — NO LIMIT</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#15151e;border:1px solid #1e1e2e;border-radius:20px;
+  padding:clamp(24px,5vw,48px);max-width:600px;width:100%}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:#c9a84c;
+  font-size:1.1rem;margin-bottom:32px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;
+  background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);
+  font-size:.75rem;font-weight:600;color:#c9a84c;margin-bottom:20px}
+h1{font-size:clamp(1.4rem,3vw,1.9rem);font-weight:700;margin-bottom:12px;line-height:1.3}
+.intro{font-size:.9rem;color:#8b949e;line-height:1.7;margin-bottom:28px}
+.doc-box{background:#0a0a0f;border:1px solid rgba(201,168,76,.15);border-radius:12px;padding:20px;margin-bottom:24px}
+.doc-label{font-size:.7rem;color:#c9a84c;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.doc-title{font-weight:700;font-size:1rem;margin-bottom:10px}
+.doc-field{display:grid;grid-template-columns:120px 1fr;gap:6px;margin-bottom:6px;font-size:.82rem}
+.doc-key{color:#8b949e}
+.doc-val{color:#f5f5f5;word-break:break-all}
+.doc-hash{color:#00ff88;font-size:.72rem;font-family:monospace}
+.witness-box{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);
+  border-radius:12px;padding:16px;margin-bottom:24px;font-size:.875rem}
+.witness-box strong{color:#c9a84c}
+textarea{width:100%;background:#0a0a0f;border:1px solid #1e1e2e;border-radius:10px;
+  color:#f5f5f5;font-family:'Inter',sans-serif;font-size:.875rem;padding:14px;
+  resize:vertical;min-height:100px;outline:none;transition:border-color .2s;margin-bottom:20px}
+textarea:focus{border-color:#c9a84c}
+textarea::placeholder{color:#8b949e}
+.btn-confirm{width:100%;padding:16px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#000;
+  font-weight:700;font-size:1rem;cursor:pointer;transition:opacity .2s,transform .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-confirm:hover{opacity:.9;transform:translateY(-1px)}
+.legal-note{font-size:.72rem;color:#8b949e;text-align:center;margin-top:14px;line-height:1.6}
+.already-done{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);
+  border-radius:12px;padding:20px;text-align:center}
+.already-done h2{color:#00ff88;margin-bottom:8px}
+.expired-note{background:rgba(255,71,87,.07);border:1px solid rgba(255,71,87,.2);
+  border-radius:12px;padding:20px;text-align:center;color:#ff4757}
+@media(max-width:480px){
+  .doc-field{grid-template-columns:1fr;gap:2px}
+  .doc-key{font-size:.7rem}
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#c9a84c" stroke-width="1.5"/><path d="M10 16 L16 10 L22 16 L16 22Z" fill="#c9a84c" opacity=".8"/><circle cx="16" cy="16" r="3" fill="#c9a84c"/></svg>
+    NO LIMIT
+  </div>
+
+  {% if already_confirmed %}
+  <div class="already-done">
+    <h2>Vec ste potvrdili</h2>
+    <p style="color:#8b949e;font-size:.875rem">Vase svjedocenje za <strong style="color:#f5f5f5">{{ obj.document_title }}</strong> je vec zabiljezenoG{{ obj.confirmed_at|date:"d.m.Y. u H:i" }}.</p>
+  </div>
+  {% elif expired %}
+  <div class="expired-note">
+    <h2>Link je istekao</h2>
+    <p style="font-size:.875rem;margin-top:8px">Kontaktirajte Ivana Brtana za novi link.</p>
+  </div>
+  {% else %}
+  <div class="badge">Digitalno svjedocenje</div>
+  <h1>Pozvani ste da potvrdite autenticnost dokumenta</h1>
+  <p class="intro">
+    Ivan Brtan, osnivac NO LIMIT udruge iz Vladislavaca (Hrvatska), trazi Vase digitalno svjedocenje.
+    Klikom na "Potvrdujem" postajete zabiljezenoG svjedok autenticnosti navedenog dokumenta u kriptografskom registru.
+    <strong style="color:#f5f5f5">Vase svjedocenje je pravno relevantna izjava.</strong>
+  </p>
+
+  <div class="doc-box">
+    <div class="doc-label">Dokument koji svjedocite</div>
+    <div class="doc-title">{{ obj.document_title }}</div>
+    {% if obj.document_description %}
+    <p style="font-size:.82rem;color:#8b949e;margin-bottom:14px;line-height:1.6">{{ obj.document_description }}</p>
+    {% endif %}
+    {% if obj.document_seal_token %}
+    <div class="doc-field"><span class="doc-key">Seal token</span><span class="doc-val doc-hash">{{ obj.document_seal_token }}</span></div>
+    {% endif %}
+    {% if obj.document_sha256 %}
+    <div class="doc-field"><span class="doc-key">SHA-256</span><span class="doc-val doc-hash">{{ obj.document_sha256 }}</span></div>
+    {% endif %}
+    {% if obj.document_url %}
+    <div class="doc-field"><span class="doc-key">PDF dokument</span><span class="doc-val"><a href="{{ obj.document_url }}" target="_blank" style="color:#c9a84c">Otvori dokument</a></span></div>
+    {% endif %}
+  </div>
+
+  <div class="witness-box">
+    <strong>Svjedok:</strong> {{ obj.witness_name }}
+    {% if obj.witness_organization %} &mdash; {{ obj.witness_organization }}{% endif %}
+    {% if obj.witness_country %}, {{ obj.witness_country }}{% endif %}
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <textarea name="statement" placeholder="Opcionalna izjava svjedoka — npr. 'Potvrdujem da mi je Ivan Brtan osobno pokazao ovaj dokument i da sam ga pregledao.' (moze ostati prazno)"></textarea>
+    <button type="submit" class="btn-confirm">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Potvrdujem svjedocenje
+    </button>
+  </form>
+  <p class="legal-note">
+    Klikom potvrdjujete da ste pregledali dokument i da svjedocite njegovoj autenticnosti.<br>
+    Vasa IP adresa i vremenski zigA biljezenoG se kriptografski. Ova potvrda je trajna i neopoziva.
+  </p>
+  {% endif %}
+</div>
+</body>
+</html>

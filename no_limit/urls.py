@@ -40,4 +40,5 @@ urlpatterns = [
     path("azili/prijava/", views.prijava_azila, name="prijava_azila"),
     # Folija showcase
     path('folija/', views.folija_page, name='no_limit_folija'),
+    path('svjedok/<uuid:token>/', views.witness_confirm, name='witness_confirm'),
 ]

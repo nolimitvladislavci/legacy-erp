@@ -341,3 +341,71 @@ class MeetingActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.meeting} — {self.event_type} @ {self.ts.strftime('%d.%m. %H:%M')}"
+
+
+import uuid as _uuid
+
+
+class WitnessConfirmation(models.Model):
+    """Digitalno svjedočenje za NO LIMIT dokumente (Genesis Block, patenti, osnivački akti)."""
+
+    ROLE_CHOICES = [
+        ('external', 'Vanjski svjedok'),
+        ('partner', 'Poslovni partner'),
+        ('ambassador', 'Ambasador'),
+        ('notary', 'Bilježnik'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Ceka potvrdu'),
+        ('confirmed', 'Potvrdjeno'),
+        ('declined', 'Odbijeno'),
+        ('expired', 'Isteklo'),
+    ]
+
+    token = models.UUIDField(default=_uuid.uuid4, unique=True, editable=False)
+
+    witness_name = models.CharField(max_length=200, verbose_name='Ime i prezime svjedoka')
+    witness_email = models.EmailField(blank=True, verbose_name='Email svjedoka')
+    witness_phone = models.CharField(max_length=50, blank=True, verbose_name='Telefon/WhatsApp')
+    witness_organization = models.CharField(max_length=200, blank=True, verbose_name='Organizacija / firma')
+    witness_country = models.CharField(max_length=100, blank=True, verbose_name='Drzava')
+    witness_role = models.CharField(max_length=30, choices=ROLE_CHOICES, default='external')
+
+    document_title = models.CharField(max_length=500, verbose_name='Naslov dokumenta')
+    document_description = models.TextField(blank=True, verbose_name='Opis dokumenta')
+    document_seal_token = models.CharField(max_length=100, blank=True, verbose_name='Seal token')
+    document_sha256 = models.CharField(max_length=64, blank=True, verbose_name='SHA-256 hash')
+    document_url = models.URLField(blank=True, verbose_name='URL dokumenta')
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    confirmed_at = models.DateTimeField(null=True, blank=True, verbose_name='Potvrdjeno u')
+    confirmed_ip = models.GenericIPAddressField(null=True, blank=True)
+    confirmed_user_agent = models.TextField(blank=True)
+    witness_statement = models.TextField(blank=True, verbose_name='Izjava svjedoka')
+
+    created_by = models.CharField(max_length=100, default='Ivan Brtan')
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Potvrda svjedocenja'
+        verbose_name_plural = 'Potvrde svjedocenja'
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.witness_name} -> {self.document_title[:50]} ({self.status})"
+
+    @property
+    def confirmation_url(self):
+        return f"/no-limit/svjedok/{self.token}/"
+
+    def mark_confirmed(self, ip=None, user_agent="", statement=""):
+        from django.utils import timezone
+        self.status = "confirmed"
+        self.confirmed_at = timezone.now()
+        if ip:
+            self.confirmed_ip = ip
+        self.confirmed_user_agent = user_agent[:500]
+        if statement:
+            self.witness_statement = statement
+        self.save()
