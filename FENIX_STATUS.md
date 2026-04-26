@@ -1,6 +1,12 @@
-# FINA-CONNECT STATUS — Azurirano: 2026-04-26 | HEAD: 32c44084
+# FINA-CONNECT STATUS — Azurirano: 2026-04-25 | HEAD: (pending)
 
 ## ZADNJE SESIJE
+
+### [S-062] --- 2026-04-25 (Marija Brtan bio update)
+**Branch:** master
+
+**Napravljeno:**
+1. no_limit/landing.html — Marija Brtan: osn-role promijenjen u "Dipl. oec. — Knjigovodstvo i revizija", bio proširen (diplomirana ekonomistica, knjigovođa, ovlašteni revizor)
 
 ### [S-061] --- 2026-04-26 (Arhiva 13/10 finalizacija — prezentacija)
 **Branch:** master | **Commit:** 32c44084
