@@ -261,14 +261,17 @@
 ---
 
 ## PRIORITETI ZA SLJEDEĆU SESIJU
+1. ⚠️ M2-01: PLAY.EU Sprint 2 — 7 templates (Creative Europe rok: 2026-05-07!)
+2. M2-02: Pokrenuti GEMINI_TASK_EU_FONDOVI_MEMIO_WORLD.md
+3. M1-01+M1-02: memio.pet pretraga + SaleAd (PLAN-005/006)
+4. PLAN-07: evalidator.eu prodajna priprema (čeka potvrdu scenarija)
+5. PLAN-03: B-01 user_edit company isolation (sigurnosni bug)
+6. NO LIMIT OIB: čeka Marija
 
-```
-1. NO LIMIT: OIB udruge — update_genesis_oib(novi_oib) kad Marija donese rješenje
-2. Stripe LIVE ključevi za KumGift (sada test mode)
-3. Pilot POS test: Ivica Kruljac + Široki Šor Restoran (test u terenu)
-4. Fenix V3 nastavak PLANOVA (35/71 DONE → sljedeći batch)
-5. Playwright Time Machine journeys proširiti
-```
+## PRODAJNA ODLUKA (2026-04-27)
+Projekt zamrznut. Memio grupa se NE prodaje (Udruga, EU fondovi).
+Preporučeni scenarij: S-3 (evalidator.eu + stolarija vertical, €35k–€80k).
+Planovi: CC_PLAN_PRODAJA_SCENARIJI.md | CC_PLAN_MEMIO_13OF10.md | CC_PLAN_BACKLOG_OSTALO.md
 
 ---
 
