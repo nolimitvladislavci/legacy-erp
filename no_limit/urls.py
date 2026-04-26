@@ -41,4 +41,5 @@ urlpatterns = [
     # Folija showcase
     path('folija/', views.folija_page, name='no_limit_folija'),
     path('svjedok/<uuid:token>/', views.witness_confirm, name='witness_confirm'),
+    path('api/ziva-istina/', views.ziva_istina_status, name='ziva_istina_status'),
 ]

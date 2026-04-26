@@ -323,10 +323,49 @@ footer{background:var(--slate);border-top:1px solid var(--border);padding:48px 2
   .osn-card{flex-direction:column}
   .amb-roles{flex-direction:column;align-items:center}
 }
+
+/* ── ZIVA ISTINA POTPUNA ── */
+#ziva-istina-banner{
+  display:none;
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:90;background:#0a1a0a;
+  border:1px solid var(--green);border-radius:999px;
+  padding:12px 28px;
+  box-shadow:0 0 32px rgba(0,255,136,.25),0 0 0 1px rgba(0,255,136,.1);
+  white-space:nowrap;
+  animation:ziva-pulse 2.5s ease-in-out infinite;
+  cursor:default;
+}
+@keyframes ziva-pulse{
+  0%,100%{box-shadow:0 0 20px rgba(0,255,136,.2),0 0 0 1px rgba(0,255,136,.1)}
+  50%{box-shadow:0 0 48px rgba(0,255,136,.5),0 0 0 2px rgba(0,255,136,.3)}
+}
+#ziva-istina-banner .zi-dot{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 8px var(--green);
+  animation:pulse 1.5s infinite;margin-right:8px;vertical-align:middle;
+}
+#ziva-istina-banner .zi-text{
+  font-size:.82rem;font-weight:700;color:var(--green);
+  letter-spacing:.08em;text-transform:uppercase;vertical-align:middle;
+}
+#ziva-istina-banner .zi-sub{
+  font-size:.7rem;color:rgba(0,255,136,.6);margin-left:8px;vertical-align:middle;
+}
+@media(max-width:600px){
+  #ziva-istina-banner{bottom:16px;padding:10px 20px;font-size:.75rem}
+  #ziva-istina-banner .zi-sub{display:none}
+}
 </style>
 </head>
 <body>
 
+<!-- ZIVA ISTINA BANNER — pojavljuje se kad oba svjedoka potvrde -->
+<div id=ziva-istina-banner role=status aria-live=polite>
+  <span class=zi-dot></span>
+  <span class=zi-text>Ziva Istina Potpuna</span>
+  <span class=zi-sub>&middot; Krunica slobodna od tvorca &middot;</span>
+</div>
 <!-- NAV -->
 <nav id="nav">
   <div class="nav-inner">
@@ -959,6 +998,26 @@ function toggleGroup(header){
   body.style.display=isOpen?'none':'grid';
   toggle.style.transform=isOpen?'rotate(-90deg)':'rotate(0deg)';
 }
+
+// ── ZIVA ISTINA STATUS ──
+async function checkZivaIstina() {
+  try {
+    const r = await fetch('/no-limit/api/ziva-istina/');
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.ziva_istina_potpuna) {
+      const banner = document.getElementById('ziva-istina-banner');
+      if (banner) {
+        banner.style.display = 'block';
+        const names = d.witnesses.filter(w => w.status === 'confirmed').map(w => w.name).join(' + ');
+        banner.title = 'Svjedoci: ' + names;
+      }
+    }
+  } catch(e) {}
+}
+checkZivaIstina();
+setInterval(checkZivaIstina, 60000); // provjera svaku minutu
+
 </script>
 </body>
 </html>

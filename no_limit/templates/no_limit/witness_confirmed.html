@@ -33,6 +33,21 @@ a{color:#c9a84c;text-decoration:none;font-size:.875rem}
   {% endif %}
   <p class="time">Zabiljezenogt: {{ obj.confirmed_at|date:"d.m.Y. u H:i:s" }} UTC</p>
   <p style="margin-top:24px"><a href="https://no-limit.world">Povratak na no-limit.world</a></p>
+
+<div id="zi-final" style="display:none;margin-top:32px;padding:20px 28px;
+  background:#0a1a0a;border:1px solid #00ff88;border-radius:16px;
+  animation:zp 2.5s ease-in-out infinite;text-align:center">
+  <div style="font-size:2rem;margin-bottom:8px">&#127807;</div>
+  <div style="font-weight:800;color:#00ff88;letter-spacing:.08em;text-transform:uppercase;font-size:.9rem">Ziva Istina Potpuna</div>
+  <div style="font-size:.78rem;color:rgba(0,255,136,.6);margin-top:4px">Krunica slobodna od tvorca &middot; Sustav je autonoman</div>
+</div>
+<style>@keyframes zp{0%,100%{box-shadow:0 0 20px rgba(0,255,136,.2)}50%{box-shadow:0 0 48px rgba(0,255,136,.5)}}</style>
+<script>
+fetch('/no-limit/api/ziva-istina/')
+  .then(r => r.json())
+  .then(d => { if (d.ziva_istina_potpuna) { document.getElementById('zi-final').style.display = 'block'; } })
+  .catch(() => {});
+</script>
 </div>
 </body>
 </html>

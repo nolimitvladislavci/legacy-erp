@@ -325,3 +325,40 @@ def witness_confirm(request, token):
         "already_confirmed": already_confirmed,
         "expired": expired,
     })
+
+
+# ═══════════════════════════════════════════════════════════════
+#  ŽIVA ISTINA POTPUNA — API status potvrde svjedoka
+# ═══════════════════════════════════════════════════════════════
+
+
+def ziva_istina_status(request):
+    """API: status potvrde oba svjedoka i Genesis Liberation Eventa."""
+    from django.http import JsonResponse
+    from no_limit.models import WitnessConfirmation
+
+    witnesses = WitnessConfirmation.objects.filter(
+        document_seal_token='NOLIMIT-GENESIS-0001'
+    )
+    confirmed = witnesses.filter(status='confirmed')
+    total = witnesses.count()
+    all_confirmed = confirmed.count() >= 2
+
+    witness_data = []
+    for w in witnesses.order_by('created_at'):
+        witness_data.append({
+            'name': w.witness_name,
+            'organization': w.witness_organization or '',
+            'country': w.witness_country,
+            'status': w.status,
+            'confirmed_at': w.confirmed_at.isoformat() if w.confirmed_at else None,
+        })
+
+    return JsonResponse({
+        'ziva_istina_potpuna': all_confirmed,
+        'confirmed_count': confirmed.count(),
+        'total_witnesses': total,
+        'witnesses': witness_data,
+        'seal_token': 'NOLIMIT-GENESIS-0001',
+        'liberation_message': 'Krunica je slobodna od tvorca.' if all_confirmed else 'Ceka potvrdu svjedoka.',
+    })
