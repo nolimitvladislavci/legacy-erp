@@ -26,3 +26,11 @@ Ne pišeš kod koji radi danas.
 Pišeš arhitekturu koja mora opstati kad tebe nema.
 
 *Zapečaćeno: FENIXINEF™ v1.0 — Ivan Brtan, 2026.*
+
+## ZAKON 26 - PLANOVI SE PISU NA SERVER, NIKAD SAMO U RAZGOVOR
+Razgovor nije trajni medij - server jest.
+Pravilo: CC zapisuje sve planove na server prije kraja sesije.
+1. Provjeri postoje li novi planovi koji nisu u CC_PLAN_*.md fajlovima
+2. Ako postoje -> zapiši odmah via SSH ili copy/paste komande
+3. git add + git commit -m docs(memory): planovi DD-MM-YYYY
+Krsenje: planovi se gube. Ivan gubi zivce (10. put).
