@@ -55,3 +55,41 @@ Za SVAKI plan item koji TVRDI da nesto postoji ili da ce CC implementirati:
 Redosljed: PROVJERI -> IMPLEMENTIRAJ -> POTVRDI -> tek onda pisi plan kao gotovo.
 
 Krsenje: Plan koji tvrdi da je nesto gotovo a nije = laz prema Ivanu = nultoleranacija.
+
+
+## ZAKON 28 — FUNKCIONALNI KOD JE POTPUN BEZ NAPLATE (2026-04-27)
+
+**Temeljno pravilo arhitekture svih sustava (VETRA, fina-connect, fenix-v3):**
+
+Svaki modul se gradi POTPUNO FUNKCIONALAN bez modula naplate.
+Naplata je tanka vanjska ljuska koja se dodaje ZADNJA, neposredno prije produkcije.
+
+**Why:**
+Naplata NIKAD ne smije biti uvjet za razvoj funkcionalnosti.
+Mijesanje billing logike s poslovnom logikom = najcesca greska arhitekture.
+Funkcionalni kod dokazuje vrijednost. Billing samo biljezi tu vrijednost.
+
+**Kako to izgleda u praksi:**
+  - Svaki modul: radi 100% bez provjere pretplate / kredita / fakture
+  - Svi moduli su globalnog karaktera - dostupni svim tenantima u testnoj fazi
+  - Billing modul: jedan, centralan, dodaje se kad je funkcionalnost gotova
+  - Produkcija = Funkcionalni kod (gotov) + Billing (brzo, na kraju) = LIVE
+
+**Redosljed razvoja (obavezan):**
+  1. Implementiraj modul potpuno (UI + logika + API)
+  2. Testiraj funkcionalni dio bez ikakvih billing provjera
+  3. Potvrdi da sve radi
+  4. Dodaj billing check kao jedan middleware/decorator (ne dirkas poslovnu logiku)
+  5. Test naplate (brzo - 1-2 dana)
+  6. Produkcija
+
+**Sto se NE radi:**
+  - Ne blokiras feature iza billing gate-a tijekom razvoja
+  - Ne pises if tenant.plan == pro: u poslovnoj logici
+  - Ne odgadas testiranje jer billing nije gotov
+
+**Analogija:**
+Gradis kucu (funkcionalni kod). Struja/voda/plin (billing) se prikljucuju zadnji.
+Kuca je gotova i korisna i bez prikljucaka - prikljucci su brzi i standardizirani.
+
+Krsenje: Blokiranje razvoja modula zbog billing logike = arhitekturalna greska = zabranjena.
