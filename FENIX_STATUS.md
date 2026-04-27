@@ -432,3 +432,13 @@ Open: no_limit_backup_20260423.html još nije obrisan (backup fajl).
 - form_toolbar v2 port na fina-connect (copy/adapt iz fenix-v3)
 - no_limit_backup_20260423.html još nije obrisan
 - memio_farm 0 zapisa — popuniti seed podacima
+
+## KONTEKST SESIJE — KRAJ (2026-04-27)
+
+### Fix ove sesije
+- celery-worker crash loop (2076 restarts): IndentationError u documents/tasks.py linija 551
+  try: blok bio prazan — fallback kod nije bio uvučen. FIXED, service active.
+- Commit: 21f54194 fix(tasks): IndentationError u generate_ai_proposal
+
+### Status
+Sve services active. Django check 0 errors.
