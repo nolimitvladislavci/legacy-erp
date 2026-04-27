@@ -33,3 +33,8 @@ staticfiles/dist/
 minio-data/
 media/
 docker-compose.override.yml
+synesis/KONJIK*
+backups/
+*.dump
+*.tar.gz
+*.zip
