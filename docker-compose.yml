@@ -1,73 +1,57 @@
-
 # fina-connect Docker Compose
-# ARHITEKTURA SIGURNOSTI:
-#   - Kod: host-mount (/var/www/fina-connect) = nikad u containeru, uvijek na disku
-#   - Baza: host PgBouncer (127.0.0.1:6432) = ne duplicira se
-#   - Media: host-mount = 274MB sigurno na disku
-#   - Redis: host (127.0.0.1:6379) = dijeli se s ostalima
-#   - Container = samo process wrapper, ne storage
+# Base: Ubuntu 24.04 (isti OS kao host = venv symlinki rade)
 
 services:
 
   fina-web:
-    image: python:3.11-slim
+    build:
+      context: /var/www/fina-connect
+      dockerfile: Dockerfile
+    image: fina-connect:local
     container_name: fina_web
     restart: always
-    working_dir: /app
-    command: >
-      bash -c "
-        pip install --quiet --no-cache-dir -r requirements.txt &&
-        venv/bin/gunicorn core.wsgi:application
-          --bind 0.0.0.0:8080
-          --workers 6
-          --threads 2
-          --timeout 300
-          --max-requests 1000
-          --max-requests-jitter 50
-          --graceful-timeout 30
-          --log-level info
-      "
+    working_dir: /var/www/fina-connect
+    command: [
+      "/var/www/fina-connect/venv/bin/gunicorn", "core.wsgi:application",
+      "--bind", "0.0.0.0:8004",
+      "--workers", "6",
+      "--threads", "2",
+      "--timeout", "300",
+      "--max-requests", "1000",
+      "--max-requests-jitter", "50",
+      "--graceful-timeout", "30",
+      "--log-level", "info"
+    ]
     volumes:
-      # KOD: host-mount, nije u containeru
-      - /var/www/fina-connect:/app:ro
-      # MEDIA: host-mount, r/w (uploadi moraju raditi)
-      - /var/www/fina-connect/media:/app/media:rw
-      # LOGS: host-mount
-      - /var/log/fina-connect:/app/logs:rw
-      # VENV: host-mount (ne rebuilda svaki restart)
-      - /var/www/fina-connect/venv:/app/venv:ro
+      - /var/www/fina-connect:/var/www/fina-connect:ro
+      - /var/www/fina-connect/media:/var/www/fina-connect/media:rw
+      - /var/log/fina-connect:/var/log/fina-connect:rw
     env_file:
       - /var/www/fina-connect/.env
     environment:
       - PYTHONUNBUFFERED=1
       - DJANGO_SETTINGS_MODULE=core.settings
     network_mode: host
-    # host network = container vidi 127.0.0.1:6432 (PgBouncer) i 127.0.0.1:6379 (Redis)
-    # direktno, bez proxy. Pragmaticno za ovu arhitekturu.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health/"]
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8004/health/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 30s
 
   fina-celery:
-    image: python:3.11-slim
+    image: fina-connect:local
     container_name: fina_celery
     restart: always
-    working_dir: /app
-    command: >
-      bash -c "
-        venv/bin/celery -A core worker
-          --loglevel=info
-          --concurrency=4
-          --logfile=/app/logs/celery.log
-      "
+    working_dir: /var/www/fina-connect
+    command: [
+      "/var/www/fina-connect/venv/bin/celery", "-A", "core", "worker",
+      "--loglevel=info", "--concurrency=4"
+    ]
     volumes:
-      - /var/www/fina-connect:/app:ro
-      - /var/www/fina-connect/media:/app/media:rw
-      - /var/log/fina-connect:/app/logs:rw
-      - /var/www/fina-connect/venv:/app/venv:ro
+      - /var/www/fina-connect:/var/www/fina-connect:ro
+      - /var/www/fina-connect/media:/var/www/fina-connect/media:rw
+      - /var/log/fina-connect:/var/log/fina-connect:rw
     env_file:
       - /var/www/fina-connect/.env
     environment:
@@ -75,31 +59,5 @@ services:
       - DJANGO_SETTINGS_MODULE=core.settings
     network_mode: host
     depends_on:
-      - fina-web
-
-  fina-celery-beat:
-    image: python:3.11-slim
-    container_name: fina_celery_beat
-    restart: always
-    working_dir: /app
-    command: >
-      bash -c "
-        venv/bin/celery -A core beat
-          --loglevel=info
-          --logfile=/app/logs/celery-beat.log
-      "
-    volumes:
-      - /var/www/fina-connect:/app:ro
-      - /var/log/fina-connect:/app/logs:rw
-      - /var/www/fina-connect/venv:/app/venv:ro
-    env_file:
-      - /var/www/fina-connect/.env
-    environment:
-      - PYTHONUNBUFFERED=1
-    network_mode: host
-    depends_on:
-      - fina-celery
-
-# NEMA named volumes - sve je na hostu.
-# docker system prune -a NE moze obrisati nista vazno.
-# Jedini rizik = disk na hostu. Rjesenje = git remote + pg_dump cron.
+      fina-web:
+        condition: service_healthy
