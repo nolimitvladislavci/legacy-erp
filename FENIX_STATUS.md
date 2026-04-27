@@ -433,6 +433,21 @@ Open: no_limit_backup_20260423.html još nije obrisan (backup fajl).
 - no_limit_backup_20260423.html još nije obrisan
 - memio_farm 0 zapisa — popuniti seed podacima
 
+
+## KONTEKST SESIJE (2026-04-27 sesija 12 — fina-connect minor)
+
+### Što je rađeno:
+- no_limit.html pravopis fix: 4 zamjene diacritika (sto→što, mreze→mreže, osnivacke→osnivačke)
+- Commit: 1951f8d fix(no_limit): ispravi diacritike
+
+### Status servisa:
+- gunicorn-fina: active
+- manage.py check: 0 errors
+
+### Open threads:
+- PLAY.EU Sprint 2 (rok: 2026-05-07 Creative Europe)
+- B-15: NO LIMIT OIB udruge — čeka Marija
+
 ## KONTEKST SESIJE — KRAJ (2026-04-27)
 
 ### Fix ove sesije
