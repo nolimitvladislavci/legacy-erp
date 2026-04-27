@@ -1,153 +1,105 @@
-# LIMIT Connect — Full Stack Docker Compose
-# Usage: docker compose -f docker-compose.yml up -d
-# Note: For development/staging. Production uses systemd + bare metal.
+
+# fina-connect Docker Compose
+# ARHITEKTURA SIGURNOSTI:
+#   - Kod: host-mount (/var/www/fina-connect) = nikad u containeru, uvijek na disku
+#   - Baza: host PgBouncer (127.0.0.1:6432) = ne duplicira se
+#   - Media: host-mount = 274MB sigurno na disku
+#   - Redis: host (127.0.0.1:6379) = dijeli se s ostalima
+#   - Container = samo process wrapper, ne storage
 
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: fina_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME:-fina_erp}
-      POSTGRES_USER: ${DB_USER:-viskovic_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "127.0.0.1:5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-viskovic_user}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: fina_redis
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:6379:6379"
-    volumes:
-      - redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  web:
-    build: .
+  fina-web:
+    image: python:3.11-slim
     container_name: fina_web
-    restart: unless-stopped
+    restart: always
+    working_dir: /app
     command: >
-      gunicorn core.wsgi:application
-      --bind 0.0.0.0:8000
-      --workers 3
-      --timeout 120
-      --access-logfile -
-    env_file: .env
-    environment:
-      - DB_HOST=db
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/2
-      - CELERY_RESULT_BACKEND=redis://redis:6379/3
+      bash -c "
+        pip install --quiet --no-cache-dir -r requirements.txt &&
+        venv/bin/gunicorn core.wsgi:application
+          --bind 0.0.0.0:8080
+          --workers 6
+          --threads 2
+          --timeout 300
+          --max-requests 1000
+          --max-requests-jitter 50
+          --graceful-timeout 30
+          --log-level info
+      "
     volumes:
-      - .:/app
-      - static_files:/app/static
-      - media_files:/app/media
-    ports:
-      - "127.0.0.1:8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      # KOD: host-mount, nije u containeru
+      - /var/www/fina-connect:/app:ro
+      # MEDIA: host-mount, r/w (uploadi moraju raditi)
+      - /var/www/fina-connect/media:/app/media:rw
+      # LOGS: host-mount
+      - /var/log/fina-connect:/app/logs:rw
+      # VENV: host-mount (ne rebuilda svaki restart)
+      - /var/www/fina-connect/venv:/app/venv:ro
+    env_file:
+      - /var/www/fina-connect/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DJANGO_SETTINGS_MODULE=core.settings
+    network_mode: host
+    # host network = container vidi 127.0.0.1:6432 (PgBouncer) i 127.0.0.1:6379 (Redis)
+    # direktno, bez proxy. Pragmaticno za ovu arhitekturu.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
-  celery-worker:
-    build: .
-    container_name: fina_celery_worker
-    restart: unless-stopped
+  fina-celery:
+    image: python:3.11-slim
+    container_name: fina_celery
+    restart: always
+    working_dir: /app
     command: >
-      celery -A core worker
-      --loglevel=info
-      --concurrency=2
-      --max-tasks-per-child=100
-    env_file: .env
-    environment:
-      - DB_HOST=db
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/2
-      - CELERY_RESULT_BACKEND=redis://redis:6379/3
+      bash -c "
+        venv/bin/celery -A core worker
+          --loglevel=info
+          --concurrency=4
+          --logfile=/app/logs/celery.log
+      "
     volumes:
-      - .:/app
-      - media_files:/app/media
+      - /var/www/fina-connect:/app:ro
+      - /var/www/fina-connect/media:/app/media:rw
+      - /var/log/fina-connect:/app/logs:rw
+      - /var/www/fina-connect/venv:/app/venv:ro
+    env_file:
+      - /var/www/fina-connect/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DJANGO_SETTINGS_MODULE=core.settings
+    network_mode: host
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - fina-web
 
-  celery-beat:
-    build: .
+  fina-celery-beat:
+    image: python:3.11-slim
     container_name: fina_celery_beat
-    restart: unless-stopped
+    restart: always
+    working_dir: /app
     command: >
-      celery -A core beat
-      --loglevel=info
-      --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    env_file: .env
+      bash -c "
+        venv/bin/celery -A core beat
+          --loglevel=info
+          --logfile=/app/logs/celery-beat.log
+      "
+    volumes:
+      - /var/www/fina-connect:/app:ro
+      - /var/log/fina-connect:/app/logs:rw
+      - /var/www/fina-connect/venv:/app/venv:ro
+    env_file:
+      - /var/www/fina-connect/.env
     environment:
-      - DB_HOST=db
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/2
-      - CELERY_RESULT_BACKEND=redis://redis:6379/3
-    volumes:
-      - .:/app
+      - PYTHONUNBUFFERED=1
+    network_mode: host
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - fina-celery
 
-  waha:
-    image: devlikeapro/waha:latest
-    container_name: fina_waha
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:3000:3000"
-    env_file: .env.waha
-    environment:
-      - WHATSAPP_DEFAULT_ENGINE=NOWEB
-      - WAHA_DASHBOARD_ENABLED=true
-      - WHATSAPP_RESTART_ALL_SESSIONS=true
-      - WAHA_LOG_LEVEL=info
-      - WHATSAPP_HOOK_URL=http://web:8000/api/whatsapp/webhook/
-      - WHATSAPP_HOOK_EVENTS=message
-    volumes:
-      - waha_sessions:/app/.sessions
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-
-  nginx:
-    image: nginx:alpine
-    container_name: fina_nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - static_files:/var/www/static:ro
-      - media_files:/var/www/media:ro
-      - ./certs:/etc/nginx/certs:ro
-    depends_on:
-      - web
-
-volumes:
-  pgdata:
-  redisdata:
-  static_files:
-  media_files:
-  waha_sessions:
+# NEMA named volumes - sve je na hostu.
+# docker system prune -a NE moze obrisati nista vazno.
+# Jedini rizik = disk na hostu. Rjesenje = git remote + pg_dump cron.

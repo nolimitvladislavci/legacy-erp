@@ -32,3 +32,4 @@ node_modules/
 staticfiles/dist/
 minio-data/
 media/
+docker-compose.override.yml
