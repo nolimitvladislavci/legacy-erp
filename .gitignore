@@ -38,3 +38,4 @@ backups/
 *.dump
 *.tar.gz
 *.zip
+.github/workflows/
