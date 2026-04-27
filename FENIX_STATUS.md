@@ -261,7 +261,7 @@
 ---
 
 ## PRIORITETI ZA SLJEDEĆU SESIJU
-1. ⚠️ M2-01: PLAY.EU Sprint 2 — 7 templates (Creative Europe rok: 2026-05-07!)
+1. ⚠️ M2-01: PLAY.EU Sprint 2 — 7 templates (Creative Europe — sljedeći sprint)
 2. M2-02: Pokrenuti GEMINI_TASK_EU_FONDOVI_MEMIO_WORLD.md
 3. M1-01+M1-02: memio.pet pretraga + SaleAd (PLAN-005/006)
 4. PLAN-07: evalidator.eu prodajna priprema (čeka potvrdu scenarija)
@@ -445,7 +445,7 @@ Open: no_limit_backup_20260423.html još nije obrisan (backup fajl).
 - manage.py check: 0 errors
 
 ### Open threads:
-- PLAY.EU Sprint 2 (rok: 2026-05-07 Creative Europe)
+- PLAY.EU Sprint 2 (Creative Europe — sljedeći sprint)
 - B-15: NO LIMIT OIB udruge — čeka Marija
 
 ## KONTEKST SESIJE — KRAJ (2026-04-27)
