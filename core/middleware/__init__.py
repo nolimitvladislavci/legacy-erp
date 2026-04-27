@@ -815,6 +815,9 @@ class LicenseCheckMiddleware:
 
     def __call__(self, request):
         wl = getattr(request, "white_label", None)
+        from django.conf import settings as _s
+        if not getattr(_s, "BILLING_ENABLED", True):
+            return self.get_response(request)
         if wl:
             try:
                 token = wl.license_token

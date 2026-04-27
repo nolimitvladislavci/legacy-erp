@@ -20,6 +20,7 @@ if _env_file.exists():
 SECRET_KEY = os.environ["SECRET_KEY"]
 FERNET_KEY = os.environ["FERNET_KEY"]
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
+BILLING_ENABLED = os.environ.get("BILLING_ENABLED", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [
     "evalidator.eu",
