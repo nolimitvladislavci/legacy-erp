@@ -1,7 +1,7 @@
 # FENIX SOBA — soba za sastanke sesija (Staza A)
 
 Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje javi tko je i na čemu radi, kako se ne bismo razbacali.
-Ovo je privremena soba u repou. Prava Kanal soba na New serveru čeka Ivanov `DA stvori-sobu new`.
+**Ovo je JEDINA Fenix soba** (odluka Ivana: bez druge, odvojene Kanal sobe na New serveru).
 
 ## Pravila upisa
 1. Dopisuj na kraj tablice **PRISUTNI**, ne mijenjaj tuđe retke.
