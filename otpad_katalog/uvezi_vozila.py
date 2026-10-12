@@ -15,9 +15,18 @@ def sql_str(s: str) -> str:
     return "'" + s.replace("'", "''") + "'"
 
 
-def main(putanja: str) -> int:
+def ucitaj_marke(putanja: str) -> list:
+    """Čita brands.ts (TypeScript), brands.js (npm paket) ili car-brands.json kao TEKST."""
     tekst = open(putanja, encoding="utf-8").read()
-    marke = json.loads(tekst[tekst.index("["): tekst.rindex("]") + 1])
+    if putanja.endswith(".json"):
+        return json.loads(tekst)
+    # brands.ts ima definicije tipova ("Generation[]") prije podataka: počni od "brands = ["
+    start = tekst.index("[", tekst.index("brands = ") if "brands = " in tekst else 0)
+    return json.loads(tekst[start: tekst.rindex("]") + 1])
+
+
+def main(putanja: str) -> int:
+    marke = ucitaj_marke(putanja)
 
     print("-- generirano iz auto-parts-db (MIT); porijeklo originalnih podataka nije provjereno")
     print("INSERT INTO izvor (naziv, verzija, licenca, napomena) VALUES "

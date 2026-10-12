@@ -35,7 +35,10 @@ PF "$TMPSQL" >/dev/null
 read -r OCEK_TIPOVA OCEK_MARKI OCEK_MODELA < <(python3 - "$BRANDS_JS" <<'E'
 import json,sys
 t=open(sys.argv[1],encoding='utf-8').read()
-b=json.loads(t[t.index('['):t.rindex(']')+1])
+if sys.argv[1].endswith('.json'):
+    b=json.loads(t)
+else:  # .ts / .js: podaci počinju iza "brands = ["
+    b=json.loads(t[t.index('[', t.index('brands = ') if 'brands = ' in t else 0):t.rindex(']')+1])
 tip={(x['brand'],m['name'],g['name'],g['yearFrom']) for x in b for m in x['models'] for g in m['generations']}
 print(len(tip), len({x['brand'] for x in b}), len({(x['brand'],m['name']) for x in b for m in x['models'] if m['generations']}))
 bez=[(x['brand'],m['name']) for x in b for m in x['models'] if not m['generations']]

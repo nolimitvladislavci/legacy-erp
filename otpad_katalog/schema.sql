@@ -23,6 +23,10 @@ CREATE TABLE IF NOT EXISTS izvor (
     napomena  text
 );
 
+INSERT INTO izvor (naziv, napomena)
+VALUES ('Unos radnice', 'Brojevi i veze unesene ručno preko ekrana za unos')
+ON CONFLICT (naziv) DO NOTHING;
+
 -- Tip vozila = marka + model + generacija s godištima.
 CREATE TABLE IF NOT EXISTS vozilo_tip (
     id          serial PRIMARY KEY,

@@ -32,4 +32,28 @@ Test briše i iznova stvara bazu `otpad_katalog_test`. **Ne pokretati prema prod
 - Paket sadrži i popis "dijelova", ali **bez kataloških brojeva** (ruski nazivi) — nije uvezen.
 - Brojevi dijelova: **još nema pravih**. Dolaze iz (1) brojeva na vašim skinutim dijelovima,
   (2) ATRIS/Autodata kopije u skladu s licencom.
-- Nema korisničkog sučelja; sljedeći korak je jednostavan ekran (jedno polje) u Djangu.
+- Sirovi izvor: `src/data/brands.ts` iz `lifeofcapo/car-api` (commit `0a7092f`, 11.8.2026., MIT).
+  Provjereno: identičan je `car-brands.json` iz istog repoa i paketu `auto-parts-db` 3.0.0.
+  `uvezi_vozila.py` čita `.ts`, `.js` ili `.json` kao tekst.
+- Ekran za radnicu postoji (vidi dolje); još nije spojen na Django projekt ni na prijavu.
+
+## Ekran za radnicu (`ekran/`)
+Dvije kartice: **Traži** (jedno polje: broj dijela ili "Focus 2013") i **Unesi skinuti dio**
+(auto → broj na dijelu → stanje A–D, polica, cijena). Poznati broj sam upiše naziv dijela;
+dio se automatski povezuje s vrstom auta s kojeg je skinut. Duplikat traži potvrdu.
+
+Samo standardna Python biblioteka + `psycopg` 3. Pokretanje na TEST bazi:
+```
+psql -d <test_baza> -f schema.sql -f pretraga.sql -f uloga_app.sql      # + uvoz vozila i seed_probni.sql
+psql -d postgres -c "ALTER ROLE otpad_app PASSWORD '<lozinka>'"          # lozinka NE ide u repo
+OTPAD_DSN="host=127.0.0.1 dbname=<test_baza> user=otpad_app password=<lozinka>" OTPAD_PORT=8765 python3 ekran/server.py
+```
+Testovi (traže pokrenut server i test bazu):
+```
+OTPAD_URL=http://127.0.0.1:8765 OTPAD_DSN=... python3 ekran/test_ekran.py          # poslužitelj, 20 testova
+OTPAD_URL=http://127.0.0.1:8765 python3 ekran/test_preglednik.py [mapa_snimki]     # Chromium, 2 teme x 2 širine
+```
+**Prije prave upotrebe obavezno:** prijava (sada je ekran otvoren svakome tko dođe na port;
+sluša samo `127.0.0.1`), HTTPS, produkcijska baza i lozinka uloge `otpad_app`.
+Uloga `otpad_app` smije samo čitati i dodavati (bez brisanja i izmjene strukture).
+Preglednik: testirano samo u Chromiumu; Firefox i WebKit nisu provjereni.
