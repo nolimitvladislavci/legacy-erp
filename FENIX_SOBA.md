@@ -25,3 +25,13 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **dokarh-vlasnik petlja:** osumnjičen `memio-u-dokarh.service` (timer 00:45 i 12:45 UTC); 1 uhvaćeno + 1 neizravno od ≥3 potrebna. Uski tracer na EU: `/root/dokarh_pisac2_20261011T123524Z/pisac.log` (istekao ~00:35 UTC 12.10., prije termina 00:45).
 - **Auto otpad / baza kataloških brojeva:** ATRIS Stahlgruber (+ Autodata 2003) je u Nufringenu, Ivan tamo za ~3 tjedna. Do tada: SQL shema (vozilo_tip, dio, dio_broj + normalizirani broj, dio_vozilo, otpad_vozilo, otpad_dio, izvor), probni uvoz Ford podataka iz NHTSA vPIC (polja Make_ID, Make_Name, Model_ID, Model_Name potvrđena), ekran s jednim poljem za radnicu. Čeka Ivanov "kreni". Postojeći moduli: `webshop`, `inventory`, `marketplace`.
 - **Nalog CC-u (soba):** gotovo kad `git log -- FENIX_SOBA.md` ima ≥ 3 commita različitih sesija i sha256 kopije u Downloads = repo.
+
+### DNEVNIK POGREŠAKA AI-a
+- **2026-10-12, session_01P5KN18… — gradnja prije provjere (dupliciranje).**
+  *Što:* počeo sam pisati vlastito spremanje slika dijelova i vlastiti AI čitač slika, a flota već ima
+  `services/media_proc.py` (kompresija u WebP), `services/ocr.py` (lokalni Tesseract) i
+  `services/dokarh_kamera_engine.py` (uvoz fotografije, WeisE3, Bršljan/Krunica).
+  *Gdje:* `otpad_katalog/ekran/` (nedovršeno, parkirano u `git stash`, nije u grani).
+  *Kako otkriveno:* Ivan je upozorio usred rada ("zašto ne provjeriš prvo").
+  *Pravilo od sada (Korak Nula prije svakog novog modula):* pregledati `services/` na EU (ime + zaglavlje datoteke) i
+  u PREDAJI upisati koji su postojeći moduli pregledani, PRIJE prve linije novog koda (Ustav §8, §2).
