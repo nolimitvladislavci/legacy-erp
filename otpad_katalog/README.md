@@ -76,10 +76,11 @@ OTPAD_SLIKE=/putanja/izvan/repoa/slike OTPAD_PORT=8765 python3 ekran/server.py
 Bez `OTPAD_SLIKE` učitavanje slika vraća 503 (nema slučajnog spremanja). Uloga `otpad_ekran` nema DELETE i ne smije mijenjati
 token, donora ni broj na dijelu.
 
-**Slike:** `ekran/spremnik.py` je PRIJELAZNI lokalni direktorij (sadržaj izvan baze, u bazi samo sha256 i veza). Prava pohrana je
-poslovna arhiva (ARHIVA 2030, `arhiva_core/ulaz.py: primi_dokument`) iz koje se gradi webshop; spajanje čeka mjerenje što
-`resolver.put` radi dalje s dokumentom i kako se u arhivi razlikuju privatne slike od javnih. Preglednik prije slanja smanji sliku
-na 2000 px i ponovno je kodira, čime se izbacuje EXIF (npr. GPS). Krunica nikad ne nosi sadržaj slike.
+**Slike:** nove slike idu u poslovnu arhivu kad su postavljeni `ARHIVA_URL`, `ARHIVA_TOKEN` i `ARHIVA_BEZ_AI_POTVRDENO=1` (adapter
+`ekran/arhiva_spremnik.py`, vidi `arhiva_spoj/README.md`: treba zakrpa na produkciji i Ivanov DA, jer svaki upload inače pokreće
+plaćenu AI obradu). Bez toga, i dalje `ekran/spremnik.py`: PRIJELAZNI lokalni direktorij (`OTPAD_SLIKE`, izvan baze, u bazi samo sha256 i veza).
+Stare lokalne slike ostaju čitljive. Preglednik prije slanja smanji sliku na 2000 px i ponovno je kodira, čime se izbacuje EXIF
+(npr. GPS). Krunica nikad ne nosi sadržaj slike.
 
 **Testovi (sve na privremenim bazama):**
 ```

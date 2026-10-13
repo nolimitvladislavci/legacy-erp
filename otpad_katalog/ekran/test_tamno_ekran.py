@@ -80,9 +80,11 @@ def q(sql, *a):
         return cur.fetchall() if cur.description else None
 
 
-def pokreni(port, slike):
+def pokreni(port, slike, dodatno=None):
     env = {**os.environ, "OTPAD_DSN": DSN, "OTPAD_PORT": str(port)}
-    env.pop("OTPAD_SLIKE", None)
+    for k in ("OTPAD_SLIKE", "ARHIVA_URL", "ARHIVA_TOKEN", "ARHIVA_BEZ_AI_POTVRDENO"):
+        env.pop(k, None)
+    env.update(dodatno or {})
     if slike:
         env["OTPAD_SLIKE"] = slike
     p = subprocess.Popen([sys.executable, "-I", os.path.join(AQ, "ekran", "server.py")], env=env,

@@ -50,7 +50,11 @@ def veza_t():
     return psycopg.connect(DSN, connect_timeout=5)
 
 
-SPREMNIK = spremnik_modul.iz_okoline()
+try:
+    SPREMNIK = spremnik_modul.iz_okoline()
+except ValueError as _e:                       # pogrešna postavka arhive: ne startati (inače bi svaka slika koštala AI obradu)
+    print("POSTAVKA ARHIVE: " + str(_e), file=sys.stderr)
+    sys.exit(2)
 
 
 # ----------------------------------------------------------------- pretraga

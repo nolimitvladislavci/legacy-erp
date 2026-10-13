@@ -51,3 +51,11 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **Slike dijelova pripadaju u poslovnu arhivu** (iz nje se gradi webshop; Ivan 13.10.), a Krunica ne nosi sadržaj slike. Moja ranija formulacija "ne smiju ući" bila je pogrešna i ispravljena u `spremnik.py`. Spajanje s `primi_dokument` NIJE gotovo (traži mjerenje: što `resolver.put` radi dalje, privatno/javno u arhivi); do tada lokalni spremnik izvan repoa.
 - **Isporučeno:** nove kartice Novi dio · U radu · Stalaža; rute `/api/pretinci`, `/api/dio/...`, `/api/nadji`, `/api/slika/<id>`; uloga `otpad_ekran`. Testovi: `test_tamno_ekran.py` 64/64 (uklj. stari `test_ekran.py` 20/20), `test_preglednik_tamno.py` 132/132, stari `test_preglednik.py` 117 prošlo, 0 palo; `test_tamno.py` 40/40, `test_prodaja.py` 28/28.
 - **DNEVNIK POGREŠAKA AI-a:** (1) uloga `otpad_prodaja` dobila je UPDATE na `token`, `otpad_vozilo_id`, `broj_na_dijelu` bez potrebe; uhvaćeno testom E13, sužena + REVOKE. (2) Potvrda "Slike su spremljene" nestajala je jer se kartica ponovno iscrtavala (isto bi se dogodilo i s porukom o grešci); uhvaćeno preglednik-testom, dodana trajna obavijest. (3) `server.py` nije radio s `python3 -I` (uvoz iz vlastite mape); popravljeno.
+
+### SPAJANJE SLIKA S POSLOVNOM ARHIVOM — session_01P5KN18DaRqxRrryzpCv9CK (2026-10-13)
+- **Pregledani moduli prije koda:** `services/dokarh_resolver.py`, `services/arhiva_core/{ulaz,logic,obrada}.py`, `api/arhiva_core.py` (EU, samo čitanje).
+- **Nalaz koji mijenja plan:** `upload-datoteka` za svaku sliku pokreće OCR, odvajanje podloge i DVA plaćena AI poziva (limit troška = 0). Zato je adapter
+  isključen dok netko ne potvrdi zakrpu (`ARHIVA_BEZ_AI_POTVRDENO=1`); ekran se bez potvrde ne pokreće. `resolver.put` replicira dokumente na Bršljan peerove (ne Krunica).
+- **Isporučeno:** `ekran/arhiva_spremnik.py`, `ekran/lazna_arhiva.py` (ugovor iz koda), `arhiva_spoj/{primijeni_zakrpu.py,README.md}`, `ekran/test_arhiva_spoj.py` 33/33
+  (lažna arhiva, NE stvarna). Regresije: `test_tamno_ekran.py` 64/64, `test_preglednik_tamno.py` 132/132.
+- **NIJE učinjeno (A4, čeka Ivanov DA):** zakrpa `api/arhiva_core.py` na EU i servisna sesija za Kelavu. Zakrpa je testirana samo na fixturi.

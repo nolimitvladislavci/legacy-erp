@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "prodaja"))
 import prodaja as P  # noqa: E402
 import tamno as T  # noqa: E402
+from arhiva_spremnik import SpremnikGreska  # noqa: E402
 from greske import Greska  # noqa: E402
 
 MAX_SLIKA = 15 * 1024 * 1024
@@ -203,7 +204,10 @@ def slika_spremi(con, dio_id: int, vrsta: str, sadrzaj: bytes, spremnik) -> dict
         raise Greska(400, "Slika je prazna.")
     if tip_slike(sadrzaj) is None:
         raise Greska(415, "Slika mora biti JPEG, PNG ili WebP.")
-    sha, ref = spremnik.spremi(sadrzaj)
+    try:
+        sha, ref = spremnik.spremi(sadrzaj)
+    except SpremnikGreska as e:
+        raise Greska(502, str(e))
     try:
         r = _uvijek(T.zabiljezi_sliku, con, dio_id, vrsta, sha, ref)
     except Greska:
@@ -221,7 +225,10 @@ def slika_citaj(con, slika_id: int, spremnik) -> tuple[bytes, str]:
     with con.cursor() as cur:
         cur.execute("SELECT ref FROM dio_slika WHERE id=%s", (slika_id,))
         r = cur.fetchone()
-    b = spremnik.dohvati(r[0]) if r else None
+    try:
+        b = spremnik.dohvati(r[0]) if r else None
+    except SpremnikGreska as e:
+        raise Greska(502, str(e))
     if b is None:
         raise Greska(404, "Slika ne postoji.")
     return b, tip_slike(b) or "application/octet-stream"

@@ -18,6 +18,8 @@ REF = re.compile(r"lokalno:([0-9a-f]{64})")
 
 
 class LokalniSpremnik:
+    PREFIKS = "lokalno:"
+
     def __init__(self, korijen: str):
         self.korijen = Path(korijen)
         self.korijen.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -49,6 +51,34 @@ class LokalniSpremnik:
         return put.read_bytes() if put.exists() else None
 
 
-def iz_okoline() -> LokalniSpremnik | None:
+class Spremnici:
+    """Primarni spremnik za NOVE slike; dohvat ide po prefiksu refa, pa stare lokalne slike ostaju čitljive."""
+
+    def __init__(self, primarni, svi):
+        self.primarni, self.svi = primarni, [x for x in svi if x is not None]
+
+    def spremi(self, sadrzaj: bytes) -> tuple[str, str]:
+        return self.primarni.spremi(sadrzaj)
+
+    def dohvati(self, ref: str) -> bytes | None:
+        for x in self.svi:
+            if (ref or "").startswith(x.PREFIKS):
+                return x.dohvati(ref)
+        return None
+
+    def opis(self) -> str:
+        return type(self.primarni).__name__
+
+
+def iz_okoline() -> Spremnici | None:
+    """OTPAD_SLIKE (lokalno, prijelazno) i/ili ARHIVA_URL + ARHIVA_TOKEN + ARHIVA_BEZ_AI_POTVRDENO=1 (poslovna arhiva).
+    Ako su oba, nove slike idu u arhivu, a stare lokalne ostaju čitljive. Pogrešna postavka arhive baca ValueError (server ne starta)."""
     k = os.environ.get("OTPAD_SLIKE", "").strip()
-    return LokalniSpremnik(k) if k else None
+    lokalni = LokalniSpremnik(k) if k else None
+    arhiva = None
+    if os.environ.get("ARHIVA_URL") or os.environ.get("ARHIVA_TOKEN"):
+        from arhiva_spremnik import ArhivaSpremnik
+        arhiva = ArhivaSpremnik(os.environ.get("ARHIVA_URL", ""), os.environ.get("ARHIVA_TOKEN", ""),
+                                bez_ai_potvrdeno=os.environ.get("ARHIVA_BEZ_AI_POTVRDENO") == "1")
+    primarni = arhiva or lokalni
+    return Spremnici(primarni, [arhiva, lokalni]) if primarni else None
