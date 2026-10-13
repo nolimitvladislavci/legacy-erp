@@ -80,7 +80,7 @@
       return stavke.reduce(function (lanac, st) {
         return lanac.then(function () {
           if (prekid) return;
-          return api('POST', '/api/dio/' + st.dioId + '/slika', st.blob, { 'X-Vrsta': st.vrsta }).then(function (odg) {
+          return api('POST', 'api/dio/' + st.dioId + '/slika', st.blob, { 'X-Vrsta': st.vrsta }).then(function (odg) {
             if (odg.ok || (odg.status === 409 && /već je dodana/.test(odg.data.greska || ''))) { poslano += 1; return Red.ukloni(st.id); }
             if (odg.status === 0 || odg.status >= 500) { prekid = true; return; }             // veza ili poslužitelj: pokušat će se opet
             odbaceno.push(odg.data.greska || 'Slika je odbijena.'); return Red.ukloni(st.id);   // trajno odbijeno: ne ponavljati beskonačno
@@ -102,12 +102,12 @@
   window.addEventListener('online', function () { ispraznRed(); });
   setInterval(function () { if (navigator.onLine) ispraznRed(); }, 30000);
   osvjeziTraku().then(function (n) { if (n && navigator.onLine) ispraznRed(); });
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
 
   // ---------- NOVI DIO ----------
   var prepoznatiDio = null;
   function ucitajAute() {
-    return api('GET', '/api/otpad-vozila').then(function (odg) {
+    return api('GET', 'api/otpad-vozila').then(function (odg) {
       var s = $('nd-auto'), staro = s.value; isprazni(s);
       s.appendChild(el('option', { value: '' }, '— odaberi auto —'));
       if (!odg.ok) { poruka($('nd-poruka'), 'greska', odg.data.greska); return; }
@@ -118,7 +118,7 @@
     });
   }
   function ucitajNazive() {
-    return api('GET', '/api/nazivi').then(function (odg) {
+    return api('GET', 'api/nazivi').then(function (odg) {
       var dl = $('nd-nazivi'); isprazni(dl);
       if (odg.ok) odg.data.nazivi.forEach(function (n) { dl.appendChild(el('option', { value: n })); });
     });
@@ -129,7 +129,7 @@
   $('nd-broj').addEventListener('change', function () {
     var broj = this.value.trim();
     if (broj.replace(/[^0-9A-Za-z]/g, '').length < 3) { ocistiPrepoznato(); return; }
-    api('GET', '/api/trazi?q=' + encodeURIComponent(broj)).then(function (odg) {
+    api('GET', 'api/trazi?q=' + encodeURIComponent(broj)).then(function (odg) {
       if (!odg.ok || odg.data.dijelovi.length !== 1) { ocistiPrepoznato(); return; }
       var d = odg.data.dijelovi[0];
       prepoznatiDio = d.dio_id; $('nd-naziv').value = d.naziv; $('nd-naziv').readOnly = true;
@@ -147,12 +147,12 @@
     poruka(por, '', '');
     if (!auto) { poruka(por, 'greska', 'Prvo odaberi auto s kojeg je dio skinut (korak 1).'); $('nd-auto').focus(); return; }
     zauzet(this, 'Unosim dio…', function () {
-      return api('POST', '/api/dio/rodi', { otpad_vozilo_id: auto, broj_na_dijelu: $('nd-broj').value,
+      return api('POST', 'api/dio/rodi', { otpad_vozilo_id: auto, broj_na_dijelu: $('nd-broj').value,
         naziv: $('nd-naziv').value, dio_id: prepoznatiDio });
     }).then(function (odg) {
       if (odg.status === 409 && odg.data.duplikat) {
         if (!window.confirm(odg.data.greska)) { poruka(por, 'info', 'Unos je otkazan.'); return; }
-        return api('POST', '/api/dio/rodi', { otpad_vozilo_id: auto, broj_na_dijelu: $('nd-broj').value,
+        return api('POST', 'api/dio/rodi', { otpad_vozilo_id: auto, broj_na_dijelu: $('nd-broj').value,
           naziv: $('nd-naziv').value, dio_id: prepoznatiDio, dopusti_duplikat: true }).then(nakonRodenja);
       }
       return nakonRodenja(odg);
@@ -175,7 +175,7 @@
   }
   function ucitajRadu() {
     var por = $('radu-poruka');
-    return api('GET', '/api/tamni').then(function (odg) {
+    return api('GET', 'api/tamni').then(function (odg) {
       var l = $('radu-lista'); isprazni(l);
       if (!odg.ok) { poruka(por, 'greska', odg.data.greska); return; }
       if (!odg.data.dijelovi.length) { poruka(por, 'info', 'Nema dijelova u radu. Unesi novi dio u kartici „Novi dio“.'); return; }
@@ -196,7 +196,7 @@
   // ---------- U RADU: kartica dijela ----------
   function otvoriDio(id) {
     otvoren = id;
-    return api('GET', '/api/dio/' + id).then(function (odg) {
+    return api('GET', 'api/dio/' + id).then(function (odg) {
       $('radu-lista-okvir').hidden = true; $('dio-okvir').hidden = false;
       var k = $('dio-kartica'); isprazni(k);
       if (!odg.ok) { k.appendChild(el('p', { class: 'poruka greska', role: 'alert' }, odg.data.greska)); return; }
@@ -226,7 +226,7 @@
     var S = sekcija(VRSTE[vrsta]), moje = d.slike.filter(function (s) { return s.vrsta === vrsta; });
     var kut = el('div', { class: 'slike' });
     moje.forEach(function (s) {
-      var jed = el('div', { class: 'slika' }, el('img', { src: '/api/slika/' + s.id, alt: VRSTE[vrsta] + ' ' + s.id, width: 104, height: 104 }));
+      var jed = el('div', { class: 'slika' }, el('img', { src: 'api/slika/' + s.id, alt: VRSTE[vrsta] + ' ' + s.id, width: 104, height: 104 }));
       if (vrsta === 'DIO' && d.status === 'NA_STALAZI') {
         var izbor = JAVNE[d.id] || (JAVNE[d.id] = {});
         if (!(s.id in izbor)) izbor[s.id] = true;
@@ -249,7 +249,7 @@
           var blob_ = null;
           return lanac.then(function () { return smanji(f); }).then(function (b) {
             blob_ = b;
-            return api('POST', '/api/dio/' + d.id + '/slika', b, { 'X-Vrsta': vrsta });
+            return api('POST', 'api/dio/' + d.id + '/slika', b, { 'X-Vrsta': vrsta });
           }).then(function (odg) {
             n += 1;
             if (odg.status === 0) {                                                  // nema veze: slika ide u red na uređaju
@@ -314,7 +314,7 @@
     if (tamno && !c.opran) {
       var bp = el('button', { class: 'gumb gumb-glavni', type: 'button' }, 'Označi oprano');
       if (!c.slika_pranje) { bp.disabled = true; P.n.appendChild(el('p', { class: 'pomoc' }, 'Prvo slikaj dio nakon pranja (gore).')); }
-      radnja(P, bp, 'Spremam…', '/api/dio/' + d.id + '/predradnja', function () { return { vrsta: 'OPRAN' }; });
+      radnja(P, bp, 'Spremam…', 'api/dio/' + d.id + '/predradnja', function () { return { vrsta: 'OPRAN' }; });
       P.n.appendChild(bp);
     }
     P.n.appendChild(P.por); k.appendChild(P.n);
@@ -328,7 +328,7 @@
       var red = el('div', { class: 'red' });
       [['DRZI', 'Radi (DRŽI)'], ['NEPOZNATO', 'Ne znam'], ['PAD', 'Ne radi (PAD → škart)']].forEach(function (x) {
         var g = el('button', { class: 'gumb' + (x[0] === 'DRZI' ? ' gumb-glavni' : ''), type: 'button' }, x[1]);
-        radnja(T, g, 'Spremam…', '/api/dio/' + d.id + '/predradnja', function () { return { vrsta: 'TESTIRAN', stanje: x[0], napomena: nap.value }; });
+        radnja(T, g, 'Spremam…', 'api/dio/' + d.id + '/predradnja', function () { return { vrsta: 'TESTIRAN', stanje: x[0], napomena: nap.value }; });
         red.appendChild(g);
       });
       T.n.appendChild(red);
@@ -345,7 +345,7 @@
         el('div', null, el('label', { class: 'oznaka', for: 'pak-tez' }, 'Težina u gramima'), el('input', { id: 'pak-tez', inputmode: 'numeric', placeholder: 'npr. 3200', autocomplete: 'off' }))));
       var bq = el('button', { class: 'gumb gumb-glavni', type: 'button' }, 'Upiši pakiranje');
       if (!c.slika_paket) { bq.disabled = true; Q.n.appendChild(el('p', { class: 'pomoc' }, 'Prvo slikaj zapakirani dio (gore).')); }
-      radnja(Q, bq, 'Spremam…', '/api/dio/' + d.id + '/predradnja', function () {
+      radnja(Q, bq, 'Spremam…', 'api/dio/' + d.id + '/predradnja', function () {
         return { vrsta: 'PAKIRAN', dimenzije_cm: $('pak-dim').value, tezina_g: $('pak-tez').value }; });
       Q.n.appendChild(bq);
     }
@@ -357,14 +357,14 @@
     if (['RODEN', 'PREDRADNJE', 'NA_STALAZI', 'NA_ZALIHI'].indexOf(d.status) >= 0) {
       var sel = el('select', { id: 'pret-sel', 'aria-label': 'Pretinac' }); R.n.appendChild(sel);
       sel.appendChild(el('option', { value: '' }, '— odaberi pretinac —'));
-      api('GET', '/api/pretinci').then(function (o) {
+      api('GET', 'api/pretinci').then(function (o) {
         if (!o.ok) { poruka(R.por, 'greska', o.data.greska); return; }
         if (!o.data.pretinci.length) { poruka(R.por, 'info', 'Još nema pretinaca. Dodaj ih u kartici „Stalaža“.'); return; }
         o.data.pretinci.forEach(function (p) { sel.appendChild(el('option', { value: p.adresa }, p.adresa + ' (' + p.dijelova + ')')); });
         if (d.pretinac) sel.value = d.pretinac;
       });
       var br = el('button', { class: 'gumb gumb-glavni', type: 'button' }, d.pretinac ? 'Premjesti' : 'Spremi u pretinac');
-      radnja(R, br, 'Spremam…', '/api/dio/' + d.id + '/spremi', function () { return { adresa: sel.value }; });
+      radnja(R, br, 'Spremam…', 'api/dio/' + d.id + '/spremi', function () { return { adresa: sel.value }; });
       R.n.appendChild(br);
     }
     R.n.appendChild(R.por); k.appendChild(R.n);
@@ -380,7 +380,7 @@
       var rs = el('select', { id: 'v-razred' }); rs.appendChild(el('option', { value: '' }, '— odaberi —'));
       RAZREDI.forEach(function (r) { rs.appendChild(el('option', { value: r[0] }, r[1])); }); V.n.appendChild(rs);
       var bv = el('button', { class: 'gumb gumb-glavni gumb-velik', type: 'button' }, 'Stavi u prodaju');
-      radnja(V, bv, 'Provjeravam…', '/api/dio/' + d.id + '/prodaja', function () {
+      radnja(V, bv, 'Provjeravam…', 'api/dio/' + d.id + '/prodaja', function () {
         var izbor = JAVNE[d.id] || {};
         return { cijena: $('v-cijena').value, razred_jamstva: $('v-razred').value,
                  javne_slike: Object.keys(izbor).filter(function (x) { return izbor[x]; }) };
@@ -398,7 +398,7 @@
 
   // ---------- STALAŽA ----------
   function ucitajPretince() {
-    return api('GET', '/api/pretinci').then(function (odg) {
+    return api('GET', 'api/pretinci').then(function (odg) {
       var l = $('pretinci-lista'); isprazni(l);
       if (!odg.ok) { poruka($('pr-poruka'), 'greska', odg.data.greska); return; }
       if (!odg.data.pretinci.length) { l.appendChild(el('p', { class: 'sitno' }, 'Još nema pretinaca.')); return; }
@@ -428,7 +428,7 @@
     g.addEventListener('click', function () {
       poruka(por, '', ''); isprazni(detalji);
       zauzet(g, 'Spremam…', function () {
-        return api('POST', '/api/pretinac/' + d.adresa + '/obilazak', {
+        return api('POST', 'api/pretinac/' + d.adresa + '/obilazak', {
           nadjeni: kutije.filter(function (k) { return k[1].checked; }).map(function (k) { return k[0].id; }),
           viska: vi.value.trim() ? [vi.value.trim()] : [] });
       }).then(function (odg) {
@@ -469,7 +469,7 @@
     var q = $('nadji-q').value.trim(), por = $('nadji-poruka');
     if (q.length < 2) { poruka(por, 'greska', 'Upiši barem 2 znaka.'); $('nadji-q').focus(); return; }
     poruka(por, 'info', '');
-    zauzet($('btn-nadji'), 'Tražim…', function () { return api('GET', '/api/nadji?q=' + encodeURIComponent(q)); }).then(function (odg) {
+    zauzet($('btn-nadji'), 'Tražim…', function () { return api('GET', 'api/nadji?q=' + encodeURIComponent(q)); }).then(function (odg) {
       isprazni($('nadji-rez'));
       if (!odg.ok) { poruka(por, 'greska', odg.data.greska); return; }
       if (odg.data.vrsta === 'nista') { poruka(por, 'info', 'Ništa nije nađeno. Provjeri adresu pretinca, oznaku ili broj.'); return; }
@@ -480,7 +480,7 @@
   $('pr-dodaj').addEventListener('click', function () {
     var por = $('pr-poruka');
     zauzet(this, 'Dodajem…', function () {
-      return api('POST', '/api/pretinci', { regal: $('pr-regal').value, polica: $('pr-polica').value, pretinaca: $('pr-n').value });
+      return api('POST', 'api/pretinci', { regal: $('pr-regal').value, polica: $('pr-polica').value, pretinaca: $('pr-n').value });
     }).then(function (odg) {
       if (!odg.ok) { poruka(por, 'greska', odg.data.greska); return; }
       poruka(por, 'ok', odg.data.poruka); ucitajPretince();

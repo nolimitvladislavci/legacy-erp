@@ -139,7 +139,7 @@
     if (q.length < 2) { poruka(por, 'greska', 'Upiši barem 2 znaka.'); $('q').focus(); return; }
     poruka(por, 'info', '');
     zauzet($('btn-trazi'), 'Tražim…', function () {
-      return api('GET', '/api/trazi?q=' + encodeURIComponent(q));
+      return api('GET', 'api/trazi?q=' + encodeURIComponent(q));
     }).then(function (odg) {
       isprazni($('rezultati'));
       if (!odg.ok) { poruka(por, 'greska', odg.data.greska); return; }
@@ -157,7 +157,7 @@
 
   // ---------- UNOS: auti ----------
   function ucitajAute(odaberi) {
-    return api('GET', '/api/otpad-vozila').then(function (odg) {
+    return api('GET', 'api/otpad-vozila').then(function (odg) {
       var s = $('auto'), staro = odaberi || s.value;
       isprazni(s);
       s.appendChild(el('option', { value: '' }, '— odaberi auto —'));
@@ -170,13 +170,13 @@
     });
   }
   function ucitajNazive() {
-    return api('GET', '/api/nazivi').then(function (odg) {
+    return api('GET', 'api/nazivi').then(function (odg) {
       var dl = $('nazivi'); isprazni(dl);
       if (odg.ok) odg.data.nazivi.forEach(function (n) { dl.appendChild(el('option', { value: n })); });
     });
   }
   function ucitajZadnje() {
-    return api('GET', '/api/zadnji').then(function (odg) {
+    return api('GET', 'api/zadnji').then(function (odg) {
       var z = $('zadnji'); isprazni(z);
       if (!odg.ok) { z.appendChild(el('p', { class: 'poruka greska' }, odg.data.greska)); return; }
       if (!odg.data.dijelovi.length) { z.appendChild(el('p', { class: 'sitno' }, 'Još ništa nije uneseno.')); return; }
@@ -202,7 +202,7 @@
     isprazni(lista);
     if (q.length < 2) { poruka(por, 'greska', 'Upiši marku i model (npr. Focus 2013).'); $('tip-q').focus(); return; }
     poruka(por, 'info', '');
-    zauzet(this, 'Tražim…', function () { return api('GET', '/api/trazi?q=' + encodeURIComponent(q)); })
+    zauzet(this, 'Tražim…', function () { return api('GET', 'api/trazi?q=' + encodeURIComponent(q)); })
       .then(function (odg) {
         if (!odg.ok) { poruka(por, 'greska', odg.data.greska); return; }
         var v = odg.data.vozila;
@@ -220,7 +220,7 @@
     var por = $('poruka-auto'), izabran = document.querySelector('input[name="tip"]:checked');
     if (!izabran) { poruka(por, 'greska', 'Prvo odaberi vrstu auta s popisa (klikni na točan red).'); return; }
     zauzet(this, 'Spremam auto…', function () {
-      return api('POST', '/api/otpad-vozila', {
+      return api('POST', 'api/otpad-vozila', {
         vozilo_tip_id: izabran.value, vin: $('auto-vin').value, km: $('auto-km').value });
     }).then(function (odg) {
       if (!odg.ok) { poruka(por, 'greska', odg.data.greska); return; }
@@ -246,7 +246,7 @@
   $('dio-broj').addEventListener('change', function () {
     var broj = this.value.trim();
     if (broj.replace(/[^0-9A-Za-z]/g, '').length < 3) { ocistiPrepoznato(); return; }
-    api('GET', '/api/trazi?q=' + encodeURIComponent(broj)).then(function (odg) {
+    api('GET', 'api/trazi?q=' + encodeURIComponent(broj)).then(function (odg) {
       if (!odg.ok) { poruka($('poruka-unos'), 'greska', odg.data.greska); return; }
       var d = odg.data.dijelovi;
       if (d.length !== 1) { ocistiPrepoznato(); return; }
@@ -280,7 +280,7 @@
     var st = document.querySelector('input[name="stanje"]:checked');
     if (!st) { poruka(por, 'greska', 'Odaberi stanje dijela: A, B, C ili D (korak 3).'); document.querySelector('input[name="stanje"]').focus(); return; }
     zauzet($('btn-spremi'), 'Spremam…', function () {
-      return api('POST', '/api/otpad-dijelovi', {
+      return api('POST', 'api/otpad-dijelovi', {
         otpad_vozilo_id: auto, dio_id: stanje.dioId, naziv: naziv, broj_na_dijelu: $('dio-broj').value,
         polica: $('polica').value, stanje: st.value, cijena: $('cijena').value,
         dopusti_duplikat: !!dopustiDuplikat });
