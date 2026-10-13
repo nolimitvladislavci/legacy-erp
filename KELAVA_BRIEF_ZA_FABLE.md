@@ -20,7 +20,7 @@ Interni sustav za auto otpad (100+ vozila) i webshop. **Bez papira**: bez printa
 
 ## Činjenice koje mijenjaju odluke
 - **Jamstvo:** za potrošača rabljena roba ne ispod 1 godine ugovorno, zakonski 2; "prodano kakvo jest" za potrošača ne postoji; za pravnu osobu može i bez garancije. Potvrđeno samo preko Your Europe; tekst hrvatskog ZZP-a nije nađen. Provjeriti s knjigovođom.
-- **Osobni podaci:** knjižica vozila nosi PII vlasnika, ne smije u Krunicu; zasebni privatni spremnik po tenantu.
+- **Knjižica vozila (Ivanova odluka 13.10.):** čitaju se i spremaju SAMO podaci o vozilu (VIN, marka, model, godište, kW, ccm, gorivo, boja, oznaka motora). Ime vlasnika se ne sprema nigdje, a prijašnji vlasnik nije bitan (nema nasljeđivanja). Slika knjižice: samo u bazi (nikad u Krunici), a ako je ime vlasnika na slici, slika se ne čuva (odluka Fablea/Ivana). Zato nema posebnog privatnog spremnika za osobne podatke: jednostavan popis dopuštenih polja (whitelist), sve ostalo se odbacuje.
 - **Nesklad u Ivanovu primjeru koda:** GiroCode kaže 2.700,00 EUR / "Rechnung 106", a HUB3 80.402,62 EUR / "Racun 100…". U Kelavi svi slojevi moraju nositi isti događaj i iznos (test).
 - Q4D oko srca (meta-okvir, sidra, pravi mobitel) **nije dokazan** (H16); srce kao običan QR jest.
 - Na EU `https://genesis.limit-connect.com/q/test` vraća 500; `pos/q4d_racun.py` koju spominje test_q4d_fenix.py nije na NEW.
