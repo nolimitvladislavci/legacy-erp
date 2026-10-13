@@ -252,7 +252,7 @@ async def _kandidati(db, dana: int, granica: int) -> list:
     # stvarni upit na sqlite: NULL app_id MORA ostati, kelava-dijelovi MORA izaći
     import asyncio
     import importlib.util
-    from datetime import datetime
+    from datetime import datetime, timezone
     sp = importlib.util.spec_from_file_location("sk", put); m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)
     from sqlalchemy import create_engine
     from sqlalchemy.orm import Session
