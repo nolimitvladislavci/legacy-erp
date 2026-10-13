@@ -35,3 +35,13 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
   *Kako otkriveno:* Ivan je upozorio usred rada ("zašto ne provjeriš prvo").
   *Pravilo od sada (Korak Nula prije svakog novog modula):* pregledati `services/` na EU (ime + zaglavlje datoteke) i
   u PREDAJI upisati koji su postojeći moduli pregledani, PRIJE prve linije novog koda (Ustav §8, §2).
+
+### IZVRŠENJE KELAVA_PLAN_K2 — session_01P5KN18DaRqxRrryzpCv9CK (2026-10-13)
+- **N1 (gdje žive q4d i qr4d): ZATVOREN.** Na EU: `/var/www/genesis/qr4d/app.py` (servis `qr4d`, uvicorn, 127.0.0.1:8120, venv `/opt/qr4d/venv`, log `get_logs qr4d`),
+  `/var/www/genesis/paketi/eho_v2/eho_v2/{q4d.py,qr_eho10_4dimenzije.py,kod4d.py}`, atomi c12422/c12423 (HUB3 propis). Plan je u Koraku Nula grešno javio "0 pogodaka": MAX `grep` je nepouzdan, a `qr4d` nije pod `/var/www/genesis/services`.
+- **N2 (`/q/test` 500): ZATVOREN.** `GET /q/test` sada 200 (5384 B), `/api/v1/qr4d/stanje` 200, `/q/skener` 200; u logu `qr4d` sve 200 od 04:33 do 05:40 UTC 13.10.
+  `genesis.limit-connect.com` i `limit-connect.com` → 217.160.71.124 (nije MAR 212.227.181.201), pa hipoteza o DNS-u na MAR otpada. 500 viđen 12.10. u 22:53 UTC bio je prolazan, uzrok nepoznat (log prozor ga ne pokriva).
+- **N3 (root-pisac):** nije izveden. Treba `auditctl` na produkciji (A4, traži Ivanov DA) i `exec`, kojeg MAX nema.
+- **N4:** čeka 10 fotografija Code 128 naljepnica i model skenera (Ivan). Jedini uzorak: `03407429544699306998215032` (26 znamenki, n=1, bez strukture).
+- **Isporučeno** (testovi, TESTIRANO): `otpad_katalog/{vin.py,vin_provjera.sql,test_vin.py}` 40/40; `prodaja/` 28/28; `prodaja/{schema_tamno.sql,tamno.py,test_tamno.py}` 40/40.
+- **DNEVNIK POGREŠAKA AI-a:** (1) `provjeri_svjetlo` je davao DRZI nad dnevnikom s krivotvorenim sadržajem (gledao samo spremljene hasheve); otkriveno testom V4; sada prvo zove `provjeri_lanac`. (2) u `schema_tamno.sql` upisao sam GRANT na nepostojeći stupac; uhvaćeno čitanjem prije pokretanja. (3) tvrdio sam "/q/test vraća 500" bez provjere ponavljanjem; kasnije mjerenje daje 200.
