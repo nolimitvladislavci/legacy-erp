@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Zakrpa za services/arhiva_core/strazar_ophodnja.py (EU, produkcija): ophodnja stražara preskače app_id "kelava-dijelovi".
 
-NIJE PRIMIJENJENA (A4, traži Ivanov DA). Zašto: ophodnja svakih 10 min uzima 200 NAJNOVIJIH nezapečaćenih dokumenata iz zadnjih 14 dana.
+PRIMIJENJENA na EU 2026-10-13 (Ivanov DA), preko write_file jer MAX nema exec (vidi FENIX_SOBA.md). Zašto: ophodnja svakih 10 min uzima 200 NAJNOVIJIH nezapečaćenih dokumenata iz zadnjih 14 dana.
 Masovni upload fotografija dijelova izgurao bi stvarne račune iz tog prozora, pa ih stražar ne bi provjeravao.
 Popis: env STRAZAR_BEZ_APP_ID (zarezom odvojeno), zadano kelava-dijelovi. Isti postupak i jamstva kao primijeni_zakrpu.py.
 Korištenje:  python3 primijeni_zakrpu_strazar.py /var/www/genesis/services/arhiva_core/strazar_ophodnja.py [--suho]

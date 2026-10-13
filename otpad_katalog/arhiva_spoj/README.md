@@ -45,5 +45,5 @@ bez `ARHIVA_BEZ_AI_POTVRDENO=1`, a ekran se bez toga ne pokreće (test A1).
 - **Servisna sesija MORA imati aktivni tenant:** bez njega stražar svakoj fotografiji upisuje alarm `T1_BEZ_KOMITENTA` i `strazar/zdravlje` postaje ALARM.
 - **Prozor stražara:** ophodnja svakih 10 min uzima 200 najnovijih nezapečaćenih dokumenata iz 14 dana. Masovni upload fotografija izgurao bi stvarne
   račune iz prozora. Rješenje je `primijeni_zakrpu_strazar.py` (isključuje `kelava-dijelovi`, NULL-sigurno; testirano na fixturi i stvarnim SQL-om na sqlite).
-  **NIJE primijenjeno** (A4, traži DA: `DA primijeni-zakrpu-strazar eu-genesis`). Primijeniti prije prvog većeg uploada.
+  **PRIMIJENJENO 2026-10-13** (Ivanov DA; cijela datoteka preko `write_file`, bez atoma, vidi FENIX_SOBA.md). Filter na pravim podacima još nije pokazan (u arhivi nema nezapečaćenih dokumenata).
 - Ophodnja NE zove obradu (provjereno), pa zakrpa nije zaobiđena tim putem. Drugi pozivatelji `obradi_dokument` nisu pretraženi (MAX grep je nepouzdan).

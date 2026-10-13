@@ -75,3 +75,12 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **Isporučeno:** `arhiva_spoj/{zakrpa_lib.py,primijeni_zakrpu_strazar.py}` (zakrpa NIJE primijenjena; traži `DA primijeni-zakrpu-strazar eu-genesis`), inventura pretinaca (`tamno.obilazak`, ruta, kartica Stalaža).
 - **Testovi:** `test_arhiva_spoj.py` 37/37, `test_tamno.py` 48/48, `test_tamno_ekran.py` 70/70 (uklj. stari 20), `test_preglednik_tamno.py` 148/148, `test_prodaja.py` 28/28, `test_vin.py` 40/40.
 - **NIJE učinjeno:** ništa novo na produkciji. Čitač knjižice nije građen: dva neovisna čitanja VIN-a traže plaćeni AI (limit = 0) pa je moguć samo OCR + ljudska potvrda.
+
+### DA primijeni-zakrpu-strazar eu-genesis: IZVEDENO (session_01P5KN18DaRqxRrryzpCv9CK, 2026-10-13 ~06:42–06:44 UTC)
+- **Meta:** EU `/var/www/genesis/services/arhiva_core/strazar_ophodnja.py`, servis `genesis`. Ivanov DA za tu jednu radnju.
+- **Izmjena (točno tri mjesta):** `from sqlalchemy import func, select`; konstanta `_APP_ID_BEZ_STRAZARA` (env `STRAZAR_BEZ_APP_ID`, zadano `kelava-dijelovi`); u `_kandidati` dodan `.where(func.coalesce(ArhivaCoreDokumentORM.app_id, "").notin_(_APP_ID_BEZ_STRAZARA))`.
+- **Backup:** `/var/www/genesis/services/arhiva_core/strazar_ophodnja.py.bak_20261013_064239` (162 retka, 6351 znak). Nova datoteka: 165 redaka, 6693 znaka (očekivano 162+3 i 6351+342), md5 `4705be0140ac48b3604718de1e6dd25b` (readback MATCH).
+- **Rollback:** `cp -p /var/www/genesis/services/arhiva_core/strazar_ophodnja.py.bak_20261013_064239 /var/www/genesis/services/arhiva_core/strazar_ophodnja.py && systemctl restart genesis` (traži exec).
+- **Restart:** `restart_service genesis eu` → active. Poslije: `/health` 200; `strazar/zdravlje` OK, `krugova` 1, zadnji prolaz 06:43:03Z (poslije restarta), `zadnja_greska` null (izmijenjeni SQL se izvršio nad pravom bazom); u logu 0 grešaka.
+- **Ograničenje dokaza:** ophodnja je pregledala 0 dokumenata (u zadnjih 14 dana nema nezapečaćenih), pa na pravim podacima NIJE pokazano da `kelava-dijelovi` izlazi iz prozora. To je pokazano samo na sqlite-u s fixturom (`test_arhiva_spoj.py` Z2). Pravi dokaz tek s prvim uploadom (korak 3).
+- **ODSTUPANJA kao kod prve zakrpe:** nema INTENT/RAČUN atoma (MAX bez `exec`), nema otiska produkcije, cijela datoteka pisana preko `write_file` (kontrola: broj redaka/znakova, md5 readback, žive rute). Atome treba naknadno upisati sesija s exec-om za OBJE zakrpe.
