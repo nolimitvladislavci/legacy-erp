@@ -165,6 +165,44 @@ def kartica(conn: psycopg.Connection, dio_id: int) -> dict:
     return k
 
 
+def obilazak(conn: psycopg.Connection, adresa: str, nadjeni_ids: list[int], viska_tokeni: list[str] | None = None) -> dict:
+    """Inventura jednog pretinca: radnica potvrdi što stvarno vidi. Bez naljepnice na dijelu, krivo vraćen dio inače nestaje.
+    Svaki očekivani dio dobiva događaj OBILAZAK (nadjen: da/ne). Višak (dio koji je tu, a vodi se drugdje) se NE premješta sam:
+    vraća se radnici. -> {nadjeno, nedostaje, viska:[{id, pretinac}], nepoznato:[oznake]}"""
+    viska_tokeni = [t.strip().upper() for t in (viska_tokeni or []) if t and t.strip()]
+    with conn.transaction(), conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM pretinac WHERE adresa=%s", (adresa,))
+        if cur.fetchone() is None:
+            raise PoslovnaGreska(f"Pretinac {adresa} ne postoji.")
+        cur.execute("""SELECT id FROM otpad_dio WHERE pretinac_adresa=%s AND status IN ('NA_STALAZI', 'NA_ZALIHI', 'REZERVIRAN')
+                       ORDER BY id FOR UPDATE""", (adresa,))
+        ocekivani = [r[0] for r in cur.fetchall()]
+        tudji = sorted(set(nadjeni_ids) - set(ocekivani))
+        if tudji:
+            raise PoslovnaGreska(f"Dio {tudji[0]} se ne vodi u pretincu {adresa}. Višak upiši preko oznake dijela.")
+        nadjeno = [i for i in ocekivani if i in set(nadjeni_ids)]
+        nedostaje = [i for i in ocekivani if i not in set(nadjeni_ids)]
+        for i in ocekivani:
+            _dogadjaj_obilazak(cur, i, adresa, i in set(nadjeni_ids), None)
+        viska, nepoznato = [], []
+        for t in viska_tokeni:
+            cur.execute("SELECT id, pretinac_adresa, status FROM otpad_dio WHERE token=%s FOR UPDATE", (t,))
+            r = cur.fetchone()
+            if r is None:
+                nepoznato.append(t); continue
+            if r[0] in ocekivani:
+                continue                                           # već je na popisu ovog pretinca
+            if r[2] not in ("NA_STALAZI", "NA_ZALIHI", "REZERVIRAN", "RODEN", "PREDRADNJE"):
+                nepoznato.append(t); continue                      # prodan/škart ne bi smio biti u pretincu: javi, ne diraj
+            _dogadjaj_obilazak(cur, r[0], adresa, True, r[1])
+            viska.append({"id": r[0], "pretinac": r[1]})
+    return {"nadjeno": nadjeno, "nedostaje": nedostaje, "viska": viska, "nepoznato": nepoznato}
+
+
+def _dogadjaj_obilazak(cur, dio_id: int, adresa: str, nadjen: bool, vodi_se_u: str | None) -> None:
+    P._dogadjaj(cur, dio_id, "OBILAZAK", {"pretinac": adresa, "nadjen": nadjen, "vodi_se_u": vodi_se_u})
+
+
 def dodaj_alias(conn: psycopg.Connection, alias: str, token: str, vrsta: str = "CODE128") -> None:
     with conn.transaction(), conn.cursor() as cur:
         cur.execute("INSERT INTO kod_alias (alias, token, vrsta) VALUES (%s,%s,%s)", (alias.strip(), token, vrsta))

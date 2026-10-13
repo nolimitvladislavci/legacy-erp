@@ -309,6 +309,45 @@
       });
     });
   }
+  function obilazakForma(d) {
+    var S = el('section', { class: 'odjeljak' }, el('h3', null, 'Obilazak pretinca ' + d.adresa));
+    S.appendChild(el('p', { class: 'pomoc' }, 'Označi što stvarno vidiš u pretincu. Što ne označiš, upisuje se da nedostaje.'));
+    var kutije = [];
+    d.dijelovi.forEach(function (x) {
+      var cb = el('input', { type: 'checkbox', id: 'ob-' + x.id });
+      kutije.push([x, cb]);
+      S.appendChild(el('label', { class: 'radio-opcija', for: 'ob-' + x.id }, cb,
+        el('span', null, x.naziv + (x.broj ? ' · ' + x.broj : '') + ' · ' + x.token)));
+    });
+    if (!d.dijelovi.length) S.appendChild(el('p', { class: 'sitno' }, 'Prema evidenciji pretinac je prazan.'));
+    S.appendChild(el('label', { class: 'oznaka', for: 'ob-viska' }, 'Višak: oznaka dijela koji je ovdje, a nije na popisu (nije obavezno)'));
+    var vi = el('input', { id: 'ob-viska', maxlength: 16, autocomplete: 'off', spellcheck: 'false' });
+    S.appendChild(vi);
+    var por = el('p', { class: 'poruka', role: 'status', 'aria-live': 'polite' }), detalji = el('div');
+    var g = el('button', { class: 'gumb gumb-glavni gumb-velik', type: 'button' }, 'Završi obilazak');
+    g.addEventListener('click', function () {
+      poruka(por, '', ''); isprazni(detalji);
+      zauzet(g, 'Spremam…', function () {
+        return api('POST', '/api/pretinac/' + d.adresa + '/obilazak', {
+          nadjeni: kutije.filter(function (k) { return k[1].checked; }).map(function (k) { return k[0].id; }),
+          viska: vi.value.trim() ? [vi.value.trim()] : [] });
+      }).then(function (odg) {
+        if (!odg.ok) { poruka(por, 'greska', odg.data.greska); return; }
+        var r = odg.data, sve = !r.nedostaje.length && !r.viska.length && !r.nepoznato.length;
+        poruka(por, sve ? 'ok' : 'info', r.poruka);
+        var ul = el('ul', { class: 'razlozi' });
+        r.nedostaje.forEach(function (id) {
+          var x = d.dijelovi.filter(function (y) { return y.id === id; })[0];
+          ul.appendChild(el('li', null, 'Nedostaje: ' + (x ? x.naziv + ' · ' + x.token : 'dio ' + id)));
+        });
+        r.viska.forEach(function (v) { ul.appendChild(el('li', null, 'Višak: dio ' + v.id + ' vodi se u ' + (v.pretinac || 'nijednom pretincu') + '. Premjesti ga u kartici dijela.')); });
+        r.nepoznato.forEach(function (t) { ul.appendChild(el('li', null, 'Nepoznata oznaka: ' + t)); });
+        if (ul.childNodes.length) detalji.appendChild(ul);
+      });
+    });
+    S.appendChild(g); S.appendChild(por); S.appendChild(detalji);
+    return S;
+  }
   function prikaziNadji(d) {
     var r = $('nadji-rez'); isprazni(r);
     function dioKartica(x) {
@@ -322,6 +361,7 @@
       r.appendChild(el('h2', { class: 'naslov-odjeljka' }, 'Pretinac ' + d.adresa));
       if (!d.dijelovi.length) r.appendChild(el('p', { class: 'sitno' }, 'Pretinac je prazan.'));
       d.dijelovi.forEach(function (x) { r.appendChild(dioKartica(x)); });
+      r.appendChild(obilazakForma(d));
     } else if (d.vrsta === 'dio') { r.appendChild(dioKartica({ id: d.dio.id, naziv: d.dio.naziv, broj: d.dio.broj, token: d.dio.token, status: d.dio.status, pretinac: d.dio.pretinac })); }
     else if (d.vrsta === 'dijelovi') { d.dijelovi.forEach(function (x) { r.appendChild(dioKartica(x)); }); }
   }

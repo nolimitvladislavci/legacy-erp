@@ -114,6 +114,14 @@ def postavi_bazu(brands: str) -> None:
     H.psql(DB, "INSERT INTO otpad_vozilo (vin, vozilo_tip_id, km) SELECT 'WVWZZZ1JZ3W386752', id, 150000 FROM vozilo_tip LIMIT 1")
 
 
+def _bez_csrf(url):
+    r = urllib.request.Request(url, data=b'{"nadjeni":[]}', method="POST", headers={"Content-Type": "application/json"})
+    try:
+        urllib.request.urlopen(r); return 200
+    except urllib.error.HTTPError as e:
+        return e.code
+
+
 def main() -> int:
     brands = os.environ.get("BRANDS_JS", "")
     try:
@@ -236,6 +244,16 @@ def main() -> int:
         st, r, _ = zahtjev("GET", "/api/tamni")
         ids = [x["id"] for x in r["dijelovi"]]
         ok("E12 popis u radu: nepoznat dio i duplikat su tu, prodani nije", n2 in ids and d not in ids, str(ids))
+
+        # E15 obilazak
+        st, r, _ = zahtjev("POST", "/api/pretinac/R01-P1-02/obilazak", {"nadjeni": [], "viska": []})
+        ok("E15 obilazak: dio u pretincu koji nije označen → nedostaje", st == 201 and r["nedostaje"] == [d] and "nedostaje 1" in r["poruka"], f"{st} {r}")
+        st, r, _ = zahtjev("POST", "/api/pretinac/R01-P1-02/obilazak", {"nadjeni": [d], "viska": []})
+        ok("E15 obilazak: sve na mjestu (potvrda)", st == 201 and r["nedostaje"] == [] and "Sve je na mjestu" in r["poruka"], f"{st} {r}")
+        ok("E15 obilazak: tuđi id → 409", zahtjev("POST", "/api/pretinac/R01-P1-02/obilazak", {"nadjeni": [n2], "viska": []})[0] == 409)
+        ok("E15 obilazak: kriva oznaka → 400", zahtjev("POST", "/api/pretinac/R01-P1-02/obilazak", {"nadjeni": [], "viska": ["kratko"]})[0] == 400)
+        ok("E15 obilazak: kriva adresa → 400", zahtjev("POST", "/api/pretinac/polica3/obilazak", {"nadjeni": []})[0] == 400)
+        ok("E15 obilazak bez CSRF zaglavlja → 403", _bez_csrf(URL + "/api/pretinac/R01-P1-02/obilazak") == 403)
 
         # E13, E14
         with psycopg.connect(DSN, autocommit=True) as c:

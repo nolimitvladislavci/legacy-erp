@@ -196,6 +196,21 @@ def kombinacija(p, tema, sirina, mapa_slika):
     page.click("#btn-nadji")
     expect(page.locator("#nadji-rez .naslov-odjeljka")).to_contain_text("R03-P2-01")
     ok(f"[{o}] nađi po adresi pretinca (mala slova)", True)
+    # ---------- OBILAZAK pretinca ----------
+    expect(page.get_by_role("button", name="Završi obilazak")).to_be_visible()
+    sjediste = page.locator("#nadji-rez input[type=checkbox]")
+    ok(f"[{o}] obilazak: za svaki dio u pretincu jedna kvačica", sjediste.count() >= 1)
+    page.get_by_role("button", name="Završi obilazak").click()
+    expect(page.locator("#nadji-rez .poruka")).to_contain_text("nedostaje")
+    ok(f"[{o}] obilazak bez označenih dijelova → 'nedostaje' (čitljiva potvrda)", True)
+    for i in range(sjediste.count()):
+        sjediste.nth(i).check()
+    page.get_by_role("button", name="Završi obilazak").click()
+    expect(page.locator("#nadji-rez .poruka")).to_contain_text("Sve je na mjestu")
+    ok(f"[{o}] obilazak sa svim dijelovima → 'Sve je na mjestu'", True)
+    skrol("obilazak")
+    snimka("obilazak")
+
     page.fill("#nadji-q", "ZZZZZZZZ")
     page.click("#btn-nadji")
     expect(page.locator("#nadji-poruka")).to_contain_text("Ništa nije nađeno")

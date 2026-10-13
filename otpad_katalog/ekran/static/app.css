@@ -110,3 +110,4 @@ input[type="radio"] { width: 26px; min-height: 26px; height: 26px; flex: none; a
 input[type="file"] { padding: 10px; min-height: 52px; }
 .ugnijezdeno { margin: 10px 0; padding-top: 8px; border-top: 1px dashed var(--rub); }
 .ugnijezdeno h3 { font-size: 0.95rem; color: var(--tiho); }
+.radio-opcija input[type="checkbox"] { width: 26px; min-height: 26px; height: 26px; flex: none; accent-color: var(--naglasak); }

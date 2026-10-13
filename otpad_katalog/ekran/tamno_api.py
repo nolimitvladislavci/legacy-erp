@@ -246,3 +246,29 @@ def u_prodaju(con, dio_id: int, p: dict) -> dict:
         raise Greska(409, "Dio još ne smije u prodaju.", razlozi=razlozi)
     r = _uvijek(T.stavi_u_prodaju, con, dio_id, cijena, razred, javne)
     return {"token": r["token"], "poruka": "Dio je u prodaji. Atom svjetla i oglas čekaju u izlaznom redu."}
+
+
+def obilazak(con, adresa: str, p: dict) -> dict:
+    if not T.PRETINAC.fullmatch(adresa):
+        raise Greska(400, "Neispravna adresa pretinca (oblik R03-P2-04).")
+    try:
+        nadjeni = [int(x) for x in (p.get("nadjeni") or [])]
+    except (TypeError, ValueError):
+        raise Greska(400, "Neispravan popis pronađenih dijelova.")
+    viska = [str(x) for x in (p.get("viska") or [])][:20]
+    if any(not TOKEN.fullmatch(t.strip().upper()) for t in viska if t.strip()):
+        raise Greska(400, "Oznaka dijela ima 16 znakova (slova A–Z i brojke 2–7).")
+    r = _uvijek(T.obilazak, con, adresa, nadjeni, viska)
+    dijelovi = len(r["nadjeno"]) + len(r["nedostaje"])
+    if not r["nedostaje"] and not r["viska"] and not r["nepoznato"]:
+        poruka = f"Sve je na mjestu ({dijelovi})." if dijelovi else "Pretinac je prazan, kako i treba biti."
+    else:
+        dijelovi_txt = []
+        if r["nedostaje"]:
+            dijelovi_txt.append(f"nedostaje {len(r['nedostaje'])}")
+        if r["viska"]:
+            dijelovi_txt.append(f"višak {len(r['viska'])} (vodi se u drugom pretincu)")
+        if r["nepoznato"]:
+            dijelovi_txt.append(f"nepoznata oznaka {len(r['nepoznato'])}")
+        poruka = "Obilazak upisan: " + ", ".join(dijelovi_txt) + "."
+    return {**r, "poruka": poruka}

@@ -8,6 +8,7 @@ Kriteriji (upisani prije pokretanja):
   E1 ekran: slika ide u arhivu (dio_slika.ref arhiva:…, nijedna lokalna), dohvat preko ekrana je bajt-identičan
   E2 arhiva pala → 502 s porukom, dio_slika bez novog retka · E3 stare lokalne slike ostaju čitljive uz arhivu
   E4 AI obrada nije pokrenuta (ai_pokrenuto = 0) za app_id kelava-dijelovi · E5 bez zaštite (kontrola): tuđi app_id pokreće AI (dokazuje da brojač radi)
+  Z2 zakrpa stražara: tri sidra točno jednom, primjena, upit je NULL-siguran (app_id NULL ostaje, kelava-dijelovi izlazi), druga primjena bezopasna
   Z1 zakrpa: suho ne piše, primjena mijenja točno dva mjesta, py_compile prolazi, druga primjena je bezopasna, krivo sidro → STOP bez izmjene
 Pokretanje:  BRANDS_JS=<brands.js> python3 -I test_arhiva_spoj.py
 """
@@ -130,6 +131,7 @@ def main() -> int:
             print(f"upozorenje: čišćenje baze: {e}")
 
     zakrpa()
+    zakrpa_strazar()
     print(f"\nUKUPNO {H.PASS + H.FAIL} · PROŠLO {H.PASS} · PALO {H.FAIL}")
     return 1 if H.FAIL else 0
 
@@ -194,6 +196,84 @@ async def obradi_dokument_ep(weise3_id, background_tasks):
     sadrzaj_prije = open(krivi).read()
     r = subprocess.run([sys.executable, "-I", skripta, krivi], capture_output=True, text=True)
     ok("Z1 krivo sidro → STOP bez izmjene", r.returncode == 1 and "STOP" in r.stdout and open(krivi).read() == sadrzaj_prije, r.stdout)
+    shutil.rmtree(d, ignore_errors=True)
+
+
+def zakrpa_strazar() -> None:
+    """Z2: zakrpa strazar_ophodnja.py na fixturi koja ima ISTA tri sidra kao stvarna datoteka (pročitana s EU) + stvarni SQL na sqlite-u."""
+    d = tempfile.mkdtemp(prefix="zakrpa_strazar_")
+    skripta = os.path.join(AQ, "arhiva_spoj", "primijeni_zakrpu_strazar.py")
+    put = os.path.join(d, "strazar_ophodnja.py")
+    fixtura = '''import os
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import select
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String, DateTime
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class ArhivaCoreDokumentORM(Base):
+    __tablename__ = "d"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    app_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    faza: Mapped[str] = mapped_column(String)
+    nastao: Mapped[datetime] = mapped_column(DateTime)
+
+
+INTERVAL_S = int(os.getenv("STRAZAR_INTERVAL_S", "600"))      # 10 min
+DANA_UNATRAG = int(os.getenv("STRAZAR_DANA_UNATRAG", "14"))
+PO_KRUGU = int(os.getenv("STRAZAR_PO_KRUGU", "200"))
+
+
+async def _kandidati(db, dana: int, granica: int) -> list:
+    od = datetime.now(timezone.utc) - timedelta(days=dana)
+    stmt = (select(ArhivaCoreDokumentORM)
+            .where(ArhivaCoreDokumentORM.nastao >= od)
+            .where(ArhivaCoreDokumentORM.faza != "zapecaceno")
+            .order_by(ArhivaCoreDokumentORM.nastao.desc())
+            .limit(granica))
+    rez = await db.execute(stmt)
+    return list(rez.scalars().all())
+'''
+    open(put, "w").write(fixtura)
+    izv = lambda *a: subprocess.run([sys.executable, "-I", skripta, put, *a], capture_output=True, text=True)
+    r = izv("--suho")
+    ok("Z2 suho ne piše", r.returncode == 0 and open(put).read() == fixtura and "SUHO" in r.stdout, r.stdout + r.stderr)
+    r = izv()
+    novo = open(put).read()
+    ok("Z2 primjena: tri izmjene, .bak postoji", r.returncode == 0 and "from sqlalchemy import func, select" in novo and "_APP_ID_BEZ_STRAZARA" in novo
+       and any(f.startswith("strazar_ophodnja.py.bak.") for f in os.listdir(d)), r.stdout + r.stderr)
+    r2 = izv()
+    ok("Z2 druga primjena je bezopasna", r2.returncode == 0 and "VEĆ PRIMIJENJENO" in r2.stdout and open(put).read() == novo)
+    # stvarni upit na sqlite: NULL app_id MORA ostati, kelava-dijelovi MORA izaći
+    import asyncio
+    import importlib.util
+    from datetime import datetime
+    sp = importlib.util.spec_from_file_location("sk", put); m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine("sqlite://")
+    m.Base.metadata.create_all(eng)
+    sad = datetime.now(timezone.utc).replace(tzinfo=None)
+    with Session(eng) as se:
+        for i, app in enumerate([None, "poslovna-arhiva-dashboard", "kelava-dijelovi", "kelava-dijelovi", "genesispos"]):
+            se.add(m.ArhivaCoreDokumentORM(id=i + 1, app_id=app, faza="draft", nastao=sad))
+        se.add(m.ArhivaCoreDokumentORM(id=9, app_id="poslovna-arhiva-dashboard", faza="zapecaceno", nastao=sad))
+        se.commit()
+
+        class Rez:
+            def __init__(self, r): self._r = r
+            def scalars(self): return self._r.scalars()
+
+        class LazniDb:
+            async def execute(self, stmt): return Rez(se.execute(stmt))
+        res = asyncio.run(m._kandidati(LazniDb(), 14, 200))
+    app_ids = sorted((x.app_id or "NULL") for x in res)
+    ok("Z2 upit: NULL i obični app_id ostaju, kelava-dijelovi i zapečaćeni izlaze", app_ids == ["NULL", "genesispos", "poslovna-arhiva-dashboard"], str(app_ids))
     shutil.rmtree(d, ignore_errors=True)
 
 

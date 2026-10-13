@@ -416,6 +416,11 @@ class Handler(BaseHTTPRequestHandler):
                 with veza_t() as ct:
                     rezultat = TA.slika_spremi(ct, int(m_slika[1]), self.headers.get("X-Vrsta", ""), p, SPREMNIK)
                 return self._json(201, rezultat)
+            m = re.fullmatch(r"/api/pretinac/([A-Za-z0-9-]{1,12})/obilazak", u.path)
+            if m:
+                with veza_t() as ct:
+                    rezultat = TA.obilazak(ct, m[1].upper(), p)
+                return self._json(201, rezultat)
             m = re.fullmatch(r"/api/dio/(\d{1,9})/(predradnja|spremi|prodaja)", u.path)
             if m:
                 f = {"predradnja": TA.predradnja, "spremi": TA.spremi_u_pretinac, "prodaja": TA.u_prodaju}[m[2]]

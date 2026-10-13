@@ -84,10 +84,12 @@ Stare lokalne slike ostaju čitljive. Preglednik prije slanja smanji sliku na 20
 
 **Testovi (sve na privremenim bazama):**
 ```
-BRANDS_JS=<brands.js> python3 -I ekran/test_tamno_ekran.py          # 64 provjere + stari test_ekran.py (20)
-BRANDS_JS=<brands.js> python3 -I ekran/test_preglednik_tamno.py [mapa_snimki]   # Chromium, 2 teme x 2 širine, cijeli tok, 132 provjere
+BRANDS_JS=<brands.js> python3 -I ekran/test_tamno_ekran.py          # 70 provjera + stari test_ekran.py (20)
+BRANDS_JS=<brands.js> python3 -I ekran/test_preglednik_tamno.py [mapa_snimki]   # Chromium, 2 teme x 2 širine, cijeli tok + obilazak, 148 provjera
 ```
 
-**Nije gotovo:** prepoznavanje po slici (H1), skeniranje kamerom (sada tipkovnica/skener kao tipkovnica), obilazak pretinaca (inventura),
+**Inventura (kartica Stalaža → pretinac):** „Obilazak pretinca“: radnica označi što stvarno vidi; neoznačeni dijelovi dobivaju događaj `OBILAZAK` s `nadjen: ne`, višak (dio koji je tu a vodi se drugdje) se javlja i NE premješta sam.
+
+**Nije gotovo:** prepoznavanje po slici (H1), skeniranje kamerom (sada tipkovnica/skener kao tipkovnica),
 offline rad u dvorištu bez signala, zamagljivanje javnih slika (lica, pločice), prijava i HTTPS (ekran sluša samo 127.0.0.1),
 nativni odabir datoteka je na jeziku preglednika. Samo Chromium je testiran.

@@ -168,6 +168,22 @@ def main() -> int:
     ok("V9 stari Code 128 broj vodi na dio preko aliasa", T.po_aliasu(c, "03407429544699306998215032") == d and T.po_aliasu(c, "x") is None)
     ok("V9 isti alias dvaput odbijen", pada(T.dodaj_alias, c, "03407429544699306998215032", n["token"]) is not None)
 
+    # V11 obilazak pretinca
+    pa = pripremi_dio(c, donor, "R02-P1-10"); pb = pripremi_dio(c, donor, "R02-P1-10"); pc = pripremi_dio(c, donor, "R03-P2-04")
+    tok_c = c.execute("SELECT token FROM otpad_dio WHERE id=%s", (pc,)).fetchone()[0]
+    r = T.obilazak(c, "R02-P1-10", [pa], [tok_c, "AAAAAAAAAAAAAAAA"])
+    ok("V11 obilazak: nađen jedan, jedan nedostaje", r["nadjeno"] == [pa] and r["nedostaje"] == [pb], str(r))
+    ok("V11 višak se javlja, ne premješta sam", r["viska"] == [{"id": pc, "pretinac": "R03-P2-04"}] and T.kartica(c, pc)["pretinac"] == "R03-P2-04", str(r))
+    ok("V11 nepoznata oznaka se javlja", r["nepoznato"] == ["AAAAAAAAAAAAAAAA"], str(r))
+    ok("V11 događaj OBILAZAK za nađen i za nedostajući (nadjen da/ne)",
+       broj(c, "SELECT count(*) FROM dio_dogadjaj WHERE vrsta='OBILAZAK' AND otpad_dio_id=%s AND (podaci->>'nadjen')='true'", pa) == 1
+       and broj(c, "SELECT count(*) FROM dio_dogadjaj WHERE vrsta='OBILAZAK' AND otpad_dio_id=%s AND (podaci->>'nadjen')='false'", pb) == 1)
+    ok("V11 lanac dijela i dalje DRZI nakon obilaska", P.provjeri_lanac(c, pa)[0] == "DRZI" and P.provjeri_lanac(c, pb)[0] == "DRZI")
+    ok("V11 tuđi dio među pronađenima odbijen", pada(T.obilazak, c, "R02-P1-10", [pc]) is not None)
+    ok("V11 nepostojeći pretinac odbijen", pada(T.obilazak, c, "R99-P9-99", []) is not None)
+    c.execute("INSERT INTO pretinac (adresa) VALUES ('R05-P5-05')")
+    ok("V11 prazan pretinac bez ičega: sve čisto", T.obilazak(c, "R05-P5-05", [], []) == {"nadjeno": [], "nedostaje": [], "viska": [], "nepoznato": []})
+
     # H3 uživo
     try:
         import zxingcpp

@@ -37,3 +37,13 @@ bez `ARHIVA_BEZ_AI_POTVRDENO=1`, a ekran se bez toga ne pokreće (test A1).
 - **Podloga za webshop:** pipeline zna odvojiti podlogu i dati transparentni sloj (korisno za oglase), ali je to dio iste obrade koja
   zove AI. Besplatni dio (samo lokalno odvajanje) treba zaseban način rada u `obrada.py` (A4 izmjena, nije pisana).
 - Trošak: dok limit nije upisan u lanac, nijedan AI poziv nad slikama dijelova.
+
+## Dodatni nalazi (2026-10-13, čitanje `obrada.py`, `strazar.py`, `strazar_ophodnja.py`)
+- **Krunica:** `obradi_dokument` na kraju zove `upisi_kao_dokarh`, koji upisuje bajtove dokumenta kao DokArh blok u Krunicu (ChainBlock, vječan,
+  replicira se). Zakrpa preskače cijelu obradu za `kelava-dijelovi`, pa se **sadržaj fotografije dijela ne upisuje u Krunicu**; ostaje u Sloju 1
+  (resolver: lokalni disk + Bršljan peerovi) i u retku arhive. Ako ikada želiš da javne slike ipak idu u Krunicu, to je zasebna odluka.
+- **Servisna sesija MORA imati aktivni tenant:** bez njega stražar svakoj fotografiji upisuje alarm `T1_BEZ_KOMITENTA` i `strazar/zdravlje` postaje ALARM.
+- **Prozor stražara:** ophodnja svakih 10 min uzima 200 najnovijih nezapečaćenih dokumenata iz 14 dana. Masovni upload fotografija izgurao bi stvarne
+  račune iz prozora. Rješenje je `primijeni_zakrpu_strazar.py` (isključuje `kelava-dijelovi`, NULL-sigurno; testirano na fixturi i stvarnim SQL-om na sqlite).
+  **NIJE primijenjeno** (A4, traži DA: `DA primijeni-zakrpu-strazar eu-genesis`). Primijeniti prije prvog većeg uploada.
+- Ophodnja NE zove obradu (provjereno), pa zakrpa nije zaobiđena tim putem. Drugi pozivatelji `obradi_dokument` nisu pretraženi (MAX grep je nepouzdan).
