@@ -84,3 +84,9 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **Restart:** `restart_service genesis eu` → active. Poslije: `/health` 200; `strazar/zdravlje` OK, `krugova` 1, zadnji prolaz 06:43:03Z (poslije restarta), `zadnja_greska` null (izmijenjeni SQL se izvršio nad pravom bazom); u logu 0 grešaka.
 - **Ograničenje dokaza:** ophodnja je pregledala 0 dokumenata (u zadnjih 14 dana nema nezapečaćenih), pa na pravim podacima NIJE pokazano da `kelava-dijelovi` izlazi iz prozora. To je pokazano samo na sqlite-u s fixturom (`test_arhiva_spoj.py` Z2). Pravi dokaz tek s prvim uploadom (korak 3).
 - **ODSTUPANJA kao kod prve zakrpe:** nema INTENT/RAČUN atoma (MAX bez `exec`), nema otiska produkcije, cijela datoteka pisana preko `write_file` (kontrola: broj redaka/znakova, md5 readback, žive rute). Atome treba naknadno upisati sesija s exec-om za OBJE zakrpe.
+
+### OFFLINE RED ZA SLIKE — session_01P5KN18DaRqxRrryzpCv9CK (2026-10-13)
+- **Isporučeno (samo repo, ništa na produkciji):** red slika na uređaju (IndexedDB) + servisni worker `ekran/static/sw.js`; traka „Na uređaju čeka n slika“; `ekran/test_offline.py` 15/15.
+- **Regresije:** `test_tamno_ekran.py` 70/70, `test_preglednik_tamno.py` 148/148, `test_arhiva_spoj.py` 37/37, stari `test_preglednik.py` bez pada.
+- **DNEVNIK POGREŠAKA AI-a:** nakon spremanja slike u red kartica se pokušavala osvježiti s poslužitelja (bez veze), pa je poruka „spremljeno na uređaju“ nestala i prikazala se greška; uhvaćeno test_offline.py (O3), poruka sada ostaje na mjestu.
+- **Granica:** offline rade samo slike već unesenih dijelova; Novi dio, predradnje, pretinac i prodaja traže vezu. Pravi offline za cijeli tok traži lokalne privremene ID-ove i usklađivanje, nije građeno.

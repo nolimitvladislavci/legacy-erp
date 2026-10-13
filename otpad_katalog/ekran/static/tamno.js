@@ -16,6 +16,94 @@
   function chip(tekst, vrsta) { return el('span', { class: 'status' + (vrsta ? ' ' + vrsta : '') }, tekst); }
   function pretinacChip(a) { return a ? chip('pretinac ' + a, 'ok') : chip('bez pretinca', 'up'); }
 
+
+  // ---------- RED NA UREĐAJU (dvorište bez signala) ----------
+  // Slike koje se ne mogu poslati (nema veze) čuvaju se u IndexedDB-u i šalju same čim se veza vrati.
+  // Samo slike već unesenih dijelova; unos novog dijela, predradnje i prodaja traže vezu i to jasno javljaju.
+  var Red = (function () {
+    var dbp = null;
+    function otvori() {
+      if (dbp) return dbp;
+      dbp = new Promise(function (res, rej) {
+        if (!window.indexedDB) { rej(new Error('nema indexedDB')); return; }
+        var r = indexedDB.open('otpad-red', 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore('slike', { keyPath: 'id', autoIncrement: true }); };
+        r.onsuccess = function () { res(r.result); };
+        r.onerror = function () { rej(r.error); };
+      });
+      dbp.catch(function () { dbp = null; });
+      return dbp;
+    }
+    function tx(nacin, f) {
+      return otvori().then(function (db) {
+        return new Promise(function (res, rej) {
+          var t = db.transaction('slike', nacin), zahtjev = f(t.objectStore('slike'));
+          t.oncomplete = function () { res(zahtjev ? zahtjev.result : undefined); };
+          t.onerror = t.onabort = function () { rej(t.error); };
+        });
+      });
+    }
+    return {
+      dodaj: function (zapis) { return tx('readwrite', function (s) { return s.add(zapis); }); },
+      sve: function () { return tx('readonly', function (s) { return s.getAll(); }); },
+      ukloni: function (id) { return tx('readwrite', function (s) { return s.delete(id); }); },
+      broj: function () { return tx('readonly', function (s) { return s.count(); }); }
+    };
+  }());
+
+  var traka = el('div', { class: 'red-traka', role: 'status', 'aria-live': 'polite', hidden: 'hidden' });
+  document.body.insertBefore(traka, document.querySelector('main'));
+  var saljem = false;
+  function slika(n) { var o = n % 10, d = n % 100; return n + (o === 1 && d !== 11 ? ' slika' : (o >= 2 && o <= 4 && (d < 12 || d > 14) ? ' slike' : ' slika')); }
+
+  function osvjeziTraku(poruka_) {
+    return Red.broj().then(function (n) {
+      isprazni(traka);
+      if (!n && !poruka_) { traka.hidden = true; return n; }
+      traka.hidden = false;
+      traka.appendChild(el('span', null, poruka_ || ('Na uređaju čeka ' + slika(n) + ' za slanje (nema veze). Šalju se same čim se veza vrati.')));
+      if (n) {
+        var g = el('button', { class: 'gumb', type: 'button' }, 'Pošalji sada');
+        g.addEventListener('click', function () { ispraznRed(true); });
+        traka.appendChild(g);
+      }
+      return n;
+    }, function () { traka.hidden = true; return 0; });
+  }
+
+  function ispraznRed(rucno) {
+    if (saljem) return Promise.resolve();
+    saljem = true;
+    return Red.sve().then(function (stavke) {
+      if (!stavke.length) { saljem = false; return osvjeziTraku(); }
+      var poslano = 0, odbaceno = [], prekid = false;
+      return stavke.reduce(function (lanac, st) {
+        return lanac.then(function () {
+          if (prekid) return;
+          return api('POST', '/api/dio/' + st.dioId + '/slika', st.blob, { 'X-Vrsta': st.vrsta }).then(function (odg) {
+            if (odg.ok || (odg.status === 409 && /već je dodana/.test(odg.data.greska || ''))) { poslano += 1; return Red.ukloni(st.id); }
+            if (odg.status === 0 || odg.status >= 500) { prekid = true; return; }             // veza ili poslužitelj: pokušat će se opet
+            odbaceno.push(odg.data.greska || 'Slika je odbijena.'); return Red.ukloni(st.id);   // trajno odbijeno: ne ponavljati beskonačno
+          });
+        });
+      }, Promise.resolve()).then(function () {
+        saljem = false;
+        var tekst = null;
+        if (poslano) tekst = 'Poslano: ' + slika(poslano) + ' koje su čekale na uređaju.';
+        if (odbaceno.length) tekst = (tekst ? tekst + ' ' : '') + 'Odbijeno ' + odbaceno.length + ': ' + odbaceno[0];
+        if (!tekst && rucno) tekst = 'Još nema veze s poslužiteljem. Slike ostaju na uređaju.';
+        return osvjeziTraku(tekst).then(function () {
+          if (poslano) { if (otvoren) osvjezi(); else ucitajRadu(); }
+          if (tekst) setTimeout(function () { osvjeziTraku(); }, 10000);
+        });
+      });
+    }).catch(function () { saljem = false; });
+  }
+  window.addEventListener('online', function () { ispraznRed(); });
+  setInterval(function () { if (navigator.onLine) ispraznRed(); }, 30000);
+  osvjeziTraku().then(function (n) { if (n && navigator.onLine) ispraznRed(); });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
+
   // ---------- NOVI DIO ----------
   var prepoznatiDio = null;
   function ucitajAute() {
@@ -155,19 +243,31 @@
       var ulaz = el('input', { type: 'file', accept: 'image/*', multiple: 'multiple', 'aria-label': 'Dodaj slike: ' + VRSTE[vrsta] });
       ulaz.addEventListener('change', function () {
         var datoteke = Array.prototype.slice.call(ulaz.files); if (!datoteke.length) return;
-        ulaz.disabled = true; var n = 0, greske = [];
+        ulaz.disabled = true; var n = 0, greske = [], uRedu = 0;
         poruka(S.por, 'info', 'Šaljem sliku 1 od ' + datoteke.length + '…');
         datoteke.reduce(function (lanac, f) {
+          var blob_ = null;
           return lanac.then(function () { return smanji(f); }).then(function (b) {
+            blob_ = b;
             return api('POST', '/api/dio/' + d.id + '/slika', b, { 'X-Vrsta': vrsta });
           }).then(function (odg) {
             n += 1;
+            if (odg.status === 0) {                                                  // nema veze: slika ide u red na uređaju
+              return Red.dodaj({ dioId: d.id, vrsta: vrsta, blob: blob_, ime: f.name, vrijeme: Date.now() }).then(function () { uRedu += 1; },
+                function () { greske.push('Nema veze s poslužiteljem i slika se ne može sačuvati na uređaju. Pokušaj ponovo kad se veza vrati.'); });
+            }
             if (!odg.ok) greske.push(odg.data.greska); else poruka(S.por, 'info', 'Poslano ' + n + ' od ' + datoteke.length + '…');
           });
         }, Promise.resolve()).then(function () {
+          if (uRedu) {                                   // bez veze se kartica ne može osvježiti: poruka ostaje na mjestu
+            poruka(S.por, greske.length ? 'greska' : 'info', (greske.length ? greske[0] + ' ' : '') + 'Nema veze. Spremljeno na uređaju: ' + slika(uRedu) +
+              '. Šalje se samo čim se veza vrati.' + (n - uRedu - greske.length > 0 ? ' Ostale su već poslane.' : ''));
+            ulaz.disabled = false; ulaz.value = '';
+            return osvjeziTraku();
+          }
           if (greske.length) obavijesti('greska', greske[0] + (greske.length > 1 ? ' (+' + (greske.length - 1) + ' grešaka)' : '') + (n - greske.length > 0 ? ' Ostale slike su spremljene.' : ''));
           else obavijesti('ok', datoteke.length === 1 ? 'Slika je spremljena.' : 'Slike su spremljene (' + datoteke.length + ').');
-          return osvjezi();
+          return osvjezi().then(function () { return osvjeziTraku(); });
         });
       });
       S.n.appendChild(ulaz);

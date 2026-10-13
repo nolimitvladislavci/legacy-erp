@@ -86,9 +86,16 @@ Stare lokalne slike ostaju čitljive. Preglednik prije slanja smanji sliku na 20
 ```
 BRANDS_JS=<brands.js> python3 -I ekran/test_tamno_ekran.py          # 70 provjera + stari test_ekran.py (20)
 BRANDS_JS=<brands.js> python3 -I ekran/test_preglednik_tamno.py [mapa_snimki]   # Chromium, 2 teme x 2 širine, cijeli tok + obilazak, 148 provjera
+BRANDS_JS=<brands.js> python3 -I ekran/test_offline.py                 # prekid veze, red na uređaju, servisni worker, 15 provjera
 ```
 
 **Inventura (kartica Stalaža → pretinac):** „Obilazak pretinca“: radnica označi što stvarno vidi; neoznačeni dijelovi dobivaju događaj `OBILAZAK` s `nadjen: ne`, višak (dio koji je tu a vodi se drugdje) se javlja i NE premješta sam.
+
+**Rad bez signala (dvorište):** slike dijela koje se ne mogu poslati (nema veze ili je poslužitelj ugašen) spremaju se na uređaj (IndexedDB) i same
+se šalju čim se veza vrati; žuta traka pokazuje koliko ih čeka (+ gumb „Pošalji sada“). Duplikat se tretira kao poslan, trajno odbijena slika
+(npr. dio je u međuvremenu otišao u škart) se prijavi i izbaci iz reda. Servisni worker (`sw.js`) sprema ljusku aplikacije pa se ona otvara i bez
+mreže (traži HTTPS ili localhost). **Ograničenje:** nova stavka (Novi dio), predradnje, pretinac i prodaja traže vezu i to jasno javljaju; offline
+rade samo slike već unesenih dijelova. Test: `test_offline.py` (15 provjera, simulirani prekid veze i gašenje poslužitelja).
 
 **Nije gotovo:** prepoznavanje po slici (H1), skeniranje kamerom (sada tipkovnica/skener kao tipkovnica),
 offline rad u dvorištu bez signala, zamagljivanje javnih slika (lica, pločice), prijava i HTTPS (ekran sluša samo 127.0.0.1),

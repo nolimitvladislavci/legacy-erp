@@ -31,7 +31,7 @@ from greske import Greska
 DSN = os.environ.get("OTPAD_DSN", "")
 PORT = int(os.environ.get("OTPAD_PORT", "8765"))
 STATIC = Path(__file__).resolve().parent / "static"
-STATICKE_DATOTEKE = {"index.html", "app.css", "app.js", "tamno.js", "favicon.svg"}
+STATICKE_DATOTEKE = {"index.html", "app.css", "app.js", "tamno.js", "sw.js", "favicon.svg"}
 
 GODINA_RE = re.compile(r"\b(19[5-9]\d|20[0-3]\d)\b")
 VIN_RE = re.compile(r"^[A-HJ-NPR-Z0-9]{17}$")
@@ -362,7 +362,7 @@ class Handler(BaseHTTPRequestHandler):
             u = urlparse(self.path)
             if u.path in ("/", "/index.html"):
                 return self._statika("index.html")
-            if u.path in ("/app.css", "/app.js", "/tamno.js", "/favicon.svg"):
+            if u.path in ("/app.css", "/app.js", "/tamno.js", "/sw.js", "/favicon.svg"):
                 return self._statika(u.path[1:])
             if u.path == "/favicon.ico":          # preglednik ga uvijek traži; bez 404 u konzoli
                 self.send_response(204)
