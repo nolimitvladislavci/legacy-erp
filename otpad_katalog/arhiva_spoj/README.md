@@ -12,6 +12,8 @@ se NIJE spajalo: za to treba zakrpa na produkciji (A4) i servisna sesija koju mo
 - `services/arhiva_core/obrada.py`: **svaki upload pokreće obradu u pozadini: OCR, odvajanje podloge i DVA AI poziva** (vizualno i
   semantičko, preko token routera). Za fotografije dijelova to je trošak bez koristi, a limit troška je 0 dok nije upisan u lanac.
 
+**Ažurirano 2026-10-13:** korak 2 je IZVEDEN na EU (vidi FENIX_SOBA.md, odjeljak "DA primijeni-zakrpu-bez-ai"), ali preko `write_file` cijele datoteke, bez INTENT/RAČUN atoma. Korak 3 (mjerenje sa servisnom sesijom) tek slijedi; do tada se `ARHIVA_BEZ_AI_POTVRDENO=1` ne uključuje.
+
 ## Zašto zakrpa
 Bez nje bi svaka fotografija dijela (tisuće) pokrenula plaćenu AI obradu i zatrpala knjigovođin popis računa. Zakrpa
 (`primijeni_zakrpu.py`) preskače obradu SAMO za app_id `kelava-dijelovi`; ručni `/obradi` ostaje. Adapter se ne da uključiti

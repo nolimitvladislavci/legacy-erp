@@ -59,3 +59,13 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **Isporučeno:** `ekran/arhiva_spremnik.py`, `ekran/lazna_arhiva.py` (ugovor iz koda), `arhiva_spoj/{primijeni_zakrpu.py,README.md}`, `ekran/test_arhiva_spoj.py` 33/33
   (lažna arhiva, NE stvarna). Regresije: `test_tamno_ekran.py` 64/64, `test_preglednik_tamno.py` 132/132.
 - **NIJE učinjeno (A4, čeka Ivanov DA):** zakrpa `api/arhiva_core.py` na EU i servisna sesija za Kelavu. Zakrpa je testirana samo na fixturi.
+
+### DA primijeni-zakrpu-bez-ai eu-genesis: IZVEDENO (session_01P5KN18DaRqxRrryzpCv9CK, 2026-10-13 ~06:23–06:25 UTC)
+- **Meta:** EU `/var/www/genesis/api/arhiva_core.py`, servis `genesis`. Ivanov DA za tu jednu radnju.
+- **Izmjena (točno dva mjesta):** konstanta `_APP_ID_BEZ_AI` (env `ARHIVA_BEZ_AI_APP_ID`, zadano `kelava-dijelovi`) i uvjet `if app_id not in _APP_ID_BEZ_AI:` ispred `background_tasks.add_task(_obradi_u_pozadini, ...)` u `upload_datoteka`. Ručni `/obradi` netaknut.
+- **Backup:** `/var/www/genesis/api/arhiva_core.py.bak_20261013_062313` (806 redaka, 35598 znakova). Nova datoteka: 811 redaka, 36022 znaka (očekivano 806+5 i 35598+424), md5 `886084c5c9a3bc3e3feaf1ce96c210c8` (readback MATCH).
+- **Rollback:** `cp -p /var/www/genesis/api/arhiva_core.py.bak_20261013_062313 /var/www/genesis/api/arhiva_core.py && systemctl restart genesis` (traži exec; MAX ga nema).
+- **Restart:** `restart_service genesis eu` → active (import-gate prošao). Poslije: `/health` 200, `strazar/zdravlje` 200 (zadnji prolaz 06:24:45Z), `status/red` 401 (ruta živa, traži prijavu).
+- **ODSTUPANJE OD PROTOKOLA (§4, §9), upisano otvoreno:** (1) **INTENT i RAČUN atomi NISU upisani** (nema `exec_command`, a atome piše samo `protokol/intent.py`; ručno pisanje u lanac je zabranjeno). Treba ih naknadno upisati sesija s exec-om, uz hashove iz ovog zapisa. (2) **Nije napravljen otisak produkcije** prije/poslije. (3) **Datoteka je zamijenjena cijela** preko `write_file` (alat nema ciljanu zamjenu), a ne `sed`-om; kontrola: broj redaka i znakova, md5 readback, import-gate, žive rute. Nije moguće dokazati bajt-identičnost ostatka (md5 originala nije izmjeren).
+- **NIJE izmjereno:** da upload za `kelava-dijelovi` zaista ne pokreće AI (treba servisna sesija, korak 3 u `arhiva_spoj/README.md`). Do tog mjerenja: **NAPISANO/TESTIRANO na fixturi, ne DOKAZANO**. Ne uključivati `ARHIVA_BEZ_AI_POTVRDENO=1` na ekranu dok se ne izmjeri.
+- **Usputni nalaz (nije moje, nisam dirao):** `log` nije definiran u `api/arhiva_core.py` (koristi se u `dokument_pogled` i `_ocr_rijeci`), pa te grane bacaju `NameError` kad se izvedu.
