@@ -14,18 +14,24 @@
         else n.setAttribute(k, atributi[k]);
       });
     }
-    for (var i = 2; i < arguments.length; i++) {
-      var d = arguments[i];
-      if (d == null || d === false) continue;
+    function dodaj(d) {
+      if (d == null || d === false) return;
+      if (Array.isArray(d)) { d.forEach(dodaj); return; }
       n.appendChild(typeof d === 'string' || typeof d === 'number' ? document.createTextNode(String(d)) : d);
     }
+    for (var i = 2; i < arguments.length; i++) dodaj(arguments[i]);
     return n;
   }
   function isprazni(n) { while (n.firstChild) n.removeChild(n.firstChild); }
 
-  function api(metoda, url, tijelo) {
+  function api(metoda, url, tijelo, zaglavlja) {
     var opcije = { method: metoda, headers: {} };
-    if (tijelo) {
+    if (typeof Blob !== 'undefined' && tijelo instanceof Blob) {      // slika: sirovi bajtovi
+      opcije.headers['Content-Type'] = tijelo.type || 'application/octet-stream';
+      opcije.headers['X-Requested-With'] = 'otpad';
+      Object.keys(zaglavlja || {}).forEach(function (k) { opcije.headers[k] = zaglavlja[k]; });
+      opcije.body = tijelo;
+    } else if (tijelo) {
       opcije.headers['Content-Type'] = 'application/json';
       opcije.headers['X-Requested-With'] = 'otpad';
       opcije.body = JSON.stringify(tijelo);
@@ -69,18 +75,21 @@
   function cijena(s) { return s == null ? '' : String(s).replace('.', ',') + ' €'; }
 
   // ---------- kartice ----------
+  var TABOVI = ['trazi', 'novi', 'radu', 'stalaza', 'unos'];
   function tabPrebaci(ime) {
-    ['trazi', 'unos'].forEach(function (t) {
+    TABOVI.forEach(function (t) {
       var aktivan = t === ime;
       $('tab-' + t).setAttribute('aria-selected', aktivan ? 'true' : 'false');
       $('tab-' + t).tabIndex = aktivan ? 0 : -1;
       $('panel-' + t).hidden = !aktivan;
     });
     if (ime === 'unos') osvjeziUnos();
-    else $('q').focus();
+    else if (ime === 'trazi') $('q').focus();
+    document.dispatchEvent(new CustomEvent('otpad-tab', { detail: ime }));
   }
-  $('tab-trazi').addEventListener('click', function () { tabPrebaci('trazi'); });
-  $('tab-unos').addEventListener('click', function () { tabPrebaci('unos'); });
+  TABOVI.forEach(function (t) { $('tab-' + t).addEventListener('click', function () { tabPrebaci(t); }); });
+  window.OTPAD = { $: $, el: el, isprazni: isprazni, api: api, poruka: poruka, zauzet: zauzet, vozilo: vozilo,
+                   cijena: cijena, tab: tabPrebaci };
 
   // ---------- TRAŽI ----------
   function prikaziRezultate(d) {

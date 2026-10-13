@@ -57,3 +57,36 @@ OTPAD_URL=http://127.0.0.1:8765 python3 ekran/test_preglednik.py [mapa_snimki]  
 sluša samo `127.0.0.1`), HTTPS, produkcijska baza i lozinka uloge `otpad_app`.
 Uloga `otpad_app` smije samo čitati i dodavati (bez brisanja i izmjene strukture).
 Preglednik: testirano samo u Chromiumu; Firefox i WebKit nisu provjereni.
+
+## Ekran: tamni dio (kartice Novi dio · U radu · Stalaža)
+
+Tok bez papira, jedna radnica s mobitelom: **Novi dio** (auto + broj/naziv; nepoznat dio se svejedno unosi) → **U radu**
+(3+ slike, pranje sa slikom, test DRŽI/PAD/NE ZNAM, pakiranje sa slikom i dimenzijama, pretinac, pa „Stavi u prodaju" uz
+cijenu i razred jamstva) → **Stalaža** (nađi po adresi pretinca, oznaci dijela ili broju; dodavanje pretinaca polica po polica).
+Vrata „Stavi u prodaju" provjerava stroj i izlistava sve razloge ako dio još ne smije van. Stara kartica „Brzi unos (staro)"
+zaobilazi vrata (dio odmah ide na zalihu) i treba se ukinuti čim novi tok proradi.
+
+Pokretanje na TEST bazi (uz korake iz prethodnog odjeljka, plus):
+```
+psql -d <test_baza> -f prodaja/schema_prodaja.sql -f prodaja/schema_tamno.sql -f uloga_ekran.sql
+psql -d postgres -c "ALTER ROLE otpad_ekran PASSWORD '<lozinka>'"                     # NE u repo
+OTPAD_DSN="host=127.0.0.1 dbname=<test_baza> user=otpad_ekran password=<lozinka>" \
+OTPAD_SLIKE=/putanja/izvan/repoa/slike OTPAD_PORT=8765 python3 ekran/server.py
+```
+Bez `OTPAD_SLIKE` učitavanje slika vraća 503 (nema slučajnog spremanja). Uloga `otpad_ekran` nema DELETE i ne smije mijenjati
+token, donora ni broj na dijelu.
+
+**Slike:** `ekran/spremnik.py` je PRIJELAZNI lokalni direktorij (sadržaj izvan baze, u bazi samo sha256 i veza). Prava pohrana je
+poslovna arhiva (ARHIVA 2030, `arhiva_core/ulaz.py: primi_dokument`) iz koje se gradi webshop; spajanje čeka mjerenje što
+`resolver.put` radi dalje s dokumentom i kako se u arhivi razlikuju privatne slike od javnih. Preglednik prije slanja smanji sliku
+na 2000 px i ponovno je kodira, čime se izbacuje EXIF (npr. GPS). Krunica nikad ne nosi sadržaj slike.
+
+**Testovi (sve na privremenim bazama):**
+```
+BRANDS_JS=<brands.js> python3 -I ekran/test_tamno_ekran.py          # 64 provjere + stari test_ekran.py (20)
+BRANDS_JS=<brands.js> python3 -I ekran/test_preglednik_tamno.py [mapa_snimki]   # Chromium, 2 teme x 2 širine, cijeli tok, 132 provjere
+```
+
+**Nije gotovo:** prepoznavanje po slici (H1), skeniranje kamerom (sada tipkovnica/skener kao tipkovnica), obilazak pretinaca (inventura),
+offline rad u dvorištu bez signala, zamagljivanje javnih slika (lica, pločice), prijava i HTTPS (ekran sluša samo 127.0.0.1),
+nativni odabir datoteka je na jeziku preglednika. Samo Chromium je testiran.

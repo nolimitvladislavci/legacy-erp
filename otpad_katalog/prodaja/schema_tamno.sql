@@ -52,8 +52,10 @@ CREATE TABLE IF NOT EXISTS kod_alias (
 
 GRANT SELECT ON pretinac TO otpad_prodaja;
 GRANT INSERT ON otpad_dio TO otpad_prodaja;
-GRANT UPDATE (token, pretinac_adresa, razred_jamstva, cijena, otpad_vozilo_id, dio_id, broj_na_dijelu)
-    ON otpad_dio TO otpad_prodaja;
+-- Najmanja prava: token, donor i broj na dijelu se nakon rođenja ne mijenjaju; dio_id smije (dopuna tipa kasnije).
+REVOKE UPDATE (token, otpad_vozilo_id, broj_na_dijelu) ON otpad_dio FROM otpad_prodaja;
+GRANT UPDATE (pretinac_adresa, razred_jamstva, cijena, dio_id) ON otpad_dio TO otpad_prodaja;
 GRANT SELECT, INSERT ON dio_slika, kod_alias TO otpad_prodaja;
 GRANT UPDATE (javna) ON dio_slika TO otpad_prodaja;
 GRANT USAGE ON SEQUENCE otpad_dio_id_seq, dio_slika_id_seq TO otpad_prodaja;
+GRANT INSERT ON pretinac TO otpad_prodaja;
