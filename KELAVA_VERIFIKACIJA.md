@@ -8,6 +8,7 @@ Svrha: da netko drugi (druga sesija, Ivan, Fable) može PROVJERITI što je napra
 - To NIJE repo `/var/www/genesis` na EU (tamo postoji samo `master`), pa `git log --all` na EU ne vidi moje commite. Paket zvan „otpad-ekran" i brojka „411/411" **nisu moji**; moji nazivi su `otpad_katalog/` i brojke u odjeljku 3.
 - Provjerena osnova (čisti radni direktorij): commit **83eb9e3afd021242af7478650f5ceb3ff2d94f21** (`83eb9e3a`).
 - Moj kod NIJE na EU. Na EU su samo dvije izmjene iz odjeljka 4.
+- **Paket za uvođenje ekrana na EU POSTOJI, ali ga je napisala DRUGA sesija** (`session_01KME8WP5HfMkATwKt7L9dke`, Claude Fable 5.1): commit **`71a756b1`** na istoj grani (mapa `otpad_katalog/deploy/`: `deploy_eu.sh`, `nginx_otpad.conf`, `otpad-ekran.service`, `vozila.sql`, `test_iza_nginxa.py`, `README.md`; uz izmjene relativnih putanja u `ekran/static/`). To je vjerojatno ono što je Ivanov `DA uvedi-otpad-ekran eu-genesis` ciljao. EU sesija ga nije našla jer je **samo na GitHubu**, ne na EU; README u toj mapi kaže da se uvodi s `git clone -b claude/loving-babbage-gzx2xt https://github.com/nolimitvladislavci/legacy-erp` na EU (traži pristup repou). **Njegove tvrdnje (411/411, 19 × DRŽI, harness 25/25 i 33/33, rollback) NISAM provjerio**; provjerio sam samo da moji testovi prolaze i uz njegove izmjene statičkih datoteka (odjeljak 3b). Prije uvođenja pročitati `deploy/README.md` i pokrenuti `deploy_eu.sh --suho`.
 
 ## 1. Kako dobiti kod
 ```
@@ -50,6 +51,10 @@ test_preglednik_tamno | exit=0 | UKUPNO 148 · PROŠLO 148 · PALO 0
 test_offline | exit=0 | UKUPNO 15 · PROŠLO 15 · PALO 0
 test_preglednik_staro | exit=0 | prošlo: 117 | exit: 0 
 ```
+### 3b. Isti testovi na vrhu grane `b918cf11` (uključuje tuđi commit `71a756b1`), čisti checkout (git worktree), 2026-10-14
+`test_vin` 40/40 · `test_prodaja` 28/28 · `test_tamno` 48/48 · `test_arhiva_spoj` 37/37 · `test_tamno_ekran` 70/70 · `test_preglednik_tamno` 148/148 · `test_offline` 15/15 · stari `test_preglednik` 117 prošlo; nijedan `PALO`, svi exit 0.
+Nisam pokretao `deploy/test_iza_nginxa.py` ni `deploy_eu.sh` (traže nginx/EU-sličnu okolinu).
+
 Naredbe (iz `otpad_katalog/`): `python3 -I test_vin.py` · `cd prodaja && python3 -I test_prodaja.py` · `cd prodaja && python3 -I test_tamno.py` ·
 `BRANDS_JS=<brands.js> python3 -I ekran/test_arhiva_spoj.py` · `… ekran/test_tamno_ekran.py` · `… ekran/test_preglednik_tamno.py` · `… ekran/test_offline.py`.
 Razina: **TESTIRANO** (jedno pokretanje po paketu), ne DOKAZANO (nema n ≥ 30 ponavljanja). Testirano samo u Chromiumu, nikad na pravom mobitelu.
@@ -129,3 +134,16 @@ a8d946d803b6986a1dbdd5d9e775b5b711b09498df6b9415e24374d0ec0c244a  otpad_katalog/
 e47fbceb6ca7de7f31539266b74139b84e9200e5c8d7cd2158b48ebc7e3ece9e  otpad_katalog/vin.py
 3db04d0b9564b1f198f9e6c4e88b50af42368b2c3f6bac58fe395f949535d056  otpad_katalog/vin_provjera.sql
 da1fbc7ec9476278f3d6fb53e5ee3c6a3908a6f784a8585a40cc7b69bda9357e  otpad_katalog/wmi.csv
+
+## 7. SHA-256 datoteka paketa za uvođenje (tuđi commit `71a756b1`) i izmijenjenih statičkih datoteka, na vrhu grane `b918cf11`
+Provjera: `sed -n '/^## 7/,$p' KELAVA_VERIFIKACIJA.md | grep -E '^[0-9a-f]{64}  ' | while read h f; do [ "$(git show b918cf11d10bd20fa638fb2ac5ddf69032e5d269:"$f" | sha256sum | cut -d' ' -f1)" = "$h" ] && echo "OK  $f" || echo "PAD $f"; done`
+dbbc14efd166bbb91d8681fb31bd5eb2cdab531c64eb5102753f10b46d7f56ad  otpad_katalog/deploy/README.md
+dccca09c546ba5967adf86b47d0940530f20970c4cbc3bab0a7575caa804f655  otpad_katalog/deploy/deploy_eu.sh
+88f066f35d68da9bb94e43128f6b02571719d6bd2811f6c0e91fc6648b009f08  otpad_katalog/deploy/nginx_otpad.conf
+cf5cf4319a0a1e54aed1f80beb6f24e5dd50ad7984b0ef8a831232470bb4fea6  otpad_katalog/deploy/otpad-ekran.service
+d6185284a10668151063431a94d5c116332cee5b29b00a6a14e627d12608ff2b  otpad_katalog/deploy/test_iza_nginxa.py
+29fdd8973c75a40fd99e2fa1fa1d3f4102ad42a9c973cbb47598267eedc5d4f0  otpad_katalog/deploy/vozila.sql
+7bcb411f0164cfe4d7c4d9bd5441b81f33b19910d9ae328ee3684cd68d956883  otpad_katalog/ekran/static/app.js
+a84a0f4a5516ccba2763a60c44aaab534c7c0793173a4a264f34fae59ad5b23b  otpad_katalog/ekran/static/index.html
+541ba23bc9726dcea8963be52ce94f7f25b05b30311e1752e35e746edea1deab  otpad_katalog/ekran/static/sw.js
+8befe809a8bbdd79a94eb19478f5b9b4b174e50cd3ad8691dd52101127ec7ac8  otpad_katalog/ekran/static/tamno.js
