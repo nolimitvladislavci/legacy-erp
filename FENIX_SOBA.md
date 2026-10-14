@@ -99,3 +99,11 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **DNEVNIK POGREŠAKA AI-a:** prva verzija isječka (`Host $host`) rušila je svaki POST iza proxyja s portom; uhvaćeno harnessom, popravljeno (`$http_host`).
 - **NIJE učinjeno na produkciji:** ništa. Uvođenje traži `exec` (pip, `nginx -t`, systemctl, `intent.py`), a MAX ga nema; i traži `DA uvedi-otpad-ekran eu-genesis`. N3 (root-pisac) i dalje čeka exec.
 - **Usklađeno s paralelnom sesijom (83eb9e3a, rad bez signala):** novi `sw.js` je imao apsolutne putanje (`/`, `/api/`) — pod `/otpad/` bi spremao ljusku genesisa i **keširao API**. Popravljeno (putanje relativno prema `sw.js`, API se prepoznaje kao `<opseg>api/`). Regresije: `test_offline.py` 15/15, `test_tamno_ekran.py` 70/70, `test_preglednik_tamno.py` 148/148, `test_arhiva_spoj.py` 37/37; harness iza nginxa provjerava opseg workera `/otpad/` i da API nije u cacheu.
+
+### NACRT USTAV v3.1 — §6a CILJEVI ISPORUKE — session_01P5KN18DaRqxRrryzpCv9CK (2026-10-14)
+**STATUS: NACRT. Ne vrijedi dok Ivan ne potpiše `DA USTAV v3 lanac` (§16). Do tada vrijedi v3 kao i dosad.**
+- **Povod (isti nesporazum, 2. put):** zadatak „zapiši rad na flotu i u Downloads" proglašen je zapisanim, a laptop i lanac nisu bili dostižni (MAX piše samo na čvorove flote, nema alata za atom, `intent.py` traži exec). Nedostižnost je trebalo javiti prije rada, ne u izvještaju.
+- **Predloženi tekst:**
+  > **§6a Ciljevi isporuke.** Prije prvog koraka svaki zadatak s metom (laptop, lanac, EU, repo) dobiva popis meta; uz svaku piše DOSTUPNA ili NEDOSTUPNA, uzrok i što treba da postane dostupna. Nedostupna meta se javlja u prvom retku odgovora, ne u izvještaju. Zadatak je GOTOV tek kad je svaka meta zapisana tripletom (naredba, exit, hash). Inače se piše „NEDOVRŠENO: <meta>", nikad „zapisano".
+- **Provjera da pravilo drži (pred-registrirana hipoteza):** u sljedećih 3 zadataka s više meta, prvi redak odgovora navodi status svake mmete. Presudu izdaje Ivan čitanjem; PAD ako i jedan odgovor kaže „gotovo" uz neispisanu nedostupnu metu.
+- **DNEVNIK POGREŠAKA AI-a:** javio „zapisano" za 2 od 4 mete (EU Downloads i repo da; laptop i lanac ne) bez prethodne najave; uhvatio ga Ivan. Test koji to hvata: §6a, popis meta u prvom retku.
