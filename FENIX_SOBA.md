@@ -123,3 +123,20 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **Nije učinjeno:** drugi redak s naljepnice („VWZ…C8440669", pokidan) nije upisan jer nije čitljiv.
 - **Internet:** nije nađen otvoren skup OEM brojeva s jasnom licencom (TecDoc je licenciran).
 - **DNEVNIK POGREŠAKA AI-a (15.10.):** neprovjerene brojeve s interneta (800 P, 802 C, 822…) stavio sam pod isti `dio` kao Ivanov broj 6Q0 920 842 C; ekran ispisuje sve brojeve dijela, pa je izgledalo da su zamjenjivi (benzin/dizel, različit zaslon). Uz to sam Ivanove slike tretirao kao Kelavinu zalihu, a bile su UZORAK PRETRAGE (traži sat). Ispravljeno: neprovjereni brojevi su u zasebnom `dio` „… srodne varijante (NEPROVJERENO, nisu zamjena)"; zaliha za 6Q0 920 842 C = 0. Test koji to hvata: `trazi_broj('6q0920842c')` ne smije vratiti ni jedan broj izvora `NEPROVJERENO:%` (provjereno upitom 15.10.). Pravilo: broj bez provjere zamjenjivosti nikad ne ide pod isti dio kao provjeren broj.
+
+### OCJENA MODULA KELAVA NA EU — session_01P5KN18DaRqxRrryzpCv9CK (2026-10-15, samo čitanje A0; produkcija nedirnuta)
+**Zaključak:** modul radi i izvana je dobro zaštićen, ali stanje na serveru više nije ono što je ova sesija uvela: druga sesija je istodobno mijenjala kod, bazu i nginx. Ocjene vrijede za stanje u trenutku provjere i NISU DOKAZANO (jedan prolaz, bez harnessa i mobitela).
+
+**Provjereno (naredba → rezultat):** `systemctl is-active/is-enabled otpad-ekran` → active/enabled; `nginx -t` → OK (uz upozorenja ispod); izvana (GET): `/otpad/` → 302 na `/otpad/prijava/`, `/otpad/prijava/` → 200, `/otpad/api/{pretinci,nazivi,trazi}` → 401, `/otpad/lozinka` → 401, `/health` → 200; `otpad_kelava`: uloge `otpad_*` nisu superuser, `CONNECT` za PUBLIC uklonjen, trigger `dio_dogadjaj_nepromjenjiv` postoji; lanac: atomi c13826–c13834 (moji) + tuđi c13842–c13865.
+
+**Nalazi (redom važnosti):**
+1. **Demo podaci u produkciji.** `otpad_dio`=6, `otpad_vozilo`=4 (VIN `WDEMVXN…`); Ivanov sat `6Q0 920 842 C` vodi se kao NA_ZALIHI (55,00) i PRODAN (40,00). Izvori kataloga su označeni „DEMO … (neprovjereno)", ali redovi zalihe nisu. Suprotno ranijoj tvrdnji „zaliha 0".
+2. **Autocomplete naziva sječe popis:** `dio` = 1527 različitih naziva, `/api/nazivi` vraća prvih 300 (`LIMIT 300`); popis od 295 vrsta većinom nije vidljiv. `dio_broj`=1431, 1474 dijela bez broja.
+3. **Produkcijski kod nije u repou:** `server.py` mijenjan ≥ 4 puta (c13850–c13862), novi `prijava.py`, `q4d_izazov.py`, `prijava_http.py`, `skener.js`, `jsqr.js`, `kodovi.js`, `potvrdi.*`; grana na GitHubu nema ih. `KELAVA_VERIFIKACIJA.md` (sha256) više ne vrijedi za server.
+4. **Lanac događaja prazan:** `dio_dogadjaj`=0, `dio_slika`=0, `izlaz_flota`=0, a postoji dio „PRODAN"; redovi su uneseni izravno SQL-om mimo ekrana i vrata prodaje.
+5. **Moja greška (deploy_eu.sh):** `genesis-eu.bak.20261015T022023Z` ostao je u `sites-enabled`; `nginx -t` javlja „conflicting server name … ignored" jer se i backup učitava kao server blok. Treba ga premjestiti izvan te mape.
+6. **Nepotvrđeno:** nginx snippet `otpad.conf` zamijenjen (74 retka, Q4D prijava); INTENT c13865 viđen, RAČUN nije (popis ograničen na 80 stavki).
+
+**Ocjene (1–10):** dostupnost servisa 8 · sigurnost pristupa 8 · cjelovitost podataka (istina) 3 · katalog/pretraga 4 · kontrola promjena 3 · dokaz/testiranost 5 · operativa/oporavak 6 · lanac/atomi 7 · frontend/UX NEPOZNATO (nije viđen iza prijave) · integracije (arhiva, Q4D, fiskal) 3 · dokumentacija/predaja 6 · usklađenost s USTAVOM 5. Moj dio uvođenja 7/10 (propust s `.bak`; neprovjereni brojevi isprva pod istim dijelom — ispravljeno). Tuđe naknadne izmjene nisu ocijenjene jer nisu viđene u cijelosti.
+
+**Popravci za CC (triplet kao uvjet gotovog):** (1) označiti/ukloniti demo redove `otpad_dio` 1–6 i demo vozila — `SELECT count(*) FROM otpad_dio WHERE …` i tvoj sat nije NA_ZALIHI; (2) `nazivi_dijelova` ne smije sjeći popis — `/api/nazivi` vraća sve vrste; (3) produkcijski kod u repo — `git diff` produkcija↔repo prazan; (4) `.bak` iz `sites-enabled` — `nginx -t` bez „conflicting server name"; (5) zatvoriti RAČUN za c13865.
