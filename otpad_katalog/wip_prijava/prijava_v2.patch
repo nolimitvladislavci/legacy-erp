@@ -1,0 +1,324 @@
+diff --git a/otpad_katalog/ekran/prijava.py b/otpad_katalog/ekran/prijava.py
+new file mode 100644
+index 00000000..9a006cc2
+--- /dev/null
++++ b/otpad_katalog/ekran/prijava.py
+@@ -0,0 +1,77 @@
++"""Prijava za ekran: provjera GenesisLogin sesije preko /api/v1/genesis/auth/me (isti obrazac kao servis qr4d na EU).
++
++Ništa se ne izmišlja: token izdaje fleta (GenesisAuth.login() popup), a ovdje se samo provjerava. Fail-closed (Z53):
++nedostupna provjera = 503 NEPOZNATO, nikad propust. Dopušteni su samo identiteti s popisa (OTPAD_DOZVOLJENI, weise3_id-evi
++odvojeni zarezom): prijava u GenesisLogin sama po sebi ne daje pristup Kelavinim dijelovima.
++Token se ne zapisuje u zapisnik; u memoriji se čuva samo njegov sha256 i to najviše TTL sekundi (pozitivni odgovori).
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import re
++import threading
++import time
++import urllib.error
++import urllib.request
++
++from greske import Greska
++
++W3 = re.compile(r"[0-9a-f]{64}")
++
++
++class Prijava:
++    def __init__(self, auth_url: str, dozvoljeni: set[str], ttl: int = 60, rok: int = 6):
++        if not dozvoljeni:
++            raise ValueError("OTPAD_DOZVOLJENI je prazan: prijava bez popisa dopuštenih identiteta nikoga ne bi pustila (ili bi pustila svakoga)")
++        for w in dozvoljeni:
++            if not W3.fullmatch(w):
++                raise ValueError(f"OTPAD_DOZVOLJENI: '{w[:12]}…' nije weise3_id (64 heksadecimalna znaka)")
++        self.auth_url, self.dozvoljeni, self.ttl, self.rok = auth_url.rstrip("/"), set(dozvoljeni), ttl, rok
++        self._kes: dict[str, tuple[str, float]] = {}
++        self._brava = threading.Lock()
++
++    def _me(self, token: str) -> tuple[int, dict]:
++        r = urllib.request.Request(self.auth_url + "/api/v1/genesis/auth/me", headers={"Authorization": "Bearer " + token})
++        try:
++            with urllib.request.urlopen(r, timeout=self.rok) as o:
++                return o.status, json.loads(o.read() or b"{}")
++        except urllib.error.HTTPError as e:
++            return e.code, {}
++
++    def provjeri(self, authorization: str | None) -> str:
++        """-> weise3_id prijavljenog i dopuštenog korisnika, ili Greska (401 prijava, 403 pristup, 503 provjera nedostupna)."""
++        if not authorization or not authorization.lower().startswith("bearer ") or len(authorization) < 16:
++            raise Greska(401, "Za rad s dijelovima prijavi se GenesisLoginom.", prijava=True)
++        token = authorization[7:].strip()
++        kljuc = hashlib.sha256(token.encode()).hexdigest()
++        sada = time.time()
++        with self._brava:
++            k = self._kes.get(kljuc)
++            if k and k[1] > sada:
++                return k[0]
++            for x in [x for x, v in self._kes.items() if v[1] <= sada]:       # čišćenje isteklih
++                del self._kes[x]
++        try:
++            kod, me = self._me(token)
++        except Exception:                                                        # noqa: BLE001
++            raise Greska(503, "Provjera prijave trenutno nije dostupna (NEPOZNATO). Pokušaj ponovo za minutu.")
++        if kod == 401:
++            raise Greska(401, "Prijava je istekla ili nije valjana. Prijavi se GenesisLoginom ponovno.", prijava=True)
++        w = str(me.get("weise3_id") or "")
++        if kod != 200 or not W3.fullmatch(w):
++            raise Greska(503, f"Provjera prijave nije dala identitet (NEPOZNATO, HTTP {kod}).")
++        if w not in self.dozvoljeni:
++            raise Greska(403, "Ovaj GenesisLogin identitet nema pristup evidenciji dijelova. Javi Ivanu.")
++        with self._brava:
++            self._kes[kljuc] = (w, sada + self.ttl)
++        return w
++
++
++def iz_okoline() -> Prijava | None:
++    """OTPAD_PRIJAVA=genesis uključuje prijavu. Zadano je ISKLJUČENA (lokalni razvoj, sluša samo 127.0.0.1) i server to glasno javlja."""
++    import os
++    if os.environ.get("OTPAD_PRIJAVA", "").strip().lower() != "genesis":
++        return None
++    dozvoljeni = {x.strip().lower() for x in os.environ.get("OTPAD_DOZVOLJENI", "").split(",") if x.strip()}
++    return Prijava(os.environ.get("OTPAD_AUTH_URL", "https://genesis.limit-connect.com"), dozvoljeni)
+diff --git a/otpad_katalog/ekran/server.py b/otpad_katalog/ekran/server.py
+index b054229e..ae43df7b 100644
+--- a/otpad_katalog/ekran/server.py
++++ b/otpad_katalog/ekran/server.py
+@@ -24,6 +24,7 @@ import psycopg
+ from psycopg.rows import dict_row
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent))      # i uz `python3 -I`, bez ovisnosti o radnom direktoriju
++import prijava as prijava_modul
+ import spremnik as spremnik_modul
+ import tamno_api as TA
+ from greske import Greska
+@@ -31,7 +32,7 @@ from greske import Greska
+ DSN = os.environ.get("OTPAD_DSN", "")
+ PORT = int(os.environ.get("OTPAD_PORT", "8765"))
+ STATIC = Path(__file__).resolve().parent / "static"
+-STATICKE_DATOTEKE = {"index.html", "app.css", "app.js", "tamno.js", "sw.js", "favicon.svg"}
++STATICKE_DATOTEKE = {"index.html", "app.css", "app.js", "tamno.js", "prijava.js", "sw.js", "favicon.svg"}
+ 
+ GODINA_RE = re.compile(r"\b(19[5-9]\d|20[0-3]\d)\b")
+ VIN_RE = re.compile(r"^[A-HJ-NPR-Z0-9]{17}$")
+@@ -50,6 +51,11 @@ def veza_t():
+     return psycopg.connect(DSN, connect_timeout=5)
+ 
+ 
++try:
++    PRIJAVA = prijava_modul.iz_okoline()
++except ValueError as _e:                       # pogrešna postavka prijave: ne startati (inače bi ekran bio otvoren ili zaključan)
++    print("POSTAVKA PRIJAVE: " + str(_e), file=sys.stderr)
++    sys.exit(2)
+ try:
+     SPREMNIK = spremnik_modul.iz_okoline()
+ except ValueError as _e:                       # pogrešna postavka arhive: ne startati (inače bi svaka slika koštala AI obradu)
+@@ -302,6 +308,15 @@ class Handler(BaseHTTPRequestHandler):
+         self.end_headers()
+         self.wfile.write(tijelo)
+ 
++    def _autoriziraj(self):
++        """Prijava za svaki /api/ poziv (osim /api/konfig). Bez OTPAD_PRIJAVA=genesis ekran je otvoren (samo lokalni razvoj)."""
++        if PRIJAVA is None:
++            TA.P.postavi_tko(None)
++            return None
++        w3 = PRIJAVA.provjeri(self.headers.get("Authorization"))
++        TA.P.postavi_tko(w3)
++        return w3
++
+     def _bajtovi(self, tijelo: bytes, tip: str):
+         self.send_response(200)
+         self.send_header("Content-Type", tip)
+@@ -316,7 +331,8 @@ class Handler(BaseHTTPRequestHandler):
+         self.send_header("Referrer-Policy", "no-referrer")
+         self.send_header("X-Frame-Options", "DENY")
+         self.send_header("Content-Security-Policy",
+-                         "default-src 'self'; img-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
++                         "default-src 'self'; script-src 'self'" + (" " + PRIJAVA.auth_url if PRIJAVA else "") +
++                         "; img-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+ 
+     def _statika(self, ime: str):
+         if ime not in STATICKE_DATOTEKE:
+@@ -362,7 +378,7 @@ class Handler(BaseHTTPRequestHandler):
+             u = urlparse(self.path)
+             if u.path in ("/", "/index.html"):
+                 return self._statika("index.html")
+-            if u.path in ("/app.css", "/app.js", "/tamno.js", "/sw.js", "/favicon.svg"):
++            if u.path in ("/app.css", "/app.js", "/tamno.js", "/prijava.js", "/sw.js", "/favicon.svg"):
+                 return self._statika(u.path[1:])
+             if u.path == "/favicon.ico":          # preglednik ga uvijek traži; bez 404 u konzoli
+                 self.send_response(204)
+@@ -372,6 +388,11 @@ class Handler(BaseHTTPRequestHandler):
+                 return
+             if not u.path.startswith("/api/"):
+                 return self._json(404, {"greska": "Stranica ne postoji."})
++            if u.path == "/api/konfig":                      # javno: front-end mora znati treba li prijavu prije nego je pokuša
++                return self._json(200, {"prijava": PRIJAVA is not None, "auth_url": PRIJAVA.auth_url if PRIJAVA else None})
++            w3 = self._autoriziraj()
++            if u.path == "/api/ja":
++                return self._json(200, {"prijava": PRIJAVA is not None, "weise3_id": w3})
+             qs = parse_qs(u.query)
+             with veza() as con, con.cursor() as cur:
+                 if u.path == "/api/trazi":
+@@ -409,6 +430,7 @@ class Handler(BaseHTTPRequestHandler):
+     def do_POST(self):
+         try:
+             u = urlparse(self.path)
++            self._autoriziraj()                              # PRIJE čitanja tijela: neprijavljen ne smije natjerati poslužitelj da čita 15 MB
+             m_slika = re.fullmatch(r"/api/dio/(\d{1,9})/slika", u.path)
+             p = self._provjeri_post(sirovo=bool(m_slika))
+             rezultat = None
+@@ -461,7 +483,10 @@ def main():
+         print("Postavi OTPAD_DSN (npr. \"host=127.0.0.1 dbname=... user=otpad_app password=...\").")
+         sys.exit(2)
+     srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+-    print(f"Ekran radi na http://127.0.0.1:{PORT}/ (bez prijave, samo lokalno)")
++    if PRIJAVA is None:
++        print(f"Ekran radi na http://127.0.0.1:{PORT}/ BEZ PRIJAVE (samo lokalni razvoj; za rad: OTPAD_PRIJAVA=genesis + OTPAD_DOZVOLJENI)")
++    else:
++        print(f"Ekran radi na http://127.0.0.1:{PORT}/ s prijavom GenesisLogin ({len(PRIJAVA.dozvoljeni)} dopuštenih identiteta); izlaganje samo preko HTTPS proxyja")
+     try:
+         srv.serve_forever()
+     except KeyboardInterrupt:
+diff --git a/otpad_katalog/ekran/static/app.css b/otpad_katalog/ekran/static/app.css
+index 34bddd8d..89a76e9c 100644
+--- a/otpad_katalog/ekran/static/app.css
++++ b/otpad_katalog/ekran/static/app.css
+@@ -115,3 +115,9 @@ input[type="file"] { padding: 10px; min-height: 52px; }
+   background: var(--up-bg); color: var(--up-tekst); border-bottom: 2px solid var(--up-tekst); padding: 10px 16px; font-weight: 600; }
+ .red-traka[hidden] { display: none; }
+ .red-traka .gumb { min-height: 44px; }
++.naslovni-red { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
++.naslovni-red h1 { margin: 0; }
++.naslovni-red .gumb { min-height: 40px; padding: 4px 14px; }
++.prijava { position: fixed; inset: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); display: flex; align-items: center; justify-content: center; padding: 16px; }
++.prijava[hidden] { display: none; }
++.prijava .kutija { max-width: 420px; width: 100%; }
+diff --git a/otpad_katalog/ekran/static/app.js b/otpad_katalog/ekran/static/app.js
+index 7689c997..190e501a 100644
+--- a/otpad_katalog/ekran/static/app.js
++++ b/otpad_katalog/ekran/static/app.js
+@@ -24,6 +24,11 @@
+   }
+   function isprazni(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+ 
++  // GenesisAuth SDK sprema sesiju u localStorage pod ovim ključem; ovdje se samo čita token (nikad se ne zapisuje u zapisnik)
++  function token() {
++    try { var s = JSON.parse(localStorage.getItem('genesis_auth_v1')); return (s && s.session_token) || ''; } catch (e) { return ''; }
++  }
++
+   function api(metoda, url, tijelo, zaglavlja) {
+     var opcije = { method: metoda, headers: {} };
+     if (typeof Blob !== 'undefined' && tijelo instanceof Blob) {      // slika: sirovi bajtovi
+@@ -36,6 +41,8 @@
+       opcije.headers['X-Requested-With'] = 'otpad';
+       opcije.body = JSON.stringify(tijelo);
+     }
++    var t = token();
++    if (t) opcije.headers['Authorization'] = 'Bearer ' + t;
+     return fetch(url, opcije).then(function (r) {
+       return r.json().then(function (data) { return { ok: r.ok, status: r.status, data: data }; },
+         function () {
+@@ -46,6 +53,7 @@
+       return { ok: false, status: 0, data: { greska: GRESKA_MREZA } };
+     }).then(function (odg) {
+       if (!odg.ok && !odg.data.greska) odg.data.greska = 'Greška ' + odg.status + '. Pokušaj ponovo.';
++      if ((odg.status === 401 || odg.status === 403) && window.OTPAD && window.OTPAD.traziPrijavu) window.OTPAD.traziPrijavu(odg.data.greska);
+       return odg;
+     });
+   }
+@@ -88,7 +96,7 @@
+     document.dispatchEvent(new CustomEvent('otpad-tab', { detail: ime }));
+   }
+   TABOVI.forEach(function (t) { $('tab-' + t).addEventListener('click', function () { tabPrebaci(t); }); });
+-  window.OTPAD = { $: $, el: el, isprazni: isprazni, api: api, poruka: poruka, zauzet: zauzet, vozilo: vozilo,
++  window.OTPAD = { token: token, $: $, el: el, isprazni: isprazni, api: api, poruka: poruka, zauzet: zauzet, vozilo: vozilo,
+                    cijena: cijena, tab: tabPrebaci };
+ 
+   // ---------- TRAŽI ----------
+diff --git a/otpad_katalog/ekran/static/prijava.js b/otpad_katalog/ekran/static/prijava.js
+new file mode 100644
+index 00000000..d484efe9
+--- /dev/null
++++ b/otpad_katalog/ekran/static/prijava.js
+@@ -0,0 +1,48 @@
++(function () {
++  'use strict';
++  // Prijava GenesisLoginom: SDK i popup su flotini (https://<auth>/static/genesis-auth.js); ovdje se samo pokreću.
++  // Token ostaje u localStorageu pod ključem koji postavlja SDK, a poslužitelj ga provjerava na svaki poziv.
++  var O = window.OTPAD, $ = O.$, poruka = O.poruka, zauzet = O.zauzet;
++  var konfig = null;
++
++  function prikazi(tekst) {
++    $('prijava').hidden = false;
++    if (tekst) poruka($('prijava-poruka'), 'info', tekst);
++    $('prijava-gumb').focus();
++  }
++  O.traziPrijavu = function (tekst) { if (konfig && konfig.prijava) prikazi(tekst); };
++
++  fetch('/api/konfig', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (k) {
++    konfig = k;
++    if (!k.prijava) return;
++    $('odjava').hidden = false;
++    if (!O.token()) { prikazi(); return; }
++    return O.api('GET', '/api/ja');          // 401/403 otvara obrazac sam (api() -> traziPrijavu)
++  }).catch(function () {});
++
++  function ucitajSdk() {
++    if (window.GenesisAuth) return Promise.resolve();
++    return new Promise(function (res, rej) {
++      var s = document.createElement('script');
++      s.src = konfig.auth_url + '/static/genesis-auth.js';
++      s.onload = res; s.onerror = function () { rej(new Error('Prijavni modul nije dostupan. Provjeri vezu i pokušaj ponovo.')); };
++      document.head.appendChild(s);
++    });
++  }
++
++  $('prijava-gumb').addEventListener('click', function () {
++    var por = $('prijava-poruka');
++    poruka(por, '', '');
++    if (!konfig || !konfig.prijava) { poruka(por, 'greska', 'Prijava nije uključena na poslužitelju.'); return; }
++    zauzet(this, 'Otvaram prijavu…', function () {
++      return ucitajSdk().then(function () { return window.GenesisAuth.login({ origin: konfig.auth_url }); });
++    }).then(function () { window.location.reload(); }, function (e) {
++      poruka(por, 'greska', (e && e.message) || 'Prijava nije uspjela. Pokušaj ponovo.');
++    });
++  });
++
++  $('odjava').addEventListener('click', function () {
++    try { localStorage.removeItem('genesis_auth_v1'); } catch (e) { /* bez pohrane nema se što brisati */ }
++    window.location.reload();
++  });
++}());
+diff --git a/otpad_katalog/prodaja/prodaja.py b/otpad_katalog/prodaja/prodaja.py
+index 6e637eec..013a04f3 100644
+--- a/otpad_katalog/prodaja/prodaja.py
++++ b/otpad_katalog/prodaja/prodaja.py
+@@ -12,6 +12,7 @@ Zakonske granice (NAPISANO, potvrditi s knjigovođom/odvjetnikom): za fizičku o
+ """
+ from __future__ import annotations
+ 
++import contextvars
+ import hashlib
+ import json
+ import os
+@@ -39,7 +40,18 @@ def _hash(prev: str, dio_id: int, vrsta: str, podaci: dict, vrijeme: str) -> str
+     return hashlib.sha256(f"{prev}|{dio_id}|{vrsta}|{_kanon(podaci)}|{vrijeme}".encode()).hexdigest()
+ 
+ 
++# Tko je radnju učinio (pseudonimni weise3_id prijavljenog radnika). Postavlja ga HTTP sloj po zahtjevu; ulazi u hash događaja.
++_TKO: contextvars.ContextVar = contextvars.ContextVar("tko", default=None)
++
++
++def postavi_tko(weise3_id: str | None) -> None:
++    _TKO.set(weise3_id)
++
++
+ def _dogadjaj(cur, dio_id: int, vrsta: str, podaci: dict) -> tuple[int, str]:
++    tko = _TKO.get()
++    if tko and "tko" not in podaci:
++        podaci = {**podaci, "tko": tko}
+     cur.execute("SELECT hash FROM dio_dogadjaj WHERE otpad_dio_id=%s ORDER BY id DESC LIMIT 1", (dio_id,))
+     r = cur.fetchone()
+     prev = r[0] if r else GENEZA
