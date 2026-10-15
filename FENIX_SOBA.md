@@ -116,3 +116,9 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
 - **GenesisLogin odgođen svjesno:** zamjenjuje Basic prijavu na nginxu (isto zaglavlje Authorization), traži popis weise3_id dopuštenih korisnika kojeg nemam, a krivo uvođenje zaključava radnice. WIP ostaje u stashu; uvodi se kad Ivan dostavi identitete.
 - **Pristup:** `https://genesis.limit-connect.com/otpad/`, korisnik `kelava`, lozinka u `/root/otpad_pristup.txt` (0600; ja je ne čitam).
 - **DNEVNIK POGREŠAKA AI-a:** pet krugova oko dostupnosti koda na EU (privatni repo, `write_file` bez mkdir): ograničenja alata provjerio sam tek kad su zapela, ne prije (§6a).
+
+### POPIS VRSTA DIJELOVA + PRVI BROJ — session_01P5KN18DaRqxRrryzpCv9CK (2026-10-15)
+- **EU `otpad_kelava`:** `dio` = 295 hrvatskih naziva vrsta dijelova (iz auto-parts-db `parts.js`, MIT, očišćeno/prevedeno: `otpad_katalog/vrste_dijelova.tsv` + `uvezi_vrste.py`), `dio_broj` bez kataloških brojeva osim jednog. Autocomplete naziva u ekranu (`/api/nazivi`, LIMIT 300) ih odmah nudi.
+- **Prvi stvarni broj (Ivanove slike kilometar-sata, `1.jpg`–`3.jpg`):** naljepnica „VW 6Q0 920 842 C B41", VDO, VD4, 110.080.126/027, Made in CZ; pročitano iz dvije slike (2.jpg i 3.jpg). Upisano: `dio_broj` (OEM, proizvođač VW (VDO), izvor „Unos radnice") uz „Instrument ploča (kilometar sat)", i `dio_vozilo` → Polo Mk4 (9N) i Mk4 Facelift (prema prefiksu 6Q0, NIJE potvrđeno katalogom). `trazi_broj('6q0920842c')` vraća oba vozila.
+- **Nije učinjeno:** drugi redak s naljepnice („VWZ…C8440669", pokidan) nije upisan jer nije čitljiv.
+- **Internet:** nije nađen otvoren skup OEM brojeva s jasnom licencom (TecDoc je licenciran).
