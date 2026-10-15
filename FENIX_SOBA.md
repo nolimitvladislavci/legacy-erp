@@ -107,3 +107,12 @@ Zajednička datoteka na grani `claude/loving-babbage-gzx2xt`. Svaka sesija ovdje
   > **§6a Ciljevi isporuke.** Prije prvog koraka svaki zadatak s metom (laptop, lanac, EU, repo) dobiva popis meta; uz svaku piše DOSTUPNA ili NEDOSTUPNA, uzrok i što treba da postane dostupna. Nedostupna meta se javlja u prvom retku odgovora, ne u izvještaju. Zadatak je GOTOV tek kad je svaka meta zapisana tripletom (naredba, exit, hash). Inače se piše „NEDOVRŠENO: <meta>", nikad „zapisano".
 - **Provjera da pravilo drži (pred-registrirana hipoteza):** u sljedećih 3 zadataka s više meta, prvi redak odgovora navodi status svake mete. Presudu izdaje Ivan čitanjem; PAD ako i jedan odgovor kaže „gotovo" uz neispisanu nedostupnu metu.
 - **DNEVNIK POGREŠAKA AI-a:** javio „zapisano" za 2 od 4 mete (EU Downloads i repo da; laptop i lanac ne) bez prethodne najave; uhvatio ga Ivan. Test koji to hvata: §6a, popis meta u prvom retku.
+
+### UVEDENO NA EU — session_01P5KN18DaRqxRrryzpCv9CK (2026-10-15 02:20 UTC, Ivanov `DA uvedi-otpad-ekran eu-genesis`)
+- **Izvedeno:** klon grane `claude/loving-babbage-gzx2xt` u `/var/www/genesis/paketi/sandbox/kelava` (repo je privremeno bio javan); sha256 `deploy_eu.sh` = `dccca09c…`, `vozila.sql` = `29fdd897…`; `deploy_eu.sh --suho` exit 0; `deploy_eu.sh` exit 0, `GOTOVO 20261015T022023Z`, 19 × DRŽI.
+- **Stanje:** servis `otpad-ekran` active (127.0.0.1:8130); baza `otpad_kelava` (vozilo_tip 4642, dio 0, pretinac 0 — pretinci nastaju pri prvom spremanju); nginx +1 linija u `genesis-eu` (`f45bc7a4…` → `2b08febd…`). Izvana (iz drugog kontejnera, 03:xx UTC): `/otpad/` → 401, `/otpad/api/pretinci` → 401, `/health` → 200. Rollback: `bash /root/otpad_rollback_20261015T022023Z.sh`.
+- **Lanac:** naknadni INTENT/RAČUN za zakrpe od 13.10.: arhiva_core c13826/c13828, strazar c13829/c13830; uvođenje: nginx c13831/c13833, baza c13832/c13834.
+- **Nije dokazano:** harness `test_iza_nginxa.py` na EU, pravi mobitel, slike u arhivu (tenant + servisni token).
+- **GenesisLogin odgođen svjesno:** zamjenjuje Basic prijavu na nginxu (isto zaglavlje Authorization), traži popis weise3_id dopuštenih korisnika kojeg nemam, a krivo uvođenje zaključava radnice. WIP ostaje u stashu; uvodi se kad Ivan dostavi identitete.
+- **Pristup:** `https://genesis.limit-connect.com/otpad/`, korisnik `kelava`, lozinka u `/root/otpad_pristup.txt` (0600; ja je ne čitam).
+- **DNEVNIK POGREŠAKA AI-a:** pet krugova oko dostupnosti koda na EU (privatni repo, `write_file` bez mkdir): ograničenja alata provjerio sam tek kad su zapela, ne prije (§6a).
