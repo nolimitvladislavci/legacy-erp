@@ -1,0 +1,296 @@
+# slug (iz auto-parts-db parts.js)	naziv_hr	kategorija
+battery	Akumulator	Elektrika
+alternator	Alternator	Elektrika
+starter-motor	Anlaser	Elektrika
+glow-plug	Grijač (žarna svjećica)	Elektrika
+wiring-harness	Instalacija (kabelski snop)	Elektrika
+engine-wiring-harness	Instalacija motora	Elektrika
+door-wiring-harness	Instalacija vrata	Elektrika
+combination-stalk	Kombinirana ručica (žmigavci/svjetla)	Elektrika
+ignition-lock	Kontakt brava	Elektrika
+fuse-box	Kutija osigurača	Elektrika
+relay-box	Kutija releja	Elektrika
+central-lock-switch	Prekidač centralne brave	Elektrika
+voltage-regulator	Regulator napona	Elektrika
+relay	Relej	Elektrika
+horn	Sirena	Elektrika
+steering-column-switch-module	Sklop prekidača na stupu upravljača	Elektrika
+clock-spring	Spiralni kabel volana	Elektrika
+spark-plug	Svjećica	Elektrika
+ignition-coil	Svjećica bobina	Elektrika
+abs-module	ABS modul	Elektronika
+bcm-body-control-module	BCM (računalo karoserije)	Elektronika
+comfort-module	Comfort modul	Elektronika
+immobilizer	Imobilajzer	Elektronika
+rear-view-camera	Kamera za vožnju unatrag	Elektronika
+keyless-entry-control-module	Modul beskontaktnog ulaza (keyless)	Elektronika
+central-lock-control-module	Modul centralne brave	Elektronika
+hvac-control-module	Modul grijanja i klime	Elektronika
+parking-sensor-control-module	Modul parkirnih senzora	Elektronika
+mirror-control-module	Modul retrovizora	Elektronika
+door-control-module	Modul vrata	Elektronika
+front-view-camera	Prednja kamera	Elektronika
+automatic-transmission-control-module	Računalo automatskog mjenjača	Elektronika
+engine-control-module-ecu	Računalo motora (ECU)	Elektronika
+electric-power-steering-control-module	Računalo servo upravljača	Elektronika
+climate-control-module	Upravljač klime	Elektronika
+coolant-expansion-tank	Ekspanzijska posuda	Hlađenje i klima
+heater-core	Grijač kabine (hladnjak grijanja)	Hlađenje i klima
+egr-cooler	Hladnjak EGR-a	Hlađenje i klima
+automatic-transmission-cooler	Hladnjak mjenjača	Hlađenje i klima
+main-radiator	Hladnjak vode	Hlađenje i klima
+radiator-assembly	Hladnjak vode sa sklopom	Hlađenje i klima
+intercooler	Hladnjak zraka (intercooler)	Hlađenje i klima
+ac-evaporator	Isparivač klime	Hlađenje i klima
+ac-compressor	Kompresor klime	Hlađenje i klima
+ac-condenser	Kondenzator klime	Hlađenje i klima
+thermostat-housing	Kućište termostata	Hlađenje i klima
+fan-shroud	Okvir ventilatora	Hlađenje i klima
+thermostat	Termostat	Hlađenje i klima
+blower-motor	Ventilator grijanja (puhalo)	Hlađenje i klima
+main-radiator-fan	Ventilator hladnjaka	Hlađenje i klima
+condenser-fan	Ventilator kondenzatora klime	Hlađenje i klima
+viscous-fan-clutch	Viskozna spojka ventilatora	Hlađenje i klima
+water-pump	Vodena pumpa	Hlađenje i klima
+fuel-injector	Brizgaljka (injektor)	Ispuh i gorivo
+exhaust-flex-pipe	Fleksibilna cijev ispuha	Ispuh i gorivo
+exhaust-manifold	Ispušna grana	Ispuh i gorivo
+catalytic-converter	Katalizator	Ispuh i gorivo
+exhaust-muffler	Lonac ispuha	Ispuh i gorivo
+front-exhaust-pipe	Prednja cijev ispuha	Ispuh i gorivo
+fuel-pump	Pumpa goriva	Ispuh i gorivo
+fuel-rail	Rail goriva	Ispuh i gorivo
+fuel-pressure-regulator	Regulator tlaka goriva	Ispuh i gorivo
+fuel-tank	Spremnik goriva	Ispuh i gorivo
+middle-muffler-resonator	Srednji lonac ispuha	Ispuh i gorivo
+rear-muffler	Stražnji lonac ispuha	Ispuh i gorivo
+high-pressure-fuel-pump	Visokotlačna pumpa goriva	Ispuh i gorivo
+a-pillar-left	A stup	Karoserija
+a-pillar-right	A stup desni	Karoserija
+a-pillar-left	A stup lijevi	Karoserija
+hood-gas-strut	Amortizer poklopca motora	Karoserija
+trunk-lid-gas-strut	Amortizer poklopca prtljažnika	Karoserija
+left-b-pillar	B stup	Karoserija
+front-left-fender	Blatobran	Karoserija
+front-bumper	Branik prednji	Karoserija
+rear-bumper	Branik stražnji	Karoserija
+hood-lock	Brava poklopca motora	Karoserija
+trunk-lid-lock	Brava prtljažnika	Karoserija
+door-lock	Brava vrata	Karoserija
+door-weatherstrip	Gumeni profil vrata (brtva)	Karoserija
+left-sliding-door	Klizna vrata	Karoserija
+wiper-arm	Krak brisača	Karoserija
+roof-panel	Krov	Karoserija
+roof-rails	Krovni nosači	Karoserija
+sunroof	Krovni otvor (šiber)	Karoserija
+tow-bar-ball	Kugla vučne kuke	Karoserija
+tow-hook	Kuka za vuču	Karoserija
+radiator-grille	Maska (rešetka hladnjaka)	Karoserija
+wiper-linkage	Mehanizam brisača	Karoserija
+windshield-washer-nozzle	Mlaznica perača stakla	Karoserija
+front-wiper-motor	Motor brisača prednji	Karoserija
+rear-wiper-motor	Motor brisača stražnji	Karoserija
+sunroof-motor	Motor krovnog otvora	Karoserija
+window-regulator-motor	Motor podizača stakla	Karoserija
+front-bumper-bracket	Nosač branika prednji	Karoserija
+rear-bumper-bracket	Nosač branika stražnji	Karoserija
+radiator-support-beam	Nosač hladnjaka (prednja traverza)	Karoserija
+door-check-strap	Ograničivač vrata	Karoserija
+front-bumper-reinforcement	Ojačanje branika prednje	Karoserija
+rear-bumper-reinforcement	Ojačanje branika stražnje	Karoserija
+floor-panel	Pod karoserije	Karoserija
+trunk-floor	Pod prtljažnika	Karoserija
+electric-window-regulator	Podizač stakla električni	Karoserija
+front-left-wheel-arch-liner	Podloga blatobrana	Karoserija
+hood-bonnet	Poklopac motora (haubu)	Karoserija
+trunk-lid-tailgate	Poklopac prtljažnika	Karoserija
+mirror-cover	Poklopac retrovizora	Karoserija
+fuel-flap	Poklopac spremnika goriva	Karoserija
+washer-fluid-reservoir	Posuda tekućine perača	Karoserija
+left-sill-panel	Prag	Karoserija
+front-crossmember	Prednja poprečna greda	Karoserija
+front-panel-crossmember	Prednji lim (traverza)	Karoserija
+washer-pump	Pumpa perača stakla	Karoserija
+left-side-mirror	Retrovizor	Karoserija
+bumper-grille	Rešetka branika	Karoserija
+spoiler	Spojler	Karoserija
+rear-crossmember	Stražnja poprečna greda	Karoserija
+outer-door-handle	Vanjska kvaka vrata	Karoserija
+front-left-door	Vrata	Karoserija
+tow-bar	Vučna kuka (tegljač)	Karoserija
+underbody-skid-plate	Zaštita ispod motora	Karoserija
+front-mud-flap	Zaštitnik od blata prednji	Karoserija
+rear-mud-flap	Zaštitnik od blata stražnji	Karoserija
+emblem-badge	Znak (amblem)	Karoserija
+hood-hinge	Šarka poklopca motora	Karoserija
+trunk-lid-hinge	Šarka prtljažnika	Karoserija
+front-left-door-hinge	Šarka vrata	Karoserija
+engine-skid-plate	Štitnik motora	Karoserija
+alloy-wheel	Alu felga	Kotači
+alloy-wheel-with-tire	Alu felga s gumom	Kotači
+tire	Guma	Kotači
+wheel-hub-cap	Poklopac kotača	Kotači
+spare-wheel	Rezervni kotač	Kotači
+steel-wheel	Čelična felga	Kotači
+abs-modulator	ABS hidroagregat	Kočnice
+brake-master-cylinder	Glavna kočiona pumpa	Kočnice
+brake-pad	Kočione pločice	Kočnice
+front-brake-caliper	Kočione čeljusti prednje	Kočnice
+rear-brake-caliper	Kočione čeljusti stražnje	Kočnice
+brake-drum	Kočioni bubanj	Kočnice
+front-brake-disc	Kočioni disk prednji	Kočnice
+rear-brake-disc	Kočioni disk stražnji	Kočnice
+electric-parking-brake-motor	Motor električne ručne kočnice	Kočnice
+brake-fluid-reservoir	Posuda kočione tekućine	Kočnice
+handbrake-lever	Ručica ručne kočnice	Kočnice
+brake-vacuum-booster	Servo kočnica (vakuum)	Kočnice
+front-differential	Diferencijal prednji	Mjenjač i prijenos
+rear-differential	Diferencijal stražnji	Mjenjač i prijenos
+clutch-master-cylinder	Glavni cilindar kvačila	Mjenjač i prijenos
+automatic-transmission-valve-body	Hidroblok automatskog mjenjača	Mjenjač i prijenos
+propshaft-driveshaft	Kardanska osovina	Mjenjač i prijenos
+rear-axle-housing	Kućište stražnje osovine	Mjenjač i prijenos
+cvt-transmission	Mjenjač CVT	Mjenjač i prijenos
+dsg-robot-transmission	Mjenjač DSG/robotizirani	Mjenjač i prijenos
+automatic-transmission	Mjenjač automatski	Mjenjač i prijenos
+manual-transmission	Mjenjač ručni	Mjenjač i prijenos
+5-speed-manual-transmission	Mjenjač ručni 5 brzina	Mjenjač i prijenos
+6-speed-manual-transmission	Mjenjač ručni 6 brzina	Mjenjač i prijenos
+half-shaft-cv-axle	Poluosovina	Mjenjač i prijenos
+front-left-half-shaft	Poluosovina prednja	Mjenjač i prijenos
+torque-converter	Pretvarač momenta	Mjenjač i prijenos
+clutch-slave-cylinder	Radni cilindar kvačila	Mjenjač i prijenos
+transfer-case	Razvodnik pogona (reduktor)	Mjenjač i prijenos
+gear-shift-lever	Ručica mjenjača	Mjenjač i prijenos
+gear-shift-cable	Sajla mjenjača	Mjenjač i prijenos
+clutch-kit	Set kvačila	Mjenjač i prijenos
+clutch-pressure-plate	Tlačna ploča kvačila	Mjenjač i prijenos
+turbo-actuator	Aktuator turba	Motor
+engine-block-cylinder-block	Blok motora	Motor
+camshaft	Bregasta osovina	Motor
+head-gasket	Brtva glave motora	Motor
+egr-valve	EGR ventil	Motor
+cylinder-head	Glava motora	Motor
+oil-pan	Karter ulja	Motor
+piston	Klip	Motor
+connecting-rod	Klipnjača	Motor
+oil-filter-housing	Kućište filtera ulja	Motor
+air-filter-housing	Kućište filtera zraka	Motor
+timing-chain	Lanac razvoda	Motor
+throttle-body	Leptir gasa	Motor
+engine	Motor kompletan	Motor
+engine-mount	Nosač motora	Motor
+crankshaft	Radilica	Motor
+crankshaft-pulley	Remenica radilice	Motor
+turbocharger	Turbo	Motor
+intake-manifold	Usisna grana	Motor
+dual-mass-flywheel	Zamašnjak dvomasni	Motor
+drive-belt-tensioner	Zatezač klinastog remena	Motor
+chain-tensioner	Zatezač lanca	Motor
+timing-belt-tensioner	Zatezač remena razvoda	Motor
+timing-belt	Zupčasti remen razvoda	Motor
+jack	Dizalica	Oprema
+roof-rack	Krovni nosač (prtljažnik)	Oprema
+front-shock-absorber	Amortizer prednji	Ovjes i upravljanje
+front-strut	Amortizer prednji (McPherson)	Ovjes i upravljanje
+rear-shock-absorber	Amortizer stražnji	Ovjes i upravljanje
+power-steering-hose	Crijevo servo upravljača	Ovjes i upravljanje
+electric-power-steering	Električni servo upravljač	Ovjes i upravljanje
+tie-rod-end	Glava spone upravljača	Ovjes i upravljanje
+front-wheel-hub	Glavčina kotača prednja	Ovjes i upravljanje
+rear-wheel-hub	Glavčina kotača stražnja	Ovjes i upravljanje
+front-top-strut-mount	Gornji ležaj amortizera prednji	Ovjes i upravljanje
+rear-top-strut-mount	Gornji ležaj amortizera stražnji	Ovjes i upravljanje
+air-suspension-compressor	Kompresor zračnog ovjesa	Ovjes i upravljanje
+ball-joint	Kugla ovjesa	Ovjes i upravljanje
+steering-rack	Letva upravljača	Ovjes i upravljanje
+wheel-hub-bearing	Ležaj kotača	Ovjes i upravljanje
+front-leaf-spring	Lisnata opruga prednja	Ovjes i upravljanje
+rear-leaf-spring	Lisnata opruga stražnja	Ovjes i upravljanje
+macpherson-strut	McPherson noga	Ovjes i upravljanje
+front-coil-spring	Opruga prednja	Ovjes i upravljanje
+rear-coil-spring	Opruga stražnja	Ovjes i upravljanje
+power-steering-fluid-reservoir	Posuda ulja servo upravljača	Ovjes i upravljanje
+front-subframe	Prednji pomoćni okvir	Ovjes i upravljanje
+power-steering-pump	Pumpa servo upravljača	Ovjes i upravljanje
+front-control-arm	Ruka ovjesa prednja	Ovjes i upravljanje
+rear-control-arm	Ruka ovjesa stražnja	Ovjes i upravljanje
+left-steering-knuckle	Rukavac kotača	Ovjes i upravljanje
+sway-bar-link	Spona stabilizatora	Ovjes i upravljanje
+steering-tie-rod	Spona upravljača	Ovjes i upravljanje
+sway-bar	Stabilizator	Ovjes i upravljanje
+rear-axle-beam	Stražnja osovina (greda)	Ovjes i upravljanje
+steering-column	Stup upravljača	Ovjes i upravljanje
+air-spring	Zračni jastuk ovjesa	Ovjes i upravljanje
+abs-sensor	ABS senzor	Senzori
+front-abs-sensor	ABS senzor prednji	Senzori
+rear-abs-sensor	ABS senzor stražnji	Senzori
+oxygen-sensor-lambda	Lambda sonda	Senzori
+map-sensor	MAP senzor	Senzori
+mass-airflow-sensor	Mjerač mase zraka	Senzori
+nox-sensor	NOx senzor	Senzori
+parking-sensor	Parkirni senzor	Senzori
+camshaft-position-sensor	Senzor bregaste	Senzori
+knock-sensor	Senzor detonacije	Senzori
+rain-sensor	Senzor kiše	Senzori
+steering-angle-sensor	Senzor kuta upravljača	Senzori
+accelerator-pedal-sensor	Senzor papučice gasa	Senzori
+throttle-position-sensor	Senzor položaja leptira	Senzori
+crankshaft-position-sensor	Senzor radilice	Senzori
+light-sensor	Senzor svjetla	Senzori
+coolant-temperature-sensor	Senzor temperature rashladne tekućine	Senzori
+oil-pressure-sensor	Senzor tlaka ulja	Senzori
+tire-pressure-sensor-tpms	TPMS senzor tlaka guma	Senzori
+passenger-airbag	Airbag suvozača	Sigurnost
+driver-airbag	Airbag vozača	Sigurnost
+knee-airbag	Airbag za koljena	Sigurnost
+seat-side-airbag	Bočni airbag sjedala	Sigurnost
+seatbelt-buckle	Kopča sigurnosnog pojasa	Sigurnost
+airbag-control-module	Računalo airbaga	Sigurnost
+airbag-sensor	Senzor airbaga	Sigurnost
+front-left-seatbelt	Sigurnosni pojas	Sigurnost
+front-seatbelt	Sigurnosni pojas prednji	Sigurnost
+rear-seatbelt	Sigurnosni pojas stražnji	Sigurnost
+curtain-airbag	Zračni zastor (airbag)	Sigurnost
+panoramic-roof-glass	Panoramsko krovno staklo	Stakla
+left-mirror-glass	Staklo retrovizora	Stakla
+front-left-door-glass	Staklo vrata	Stakla
+rear-windshield	Stražnje staklo	Stakla
+windshield	Vjetrobransko staklo	Stakla
+left-daytime-running-lights	Dnevna svjetla	Svjetla
+left-headlight	Far	Svjetla
+headlight-set	Farovi par	Svjetla
+left-fog-light	Maglenka	Svjetla
+tail-light-set	Stop svjetla par	Svjetla
+left-tail-light	Stop svjetlo	Svjetla
+left-trunk-light	Stop svjetlo na poklopcu	Svjetla
+left-turn-signal	Žmigavac	Svjetla
+antenna	Antena	Unutrašnjost
+dashboard	Armaturna ploča	Unutrašnjost
+tachometer	Brojač okretaja	Unutrašnjost
+information-display	Informacijski zaslon	Unutrašnjost
+instrument-cluster	Instrument ploča (kilometar sat)	Unutrašnjost
+seat-adjustment-motor	Motor podešavanja sjedala	Unutrašnjost
+headrest	Naslon za glavu	Unutrašnjost
+armrest	Naslon za ruku	Unutrašnjost
+navigation-module	Navigacija (modul)	Unutrašnjost
+trunk-lining	Obloga prtljažnika	Unutrašnjost
+floor-mat	Patos (prostirka)	Unutrašnjost
+brake-pedal	Pedala kočnice	Unutrašnjost
+headliner	Podstava krova	Unutrašnjost
+audio-amplifier	Pojačalo zvuka	Unutrašnjost
+parcel-shelf	Polica prtljažnika	Unutrašnjost
+glove-box	Pretinac suvozača	Unutrašnjost
+on-board-computer	Putno računalo	Unutrašnjost
+head-unit-radio	Radio (glavna jedinica)	Unutrašnjost
+interior-seats-set	Set sjedala	Unutrašnjost
+front-left-seat	Sjedalo	Unutrašnjost
+center-console	Središnja konzola	Unutrašnjost
+rear-seat	Stražnja klupa	Unutrašnjost
+subwoofer	Subwoofer	Unutrašnjost
+door-panel-set	Tapeciranje vrata	Unutrašnjost
+inner-door-handle-trim	Unutarnja kvaka vrata	Unutrašnjost
+interior-rear-view-mirror	Unutarnji retrovizor	Unutrašnjost
+steering-wheel	Volan	Unutrašnjost
+speaker	Zvučnik	Unutrašnjost
+sun-visor	Štitnik od sunca	Unutrašnjost

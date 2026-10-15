@@ -1,0 +1,21 @@
+[Unit]
+Description=Kelava otpad — ekran za radnicu (otpad_katalog/ekran), 127.0.0.1:8130, iza nginx /otpad/
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/otpad/ekran
+EnvironmentFile=/etc/otpad/ekran.env
+ExecStart=/opt/otpad/venv/bin/python -I /var/www/otpad/ekran/server.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/otpad
+
+[Install]
+WantedBy=multi-user.target

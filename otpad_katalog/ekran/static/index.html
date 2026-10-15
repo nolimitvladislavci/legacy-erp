@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Auto otpad — dijelovi</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="zaglavlje">
+  <h1>Auto otpad — dijelovi</h1>
+  <div class="tabovi" role="tablist" aria-label="Što želiš napraviti?">
+    <button class="tab" role="tab" id="tab-trazi" aria-selected="true" aria-controls="panel-trazi" type="button">Traži</button>
+    <button class="tab" role="tab" id="tab-novi" aria-selected="false" aria-controls="panel-novi" type="button" tabindex="-1">Novi dio</button>
+    <button class="tab" role="tab" id="tab-radu" aria-selected="false" aria-controls="panel-radu" type="button" tabindex="-1">U radu</button>
+    <button class="tab" role="tab" id="tab-stalaza" aria-selected="false" aria-controls="panel-stalaza" type="button" tabindex="-1">Stalaža</button>
+    <button class="tab" role="tab" id="tab-unos" aria-selected="false" aria-controls="panel-unos" type="button" tabindex="-1">Brzi unos (staro)</button>
+  </div>
+</header>
+
+<main>
+  <!-- ===================== TRAŽI ===================== -->
+  <section id="panel-trazi" role="tabpanel" aria-labelledby="tab-trazi">
+    <form id="forma-trazi" novalidate>
+      <label for="q" class="oznaka">Upiši broj dijela ili auto</label>
+      <p class="pomoc">Primjeri: <b>1K0 615 301 AA</b> (razmaci i crtice nisu važni) ili <b>Focus 2013</b></p>
+      <div class="red">
+        <input id="q" name="q" type="search" autocomplete="off" maxlength="80" aria-describedby="poruka-trazi">
+        <button id="btn-trazi" class="gumb gumb-glavni" type="submit">Traži</button>
+      </div>
+    </form>
+    <p id="poruka-trazi" class="poruka" role="status" aria-live="polite"></p>
+    <div id="rezultati"></div>
+  </section>
+
+
+  <!-- ===================== NOVI DIO (tamni dio: rođenje) ===================== -->
+  <section id="panel-novi" role="tabpanel" aria-labelledby="tab-novi" hidden>
+    <h2 class="korak">1. S kojeg je auta dio skinut?</h2>
+    <label for="nd-auto" class="oznaka">Auto</label>
+    <select id="nd-auto"></select>
+    <h2 class="korak">2. Što piše na dijelu?</h2>
+    <label for="nd-broj" class="oznaka">Broj na dijelu (ako ga ima)</label>
+    <p class="pomoc">Razmaci i crtice nisu važni. Ako program zna broj, sam će upisati naziv.</p>
+    <input id="nd-broj" autocomplete="off" maxlength="80" spellcheck="false">
+    <div id="nd-prepoznato" class="prepoznato" role="status" aria-live="polite" hidden></div>
+    <label for="nd-naziv" class="oznaka">Naziv dijela (ako ga znaš)</label>
+    <p class="pomoc">Ne znaš što je? Ostavi prazno. Dio se svejedno unosi, naziv se može dopuniti kasnije.</p>
+    <input id="nd-naziv" list="nd-nazivi" autocomplete="off" maxlength="120" placeholder="npr. Alternator, Far lijevi">
+    <datalist id="nd-nazivi"></datalist>
+    <button id="nd-rodi" class="gumb gumb-glavni gumb-velik" type="button">Unesi dio i idi na slikanje</button>
+    <p id="nd-poruka" class="poruka" role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- ===================== U RADU (slikanje, pranje, test, pakiranje, pretinac, prodaja) ===================== -->
+  <section id="panel-radu" role="tabpanel" aria-labelledby="tab-radu" hidden>
+    <div id="radu-lista-okvir">
+      <h2 class="korak">Dijelovi u radu</h2>
+      <p id="radu-poruka" class="poruka" role="status" aria-live="polite"></p>
+      <div id="radu-lista"></div>
+    </div>
+    <div id="dio-okvir" hidden>
+      <button id="dio-natrag" class="gumb" type="button">← Natrag na popis</button>
+      <div id="dio-kartica"></div>
+    </div>
+  </section>
+
+  <!-- ===================== STALAŽA ===================== -->
+  <section id="panel-stalaza" role="tabpanel" aria-labelledby="tab-stalaza" hidden>
+    <form id="forma-nadji" novalidate>
+      <label for="nadji-q" class="oznaka">Nađi dio ili pretinac</label>
+      <p class="pomoc">Upiši ili skeniraj: adresu pretinca (<b>R03-P2-04</b>), oznaku dijela ili broj na dijelu.</p>
+      <div class="red">
+        <input id="nadji-q" autocomplete="off" maxlength="80" spellcheck="false">
+        <button id="btn-nadji" class="gumb gumb-glavni" type="submit">Nađi</button>
+      </div>
+    </form>
+    <p id="nadji-poruka" class="poruka" role="status" aria-live="polite"></p>
+    <div id="nadji-rez"></div>
+
+    <h2 class="korak">Pretinci</h2>
+    <div id="pretinci-lista" class="cipovi"></div>
+
+    <h2 class="korak">Dodaj pretince jedne police</h2>
+    <p class="pomoc">Npr. regal 3, polica 2, 8 pretinaca napravi R03-P2-01 … R03-P2-08. Oznaku zalijepiš na stalažu jednom i trajno.</p>
+    <div class="tri">
+      <div><label for="pr-regal" class="oznaka">Regal</label><input id="pr-regal" inputmode="numeric" maxlength="2"></div>
+      <div><label for="pr-polica" class="oznaka">Polica</label><input id="pr-polica" inputmode="numeric" maxlength="1"></div>
+      <div><label for="pr-n" class="oznaka">Pretinaca</label><input id="pr-n" inputmode="numeric" maxlength="2"></div>
+    </div>
+    <button id="pr-dodaj" class="gumb gumb-glavni gumb-velik" type="button">Dodaj pretince</button>
+    <p id="pr-poruka" class="poruka" role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- ===================== UNOS ===================== -->
+  <section id="panel-unos" role="tabpanel" aria-labelledby="tab-unos" hidden>
+    <h2 class="korak">1. S kojeg je auta dio skinut?</h2>
+    <div class="red">
+      <select id="auto" aria-label="Auto s kojeg je dio skinut"></select>
+      <button id="btn-novi-auto" class="gumb" type="button" aria-expanded="false" aria-controls="novi-auto">+ Novi auto</button>
+    </div>
+
+    <fieldset id="novi-auto" class="kutija" hidden>
+      <legend>Novi auto na otpadu</legend>
+      <label for="tip-q" class="oznaka">Vrsta auta</label>
+      <p class="pomoc">Upiši marku, model i godinu, npr. <b>Focus 2013</b>, pa klikni <b>Traži vrstu</b>.</p>
+      <div class="red">
+        <input id="tip-q" type="search" autocomplete="off" maxlength="80">
+        <button id="btn-tip" class="gumb" type="button">Traži vrstu</button>
+      </div>
+      <div id="tip-lista" class="radio-lista" role="radiogroup" aria-label="Odaberi vrstu auta"></div>
+      <div class="dvije">
+        <div>
+          <label for="auto-vin" class="oznaka">VIN (nije obavezno)</label>
+          <input id="auto-vin" maxlength="17" autocomplete="off" spellcheck="false" placeholder="17 znakova s prometne">
+        </div>
+        <div>
+          <label for="auto-km" class="oznaka">Kilometri (nije obavezno)</label>
+          <input id="auto-km" inputmode="numeric" autocomplete="off" placeholder="npr. 187000">
+        </div>
+      </div>
+      <button id="btn-spremi-auto" class="gumb gumb-glavni" type="button">Spremi auto</button>
+      <p id="poruka-auto" class="poruka" role="status" aria-live="polite"></p>
+    </fieldset>
+
+    <h2 class="korak">2. Koji je to dio?</h2>
+    <label for="dio-broj" class="oznaka">Broj na dijelu</label>
+    <p class="pomoc">Prepiši broj koji piše na dijelu. Razmaci i crtice nisu važni. Ako ga program zna, sam će upisati naziv.</p>
+    <input id="dio-broj" autocomplete="off" maxlength="80" spellcheck="false">
+    <div id="prepoznato" class="prepoznato" role="status" aria-live="polite" hidden></div>
+
+    <label for="dio-naziv" class="oznaka">Naziv dijela</label>
+    <input id="dio-naziv" list="nazivi" autocomplete="off" maxlength="120" placeholder="npr. Alternator, Far lijevi">
+    <datalist id="nazivi"></datalist>
+
+    <h2 class="korak">3. Gdje je i u kakvom je stanju?</h2>
+    <div class="dvije">
+      <div>
+        <label for="polica" class="oznaka">Polica (nije obavezno)</label>
+        <input id="polica" maxlength="40" autocomplete="off" placeholder="npr. A-01-3">
+      </div>
+      <div>
+        <label for="cijena" class="oznaka">Cijena u € (nije obavezno)</label>
+        <input id="cijena" inputmode="decimal" autocomplete="off" placeholder="npr. 45 ili 45,50">
+      </div>
+    </div>
+
+    <fieldset class="stanje" id="stanje">
+      <legend class="oznaka">Stanje dijela</legend>
+      <label class="stanje-opcija"><input type="radio" name="stanje" value="A"><span><b>A</b> kao novo</span></label>
+      <label class="stanje-opcija"><input type="radio" name="stanje" value="B"><span><b>B</b> dobro, bez oštećenja</span></label>
+      <label class="stanje-opcija"><input type="radio" name="stanje" value="C"><span><b>C</b> vidljivi tragovi, ispravno</span></label>
+      <label class="stanje-opcija"><input type="radio" name="stanje" value="D"><span><b>D</b> za popravak ili za dijelove</span></label>
+    </fieldset>
+
+    <div id="duplikat" class="kutija upozorenje" role="alert" hidden>
+      <p id="duplikat-tekst"></p>
+      <button id="btn-duplikat" class="gumb" type="button">Ipak spremi (drugi isti dio)</button>
+    </div>
+
+    <button id="btn-spremi" class="gumb gumb-glavni gumb-velik" type="button">Spremi dio</button>
+    <p id="poruka-unos" class="poruka" aria-live="polite"></p>
+
+    <h2 class="korak">Zadnje uneseno</h2>
+    <div id="zadnji" class="lista-zadnji"></div>
+  </section>
+</main>
+<script src="app.js"></script>
+<script src="tamno.js"></script>
+</body>
+</html>
